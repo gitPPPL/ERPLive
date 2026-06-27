@@ -1,64 +1,73 @@
 ﻿@{
-	ViewBag.Title = "Approved Send List";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Approved Send List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-	<legend class="legend-field">Approved Send List</legend>
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				<button class="btn btn-draft" onclick="window.location.href='@Url.Action("Index", "Dashboard")'">
-					<i class="fas fa-chart-line"></i> Back to Dashboard
-				</button>
-			</div>
-		</div>
-	</div>
+<style>
+    .fixed-grid-table td {
+        padding: 9px 8px !important;
+    }
+</style>
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Approved Send List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "Dashboard")'">
+            <i class="fa fa-arrow-left"></i>Back to Dashboard
+        </button>
+    </div>
+</div>
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblApprovedReceivedList" class="excel-table fixed-grid-table sortable-table resizable-table">
+            <colgroup>
+                <col style="display:none;"> 
+                <col style="width: 125px;"> 
+                <col style="width: 80px;"> 
+                <col style="width: 65px;"> 
+                <col style="width: 82px;"> 
+                <col style="width: 121px;"> 
+                <col style="width: 111px;"> 
+                <col style="width: 73px;"> 
+                <col style="width: 93px;"> 
+                <col style="width: 91px;"> 
+                <col style="width: 81px;"> 
+                <col style="width: 90px;"> 
+                <col style="width: 100px;"> 
+            </colgroup>
+            <thead>
+                <tr>
+                    <th style="display:none;">Code</th>
+                    @* <td><input type="checkbox"></td> *@
+                    <th>Document Name</th>
+                    <th>Voucher No</th>
+                    <th>Sender</th>
+                    <th>Send Date</th>
+                    <th>Document Status</th>
+                    <th>Approval Status</th>
+                    <th>Remarks</th>
+                    <th>New/Modify</th>
+                    <th>Department</th>
+                    <th>Originator</th>
+                    <th>Origin Date</th>
+                    <th>Voucher Type</th>
+                   @*  <th class="action-col">Action</th> *@
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
 
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblApprovedReceivedList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						@* <td><input type="checkbox"></td> *@
-						<th>Document Name</th>
-						<th>Voucher No</th>
-						<th>Sender</th>
-						<th>Send Date</th>
-						<th>Document Status</th>
-						<th>Approval Status</th>
-						<th>Remarks</th>
-						<th>New/Modify</th>
-						<th>Department</th>
-						<th>Originator</th>
-						<th>Origin Date</th>
-						<th>Voucher Type</th>
-						@* <th>Action</th> *@
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-
-</fieldset>
 <script>
-    let currentPage = 1;
-    let pageSize = 10;
     $(document).ready(function () {
         loadDocumentStages();
         $('#searchBox').on('keyup', function () {
@@ -67,34 +76,43 @@
         });
     });
     // Load main grid
-    function loadDocumentStages() {
+        function loadDocumentStages() {
         const searchTerm = $('#searchBox').val();
+
         $.ajax({
             url: '/ApprovalSendList/GetApprovalList',
             type: 'GET',
             dataType: 'json',
             data: {
-                searchTerm,
-                pageNumber: currentPage,
-                pageSize: pageSize
+                searchTerm: searchTerm
             },
             success: function (res) {
-                console.log('kks',res)
+
                 const docs = res.data || [];
-                const totalCount = res.totalCount || 0;
                 const tbody = $('#tblApprovedReceivedList tbody');
                 tbody.empty();
+
                 if (docs.length === 0) {
-                    tbody.append(`<tr><td colspan="14" class="text-center text-muted">No records found.</td></tr>`);
-                    renderPagination(0, pageSize, currentPage);
+                    tbody.append(`<tr>
+                        <td colspan="14" class="text-center text-muted">
+                            No records found.
+                        </td>
+                    </tr>`);
                     return;
                 }
+
                 docs.forEach(doc => {
-                    const formattedSendDate = doc.sendDate ? formatDate(doc.sendDate) : '';
-                    const formattedOriginDate = doc.originDate ? formatDate(doc.originDate) : '';
+
+                    const formattedSendDate = doc.sendDate
+                        ? formatDate(doc.sendDate)
+                        : '';
+
+                    const formattedOriginDate = doc.originDate
+                        ? formatDate(doc.originDate)
+                        : '';
                     tbody.append(`
                         <tr>
-                         <td style="display:none;" class="usercode">${doc.user_code || ''}</td>
+                            <td style="display:none;" class="usercode">${doc.user_code || ''}</td>
                             <td>${doc.docName || ''}</td>
                             <td class="vNo">${doc.vNo || ''}</td>
                             <td>${doc.sendName || ''}</td>
@@ -111,10 +129,10 @@
                         </tr>
                     `);
                 });
-                renderPagination(totalCount, pageSize, currentPage);
             },
             error: function (xhr) {
-                toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
+                toastr.error('Error loading document stages: ' +
+                    (xhr.responseJSON?.message || xhr.statusText));
             }
         });
     }
@@ -125,38 +143,5 @@
         const year = d.getFullYear();
         return `${day}/${month}/${year}`;
     }
-    // Pagination rendering
-    function renderPagination(total, pageSize, currentPage) {
-        const totalPages = Math.ceil(total / pageSize);
-        const pagination = $('#tablePagination');
-        pagination.empty();
 
-        if (totalPages <= 1) return;
-
-        let html = '';
-
-        if (currentPage > 1) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-        }
-
-        const startPage = Math.max(1, currentPage - 2);
-        const endPage = Math.min(totalPages, currentPage + 2);
-
-        for (let i = startPage; i <= endPage; i++) {
-            html += `
-                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-        }
-
-        if (currentPage < totalPages) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-        }
-
-        pagination.html(html);
-    }
-    function goToPage(page) {
-        currentPage = page;
-        loadDocumentStages();
-    }
 </script>

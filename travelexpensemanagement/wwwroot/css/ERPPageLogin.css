@@ -118,9 +118,12 @@
 
 .erppagelogin-description {
     font-size: 15px;
-    color: #fffcdb;
+    color: #fffcde;
     line-height: 1.7;
     max-width: 500px;
+    background-color: #2c2c2c;
+    padding: 10px;
+    border-radius: 4px;
 }
 
 .erppagelogin-buttons {
@@ -177,20 +180,20 @@
     width: 100%;
     max-width: 400px;
     background: #FFFFFF;
-    padding: 30px 30px;
+    padding: 24px 24px;
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
 
     .erppagelogin-form h2 {
-        font-size: 28px;
+        font-size: 24px;
         color: #1C5E31;
         text-align: center;
     }
 
 .erppagelogin-subtitle {
-    font-size: 13px;
-    color: #1C5E31;
+    font-size: 12px;
+    color: #1d1d1d;
     margin-bottom: 10px;
     text-align: center;
 }
@@ -222,7 +225,7 @@
     background: #FFFFFF;
     color: #0f0f0f;
     transition: 0.3s;
-    font-size: 14px;
+    font-size: 12px;
 }
 
     .erppagelogin-input:focus {
@@ -300,9 +303,9 @@
 
 .erppagelogin-btn-login {
     width: 100%;
-    padding: 14px;
+    padding: 10px;
     border: none;
-    border-radius: 12px;
+    border-radius: 8px;
     background: #1C5E31;
     color: #FFFFFF;
     font-weight: 600;
@@ -311,7 +314,7 @@
 }
 
     .erppagelogin-btn-login:hover {
-        background: #5DA823;
+        background: #326c05;
     }
 
 .erppagelogin-footer {
@@ -343,8 +346,7 @@
 
 /* =========================================
        ERP LOGIN LOADER
-    ========================================= */
-
+   ========================================= */
 .erppagelogin-loader {
     position: fixed;
     inset: 0;
@@ -353,7 +355,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /*background: linear-gradient( 135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.96) ), url('../images/auth/pashupati_logo.webp');*/
     background-size: cover;
     background-position: center;
     backdrop-filter: blur(10px);
@@ -392,7 +393,6 @@
     width: 260px;
     height: 260px;
     border-radius: 30px;
-    /* GREY GLASS EFFECT */
     background: rgba(220, 220, 220, 0.18);
     border: 1px solid rgba(180, 180, 180, 0.30);
     backdrop-filter: blur(14px);
@@ -446,12 +446,12 @@
 }
 .erppagelogin-date-input {
     width: 100%;
-    height: 34px; /* same height as other inputs */
-    padding-left: 45px;
+    height: 30px;
+    padding-left: 38px;
     padding-right: 15px;
     border-radius: 8px;
     border: 1px solid #B5C5AD;
-    font-size: 14px;
+    font-size: 12px;
     background: #fff;
     appearance: none;
     -webkit-appearance: none;
@@ -474,20 +474,17 @@
     font-size: 14px;
 }
 /* FINANCIAL YEAR + DATE ROW */
-
 .erppagelogin-row {
     display: flex;
     gap: 12px;
     width: 100%;
 }
-
     .erppagelogin-row .erppagelogin-group {
         width: 50%;
         flex: 0 0 calc(50% - 6px);
     }
 
 /* DATE ICON FIX */
-
 input[type="date"]::-webkit-calendar-picker-indicator {
     opacity: 0;
     cursor: pointer;

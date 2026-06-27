@@ -2,6 +2,10 @@
 	ViewBag.Title = "Purchase Order List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 
+
+	var userlevel = ViewBag.userLevel;
+
+
 	var currentMenu = ViewBag.CurrentMenu as string;
 	bool canAdd = false;
 	bool canEdit = false;
@@ -26,86 +30,119 @@
 			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
 			break;
 		}
-	}
-	 
+	} 
 
 }
 
-<fieldset>
-	<legend class="legend-field">Purchase Order List</legend>
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Purchase Order List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		@if (canAdd)
+		{
+			<button class="erppage-header-back"
+					onclick="window.location.href='@Url.Action("Index", "PurchaseOrder")'">
+				<i class="fa fa-plus"></i> Add New
+			</button>
+		}
+	</div>
+</div>
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search Purchase Order..." />
+	</div>
+	<div class="erppagelist-actions">
+		@if (canPrint)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+				<i class="fa fa-print"></i> Print
+			</button>
+		}
+
+		@if (canExport)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" onclick="exportToExcel()">
+				<i class="fa fa-file-excel"></i> Export
+			</button>
+		}
+
+		@if (canMail)
+		{
+			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+				<i class="fa fa-envelope"></i> Mail
+			</button>
+		}
+
+		@if (canApproval)
+		{
+			<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+				<i class="fa fa-check-circle"></i> Approved
+			</button>
+		}
+
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblPurchaseOrderList" class="excel-table fixed-grid-table table-width resizable-table">
+			<colgroup>
+				<col style="display:none;">      
+				<col style="width:120px;">       
+				<col style="width:110px;">       
+				<col style="width:110px;">       
+				<col style="width:220px;">       
+				<col style="width:180px;">       
+				<col style="width:90px;">        
+				<col style="width:120px;">       
+				<col style="width:120px;">       
+				<col style="width:120px;">       
+				<col style="width:100px;">       
+			</colgroup>
+			<thead>
+				<tr>
+					<th class="hidden-col">DocId</th>
+					<th>Voucher No</th>
+					<th>Voucher Type</th>
+					<th>Voucher Date</th>
+					<th>Party Name</th>
+					<th>Ship To</th>
+					<th>Quantity</th>
+					<th>Amount</th>
+					<th>Delivery Date</th>
+					<th>Validity Date</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
 		</div>
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				@if (canAdd)
-				{
-					<button onclick="window.location.href='@Url.Action("Index", "PurchaseOrder")'" type="button" class="btn btn-add">
-						<i class="fa fa-plus"></i>Add
-					</button>
-				}
-				@if (canPrint)
-				{
-					<button class="btn btn-print" onclick="printCityMasterReport()">
-						<i class="fa fa-print"></i> Print
-					</button>
-				}
-				@if (canExport)
-				{
-					<button class="btn btn-export" onclick="exportToExcel()">
-						<i class="fas fa-file-export"></i> Export
-					</button>
-				}
-				@if (canMail)
-				{
-					<button class="btn btn-mail">
-						<i class="fa fa-envelope"></i> Mail
-					</button>
-				}
-				@if (canApproval)
-				{
-					<button class="btn btn-approved">
-						<i class="fa fa-check"></i> Approved
-					</button>
-				}				
-			</div>
+
+		<div class="pagination-center">
+			<button class="page-nav" id="prevBtn">‹</button>
+			<div id="tablePagination" class="page-numbers"></div>
+			<button class="page-nav" id="nextBtn">›</button>
 		</div>
+
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
+
 	</div>
 
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblPurchaseOrderList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Docid</th>
-						<th>Voucher No</th>
-						<th>Voucher Type</th>
-						<th>Voucher Date</th>
-						<th>Party Name</th>
-						<th>Ship To</th>						 
-						<th>Quantity</th>
-						<th>Amount</th>
-						<th>Delivery Date</th>
-						<th>Validity Date</th> 			 
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</fieldset>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
@@ -115,21 +152,22 @@
 		canDelete: @canDelete.ToString().ToLower(),
 		canDocDetail: @canDocDetail.ToString().ToLower()
 	};
-	
-		    let currentPage = 1;
-	    	let pageSize = 10;
 
-		    $(document).ready(function () {
+	const userlevel = @Model.UserLevel;	   	
+	let currentPage = 1;
+	let pageSize = 10;
+
+	$(document).ready(function () {
+		GetMasterDataList();
+		$('#searchBox').on('keyup', function () {
+			currentPage = 1;
 			GetMasterDataList();
-			$('#searchBox').on('keyup', function () {
-				currentPage = 1;
-				GetMasterDataList();
-			});
-	    	});
+		});
+	});
  
-		function GetMasterDataList() {
-		const searchTerm = $('#searchBox').val().trim();
-		$.ajax({
+	function GetMasterDataList() {
+	      const searchTerm = $('#searchBox').val().trim();
+		  $.ajax({
 			url: '@Url.Action("GetPurchaseOrderList", "PurchaseOrderList")',
 			type: 'GET',
 			dataType: 'json',
@@ -143,8 +181,7 @@
 				const totalCount = res.totalCount || 0;
 				let tbody = $('#tblPurchaseOrderList tbody');
 				tbody.empty();
-				console.log(mastListData);
-
+		
 				if (mastListData.length === 0) {
 					tbody.append('<tr><td colspan="10" class="text-center text-muted">No PO found.</td></tr>');
 					return;
@@ -152,21 +189,21 @@
 				$.each(mastListData, function (index, item) {
 					let actions = '';
 					if (permissions.canEdit) {
-						actions += `<i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="AddOrEditFunction('${item.DOC_ID}')"></i>`;
+						actions += `<button class="act-btn edit btn-edit" title="Edit Row" style="cursor:pointer;" onclick="AddOrEditFunction('${item.DOC_ID}','${item.V_NO}','${item.V_TYPE}')"><i class="fa fa-edit"></i></button>`;
 					}
-					actions += `<i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewMenuDetails('${item.DOC_ID}')"></i>`;
+					actions += `<button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewMenuDetails('${item.DOC_ID}')"><i class="fa fa-eye"></i></button>`;
 
 					if (permissions.canDelete) {
-						actions += `<i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete"></i>`;
+						actions += `<button class="act-btn delete btn-delete" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash"></i></button>`;
 					}
 					if (permissions.canDocDetail) {
-						actions += `<i class="fa fa-file btn-document btn-details" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showEmployeePopup('${item.DOC_ID}')"></i>`;
+						actions += `<button class="act-btn document btn-document btn-details" title="Document Row" style="cursor:pointer;" onclick="showEmployeePopup('${item.DOC_ID}')"><i class="fa fa-file"></i></button>`;
 					}
 					tbody.append(`
 						<tr>
 							<td class="d-none code">${item.DOC_ID}</td>
-							<td>${item.V_NO}</td>
-							<td>${item.V_TYPE}</td>
+							<td id="v_no">${item.V_NO}</td>
+							<td id="v_type">${item.V_TYPE}</td>
 							<td>${item.V_DATE}</td>
 							<td>${item.PartyName}</td>
 							<td>${item.ShipTo}</td>
@@ -174,7 +211,7 @@
 							<td>${item.AMOUNT}</td>
 							<td>${item.DELIVERY_DATE}</td>
 							<td>${item.VALIDITY_DATE}</td>
-							<td>${actions}</td>
+							<td class="action-col"><div class="action-wrap">${actions}</div></td>
 						</tr>
 					`);
 				});				 
@@ -185,10 +222,9 @@
 				toastr.error('Error loading Purchase Order list: ' + xhr.responseText);
 			}
 		    });
-	        }
+	    }
 
-
-		function renderPagination(total, pageSize, currentPage) {
+	function renderPagination(total, pageSize, currentPage) {
 			const totalPages = Math.ceil(total / pageSize);
 			const paginationContainer = $('#tablePagination');
 			paginationContainer.empty();
@@ -221,47 +257,126 @@
 			paginationContainer.html(paginationHtml);
 		}
 
-		function goToPage(page) {
+	function goToPage(page) {
 			currentPage = page;
 			GetMasterDataList();
 		}
 
-		function AddOrEditFunction(rowId) {
-			window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId);
-		}
-
-		function viewMenuDetails(rowId) {
-			window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
-		}
-
-		$(document).on('click', '.btn-delete', function() {
-			const $row = $(this).closest('tr');
-			const CodeforDel = $row.find('.code').text().trim();
-			confirmAction().then((confirmed) => {
-				if (!confirmed) return;
-
-				$.ajax({
-					url: '/PurchaseOrderList/DeletePurchaseOrderEntry',
-					type: 'delete',
-					data: { docid: CodeforDel },
-					success: function (res) {
-						if (res.status) {
-							showFlashMessageByKey('delete', 'success');
-							$row.remove();
-							GetMasterDataList();
-						} else {
-							Swal.fire('Error!', 'Error deleting item group: ' + res.message, 'error');
-						}
-					},
-					error: function (xhr) {
-						Swal.fire('Error!', 'Error deleting item group: ' + xhr.responseText, 'error');
-					}
+	async function AddOrEditFunction(rowId , v_no ,v_type ) {
+	        try {
+				const res = await $.ajax({
+					url: '/PurchaseOrderList/EditValidation',
+					method: 'GET',
+					dataType: 'json',
+					data: { v_no: v_no, v_type: v_type }
 				});
-			});
-		});
 
-	 
-		function exportToExcel() {
+				if (res?.validation1?.success === true) {
+					toastr.warning(res?.validation1?.message );
+					return;
+				}
+
+				if (res?.validation2?.success === true) {
+					toastr.info(res.validation2.message);
+				}
+
+				if (res?.validation2?.success === true) {
+					toastr.info(res.validation2.message);
+				}
+
+				if (res?.validation3?.success === true) {
+					toastr.info(res.validation3.message);
+				}
+
+			      window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId);
+			
+
+			} catch (error) {
+				console.error("AJAX error:", error);
+				alert("Something went wrong while validating.");
+			}
+
+
+		}
+
+	async function viewMenuDetails(rowId) {
+	    	window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+		}
+
+   $(document).on('click', '.btn-delete', async function () {
+
+		const $row = $(this).closest('tr');
+		const CodeforDel = $row.find('.code').text().trim();
+		const v_no = $row.find('#v_no').text().trim();
+		const v_type = $row.find('#v_type').text().trim();
+
+		try {
+			const res = await $.ajax({
+				url: '/PurchaseOrderList/DeleteValidation',
+				method: 'GET',
+				dataType: 'json',   // ✅ IMPORTANT FIX
+				data: { v_no: v_no, v_type : v_type }
+			});
+
+			console.log("res", res);
+
+				if (res?.validation4?.approval === "Approved") {
+					toastr.warning("This document approval is in process, deletion not allowed.");
+					return;
+				}
+
+				if (res?.validation1?.success === true) {
+					toastr.info(res.validation1.message);
+				   console.log("User_level" ,userlevel);
+
+				   if(userlevel != "1")
+				   {
+					   return ;
+				   }
+
+
+				}
+
+				if (res?.validation2?.success === true) {
+					toastr.info(res.validation2.message);
+
+				}
+
+				if (res?.validation3?.success === true) {
+					toastr.info(res.validation3.message);
+
+				}
+
+
+			const confirmed = await confirmAction();
+			if (!confirmed) return;
+
+			$.ajax({
+				url: '/PurchaseOrderList/DeletePurchaseOrderEntry',
+				type: 'DELETE',
+				dataType: 'json',   // ✅ important
+				data: { docid: CodeforDel },
+				success: function (res) {
+					if (res.status) {
+						showFlashMessageByKey('delete', 'success');
+						$row.remove();
+						GetMasterDataList();
+					} else {
+						Swal.fire('Error!', res.message || 'Delete failed', 'error');
+					}
+				},
+				error: function (xhr) {
+					Swal.fire('Error!', xhr.responseText || 'Server error', 'error');
+				}
+			});
+
+		} catch (err) {
+			console.error("Validation error:", err);
+			Swal.fire('Error!', 'Validation failed. Please try again.', 'error');
+		}
+	});
+			 
+   function exportToExcel() {
 		  fetch('/PurchaseOrderList/ExportAllDocs')
 			.then(response => {
 			  if (!response.ok) throw new Error("Network response was not ok");
@@ -316,8 +431,8 @@
 			});
 		}
 
-	function callGetReportAsPdf() {
-				var reportName = "rpt_emp_mast";
+   function callGetReportAsPdf() {
+		    var reportName = "rpt_emp_mast";
 			var now = new Date();
 			var day = String(now.getDate()).padStart(2, '0');
 			var month = String(now.getMonth() + 1).padStart(2, '0');
@@ -352,7 +467,7 @@
 			});
 		}
 
-		 function showEmployeePopup(docCode) {
+   function showEmployeePopup(docCode) {
 			 $.ajax({
 				 url: '/PurchaseOrderList/GetPurchaseOrderEntryDetails',
 				 type: 'Get',

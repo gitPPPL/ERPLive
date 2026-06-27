@@ -2,71 +2,48 @@
     ViewBag.Title = "Purchase Order";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<style>
-    #tblItemRecordPO th:nth-child(2),
-    #tblItemRecordPO td:nth-child(2) select {
-        min-width: 400px;
-        max-width: 700px; /* optional */
-    }
-
-    #tblItemRecordPO th:nth-child(3),
-    #tblItemRecordPO th:nth-child(4),
-    #tblItemRecordPO th:nth-child(5),
-    #tblItemRecordPO th:nth-child(6),
-    #tblItemRecordPO td:nth-child(3) select,
-    #tblItemRecordPO td:nth-child(4) select,
-    #tblItemRecordPO td:nth-child(5) select,
-    #tblItemRecordPO td:nth-child(6) select {
-        min-width: 100px;
-        max-width: 200px;
-    }
-</style>
-<fieldset>
-    <legend class="legend-field">Purchase Order</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "PurchaseOrderList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-file-invoice-dollar"></i>
         </div>
+        <div class="erppage-header-title">Purchase Order</div>
     </div>
-
-    <form id="PurchaseOrderForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        <div class="row">
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type <span class="required">*</span> </label>
-                    <select class="form-control" id="ddlDocType">                     
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PurchaseOrderList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="PurchaseOrderForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-required" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="txtDocNo">Doc No</label>
-                    <input type="text" class="form-control" id="txtDocNo" readonly>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="text" class="erppage-input" id="txtDocNo" readonly>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="dtDocDate">Doc Date <span class="required">*</span></label>
-                    <input type="date" class="form-control" id="dtDocDate">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-redinput" id="dtDocDate">
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="ddlPOType1">PO Type</label>
-                    <div class="input-divide">
-                        <select class="form-control" id="ddlPOType1">
-                            <option>Others</option>
-                            <option>Capital</option>
-                            <option>Monthly</option>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">PO Type</label>
+                    <div class="erppage-inputgroup">
+                        <select class="erppage-input erppage-select" id="ddlPOType1">
+                            <option value="others">Others</option>
+                            <option value="capital">Capital</option>
+                            <option value="monthly">Monthly</option>
                         </select>
-                        @* <label for="ddlStatus">Request Status</label> *@
-                        <select class="form-control" id="ddlStatus">
+                        <select class="erppage-input erppage-select" id="ddlStatus">
                             <option value="1">Open</option>
                             <option value="0">Cancel</option>
                             <option value="2">Close</option>
@@ -74,830 +51,485 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="ddlPlace">Place <span class="required">*</span></label>
-                    <select class="form-control" id="ddlPlace">
-                        <option value="">-Select Place-</option>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Place</label>
+                    <select class="erppage-input erppage-required" id="ddlPlace">
+                        <option value="">Select Place</option>
                     </select>
                 </div>
             </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub-divide">
-                    <legend class="sub-legend">Party Details</legend>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="ddlPartyName">Party Name<span class="required">*</span></label>
-                                <div class="input-divide">
-                                    <select class="form-control" id="ddlPartyName">
+            <div class="erppagesrow">
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                       @*  <legend class="erppagefieldset-legend">Party Details</legend> *@
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Party Name</label>
+                                <div class="erppage-inputgroup">
+                                    <select class="erppage-input erppage-required" id="ddlPartyName">
                                         <option value="">Select Party Name</option>
                                     </select>
-                                    <div class="select-wrapper">
-                                        <select class="form-control" id="ddlAddressbyparty">
-                                            <option value=""></option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="TxtAdd1PD">Address 1</label>
-                                <textarea type="text" class="form-control" id="TxtAdd1PD" placeholder="Enter Address 1" readonly></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="TxtAdd2PD">Address 2</label>
-                                <textarea type="text" class="form-control" id="TxtAdd2PD" placeholder="Enter Address 2" readonly></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtAdd3PD">Address 3</label>
-                                <input type="text" class="form-control" id="TxtAdd3PD" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="NumPincodePD">Pincode</label>
-                                <input type="text" class="form-control" id="NumPincodePD" readonly>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtCity1PD">City</label>
-                                <input type="text" class="form-control" id="TxtCity1PD" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtGSTPD">GST</label>
-                                <input type="text" class="form-control" id="TxtGSTPD" readonly>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub-divide">
-                    <legend class="sub-legend">Ship Details</legend> 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="ddlShipFrom">Ship From <span class="required">*</span></label>
-                                <div class="input-divide">
-                                    <select class="form-control" id="ddlShipFrom">
-                                        <option value="">-Select Ship From-</option>
+                                    <select class="erppage-input erppage-required" id="ddlAddressbyparty">
+                                        <option value=""></option>
                                     </select>
-                                    <div class="select-wrapper">
-                                        <select class="form-control" id="ddlAddressbypartySD">
-                                            <option value=""></option>
-                                        </select>
-                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>                   
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="TxtAdd1SD">Address 1</label>
-                                <textarea type="text" class="form-control" id="TxtAdd1SD" placeholder="Enter Address 1" readonly></textarea>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Address 1</label>
+                                <input type="text" class="erppage-input" id="TxtAdd1PD" placeholder="Enter Address 1" readonly>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="TxtAdd2SD">Address 2</label>
-                                <textarea type="text" class="form-control" id="TxtAdd2SD" placeholder="Enter Address 2" readonly></textarea>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Address 2</label>
+                                <input type="text" class="erppage-input" id="TxtAdd2PD" placeholder="Enter Address 2" readonly>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtAdd3SD">Address 3</label>
-                                <input type="text" class="form-control" id="TxtAdd3SD" readonly>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Address 3</label>
+                                <input type="text" class="erppage-input" id="TxtAdd3PD" placeholder="Enter Address 3" readonly>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Pincode</label>
+                                <input type="text" class="erppage-input" id="NumPincodePD" placeholder="Enter Pincode" readonly>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="NumPincodeSD">Pincode</label>
-                                <input type="text" class="form-control" id="NumPincodeSD" readonly>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">City</label>
+                                <input type="text" class="erppage-input" id="TxtCity1PD" placeholder="Enter City" readonly>
                             </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtCity1SD">City</label>
-                                <input type="text" class="form-control" id="TxtCity1SD" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtGSTSD">GST</label>
-                                <input type="text" class="form-control" id="TxtGSTSD" readonly>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub-divide">
-                    <legend class="sub-legend">Terms and Condition</legend>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="txtDeliveryTerm">Delivery Term</label>
-                                <input type="text" class="form-control" id="txtDeliveryTerm" placeholder="Enter Delivery Term">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="txtTransportTerm">Transport Term</label>
-                                <input type="text" class="form-control" id="txtTransportTerm" placeholder="Enter Transport Term">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="ddlPaymentTerm">Payment Term</label>
-                                <div class="input-divide">
-                                    <select class="form-control" id="ddlPaymentTerm" style="width:30%">
-                                        <option value="">Select Payment Term</option>
-                                    </select>
-                                    <input type="text" class="form-control" id="txtPaymentTerm" placeholder="Enter Payment Term" style="width:70%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="txtPriceTerm">Price Term</label>
-                                <input type="text" class="form-control" id="txtPriceTerm" placeholder="Enter Price Term">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="txtRemarksTC">Remarks</label>
-                                <textarea type="text" class="form-control" id="txtRemarksTC" placeholder="Enter Remarks"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="txtPartyRef">Party Ref/Quot No</label>
-                    <input type="text" class="form-control" id="txtPartyRef" placeholder="Enter Party Ref/Quot No">
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group position-relative">
-                    <label for="chkDeliveryDate">Delivery Date</label>
-                    <div class="calender-check">
-                        <input type="date" class="form-control" id="DtDeliveryDate" name="DeliveryDate" style="padding-left: 30px;">
-                        <input type="checkbox" id="chkDeliveryDate" class="checkbox-inside">
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group position-relative">
-                    <label for="chkValidateDate">Validate Date</label>
-                    <div class="calender-check">
-                        <input type="date" class="form-control" id="DtValidateDate" name="DeliveryDate" style="padding-left: 30px;">
-                        <input type="checkbox" id="chkValidateDate" class="checkbox-inside">
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="ddlPriceType">Price Type <span class="required">*</span></label>
-                    <select class="form-control" id="ddlPriceType">
-                        <option value="">-Select Price Type-</option>
-                        <option>F.O.R -at our plant</option>
-                        <option>Ex-Work</option>
-                        <option>CIF</option>
-                        <option>FOB</option>
-                        <option>CFR</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label id="LblWbNo" for="ddWBNo">WB No</label>
-                    <select id="ddWBNo" class="form-control">
-                        <option value="">-Select WB No-</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label id="LblSaudaNo" for="ddSaudaNo">Sauda No</label>
-                    <div class="input-icon-wrapper">
-                        <select class="form-control" id="ddSaudaNo">
-                            <option value="">-Select Sauda No-</option>
-                        </select>
-                        <button id="BtnCalculation">
-                            <span class="input-icon"><i class="fa-solid fa-c"></i></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="txtnetamount1">Net Amount</label>
-                    <div class="input-divide">
-                        <input type="text" class="form-control" id="txtnetamount1" readonly>
-                        <input type="text" class="form-control" id="TxtDocId" readonly>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="ddlCurrency">Currency</label>
-                    <select class="form-control" id="ddlCurrency">
-                        <option value="">-Select Currency-</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label for="NumExRate">Ex-Rate</label>
-                    <input type="text" class="form-control" id="NumExRate" oninput="allowOnlyNumbers(this)" placeholder="Enter Ex-Rate">
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <fieldset class="fieldset-sub">
-                    <legend class="sub-legend">Item Total</legend>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label for="NumTotalNos">Total Nos</label>
-                                <input type="text" class="form-control" id="NumTotalNosIt" placeholder="Enter Total Nos" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label for="NumQty">Quantity</label>
-                                <input type="text" class="form-control" id="NumQtyIt" placeholder="Enter Quantity" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label for="NumAmount">Amount</label>
-                                <input type="text" class="form-control" id="NumAmountIt" placeholder="Enter Amount" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label for="NumPackingAmt">Packing Amt</label>
-                                <input type="text" class="form-control" id="NumPackingAmtIt" oninput="allowOnlyNumbers(this)" placeholder="Enter Packing Amt">
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label for="NumDiscAmt">Disc Amt</label>
-                                <input type="text" class="form-control" id="NumDiscAmtIt" oninput="allowOnlyNumbers(this)" placeholder="Enter Disc Amt">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="NumCgstAmt">CGST Amt</label>
-                                <input type="text" class="form-control" id="NumCgstAmtIt" oninput="allowOnlyNumbers(this)" placeholder="Enter CGST Amt" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="NumSgstAmt">SGST Amt</label>
-                                <input type="text" class="form-control" id="NumSgstAmtIt"  placeholder="Enter SGST Amt" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="NumIgstAmt">IGST Amt</label>
-                                <input type="text" class="form-control" id="NumIgstAmtIt" placeholder="Enter IGST Amt" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="NumVatAmt">VAT Amt</label>
-                                <input type="text" class="form-control" id="NumVatAmtIt" placeholder="Enter VAT Amt" readonly>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="NumCessAmt">Cess Amt</label>
-                                <input type="text" class="form-control" id="NumCessAmtIt" placeholder="Enter Cess Amt" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="NumTCS">TCS</label>
-                                <input type="text" class="form-control" id="NumTCSIt" placeholder="Enter TCS" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="NumOtherAmt">Other Amt</label>
-                                <input type="text" class="form-control" id="NumOtherAmtIt" oninput="allowOnlyNumbers(this)"                                                         placeholder="Enter Other Amt">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="NumNetAmt">Net Amt</label>
-                                <input type="text" class="form-control" id="NumNetAmtIt" placeholder="Enter Net Amt" readonly>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-6 col-md-6 mt-2">
-                <div class="button-right">
-                    <button type="button" class="btn btn-primary">
-                        <i class="fa-solid fa-clock-rotate-left"></i> PO Modification History
-                    </button>
-
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#PendingRequestModal">
-                        <i class="fa-solid fa-hourglass-half"></i> Pending Request
-                    </button>
-
-                    <div class="dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="copyFromDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-copy"></i> <span id="dropdownText">Copy From</span>
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="copyFromDropdown">
-                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#purchaseRequestModal" id="BtnPurchaseReq">Purchase Request</a></li>
-                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#quotationModal" id="BtnQuotationRtAprvl">Quotation Rate Approval</a></li>
-                        </ul>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-        <!--Purchase Request Modal-->
-        <div class="modal fade" id="purchaseRequestModal" tabindex="-1" aria-labelledby="purchaseRequestLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content draggable-modal">
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="purchaseRequestLabel">Copy From</h5>
-                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                                    <input type="text" id="searchBoxPR" class="form-control border-0" placeholder="Search Module..." aria-label="Search term" />
-                                </div>
-                            </div>
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                    <div class="form-row">
-                                        <input type="checkbox" id="chkAppendPR">
-                                        <label class="checkbox-label" for="chkAppendPR">Append</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="btn-rightalign">
-                                    <button type="button" class="btn btn-primary btn-purchaseCopy" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
-                                    @*  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-close"></i>Close</button> *@
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="table-responsive">
-                                <table id="tblPurchaseRequest" class="table-width">
-                                    <thead class="table-head">
-                                        <tr>
-                                            <th><input type="checkbox" id="selectAllPR" /></th>
-                                            <th>Vno</th>
-                                            <th>VType</th>
-                                            <th>Vdate</th>
-                                            <th>Item C</th>
-                                            <th>Item Name</th>
-                                            <th>Unit</th>
-                                            <th>Make</th>
-                                            <th>Tech Desc</th>
-                                            <th>Req_Qty</th>
-                                            <th>Valid Date</th>
-                                            <th>Remarks</th>
-                                            <th>Status</th>
-                                            <th>Department</th>
-                                            <th>Dept Code</th>
-                                            <th>Make Code</th>
-                                            <th>Reqno</th>
-                                            <th>Reqtype</th>
-                                            <th>Ucode</th>
-                                            <th style="display:none;">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--Quotation Modal-->
-        <div class="modal fade" id="quotationModal" tabindex="-1" aria-labelledby="quotationLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content draggable-modal">
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="quotationLabel">Copy From</h5>
-                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                                    <input type="text" id="searchBoxQM" class="form-control" placeholder="Search Module..." aria-label="Search term" />
-                                </div>
-                            </div>
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                    <div class="form-row">
-                                        <input type="checkbox" id="chkAppendQM">
-                                        <label class="checkbox-label" for="chkAppendQM">Append</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="btn-rightalign">
-                                    <button type="button" class="btn btn-primary btn-quoteCopy" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
-                                    @*  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-close"></i>Close</button> *@
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="table-responsive">
-                                <table id="tblQuotationModal" class="table-width">
-                                    <thead class="table-head">
-                                        <tr>
-                                            <th><input type="checkbox" id="selectAllQM" /></th>
-                                            <th>Vno</th>
-                                            <th>VType</th>
-                                            <th>Vdate</th>
-                                            <th>Item Name</th>
-                                            <th>Unit</th>
-                                            <th>Make</th>
-                                            <th>Tech Desc</th>
-                                            <th>Qty</th>
-                                            <th>Rate</th>
-                                            <th>Amount</th>
-                                            <th>Pack %</th>
-                                            <th>Pack Amt</th>
-                                            <th>Freight</th>
-                                            <th>Disc%</th>
-                                            <th>Disc Amt</th>
-                                            <th>Tax Type</th>
-                                            <th>CGST%</th>
-                                            <th>CGST Amt</th>
-                                            <th>SGST%</th>
-                                            <th>SGST Amt</th>
-                                            <th>IGST%</th>
-                                            <th>IGST Amt</th>
-                                            <th>Cessp</th>
-                                            <th>Cess</th>
-                                            <th>Oth Amt</th>
-                                            <th>LD Rate</th>
-                                            <th>Net Amt</th>
-                                            <th>Party Name</th>
-                                            <th>Quote No</th>
-                                            <th>Quote Date</th>
-                                            <th>Remarks</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--Pending Request Modal Popup-->
-        <div class="modal fade" id="PendingRequestModal" tabindex="-1" aria-labelledby="PendingRequestModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content draggable-modal">
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="PendingRequestModal">Pending Request for Make PO</h5>
-                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                    </div>
-                    <div class="modal-body">
-                        <div class="card">
-                            <div class="table-responsive">
-                                <table id="tblPOPendingRequest" class="table-width">
-                                    <thead class="table-head">
-                                        <tr>
-                                            <th style="display:none;">VNo</th>
-                                            <th>Department</th>
-                                            <th>DOC_ID</th>
-                                            <th>Item Name</th>
-                                            <th>Make</th>
-                                            <th>Unit</th>
-                                            <th>TechDesc</th>
-                                            <th>Monthly</th>
-                                            <th>STD Req</th>
-                                            <th>ReqQty</th>
-                                            <th>ReqReason</th>
-                                            <th>PlaceUse</th>
-                                            <th>WorkType</th>
-                                            <th>Priority</th>
-                                            <th>Scrapped</th>
-                                            <th>Owner</th>
-                                            <th>Reason</th>
-                                            <th>Remarks</th>
-                                            <th style="display:none;">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-close"></i>Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="navtab-form">
-            <ul class="nav nav-tabs" id="formTabs" role="tablist">
-                <li class="nav-item">
-                    <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">Item Record</button>
-                </li>
-                @*  <li class="nav-item">
-                    <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Item Total</button>
-                </li> *@
-                @* <li class="nav-item">
-                    <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab">Service Item</button>
-                </li> *@
-                <li class="nav-item">
-                    <button class="nav-link" id="tab4-tab" data-bs-toggle="tab" data-bs-target="#tab4" type="button" role="tab">Attachments</button>
-                </li>
-            </ul>
-            <div class="tab-content">
-                <!-- tab 1 -->
-                <div class="tab-pane fade show active" id="tab1">
-
-                    <div class="card">
-                        <div class="table-responsive">
-                            <table id="tblItemRecordPO" class="table-width">
-                                <thead class="table-head">
-                                    <tr>
-                                        <th style="display:none;">Code</th>
-                                        <th style="min-width: 500px;">Item Name</th>
-                                        <th style="min-width: 100px;">Make</th>
-                                        <th style="min-width: 100px;">Unit</th>
-                                        <th style="min-width: 100px;">Place Of Use</th>
-                                        <th style="min-width: 100px;">Department</th>
-                                        <th>Nos</th>
-                                        <th>Qty</th>
-                                        <th>Rate</th>
-                                        <th>Exrate</th>
-                                        <th>Amount</th>
-                                        <th>Pack%</th>
-                                        <th>Pack</th>
-                                        <th>Disc%</th>
-                                        <th>Disc</th>
-                                        <th>Taxtype</th>
-                                        <th>Cgst%</th>
-                                        <th>Cgst</th>
-                                        <th>Sgst%</th>
-                                        <th>Sgst</th>
-                                        <th>Igst%</th>
-                                        <th>Igst</th>
-                                        <th>Vat%</th>
-                                        <th>Vat</th>
-                                        <th>Cess%</th>
-                                        <th>Cess</th>
-                                        <th style="display:none;">TCS%</th>
-                                        <th style="display:none;">TCS</th>
-                                        <th style="display:none;">Other%</th>
-                                        <th>Other Amt</th>
-                                        <th style="display:none;">Other2%</th>
-                                        <th style="display:none;">Other2 Amt</th>
-                                        <th>Net Amt</th>
-                                        <th>Ld Rate</th>
-                                        <th>Remarks</th>
-                                        <th>App. Level</th>
-                                        <th>App. Remarks</th>
-                                        <th>Status</th>
-                                        <th>Reqtype</th>
-                                        <th>Reqno</th>
-                                        <th>Apptype</th>
-                                        <th>Appno</th>
-                                        <th>Saudatype</th>
-                                        <th>Saudano</th>
-                                        <th>Mth Rate</th>
-                                        <th>Qtr Rate</th>
-                                        <th>Anl Rate</th>
-                                        <th>Spcl Rate</th>
-                                        <th>Calc Rate</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                        <!-- Pagination container -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="btn-add-row-last">
-                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
-                                </div>
-                                @* <div class="pagination-end">
-                                    <div class="custom-pagination" id="tablePagination"></div>
-                                </div> *@
-                            </div>
-                        </div>
-                    </div>
-                    
-                </div>
-
-                <!-- tab 2 -->
-                <div class="tab-pane fade" id="tab2">
-
-
-                    @* <fieldset class="fieldset-sub">
-                        <legend class="sub-legend">PO History</legend>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumTodayPOAmt">Today PO Amt</label>
-                                    <input type="text" class="form-control" id="NumTodayPOAmtIt" placeholder="Enter Today PO Amt" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumDateAmt">Till Date Amt</label>
-                                    <input type="text" class="form-control" id="NumDateAmtIt" placeholder="Enter Till Date Amt" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumTodayDepttAmt">Today Deptt Amt</label>
-                                    <input type="text" class="form-control" id="NumTodayDepttAmtIt" placeholder="Enter Today Deptt Amt" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumTilldateDepttAmt">Till date Deptt Amt</label>
-                                    <input type="text" class="form-control" id="NumTilldateDepttAmtIt" placeholder="Enter Till date Deptt Amt" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumLastMonthTilldateAmt">Last Month Till date Amt</label>
-                                    <input type="text" class="form-control" id="NumLastMonthTilldateAmtIt" placeholder="Enter Last Month Till date Amt" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </fieldset> *@
-                </div>
-
-                <!--tab 3-->
-                @* <div class="tab-pane fade" id="tab3">
-                    <fieldset class="fieldset-sub">
-                        <legend class="sub-legend">Service Order Detail</legend>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="txtTotalNos">Total Nos</label>
-                                    <input type="text" class="form-control" id="txtTotalNosSod" placeholder="Enter Total Nos" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="txtQuantity">Quantity</label>
-                                    <input type="text" class="form-control" id="txtQuantitySod" placeholder="Enter Quantity" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="txtAmount">Amount</label>
-                                    <input type="text" class="form-control" id="txtAmountSod" placeholder="Enter Amount" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="txtPackingAmt">Packing Amt</label>
-                                    <input type="text" class="form-control" id="txtPackingAmtSod" placeholder="Enter Packing Amt">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="NumCgstAmt">CGST Amt</label>
-                                    <input type="text" class="form-control" id="NumCgstAmtSod" placeholder="Enter CGST Amt" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="NumSgstAmt">SGST Amt</label>
-                                    <input type="text" class="form-control" id="NumSgstAmtSod" placeholder="Enter SGST Amt" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="NumIgstAmt">IGST Amt</label>
-                                    <input type="text" class="form-control" id="NumIgstAmtSod" placeholder="Enter IGST Amt" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="TxtOtherAmtSod">Other Amt</label>
-                                    <input type="text" class="form-control" id="TxtOtherAmtSod" placeholder="Enter Other Amt">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="TxtDiscAmtSod">Disc Amt</label>
-                                    <input type="text" class="form-control" id="TxtDiscAmtSod" placeholder="Enter Disc Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="TxtNetAmtSod">Net Amt</label>
-                                    <input type="text" class="form-control" id="TxtNetAmtSod" placeholder="Enter Net Amt" readonly>
-                                </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">GST</label>
+                                <input type="text" class="erppage-input" id="TxtGSTPD" placeholder="Enter GST" readonly>
                             </div>
                         </div>
                     </fieldset>
-                </div> *@
-
-                <!--tab 4-->
-                <div class="tab-pane fade" id="tab4">
-                    <div class="card">
-                        <div class="table-responsive">
-                            <table id="tblAttachmentPO" class="table-width">
-                                <thead class="table-head">
-                                    <tr>
-                                        <th>File Upload</th>
-                                        <th>Preview</th>
-                                        <th>File Name</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                        <!-- Pagination container -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="btn-add-row-last">
-                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
+                </div>
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        @* <legend class="erppagefieldset-legend">Party Details</legend> *@
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Ship From</label>
+                                <div class="erppage-inputgroup">
+                                    <select class="erppage-input erppage-required" id="ddlShipFrom">
+                                        <option value="">-Select Ship From-</option>
+                                    </select>
+                                    <select class="erppage-input erppage-required" id="ddlAddressbypartySD">
+                                        <option value=""></option>
+                                    </select>
                                 </div>
-                                <div class="pagination-end">
-                                    <div class="custom-pagination" id="tablePagination"></div>
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Address 1</label>
+                                <input type="text" class="erppage-input" id="TxtAdd1SD" placeholder="Enter Address 1" readonly>
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Address 2</label>
+                                <input type="text" class="erppage-input" id="TxtAdd2SD" placeholder="Enter Address 2" readonly>
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Address 3</label>
+                                <input type="text" class="erppage-input" id="TxtAdd3SD" placeholder="Enter Address 3" readonly>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Pincode</label>
+                                <input type="text" class="erppage-input" id="NumPincodeSD" placeholder="Enter Pincode" readonly>
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">City</label>
+                                <input type="text" class="erppage-input" id="TxtCity1SD" placeholder="Enter City" readonly>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">GST</label>
+                                <input type="text" class="erppage-input" id="TxtGSTSD" placeholder="Enter GST" readonly>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="erppagesrow">
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        @* <legend class="erppagefieldset-legend">Terms and Condition</legend> *@
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Delivery Term</label>
+                                <input type="text" class="erppage-input" id="txtDeliveryTerm" placeholder="Enter Delivery Term" maxlength="250">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Transp. Term</label>
+                                <input type="text" class="erppage-input" id="txtTransportTerm" placeholder="Enter Transport Term" maxlength="250">
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Paym. Term</label>
+                                <div class="erppage-inputgroup">
+                                    <select class="erppage-input erppage-select" id="ddlPaymentTerm">
+                                        <option value="">Select Payment Term</option>
+                                    </select>
+                                    <input type="text" class="erppage-input" id="txtPaymentTerm" placeholder="Enter Payment Term" maxlength="250">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Price Term</label>
+                                <input type="text" class="erppage-input" id="txtPriceTerm" placeholder="Enter Price Term" maxlength="250">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Remarks</label>
+                                <input type="text" class="erppage-input" id="txtRemarksTC" placeholder="Enter Remarks">
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                       @*  <legend class="erppagefieldset-legend">Other Details</legend> *@
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Party Ref/Quot No</label>
+                                <input type="text" class="erppage-input" id="txtPartyRef" placeholder="Enter Party Ref/Quot No" maxlength="200">
+                            </div>
+                            <div class="erppage-divfield erppage-datefield">
+                                <label class="erppage-label">Delivery Date</label>
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtDeliveryDate">
+                                    <label class="erppage-checkbox-inside">
+                                        <input type="checkbox" class="erppage-checkbox-input" id="chkDeliveryDate">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield erppage-datefield">
+                                <label class="erppage-label">Validate Date</label>
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtValidateDate">
+                                    <label class="erppage-checkbox-inside">
+                                        <input type="checkbox" class="erppage-checkbox-input" id="chkValidateDate">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Price Type</label>
+                                <select class="erppage-input erppage-required" id="ddlPriceType">
+                                    <option value="">Select Price Type</option>
+                                    <option value="foratourplant">F.O.R - at our plant</option>
+                                    <option value="exwork">Ex-Work</option>
+                                    <option value="cif">CIF</option>
+                                    <option value="fob">FOB</option>
+                                    <option value="cfr">CFR</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label id="LblWbNo" class="erppage-label">WB No</label>
+                                <select class="erppage-input erppage-select" id="ddWBNo">
+                                    <option value="">Select WB No</option>
+                                </select>
+                            </div>
+                            <div class="erppage-field">
+                                <label id="LblSaudaNo" class="erppage-label">Sauda No</label>
+                                <div class="erppageinputicon-wrapper">
+                                    <select class="erppage-input erppage-select" id="ddSaudaNo">
+                                        <option value="">Select WB No</option>
+                                    </select>
+                                    <span class="erppageinputicon" id="BtnCalculation">
+                                        <i class="fa-solid fa-c"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Net Amount</label>
+                                <div class="erppage-inputgroup">
+                                    <input type="text" class="erppage-input" id="txtnetamount1" readonly>
+                                    <input type="text" class="erppage-input" id="TxtDocId" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Currency</label>
+                                <select class="erppage-input erppage-select" id="ddlCurrency">
+                                    <option value="">Select Currency</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Ex-Rate</label>
+                                <input type="text" class="erppage-input" id="NumExRate" oninput="allowOnlyNumbers(this)" placeholder="Enter Ex-Rate" maxlength="16">
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Total</legend>
+                <div class="erppage-grid5">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Total Nos</label>
+                        <input type="text" class="erppage-input" id="NumTotalNosIt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Quantity</label>
+                        <input type="text" class="erppage-input" id="NumQtyIt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Amount</label>
+                        <input type="text" class="erppage-input" id="NumAmountIt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Packing Amt</label>
+                        <input type="text" class="erppage-input" id="NumPackingAmtIt" oninput="allowOnlyNumbers(this)">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Disc Amt</label>
+                        <input type="text" class="erppage-input" id="NumDiscAmtIt" oninput="allowOnlyNumbers(this)">
+                    </div>
+                </div>
+                <div class="erppage-grid5">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CGST Amt</label>
+                        <input type="text" class="erppage-input" id="NumCgstAmtIt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">SGST Amt</label>
+                        <input type="text" class="erppage-input" id="NumSgstAmtIt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">IGST Amt</label>
+                        <input type="text" class="erppage-input" id="NumIgstAmtIt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">VAT Amt</label>
+                        <input type="text" class="erppage-input" id="NumVatAmtIt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Cess Amt</label>
+                        <input type="text" class="erppage-input" id="NumCessAmtIt" readonly>
+                    </div>
+                </div>
+                <div class="erppage-grid5">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">TCS</label>
+                        <input type="text" class="erppage-input" id="NumTCSIt" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Other Amt</label>
+                        <input type="text" class="erppage-input" id="NumOtherAmtIt" oninput="allowOnlyNumbers(this)">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Net Amt</label>
+                        <input type="text" class="erppage-input" id="NumNetAmtIt" readonly>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="erppage-internalaction mt-2">
+                <div class="dropdown erppagedropdown">
+                    <button class="erppagedropdown-btn" type="button" id="copyFromDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy From</span>
+                    </button>
+                    <button class="erppagedropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu erppagedropdown-menu">
+                        <li>
+                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#purchaseRequestModal" id="BtnPurchaseReq">
+                                <i class="fa-solid fa-file-import"></i>
+                                <span>Purchase Request</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#quotationModal" id="BtnQuotationRtAprvl">
+                                <i class="fa-solid fa-file-signature"></i>
+                                <span>Quotation Rate Approval</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <button type="button" id="btnPOModHistory" class="erppage-btn erppage-btn-common-disabled">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>PO Modification History</span>
+                </button>
+                <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" data-bs-toggle="modal" data-bs-target="#PendingRequestModal">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    <span>Pending Request</span>
+                </button>
+            </div>
+
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Record</legend>
+                <div class="erppagelist-container">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblItemRecordPO" class="excel-table fixed-grid-table width-table resizable-table">
+                            <colgroup>
+                                <col style="display:none;"> 
+                                <col style="width:300px;"> 
+                                <col style="width:120px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:140px;"> 
+                                <col style="width:140px;"> 
+                                <col style="width:80px;"> 
+                                <col style="width:80px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:120px;"> 
+                                <col style="width:80px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:80px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:80px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:80px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:80px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:80px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:80px;"> 
+                                <col style="width:100px;"> 
+                                <col style="display:none;"> 
+                                <col style="display:none;"> 
+                                <col style="display:none;"> 
+                                <col style="width:100px;"> 
+                                <col style="display:none;"> 
+                                <col style="display:none;"> 
+                                <col style="width:120px;"> 
+                                <col style="width:120px;"> 
+                                <col style="width:180px;"> 
+                                <col style="width:120px;"> 
+                                <col style="width:180px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:120px;"> 
+                            </colgroup>
+
+                            <thead>
+                                <tr>
+                                    <th class="hidden-col">Code</th>
+                                    <th>Item Name</th>
+                                    <th>Make</th>
+                                    <th>Unit</th>
+                                    <th>Place Of Use</th>
+                                    <th>Department</th>
+                                    <th>Nos</th>
+                                    <th>Quantity</th>
+                                    <th>Rate</th>
+                                    <th>Exrate</th>
+                                    <th>Amount</th>
+                                    <th>Pack%</th>
+                                    <th>Pack</th>
+                                    <th>Disc%</th>
+                                    <th>Disc</th>
+                                    <th>Taxtype</th>
+                                    <th>Cgst%</th>
+                                    <th>Cgst</th>
+                                    <th>Sgst%</th>
+                                    <th>Sgst</th>
+                                    <th>Igst%</th>
+                                    <th>Igst</th>
+                                    <th>Vat%</th>
+                                    <th>Vat</th>
+                                    <th>Cess%</th>
+                                    <th>Cess</th>
+                                    <th class="hidden-col">TCS%</th>
+                                    <th class="hidden-col">TCS</th>
+                                    <th class="hidden-col">Other%</th>
+                                    <th>Other Amount</th>
+                                    <th class="hidden-col">Other2%</th>
+                                    <th class="hidden-col">Other2 Amt</th>
+                                    <th>Net Amt</th>
+                                    <th>Ld Rate</th>
+                                    <th>Remarks</th>
+                                    <th>App. Level</th>
+                                    <th>App. Remarks</th>
+                                    <th>Status</th>
+                                    <th>Reqtype</th>
+                                    <th>Reqno</th>
+                                    <th>Apptype</th>
+                                    <th>Appno</th>
+                                    <th>Sauda Type</th>
+                                    <th>Sauda No</th>
+                                    <th>Mth Rate</th>
+                                    <th>Qtr Rate</th>
+                                    <th>Anl Rate</th>
+                                    <th>Spcl Rate</th>
+                                    <th>Calc Rate</th>
+                                    <th class="action-col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Attachment</legend>
+                <div class="erppageattachmentsection">
+                    <div class="erppageattachmentsectionrow">
+                        <div class="erppageattachmentsectioncol">
+                            <div class="erppageattachmentsectionuploadcard">
+                                <h2 class="erppageattachmentsectiontitle">UPLOAD MULTIPLE FILES</h2>
+                                <div class="erppageattachmentsectiondropzone" id="dropZone">
+                                    <div class="erppageattachmentsectioncloud">
+                                        <i class="fa fa-cloud"></i>
+                                    </div>
+                                    <div class="erppageattachmentsectiondragtext">
+                                        Drag & Drop your files here
+                                    </div>
+                                    <div class="erppageattachmentsectionor">
+                                        OR
+                                    </div>
+                                    <button type="button" class="erppageattachmentsectionbrowsebtn" id="browseBtn">
+                                        Browse Files
+                                    </button>
+                                    <input type="file" id="fileInput" multiple hidden>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppageattachmentsectioncol">
+                            <div class="erppageattachmentsectionfilecard">
+                                <div class="erppageattachmentsectionheader">Uploaded Files</div>
+                                <div class="erppageattachmentsectionfilelist" id="fileList">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </fieldset>
 
-                <fieldset class="fieldset-sub" id="SaudaDetail">
-                    <legend class="sub-legend">Sauda Details</legend>
+            <fieldset class="erppagefieldset" id="SaudaDetail">
+                <legend class="erppagefieldset-legend">Sauda Details</legend>
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
@@ -949,9 +581,7 @@
                                         </div>
                                     </div>
                                 </div>
-                               @*  <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div> *@
+
                             </div>
                         </div>
                     </div>
@@ -993,67 +623,391 @@
                             </div>
                         </div>
                     </div>
-                </fieldset>
-            </div>
+               
+            </fieldset>
+        </fieldset>
+        <div class="erppage-actions">
+            <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
         </div>
-        <ul id="customContextMenu" class="custom-context-menu" style="display:none;">
-            <li data-action="exporttoexcel" data-bs-toggle="modal" data-bs-target="#ExportToExcel">Export To Excel</li>
-            <li data-action="purchasereceipthistory" data-bs-toggle="modal" data-bs-target="#purchasereceipthistory">Show/Set QC Parameter</li>
-            <li data-action="orderhistory" data-bs-toggle="modal" data-bs-target="#orderhistory">Order History</li>
-        </ul>
-        <!--purchasereceipthistory-->
-        <div class="modal fade" id="orderhistory" tabindex="-1" aria-labelledby="orderhistoryLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content draggable-modal">
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="orderhistoryyLabel">Purchase Receipt History</h5>
-                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+    </div>
+
+    <!--Purchase Request Modal Popup-->
+    <div class="modal fade" id="purchaseRequestModal" tabindex="-1" aria-labelledby="purchaseRequestLabel" aria-hidden="true">
+        <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+            <div class="modal-content erppagesmodal-content">
+                <div class="erppagesmodal-header">
+                    <div class="erppagesmodal-header-left">
+                        <div class="erppagesmodal-header-icon">
+                            <i class="fa fa-copy"></i>
+                        </div>
+                        <h5 class="erppagesmodal-title" id="purchaseRequestLabel">
+                            Copy From Purchase Request
+                        </h5>
                     </div>
-                    <div class="modal-body">
-                        <div class="card">
-                            <div class="table-responsive">
-                                <table id="tblorderhistory" class="table-width">
-                                    <thead class="table-head">
-                                        <tr>
-                                            <th>Vno</th>
-                                            <th>Date</th>
-                                            <th>Supplier</th>
-                                            <th>Item Name</th>
-                                            <th>Make</th>
-                                            <th>Unit</th>
-                                            <th>Qty</th>
-                                            <th>Rate</th>
-                                            <th>Other Amount</th>
-                                            <th>CGST %</th>
-                                            <th>SGST %</th>
-                                            <th>IGST %</th>
-                                            <th>Pack %</th>
-                                            <th>Disc %</th>
-                                            <th>Other Expenses</th>
-                                            <th>LD Rate</th>
-                                            <th>Remarks</th>
-                                            <th>Status</th>
-                                            <th style="display:none;">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
+                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <div class="erppagesmodal-body">
+                    <div class="erppage-grid3">
+                        <div class="erppage-divfield">
+                            <div class="erppagelist-search-wrapper">
+                                <i class="fa fa-search"></i>
+                                <input type="text" id="searchBoxPR" placeholder="Search..." />
+                            </div>
+                        </div>
+                        <div class="erppage-divfield">
+                            <label class="erppage-label"></label>
+                            <div class="erppage-checkbox-wrap">
+                                <input type="checkbox" id="chkAppendPR" class="erppage-checkbox-input">
+                                <label for="chkAppendPR" class="erppage-checkbox-label">Append</label>
                             </div>
                         </div>
                     </div>
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblPurchaseRequest" class="excel-table width-table fixed-grid-table resizable-table">
+                            <colgroup>
+                                <col style="width:50px;">   
+                                <col style="width:100px;">  
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="width:100px;">  
+                                <col style="width:250px;">  
+                                <col style="width:80px;">   
+                                <col style="width:120px;">  
+                                <col style="width:250px;">  
+                                <col style="width:100px;">  
+                                <col style="width:120px;">  
+                                <col style="width:200px;">  
+                                <col style="width:120px;">  
+                                <col style="width:150px;">  
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="display:none;"> 
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllPR" /></th>
+                                    <th>Voucher No</th>
+                                    <th>Voucher Type</th>
+                                    <th>Voucher Date</th>
+                                    <th>Item Code</th>
+                                    <th>Item Name</th>
+                                    <th>Unit</th>
+                                    <th>Make</th>
+                                    <th>Tech Desc</th>
+                                    <th>Req Qty</th>
+                                    <th>Valid Date</th>
+                                    <th>Remarks</th>
+                                    <th>Status</th>
+                                    <th>Department</th>
+                                    <th>Dept Code</th>
+                                    <th>Make Code</th>
+                                    <th>Req No</th>
+                                    <th>Req Type</th>
+                                    <th>U Code</th>
+                                    <th class="hidden-col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="erppagesmodal-action mt-2">
+                        <button type="button" class="erppagesmodal-btn" data-bs-dismiss="modal">
+                            <i class="fa fa-copy"></i>Copy
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="offset-md-9 col-md-3">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+    </div>
+    <!--Quotation Modal Popup-->
+    <div class="modal fade" id="quotationModal" tabindex="-1" aria-labelledby="quotationLabel" aria-hidden="true">
+        <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+            <div class="modal-content erppagesmodal-content">
+                <div class="erppagesmodal-header">
+                    <div class="erppagesmodal-header-left">
+                        <div class="erppagesmodal-header-icon">
+                            <i class="fa fa-copy"></i>
+                        </div>
+                        <h5 class="erppagesmodal-title" id="quotationLabel">Copy From Quotation</h5>
+                    </div>
+                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <div class="erppagesmodal-body">
+                    <div class="erppage-grid3">
+                        <div class="erppage-divfield">
+                            <div class="erppagelist-search-wrapper">
+                                <i class="fa fa-search"></i>
+                                <input type="text" id="searchBoxQM" placeholder="Search..." />
+                            </div>
+                        </div>
+                        <div class="erppage-divfield">
+                            <label class="erppage-label"></label>
+                            <div class="erppage-checkbox-wrap">
+                                <input type="checkbox" id="chkAppendQM" class="erppage-checkbox-input">
+                                <label for="chkAppendQM" class="erppage-checkbox-label">Append</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblQuotationModal" class="excel-table width-table fixed-grid-table resizable-table">
+                            <colgroup>
+                                <col style="width:50px;">   
+                                <col style="width:100px;">  
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="width:250px;">  
+                                <col style="width:80px;">   
+                                <col style="width:120px;">  
+                                <col style="width:250px;">  
+                                <col style="width:90px;">   
+                                <col style="width:100px;">  
+                                <col style="width:120px;">  
+                                <col style="width:80px;">   
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="width:80px;">   
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="width:80px;">   
+                                <col style="width:120px;">  
+                                <col style="width:80px;">   
+                                <col style="width:120px;">  
+                                <col style="width:80px;">   
+                                <col style="width:120px;">  
+                                <col style="width:80px;">   
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="width:220px;">  
+                                <col style="width:120px;">  
+                                <col style="width:120px;">  
+                                <col style="width:250px;">  
+                                <col style="width:120px;">  
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllQM" /></th>
+                                    <th>Voucher No</th>
+                                    <th>Voucher Type</th>
+                                    <th>Voucher Date</th>
+                                    <th>Item Name</th>
+                                    <th>Unit</th>
+                                    <th>Make</th>
+                                    <th>Tech Desc</th>
+                                    <th>Qty</th>
+                                    <th>Rate</th>
+                                    <th>Amount</th>
+                                    <th>Pack %</th>
+                                    <th>Pack Amt</th>
+                                    <th>Freight</th>
+                                    <th>Disc %</th>
+                                    <th>Disc Amt</th>
+                                    <th>Tax Type</th>
+                                    <th>CGST %</th>
+                                    <th>CGST Amt</th>
+                                    <th>SGST %</th>
+                                    <th>SGST Amt</th>
+                                    <th>IGST %</th>
+                                    <th>IGST Amt</th>
+                                    <th>Cess %</th>
+                                    <th>Cess</th>
+                                    <th>Other Amt</th>
+                                    <th>LD Rate</th>
+                                    <th>Net Amt</th>
+                                    <th>Party Name</th>
+                                    <th>Quote No</th>
+                                    <th>Quote Date</th>
+                                    <th>Remarks</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="erppagesmodal-action mt-2">
+                        <button type="button" class="erppagesmodal-btn btn-quoteCopy" data-bs-dismiss="modal">
+                            <i class="fa fa-copy"></i> Copy
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-        
-    </form>
-</fieldset>
+
+    </div>
+    <!--Pending Request Modal Popup-->
+    <div class="modal fade" id="PendingRequestModal" tabindex="-1" aria-labelledby="PendingRequestModalLabel" aria-hidden="true">
+        <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+            <div class="modal-content erppagesmodal-content">
+                <div class="erppagesmodal-header">
+                    <div class="erppagesmodal-header-left">
+                        <div class="erppagesmodal-header-icon">
+                            <i class="fa fa-list-alt"></i>
+                        </div>
+                        <h5 class="erppagesmodal-title" id="PendingRequestModalLabel">Pending Request for Make PO</h5>
+                    </div>
+                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <div class="erppagesmodal-body">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblPOPendingRequest" class="excel-table width-table fixed-grid-table resizable-table">
+                            <colgroup>
+                                <col style="display:none;"> 
+                                <col style="width:150px;"> 
+                                <col style="width:120px;"> 
+                                <col style="width:250px;"> 
+                                <col style="width:150px;"> 
+                                <col style="width:80px;"> 
+                                <col style="width:250px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:180px;"> 
+                                <col style="width:150px;"> 
+                                <col style="width:120px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:100px;"> 
+                                <col style="width:120px;"> 
+                                <col style="width:180px;"> 
+                                <col style="width:250px;"> 
+                                <col style="display:none;"> 
+                            </colgroup>
+
+                            <thead>
+                                <tr>
+                                    <th class="hidden-col">VNo</th>
+                                    <th>Department</th>
+                                    <th>Document ID</th>
+                                    <th>Item Name</th>
+                                    <th>Make</th>
+                                    <th>Unit</th>
+                                    <th>Tech Desc</th>
+                                    <th>Monthly</th>
+                                    <th>STD Req</th>
+                                    <th>Req Quantity</th>
+                                    <th>Req Reason</th>
+                                    <th>Place Use</th>
+                                    <th>Work Type</th>
+                                    <th>Priority</th>
+                                    <th>Scrapped</th>
+                                    <th>Owner</th>
+                                    <th>Reason</th>
+                                    <th>Remarks</th>
+                                    <th class="hidden-col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="erppagesmodal-action">
+                    <button type="button" class="erppagesmodal-btn erppagesmodal-btn-secondary"
+                            data-bs-dismiss="modal">
+                        <i class="fa fa-times"></i>
+                        Close
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <!--Purchase Receipt History Modal Popup-->
+    <div class="modal fade" id="orderhistory" tabindex="-1" aria-labelledby="orderhistoryLabel" aria-hidden="true">
+        <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+            <div class="modal-content erppagesmodal-content">
+                <div class="erppagesmodal-header">
+                    <div class="erppagesmodal-header-left">
+                        <div class="erppagesmodal-header-icon">
+                            <i class="fa fa-history"></i>
+                        </div>
+                        <h5 class="erppagesmodal-title" id="orderhistoryLabel">Purchase Receipt History</h5>
+                    </div>
+                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <div class="erppagesmodal-body">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblorderhistory" class="excel-table width-table fixed-grid-table resizable-table">
+                            <colgroup>
+                                <col style="width:120px;"> 
+                                <col style="width:120px;"> 
+                                <col style="width:220px;"> 
+                                <col style="width:250px;"> 
+                                <col style="width:150px;"> 
+                                <col style="width:80px;">  
+                                <col style="width:90px;">  
+                                <col style="width:100px;"> 
+                                <col style="width:120px;"> 
+                                <col style="width:90px;">  
+                                <col style="width:90px;">  
+                                <col style="width:90px;">  
+                                <col style="width:90px;">  
+                                <col style="width:90px;">  
+                                <col style="width:140px;"> 
+                                <col style="width:120px;"> 
+                                <col style="width:250px;"> 
+                                <col style="width:120px;"> 
+                                <col style="display:none;"> 
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>Voucher No</th>
+                                    <th>Date</th>
+                                    <th>Supplier</th>
+                                    <th>Item Name</th>
+                                    <th>Make</th>
+                                    <th>Unit</th>
+                                    <th>Qty</th>
+                                    <th>Rate</th>
+                                    <th>Other Amount</th>
+                                    <th>CGST %</th>
+                                    <th>SGST %</th>
+                                    <th>IGST %</th>
+                                    <th>Pack %</th>
+                                    <th>Disc %</th>
+                                    <th>Other Expenses</th>
+                                    <th>LD Rate</th>
+                                    <th>Remarks</th>
+                                    <th>Status</th>
+                                    <th class="hidden-col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="erppagesmodal-action">
+                    <button type="button" class="erppagesmodal-btn erppagesmodal-btn-secondary" data-bs-dismiss="modal">
+                        <i class="fa fa-times"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul id="customContextMenu" class="custom-context-menu" style="display:none;">
+        <li data-action="exporttoexcel" data-bs-toggle="modal" data-bs-target="#ExportToExcel">Export To Excel</li>
+        <li data-action="purchasereceipthistory" data-bs-toggle="modal" data-bs-target="#purchasereceipthistory">Show/Set QC Parameter</li>
+        <li data-action="orderhistory" data-bs-toggle="modal" data-bs-target="#orderhistory">Order History</li>
+    </ul>
+</div>
+
+
+
 <script src="~/js/GlobalValidation.js" asp-append-version="true"></script>
 
 <script>
@@ -1081,6 +1035,11 @@
     let docId = "";
     let readOnly;
 
+
+    console.log("readOnly", readOnly); 
+
+
+
     function getQueryParam(param) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(param);
@@ -1097,342 +1056,287 @@
     });
 
     $(document).ready(function () {
-    GetPlaceList();
-    GetCurrencyList();
-    GetShipFromList();
-    GetPartyList();
-    addItemRecordRow();
-    addAttachmentRow();
-    GetPayTermList();
+        GetPlaceList();
+        GetCurrencyList();
+        GetShipFromList();
+        GetPartyList();
+        addItemRecordRow();
+        addAttachmentRow();
+        GetPayTermList();
     });
 
     $(document).ready(function () {
-    // handleDocLoad();
-    setEnterKeyFocus(AllFieldsId);
+        setEnterKeyFocus(AllFieldsId);
 
-    $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
-        var tbody = $(this).closest('tbody');
-        var rowCount = tbody.find('tr').length;
+        $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
+            var tbody = $(this).closest('tbody');
+            var rowCount = tbody.find('tr').length;
 
-        if (rowCount > 1) {
-            $(this).closest('tr').remove();
-        } else {
-            alert('Cannot delete the first row.');
-        }
-    });
+            if (rowCount > 1) {
+                $(this).closest('tr').remove();
+            } else {
+                alert('Cannot delete the first row.');
+            }
+        });
 
-    $(document).on('click', '#tab4 .btn-add-action', function () {
-    addAttachmentRow();
-    });
+        $(document).on('click', '#tab4 .btn-add-action', function () {
+        addAttachmentRow();
+        });
 
-    
-    $(document).on('click', '#tab1 .btn-add-row, #tab1 .btn-Itemadd-action', function () {
-        addItemRecordRow();
-    });
+        $(document).on('click', '#tab1 .btn-add-row, #tab1 .btn-Itemadd-action', function () {
+            addItemRecordRow();
+        });
 
-    $('#ddlPartyName').on('change', function() {
-        var partyCode = $(this).val();
-        var selectedOption = $(this).find('option:selected');
-       var shipCode= $('#ddlShipFrom').val();
-        if (partyCode) {
-            $('#TxtAdd1PD').val(selectedOption.data('add1'));
-            $('#TxtAdd2PD').val(selectedOption.data('add2'));
-            $('#TxtAdd3PD').val(selectedOption.data('add3'));
-            $('#NumPincodePD').val(selectedOption.data('pincd'));
-            $('#TxtCity1PD').val(selectedOption.data('cityname'));
-            $('#TxtGSTPD').val(selectedOption.data('gstin'));
-            GetPartyAddress(partyCode, '#ddlAddressbyparty');
-            GetSaudaList(partyCode);
-            GetWeighBridgeNo(partyCode);
-            if(!shipCode)
+        $('#ddlPartyName').on('change', function() {
+            var partyCode = $(this).val();
+            var selectedOption = $(this).find('option:selected');
+           var shipCode= $('#ddlShipFrom').val();
+            if (partyCode) {
+
+
+                $('#TxtAdd1PD').val(selectedOption.data('add1'));
+                $('#TxtAdd2PD').val(selectedOption.data('add2'));
+                $('#TxtAdd3PD').val(selectedOption.data('add3'));
+                $('#NumPincodePD').val(selectedOption.data('pincd'));
+                $('#TxtCity1PD').val(selectedOption.data('cityname'));
+                $('#TxtGSTPD').val(selectedOption.data('gstin'));
+                GetPartyAddress(partyCode, '#ddlAddressbyparty');
+                GetSaudaList(partyCode);
+                GetWeighBridgeNo(partyCode);
+                if(!shipCode)
+                {
+                   GetShipFromList(partyCode);
+                   $('#TxtAdd1SD').val(selectedOption.data('add1'));
+                   $('#TxtAdd2SD').val(selectedOption.data('add2'));
+                   $('#TxtAdd3SD').val(selectedOption.data('add3'));
+                   $('#NumPincodeSD').val(selectedOption.data('pincd'));
+                   $('#TxtCity1SD').val(selectedOption.data('cityname'));
+                   $('#TxtGSTSD').val(selectedOption.data('gstin'));
+                   GetPartyAddress(partyCode, '#ddlAddressbypartySD');
+                }
+
+            } else {
+                $('#TxtAdd1PD').val('');
+                $('#TxtAdd2PD').val('');
+                $('#TxtAdd3PD').val('');
+                $('#NumPincodePD').val('');
+                $('#TxtCity1PD').val('');
+                $('#TxtGSTPD').val('');
+                $('#ddlAddressbyparty').empty().append('<option value="">-Select Address-</option>');
+                $('#ddSaudaNo').empty().append('<option value="">-Select Sauda No.-</option>');
+                $('#ddWBNo').empty().append('<option value="">-Select WeighBridge No.-</option>');
+                if(!shipCode)
+                {
+                $('#TxtAdd1SD').val('');
+                $('#TxtAdd2SD').val('');
+                $('#TxtAdd3SD').val('');
+                $('#NumPincodeSD').val('');
+                $('#TxtCity1SD').val('');
+                $('#TxtGSTSD').val('');
+                $('#ddlAddressbypartySD').empty().append('<option value="">-Select Address-</option>');
+
+                }
+            }
+        });
+
+        $('#ddlShipFrom').on('change', function(){
+                var shipCode = $(this).val();
+                var selectedOption= $(this).find('option:selected');
+                if (shipCode) {
+                $('#TxtAdd1SD').val(selectedOption.data('add1'));
+                $('#TxtAdd2SD').val(selectedOption.data('add2'));
+                $('#TxtAdd3SD').val(selectedOption.data('add3'));
+                $('#NumPincodeSD').val(selectedOption.data('pincd'));
+                $('#TxtCity1SD').val(selectedOption.data('cityname'));
+                $('#TxtGSTSD').val(selectedOption.data('gstin'));
+                GetPartyAddress(shipCode, '#ddlAddressbypartySD');
+                } else {
+                 $('#TxtAdd1SD').val('');
+                $('#TxtAdd2SD').val('');
+                $('#TxtAdd3SD').val('');
+                $('#NumPincodeSD').val('');
+                $('#TxtCity1SD').val('');
+                $('#TxtGSTSD').val('');
+                $('#ddlAddressbypartySD').empty().append('<option value="">-Select Address-</option>');
+                }
+        });
+
+        $(document).on('change', '#ddlAddressbyparty, #ddlAddressbypartySD', function () {
+            const selectedOption = $(this).find('option:selected');
+            const dropdownId = $(this).attr('id');
+
+            if (dropdownId === 'ddlAddressbyparty') {
+                $('#TxtAdd1PD').val(selectedOption.text().trim());
+                $('#TxtAdd2PD').val(selectedOption.data('add2'));
+                $('#TxtAdd3PD').val(selectedOption.data('add3'));
+                $('#NumPincodePD').val(selectedOption.data('pincd'));
+                $('#TxtCity1PD').val(selectedOption.data('cityname'));
+                $('#TxtGSTPD').val(selectedOption.data('gstin'));
+   
+            } else {
+                $('#TxtAdd1SD').val(selectedOption.text().trim());
+                $('#TxtAdd2SD').val(selectedOption.data('add2'));
+                $('#TxtAdd3SD').val(selectedOption.data('add3'));
+                $('#NumPincodeSD').val(selectedOption.data('pincd'));
+                $('#TxtCity1SD').val(selectedOption.data('cityname'));
+                $('#TxtGSTSD').val(selectedOption.data('gstin'));
+            }
+        });
+
+        $('#ddlDocType').on('change', function () {
+            const VType = $(this).val();
+            Wb_SaudaDdl_Make_enabledisable(VType);
+            GetDocid(VType);
+
+        });
+
+        $('#chkDeliveryDate').on('change', function () {
+        $(this).val(this.checked ? '1' : '0');
+        });
+
+        $('#chkValidateDate').on('change', function () {
+        $(this).val(this.checked ? '1' : '0');
+        });
+
+        $(document).on('change', '[id^=ddlTax]', function () {
+            const $select = $(this);
+            const selectedOption = $select.find('option:selected');
+            const rowId = $select.closest('tr').attr('id').replace('row', '');
+
+            const csgstPer = selectedOption.data('csgstper') || 0;
+            const igstPer = selectedOption.data('igstper') || 0;
+            const tdsPer = selectedOption.data('tdsper') || 0;
+            const tcsPer = selectedOption.data('tcsper') || 0;
+            const vatPer = selectedOption.data('vatper') || 0;
+            const othPer1 = selectedOption.data('otherper') || 0;
+            const othPer2 = selectedOption.data('otherper2') || 0;
+
+            // ✅ Update matching input fields
+            $(`#TxtCgstPercent${rowId}`).val(csgstPer);
+            $(`#TxtSgstPercent${rowId}`).val(csgstPer);
+            $(`#TxtIgstPercent${rowId}`).val(igstPer);
+            $(`#TxtTcsPer${rowId}`).val(tcsPer);
+            $(`#TxtVatPercent${rowId}`).val(vatPer);
+            $(`#TxtOthPer${rowId}`).val(othPer1);
+            $(`#TxtOthPer2${rowId}`).val(othPer2);
+            calculateTaxAmounts(rowId);
+        });
+
+        $(document).on('click', '[id^=TxtRate], [id^=TxtQty]', function () {
+            const $select = $(this);
+            const rowId = $select.closest('tr').attr('id').replace('row', '');
+            calculateTaxAmounts(rowId);
+        });
+
+        $(document).on('input', '[id^=TxtRate], [id^=TxtQty], [id^=TxtCess], [id^=TxtPack], [id^=TxtDisc]', function () {
+            const $input = $(this);
+            const rowId = $input.closest('tr').attr('id').replace('row', '');
+            calculateTaxAmounts(rowId);
+        });
+
+        $('#btn-save').on('click', async function (e) {
+            e.preventDefault();
+
+              if (!validateRequiredField('#ddlPriceType', 'Price Type')) return;
+              if (!validateRequiredField('#ddlPlace', 'Place')) return;
+              if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
+              if (!validateRequiredField('#ddlShipFrom', 'Ship From')) return;
+
+            try
             {
-               GetShipFromList(partyCode);
-               $('#TxtAdd1SD').val(selectedOption.data('add1'));
-               $('#TxtAdd2SD').val(selectedOption.data('add2'));
-               $('#TxtAdd3SD').val(selectedOption.data('add3'));
-               $('#NumPincodeSD').val(selectedOption.data('pincd'));
-               $('#TxtCity1SD').val(selectedOption.data('cityname'));
-               $('#TxtGSTSD').val(selectedOption.data('gstin'));
-               GetPartyAddress(partyCode, '#ddlAddressbypartySD');
+                const tableData = await collectFormData();
+                if (docId) {
+                    UpdateData(tableData);
+                } else {
+                    SaveData(tableData);
+                }
+            } catch (error) {
+                toastr.error('An error occurred while saving the data.');
             }
-              
-        } else {
-            $('#TxtAdd1PD').val('');
-            $('#TxtAdd2PD').val('');
-            $('#TxtAdd3PD').val('');
-            $('#NumPincodePD').val('');
-            $('#TxtCity1PD').val('');
-            $('#TxtGSTPD').val('');
-            $('#ddlAddressbyparty').empty().append('<option value="">-Select Address-</option>');
-            $('#ddSaudaNo').empty().append('<option value="">-Select Sauda No.-</option>');
-            $('#ddWBNo').empty().append('<option value="">-Select WeighBridge No.-</option>');
-            if(!shipCode)
-            {
-            $('#TxtAdd1SD').val('');
-            $('#TxtAdd2SD').val('');
-            $('#TxtAdd3SD').val('');
-            $('#NumPincodeSD').val('');
-            $('#TxtCity1SD').val('');
-            $('#TxtGSTSD').val('');
-            $('#ddlAddressbypartySD').empty().append('<option value="">-Select Address-</option>');
+        });
 
+        $(document).on('click', '#BtnPurchaseReq', function(){
+            PurchaseRateApproval();
+
+        });
+
+        $(document).on('click', '#BtnQuotationRtAprvl', function(){
+            quotationRtApproval();
+        });
+
+        $(document).on('click', '.btn-quoteCopy', async function(){
+           var quotationrateList = getquoteTabledata();
+           console.log(quotationrateList);
+           await fillItemDetailsTable(quotationrateList)
+        });
+
+        $(document).on('change', '[id^=ddlItemname]', function () {
+            const $select = $(this);
+            const selectedOption = $select.find('option:selected');
+            const rowId = $select.closest('tr').attr('id').replace('row', '');
+
+            const unit = selectedOption.data('unitname') || '';
+            const unitcode = selectedOption.data('unitcd') || '';
+
+        });
+
+        $(document).on('click', '.btn-purchaseCopy',async function(){
+        const selectedItems = getPurchaseData();
+        console.log('a');
+        console.log(selectedItems);
+        fillItemDetailsTable(selectedItems);
+        });
+
+        $('#selectAllQM').on('change', function () {
+            const isChecked = $(this).is(':checked');
+            $('#tblQuotationModal tbody .chkQuot').prop('checked', isChecked);
+        });
+
+        $(document).on('click', '#BtnCalculation', async function (event) {
+            event.preventDefault(); 
+
+            try {
+                const itemRecords = await collectGridDetail();
+                const $selectedOption = $('#ddSaudaNo option:selected');
+                const saudaType = $selectedOption.data('saudatype');
+                const saudaNoText = $selectedOption.text();
+                const saudaNo = parseInt(saudaNoText);
+
+                const stateCd = parseInt($('#TxtGSTPD').val());
+                const cityCd = parseInt($('#TxtCity1PD').val());
+                const docDt = $('#dtDocDate').val();
+
+                const payload = {
+                    btn: "BTN",
+                    SaudaNo: saudaNo,
+                    SaudaType: saudaType,
+                    stateCode: stateCd,
+                    cityCode: cityCd,
+                    effectiveDate: docDt,
+                    orders: itemRecords
+                };
+
+                const response = await $.ajax({
+                    url: 'PurchaseOrder/CalculationBySaudaNo',
+                    type: 'POST',
+                    data: JSON.stringify(payload),
+                    contentType: 'application/json',
+                    dataType: 'json'
+                });
+
+                if (response.status) {
+                    await fillItemDetailsTableBySaudaNo(response.data);
+                    calculateAllRows();
+                    calculateAllTotals();
+                } else {
+                    console.warn('Server returned failure status:', response.message);
+                }
+
+            } catch (err) {
+                console.error('Error during calculation:', err);
             }
-        }
-    });
+        });
 
-    $('#ddlShipFrom').on('change', function(){
-            var shipCode = $(this).val();
-            var selectedOption= $(this).find('option:selected');
-            if (shipCode) {
-            $('#TxtAdd1SD').val(selectedOption.data('add1'));
-            $('#TxtAdd2SD').val(selectedOption.data('add2'));
-            $('#TxtAdd3SD').val(selectedOption.data('add3'));
-            $('#NumPincodeSD').val(selectedOption.data('pincd'));
-            $('#TxtCity1SD').val(selectedOption.data('cityname'));
-            $('#TxtGSTSD').val(selectedOption.data('gstin'));
-            GetPartyAddress(shipCode, '#ddlAddressbypartySD');
-            } else {
-             $('#TxtAdd1SD').val('');
-            $('#TxtAdd2SD').val('');
-            $('#TxtAdd3SD').val('');
-            $('#NumPincodeSD').val('');
-            $('#TxtCity1SD').val('');
-            $('#TxtGSTSD').val('');
-            $('#ddlAddressbypartySD').empty().append('<option value="">-Select Address-</option>');
-            }
-    });
-
-    $(document).on('change', '#ddlAddressbyparty, #ddlAddressbypartySD', function () {
-        const selectedOption = $(this).find('option:selected');
-        const dropdownId = $(this).attr('id');
-
-        if (dropdownId === 'ddlAddressbyparty') {
-            $('#TxtAdd1PD').val(selectedOption.text().trim());
-            $('#TxtAdd2PD').val(selectedOption.data('add2'));
-            $('#TxtAdd3PD').val(selectedOption.data('add3'));
-            $('#NumPincodePD').val(selectedOption.data('pincd'));
-            $('#TxtCity1PD').val(selectedOption.data('cityname'));
-            $('#TxtGSTPD').val(selectedOption.data('gstin'));
-
-            // $('#TxtAdd1SD').val(selectedOption.text().trim());
-            // $('#TxtAdd2SD').val(selectedOption.data('add2'));
-            // $('#TxtAdd3SD').val(selectedOption.data('add3'));
-            // $('#NumPincodeSD').val(selectedOption.data('pincd'));
-            // $('#TxtCity1SD').val(selectedOption.data('cityname'));
-            // $('#TxtGSTSD').val(selectedOption.data('gstin'));
-        } else {
-            $('#TxtAdd1SD').val(selectedOption.text().trim());
-            $('#TxtAdd2SD').val(selectedOption.data('add2'));
-            $('#TxtAdd3SD').val(selectedOption.data('add3'));
-            $('#NumPincodeSD').val(selectedOption.data('pincd'));
-            $('#TxtCity1SD').val(selectedOption.data('cityname'));
-            $('#TxtGSTSD').val(selectedOption.data('gstin'));
-        }
-    });
-     
-
-    $('#ddlDocType').on('change', function () {
-        const VType = $(this).val();
-        Wb_SaudaDdl_Make_enabledisable(VType);
-        GetDocid(VType); 
-        
-    });
-
-    $('#chkDeliveryDate').on('change', function () {
-    $(this).val(this.checked ? '1' : '0');
-    });
-
-    $('#chkValidateDate').on('change', function () {
-    $(this).val(this.checked ? '1' : '0');
-    });
-
-    $(document).on('change', '[id^=ddlTax]', function () {
-        const $select = $(this);
-        const selectedOption = $select.find('option:selected');
-        const rowId = $select.closest('tr').attr('id').replace('row', '');
-
-        const csgstPer = selectedOption.data('csgstper') || 0;
-        const igstPer = selectedOption.data('igstper') || 0;
-        const tdsPer = selectedOption.data('tdsper') || 0;
-        const tcsPer = selectedOption.data('tcsper') || 0;
-        const vatPer = selectedOption.data('vatper') || 0;
-        const othPer1 = selectedOption.data('otherper') || 0;
-        const othPer2 = selectedOption.data('otherper2') || 0;
-
-        // ✅ Update matching input fields
-        $(`#TxtCgstPercent${rowId}`).val(csgstPer);
-        $(`#TxtSgstPercent${rowId}`).val(csgstPer);
-        $(`#TxtIgstPercent${rowId}`).val(igstPer);
-        $(`#TxtTcsPer${rowId}`).val(tcsPer);
-        $(`#TxtVatPercent${rowId}`).val(vatPer);
-        $(`#TxtOthPer${rowId}`).val(othPer1);
-        $(`#TxtOthPer2${rowId}`).val(othPer2);
-        calculateTaxAmounts(rowId);
-    });
-
-    $(document).on('click', '[id^=TxtRate], [id^=TxtQty]', function () {
-        const $select = $(this);
-        const rowId = $select.closest('tr').attr('id').replace('row', '');
-        calculateTaxAmounts(rowId);
-    });
-
-    $(document).on('input', '[id^=TxtRate], [id^=TxtQty], [id^=TxtCess], [id^=TxtPack], [id^=TxtDisc]', function () {
-        const $input = $(this);
-        const rowId = $input.closest('tr').attr('id').replace('row', '');
-        calculateTaxAmounts(rowId);
-    });
-
-    $('#btn-save').on('click', async function (e) {
-        e.preventDefault();
-
-          if (!validateRequiredField('#ddlPriceType', 'Price Type')) return;
-          if (!validateRequiredField('#ddlPlace', 'Place')) return;
-          if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
-          if (!validateRequiredField('#ddlShipFrom', 'Ship From')) return;
-
-        try 
-        {            
-            const tableData = await collectFormData();
-            if (docId) {
-                UpdateData(tableData);
-            } else {
-                SaveData(tableData);
-            }
-        } catch (error) {           
-            toastr.error('An error occurred while saving the data.');
-        }
-    });
-
-    $(document).on('click', '#BtnPurchaseReq', function(){
-        PurchaseRateApproval();
-
-    });
-    $(document).on('click', '#BtnQuotationRtAprvl', function(){
-        quotationRtApproval();
-    });
-
-    $(document).on('click', '.btn-quoteCopy', async function(){
-       var quotationrateList = getquoteTabledata();
-       console.log(quotationrateList);
-       await fillItemDetailsTable(quotationrateList)
-    });
-
-    $(document).on('change', '[id^=ddlItemname]', function () {
-        const $select = $(this);
-        const selectedOption = $select.find('option:selected');
-        const rowId = $select.closest('tr').attr('id').replace('row', '');
-
-        const unit = selectedOption.data('unitname') || '';
-        const unitcode = selectedOption.data('unitcd') || '';       
-    
-    });
-
-    $(document).on('click', '.btn-purchaseCopy',async function(){
-    const selectedItems = getPurchaseData();
-    console.log('a');
-    console.log(selectedItems);
-    fillItemDetailsTable(selectedItems);
-    });
-    
-    $('#selectAllQM').on('change', function () {
-        const isChecked = $(this).is(':checked'); 
-        $('#tblQuotationModal tbody .chkQuot').prop('checked', isChecked);
-    });
-
-    // $(document).on('click', '#BtnCalculation', async function () {
-    //     try {
-    //         const itemRecords = await collectGridDetail();
-    //         const $selectedOption = $('#ddSaudaNo option:selected');
-    //         const saudaType = $selectedOption.data('saudatype');
-    //         const saudaNoText = $selectedOption.val();  
-    //         const saudaNo = parseInt(saudaNoText);
-
-    //         const stateCd = parseInt($('#TxtGSTPD').val());
-    //         const cityCd = parseInt($('#TxtCity1PD').val());
-    //         const docDt = $('#dtDocDate').val();
-
-    //         const payload = {
-    //             btn: "BTN",
-    //             saudaNo,
-    //             SaudaType: saudaType,
-    //             stateCode: stateCd,
-    //             cityCode: cityCd,
-    //             effectiveDate: docDt,
-    //             orders: itemRecords
-    //         };
-
-    //         console.log("Sending payload:", payload);
-
-    //         const response = await $.ajax({
-    //             url: 'PurchaseOrder/CalculationBySaudaNo',
-    //             type: 'POST',                
-    //             data: JSON.stringify(payload)
-    //             // ❌ Removed dataType: 'json' to let jQuery infer it
-    //         });
-
-    //         console.log('AJAX request succeeded.');
-
-    //         if (response.status) {
-    //             console.log('response.data:', response.data);
-    //             // Uncomment when ready:
-    //             // await fillItemDetailsTable(response.data);
-    //         } else {
-    //             console.warn('Server returned failure status:', response.message);
-    //         }
-
-    //     } catch (err) {
-    //         console.error('Error during calculation:', err);
-    //     }
-    // });
-
-    $(document).on('click', '#BtnCalculation', async function (event) {
-        event.preventDefault(); // ✅ Prevent form from submitting and clearing fields
-
-        try {
-            const itemRecords = await collectGridDetail();
-            const $selectedOption = $('#ddSaudaNo option:selected');
-            const saudaType = $selectedOption.data('saudatype');
-            const saudaNoText = $selectedOption.text();
-            const saudaNo = parseInt(saudaNoText);
-
-            const stateCd = parseInt($('#TxtGSTPD').val());
-            const cityCd = parseInt($('#TxtCity1PD').val());
-            const docDt = $('#dtDocDate').val();
-
-            const payload = {
-                btn: "BTN",
-                SaudaNo: saudaNo,
-                SaudaType: saudaType,
-                stateCode: stateCd,
-                cityCode: cityCd,
-                effectiveDate: docDt,
-                orders: itemRecords
-            };
-
-            const response = await $.ajax({
-                url: 'PurchaseOrder/CalculationBySaudaNo',
-                type: 'POST',
-                data: JSON.stringify(payload),
-                contentType: 'application/json',
-                dataType: 'json'
-            });
-                        
-            if (response.status) {               
-                await fillItemDetailsTableBySaudaNo(response.data);
-                calculateAllRows();          
-                calculateAllTotals();
-            } else {
-                console.warn('Server returned failure status:', response.message);
-            }
-
-        } catch (err) {
-            console.error('Error during calculation:', err);
-        }
-    });
-
-
- 
-         
     });
 
 </script>
@@ -1527,7 +1431,6 @@
         }
     }
 
-
     async function collectGridDetail() {
          const items = [];
          $('#tblItemRecordPO tbody tr').each(function () {
@@ -1547,8 +1450,6 @@
 
          return items;
     }
-
-    
 
     function Wb_SaudaDdl_Make_enabledisable(VType)
     {
@@ -1577,7 +1478,7 @@
             dataType: 'json',
             data:{ partyCode: partyCode },
             success: function (response) {
-                if (response.status) {                   
+                if (response.status) {
                     var $tableBody = $('#tblQuotationModal tbody');
                     $tableBody.empty();
                     $.each(response.data, function (index, item) {
@@ -1697,8 +1598,6 @@
         });
         return quoteData;
     }
-
-
 
     async function fillItemDetailsTable(data) {
         const $tbody = $('#tblItemRecordPO tbody');
@@ -1888,24 +1787,6 @@
         }
     }
 
-    // $(document).on('change', '#ddSaudaNo', async function () {
-    //     const docid = $('#ddSaudaNo').val();
-    //     const data = await GetSaudaDetail(docid);
-
-    //     const item = data[0];
-    //     const rate = item.RATE;
-    //     const taxCode = parseIntSafe(item.TAX_CODE);
-    //     const discper = parseFloatSafe(item.DISC_PER);
-    //     const $rows = $('#tblItemRecordPO tbody tr');
-    //     $rows.each(function () {
-    //         const idx = this.id.replace('row', '');
-    //         $(`#TxtRate${idx}`).val(rate);
-    //         $(`#TxtDiscPercent${idx}`).val(discper);
-    //         $(`#ddlTax${idx}`).val(taxCode);
-    //     });
-    //     calculateAllRows();
-    //     calculateAllTotals();
-    // });
 
     $(document).on('change', '#ddWBNo', async function () {
         var docid = $('#ddWBNo').find('option:selected').val();
@@ -1927,7 +1808,7 @@
 
             // Now set values
             $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
-            $(`#ddlImake${idx}`).val(item.MakeCode).trigger('change'); 
+            $(`#ddlImake${idx}`).val(item.MakeCode).trigger('change');
             $(`#TxtQty${idx}`).val(item.Qty);
             $(`#ddlUnit${idx}`).val(item.UNIT_CODE).trigger('change');
         }
@@ -2016,8 +1897,8 @@
                     }
                 } else {
                     addAttachmentRow();
-                }                             
-                
+                }
+
             } else {
                 toastr.error('No data returned.');
             }
@@ -2047,7 +1928,7 @@
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(saveDt),
-                    success: function (response) {             
+                    success: function (response) {
                         if (response?.status) {
                             // showFlashMessageByKey('insert', 'success');
                             toastr.success("Data Insert Successfully");
@@ -2210,7 +2091,7 @@
     async function collectFormData() {
         const id = toNullableString(docId);
         const itemRecords = await collectOrder2Items();
-         const attachment = await getAttachmentDetails(); 
+         const attachment = await getAttachmentDetails();
         return {
             VNo: parseIntSafe(document.getElementById("txtDocNo")?.value),
             VType: toNullableString(document.getElementById("ddlDocType")?.value),
@@ -2413,7 +2294,7 @@
         }
         return attachments;
     }
-    
+
     function toBase64(file) {
          return new Promise((resolve, reject) => {
              const reader = new FileReader();
@@ -2422,7 +2303,7 @@
              reader.readAsDataURL(file);
          });
      }
-    
+
     function GetDocTypeAsync(selectedValue) {
           return new Promise((resolve, reject) => {
               $.ajax({
@@ -2477,7 +2358,7 @@
             }
         });
     }
-    
+
     function GetSaudaDetail(docid)
     {
         return new Promise((resolve, reject) => {
@@ -2595,7 +2476,7 @@
             dataType: 'json',
             data: { partyCd: partyCd },
             success: function(response) {
-                if (response.status) {                    
+                if (response.status) {
                     const $dropdown = $(selectedId);
                     $dropdown.empty(response.data);
                      $dropdown.append('<option selected disabled value="">- Select Address -</option>');
@@ -2750,13 +2631,13 @@
             dataType: 'json',
             data: { partyCd: partyCd },
             success: function(response) {
-                if (response.status) {                   
+                if (response.status) {
                     const $dropdown = $('#ddSaudaNo');
                     $dropdown.empty(response.data);
                      $dropdown.append('<option selected disabled value="">- Select Sauda No. -</option>');
 
                     $.each(response.data, function(index, item) {
-                        $dropdown.append(`<option 
+                        $dropdown.append(`<option
                         data-saudaType="${item.V_TYPE}"
                         value="${item.DOC_ID}">${item.V_NO}
                         </option>`);
@@ -2835,60 +2716,62 @@
                 </select>
             </td>
             <td>
-                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlDepartment${rowCount}">
+                <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="ddlDepartment${rowCount}">
                     <option value="">-select department-</option>
                 </select>
             </td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtNos${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtQty${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtRate${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtExrate${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" readonly id="TxtAmount${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtPackPercent${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtPack${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtDiscPercent${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtDisc${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtNos${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtQty${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtRate${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtExrate${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" readonly id="TxtAmount${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtPackPercent${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtPack${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtDiscPercent${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtDisc${rowCount}" /></td>
             <td>
-                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlTax${rowCount}">
+                <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="ddlTax${rowCount}">
                     <option value="">-select Tax Type-</option>
                 </select>
             </td>
-             <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtCgstPercent${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtCgst${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtSgstPercent${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtSgst${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtIgstPercent${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtIgst${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"  id="TxtVatPercent${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtVat${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"  oninput="allowOnlyNumbers(this)" id="TxtCessPercent${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtCess${rowCount}"  /></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtTcsPer${rowCount}" readonly/></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtTcsAmt${rowCount}" readonly/></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtOthPer${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtOthAmt${rowCount}" readonly/></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtOthPer2${rowCount}" readonly/></td>
-            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtOthAmt2${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"  id="TxtNetAmt${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control"   id="TxtLdRate${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtRemarks${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" oninput="allowOnlyNumbers(this)" id="TxtAppLevel${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtAppRemarks${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtStatus${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtReqtype${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtReqno${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtApptype${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtAppno${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtSaudatype${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtSaudano${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtMthRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtQtrRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtAnlRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtSpclRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="TxtCalcRate${rowCount}" readonly /></td>
-            <td>
-                <i class="fa fa-plus btn-add-action btn-Itemadd-action" title="Add Row"></i>
-                <i class="fa fa-trash btn-delete-action btn-Itemdelete-action" title="Delete Row"></i>
+             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtCgstPercent${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtCgst${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtSgstPercent${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtSgst${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtIgstPercent${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtIgst${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  id="TxtVatPercent${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtVat${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  oninput="allowOnlyNumbers(this)" id="TxtCessPercent${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtCess${rowCount}"  /></td>
+            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsPer${rowCount}" readonly/></td>
+            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsAmt${rowCount}" readonly/></td>
+            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthAmt${rowCount}" readonly/></td>
+            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer2${rowCount}" readonly/></td>
+            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthAmt2${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  id="TxtNetAmt${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtLdRate${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtRemarks${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtAppLevel${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAppRemarks${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtStatus${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqtype${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqno${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtApptype${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAppno${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSaudatype${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSaudano${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtMthRate${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtQtrRate${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAnlRate${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSpclRate${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtCalcRate${rowCount}" readonly /></td>
+            <td class="action-col">
+                <div class="action-wrap">
+                    <button class="act-btn add btn-add-action btn-Itemadd-action" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus-circle"></i></button>
+                    <button class="act-btn delete btn-delete-action btn-Itemdelete-action" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
+                </div>
             </td>
         </tr>
         `;
@@ -2978,84 +2861,15 @@
                     data-OtherPer2="${item.OTH_PER2}">
                     ${item.NAME}
                 </option>`)
-        ]).then(() => {           
+        ]).then(() => {
             bindUnitOnItemSelect(itemSelect, unitSelect);
         });
     }
-
-    // function bindDropdownData(rowCount) {
-    //     const itemSelect = $(`#ddlItemname${rowCount}`);
-    //     const makeSelect = $(`#ddlImake${rowCount}`);
-    //     const unitSelect = $(`#ddlUnit${rowCount}`);
-    //     const departmentSelect = $(`#ddlDepartment${rowCount}`);
-    //     const taxSelect = $(`#ddlTax${rowCount}`);
-    //     const placeofUse = $(`#ddlIplaceofUse${rowCount}`);
-
-    //     // Helper to wrap AJAX call in a Promise
-    //     const loadDropdown = (url, selectElem, defaultText, formatter) => {
-    //         return new Promise((resolve, reject) => {
-    //             $.ajax({
-    //                 url: url,
-    //                 type: 'GET',
-    //                 dataType: 'json',
-    //                 success: function (response) {
-    //                     if (response.status) {
-    //                         selectElem.empty().append(`<option value="">${defaultText}</option>`);
-    //                         $.each(response.data, function (i, item) {
-    //                             selectElem.append(formatter(item));
-    //                         });
-
-    //                         selectElem.select2({
-    //                             width:'300px',
-    //                             placeholder: defaultText,
-    //                             allowClear: true,
-    //                             minimumResultsForSearch: 0
-    //                         });
-    //                         resolve();
-    //                     } else {
-    //                         toastr.error(`${defaultText} Load failed`);
-    //                         resolve(); // Still resolve to avoid hanging
-    //                     }
-    //                 },
-    //                 error: reject
-    //             });
-    //         });
-    //     };
-
-    //     return Promise.all([
-    //         // loadDropdown('@Url.Action("GetItemList", "PurchaseOrder")', itemSelect, "- Select Item -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-    //         loadDropdown('@Url.Action("GetMakeList", "PurchaseOrder")', makeSelect, "- Select Make -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-    //         loadDropdown('@Url.Action("GetUnitList", "PurchaseOrder")', unitSelect, "- Select Unit -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-    //         loadDropdown('@Url.Action("GetDepartmentList", "PurchaseOrder")', departmentSelect, "- Select Department -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-    //         loadDropdown('@Url.Action("GetMachineMastList", "PurchaseOrder")', placeofUse, "- Select Place Of Use -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-    //        loadDropdown('@Url.Action("GetItemList", "PurchaseOrder")',
-    //         itemSelect,
-    //         "- Select Item -",
-    //         item => `<option
-    //         data-unitCd="${item.UNIT_CODE}"
-    //         data-unitname="${item.UNIT_NAME}"
-    //         value="${item.CODE}">${item.NAME}
-    //         </option>`),
-            
-    //         loadDropdown('@Url.Action("GetTaxList", "PurchaseOrder")', taxSelect, "- Select Tax -", item => `
-    //             <option
-    //                 value="${item.CODE}"
-    //                 data-CSgstPer="${item.CSGST_PER}"
-    //                 data-IgstPer="${item.IGST_PER}"
-    //                 data-TdsPer="${item.TDS_PER}"
-    //                 data-TcsPer="${item.TCS_PER}"
-    //                 data-VatPer="${item.VAT_PER}"
-    //                 data-OtherPer1="${item.OTH_PER}"
-    //                 data-OtherPer2="${item.OTH_PER2}">
-    //                 ${item.NAME}
-    //             </option>`)
-    //     ]);
-    // }
-        
+      
     function addAttachmentRow(data = {}) {
         const $attachmentTbody = $('#tblAttachmentPO tbody');
 
-        // Don't empty here if you're adding multiple rows
+   
         if ($attachmentTbody.find('tr').length === 0) {
             $attachmentTbody.empty();
         }
@@ -3367,7 +3181,32 @@
             });
         });
     }
-      
+
+
+        function handleBack(redirectUrl, isReadOnly = false) {
+
+        if (isReadOnly) {
+            window.location.href = redirectUrl;
+            return;
+        }
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Unsaved data will be lost.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, exit',
+            cancelButtonText: 'Stay',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = redirectUrl;
+            }
+        });
+    }
+
+
 
 </script>
 

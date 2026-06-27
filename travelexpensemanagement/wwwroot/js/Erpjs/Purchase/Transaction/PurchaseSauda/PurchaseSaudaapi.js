@@ -83,6 +83,7 @@ function addAttachmentRow(data = {}) {
 
     $attachmentTbody.append(row);
 }
+
 async function LoadFormByID(id) {
     try {
         const res = await $.ajax({

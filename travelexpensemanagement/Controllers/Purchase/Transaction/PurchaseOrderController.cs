@@ -65,13 +65,13 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                 var yearParams = new Dictionary<string, object> { { "@YearCd", yearCode } };
                 var vnoParams = new Dictionary<string, object>
-            {
-            { "@COMP_CODE", companyCode },
-            { "@BRANCH_CODE", branchCode },
-            { "@YEAR_CODE", yearCode },
-            { "@V_TYPE", vType },
-            { "@TableName", tableName }
-            };
+                {
+                    { "@COMP_CODE", companyCode },
+                    { "@BRANCH_CODE", branchCode },
+                    { "@YEAR_CODE", yearCode },
+                    { "@V_TYPE", vType },
+                    { "@TableName", tableName }
+                };
 
                 string nextVNo = await _dbHelper.GetExecuteScalarAsync<string>("sp_GetMaxVNo", vnoParams, isStoredProc: true);
                 string year = await _dbHelper.GetExecuteScalarAsync<string>("SELECT dbo.fn_GetCurrentYear(@YearCd)", yearParams);
@@ -122,7 +122,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             try
             {
                 var UserLoginData = _globalValue.GetGlobalVariables();
-                var PartyList = await _dbHelper.GetJsonDataAsync($@"select distinct sg.CODE, sg.NAME, sg.ADD1,sg.ADD2,sg.ADD3,sg.PINCODE, isnull(cm.NAME, '') as CityName ,sg.CITY_CODE,sg.GSTIN from SUBGROUP_MAST sg left join CITY_MAST cm on sg.CITY_CODE=cm.CODE  where sg.COMP_CODE={UserLoginData.PubCompCode}  and UPPER(NATURE)='SUPPLIER' and sg.ACTIVE=1  order by NAME ");
+                var PartyList = await _dbHelper.GetJsonDataAsync($@"select distinct sg.CODE, sg.NAME, sg.ADD1,sg.ADD2,sg.ADD3,sg.PINCODE, isnull(cm.NAME, '') as CityName ,
+                sg.CITY_CODE,sg.GSTIN from SUBGROUP_MAST sg left join CITY_MAST cm on sg.CITY_CODE=cm.CODE  where sg.COMP_CODE={UserLoginData.PubCompCode}  and UPPER(NATURE)='SUPPLIER' and
+                sg.ACTIVE=1  order by NAME ");
                 return Json(new { status = true, data = PartyList });
             }
             catch (Exception ex)
@@ -470,22 +472,22 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             {
                 var usersession = _globalValue.GetGlobalVariables();
                 string strqry = $@"   SELECT Q2.YEAR_CODE, Q2.COMP_CODE, Q2.BRANCH_CODE, Q2.V_NO, Q2.V_TYPE, isnull(Q2.V_DATE, '') V_DATE, isnull(Q2.PARTY_CODE, '') PARTY_CODE,isnull(sg.NAME, '') as party, Q2.ITEM_CODE,
-       Q2.MAKE_CODE, Q2.TECH_DESC, Q2.UOM_CODE, 
-       IM.NAME AS itemName,isnull(ium.NAME, '') as Unit, isnull(imm.NAME, '') as make,
-       isnull(Q2.REF_NO, 0) REF_NO, Q2.REF_DATE, isnull(Q2.REF_TYPE, '') REF_TYPE, Q2.REF_DOCID, Q2.QTY, Q2.RATE,
-       Q2.AMOUNT, Q2.PACK_PER, Q2.PACK_AMT, Q2.DISC_PER, Q2.DISC_AMT, Q2.FREIGHT,isnull(tm.NAME, '') taxType,Q2.TAX_CODE, Q2.CGST_PER,
-       Q2.CGST_AMT, Q2.SGST_PER, Q2.SGST_AMT, Q2.IGST_PER, Q2.IGST_AMT, Q2.VAT_PER, Q2.VAT_AMT, Q2.CESS_PER,
-       Q2.CESS_AMT, Q2.OTH_EXPS, Q2.LD_RATE, Q2.NET_AMT, Q2.BULK_QTY, Q2.BULK_RATE, Q2.BULK_DISC_PER,
-       Q2.PREORITY_LEVEL, Q2.REQ_TYPE, Q2.REQ_NO, Q2.STATUS, 
-       Q2.APROV_STATUS, Q2.APROV_REMARKS, Q2.FAPROV_STATUS, Q2.FAPROV_REMARKS,Q2.DOC_ID
-       FROM QUOTATION2 Q2
-       left join SUBGROUP_MAST sg on sg.code=q2.PARTY_CODE and sg.COMP_CODE=q2.COMP_CODE
-       left join TAX_MAST tm on tm.code=q2.TAX_CODE 
-       LEFT JOIN item_mast IM ON IM.CODE=Q2.ITEM_CODE AND IM.COMP_CODE=Q2.COMP_CODE
-       LEFT JOIN ITEMUNIT_MAST IUM ON IUM.CODE=Q2.UOM_CODE AND IUM.COMP_CODE=Q2.COMP_CODE
-       LEFT JOIN ITEMMAKE_MAST IMM ON IMM.CODE=Q2.MAKE_CODE AND IMM.COMP_CODE=Q2.COMP_CODE 
-       WHERE Q2.COMP_CODE = {usersession.PubCompCode} AND Q2.YEAR_CODE = {usersession.PubFYearCode} AND Q2.BRANCH_CODE = 1 and Q2.V_TYPE='STAP' and Q2.PARTY_CODE={partyCode}
-        ORDER BY Q2.DOC_ID DESC ";
+                   Q2.MAKE_CODE, Q2.TECH_DESC, Q2.UOM_CODE, 
+                   IM.NAME AS itemName,isnull(ium.NAME, '') as Unit, isnull(imm.NAME, '') as make,
+                   isnull(Q2.REF_NO, 0) REF_NO, Q2.REF_DATE, isnull(Q2.REF_TYPE, '') REF_TYPE, Q2.REF_DOCID, Q2.QTY, Q2.RATE,
+                   Q2.AMOUNT, Q2.PACK_PER, Q2.PACK_AMT, Q2.DISC_PER, Q2.DISC_AMT, Q2.FREIGHT,isnull(tm.NAME, '') taxType,Q2.TAX_CODE, Q2.CGST_PER,
+                   Q2.CGST_AMT, Q2.SGST_PER, Q2.SGST_AMT, Q2.IGST_PER, Q2.IGST_AMT, Q2.VAT_PER, Q2.VAT_AMT, Q2.CESS_PER,
+                   Q2.CESS_AMT, Q2.OTH_EXPS, Q2.LD_RATE, Q2.NET_AMT, Q2.BULK_QTY, Q2.BULK_RATE, Q2.BULK_DISC_PER,
+                   Q2.PREORITY_LEVEL, Q2.REQ_TYPE, Q2.REQ_NO, Q2.STATUS, 
+                   Q2.APROV_STATUS, Q2.APROV_REMARKS, Q2.FAPROV_STATUS, Q2.FAPROV_REMARKS,Q2.DOC_ID
+                   FROM QUOTATION2 Q2
+                   left join SUBGROUP_MAST sg on sg.code=q2.PARTY_CODE and sg.COMP_CODE=q2.COMP_CODE
+                   left join TAX_MAST tm on tm.code=q2.TAX_CODE 
+                   LEFT JOIN item_mast IM ON IM.CODE=Q2.ITEM_CODE AND IM.COMP_CODE=Q2.COMP_CODE
+                   LEFT JOIN ITEMUNIT_MAST IUM ON IUM.CODE=Q2.UOM_CODE AND IUM.COMP_CODE=Q2.COMP_CODE
+                   LEFT JOIN ITEMMAKE_MAST IMM ON IMM.CODE=Q2.MAKE_CODE AND IMM.COMP_CODE=Q2.COMP_CODE 
+                   WHERE Q2.COMP_CODE = {usersession.PubCompCode} AND Q2.YEAR_CODE = {usersession.PubFYearCode} AND Q2.BRANCH_CODE = 1 and Q2.V_TYPE='STAP' and Q2.PARTY_CODE={partyCode}
+                    ORDER BY Q2.DOC_ID DESC ";
 
                 var QuotationRtList = await _dbHelper.GetJsonDataAsync(strqry);
                 return Json(new { status = true, data = QuotationRtList });

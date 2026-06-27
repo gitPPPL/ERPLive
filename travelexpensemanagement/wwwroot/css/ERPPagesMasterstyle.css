@@ -64,7 +64,7 @@
     background: rgba(255,255,255,0.15);
     color: #fff;
     border: 1px solid rgba(255,255,255,0.25);
-    padding: 4px 8px;
+    padding: 2px 8px;
     border-radius: 6px;
     font-size: 12px;
     cursor: pointer;
@@ -173,7 +173,6 @@
     color: #fff;
     border: none;
     padding: 4px 12px;
-    /* padding: 10px 16px; */
     height: 26px;
     border-radius: 8px 0 0 8px;
     font-size: 12px;
@@ -232,12 +231,12 @@
         color: #0d6efd;
     }
 
-    .erppagedropdown-item i {
+   /* .erppagedropdown-item i {
         width: 18px;
         text-align: center;
         color: #0d6efd;
         font-size: 15px;
-    }
+    }*/
 
     .erppagedropdown-item span {
         font-weight: 500;
@@ -280,12 +279,6 @@
     margin-bottom: 8px;
 }
 
-/*.erppageattachmentsectionsubtitle {
-    text-align: center;
-    color: #a0a7cb;
-    margin: 10px 0 25px;
-}*/
-
 .erppageattachmentsectiondropzone {
     border: 2px dashed #c8cbff;
     border-radius: 12px;
@@ -305,7 +298,6 @@
 
 .erppageattachmentsectiondragtext {
     color: #8f96c2;
-   /* margin-top: 10px;*/
 }
 
 .erppageattachmentsectionor {
@@ -370,7 +362,6 @@
     color: #fff;
     font-size: 11px;
     font-weight: 700;
-   /* background: #5f84ff;*/
 }
 
 .erppageattachmentsectioncontent {
@@ -417,7 +408,6 @@
     color: #346bff;
 }
 
-
 .erppageattachmentsectiondelete {
     background: #ffe9e9;
     color: #df4343;
@@ -462,9 +452,6 @@
     background: #7f8c8d;
 }
 
-
-
-
 @media(max-width:768px) {
 
     .erppageattachmentsectionrow {
@@ -497,11 +484,10 @@
     }
 /* BASE COPY BUTTON */
 .erppage-btn-copy {
-    background: #2563eb; /* nice blue for copy */
+    background: #2563eb; 
     color: #fff;
-    border: 1px solid #1e40af; /* slightly darker border */
+    border: 1px solid #1e40af; 
 }
-
     /* Hover effect */
     .erppage-btn-copy:hover {
         background: #1e40af;
@@ -520,14 +506,13 @@
     }
 
 .erppage-btn-danger {
-    background: #ef4444; /* nice red for danger */
+    background: #ef4444; 
     color: #fff;
-    border: 1px solid #dc2626; /* slightly darker red border */
+    border: 1px solid #dc2626; 
 }
-
     /* Hover effect */
     .erppage-btn-danger:hover {
-        background: #dc2626; /* darker red for hover */
+        background: #dc2626; 
         transform: translateY(-1px);
     }
 
@@ -541,41 +526,60 @@
         font-size: 14px;
         color: #fff;
     }
+
 /* Container aligns buttons to the right */
-.erppage-internalaction {
+.approval-toolbar {
     display: flex;
-    justify-content: flex-end; /* pushes content to the right */
-    gap: 6px; /* optional spacing if multiple buttons */
-    margin-top: 10px; /* optional spacing from fields above */
+    align-items: center;
+    width: 100%;
+}
+
+#div-ApproxTotalAmt {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.erppage-internalaction {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
 }
 /* Active Page */
 .page-number.active {
     border: none;
     background: #5b6ee1;
     padding: 4px 8px;
-    border-radius: 6px;
+    border-radius: 20px;
     cursor: pointer;
     color: #fff;
 }
-
 .page-number {
     padding: 4px 8px;
+    cursor: pointer;
 }
-.erppagefieldset {
-    width: 100%;
-    border: 1px solid #a2bee7;
-    border-left: 3px solid #2952cc;
-    border-radius: 8px;
-    padding: 6px;
-    background: #fafcff;
-    box-sizing: border-box;
-    margin-top: 10px;
-}
+    .page-number:hover {
+        border: none;
+        background: #7f8fef;
+        padding: 4px 8px;
+        border-radius: 20px;
+        cursor: pointer;
+        color: #fff;
+    }
+    .erppagefieldset {
+        width: 100%;
+        border: 1px solid #a2bee7;
+        border-left: 3px solid #2952cc;
+        border-radius: 8px;
+        padding: 6px;
+        background: #fafcff;
+        box-sizing: border-box;
+        margin-top: 10px;
+    }
 
 .erppagefieldset-legend {
     padding: 0 10px;
-    /* margin-left: 8px; */
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
     color: #2952cc;
     width: fit-content;
@@ -612,10 +616,11 @@
 .erppage-readonly input,
 .erppage-readonly textarea,
 .erppage-readonly select {
-    pointer-events: none; /* 🚫 no click */
-    user-select: none; /* 🚫 no text select */
-    background-color: #e5e5e5 !important; /* optional grey */
-    cursor: not-allowed; /* 🚫 no text cursor */
+    pointer-events: none;
+    user-select: none;
+    background-color: #e5e5e5 !important;
+    cursor: not-allowed;
+    color: #5e5e5e;
 }
 
 /* Select2 fix */
@@ -623,7 +628,7 @@
     pointer-events: none;
     user-select: none;
     cursor: not-allowed;
-    background-color: #e5e5e5 !important; /* optional grey */
+    background-color: #e5e5e5 !important; 
 }
 /* For single select */
 .select2-container .select2-selection--single {
@@ -640,16 +645,15 @@
     min-width: 100px;
     width: auto;
 }
-
     /* Wrap text for choices in multiple select */
     .select2-container .select2-selection--multiple .select2-selection__rendered {
-       
         word-wrap: break-word;
     }
+
 /* OUTER Select2 container */
 .erppage-readonly .select2-container--default {
     pointer-events: none !important;
-    opacity: 1 !important; /* keep readable */
+    opacity: 1 !important; 
 }
 
 /* MAIN selection box */
@@ -827,6 +831,7 @@
 /* ===== CONTAINER ===== */
 .erppage-container {
     margin: 8px auto;
+    padding-bottom: 40px; 
 }
 .erppage-input-with-icon {
     display: flex;
@@ -853,7 +858,23 @@
         color: #fff;
         cursor: pointer;
     }
+.erppage-split-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
 
+@media (max-width: 1024px) {
+    .erppage-split-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .erppage-split-3 {
+        grid-template-columns: 1fr;
+    }
+}
 /* Status Container */
 .erppage-toggle-container {
     display: flex;
@@ -898,7 +919,7 @@
 .erppage-toggle-slider {
     position: absolute;
     inset: 0;
-    background: #9ca3af; /* OFF = Grey */
+    background: #9ca3af; 
     border-radius: 30px;
     transition: .3s;
 }
@@ -915,8 +936,25 @@
         transition: .3s;
         box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
     }
+/*table First columns fixed and position sticky*/
+.fixed-grid-table th.freeze-item,
+.fixed-grid-table td.freeze-item {
+    position: sticky;
+    left: 0;
+    background: #161616;
+    z-index: 5;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-/* ON State */
+
+/*table First columns fixed and position sticky End*/
 .erppage-toggle input:checked + .erppage-toggle-slider {
     background: linear-gradient(135deg,#2f7d32,#1b5e20);
 }
@@ -935,14 +973,8 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: border-color 0.3s ease;
 }
-
-    /* Keep semantic but hide default legend */
-/*.erppage-fieldset legend {
-    position: absolute;
-    opacity: 0;
-}*/
    
-    /* ===== SECTION HEADER ===== */
+ /* ===== SECTION HEADER ===== */
 .erppage-section-header {
     padding: 4px 8px;
     background: #ebebeb;
@@ -962,13 +994,11 @@
 /* ===== Dynamic Item Table ===== */
 .erppagetabledynamic-wrapper {
     width:100%;
-    /*display: inline-block;*/ /* wrapper shrinks to content */
-    max-height: 180px; /* Fixed height */
-    overflow-y: auto; /* Vertical scrollbar */
-    overflow-x: auto; /* Horizontal scrollbar if needed */
+    max-height: 180px; 
+    overflow-y: auto; 
+    overflow-x: auto; 
     border: 1px solid #c9c9c9;
     border-radius: 10px;
-   /* overflow: hidden;*/
     background: #fff;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
@@ -980,17 +1010,16 @@
 }
 
     .erppagetabledynamic-table thead th {
-        background: linear-gradient(135deg, #2f7d32, #1b5e20);
+        background: linear-gradient(135deg, #0f0f0f, #1f2224);
         color: #fff;
         padding: 8px 12px;
         font-weight: 600;
         text-align: left;
-        border: 1px solid #256329;
         white-space: nowrap;
     }
 
     .erppagetabledynamic-table tbody td {
-        padding: 8px 12px;
+        padding: 4px 8px;
         border: 1px solid #e5e7eb;
         color: #374151;
         background: #fff;
@@ -1008,7 +1037,7 @@
 
     .erppagetabledynamic-table tbody td:first-child {
         font-weight: 600;
-        color: #1b5e20;
+        color: #254dc3;
         font-size: 12px;
     }
 
@@ -1064,6 +1093,27 @@
     row-gap: 10px;
     padding: 4px;
     align-items: start;
+}
+.erppage-grid5 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    column-gap: 16px;
+    row-gap: 10px;
+    padding: 4px;
+    align-items: start;
+}
+/* Tablet */
+@media (max-width: 1024px) {
+    .erppage-grid5 {
+        grid-template-columns: repeat(5, 1fr);
+        column-gap: 25px;
+    }
+}
+/* Mobile */
+@media (max-width: 600px) {
+    .erppage-grid5 {
+        grid-template-columns: 1fr;
+    }
 }
 .erppage-btn-group-right {
     justify-self: end;
@@ -1127,7 +1177,7 @@
     }
 .erppagescolumn {
     flex: 1;
-    min-width: 0; /* prevents overflow issues */
+    min-width: 0; 
 }
 .erppagescol-1 {
     flex: 0 0 8.333%;
@@ -1163,10 +1213,66 @@
     flex: 0 0 100%;
     max-width: 100%;
 }
+
+.erppagescol-6 .erppagetabledynamic-wrapper {
+    min-height: 130px;
+    background-color: #e1e1e1;
+}
+
+.erppagescol-6 {
+    display: flex;
+    flex-direction: column;
+}
+.erppage-tablefield {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+    .erppage-tablefield .erppage-label {
+        width: auto;
+        margin-bottom: 2px;
+    }
+
+    .erppage-tablefield .erppagetabledynamic-wrapper {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .erppage-tablefield .erppagetabledynamic-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+.erppagesrow {
+    align-items: stretch;
+}
+
+.erppagescol-6 {
+    display: flex;
+}
+
+    .erppagescol-6 .erppage-tablefield {
+        flex: 1;
+    }
+#itemTable td,
+#vendorTable td {
+    word-break: break-word;
+    white-space: normal;
+}
+
+#itemTable {
+    table-layout: fixed;
+}
+
+    #itemTable th:last-child,
+    #itemTable td:last-child {
+        width: 80px;
+    }
 @media (max-width: 768px) {
     .erppagescolumn,
     [class*="erppagescol-"] {
-        flex: 0 0 100%; /* 🔥 stack on mobile */
+        flex: 0 0 100%; 
     }
 }
 
@@ -1175,15 +1281,13 @@
 }
 
 .erppage-col-span-2 {
-    grid-column: span 2; /* 🔥 takes double width */
+    grid-column: span 2; 
 }
 
 .erppage-col-span-3 {
     grid-column: span 3;
 }
 /*Row columns behavior end*/
-
-
 /* CUSTOM HEADER */
 .erppage-subheader {
     padding: 4px 10px;
@@ -1235,18 +1339,11 @@
     grid-template-columns: 100px 1fr auto;
     align-items: center;
     gap: 12px;
-    flex-direction: column; /* 🔥 stack label + input always */
+    flex-direction: column; 
 }
 
 /* ===== FIELD ===== */
-/*.erppage-divfield {
-    display: grid;
-    grid-template-columns: 80px 1fr auto;
-    align-items: center;
-    gap: 4px;
-    flex-direction: column;*/ /* 🔥 stack label + input always */
-    /*min-width: 0;
-}*/
+
 .erppage-divfield {
     display: flex;
     align-items: center;
@@ -1279,8 +1376,6 @@
 /* ===== Selected Box ===== */
 .select2-container--default .select2-selection--single {
     height: 24px !important;
-    /*min-height: 28px !important;
-    max-height: 28px !important;*/
     overflow: hidden;
     border: 1px solid #ced4da;
     border-radius: 6px;
@@ -1315,10 +1410,6 @@
 .select2-container--default .select2-selection--single .select2-selection__clear {
     height: 24px !important;
 }
-/* ===== Focus Effect ===== */
-/*.select2-container--default.select2-container--focus .select2-selection--single {
-    box-shadow: 0 0 0 1px rgb(47 125 50 / 95%);
-}*/
 
 /* ===== Dropdown Panel ===== */
 .select2-dropdown {
@@ -1372,7 +1463,7 @@
 }
 .erppage-required {
     border-left: 3px solid #ff2626 !important;
-    padding-left: 6px; /* adjust spacing after border */
+    padding-left: 6px; 
 }
 
     .erppage-required + .select2-container .select2-selection--single {
@@ -1391,17 +1482,18 @@
     padding: 3px 8px;
     transition: 0.2s;
     box-sizing: border-box;
-    font-size: 12px;
+    font-size: 11px;
     color: #2c2c2c;
     border-left: 3px solid #ff2626;
 }
 
 /* Focus */
-.erppage-redinput:focus {
-    outline: none;
-    border-color: #2f7d32;
-    box-shadow: 0 0 0 2px rgba(47,125,50,0.15);
-}
+    .erppage-redinput:focus {
+        outline: none;
+        border-color: #2f7d32;
+        background-color: #fff3e0 !important;
+        box-shadow: 0 0 0 2px rgba(47,125,50,0.15);
+    }
 .erppage-datebox {
     position: relative;
     width: 100%;
@@ -1426,22 +1518,28 @@
     font-size: 12px;
     color: #181818;
 }
+    .erppage-input:disabled {
+        
+        background-color: #e5e5e5 !important;
+        cursor: not-allowed;
+        color: #5e5e5e;
+    }
+    
 /* ===== TEXTAREA ===== */
 .erppage-textarea {
     width: 100%;
-    height: 60px; /* fixed height */
+    height: 60px; 
     border: 1px solid #d1d5db;
     border-radius: 6px;
     padding: 6px 10px;
     box-sizing: border-box;
     font-size: 13px;
     color: #2c2c2c;
-    resize: none; /* user cannot resize */
+    resize: none; 
     font-family: inherit;
-    overflow-y: auto; /* vertical scrollbar if content overflows */
-
-    white-space: pre-wrap; /* preserves line breaks from Enter */
-    word-break: break-word; /* wraps long words */
+    overflow-y: auto; 
+    white-space: pre-wrap; 
+    word-break: break-word; 
     overflow-wrap: break-word;
 }
 
@@ -1470,10 +1568,10 @@ select.erppage-input {
 .erppage-input:focus {
     outline: none;
     border-color: #2f7d32;
+    background-color: #fff3e0 !important;
     box-shadow: 0 0 0 2px rgba(47,125,50,0.15);
 }
 /* wrapper for date + checkbox */
-/* ERP Checkbox */
 .erppage-checkbox-wrap {
     display: inline-flex;
     align-items: center;
@@ -1482,9 +1580,9 @@ select.erppage-input {
 }
 
 .erppage-checkbox-input {
-    width: 12px;
-    height: 12px;
-    accent-color: #2f7d32; /* ERP Green Theme */
+    width: 11px;
+    height: 11px;
+    accent-color: #2f7d32; 
     cursor: pointer;
     margin: 0;
     flex-shrink: 0;
@@ -1502,8 +1600,8 @@ select.erppage-input {
 /* date input takes full space */
 .erppage-dateinput {
     width: 100%;
-    height: 30px;
-    padding-right: 35px; /* 🔥 space for checkbox */
+    height: 25px;
+    padding-right: 35px; 
 }
 .erppage-checkbox-inside {
     position: absolute;
@@ -1523,6 +1621,7 @@ select.erppage-input {
     }
 
 /* checkbox inside input area */
+
 /*Image Attachment Start*/
 .erppage-upload-wrap {
     display: flex;
@@ -1597,12 +1696,13 @@ select.erppage-input {
     }
 }
 /*image Attachment End*/
+
 /* ===== RADIO GROUP ===== */
 .erppage-radio-group {
     display: flex;
     align-items: center;
     gap: 18px;
-    flex-wrap: wrap; /* ✅ allows wrapping on small screens */
+    flex-wrap: wrap; 
 }
 
 .erppage-radio {
@@ -1620,7 +1720,6 @@ select.erppage-input {
     align-items: center;
     gap: 6px;
     flex-wrap: nowrap;
-    /*flex-wrap: wrap;*/ /* ✅ important for mobile */
 }
 
 .small-input {
@@ -1697,13 +1796,13 @@ input[type="number"] {
 /* ===== MULTI SELECT (COLORS) ===== */
 .erppage-multi-select {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* desktop */
+    grid-template-columns: repeat(4, 1fr); 
     gap: 6px;
 }
 
 /* Make complex fields take full row */
 .full-width {
-    grid-column: 1 / -1; /* 🔥 always full width */
+    grid-column: 1 / -1; 
 }
 
 .erppage-tabs {
@@ -1750,7 +1849,7 @@ input[type="number"] {
 @media (max-width: 768px) {
 
     .erppage-tabs {
-        display: none; /* hide tabs */
+        display: none; 
     }
 
     .erppage-tab-content {
@@ -1795,7 +1894,7 @@ input[type="number"] {
 /* ===== TABLET FIX ===== */
 @media (max-width: 1024px) {
     .erppage-multi-select {
-        grid-template-columns: repeat(2, 1fr); /* 2 per row */
+        grid-template-columns: repeat(2, 1fr); 
     }
 }
 
@@ -1816,7 +1915,7 @@ input[type="number"] {
     }
 
     .small-input {
-        flex: 1; /* 🔥 equal width */
+        flex: 1; 
         min-width: 50px;
     }
 
@@ -1829,12 +1928,7 @@ input[type="number"] {
         grid-template-columns: 1fr;
     }
 }
-/*.erppage-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr; 
-    gap: 15px;
-    align-items: start;
-}*/
+
 /* ===== INPUT + BUTTON GROUP ===== */
 .erppage-inputgroup {
     display: flex;
@@ -1845,7 +1939,7 @@ input[type="number"] {
     /* Select/Input inside group */
     .erppage-inputgroup .erppage-input {
         flex: 1;
-        height: 30px;
+        height: 24px;
     }
 
     /* Button inside group */
@@ -1886,21 +1980,53 @@ input[type="number"] {
         background: linear-gradient(135deg, #1e40af, #1e3a8a);
         
     }
-
+.erppage-toast-error {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #dc2626;
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 6px;
+    z-index: 999999;
+    font-size: 13px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
     
 .erppage-btn-common-disabled {
     color: #2359da !important;
     font-weight: 600;
-    border: 2px solid #2359da !important;
+    border: 1px solid #2359da !important;
 }
 
-        /* Prevent hover effect on disabled */
+    /* Prevent hover effect on disabled */
     .erppage-btn-common-disabled:hover {
         background: linear-gradient(135deg, #2563eb, #1e40af);
         color: #fff !important;
     }
 
+.erppage-btn-common-pending {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+}
 
+    .erppage-btn-common-pending:hover {
+        background: linear-gradient(135deg, #d97706, #b45309);
+        color: #fff;
+    }
+
+.erppage-btn-common-pending-disabled {
+    color: #d97706 !important;
+    font-weight: 600;
+    border: 1px solid #d97706 !important;
+    background: #fff;
+}
+
+    /* Prevent hover effect on disabled */
+    .erppage-btn-common-pending-disabled:hover {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #fff !important;
+    }
 .erppage-btn-print {
     background: linear-gradient(135deg, #374151, #111827);
     color: #fff;
@@ -1931,7 +2057,6 @@ input[type="number"] {
     font-size: 11px;
     font-weight: 700;
     gap: 8px;
-   /* text-transform: uppercase;*/
 }
 
 .erppagestatus-active {
@@ -1945,9 +2070,10 @@ input[type="number"] {
 }
 /* ACTION BAR */
 .erppage-actions {
-    position: sticky;
+    position: fixed;
     bottom: 0;
-    z-index: 998;
+    left: 280px;
+    right: 0;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -1955,15 +2081,15 @@ input[type="number"] {
     padding: 10px 15px;
     border-top: 1px solid #ddd;
     box-shadow: 0 -2px 8px rgba(0,0,0,.08);
+    z-index: 9999;
 }
-
 /* BASE BUTTON */
 .erppage-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     border: none;
-    padding: 4px 12px;
+    padding: 3px 8px;
     border-radius: 6px;
     font-size: 12px;
     cursor: pointer;
@@ -2024,13 +2150,11 @@ input[type="number"] {
     flex: 0 0 calc(25% - 9px);
     max-width: calc(25% - 9px);
 }
-.erppagesrow + .erppagesrow {
-    margin-top: 18px;
-}
+
 /*Split pages into 9:3 start*/
 .erppage-split {
     display: grid;
-    grid-template-columns: 3fr 1fr; /* 🔥 9:3 ratio */
+    grid-template-columns: 3fr 1fr; 
     gap: 20px;
     align-items: start;
 }
@@ -2048,7 +2172,7 @@ input[type="number"] {
     border-radius: 12px;
     padding: 12px;
     position: sticky;
-    top: 20px; /* 🔥 stays visible */
+    top: 20px; 
 }
 .erppage-image-preview {
     width: 100%;
@@ -2103,15 +2227,15 @@ input[type="number"] {
 @media (max-width: 768px) {
 
     .erppage-split {
-        grid-template-columns: 1fr; /* 🔥 STACK */
+        grid-template-columns: 1fr; 
     }
 
     .erppage3 {
-        order: -1; /* 🔥 image comes on top */
+        order: -1; 
     }
 
     .erppage-image-card {
-        position: static; /* remove sticky */
+        position: static; 
     }
 
     .erppage-image-preview {
@@ -2129,8 +2253,8 @@ input[type="number"] {
         }
 }
 /*Split pages into 9:3 end*/
-/* ===== RESPONSIVE ===== */
 
+/* ===== RESPONSIVE ===== */
 /* Tablet */
 @media (max-width: 1024px) {
     .erppage-grid1 {
