@@ -540,7 +540,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                                 cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode ?? (object)DBNull.Value);
-                                cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                                cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
                                 cmd.Parameters.AddWithValue("@V_NO", _dbHelper.Xnull(POmodel.VNo));
                                 cmd.Parameters.AddWithValue("@V_TYPE", _dbHelper.Xnull(POmodel.VType));
                                 cmd.Parameters.AddWithValue("@V_DATE", _dbHelper.Xnull(POmodel.VDate));
@@ -635,6 +635,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 cmd.Parameters.Add(errorParam);
                                 await cmd.ExecuteNonQueryAsync();
                                 string errorMessage = errorParam.Value?.ToString();
+
                                 if ((int)returnParam.Value <= 0)
                                     success = false;
                             }
@@ -644,11 +645,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                             else
                                 transaction.Rollback();
 
-                            return Json(new
-                            {
-                                status = success,
-                                message = success ? "Data save/update successfully." : "Failed to save or update some employee details."
-                            });
+                            return Json(new  {   status = success, message = success ? "Data save/update successfully." : "Failed to save or update some employee details." });
                         }
                         catch (Exception ex)
                         {

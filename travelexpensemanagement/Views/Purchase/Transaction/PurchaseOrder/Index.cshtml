@@ -1,21 +1,15 @@
 ﻿
 @using System.Text.Json
 
-
-
-
-
 @{
     ViewBag.Title = "Purchase Order";
     Layout = "~/Views/Shared/_Layout.cshtml";
-
 
     var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
     var databaseName = ViewBag.DatabaseName as string;
     var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0; // Ensure proper type conversion
     var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
     var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
-
 
 }
 <div id="erp-toast-container"></div>
@@ -40,7 +34,7 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc Type</label>
                     <select class="erppage-input erppage-required" id="ddlDocType">
-                        <option value="">Select Doc Type</option>
+                    
                     </select>
                 </div>
                 <div class="erppage-divfield">
@@ -78,7 +72,7 @@
             <div class="erppagesrow">
                 <div class="erppagescol-6">
                     <fieldset class="erppagefieldset">
-                       @*  <legend class="erppagefieldset-legend">Party Details</legend> *@
+
                         <div class="erppage-grid1">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Party Name</label>
@@ -128,7 +122,7 @@
                 </div>
                 <div class="erppagescol-6">
                     <fieldset class="erppagefieldset">
-                        @* <legend class="erppagefieldset-legend">Party Details</legend> *@
+
                         <div class="erppage-grid1">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Ship From</label>
@@ -180,7 +174,7 @@
             <div class="erppagesrow">
                 <div class="erppagescol-6">
                     <fieldset class="erppagefieldset">
-                        @* <legend class="erppagefieldset-legend">Terms and Condition</legend> *@
+
                         <div class="erppage-grid2">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Delivery Term</label>
@@ -216,7 +210,7 @@
                 </div>
                 <div class="erppagescol-6">
                     <fieldset class="erppagefieldset">
-                       @*  <legend class="erppagefieldset-legend">Other Details</legend> *@
+
                         <div class="erppage-grid2">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Party Ref/Quot No</label>
@@ -653,6 +647,7 @@
                     </div>
                
             </fieldset>
+
         </fieldset>
         <div class="erppage-actions">
             <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
@@ -1034,12 +1029,7 @@
     </ul>
 </div>
 
-
-
 <script src="~/js/GlobalValidation.js" asp-append-version="true"></script>
-
-
-
 
 <script>
     // Passing only required variables to JS
@@ -1062,10 +1052,6 @@
 
     window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
 </script>
-
-
-
-
 
 
 
@@ -1095,9 +1081,8 @@
     let readOnly;
     let selectedFiles = [];
     let globalAttachments = [];
-    console.log("readOnly", readOnly); 
-
-
+    var globalVars = window.globalVariables || {};
+    let LoginDate = globalVars.LoginDate;
 
     function getQueryParam(param) {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1107,7 +1092,7 @@
     $(async function () {
         try {
             await GetDocTypeAsync();
-            $('#ddlDocType').prop('selectedIndex', 0);
+          //  $('#ddlDocType').prop('selectedIndex', 0);
             handleDocLoad();
         } catch (error) {
             toastr.error('Failed to load document types: ' + error);
@@ -1399,11 +1384,11 @@
 
         //Attachment
 
-    browseBtn.addEventListener("click", function () {
+        browseBtn.addEventListener("click", function () {
         fileInput.click();
     });
 
-    fileInput.addEventListener("change", function () {
+        fileInput.addEventListener("change", function () {
 
         Array.from(this.files).forEach(file => {
 
@@ -1416,7 +1401,7 @@
         this.value = "";
     });
 
-    $(document).on("click", ".erp-delete-file-btn", function () {
+        $(document).on("click", ".erp-delete-file-btn", function () {
 
         const index = $(this).data("index");
 
@@ -1425,7 +1410,7 @@
         renderFileList();
     });
 
-    $(document).on("click", ".erp-delete-db-btn", function () {
+        $(document).on("click", ".erp-delete-db-btn", function () {
 
         const index = $(this).data("index");
 
@@ -1434,16 +1419,16 @@
         renderFileList();
     });
 
-    dropZone.addEventListener("dragover", function (e) {
+        dropZone.addEventListener("dragover", function (e) {
         e.preventDefault();
         dropZone.classList.add("dragover");
     });
 
-    dropZone.addEventListener("dragleave", function () {
+        dropZone.addEventListener("dragleave", function () {
         dropZone.classList.remove("dragover");
     });
 
-    dropZone.addEventListener("drop", function (e) {
+        dropZone.addEventListener("drop", function (e) {
         e.preventDefault();
         dropZone.classList.remove("dragover");
 
@@ -1459,13 +1444,6 @@
         renderFileList();
     });
 
-
-
-
-
-
-
-
     });
 
 </script>
@@ -1475,16 +1453,26 @@
     async function handleDocLoad() {
         const docId = getQueryParam('id');
         const readOnly = getQueryParam('readOnly');
+
+        console.log("LoginDate",LoginDate);
+
           SetFYDate('dtDocDate', LoginDate);
+          debugger;
         if (docId) {
+
+
+            await GetDocData(docId, readOnly);
+
             $('#SaudaDetail').show();
+
+            $('#ddlDocType').prop('disabled', true);
             $('#ddlStatus').prop('disabled', false);
             var VTpeU = docId.substring(0,4);
             var VNoU = docId.substring(4);
             $('#txtDocNo').val(VNoU);
             console.log(VTpeU, VNoU);
             Wb_SaudaDdl_Make_enabledisable(VTpeU);
-            await GetDocData(docId, readOnly);
+     
         } else {
             $('#SaudaDetail').hide();
             $('#ddlStatus').prop('disabled', true);
@@ -1493,14 +1481,7 @@
             GetDocid(Vtype);
 
             const today = new Date();
-            const todayDate = today.getFullYear() + '-' +
-                (today.getMonth() + 1).toString().padStart(2, '0') + '-' +
-                today.getDate().toString().padStart(2, '0');
-
-
-
-
-
+            const todayDate = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' +  today.getDate().toString().padStart(2, '0');
            // $('#dtDocDate').val(todayDate);
             $('#DtDeliveryDate').val(todayDate);
             $('#DtValidateDate').val(todayDate);
@@ -1920,7 +1901,6 @@
         }
     }
 
-
     $(document).on('change', '#ddWBNo', async function () {
         var docid = $('#ddWBNo').find('option:selected').val();
         var partyCode = $('#ddlPartyName').val();
@@ -2063,9 +2043,8 @@
                     data: JSON.stringify(saveDt),
                     success: function (response) {
                         if (response?.status) {
-                            // showFlashMessageByKey('insert', 'success');
                             toastr.success("Data Insert Successfully");
-                            // resetFields();
+             
                             setTimeout(() => {
                                 window.location.href = '/PurchaseOrderList/Index';
                             }, 500);
@@ -2108,9 +2087,7 @@
         toastr.error("Invalid or empty data array");
         return;
       }
-
-      const d = data[0]; // use first object
-
+      const d = data[0]; 
       $('#txtDocNo').val(d.V_NO || '');
       $('#TxtDocId').val(d.DOC_ID || '');
       $('#dtDocDate').val((d.V_DATE || '').substring(0, 10));
@@ -2119,8 +2096,9 @@
       $('#ddlDocType').val(d.V_TYPE || '');
       $('#ddlPlace').val(d.PLACE_CODE || '');
       $('#ddWBNo').val(d.WB_NO || '');
-      $('#ddlPartyName').val(d.PARTY_CODE || '');
-      $('#ddlShipFrom').val(d.SHIP_CODE || '');
+
+      $('#ddlPartyName').val(d.PARTY_CODE || '').trigger('change');
+      $('#ddlShipFrom').val(d.SHIP_CODE || '').trigger('change');
 
       // Billing Address
       $('#TxtAdd1PD').val(d.BILL_ADD1 || '');
@@ -2164,6 +2142,8 @@
       $('#txtPriceTerm').val(d.PRICE_TERM || '');
       $('#txtRemarksTC').val(d.REMARKS || '');
       $('#txtPartySauda').val(d.PARTY_NAME || '');
+
+
     }
 
     async function fillItemDetailsTable(data) {
@@ -3315,7 +3295,6 @@
         });
     }
 
-
     function handleBack(redirectUrl, isReadOnly = false) {
 
         if (isReadOnly) {
@@ -3339,7 +3318,7 @@
         });
     }
 
-        function isDuplicateFile(file) {
+    function isDuplicateFile(file) {
 
         const fileName = file.name;
 
@@ -3364,7 +3343,7 @@
         return false;
     }
 
-        function renderFileList() {
+    function renderFileList() {
 
         const attachBody = $("#fileList");
         attachBody.empty();
