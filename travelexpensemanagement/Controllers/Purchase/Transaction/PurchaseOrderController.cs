@@ -9,6 +9,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.Common;
 using System.Linq.Expressions;
+using System.Net.Mail;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -521,10 +522,43 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     await con.OpenAsync();
                     var usersessionDt = _globalValue.GetGlobalVariables();
                     DataTable purchaseOrderTable = FillDataTable(POmodel.ItemRecords, "[dbo].[Type_Order2]");
-                    DataTable purchaseOrderAttachmentTable = FillDataTable(POmodel.Attachments, "[dbo].[Type_order3]");
+
+
+                    // 🔥 REPLACE FillDataTable with this
+
+                    DataTable purchaseOrderAttachmentTable = new DataTable();
+
+                    purchaseOrderAttachmentTable.Columns.Add("FILE_Path", typeof(string));
+                    purchaseOrderAttachmentTable.Columns.Add("FILE_NAME", typeof(string));
+                    purchaseOrderAttachmentTable.Columns.Add("SRNO", typeof(int));
+
+                    int srno = 1;
+
+
+
+
+
+
+
+                    if (POmodel.Attachments != null)
+                    {
+                        foreach (var a in POmodel.Attachments)
+                        {
+                            purchaseOrderAttachmentTable.Rows.Add(
+                                "/attachments/Purchase/" + (a.FileName ?? ""),
+                                a.FileName,
+                                srno++
+                            );
+                        }
+                    }
+
+                    //DataTable purchaseOrderAttachmentTable = FillDataTable(POmodel.Attachments, "[dbo].[Type_order3]");
+
+
                     using (var transaction = con.BeginTransaction())
                     {
                         bool success = true;
+
                         try
                         {
                             using (SqlCommand cmd = new SqlCommand("[dbo].[sp_PurchaseOrder_AE]", con, transaction))
@@ -626,7 +660,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 tvp2.SqlDbType = SqlDbType.Structured;
                                 tvp2.TypeName = "[dbo].[Type_order3]";
 
-                                var returnParam = new SqlParameter("@ReturnVal", SqlDbType.Int) { Direction = ParameterDirection.ReturnValue };
+                                 var returnParam = new SqlParameter("@ReturnVal", SqlDbType.Int) { Direction = ParameterDirection.ReturnValue };
                                 cmd.Parameters.Add(returnParam);
                                 var errorParam = new SqlParameter("@ErrorMessage", SqlDbType.NVarChar, 4000)
                                 {

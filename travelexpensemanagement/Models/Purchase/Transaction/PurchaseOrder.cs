@@ -84,7 +84,7 @@
 
     public class Order2
     {       
-        public int SNO { get; set; }
+        public int? SNO { get; set; }
         public int? PlaceCode { get; set; }
         public string? ItemName { get; set; }
         public int? ItemCode { get; set; }
@@ -151,16 +151,16 @@
 
     public class PurchaseAttachment
     {
-        public string FileName { get; set; }      
+        public string? FileName { get; set; }      
         public long? FileSize { get; set; }    
-        public string FileType { get; set; }     
-        public string FilePath { get; set; }    
-        public string FileContentBase64 { get; set; }
+        public string? FileType { get; set; }     
+        public string? FilePath { get; set; }    
+        public string? FileContentBase64 { get; set; }
     }
 
     public class SaudaCalculationRequest
     {
-        public string Btn { get; set; }
+        public string? Btn { get; set; }
         public int? SaudaNo { get; set; }
         public string? SaudaType { get; set; }
         public DateTime? EffectiveDate { get; set; } // Add this if needed

@@ -219,10 +219,7 @@
                             <div class="erppage-divfield erppage-datefield">
                                 <label class="erppage-label">Delivery Date</label>
                                 <div class="erppage-datebox">
-                                    <input type="date" class="erppage-input erppage-dateinput" id="DtDeliveryDate">
-                                    <label class="erppage-checkbox-inside">
-                                        <input type="checkbox" class="erppage-checkbox-input" id="chkDeliveryDate">
-                                    </label>
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtDeliveryDate">                            
                                 </div>
                             </div>
                         </div>
@@ -230,10 +227,7 @@
                             <div class="erppage-divfield erppage-datefield">
                                 <label class="erppage-label">Validate Date</label>
                                 <div class="erppage-datebox">
-                                    <input type="date" class="erppage-input erppage-dateinput" id="DtValidateDate">
-                                    <label class="erppage-checkbox-inside">
-                                        <input type="checkbox" class="erppage-checkbox-input" id="chkValidateDate">
-                                    </label>
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtValidateDate">                                 
                                 </div>
                             </div>
                             <div class="erppage-divfield">
@@ -1053,8 +1047,6 @@
     window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
 </script>
 
-
-
 <script>
 
     const AllFieldsId = [
@@ -1084,32 +1076,33 @@
     var globalVars = window.globalVariables || {};
     let LoginDate = globalVars.LoginDate;
 
-    function getQueryParam(param) {
+         function getQueryParam(param) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(param);
     }
 
-    $(async function () {
-        try {
-            await GetDocTypeAsync();
-          //  $('#ddlDocType').prop('selectedIndex', 0);
-            handleDocLoad();
-        } catch (error) {
-            toastr.error('Failed to load document types: ' + error);
-        }
-    });
+        $(async function () {
+            try {
+                await GetDocTypeAsync();
+              //  $('#ddlDocType').prop('selectedIndex', 0);
+                handleDocLoad();
+            } catch (error) {
+                toastr.error('Failed to load document types: ' + error);
+            }
+        });
 
-    $(document).ready(function () {
-        GetPlaceList();
-        GetCurrencyList();
-        GetShipFromList();
-        GetPartyList();
-        addItemRecordRow();
-        addAttachmentRow();
-        GetPayTermList();
-    });
+        $(document).ready(function () {
+            GetPlaceList();
+            GetCurrencyList();
+            GetShipFromList();
+            GetPartyList();
+            addItemRecordRow();
+            addAttachmentRow();
+            GetPayTermList();
+        });
 
-    $(document).ready(function () {
+        $(document).ready(function () {
+
         setEnterKeyFocus(AllFieldsId);
 
         $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
@@ -1124,7 +1117,7 @@
         });
 
         $(document).on('click', '#tab4 .btn-add-action', function () {
-        addAttachmentRow();
+         addAttachmentRow();
         });
 
         $(document).on('click', '#tab1 .btn-add-row, #tab1 .btn-Itemadd-action', function () {
@@ -1266,17 +1259,20 @@
             calculateTaxAmounts(rowId);
         });
 
+
         $(document).on('click', '[id^=TxtRate], [id^=TxtQty]', function () {
             const $select = $(this);
             const rowId = $select.closest('tr').attr('id').replace('row', '');
             calculateTaxAmounts(rowId);
         });
 
+
         $(document).on('input', '[id^=TxtRate], [id^=TxtQty], [id^=TxtCess], [id^=TxtPack], [id^=TxtDisc]', function () {
             const $input = $(this);
             const rowId = $input.closest('tr').attr('id').replace('row', '');
             calculateTaxAmounts(rowId);
         });
+
 
         $('#btn-save').on('click', async function (e) {
             e.preventDefault();
@@ -1381,7 +1377,6 @@
             }
         });
 
-
         //Attachment
 
         browseBtn.addEventListener("click", function () {
@@ -1453,13 +1448,9 @@
     async function handleDocLoad() {
         const docId = getQueryParam('id');
         const readOnly = getQueryParam('readOnly');
-
         console.log("LoginDate",LoginDate);
-
           SetFYDate('dtDocDate', LoginDate);
-          debugger;
         if (docId) {
-
 
             await GetDocData(docId, readOnly);
 
@@ -1497,16 +1488,30 @@
             const item = data[index];
             const idx = index + 1;
 
+
+            console.log("Item data",data);
+
+
             addItemRecordRow();
             await bindDropdownData(idx);
 
             $(`#ddlIplaceofUse${idx}`).val(item.placeUse || '');
-            $(`#ddlItemname${idx}`).val(item.itemCode || '').trigger('change');
-            $(`#ddlImake${idx}`).val(item.makeCode || '').trigger('change');
+
+
+            // $(`#ddlItemname${idx}`).val(item.itemCode || '').trigger('change');
+            // $(`#ddlImake${idx}`).val(item.makeCode || '').trigger('change');
+
+            $(`#ddlItemname${idx}`) .val(item.itemCode) .trigger('change.select2');
+
+            $(`#ddlImake${idx}`)  .val(item.makeCode) .trigger('change.select2');
+            $(`#ddlUnit${idx}`).val(item.uomCode || '').trigger('change');
+            $(`#ddlTax${idx}`).val(item.taxCode || '').trigger('change');
+            $(`#ddlDepartment${idx}`).val(item.deptCode || '');
+
+
             $(`#TxtNos${idx}`).val(item.nos || '');
             $(`#TxtQty${idx}`).val(item.qty || '');
             $(`#txtAdjQtySauda${idx}`).val(item.adjQty || '');
-            $(`#ddlUnit${idx}`).val(item.uomCode || '').trigger('change');
             $(`#TxtRate${idx}`).val(item.rate || '');
             $(`#TxtExrate${idx}`).val(item.importRate || '');
             $(`#TxtCalcRate${idx}`).val(item.calcRate || '');
@@ -1514,8 +1519,7 @@
             $(`#TxtPackPercent${idx}`).val(item.packPer || '');
             $(`#TxtPack${idx}`).val(item.packAmt || '');
             $(`#TxtDiscPercent${idx}`).val(item.discPer || '');
-            $(`#TxtDisc${idx}`).val(item.discAmt || '');
-            $(`#ddlTax${idx}`).val(item.taxCode || '').trigger('change');
+            $(`#TxtDisc${idx}`).val(item.discAmt || '');         
             $(`#TxtCgstPercent${idx}`).val(item.cgstPer || '');
             $(`#TxtCgst${idx}`).val(item.cgstAmt || '');
             $(`#TxtSgstPercent${idx}`).val(item.sgstPer || '');
@@ -1534,7 +1538,7 @@
             $(`#TxtOthAmt2${idx}`).val(item.othAmt2 || '');
             $(`#TxtNetAmt${idx}`).val(item.netAmt || '');
             $(`#TxtLdRate${idx}`).val(item.landRate || '');
-            $(`#ddlDepartment${idx}`).val(item.deptCode || '');
+         
             $(`#TxtRemarks${idx}`).val(item.remarks || '');
             $(`#TxtAppLevel${idx}`).val(item.preorityLevel || '');
             $(`#TxtAppRemarks${idx}`).val(item.preorityRemarks || '');
@@ -1716,19 +1720,24 @@
     async function fillItemDetailsTable(data) {
         const $tbody = $('#tblItemRecordPO tbody');
         $tbody.empty();
-        console.log(data);
+        console.log("Load data" , data);
         for (let index = 0; index < data.length; index++) {
             const item = data[index];
             const idx = index + 1;
             addItemRecordRow();
             await bindDropdownData(idx);
-            $(`#ddlIplaceofUse${idx}`).val(item.PLACE_OF_USE || '');
-            $(`#ddlItemname${idx}`).val(item.ITEM_CODE || '');
+
+
+            $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
             $(`#ddlImake${idx}`).val(item.MAKE_CODE || '');
+            $(`#ddlUnit${idx}`).val(item.UOM_CODE || '');
+            $(`#ddlTax${idx}`).val(item.TAX_CODE || '');
+            $(`#ddlDepartment${idx}`).val(item.DEPT_CODE || '');
+            $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE || '');
+
             $(`#TxtNos${idx}`).val(item.NOS || '');
             $(`#TxtQty${idx}`).val(item.QTY || '');
             $(`#txtAdjQtySauda${idx}`).val(item.ADJ_QTY_SAUDA || '');
-            $(`#ddlUnit${idx}`).val(item.UOM_CODE || '');
             $(`#TxtRate${idx}`).val(item.RATE || '');
             $(`#TxtExrate${idx}`).val(item.EXRATE || '');
             $(`#TxtCalcRate${idx}`).val(item.CALC_RATE || '');
@@ -1737,7 +1746,6 @@
             $(`#TxtPack${idx}`).val(item.PACK_AMT || '');
             $(`#TxtDiscPercent${idx}`).val(item.DISC_PER || '');
             $(`#TxtDisc${idx}`).val(item.DISC_AMT || '');
-            $(`#ddlTax${idx}`).val(item.TAX_CODE || '');
             $(`#TxtCgstPercent${idx}`).val(item.CGST_PER || '');
             $(`#TxtCgst${idx}`).val(item.CGST_AMT || '');
             $(`#TxtSgstPercent${idx}`).val(item.SGST_PER || '');
@@ -1755,8 +1763,7 @@
             $(`#TxtOthPer2${idx}`).val(item.OTH_PER2 || '');
             $(`#TxtOthAmt2${idx}`).val(item.OTH_AMT2 || '');
             $(`#TxtNetAmt${idx}`).val(item.NET_AMT || '');
-            $(`#TxtLdRate${idx}`).val(item.LD_RATE || '');
-            $(`#ddlDepartment${idx}`).val(item.DEPARTMENT || '');
+            $(`#TxtLdRate${idx}`).val(item.LD_RATE || ''); 
             $(`#TxtRemarks${idx}`).val(item.REMARKS || '');
             $(`#TxtAppLevel${idx}`).val(item.APP_LEVEL || '');
             $(`#TxtAppRemarks${idx}`).val(item.APP_REMARKS || '');
@@ -1915,11 +1922,7 @@
             const idx = index + 1;
 
             addItemRecordRow();
-
-            // Ensure dropdowns are bound before setting values
             await bindDropdownData(idx);
-
-            // Now set values
             $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
             $(`#ddlImake${idx}`).val(item.MakeCode).trigger('change');
             $(`#TxtQty${idx}`).val(item.Qty);
@@ -1978,48 +1981,112 @@
         calculateAllTotals(); // Recalculate footer totals
     }
 
-    async function GetDocData(MasterTblId, readOnly) {
-        try {
-            const response = await $.ajax({
-                url: '/PurchaseOrder/GetPurchaseOrderRecordsById',
-                type: 'GET',
-                data: { id: MasterTblId }
-            });
+     async function GetDocData(MasterTblId, readOnly) {
+    try {
+        const response = await $.ajax({
+            url: '/PurchaseOrder/GetPurchaseOrderRecordsById',
+            type: 'GET',
+            data: { id: MasterTblId }
+        });
 
-            if (response.status) {
-                if (readOnly === 'true') {
-                    disableAllFields();
-                    $('.btn-add-row-last').hide();
-                    $('#btn-save, #cancelBtn').hide();
-                } else {
-                    enableAllFields();
-                    $('#btn-save, #cancelBtn').show();
-                    $('.btn-add-row-last').show();
+        console.log("response", response);
 
-                }
-                await fillFormFields(response.header);
-                await fillItemDetailsTable(response.detail);
-                $('#tblAttachmentPO tbody').empty();
-                if (response.attachment) {
-                    if (Array.isArray(response.attachment)) {
-                        response.attachment.forEach(att => addAttachmentRow(att));
-                    } else if (typeof response.attachment === 'object') {
-                        addAttachmentRow(response.attachment);
-                    } else {
-                        addAttachmentRow();
-                    }
-                } else {
-                    addAttachmentRow();
-                }
-
-            } else {
-                toastr.error('No data returned.');
-            }
-        } catch (error) {
-            toastr.error('Failed to load data.');
-            toastr.error(error);
+        if (!response || !response.status) {
+            toastr.error('No data returned.');
+            return;
         }
+
+        if (readOnly === 'true') {
+            disableAllFields();
+            $('.btn-add-row-last').hide();
+            $('#btn-save, #cancelBtn').hide();
+        } else {
+            enableAllFields();
+            $('#btn-save, #cancelBtn').show();
+            $('.btn-add-row-last').show();
+        }
+
+        await fillFormFields(response.header);
+        await fillItemDetailsTable(response.detail);
+
+        $('#fileList').empty();
+
+        const attachments = Array.isArray(response.attachment)  ? response.attachment : [];
+
+        if (attachments.length === 0) {
+            $('#fileList').html(`
+                <div class="text-muted text-center">
+                    No attachments found.
+                </div>
+            `);
+        } else {
+
+            attachments.forEach((att, idx) => {
+
+                const fileName =
+                    att.FILE_NAME ||
+                    att.FileName ||
+                    att.fileName ||
+                    `File_${idx + 1}`;
+
+                let filePath =
+                    att.FILE_Path ||
+                    att.FilePath ||
+                    att.filePath ||
+                    '';
+
+                // safe URL
+                if (filePath && !filePath.startsWith('http') && !filePath.startsWith('/')) {
+                    filePath = '/' + filePath;
+                }
+
+                const ext = (fileName.split('.').pop() || '').toLowerCase();
+
+                let icon = '📄';
+
+                if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) icon = '🖼️';
+                else if (ext === 'pdf') icon = '📕';
+
+                $('#fileList').append(`
+                    <div class="file-item erp-file-row"
+                         data-id="${att.ID || idx}">
+
+                        <div class="file-icon">
+                            ${icon}
+                        </div>
+
+                        <div class="file-info">
+                            <div class="file-name-text">${fileName}</div>
+                        </div>
+
+                        <div class="file-actions">
+
+                            ${filePath ? `
+                                <button type="button"
+                                        class="view-file"
+                                        onclick="window.open('${filePath}', '_blank')">
+                                    View
+                                </button>
+                            ` : ''}
+
+                            <button type="button"
+                                    class="delete-file"
+                                    data-id="${att.ID || idx}">
+                                Delete
+                            </button>
+
+                        </div>
+
+                    </div>
+                `);
+            });
+        }
+
+    } catch (error) {
+        console.error(error);
+        toastr.error('Failed to load data.');
     }
+}
 
     function enableAllFields() {
       AllFieldsId.forEach(id => {
@@ -2083,6 +2150,9 @@
         }
 
     async  function fillFormFields(data) {
+
+        console.log("header data" , data);
+
       if (!Array.isArray(data) || data.length === 0) {
         toastr.error("Invalid or empty data array");
         return;
@@ -2116,23 +2186,27 @@
       $('#NumPincodeSD').val(d.SHIP_PINCODE || '');
 
       // Financials
+
+        $('#NumTotalNosIt').val(d.NOS || '');
+        $('#NumQtyIt').val(d.QTY || '');
+        $('#NumAmountIt').val(d.AMOUNT || '');
+        $('#NumPackingAmtIt').val(d.PACK_AMT || '');
+        $('#NumDiscAmtIt').val(d.DISC_AMT || '');
+        $('#NumCgstAmtIt').val(d.CGST_AMT || '');
+        $('#NumSgstAmtIt').val(d.SGST_AMT || '');
+        $('#NumIgstAmtIt').val(d.IGST_AMT || '');
+        $('#NumVatAmtIt').val(d.VAT_AMT || '');           
+        $('#NumCessAmtIt').val(d.CESS_AMT || '');
+        $('#NumTCSIt').val(d.TCS_AMT || '');            
+        $('#TxtOtherAmtSod').val(d.OTH_AMT || '');      
+        $('#NumNetAmtIt').val(d.NET_AMT || '');
+
+
       $('#ddlPriceType').val(d.PRICE_TYPE || '');
       $('#txtPartyRef').val(d.PARTY_REF || '');
       $('#ddlCurrency').val(d.IMPORT_CURRENCY || '');
       $('#NumExRate').val(d.EXRATE || '');
-      $('#NumTotalNosIt').val(d.NOS || '');
-      $('#NumQtyIt').val(d.QTY || '');
-      $('#NumAmountIt').val(d.AMOUNT || '');
-      $('#NumPackingAmtIt').val(d.PACK_AMT || '');
-      $('#NumDiscAmtIt').val(d.DISC_AMT || '');
-      $('#NumCgstAmtIt').val(d.CGST_AMT || '');
-      $('#NumSgstAmtIt').val(d.SGST_AMT || '');
-      $('#NumIgstAmtIt').val(d.IGST_AMT || '');
-      $('#TxtOtherAmtSod').val(d.OTH_AMT || '');
-      $('#NumVatAmtIt').val(d.VAT_AMT || '');
-      $('#NumCessAmtIt').val(d.CESS_AMT || '');
-      $('#NumTCSIt').val(d.TCS_AMT || '');
-      $('#NumNetAmtIt').val(d.NET_AMT || '');
+
 
       // Terms
       $('#txtDeliveryTerm').val(d.DELIVERY_TERM || '');
@@ -2156,9 +2230,17 @@
             await bindDropdownData(idx);
 
             console.log(data, item.ITEM_CODE);
-            $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE);
+          //  $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE);
+            $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE).trigger('change');
             $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
-            $(`#ddlImake${idx}`).val(item.MAKE_CODE);
+            $(`#ddlImake${idx}`).val(item.MAKE_CODE).trigger('change');
+            $(`#ddlTax${idx}`).val(item.TAX_CODE).trigger('change');
+            $(`#ddlDepartment${idx}`).val(item.DEPT_CODE).trigger('change');
+
+              // $(`#ddlTax${idx}`).val(item.TAX_CODE);
+               // $(`#ddlDepartment${idx}`).val(item.DEPT_CODE);
+
+           // $(`#ddlImake${idx}`).val(item.MAKE_CODE);
             $(`#TxtNos${idx}`).val(item.NOS);
             $(`#TxtQty${idx}`).val(item.QTY);
             $(`#txtAdjQtySauda${idx}`).val(item.ADJ_QTY);
@@ -2171,7 +2253,7 @@
             $(`#TxtPack${idx}`).val(item.PACK_AMT);
             $(`#TxtDiscPercent${idx}`).val(item.DISC_PER);
             $(`#TxtDisc${idx}`).val(item.DISC_AMT);
-            $(`#ddlTax${idx}`).val(item.TAX_CODE);
+         
             $(`#TxtCgstPercent${idx}`).val(item.CGST_PER);
             $(`#TxtCgst${idx}`).val(item.CGST_AMT);
             $(`#TxtSgstPercent${idx}`).val(item.SGST_PER);
@@ -2190,7 +2272,7 @@
             $(`#TxtOthAmt2${idx}`).val(item.TOTAL_AMT2);
             $(`#TxtNetAmt${idx}`).val(item.NET_AMT);
             $(`#TxtLdRate${idx}`).val(item.LAND_RATE);
-            $(`#ddlDepartment${idx}`).val(item.DEPT_CODE);
+        
             $(`#TxtRemarks${idx}`).val(item.REMARKS);
             $(`#TxtAppLevel${idx}`).val(item.PREORITY_LEVEL);
             $(`#TxtAppRemarks${idx}`).val(item.PREORITY_REMARKS);
@@ -2205,6 +2287,14 @@
         const id = toNullableString(docId);
         const itemRecords = await collectOrder2Items();
          const attachment = await getAttachmentDetails();
+
+         console.log("id",docId);
+
+
+         const docid = toNullableString(document.getElementById("TxtDocId")?.value);
+
+         console.log("docid", docid);
+
         return {
             VNo: parseIntSafe(document.getElementById("txtDocNo")?.value),
             VType: toNullableString(document.getElementById("ddlDocType")?.value),
@@ -2279,7 +2369,8 @@
             PartyName: toNullableString(document.getElementById("txtPartySauda")?.value),
             ShipName: null,
             Status: null,
-            SaveOrUpdate: (!id || id === 0) ? 'Save' : 'Update',
+
+            SaveOrUpdate: (!docid || docid === "") ? 'Save' : 'Update',
             ItemRecords: itemRecords,
             Attachments:attachment
         };
@@ -2343,7 +2434,7 @@
           RequestNo: null,
           ApprovalType: null,
           ApprovalNo: null,
-          DeptCode: null,
+          DeptCode: parseFloatSafe($r.find(`#ddlDepartment${idx}`).val()),
           DeliveryDate: null,
           SaudaType: null,
           SaudaNo: null,
@@ -2367,44 +2458,27 @@
     async function getAttachmentDetails() {
         const attachments = [];
 
-        const rows = $('#tblAttachmentPO tbody tr').toArray();
-        for (const row of rows) {
-            const $row = $(row);
-            const fileInput = $row.find('.file-input')[0];
-            const file = fileInput?.files[0];
-            const fileNameInput = $row.find('.file-name-input').val()?.trim() || null;
+        selectedFiles.forEach(file => {
+            attachments.push({
+                FileName: file.name,
+                FilePath: `/uploads/${file.name}`,
+                FileSize: null,
+                FileType: null,
+                FileContentBase64: null
+            });
+        });
 
-            let base64String = null;
-            let filePath = null;
-            let fileName = null;
-            let fileType = null;
-            let fileSize = null;
+        globalAttachments.forEach(file => {
+            attachments.push({
+                FileName: file.fileName,
+                FilePath: file.filePath,
+                FileSize: null,
+                FileType: null,
+                FileContentBase64: null
+            });
+        });
 
-            if (file) {
-                base64String = await toBase64(file);
-                fileName = file.name;
-                fileSize = file.size;
-                fileType = file.type;
-                filePath = `/uploads/${file.name}`; // Optional; actual path may depend on backend
-            } else {
-                // Use existing file data if no new file selected
-                fileName = $row.find('.existing-file-name').val()?.trim() || null;
-                fileSize = $row.find('.existing-file-size').val()?.trim() || null;
-                fileType = $row.find('.existing-file-type').val()?.trim() || null;
-                filePath = $row.find('.existing-file-path').val()?.trim() || null;
-            }
-
-            // Only add if there is file info
-            if (fileName || filePath) {
-                attachments.push({
-                    fileName: fileNameInput || fileName,
-                    fileSize: fileSize,
-                    fileType: fileType,
-                    filePath: filePath,
-                    fileContentBase64: base64String // will be null for existing files
-                });
-            }
-        }
+        console.log("attachments", attachments);
         return attachments;
     }
 
@@ -2954,6 +3028,7 @@
             loadDropdown('@Url.Action("GetUnitList", "PurchaseOrder")', unitSelect, "- Select Unit -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
             loadDropdown('@Url.Action("GetDepartmentList", "PurchaseOrder")', departmentSelect, "- Select Department -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
             loadDropdown('@Url.Action("GetMachineMastList", "PurchaseOrder")', placeofUse, "- Select Place Of Use -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
+
             loadDropdown('@Url.Action("GetItemList", "PurchaseOrder")',
                 itemSelect,
                 "- Select Item -",
@@ -2962,6 +3037,8 @@
                     data-unitname="${item.UNIT_NAME}"
                     value="${item.CODE}">${item.NAME}</option>`
             ),
+
+
             loadDropdown('@Url.Action("GetTaxList", "PurchaseOrder")', taxSelect, "- Select Tax -", item => `
                 <option
                     value="${item.CODE}"
@@ -2980,96 +3057,103 @@
     }
       
     function addAttachmentRow(data = {}) {
-        const $attachmentTbody = $('#tblAttachmentPO tbody');
+    const $list = $('#fileList');
 
-   
-        if ($attachmentTbody.find('tr').length === 0) {
-            $attachmentTbody.empty();
-        }
-            const row = $(`
-         <tr class="no-border-input">
-        <td>
-            <input type="file" class="form-control file-input" />
-            <input type="hidden" class="existing-file-path" value="${data.FILE_Path || ''}" />
-            <input type="hidden" class="existing-file-name" value="${data.FILE_NAME || ''}" />
-        </td>
-        <td>
-            <div class="file-preview mt-2"></div>
-        </td>
-        <td>
-            <input type="text" class="form-control file-name-input" placeholder="Enter file name" value="${data.FILE_NAME || ''}" />
-        </td>
-        <td>
-            <i class="fa fa-plus btn-add-action attach-row" title="Add Row"></i>
-            <i class="fa fa-trash btn-delete-action" id="attach-del" title="Delete Row"></i>
-        </td>
-       </tr>
-       `);
+    const filePath = data.FILE_Path ? resolveFileUrl(data.FILE_Path) : '';
+    const fileName = data.FILE_NAME || '';
 
+    // safer extension logic (use filename, not path)
+    const ext = (fileName.split('.').pop() || '').toLowerCase();
 
-        $attachmentTbody.append(row);
+    let icon = '📄';
 
-        const previewDiv = row.find('.file-preview');
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) icon = '🖼️';
+    else if (ext === 'pdf') icon = '📕';
 
-    if (data.FILE_Path) {
-        const fileExt = data.FILE_Path.split('.').pop().toLowerCase();
-        const fileName = data.FILE_NAME || 'View File';
+    const item = $(`
+        <div class="file-item">
 
-        // Build preview + download
-        let previewHtml = '';
-        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
-            previewHtml = `<img src="${data.FILE_Path}" alt="Preview" style="max-width: 30px; max-height: 30px;" />`;
-        } else if (fileExt === 'pdf') {
-            previewHtml = `<iframe src="${data.FILE_Path}" style="width: 30px; height: 30px;"></iframe>`;
+            <div class="file-icon">
+                ${icon}
+            </div>
+
+            <div class="file-info">
+
+                <input type="file" class="file-input" />
+
+                <input type="hidden" class="existing-file-path" value="${filePath}" />
+                <input type="hidden" class="existing-file-name" value="${fileName}" />
+
+                <div class="file-name-text">
+                    ${fileName || 'No file selected'}
+                </div>
+
+                ${filePath ? `
+                    <a href="${filePath}" target="_blank" class="file-link">
+                        Download
+                    </a>
+                ` : ''}
+
+            </div>
+
+            <div class="file-actions">
+                <i class="fa fa-plus add-file"></i>
+                <i class="fa fa-trash delete-file"></i>
+            </div>
+
+        </div>
+    `);
+
+    $list.append(item);
+
+    const $fileInput = item.find('.file-input');
+    const $fileNameText = item.find('.file-name-text');
+    const $link = item.find('.file-link');
+    const $icon = item.find('.file-icon');
+
+    // If existing file → hide input
+    if (filePath) {
+        $fileInput.hide();
+    }
+
+    // =========================
+    // FILE CHANGE HANDLER
+    // =========================
+    $fileInput.on('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        const url = URL.createObjectURL(file);
+
+        const newExt = (file.name.split('.').pop() || '').toLowerCase();
+
+        let newIcon = '📄';
+
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(newExt)) newIcon = '🖼️';
+        else if (newExt === 'pdf') newIcon = '📕';
+
+        $fileNameText.text(file.name);
+
+        if ($link.length) {
+            $link.attr('href', url);
         } else {
-            previewHtml = `<span>${fileName}</span>`;
+            $fileNameText.after(`
+                <a href="${url}" target="_blank" class="file-link">
+                    Preview
+                </a>
+            `);
         }
 
-        // Add a download or view link
-        previewHtml += `<br><a href="${data.FILE_Path}" target="_blank" style="font-size: 10px;">Download</a>`;
+        $icon.text(newIcon);
+    });
 
-        previewDiv.html(previewHtml);
-    }
-
-        // Handle file input preview on change
-        row.find('.file-input').on('change', function () {
-            const file = this.files[0];
-            previewDiv.empty();
-            const fileNameInput = row.find('.file-name-input');
-
-            if (file) {
-                const fileURL = URL.createObjectURL(file);
-                fileNameInput.val(file.name);
-
-                if (file.type.startsWith('image/')) {
-                    previewDiv.append(
-                        $('<img>', {
-                            src: fileURL,
-                            css: {
-                                width: '30px',
-                                height: '30px',
-                                objectFit: 'cover',
-                                border: '1px solid #ccc',
-                            }
-                        })
-                    );
-                } else if (file.type === 'application/pdf') {
-                    previewDiv.append(
-                        $('<iframe>', {
-                            src: fileURL,
-                            css: {
-                                width: '30px',
-                                height: '30px',
-                                border: '1px solid #ccc',
-                            }
-                        })
-                    );
-                } else {
-                    previewDiv.text('Preview not available');
-                }
-            }
-        });
-    }
+    // =========================
+    // DELETE ROW
+    // =========================
+    item.find('.delete-file').on('click', function () {
+        item.remove();
+    });
+}
 
     function calculateAllRows() {
         let totalNos = 0,
@@ -3482,4 +3566,3 @@
 }
 
 </script>
-
