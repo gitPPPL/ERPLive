@@ -1,31 +1,9 @@
 ﻿@{
     ViewBag.Title = "Purchase Request";
     Layout = "~/Views/Shared/_Layout.cshtml";
-
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
-<style>
-    .po-generated-row,
-    .po-generated-row td,
-    .po-generated-row input,
-    .po-generated-row select,
-    .po-generated-row textarea {
-        background-color: #ffdea2 !important;
-    }
 
-        .po-generated-row .select2-container--default .select2-selection--single {
-            background: #ffdea2 !important;
-            border: 1px solid #ffdea2 !important;
-        }
-
-        .po-generated-row .select2-selection__rendered {
-            background: #ffdea2 !important;
-            color: #000 !important;
-        }
-
-        .po-generated-row .select2-selection__arrow {
-            background: #ffdea2 !important;
-        }
-</style>
 
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
@@ -36,6 +14,21 @@
         <div class="erppage-header-title">Purchase Request</div>
     </div>
     <div class="erppage-header-right">
+        <button type="button"
+                id="btn_Sendapproval"
+                style="display:none;" class="erppagebtn_sendapproval">
+            <i class="fa fa-share"></i>Send For Approval
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="PRReport()">
+            <i class="fa fa-print"></i>Print
+        </button>
+        
+
+        <button type="button"
+                id="btn_Approved"
+                 class="erppagebtn_approved">
+            Approved
+        </button>
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PurchaseRequestList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -56,10 +49,9 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Department</label>
-                    @* <select class="erppage-input erppage-required" id="ddlDepartment">
+                    <select class="erppage-input erppage-required" id="ddlDepartment">
                         <option value="">Select Department</option>
-                    </select> *@
-                    <div id="ddlDepartment" class="erppage-search-inputdropdown erppage-required"></div>
+                    </select>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Status</label>
@@ -119,18 +111,22 @@
                             </li>
                         </ul>
                     </div>
-                   
+                   @*  <button id="btn-closeprocess" type="button" class="erppage-btn erppage-btn-copy">
+                        <i class="fa fa-lock"></i>
+                        <span>Close Process</span>
+                    </button> *@
                     <button id="btn-monthlyrequirement" type="button" class="erppage-btn erppage-btn-copy" onclick="LoadMonthlyRequirementData()">
                         <i class="fa fa-calendar"></i><span>Monthly Requirement</span>
                     </button>
                 </div>
             </div>
             <div class="approval-toolbar">
-                <div class="erppage-divfield" style="background-color: #66a644;padding: 5px 10px;border-radius: 20px;color: white !important;" id="div-ApproxTotalAmt">
+                <div class="erppage-divfield" style="background-color: #66a644; padding: 3px 5px;border-radius: 6px;color: white !important;" id="div-ApproxTotalAmt">
                     <label class="erppage-label" style="display: contents;color: white;">
                         Approx Total Amount: ₹<span id="lbl-totalApproxAmount">0.00</span>
                     </label>
                 </div>
+
                 <div class="erppage-internalaction" style="margin:0px;">
                     <button id="btn-lastTenPurchaseOrder" type="button" class="erppage-btn erppage-btn-common-disabled">
                         <i class="fa fa-calendar"></i><span>Last 10 Purchase Order</span>
@@ -147,34 +143,34 @@
                 </div>
             </div>
            
-          
+           
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Item Detail</legend>
                     <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblItemDetailsPR" class="excel-table fixed-grid-table resizable-table sortable-table">
                         <colgroup>
                             <col style="display:none;">
-                            <col style="width: 228px;">
-                            <col style="width: 132px;">
+                            <col style="width: 199px;">
+                            <col style="width: 111px;">
                             <col style="width: 62px;">
-                            <col style="width: 136px;">
-                            <col style="width: 116px;" id="itemCol-approx-rate">
-                            <col style="width:120px;">
-                            <col style="width: 131px;">
-                            <col style="width: 90px;">
+                            <col style="width: 85px;">
+                            <col style="width: 105px; display: none;" id="itemCol-approx-rate">
+                            <col style="width: 124px;">
+                            <col style="width: 132px;">
+                            <col style="width: 117px; display: none;" id="itemCol-OpenReqQty">
+                            <col style="width: 82px;">
+                            <col style="width: 108px;">
                             <col style="width: 118px;">
-                            <col style="width: 145px;" id="itemCol-avgConsumption">
-                            <col style="width: 130px;">
-                            <col style="width: 125px;" id="itemCol-OpenReqQty">
-                            <col style="width: 96px;">
-                            <col style="width: 125px;">
-                            <col style="width: 178px;">
-                            <col style="width:180px;">
-                            <col style="width:130px;">
+                            <col style="width: 187px;">
+                            <col style="width: 101px;">
                             <col style="width: 107px;">
                             <col style="width: 104px;">
-                            <col style="width: 99px;">
-                            <col style="width:100px;" id="itemCol-status">
+                            <col style="width: 81px;">
+                            <col style="width: 78px;">
+                            <col style="width: 112px;">
+                            <col style="width: 100px;" id="itemCol-avgConsumption">
+                            <col style="width: 122px;">
+                            <col style="width: 65px; display: none;" id="itemCol-status">
                             <col style="display:none;">
                             <col style="width:100px;">
                         </colgroup>
@@ -204,7 +200,7 @@
                                 <th data-column="7">
                                     Approval Remarks <span class="sort-icon"></span>
                                 </th>
-                                <th data-column="8">
+                                @* <th data-column="8">
                                     Std Req <span class="sort-icon"></span>
                                 </th>
                                 <th data-column="9">
@@ -215,7 +211,7 @@
                                 </th>
                                 <th data-column="11">
                                     Pending PO Qty <span class="sort-icon"></span>
-                                </th>
+                                </th> *@
                                 <th data-column="12" id="item-OpenReqQty">
                                     Open Req Qty <span class="sort-icon"></span>
                                 </th>
@@ -242,6 +238,18 @@
                                 </th>
                                 <th data-column="20">
                                     Remarks <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="8">
+                                    Std Req <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="9">
+                                    Current Stock <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="10" id="item-avgConsumption">
+                                    Avg Consumption <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="11">
+                                    Pending PO Qty <span class="sort-icon"></span>
                                 </th>
                                 <th data-column="21" id="item-status">
                                     Status <span class="sort-icon"></span>
@@ -420,21 +428,21 @@
 
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblLastTenPurchaseRequest"
-                           class="excel-table fixed-grid-table resizable-table">
+                           class="excel-table fixed-grid-table width-table resizable-table">
 
                         <colgroup>
-                            <col style="width:100px;">
-                            <col style="width:220px;">
-                            <col style="width:120px;">
-                            <col style="width:120px;">
-                            <col style="width:180px;">
-                            <col style="width:150px;">
-                            <col style="width:80px;">
-                            <col style="width:100px;">
+                            <col style="width: 79px;">
+                            <col style="width: 181px;">
+                            <col style="width: 76px;">
+                            <col style="width: 75px;">
+                            <col style="width: 89px;">
+                            <col style="width: 69px;">
+                            <col style="width: 51px;">
+                            <col style="width: 63px;">
                             <col style="width:200px;">
-                            <col style="width:250px;">
-                            <col style="width:250px;">
-                            <col style="width:100px;">
+                            <col style="width: 102px;">
+                            <col style="width: 153px;">
+                            <col style="width: 57px;">
                         </colgroup>
 
                         <thead>
@@ -492,7 +500,7 @@
 
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblLastTenConsumption"
-                           class="excel-table fixed-grid-table resizable-table">
+                           class="excel-table fixed-grid-table width-table resizable-table">
 
                         <colgroup>
                             <col style="width:100px;">
@@ -565,27 +573,27 @@
 
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblLastTenPurchaseHistory"
-                           class="excel-table fixed-grid-table resizable-table">
+                           class="excel-table fixed-grid-table width-table resizable-table">
 
                         <colgroup>
-                            <col style="width:100px;">
-                            <col style="width:120px;">
-                            <col style="width:120px;">
-                            <col style="width:220px;">
-                            <col style="width:220px;">
-                            <col style="width:150px;">
-                            <col style="width:80px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:120px;">
-                            <col style="width:250px;">
-                            <col style="width:100px;">
+                            <col style="width: 76px;">
+                            <col style="width: 77px;">
+                            <col style="width: 77px;">
+                            <col style="width: 173px;">
+                            <col style="width: 183px;">
+                            <col style="width: 73px;">
+                            <col style="width: 51px;">
+                            <col style="width: 63px;">
+                            <col style="width: 70px;">
+                            <col style="width: 74px;">
+                            <col style="width: 66px;">
+                            <col style="width: 69px;">
+                            <col style="width: 65px;">
+                            <col style="width: 64px;">
+                            <col style="width: 58px;">
+                            <col style="width: 65px;">
+                            <col style="width: 73px;">
+                            <col style="width: 61px;">
                         </colgroup>
 
                         <thead>
@@ -650,27 +658,27 @@
 
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblLastTenOrderHistory"
-                           class="excel-table fixed-grid-table resizable-table">
+                           class="excel-table fixed-grid-table width-table resizable-table">
 
                         <colgroup>
-                            <col style="width:100px;">
-                            <col style="width:120px;">
-                            <col style="width:120px;">
-                            <col style="width:220px;">
-                            <col style="width:220px;">
-                            <col style="width:150px;">
-                            <col style="width:80px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:120px;">
-                            <col style="width:250px;">
-                            <col style="width:100px;">
+                            <col style="width: 79px;">
+                            <col style="width: 79px;">
+                            <col style="width: 82px;">
+                            <col style="width: 173px;">
+                            <col style="width: 182px;">
+                            <col style="width: 70px;">
+                            <col style="width: 51px;">
+                            <col style="width: 64px;">
+                            <col style="width: 68px;">
+                            <col style="width: 66px;">
+                            <col style="width: 71px;">
+                            <col style="width: 70px;">
+                            <col style="width: 63px;">
+                            <col style="width: 71px;">
+                            <col style="width: 62px;">
+                            <col style="width: 77px;">
+                            <col style="width: 70px;">
+                            <col style="width: 69px;">
                         </colgroup>
 
                         <thead>
@@ -858,6 +866,19 @@
 
 <script>
     window.userLevel = "@ViewBag.UserLevel";
+    window.compCode = "@ViewBag.CompCode";
+        window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2",
+
+    };
+    window.database = {
+         db: "@ViewBag.DatabaseName"
+    }
 </script>
 
 <script src="~/js/erpjs/purchase/transaction/purchaserequest/purchaserequest.js"></script>

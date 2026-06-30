@@ -236,12 +236,10 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                     var orderRcvdItems = new HashSet<int?>();
 
                     using (SqlCommand checkCmd = new SqlCommand(@"
-                            SELECT ITEM_CODE
-                            FROM ORDER2
-                            WHERE REQUEST_TYPE = 'STPI'
-                              AND REQUEST_NO = @V_NO
-                              AND COMP_CODE = @COMP_CODE
-                              AND BRANCH_CODE = @BRANCH_CODE", con))
+                            select ITEM_CODE from PURCHASE2 
+                            where v_type in ('BFRC','RCPI','RCPT','SRPU') and 
+                            REQ_TYPE ='STPI' and REQ_NO =@V_NO and 
+                            COMP_CODE =@COMP_CODE and BRANCH_CODE =@BRANCH_CODE", con))
                     {
                         checkCmd.Parameters.AddWithValue("@V_NO", code);
                         checkCmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
@@ -350,6 +348,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                     foreach (var item in resultWrapper.ItamDetails)
                     {
                         item.isPOGenerated = generatedItems.Contains(item.ITEM_CODE);
+                        item.isOrderRcvd = orderRcvdItems.Contains(item.ITEM_CODE);
                     }
 
                     // --------- Third Call: Fetch Attachments (Purchase Documents)

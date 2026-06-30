@@ -50,12 +50,12 @@
 		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
 	</div>
 	<div class="erppagelist-actions">
-		@if (canPrint)
+		@* @if (canPrint)
 		{
 			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
 				<i class="fa fa-print"></i>Print
 			</button>
-		}
+		} *@
 		@if (canExport)
 		{
 			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel">
@@ -68,13 +68,13 @@
 				<i class="fa fa-envelope"></i>Mail
 			</button>
 		}
-		@if (canApproval)
+		@* @if (canApproval)
 		{
 
 			<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
 				<i class="fa fa-check-circle"></i>Approved
 			</button>
-		}
+		} *@
 	</div>
 </div>
 <div class="erppagelist-container">

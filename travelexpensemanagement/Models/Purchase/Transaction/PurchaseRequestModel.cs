@@ -62,6 +62,7 @@
         public class ItamDetails
         {
             public bool isPOGenerated { get; set; } = false;
+            public bool isOrderRcvd { get; set; } = false;
             public int? ITEM_CODE { get; set; }
             public string? ItemName { get; set; }
             public int? MAKE_CODE { get; set; }
@@ -186,5 +187,15 @@
             public string Status { get; set; }
         }
 
+        public class PRPrintModel
+        {
+            public int VNo { get; set; }
+            public List<PRPrintItemModel> Items { get; set; } = new List<PRPrintItemModel>();
+        }
+
+        public class PRPrintItemModel
+        {
+            public int ItemCode { get; set; }
+        }
     }
 }

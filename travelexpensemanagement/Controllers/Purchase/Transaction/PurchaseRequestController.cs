@@ -39,10 +39,18 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
         public IActionResult Index()
         {
-            var userLevel = _globalVariableService.GetGlobalVariables().PubUserLevel;
+            var gv = _globalVariableService.GetGlobalVariables();
 
-            ViewBag.UserLevel = userLevel;
+            ViewBag.UserLevel = gv.PubUserLevel;
+            ViewBag.CompCode = gv.PubCompCode;
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database; // Get the database name
+            }
 
+            ViewBag.GlobalVariables = gv;
+            ViewBag.DatabaseName = databaseName;
             return View("~/Views/Purchase/Transaction/PurchaseRequest/Index.cshtml");
         }
         [HttpGet]
@@ -100,10 +108,10 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         select CODE,NAME from PLACE_MAST  WHERE  COMP_CODE = {gv.PubCompCode}  AND  NAME <> ''  ORDER BY NAME asc";
                     break;
 
-                case "Requester":
-                    query = $@"
-                        Select a.Code , a.Name from EMP_MAST a where a.RESIGN_DATE is null and a.COMP_CODE=  {gv.PubCompCode}  order by a.Name asc";
-                    break;
+                //case "Requester":
+                    //query = $@"
+                    //    Select a.Code , a.Name from EMP_MAST a where a.RESIGN_DATE is null and a.COMP_CODE=  {gv.PubCompCode}  order by a.Name asc";
+                    //break;
 
                 case "PlaceUse":
                     query = $@"
@@ -173,6 +181,17 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                           Left join Machine_Mast d on a.mach_code=d.Code and a.comp_code=d.comp_code
                            where a.comp_code={gv.PubCompCode} and a.Branch_code= {gv.PubBranchCode}
                           and a.Year_code={gv.PubFYearCode} and V_type='PMCP'  order by a.V_no asc";
+            var dataList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = dataList });
+        }
+        [HttpGet]
+        public async Task<JsonResult> GetRequesterList()
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            string query = $@"
+                            Select a.Code as Code, a.Name as Name, b.NAME as Designation from EMP_MAST a 
+                            left join DESG_MAST b on b.CODE = a.DESG_CODE
+                            where a.RESIGN_DATE is null and a.COMP_CODE = {gv.PubCompCode}  order by a.Name asc";
             var dataList = await _dbHelper.GetJsonDataAsync(query);
             return Json(new { success = true, data = dataList });
         }
@@ -384,6 +403,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
             return Json(new { success = result.status, message = result.message });
         }
+
         [HttpPost]
         public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
         {
@@ -393,6 +413,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             var result = await _globalValidationdate.CheckValidDate("PREQUEST1", vdate, vtype, vno);
             return Ok(result);
         }
+
         [HttpGet]
         public IActionResult ExportAllDocs()
         {
@@ -470,6 +491,18 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
             return Json(new { success = true, data = model });
         }
+        
+        //[HttpPost]
+        //public JsonResult PrintRequest([FromBody] PRPrintModel model)
+        //{
+        //    if(model == null)
+        //    {
+        //        return Json(new { success = false, message = "Invalid data!" });
+        //    }
+        //    var result = _IPRRepository.PRPrintRequest(model);
+        //    return Json(new { success = result.status, message = result.message, approvedBy = result.data });
+        //}
+
     }
 
 }

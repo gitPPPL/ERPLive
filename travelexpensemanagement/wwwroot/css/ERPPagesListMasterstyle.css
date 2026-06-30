@@ -37,11 +37,11 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 12px;
+    padding: 4px 10px;
     border-radius: 6px;
     border: none;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
 }
 /*button More*/
 .erppagebtn_approved {
@@ -1166,21 +1166,21 @@ button:focus {
 .po-generated-row input,
 .po-generated-row select,
 .po-generated-row textarea {
-    background-color: #ffdea2 !important;
+    background-color: #ffe5b6 !important;
 }
 
     .po-generated-row .select2-container--default .select2-selection--single {
-        background: #ffdea2 !important;
-        border: 1px solid #ffdea2 !important;
+        background: #ffe5b6 !important;
+        border: 1px solid #ffe5b6 !important;
     }
 
     .po-generated-row .select2-selection__rendered {
-        background: #ffdea2 !important;
+        background: #ffe5b6 !important;
         color: #000 !important;
     }
 
     .po-generated-row .select2-selection__arrow {
-        background: #ffdea2 !important;
+        background: #ffe5b6 !important;
     }
 
 .order-received-row,
@@ -1188,19 +1188,26 @@ button:focus {
 .order-received-row input,
 .order-received-row select,
 .order-received-row textarea {
-    background-color: #bbffd0 !important;
+    background-color: #cdf9da !important;
 }
 
     .order-received-row .select2-container--default .select2-selection--single {
-        background: #bbffd0 !important;
-        border: 1px solid #bbffd0 !important;
+        background: #cdf9da !important;
+        border: 1px solid #cdf9da !important;
     }
 
     .order-received-row .select2-selection__rendered {
-        background: #bbffd0 !important;
+        background: #cdf9da !important;
         color: #000 !important;
     }
 
     .order-received-row .select2-selection__arrow {
-        background: #bbffd0 !important;
+        background: #cdf9da !important;
     }
+
+.ui-widget.ui-widget-content {
+    top: 158px;
+    left: 690.5px;
+    width: 294px;
+    z-index: 9999999999;
+}

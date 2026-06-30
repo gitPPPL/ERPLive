@@ -279,25 +279,25 @@
                     </button>
                     <ul class="dropdown-menu erppagedropdown-menu">
                         <li>
-                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#purchaseRequestModal" id="BtnPurchaseReq">
+                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#" id="">
                                 <i class="fa-solid fa-boxes-stacked"></i>
                                 <span>Indent Order Store</span>
                             </a>
                         </li>
                          <li>
-                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#purchaseRequestModal" id="BtnPurchaseReq">
+                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#" id="">
                                 <i class="fa-solid fa-screwdriver-wrench"></i>
                                 <span>Service Order</span>
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#purchaseRequestModal" id="BtnPurchaseReq">
+                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#" id="">
                                 <i class="fa-solid fa-cart-shopping"></i>
                                 <span>Puchase Order</span>
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#quotationModal" id="BtnQuotationRtAprvl">
+                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#" id="">
                                 <i class="fa-solid fa-industry"></i>
                                 <span>Puchase Order RM</span>
                             </a>
@@ -306,12 +306,9 @@
                 </div>
                 <button type="button" id="btnPOModHistory" class="erppage-btn erppage-btn-common-disabled">
                     <i class="fa-solid fa-clock-rotate-left"></i>
-                    <span>PO Modification History</span>
+                    <span>Show Production Batch</span>
                 </button>
-                <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" data-bs-toggle="modal" data-bs-target="#PendingRequestModal">
-                    <i class="fa-solid fa-hourglass-half"></i>
-                    <span>Pending Request</span>
-                </button>
+                
             </div>
 
             <fieldset class="erppagefieldset">
@@ -580,6 +577,10 @@
             </fieldset>
         </fieldset>
         <div class="erppage-actions">
+            <button type="button" class="erppage-btn erppage-btn-print" >
+                <i class="fa fa-file-text-o"></i>
+                <span>Print Intimation</span>
+            </button>
             <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
                 <i class="fa-solid fa-floppy-disk"></i>
                 <span>Save</span>
@@ -680,281 +681,12 @@
             </div>
         </div>
     </div>
-    <!--Quotation Modal Popup-->
-    <div class="modal fade" id="quotationModal" tabindex="-1" aria-labelledby="quotationLabel" aria-hidden="true">
-        <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
-            <div class="modal-content erppagesmodal-content">
-                <div class="erppagesmodal-header">
-                    <div class="erppagesmodal-header-left">
-                        <div class="erppagesmodal-header-icon">
-                            <i class="fa fa-copy"></i>
-                        </div>
-                        <h5 class="erppagesmodal-title" id="quotationLabel">Copy From Quotation</h5>
-                    </div>
-                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
-                        <i class="fa fa-times"></i>
-                    </button>
-                </div>
-                <div class="erppagesmodal-body">
-                    <div class="erppage-grid3">
-                        <div class="erppage-divfield">
-                            <div class="erppagelist-search-wrapper">
-                                <i class="fa fa-search"></i>
-                                <input type="text" id="searchBoxQM" placeholder="Search..." />
-                            </div>
-                        </div>
-                        <div class="erppage-divfield">
-                            <label class="erppage-label"></label>
-                            <div class="erppage-checkbox-wrap">
-                                <input type="checkbox" id="chkAppendQM" class="erppage-checkbox-input">
-                                <label for="chkAppendQM" class="erppage-checkbox-label">Append</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="excel-wrapper fixed-grid-wrapper">
-                        <table id="tblQuotationModal" class="excel-table width-table fixed-grid-table resizable-table">
-                            <colgroup>
-                                <col style="width:50px;">
-                                <col style="width:100px;">
-                                <col style="width:120px;">
-                                <col style="width:120px;">
-                                <col style="width:250px;">
-                                <col style="width:80px;">
-                                <col style="width:120px;">
-                                <col style="width:250px;">
-                                <col style="width:90px;">
-                                <col style="width:100px;">
-                                <col style="width:120px;">
-                                <col style="width:80px;">
-                                <col style="width:120px;">
-                                <col style="width:120px;">
-                                <col style="width:80px;">
-                                <col style="width:120px;">
-                                <col style="width:120px;">
-                                <col style="width:80px;">
-                                <col style="width:120px;">
-                                <col style="width:80px;">
-                                <col style="width:120px;">
-                                <col style="width:80px;">
-                                <col style="width:120px;">
-                                <col style="width:80px;">
-                                <col style="width:120px;">
-                                <col style="width:120px;">
-                                <col style="width:120px;">
-                                <col style="width:120px;">
-                                <col style="width:220px;">
-                                <col style="width:120px;">
-                                <col style="width:120px;">
-                                <col style="width:250px;">
-                                <col style="width:120px;">
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th><input type="checkbox" id="selectAllQM" /></th>
-                                    <th>Voucher No</th>
-                                    <th>Voucher Type</th>
-                                    <th>Voucher Date</th>
-                                    <th>Item Name</th>
-                                    <th>Unit</th>
-                                    <th>Make</th>
-                                    <th>Tech Desc</th>
-                                    <th>Qty</th>
-                                    <th>Rate</th>
-                                    <th>Amount</th>
-                                    <th>Pack %</th>
-                                    <th>Pack Amt</th>
-                                    <th>Freight</th>
-                                    <th>Disc %</th>
-                                    <th>Disc Amt</th>
-                                    <th>Tax Type</th>
-                                    <th>CGST %</th>
-                                    <th>CGST Amt</th>
-                                    <th>SGST %</th>
-                                    <th>SGST Amt</th>
-                                    <th>IGST %</th>
-                                    <th>IGST Amt</th>
-                                    <th>Cess %</th>
-                                    <th>Cess</th>
-                                    <th>Other Amt</th>
-                                    <th>LD Rate</th>
-                                    <th>Net Amt</th>
-                                    <th>Party Name</th>
-                                    <th>Quote No</th>
-                                    <th>Quote Date</th>
-                                    <th>Remarks</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    <div class="erppagesmodal-action mt-2">
-                        <button type="button" class="erppagesmodal-btn btn-quoteCopy" data-bs-dismiss="modal">
-                            <i class="fa fa-copy"></i> Copy
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-    <!--Pending Request Modal Popup-->
-    <div class="modal fade" id="PendingRequestModal" tabindex="-1" aria-labelledby="PendingRequestModalLabel" aria-hidden="true">
-        <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
-            <div class="modal-content erppagesmodal-content">
-                <div class="erppagesmodal-header">
-                    <div class="erppagesmodal-header-left">
-                        <div class="erppagesmodal-header-icon">
-                            <i class="fa fa-list-alt"></i>
-                        </div>
-                        <h5 class="erppagesmodal-title" id="PendingRequestModalLabel">Pending Request for Make PO</h5>
-                    </div>
-                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
-                        <i class="fa fa-times"></i>
-                    </button>
-                </div>
-                <div class="erppagesmodal-body">
-                    <div class="excel-wrapper fixed-grid-wrapper">
-                        <table id="tblPOPendingRequest" class="excel-table width-table fixed-grid-table resizable-table">
-                            <colgroup>
-                                <col style="display:none;">
-                                <col style="width:150px;">
-                                <col style="width:120px;">
-                                <col style="width:250px;">
-                                <col style="width:150px;">
-                                <col style="width:80px;">
-                                <col style="width:250px;">
-                                <col style="width:100px;">
-                                <col style="width:100px;">
-                                <col style="width:100px;">
-                                <col style="width:180px;">
-                                <col style="width:150px;">
-                                <col style="width:120px;">
-                                <col style="width:100px;">
-                                <col style="width:100px;">
-                                <col style="width:120px;">
-                                <col style="width:180px;">
-                                <col style="width:250px;">
-                                <col style="display:none;">
-                            </colgroup>
-
-                            <thead>
-                                <tr>
-                                    <th class="hidden-col">VNo</th>
-                                    <th>Department</th>
-                                    <th>Document ID</th>
-                                    <th>Item Name</th>
-                                    <th>Make</th>
-                                    <th>Unit</th>
-                                    <th>Tech Desc</th>
-                                    <th>Monthly</th>
-                                    <th>STD Req</th>
-                                    <th>Req Quantity</th>
-                                    <th>Req Reason</th>
-                                    <th>Place Use</th>
-                                    <th>Work Type</th>
-                                    <th>Priority</th>
-                                    <th>Scrapped</th>
-                                    <th>Owner</th>
-                                    <th>Reason</th>
-                                    <th>Remarks</th>
-                                    <th class="hidden-col">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="erppagesmodal-action">
-                    <button type="button" class="erppagesmodal-btn erppagesmodal-btn-secondary"
-                            data-bs-dismiss="modal">
-                        <i class="fa fa-times"></i>
-                        Close
-                    </button>
-                </div>
-
-            </div>
-        </div>
-
-    </div>
-    <!--Purchase Receipt History Modal Popup-->
-    <div class="modal fade" id="orderhistory" tabindex="-1" aria-labelledby="orderhistoryLabel" aria-hidden="true">
-        <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
-            <div class="modal-content erppagesmodal-content">
-                <div class="erppagesmodal-header">
-                    <div class="erppagesmodal-header-left">
-                        <div class="erppagesmodal-header-icon">
-                            <i class="fa fa-history"></i>
-                        </div>
-                        <h5 class="erppagesmodal-title" id="orderhistoryLabel">Purchase Receipt History</h5>
-                    </div>
-                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
-                        <i class="fa fa-times"></i>
-                    </button>
-                </div>
-                <div class="erppagesmodal-body">
-                    <div class="excel-wrapper fixed-grid-wrapper">
-                        <table id="tblorderhistory" class="excel-table width-table fixed-grid-table resizable-table">
-                            <colgroup>
-                                <col style="width:120px;">
-                                <col style="width:120px;">
-                                <col style="width:220px;">
-                                <col style="width:250px;">
-                                <col style="width:150px;">
-                                <col style="width:80px;">
-                                <col style="width:90px;">
-                                <col style="width:100px;">
-                                <col style="width:120px;">
-                                <col style="width:90px;">
-                                <col style="width:90px;">
-                                <col style="width:90px;">
-                                <col style="width:90px;">
-                                <col style="width:90px;">
-                                <col style="width:140px;">
-                                <col style="width:120px;">
-                                <col style="width:250px;">
-                                <col style="width:120px;">
-                                <col style="display:none;">
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th>Voucher No</th>
-                                    <th>Date</th>
-                                    <th>Supplier</th>
-                                    <th>Item Name</th>
-                                    <th>Make</th>
-                                    <th>Unit</th>
-                                    <th>Qty</th>
-                                    <th>Rate</th>
-                                    <th>Other Amount</th>
-                                    <th>CGST %</th>
-                                    <th>SGST %</th>
-                                    <th>IGST %</th>
-                                    <th>Pack %</th>
-                                    <th>Disc %</th>
-                                    <th>Other Expenses</th>
-                                    <th>LD Rate</th>
-                                    <th>Remarks</th>
-                                    <th>Status</th>
-                                    <th class="hidden-col">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="erppagesmodal-action">
-                    <button type="button" class="erppagesmodal-btn erppagesmodal-btn-secondary" data-bs-dismiss="modal">
-                        <i class="fa fa-times"></i>Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    
+   
 
 </div>
 
-<fieldset>
+@* <fieldset>
     <legend class="legend-field">Purchase Receipt Entry</legend>
     <div class="row">
         <div class="offset-md-10 col-md-2">
@@ -1426,7 +1158,7 @@
                             <div class="col-lg-6">
                                 <div class="btn-rightalign">
                                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
-                                    @*  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-close"></i>Close</button> *@
+                                   
                                 </div>
                             </div>
                         </div>
@@ -1501,7 +1233,7 @@
                 </div>
             </div>
 
-            @* Add List box showing block Start *@
+           
             <div class="tab-content">
                 <!-- tab 1 -->
                 <div class="tab-pane fade show active" id="tab1">
@@ -1576,7 +1308,7 @@
                                         <td><input type="number" class="form-control" style="width: 100PX;" name="ExRate" /></td>
                                         <td><input type="number" class="form-control" style="width: 100PX;" name="Rate" /></td>
                                         <td><input type="number" class="form-control" style="width: 100PX;" name="Amount" /></td>
-                                        @* <td><input type="text" class="form-control" style="width: 100PX;" name="EmptyYN" /></td> *@
+                                        
                                         <td>
                                             <select class="form-control EmptyYN-dropdown" style="width: 100PX;" name="EmptyYN">
                                                 <option value="">--Select--</option>
@@ -1586,7 +1318,7 @@
                                         </td>
                                         <td><input type="number" class="form-control" style="width: 100PX;" name="WBQty" /></td>
                                         <td>
-                                            @* <input type="text" class="form-control" style="width: 100PX;" name="TaxType" /> *@
+                                            
                                             <select class="form-control TaxType-dropdown" style="width: 100PX;" name="TaxType">
                                                 <option value="">--Select--</option>
                                             </select>
@@ -1623,7 +1355,7 @@
                                         <td><input type="text" class="form-control" style="width: 100PX;" name="GateType" /></td>
                                         <td><input type="text" class="form-control" style="width: 100PX;" name="GateNo" /></td>
                                         <td>
-                                            @*  <button type="button" class="btn btn-danger btn-sm btn-delete-row">Delete</button> *@
+                                           
                                             <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit"></i>
                                             <i class="fas fa-trash btn-delete btn-delete-row" data-bs-toggle="tooltip" title="Delete"></i>
 
@@ -1749,15 +1481,9 @@
         </div>
     </form>
 </fieldset>
+ *@
 
 
-<script>
-    $(function () {
-        $(".draggable-modal").draggable({
-            handle: ".popup-header"
-        });
-    });
-</script>
 
 <script>
     document.getElementById('fileUpload').addEventListener('change', function () {
