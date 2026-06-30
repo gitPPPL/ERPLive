@@ -10,6 +10,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq.Expressions;
 using System.Net.Mail;
+using System.Text.Json;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -26,13 +27,14 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public PurchaseOrderController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        private readonly GlobalValidationdate _globalValidationdate;
+        public PurchaseOrderController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _moduleService = moduleService;
-
+            _globalValidationdate = globalValidationdate;
         }
         public IActionResult Index()
         {
@@ -513,10 +515,26 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         [HttpPost]
         public async Task<IActionResult> SaveOrUpdatePurchaseOrder([FromBody] PurchaseOrder POmodel)
         {
-            if (POmodel == null)
-                return Json(new { status = false, message = " data save failed." });
             try
             {
+
+                if (POmodel == null)
+                return Json(new { status = false, message = " data save failed." });
+
+
+                var result = await saveValidateData(POmodel) as JsonResult;
+
+                if (result is JsonResult json)
+                {
+                    dynamic data = json.Value;
+
+                    if (data.status == false)
+                    {
+                        return Json(new  { status = false, message = data.message  });
+                    }
+                }
+
+
                 using (var con = _dbcontext.GetErpConnection())
                 {
                     await con.OpenAsync();
@@ -535,11 +553,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     int srno = 1;
 
 
-
-
-
-
-
                     if (POmodel.Attachments != null)
                     {
                         foreach (var a in POmodel.Attachments)
@@ -551,9 +564,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                             );
                         }
                     }
-
-                    //DataTable purchaseOrderAttachmentTable = FillDataTable(POmodel.Attachments, "[dbo].[Type_order3]");
-
 
                     using (var transaction = con.BeginTransaction())
                     {
@@ -1219,6 +1229,168 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 }
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("ORDER1", vdate, vtype, vno);
+            return Ok(result);
+        }
+
+
+
+        public async Task<IActionResult> saveValidateData([FromBody] PurchaseOrder POmodel)
+        {
+            if (POmodel == null)
+                return Json(new { status = false, message = " data save failed." });
+            try
+            {
+
+                var userData = _globalValue.GetCompanydata();
+
+                using (var con = _dbcontext.GetErpConnection())
+                {
+                    await con.OpenAsync();
+                    var usersessionDt = _globalValue.GetGlobalVariables();
+
+                    DataTable purchaseOrderTable = FillDataTable(POmodel.ItemRecords, "[dbo].[Type_Order2]");
+
+
+
+                    DataTable purchaseOrderAttachmentTable = new DataTable();
+
+                    purchaseOrderAttachmentTable.Columns.Add("FILE_Path", typeof(string));
+                    purchaseOrderAttachmentTable.Columns.Add("FILE_NAME", typeof(string));
+                    purchaseOrderAttachmentTable.Columns.Add("SRNO", typeof(int));
+
+                    int srno = 1;
+
+
+                    if (POmodel.Attachments != null)
+                    {
+                        foreach (var a in POmodel.Attachments)
+                        {
+                            purchaseOrderAttachmentTable.Rows.Add(
+                                "/attachments/Purchase/" + (a.FileName ?? ""),
+                                a.FileName,
+                                srno++
+                            );
+                        }
+                    }
+
+
+                    string StateType = "";
+
+                    if (POmodel.PartyCode > 0)
+                    {
+                        string state_type = getText(
+                            "SELECT STATE_TYPE FROM STATE_MAST WHERE CODE = " +
+                            "(SELECT STATE_CODE FROM SUBGROUP_ADDRESS " +
+                            "WHERE CODE = " + POmodel.PartyCode +
+                            " AND ISNULL(IS_DEFAULT,0)=1 " +
+                            "AND COMP_CODE = " + usersessionDt.PubCompCode + ")");
+
+                        // Foreign currency validation
+                        if (!string.IsNullOrEmpty(POmodel.ImportCurrency) && state_type != "Import")
+                        {
+                            return Json(new  { status = false, message = "Party belongs to India. Foreign currency/Ex-Rate not applicable. Please remove." });
+                        }
+
+                        string StateCode = getText("SELECT State_Code FROM CITY_MAST WHERE Code = " + POmodel.BillCity);
+
+                        if (userData.STATE_CODE == StateCode)
+                        {
+                            StateType = "Local";
+                        }
+                        else
+                        {
+                            StateType = "Central/Other";
+                        }
+
+                        // Local Party - IGST should not be applicable
+                        if (userData.STATE_CODE == StateCode && POmodel.IgstAmt > 0)
+                        {
+                            return Json(new { status = false, message = $"IGST not applicable as per Party State type is {StateType}."  });
+                        }
+                        // Interstate Party - CGST/SGST should not be applicable
+                        else if (userData.STATE_CODE != StateCode &&
+                                 (POmodel.CgstAmt + POmodel.SgstAmt) > 0)
+                        {
+                            return Json(new { status = false, message = $"CGST/SGST not applicable as per Party State type is {StateType}." });
+                        }
+
+                        // Both tax types cannot exist together
+                        if (POmodel.IgstAmt > 0 && (POmodel.CgstAmt + POmodel.SgstAmt) > 0)
+                        {
+                            return Json(new { status = false, message = "CGST+SGST+IGST all three type tax not applicable." });
+                        }
+                    }
+
+
+
+                    if (POmodel.VType == "RORD" && POmodel.VNo > 0)
+                    {
+                        var GateNo = getText(
+                            "SELECT CONCAT(GATE_TYPE,GATE_NO) FROM WB1 " +
+                            "WHERE V_TYPE='" + POmodel.WbType + "' " +
+                            "AND V_No=" + POmodel.WbNo + " " +
+                            "AND Comp_code=" + usersessionDt.PubCompCode
+                        );
+
+                        var SaudaNo = getText(
+                            "SELECT CONCAT(REF_TYPE,REF_NO) FROM GATE2 " +
+                            "WHERE Ref_type='PAUD' " +
+                            "AND CONCAT(V_TYPE,V_no)='" + GateNo + "' " +
+                            "AND Comp_code=" + usersessionDt.PubCompCode
+                        );
+
+                        string currentSauda = POmodel.SaudaType + POmodel.SaudaNo;
+
+                        if (!string.IsNullOrEmpty(SaudaNo) && SaudaNo != currentSauda)
+                        {
+                            return Json(new
+                            {
+                                status = false,
+                                message = $"Sauda No mismatch. Gate has {SaudaNo}, but current is {currentSauda}. Please check Gate Pass."
+                            });
+                        }
+                    }
+
+                    if(POmodel.PriceType != "" && POmodel.SaudaNo > 0 )
+                    {
+                        var saudaPricetype = getText("Select isnull(FRT_TERM,'') From Sauda Where Concat(V_type,V_no)='" + Convert.ToString(POmodel.SaudaNo) + Convert.ToString(POmodel.SaudaType) + "' and Comp_code=" + usersessionDt.PubCompCode + "");
+
+
+                        if(saudaPricetype != "")
+                        {
+
+                            if(saudaPricetype != POmodel.PriceType)
+                            {
+
+                                return Json(new
+                                {
+                                    status = false,
+                                    message = $"Price type is mismatch from sauda. {saudaPricetype}, is in Sauda, while here is {POmodel.PriceType}"
+                                });
+
+                            }
+
+                        }
+
+                    }
+
+                    return Json(new { status = true});
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { status = false, message = "Error: " + ex.Message });
+            }
+        }
+
 
 
     }

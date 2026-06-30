@@ -107,7 +107,7 @@ namespace travelexpensemanagement.Common.Globalvariable
             var sessionComp = httpContext.Session.GetString("COMP_CODE");
 
             string query = @"SELECT NAME, ADD1, ADD2, ADD3, GSTIN, PAN, PHONE, FAX, EMAIL, WEBSITE, EXCISE, SERVICETAX,
-            RegAdd1, RegAdd2, CINNO  FROM COMP_MAST WHERE CODE = @Code";
+            RegAdd1, RegAdd2, CINNO,STATE_CODE  FROM COMP_MAST WHERE CODE = @Code";
 
             using (SqlConnection con = _dbConnection.GetErpConnection())
             using (SqlCommand cmd = new SqlCommand(query, con))
@@ -142,7 +142,8 @@ namespace travelexpensemanagement.Common.Globalvariable
                             RegAdd1 = reader["RegAdd1"]?.ToString(),
                             RegAdd2 = reader["RegAdd2"]?.ToString(),
 
-                            CINNO = reader["CINNO"]?.ToString()
+                            CINNO = reader["CINNO"]?.ToString(),
+                            STATE_CODE = reader["STATE_CODE"]?.ToString()
                         };
                     }
                 }

@@ -321,10 +321,6 @@ async function LoadDropDown() {
 }
 
 
-
-
-
-
 async function GetFinalUser(v_no) {
     try {
         const res = await $.ajax({
@@ -487,11 +483,6 @@ function GetTransitReportFile() {
         });
     });
 }
-
-
-
-
-
 
 function TransitReport() {
 

@@ -112,6 +112,8 @@
                             <div class="erppage-divfield">
                                 <label class="erppage-label">City</label>
                                 <input type="text" class="erppage-input" id="TxtCity1PD" placeholder="Enter City" readonly>
+                                <input type="text" class="erppage-input" id="TxtCityID" placeholder="Enter City" readonly>
+
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">GST</label>
@@ -1046,6 +1048,10 @@
 
     window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
 </script>
+<script src="~/js/erpjs/purchase/transaction/purchaseorder/purchaseorderapi.js"></script>
+<script src="~/js/erpjs/purchase/transaction/purchaseorder/purchaseorderinit.js"></script>
+
+
 
 <script>
 
@@ -1075,8 +1081,11 @@
     let globalAttachments = [];
     var globalVars = window.globalVariables || {};
     let LoginDate = globalVars.LoginDate;
+    let isLoading = false;
 
-         function getQueryParam(param) {
+
+
+    function getQueryParam(param) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(param);
     }
@@ -1136,6 +1145,8 @@
                 $('#TxtAdd3PD').val(selectedOption.data('add3'));
                 $('#NumPincodePD').val(selectedOption.data('pincd'));
                 $('#TxtCity1PD').val(selectedOption.data('cityname'));
+                $('#TxtCityID').val(selectedOption.data('cityCd'));
+
                 $('#TxtGSTPD').val(selectedOption.data('gstin'));
                 GetPartyAddress(partyCode, '#ddlAddressbyparty');
                 GetSaudaList(partyCode);
@@ -1235,65 +1246,8 @@
         $(this).val(this.checked ? '1' : '0');
         });
 
-        $(document).on('change', '[id^=ddlTax]', function () {
-            const $select = $(this);
-            const selectedOption = $select.find('option:selected');
-            const rowId = $select.closest('tr').attr('id').replace('row', '');
-
-            const csgstPer = selectedOption.data('csgstper') || 0;
-            const igstPer = selectedOption.data('igstper') || 0;
-            const tdsPer = selectedOption.data('tdsper') || 0;
-            const tcsPer = selectedOption.data('tcsper') || 0;
-            const vatPer = selectedOption.data('vatper') || 0;
-            const othPer1 = selectedOption.data('otherper') || 0;
-            const othPer2 = selectedOption.data('otherper2') || 0;
-
-            // ✅ Update matching input fields
-            $(`#TxtCgstPercent${rowId}`).val(csgstPer);
-            $(`#TxtSgstPercent${rowId}`).val(csgstPer);
-            $(`#TxtIgstPercent${rowId}`).val(igstPer);
-            $(`#TxtTcsPer${rowId}`).val(tcsPer);
-            $(`#TxtVatPercent${rowId}`).val(vatPer);
-            $(`#TxtOthPer${rowId}`).val(othPer1);
-            $(`#TxtOthPer2${rowId}`).val(othPer2);
-            calculateTaxAmounts(rowId);
-        });
 
 
-        $(document).on('click', '[id^=TxtRate], [id^=TxtQty]', function () {
-            const $select = $(this);
-            const rowId = $select.closest('tr').attr('id').replace('row', '');
-            calculateTaxAmounts(rowId);
-        });
-
-
-        $(document).on('input', '[id^=TxtRate], [id^=TxtQty], [id^=TxtCess], [id^=TxtPack], [id^=TxtDisc]', function () {
-            const $input = $(this);
-            const rowId = $input.closest('tr').attr('id').replace('row', '');
-            calculateTaxAmounts(rowId);
-        });
-
-
-        $('#btn-save').on('click', async function (e) {
-            e.preventDefault();
-
-              if (!validateRequiredField('#ddlPriceType', 'Price Type')) return;
-              if (!validateRequiredField('#ddlPlace', 'Place')) return;
-              if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
-              if (!validateRequiredField('#ddlShipFrom', 'Ship From')) return;
-
-            try
-            {
-                const tableData = await collectFormData();
-                if (docId) {
-                    UpdateData(tableData);
-                } else {
-                    SaveData(tableData);
-                }
-            } catch (error) {
-                toastr.error('An error occurred while saving the data.');
-            }
-        });
 
         $(document).on('click', '#BtnPurchaseReq', function(){
             PurchaseRateApproval();
@@ -1445,39 +1399,6 @@
 
 <script>
 
-    async function handleDocLoad() {
-        const docId = getQueryParam('id');
-        const readOnly = getQueryParam('readOnly');
-        console.log("LoginDate",LoginDate);
-          SetFYDate('dtDocDate', LoginDate);
-        if (docId) {
-
-            await GetDocData(docId, readOnly);
-
-            $('#SaudaDetail').show();
-
-            $('#ddlDocType').prop('disabled', true);
-            $('#ddlStatus').prop('disabled', false);
-            var VTpeU = docId.substring(0,4);
-            var VNoU = docId.substring(4);
-            $('#txtDocNo').val(VNoU);
-            console.log(VTpeU, VNoU);
-            Wb_SaudaDdl_Make_enabledisable(VTpeU);
-     
-        } else {
-            $('#SaudaDetail').hide();
-            $('#ddlStatus').prop('disabled', true);
-            const Vtype = $('#ddlDocType').val();
-            Wb_SaudaDdl_Make_enabledisable(Vtype);
-            GetDocid(Vtype);
-
-            const today = new Date();
-            const todayDate = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' +  today.getDate().toString().padStart(2, '0');
-           // $('#dtDocDate').val(todayDate);
-            $('#DtDeliveryDate').val(todayDate);
-            $('#DtValidateDate').val(todayDate);
-        }
-    }
 
     async function fillItemDetailsTableBySaudaNo(data) {
         const $tbody = $('#tblItemRecordPO tbody');
@@ -1488,27 +1409,21 @@
             const item = data[index];
             const idx = index + 1;
 
-
             console.log("Item data",data);
-
 
             addItemRecordRow();
             await bindDropdownData(idx);
 
             $(`#ddlIplaceofUse${idx}`).val(item.placeUse || '');
-
-
-            // $(`#ddlItemname${idx}`).val(item.itemCode || '').trigger('change');
-            // $(`#ddlImake${idx}`).val(item.makeCode || '').trigger('change');
-
             $(`#ddlItemname${idx}`) .val(item.itemCode) .trigger('change.select2');
-
             $(`#ddlImake${idx}`)  .val(item.makeCode) .trigger('change.select2');
             $(`#ddlUnit${idx}`).val(item.uomCode || '').trigger('change');
-            $(`#ddlTax${idx}`).val(item.taxCode || '').trigger('change');
+           // $(`#ddlTax${idx}`).val(item.taxCode || '').trigger('change');
+
+            $(`#ddlTax${idx}`).val(item.taxCode || '');
+
+
             $(`#ddlDepartment${idx}`).val(item.deptCode || '');
-
-
             $(`#TxtNos${idx}`).val(item.nos || '');
             $(`#TxtQty${idx}`).val(item.qty || '');
             $(`#txtAdjQtySauda${idx}`).val(item.adjQty || '');
@@ -1537,8 +1452,7 @@
             $(`#TxtOthPer2${idx}`).val(item.othPer2 || '');
             $(`#TxtOthAmt2${idx}`).val(item.othAmt2 || '');
             $(`#TxtNetAmt${idx}`).val(item.netAmt || '');
-            $(`#TxtLdRate${idx}`).val(item.landRate || '');
-         
+            $(`#TxtLdRate${idx}`).val(item.landRate || '');         
             $(`#TxtRemarks${idx}`).val(item.remarks || '');
             $(`#TxtAppLevel${idx}`).val(item.preorityLevel || '');
             $(`#TxtAppRemarks${idx}`).val(item.preorityRemarks || '');
@@ -1727,11 +1641,18 @@
             addItemRecordRow();
             await bindDropdownData(idx);
 
+            isLoading = true;
 
             $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
             $(`#ddlImake${idx}`).val(item.MAKE_CODE || '');
             $(`#ddlUnit${idx}`).val(item.UOM_CODE || '');
-            $(`#ddlTax${idx}`).val(item.TAX_CODE || '');
+
+            $(`#ddlTax${idx}`) .val(item.taxCode || '') .trigger('change');
+
+            // $(`#ddlTax${idx}`).val(item.TAX_CODE || '');
+
+
+
             $(`#ddlDepartment${idx}`).val(item.DEPT_CODE || '');
             $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE || '');
 
@@ -1930,57 +1851,6 @@
         }
     });
 
-    function calculateTaxAmounts(rowId) {
-        const rate = parseFloat($(`#TxtRate${rowId}`).val()) || 0;
-        const qty = parseFloat($(`#TxtQty${rowId}`).val()) || 0;
-        const amount = rate * qty;
-
-        const discPer = parseFloat($(`#TxtDiscPercent${rowId}`).val()) || 0;
-        const discAmt = (amount * discPer) / 100;
-        $(`#TxtDisc${rowId}`).val(discAmt.toFixed(2));
-
-        const packPer = parseFloat($(`#TxtPackPercent${rowId}`).val()) || 0;
-        const packAmt = (amount * packPer) / 100;
-        $(`#TxtPack${rowId}`).val(packAmt.toFixed(2));
-
-        const taxableAmount = amount - discAmt + packAmt;
-
-        const cgstPer = parseFloat($(`#TxtCgstPercent${rowId}`).val()) || 0;
-        const sgstPer = parseFloat($(`#TxtSgstPercent${rowId}`).val()) || 0;
-        const igstPer = parseFloat($(`#TxtIgstPercent${rowId}`).val()) || 0;
-        const cessPer = parseFloat($(`#TxtCessPercent${rowId}`).val()) || 0;
-        const tcsPer = parseFloat($(`#TxtTcsPer${rowId}`).val()) || 0;
-        const vatPer = parseFloat($(`#TxtVatPercent${rowId}`).val()) || 0;
-        const othPer1 = parseFloat($(`#TxtOthPer${rowId}`).val()) || 0;
-        const othPer2 = parseFloat($(`#TxtOthPer2${rowId}`).val()) || 0;
-
-        const cgstAmt = (taxableAmount * cgstPer) / 100;
-        const sgstAmt = (taxableAmount * sgstPer) / 100;
-        const igstAmt = (taxableAmount * igstPer) / 100;
-        const cessAmt = (taxableAmount * cessPer) / 100;
-        const tcsAmt = (taxableAmount * tcsPer) / 100;
-        const vatAmt = (taxableAmount * vatPer) / 100;
-        const othAmt1 = (taxableAmount * othPer1) / 100;
-        const othAmt2 = (taxableAmount * othPer2) / 100;
-
-        const totalTax = cgstAmt + sgstAmt + igstAmt + cessAmt + tcsAmt + vatAmt + othAmt1 + othAmt2;
-        const netAmt = taxableAmount + totalTax;
-
-        // Update DOM
-        $(`#TxtAmount${rowId}`).val(amount.toFixed(2));
-        $(`#TxtCgst${rowId}`).val(cgstAmt.toFixed(2));
-        $(`#TxtSgst${rowId}`).val(sgstAmt.toFixed(2));
-        $(`#TxtIgst${rowId}`).val(igstAmt.toFixed(2));
-        $(`#TxtCess${rowId}`).val(cessAmt.toFixed(2));
-        $(`#TxtTcsAmt${rowId}`).val(tcsAmt.toFixed(2));
-        $(`#TxtVat${rowId}`).val(vatAmt.toFixed(2));
-        $(`#TxtOthAmt${rowId}`).val(othAmt1.toFixed(2));
-        $(`#TxtOthAmt2${rowId}`).val(othAmt2.toFixed(2));
-        $(`#TxtNetAmt${rowId}`).val(netAmt.toFixed(2));
-
-        calculateAllTotals(); // Recalculate footer totals
-    }
-
      async function GetDocData(MasterTblId, readOnly) {
     try {
         const response = await $.ajax({
@@ -2102,52 +1972,8 @@
       });
     }
 
-    function SaveData(saveDt) {
-                $.ajax({
-                    url: '@Url.Action("SaveOrUpdatePurchaseOrder", "PurchaseOrder")',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(saveDt),
-                    success: function (response) {
-                        if (response?.status) {
-                            toastr.success("Data Insert Successfully");
-             
-                            setTimeout(() => {
-                                window.location.href = '/PurchaseOrderList/Index';
-                            }, 500);
-                        } else {
-                            toastr.error(response?.message || "Save failed. Please try again.");
-                        }
-                    },
-                    error: function () {
-                        toastr.error("Error occurred while saving. Please contact admin.");
-                    }
-                });
-    }
 
-    function UpdateData(UpdateDt) {
-        $.ajax({
-            url: '@Url.Action("SaveOrUpdatePurchaseOrder", "PurchaseOrder")',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(UpdateDt),
-            dataType: 'json',
-            success: function (response) {
-                if (response?.status) {
-                    showFlashMessageByKey('update', 'success');
-                    // resetFields();
-                    setTimeout(() => {
-                        window.location.href = '/PurchaseOrderList/Index';
-                    }, 1500);
-                } else {
-                    toastr.error("Update failed: " + (response?.message || "Unknown error."));
-                }
-            },
-            error: function (xhr, status, error) {
-                toastr.error("Data not updated: " + error);
-            }
-          });
-        }
+
 
     async  function fillFormFields(data) {
 
@@ -2283,99 +2109,7 @@
         }
     }
 
-    async function collectFormData() {
-        const id = toNullableString(docId);
-        const itemRecords = await collectOrder2Items();
-         const attachment = await getAttachmentDetails();
-
-         console.log("id",docId);
-
-
-         const docid = toNullableString(document.getElementById("TxtDocId")?.value);
-
-         console.log("docid", docid);
-
-        return {
-            VNo: parseIntSafe(document.getElementById("txtDocNo")?.value),
-            VType: toNullableString(document.getElementById("ddlDocType")?.value),
-            VDate: toNullableDate(document.getElementById("dtDocDate")?.value),
-            DeliveryDate: toNullableDate(document.getElementById("DtDeliveryDate")?.value),
-            ValidityDate: toNullableDate(document.getElementById("DtValidateDate")?.value),
-            DocId: toNullableString(document.getElementById("TxtDocId")?.value),
-            PlaceCode: parseIntSafe(document.getElementById("ddlPlace")?.value),
-            WbType: null,
-            WbNo: parseIntSafe(document.getElementById("ddWBNo")?.value),
-            PartyCode: parseIntSafe(document.getElementById("ddlPartyName")?.value),
-            ShipCode: parseIntSafe(document.getElementById("ddlShipFrom")?.value),
-            ShipFrom: parseIntSafe(document.getElementById("ddlPartyName")?.value),
-            BillAdd1: toNullableString(document.getElementById("TxtAdd1PD")?.value),
-            BillAdd2: toNullableString(document.getElementById("TxtAdd2PD")?.value),
-            BillAdd3: toNullableString(document.getElementById("TxtAdd3PD")?.value),
-            BillCity: parseIntSafe(document.getElementById("TxtCity1PD")?.value),
-            BillPincode: toNullableString(document.getElementById("NumPincodePD")?.value),
-            BillGst: toNullableString(document.getElementById("TxtGSTPD")?.value),
-            ShipAdd1: toNullableString(document.getElementById("TxtAdd1SD")?.value),
-            ShipAdd2: toNullableString(document.getElementById("TxtAdd2SD")?.value),
-            ShipAdd3: toNullableString(document.getElementById("TxtAdd3SD")?.value),
-            ShipCity: parseIntSafe(document.getElementById("TxtCity1SD")?.value),
-            ShipPincode: toNullableString(document.getElementById("NumPincodeSD")?.value),
-            ShipGst: null,
-            PriceType: toNullableString(document.getElementById("ddlPriceType")?.value),
-            PartyRef: toNullableString(document.getElementById("txtPartyRef")?.value),
-            ImportCurrency: toNullableString(document.getElementById("ddlCurrency")?.value),
-            ExRate: parseFloatSafe(document.getElementById("NumExRate")?.value),
-            Nos: parseFloatSafe(document.getElementById("NumTotalNosIt")?.value),
-            Qty: parseFloatSafe(document.getElementById("NumQtyIt")?.value),
-            Amount: parseFloatSafe(document.getElementById("NumAmountIt")?.value),
-            PackAmt: parseFloatSafe(document.getElementById("NumPackingAmtIt")?.value),
-            DiscAmt: parseFloatSafe(document.getElementById("NumDiscAmtIt")?.value),
-            CgstAmt: parseFloatSafe(document.getElementById("NumCgstAmtIt")?.value),
-            SgstAmt: parseFloatSafe(document.getElementById("NumSgstAmtIt")?.value),
-            IgstAmt: parseFloatSafe(document.getElementById("NumIgstAmtIt")?.value),
-            OthAmt: parseFloatSafe(document.getElementById("TxtOtherAmtSod")?.value),
-            VatAmt: parseFloatSafe(document.getElementById("NumVatAmtIt")?.value),
-            CessPer: null,
-            CessAmt: parseFloatSafe(document.getElementById("NumCessAmtIt")?.value),
-            TcsPer: null,
-            TcsAmt: parseFloatSafe(document.getElementById("NumTCSIt")?.value),
-            NetAmt: parseFloatSafe(document.getElementById("NumNetAmtIt")?.value),
-            DeliveryTerm: toNullableString(document.getElementById("txtDeliveryTerm")?.value),
-            TransportTerm: toNullableString(document.getElementById("txtTransportTerm")?.value),
-            PaytermCode: parseIntSafe(document.getElementById("ddlPaymentTerm")?.value),
-            PaymentTerm: toNullableString(document.getElementById("txtPaymentTerm")?.value),
-            PriceTerm: toNullableString(document.getElementById("txtPriceTerm")?.value),
-            SaudaType: null,
-            SaudaNo: null,
-            DeliveryPeriod: null,
-            DeliveryTo: null,
-            Remarks: toNullableString(document.getElementById("txtRemarksTC")?.value),
-            PoType: null,
-            FAProvStatus: null,
-            FAProvRemarks: null,
-            MailSend: null,
-            CDiscAmt: null,
-            AutoGenPo: null,
-            PoAcceptFlg: null,
-            PoAttachPath: null,
-            PoAttachDate: null,
-            TaxCode: null,
-            ItemType: null,
-            SupplyType: null,
-            TranType: null,
-            FormCode: null,
-            VehicleNo: null,
-            InvType: null,
-            InvNo: null,
-            PartyName: toNullableString(document.getElementById("txtPartySauda")?.value),
-            ShipName: null,
-            Status: null,
-
-            SaveOrUpdate: (!docid || docid === "") ? 'Save' : 'Update',
-            ItemRecords: itemRecords,
-            Attachments:attachment
-        };
-    }
-
+   
     async function collectOrder2Items() {
       const items = [];
       $('#tblItemRecordPO tbody tr').each(function () {
@@ -2621,12 +2355,16 @@
                     $dropdown.empty();
                     $dropdown.append('<option selected disabled value="">- Select Party -</option>');
 
+                    console.log("Party response.data", response.data);
+
+
                     $.each(response.data, function (index, item) {
                         $dropdown.append(`<option
                             data-add1="${item.ADD1}"
                             data-add2="${item.ADD2}"
                             data-add3="${item.ADD3}"
                             data-cityName="${item.CityName}"
+                
                             data-GstIn="${item.GSTIN}"
                             data-cityCd="${item.CITY_CODE}"
                             data-pinCd="${item.PINCODE}"
@@ -2907,7 +2645,7 @@
                     <option value="">-select department-</option>
                 </select>
             </td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtNos${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtNos${rowCount}"     maxlength="15"  /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtQty${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtRate${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtExrate${rowCount}" /></td>
