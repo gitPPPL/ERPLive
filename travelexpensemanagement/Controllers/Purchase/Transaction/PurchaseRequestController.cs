@@ -39,10 +39,18 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
         public IActionResult Index()
         {
-            var userLevel = _globalVariableService.GetGlobalVariables().PubUserLevel;
+            var gv = _globalVariableService.GetGlobalVariables();
 
-            ViewBag.UserLevel = userLevel;
+            ViewBag.UserLevel = gv.PubUserLevel;
+            ViewBag.CompCode = gv.PubCompCode;
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database; // Get the database name
+            }
 
+            ViewBag.GlobalVariables = gv;
+            ViewBag.DatabaseName = databaseName;
             return View("~/Views/Purchase/Transaction/PurchaseRequest/Index.cshtml");
         }
         [HttpGet]
@@ -100,10 +108,10 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         select CODE,NAME from PLACE_MAST  WHERE  COMP_CODE = {gv.PubCompCode}  AND  NAME <> ''  ORDER BY NAME asc";
                     break;
 
-                case "Requester":
-                    query = $@"
-                        Select a.Code , a.Name from EMP_MAST a where a.RESIGN_DATE is null and a.COMP_CODE=  {gv.PubCompCode}  order by a.Name asc";
-                    break;
+                //case "Requester":
+                    //query = $@"
+                    //    Select a.Code , a.Name from EMP_MAST a where a.RESIGN_DATE is null and a.COMP_CODE=  {gv.PubCompCode}  order by a.Name asc";
+                    //break;
 
                 case "PlaceUse":
                     query = $@"
@@ -176,108 +184,16 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             var dataList = await _dbHelper.GetJsonDataAsync(query);
             return Json(new { success = true, data = dataList });
         }
-
-        //======================================
-        public JsonResult GetApporxiateRate(int Itemcode)
-        {   
-            if (Itemcode <= 0)
-            {
-                return Json(new { success = false, message = "Invalid item code!" });
-            }
-            var result = _IPRRepository.GetApporxiateRate(Itemcode);
-
-            if (!result.status)
-            {
-                return Json(new { success = false, message = result.message });
-            }
-            return Json(new { success = true, Rate = result.data });
-
-        }
-
-        public JsonResult GetPendingQty(int Itemcode)
+        [HttpGet]
+        public async Task<JsonResult> GetRequesterList()
         {
-            if (Itemcode <= 0)
-            {
-                return Json(new { success = false, message = "Invalid item code!" });
-            }
-            var result = _IPRRepository.GetPendingQty(Itemcode);
-
-            if (!result.status)
-            {
-                return Json(new { success = false, message = result.message });
-            }
-            return Json(new { success = true, PendingQty = result.data });
-        }
-        
-        public JsonResult GetTotal_Qty(int Itemcode)
-        {
-            if (Itemcode <= 0)
-            {
-                return Json(new { success = false, message = "Invalid item code!" });
-            }
-            var result = _IPRRepository.GetTotalQty(Itemcode);
-
-            if (!result.status)
-            {
-                return Json(new { success = false, message = result.message });
-            }
-
-            return Json(new { success = true, Total_Qty = result.data });
-        }
-        
-        public JsonResult GetTECH_DESC(int Itemcode)
-        {
-            if (Itemcode <= 0)
-            {
-                return Json(new { success = false, message = "Invalid item code!" });
-            }
-            var result = _IPRRepository.GetTECH_DESC(Itemcode);
-
-            if (!result.status)
-            {
-                return Json(new { success = false, message = result.message });
-            }
-
-            return Json(new { success = true, TECH_DESC = result.data });
-        }
-        
-        public JsonResult GetCurrentStock(int Itemcode)
-        {
-            var getdata = _globalVariableService.GetGlobalVariables();
-            decimal? CurrentStocklist = null;
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                using (SqlCommand cmd = new SqlCommand("sp_PurchaseReq1", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@Action", "GetItemCurr_Stk");
-                    cmd.Parameters.AddWithValue("@ITEM_CODE", Itemcode);
-                    cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
-                    //cmd.Parameters.AddWithValue("@BranchCode", 1);
-                    con.Open();
-                    object result = cmd.ExecuteScalar();
-                    if (result != null && result != DBNull.Value)
-                    {
-                        CurrentStocklist = Convert.ToDecimal(result);
-                    }
-                }
-            }
-
-            return Json(new { CurrentStocklist = CurrentStocklist });
-        }
-
-        public JsonResult GetAvgConsumption(int itemCode, DateTime vDate)
-        {
-            if (itemCode <= 0)
-                return Json(new { avgConsumption = 0m, message = "Invalid item code." });
-
-            var result = _IPRRepository.GetAvgConsumption(itemCode, vDate);
-
-            if (result == null)
-                return Json(new { avgConsumption = 0m, message = "No data found." });
-
-            return Json(new { avgConsumption = result.data, message = result.message});
+            var gv = _globalVariableService.GetGlobalVariables();
+            string query = $@"
+                            Select a.Code as Code, a.Name as Name, b.NAME as Designation from EMP_MAST a 
+                            left join DESG_MAST b on b.CODE = a.DESG_CODE
+                            where a.RESIGN_DATE is null and a.COMP_CODE = {gv.PubCompCode}  order by a.Name asc";
+            var dataList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = dataList });
         }
 
         //=============================================
@@ -487,6 +403,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
             return Json(new { success = result.status, message = result.message });
         }
+
         [HttpPost]
         public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
         {
@@ -496,6 +413,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             var result = await _globalValidationdate.CheckValidDate("PREQUEST1", vdate, vtype, vno);
             return Ok(result);
         }
+
         [HttpGet]
         public IActionResult ExportAllDocs()
         {
@@ -528,6 +446,63 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 });
             }
         }
+
+        public class ItemAllDetailsDto
+        {
+            public decimal? Rate { get; set; }
+            public decimal? PendingQty { get; set; }
+            public decimal? Total_Qty { get; set; }
+            public decimal? CurrentStocklist { get; set; }
+            public decimal? AvgConsumption { get; set; }
+            public string TECH_DESC { get; set; }
+        }
+        public JsonResult GetItemAllDetails(int itemCode, DateTime vDate)
+        {
+            if (itemCode <= 0)
+            {
+                return Json(new { success = false, message = "Invalid item code!" });
+            }
+
+            var model = new ItemAllDetailsDto();
+
+            // 1. Rate
+            var rateResult = _IPRRepository.GetApporxiateRate(itemCode);
+                model.Rate = rateResult.data;
+
+            // 2. Pending Qty
+            var pendingResult = _IPRRepository.GetPendingQty(itemCode);
+                model.PendingQty = pendingResult.data;
+
+            // 3. Total Qty
+            var totalResult = _IPRRepository.GetTotalQty(itemCode);
+                model.Total_Qty = totalResult.data;
+
+            // 4. TECH DESC
+            var techResult = _IPRRepository.GetTECH_DESC(itemCode);
+                model.TECH_DESC = techResult.data;
+
+            // 5. Current Stock
+            var cStock = _IPRRepository.GetCurrentStock(itemCode);
+            model.CurrentStocklist = cStock.data;
+           
+            // 6. Avg Consumption
+            var avgResult = _IPRRepository.GetAvgConsumption(itemCode, vDate);
+                model.AvgConsumption = avgResult.data;
+
+            return Json(new { success = true, data = model });
+        }
+        
+        [HttpPost]
+        public JsonResult PrintRequest([FromBody] PRPrintModel model)
+        {
+            if(model == null)
+            {
+                return Json(new { success = false, message = "Invalid data!" });
+            }
+            var result = _IPRRepository.PRPrintRequest(model);
+            return Json(new { success = result.status, message = result.message, approvedBy = result.data });
+        }
+
     }
 
 }

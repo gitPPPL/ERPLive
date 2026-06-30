@@ -29,7 +29,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
         public IActionResult Index()
         {
-            ViewBag.CurrentMenu = "Transit EWwaybill";
+            ViewBag.CurrentMenu = "Purchase Request";
             var permissions = _moduleService.GetUserMenuPermissions();
             var userLevel = _moduleService.GetUserLevel();
             var model = new UserMenuPermissionsViewModel

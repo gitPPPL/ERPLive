@@ -75,7 +75,7 @@ $(document).ready(async function () {
 							<td>${formatDate(item.targeT_DATE)}</td>
 							<td>${item.remarks}</td>
 							<td>${item.status === 1 ? 'Open' : item.status === 2 ? 'Cancel' : item.status === 3 ? 'Close' : 'Unknown'}</td>
-							<td class="action-col">${actions}</td>
+							<td class="action-col"><div class="action-wrap">${actions}</div></td>
 				</tr>
 				`);
 
@@ -152,18 +152,23 @@ function formatDate(dateStr) {
 }
 
 //===========Edit Start===========
+
 $(document).on('click', '.btn-edit', function () {
 	const no = $(this).data('no');
 	const date = $(this).data('date');
 	const deptCode = $(this).data('dept');
-	console.log(no, date, deptCode);
-	getPRApprovalStatus(no, function (canProceed) {
+
+	checkModificationAllowed(date, no, function (canProceed) {
 		if (!canProceed) return;
 
-		validateDepartmentAccess(deptCode, function (canProceed2) {
+		getPRApprovalStatus(no, function (canProceed2) {
 			if (!canProceed2) return;
 
-			checkModificationAllowed(date, no);
+			validateDepartmentAccess(deptCode, function (canProceed3) {
+				if (!canProceed3) return;
+
+				AddOrEditFunction(no);
+			});
 		});
 	});
 });
@@ -171,13 +176,16 @@ function AddOrEditFunction(code) {
 	window.location.href = '/PurchaseRequest/Index?id=' + encodeURIComponent(code);
 }
 
-function checkModificationAllowed(vDate, rowId) {
+function checkModificationAllowed(vDate, rowId, callback) {
 	checkModificationDays({
 		controller: 'PurchaseRequest',
 		vDate: vDate,
 		rowId: rowId,
 		onAllowed: function (rowId) {
-			AddOrEditFunction(rowId);
+			getPRApprovalStatus(rowId, callback);
+		},
+		onBlocked: function () {
+			callback(false);
 		}
 	})
 }
@@ -198,22 +206,31 @@ function getPRApprovalStatus(vNo, callback) {
 			const status = (response.faproV_STATUS || "").toUpperCase();
 
 			// Not approved → allow next check
-			if (status !== "APPROVED") {
-				callback(true);
-				return;
-			}
+			//if (status !== "APPROVED") {
+			//	callback(true);
+			//	return;
+			//}
 
 			// Approved + final approval body → allow next check
-			if (IsFinalApprovalBody) {
-				callback(true);
-				return;
-			}
+			//if (IsFinalApprovalBody) {
+			//	callback(true);
+			//	return;
+			//}
 
 			// Approved + not final + non-admin → block
-			if (pubUserLevel !== 1) {
-				showToast("This Document has been Approved, Edit not allowed.", { type: "warning" });
-				callback(false);
-				return;
+			//if (pubUserLevel !== 1) {
+			//	showToast("This Document has been Approved, Edit not allowed.", { type: "warning" });
+			//	callback(false);
+			//	return;
+			//}
+			if (status === "APPROVED") {
+				if (!IsFinalApprovalBody) {
+					showToast("This Document has been Approved, Edit not allowed.", { type: "warning" });
+					if (pubUserLevel !== 1) {
+						callback(false);
+						return;
+					}
+				}
 			}
 
 			// Admin override
@@ -267,10 +284,19 @@ function deleteTemp(docId) {
 	});
 }
 // ================= Download Excel =================
-document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
-	e.preventDefault();
-	window.location.href = "/PurchaseRequest/ExportAllDocs";
-});
+//document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
+//	e.preventDefault();
+//	window.location.href = "/PurchaseRequest/ExportAllDocs";
+//});
+
+const btn = document.getElementById("btn-Export-Excel");
+
+if (btn) {
+	btn.addEventListener("click", function (e) {
+		e.preventDefault();
+		window.location.href = "/PurchaseRequest/ExportAllDocs";
+	});
+}
 
 function showImpExpExpensePopup(docCode) {
 	$.ajax({

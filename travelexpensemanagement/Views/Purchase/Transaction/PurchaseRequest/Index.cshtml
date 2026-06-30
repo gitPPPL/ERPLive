@@ -1,9 +1,53 @@
 ﻿@{
     ViewBag.Title = "Purchase Request";
     Layout = "~/Views/Shared/_Layout.cshtml";
-
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
+<style>
+    .po-generated-row,
+    .po-generated-row td,
+    .po-generated-row input,
+    .po-generated-row select,
+    .po-generated-row textarea {
+        background-color: orange !important;
+    }
 
+        .po-generated-row .select2-container--default .select2-selection--single {
+            background: orange !important;
+            border: 1px solid orange !important;
+        }
+
+        .po-generated-row .select2-selection__rendered {
+            background: orange !important;
+            color: #000 !important;
+        }
+
+        .po-generated-row .select2-selection__arrow {
+            background: orange !important;
+        }
+
+        .order-received-row,
+        .order-received-row td,
+        .order-received-row input,
+        .order-received-row select,
+        .order-received-row textarea {
+            background-color: forestgreen !important;
+        }
+
+        .order-received-row .select2-container--default .select2-selection--single {
+            background: forestgreen !important;
+            border: 1px solid forestgreen !important;
+            }
+
+        .order-received-row .select2-selection__rendered {
+            background: forestgreen !important;
+                color: #000 !important;
+            }
+
+        .order-received-row .select2-selection__arrow {
+            background: forestgreen !important;
+            }
+</style>
 
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
@@ -14,6 +58,20 @@
         <div class="erppage-header-title">Purchase Request</div>
     </div>
     <div class="erppage-header-right">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="PRReport()">
+            <i class="fa fa-print"></i>Print
+        </button>
+        <button type="button"
+                id="btn_Sendapproval"
+                style="display:none;">
+            Send For Approval
+        </button>
+
+        <button type="button"
+                id="btn_Approved"
+                style="display:none;color:green;font-weight:bold;">
+            Approved
+        </button>
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PurchaseRequestList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -160,27 +218,27 @@
                     <table id="tblItemDetailsPR" class="excel-table fixed-grid-table resizable-table sortable-table">
                         <colgroup>
                             <col style="display:none;">
-                            <col style="width:180px;">
-                            <col style="width:150px;">
-                            <col style="width:100px;">
-                            <col style="width:250px;">
-                            <col style="width:120px;" id="itemCol-approx-rate">
-                            <col style="width:120px;">
-                            <col style="width:200px;">
-                            <col style="width:100px;">
-                            <col style="width:120px;">
-                            <col style="width:130px;" id="itemCol-avgConsumption">
-                            <col style="width:130px;">
-                            <col style="width:130px;" id="itemCol-OpenReqQty">
-                            <col style="width:100px;">
-                            <col style="width:120px;">
-                            <col style="width:250px;">
-                            <col style="width:180px;">
-                            <col style="width:130px;">
-                            <col style="width:130px;">
-                            <col style="width:130px;">
-                            <col style="width:200px;">
-                            <col style="width:100px;" id="itemCol-status">
+                            <col style="width: 199px;">
+                            <col style="width: 111px;">
+                            <col style="width: 62px;">
+                            <col style="width: 85px;">
+                            <col style="width: 105px; display: none;" id="itemCol-approx-rate">
+                            <col style="width: 124px;">
+                            <col style="width: 132px;">
+                            <col style="width: 117px; display: none;" id="itemCol-OpenReqQty">
+                            <col style="width: 82px;">
+                            <col style="width: 108px;">
+                            <col style="width: 118px;">
+                            <col style="width: 187px;">
+                            <col style="width: 101px;">
+                            <col style="width: 107px;">
+                            <col style="width: 104px;">
+                            <col style="width: 81px;">
+                            <col style="width: 78px;">
+                            <col style="width: 112px;">
+                            <col style="width: 100px;" id="itemCol-avgConsumption">
+                            <col style="width: 122px;">
+                            <col style="width: 65px; display: none;" id="itemCol-status">
                             <col style="display:none;">
                             <col style="width:100px;">
                         </colgroup>
@@ -189,7 +247,7 @@
                                 <th class="hidden-col" data-column="0">
                                     Code <span class="sort-icon"></span>
                                 </th>
-                                <th data-column="1">
+                                <th data-column="1" class="freeze-item">
                                     Item Name<span class="required">*</span> <span class="sort-icon"></span>
                                 </th>
                                 <th data-column="2">
@@ -210,7 +268,7 @@
                                 <th data-column="7">
                                     Approval Remarks <span class="sort-icon"></span>
                                 </th>
-                                <th data-column="8">
+                                @* <th data-column="8">
                                     Std Req <span class="sort-icon"></span>
                                 </th>
                                 <th data-column="9">
@@ -221,7 +279,7 @@
                                 </th>
                                 <th data-column="11">
                                     Pending PO Qty <span class="sort-icon"></span>
-                                </th>
+                                </th> *@
                                 <th data-column="12" id="item-OpenReqQty">
                                     Open Req Qty <span class="sort-icon"></span>
                                 </th>
@@ -248,6 +306,18 @@
                                 </th>
                                 <th data-column="20">
                                     Remarks <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="8">
+                                    Std Req <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="9">
+                                    Current Stock <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="10" id="item-avgConsumption">
+                                    Avg Consumption <span class="sort-icon"></span>
+                                </th>
+                                <th data-column="11">
+                                    Pending PO Qty <span class="sort-icon"></span>
                                 </th>
                                 <th data-column="21" id="item-status">
                                     Status <span class="sort-icon"></span>
@@ -864,6 +934,19 @@
 
 <script>
     window.userLevel = "@ViewBag.UserLevel";
+    window.compCode = "@ViewBag.CompCode";
+        window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2",
+
+    };
+    window.database = {
+         db: "@ViewBag.DatabaseName"
+    }
 </script>
 
 <script src="~/js/erpjs/purchase/transaction/purchaserequest/purchaserequest.js"></script>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Linq;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Purchase.Transaction;
@@ -207,6 +208,52 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
                     con.Open();
+
+                    //====================Check For PO====================
+                    var generatedItems = new HashSet<int?>();
+
+                    using (SqlCommand checkCmd = new SqlCommand(@"
+                            SELECT ITEM_CODE
+                            FROM ORDER2
+                            WHERE REQUEST_TYPE = 'STPI'
+                              AND REQUEST_NO = @V_NO
+                              AND COMP_CODE = @COMP_CODE
+                              AND BRANCH_CODE = @BRANCH_CODE", con))
+                    {
+                        checkCmd.Parameters.AddWithValue("@V_NO", code);
+                        checkCmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                        checkCmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+
+                        using (var rdr = checkCmd.ExecuteReader())
+                        {
+                            while (rdr.Read())
+                            {
+                                generatedItems.Add(Convert.ToInt32(rdr["ITEM_CODE"]));
+                            }
+                        }
+                    }
+                    //===========================Check for Order Received============
+                    var orderRcvdItems = new HashSet<int?>();
+
+                    using (SqlCommand checkCmd = new SqlCommand(@"
+                            select ITEM_CODE from PURCHASE2 
+                            where v_type in ('BFRC','RCPI','RCPT','SRPU') and 
+                            REQ_TYPE ='STPI' and REQ_NO =@V_NO and 
+                            COMP_CODE =@COMP_CODE and BRANCH_CODE =@BRANCH_CODE", con))
+                    {
+                        checkCmd.Parameters.AddWithValue("@V_NO", code);
+                        checkCmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                        checkCmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+
+                        using (var rdr = checkCmd.ExecuteReader())
+                        {
+                            while (rdr.Read())
+                            {
+                                orderRcvdItems.Add(Convert.ToInt32(rdr["ITEM_CODE"]));
+                            }
+                        }
+                    }
+                    //=========================Header=======================
                     using (SqlCommand cmd = new SqlCommand("sp_PurchaseReq1", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -242,7 +289,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                             }
                         }
                     }
-
                     // --------- Second Call: Fetch Details (PREQUEST2)
                     using (SqlCommand cmd2 = new SqlCommand("sp_PurchaseReq1", con))
                     {
@@ -298,6 +344,11 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                                 });
                             }
                         }
+                    }
+                    foreach (var item in resultWrapper.ItamDetails)
+                    {
+                        item.isPOGenerated = generatedItems.Contains(item.ITEM_CODE);
+                        item.isOrderRcvd = orderRcvdItems.Contains(item.ITEM_CODE);
                     }
 
                     // --------- Third Call: Fetch Attachments (Purchase Documents)

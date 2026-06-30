@@ -1334,5 +1334,76 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                 return new RepositoryResponseData<List<LastTenPurchaseHistoryModel>> { status = false, message = ex.Message };
             }
         }
+
+        public RepositoryResponseData<string> PRPrintRequest(PRPrintModel model)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    using(SqlTransaction tran = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            // 1. Clear temp table
+                            using (SqlCommand cmdClear = new SqlCommand("sp_PurchaseReq1", con, tran))
+                            {
+                                cmdClear.CommandType = CommandType.StoredProcedure;
+                                cmdClear.Parameters.AddWithValue("@Action", "ClearTemp_Cheq");
+                                cmdClear.ExecuteNonQuery();
+                            }
+                            // 1. Item Process
+                            foreach (var item in model.Items)
+                            {
+                                using (SqlCommand cmd = new SqlCommand("sp_PurchaseReq1", con, tran))
+                                {
+                                    cmd.CommandType = CommandType.StoredProcedure;
+
+                                    cmd.Parameters.AddWithValue("@Action", "ITEM_PROCESS");
+                                    cmd.Parameters.AddWithValue("@V_NO", model.VNo);
+                                    cmd.Parameters.AddWithValue("@ITEM_CODE", item.ItemCode);
+                                    cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+
+                            // =========================
+                            // 3. FINAL APPROVED BY STRING
+                            // =========================
+                            string finalApprovedBy = "";
+
+                            string docId = "STPI" + model.VNo;
+
+                            using (SqlCommand cmd = new SqlCommand("sp_PurchaseReq1", con, tran))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+
+                                cmd.Parameters.AddWithValue("@Action", "Get_ApprovedBy");
+                                cmd.Parameters.AddWithValue("@DOC_ID", docId);
+                                cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                                cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                                finalApprovedBy = Convert.ToString(cmd.ExecuteScalar());
+                            }
+                            tran.Commit();
+                            return new RepositoryResponseData<string> { status = true, message = "Processed successfully", data = finalApprovedBy };
+                        }
+                        catch (Exception ex)
+                        {
+                            tran.Rollback();
+                            return new RepositoryResponseData<string> { status = false, message = ex.Message, data = "" };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new RepositoryResponseData<string> { status = false, message = ex.Message };
+            }
+        }
     }
 }

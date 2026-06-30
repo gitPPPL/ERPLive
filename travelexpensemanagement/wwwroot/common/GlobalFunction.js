@@ -161,11 +161,519 @@ document.querySelectorAll(".sortable-table").forEach((table, index) => {
     table.dataset.sortId = index;
 });
 
-////Global Attachment
+//Global Focus and Input field is visible
+
+$(document).on(
+    'focus',
+    '.fixed-grid-table input, .fixed-grid-table textarea, .fixed-grid-table select',
+    function () {
+
+        const wrapper = $(this).closest('.fixed-grid-wrapper')[0];
+        if (!wrapper) return;
+
+        const td = this.closest('td');
+        if (!td) return;
+
+        const tdRect = td.getBoundingClientRect();
+        const wrapperRect = wrapper.getBoundingClientRect();
+
+        const safeArea = 140; // action column width
+
+        if (tdRect.right > wrapperRect.right - safeArea) {
+            wrapper.scrollLeft +=
+                tdRect.right - (wrapperRect.right - safeArea) + 20;
+        }
+    }
+);
+
+//Global Input Value Dropdown Multi Select Filter 
+const ERPFilterDropdownManager = {};
+
+function InitializeERPFilterDropdown(config) {
+
+    const container =
+        document.getElementById(config.id);
+
+    if (!container) {
+        console.error("Dropdown not found : " + config.id);
+        return;
+    }
+
+    const state = {
+        items: config.data || [],
+        filteredItems: [],
+        selected: []
+    };
+
+    state.filteredItems = [...state.items];
+
+    container.innerHTML = `
+
+        <div class="erppage-search-inputdropdown-control">
+
+            <div class="erppage-search-inputdropdown-selected">
+
+                <span class="erppage-search-inputdropdown-placeholder">
+                    ${config.placeholder || "Select"}
+                </span>
+
+            </div>
+
+            <i class="fa fa-chevron-down erppage-search-inputdropdown-arrow"></i>
+
+        </div>
+
+        <div class="erppage-search-inputdropdown-panel">
+
+            <div class="erppage-search-inputdropdown-search">
+
+                <input type="text"
+                       placeholder="Search..." />
+
+            </div>
+
+            <div class="erppage-search-inputdropdown-list"></div>
+
+        </div>
+    `;
+
+    const control =
+        container.querySelector(".erppage-search-inputdropdown-control");
+
+    const panel =
+        container.querySelector(".erppage-search-inputdropdown-panel");
+
+    const searchBox =
+        container.querySelector(".erppage-search-inputdropdown-search input");
+
+    const list =
+        container.querySelector(".erppage-search-inputdropdown-list");
+
+    const selectedBox =
+        container.querySelector(".erppage-search-inputdropdown-selected");
+
+
+    function RenderItems() {
+
+        list.innerHTML = "";
+
+        const selectedItems =
+            state.filteredItems.filter(item =>
+                state.selected.some(x => x.id === item.id)
+            );
+
+        const unselectedItems =
+            state.filteredItems.filter(item =>
+                !state.selected.some(x => x.id === item.id)
+            );
+
+        const displayItems = [
+            ...selectedItems,
+            ...unselectedItems
+        ];
+
+        displayItems.forEach(item => {
+
+            const checked =
+                state.selected.some(x => x.id === item.id);
+
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "erppage-search-inputdropdown-item";
+
+            if (checked) {
+                row.classList.add("selected");
+            }
+
+            row.innerHTML = `
+            <input type="checkbox"
+                   ${checked ? "checked" : ""}>
+
+            <span>${item.text}</span>
+        `;
+
+            row.addEventListener("click", function (e) {
+
+                e.stopPropagation();
+
+                ToggleItem(item);
+
+            });
+
+            list.appendChild(row);
+
+        });
+
+    }
+
+
+    function RenderSelected() {
+
+        selectedBox.innerHTML = "";
+
+        if (state.selected.length === 0) {
+
+            selectedBox.innerHTML = `
+                <span class="erppage-search-inputdropdown-placeholder">
+                    ${config.placeholder}
+                </span>
+            `;
+
+            return;
+        }
+
+        const maxVisible = 3;
+
+        state.selected
+            .slice(0, maxVisible)
+            .forEach(item => {
+
+                const chip =
+                    document.createElement("span");
+
+                chip.className =
+                    "erppage-search-inputdropdown-chip";
+
+                chip.innerHTML = `
+                    ${item.text}
+                    <i class="fa fa-times"></i>
+                `;
+
+                chip.querySelector("i")
+                    .addEventListener("click", function (e) {
+
+                        e.stopPropagation();
+
+                        state.selected =
+                            state.selected.filter(
+                                x => x.id !== item.id
+                            );
+
+                        RenderItems();
+                        RenderSelected();
+
+                        TriggerChange();
+                    });
+
+                selectedBox.appendChild(chip);
+
+            });
+
+        if (state.selected.length > maxVisible) {
+
+            const more =
+                document.createElement("span");
+
+            more.className =
+                "erppage-search-inputdropdown-chip-more";
+
+            more.innerText =
+                `+${state.selected.length - maxVisible} More`;
+
+            selectedBox.appendChild(more);
+        }
+    }
+
+    function ToggleItem(item) {
+
+        const exists =
+            state.selected.some(x => x.id === item.id);
+
+        if (exists) {
+
+            state.selected =
+                state.selected.filter(
+                    x => x.id !== item.id
+                );
+
+        } else {
+
+            state.selected.push(item);
+        }
+
+        RenderItems();
+        RenderSelected();
+
+        TriggerChange(); 
+    }
+
+    function TriggerChange() {
+
+        if (config.onChange) {
+
+            config.onChange(
+                state.selected
+            );
+        }
+    }
+
+    searchBox.addEventListener("input", function () {
+
+        const search =
+            this.value.toLowerCase();
+
+        state.filteredItems =
+            state.items.filter(x =>
+                x.text.toLowerCase()
+                    .includes(search)
+            );
+
+        RenderItems();
+    });
+
+    control.addEventListener("click", function () {
+
+        panel.classList.toggle("show");
+
+        searchBox.focus();
+
+    });
+
+    document.addEventListener("click", function (e) {
+
+        if (!container.contains(e.target)) {
+
+            panel.classList.remove("show");
+        }
+
+    });
+
+    RenderItems();
+    RenderSelected();
+
+    ERPFilterDropdownManager[config.id] = {
+
+        GetValue: function () {
+
+            return state.selected;
+        },
+
+        Clear: function () {
+
+            state.selected = [];
+
+            RenderItems();
+            RenderSelected();
+        },
+
+        SetValue: function (ids) {
+
+            state.selected =
+                state.items.filter(x =>
+                    ids.includes(x.id)
+                );
+
+            RenderItems();
+            RenderSelected();
+        },
+
+        Reload: function (items) {
+
+            state.items = items;
+
+            state.filteredItems = [...items];
+
+            RenderItems();
+        }
+    };
+}
+
+//Global Input Value Dropdown Single Select Filter 
+
+const ERPSingleDropdownManager = {};
+
+function InitializeERPSingleDropdown(config) {
+
+    const container = document.getElementById(config.id);
+
+    if (!container) {
+        console.error("Dropdown not found : " + config.id);
+        return;
+    }
+
+    const state = {
+        items: config.data || [],
+        filteredItems: [],
+        selected: null
+    };
+
+    state.filteredItems = [...state.items];
+
+    container.innerHTML = `
+
+    <div class="erppage-search-inputdropdown-control">
+
+        <div class="erppage-search-inputdropdown-selected">
+
+            <span class="erppage-search-inputdropdown-placeholder">
+                ${config.placeholder || "Select"}
+            </span>
+
+        </div>
+
+        <i class="fa fa-chevron-down erppage-search-inputdropdown-arrow"></i>
+
+    </div>
+
+    <div class="erppage-search-inputdropdown-panel">
+
+        <div class="erppage-search-inputdropdown-search">
+            <input type="text" placeholder="Search..." />
+        </div>
+
+        <div class="erppage-search-inputdropdown-list"></div>
+
+    </div>
+
+    `;
+
+    const control = container.querySelector(".erppage-search-inputdropdown-control");
+    const panel = container.querySelector(".erppage-search-inputdropdown-panel");
+    const searchBox = container.querySelector(".erppage-search-inputdropdown-search input");
+    const list = container.querySelector(".erppage-search-inputdropdown-list");
+    const selectedBox = container.querySelector(".erppage-search-inputdropdown-selected");
+
+    function RenderItems() {
+
+        list.innerHTML = "";
+
+        state.filteredItems.forEach(item => {
+
+            const row = document.createElement("div");
+
+            row.className = "erppage-search-inputdropdown-item";
+
+            if (state.selected && state.selected.id == item.id) {
+                row.classList.add("selected");
+            }
+
+            row.innerHTML = `<span>${item.text}</span>`;
+
+            row.onclick = function () {
+
+                state.selected = item;
+
+                RenderItems();
+                RenderSelected();
+
+                panel.classList.remove("show");
+
+                if (config.onChange)
+                    config.onChange(item);
+            };
+
+            list.appendChild(row);
+
+        });
+
+    }
+
+    function RenderSelected() {
+
+        if (!state.selected) {
+
+            selectedBox.innerHTML = `
+
+            <span class="erppage-search-inputdropdown-placeholder">
+
+                ${config.placeholder}
+
+            </span>`;
+
+            return;
+        }
+
+        selectedBox.innerHTML = `
+
+            <span class="erppage-search-inputdropdown-chip-single">
+
+                ${state.selected.text}
+
+            </span>
+        `;
+    }
+
+    searchBox.addEventListener("input", function () {
+
+        const search = this.value.toLowerCase();
+
+        state.filteredItems = state.items.filter(x =>
+            x.text.toLowerCase().includes(search));
+
+        RenderItems();
+
+    });
+
+    control.onclick = function () {
+
+        panel.classList.toggle("show");
+
+        searchBox.focus();
+
+    };
+
+    document.addEventListener("click", function (e) {
+
+        if (!container.contains(e.target)) {
+            panel.classList.remove("show");
+        }
+
+    });
+
+    RenderItems();
+    RenderSelected();
+
+    ERPSingleDropdownManager[config.id] = {
+
+        GetValue() {
+            return state.selected;
+        },
+
+        Clear() {
+
+            state.selected = null;
+
+            RenderItems();
+
+            RenderSelected();
+
+        },
+
+        SetValue(id) {
+
+            state.selected =
+                state.items.find(x => x.id == id);
+
+            RenderItems();
+
+            RenderSelected();
+
+        },
+
+        Reload(items) {
+
+            state.items = items;
+
+            state.filteredItems = [...items];
+
+            RenderItems();
+
+        }
+
+    };
+
+}
+
+
+//Global Attachment
+
 //const fileInput = document.getElementById('fileInput');
 //const browseBtn = document.getElementById('browseBtn');
 //const dropZone = document.getElementById('dropZone');
 //const fileList = document.getElementById('fileList');
+//const uploadedFiles = new Set();
 //if (browseBtn && fileInput) {
 //    browseBtn.addEventListener('click', () => {
 //        fileInput.click();
@@ -190,9 +698,20 @@ document.querySelectorAll(".sortable-table").forEach((table, index) => {
 //        renderFiles(e.dataTransfer.files, fileList);
 //    });
 //}
+
 //function renderFiles(files, fileList) {
 
 //    Array.from(files).forEach(file => {
+
+//        const fileKey = `${file.name.trim().toLowerCase()}`; // name + extension
+
+//        // CHECK DUPLICATE
+//        if (uploadedFiles.has(fileKey)) {
+//            showAttachmentError("You have already attached this file: " + file.name);
+//            return;
+//        }
+
+//        uploadedFiles.add(fileKey);
 
 //        const fileItem = document.createElement('div');
 //        fileItem.className = 'erppageattachmentsectionfileitem';
@@ -233,18 +752,20 @@ document.querySelectorAll(".sortable-table").forEach((table, index) => {
 //            }
 //        }, 100);
 
-//        // DELETE
+//        // DELETE (remove from Set also)
 //        fileItem.querySelector('.erppageattachmentsectiondelete')
 //            .addEventListener('click', () => {
+
 //                fileItem.remove();
+//                uploadedFiles.delete(fileKey);
 //            });
 //    });
 
-//    // reset input here too (extra safety)
 //    if (fileInput) {
 //        fileInput.value = "";
 //    }
 //}
+
 //function getFileType(fileName) {
 //    return fileName.split('.').pop().toUpperCase();
 //}
@@ -290,6 +811,73 @@ document.querySelectorAll(".sortable-table").forEach((table, index) => {
 //            return 'erppageattachmentsectiondefault';
 //    }
 //}
+
+//function showAttachmentError(message) {
+//    const toast = document.createElement("div");
+//    toast.className = "erppage-toast-error";
+//    toast.innerText = message;
+
+//    document.body.appendChild(toast);
+
+//    setTimeout(() => {
+//        toast.remove();
+//    }, 3000);
+//}
+
+//Global Dragable Modal Popup
+
+(function () {
+    let activeModal = null;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    function initDraggable(modal) {
+        const header = modal.querySelector(".erppagesmodal-header");
+        if (!header) return;
+
+        header.style.cursor = "move";
+
+        header.addEventListener("mousedown", function (e) {
+            activeModal = modal;
+
+            const rect = modal.getBoundingClientRect();
+
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+
+            modal.style.margin = "0";
+            modal.style.left = rect.left + "px";
+            modal.style.top = rect.top + "px";
+        });
+
+        document.addEventListener("mousemove", function (e) {
+            if (!activeModal) return;
+
+            activeModal.style.left = (e.clientX - offsetX) + "px";
+            activeModal.style.top = (e.clientY - offsetY) + "px";
+        });
+
+        document.addEventListener("mouseup", function () {
+            activeModal = null;
+        });
+    }
+
+    function scanModals() {
+        document.querySelectorAll(".modal .modal-dialog.erppage-modal-drag")
+            .forEach(initDraggable);
+    }
+
+    // Observe DOM for dynamically opened modals
+    const observer = new MutationObserver(scanModals);
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    // Initial scan
+    document.addEventListener("DOMContentLoaded", scanModals);
+})();
 
 //Smart Global Search Dropdown
 const SearchDropdownManager = {};

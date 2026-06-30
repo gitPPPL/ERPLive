@@ -1,18 +1,23 @@
-﻿const $tbody = $('#tblItemDetailsPR tbody');
+﻿
+const $tbody = $('#tblItemDetailsPR tbody');
 const $attachmentTbody = $('#tblAttachmentPR tbody');
 const urlParams = new URLSearchParams(location.search);
 const rowId = urlParams.get('id');
 const mode = urlParams.get('mode');
-const isReadOnly = mode === 'view';
-
+let isReadOnly = mode === 'view';
+const vType = 'STPI';
+const DBTableName = 'PREQUEST1';
 let itemCache = {};
 let IsApprovalBody = false;
 let IsFinalApprovalBody = false;
 let userLevel = window.userLevel;
+let compCode = window.compCode;
 let isInitialLoad = false;
 let isMonthlyRequirementLoad = false;
 let isCopyFromOrMonthly = false;
 let uploadedFiles = [];
+let isEdit = false;
+let isSaved = true;
 
 $(document).ready(async function () {
     await InitPage(rowId);
@@ -34,17 +39,27 @@ async function InitPage(rowId) {
     await WireAllEvents();
     if (!rowId) {
         GetVNo();
-        document.getElementById('DtDocDate').valueAsDate = new Date();
-        document.getElementById('DtRequiredDate').valueAsDate = new Date();
+        const date = new Date();
+        document.getElementById('DtDocDate').valueAsDate = date;
+        date.setDate(date.getDate() + 7);
+        document.getElementById('DtRequiredDate').valueAsDate = date;
+
         document.getElementById("ddlStatus").disabled = true;
         await addRow();
+        ApprovalFields();
+        calculateTotalAmount();
     }
     else {
+        if (!isReadOnly) {
+            isEdit = true;
+        }
         await LoadFormByID(rowId);
+        checkApprovalStatus(vType, rowId, DBTableName);
     }
     if (!isInitialLoad) {
         await bindHeaderDropDowns();
         fetchPlanList();
+        fetchRequesterList();
     }
     
     //addAttachmentRow({ index: 0 });
@@ -100,7 +115,7 @@ function ApprovalFields() {
         $tbody.find('tr').each(function () {
             $(this).find('.td-approxRate, .td-open-req-qty').show();
             $(this).find('.approvalStatus').prop('disabled', false);
-            $(this).find('.approval-remarks').prop('readonly', false);
+            $(this).find('.approval-remarks').prop('disabled', false);
             $(this).find('.td-status').show();
         });
         $('#btn-monthlyrequirement').show();
@@ -112,7 +127,7 @@ function ApprovalFields() {
         $tbody.find('tr').each(function () {
             $(this).find('.td-approxRate, .td-open-req-qty').hide();
             $(this).find('.approvalStatus').prop('disabled', true);
-            $(this).find('.approval-remarks').prop('readonly', true);
+            $(this).find('.approval-remarks').prop('disabled', true);
             $(this).find('.td-status').hide();
         });
         $('#btn-monthlyrequirement').hide();
@@ -133,8 +148,14 @@ async function WireAllEvents() {
             $("#DtDocDate").focus();
             return;
         }
-
         await fetchDDlItems($('.ddlItem'), selectedValue, null);
+        if (isMonthlyRequirementLoad) {
+            $tbody.empty();
+            await addRow();
+            ApprovalFields();
+
+            calculateTotalAmount();
+        }
     });
 
     //=============Item change==========
@@ -148,7 +169,7 @@ async function WireAllEvents() {
                 return;
             }
         }
-        if (!isCopyFromOrMonthly) {
+        if (!isCopyFromOrMonthly && !isReadOnly && !IsApprovalBody && !isInitialLoad) {
             if (selectedId && selectedId.length > 0) {
                 const isMonthly = await CheckMonthlyReq(selectedId);
                 if (isMonthly) {
@@ -167,10 +188,8 @@ async function WireAllEvents() {
         $row.find('.unit-code').val(unitCode);
         $row.find('.unit-name').val(unitName);
 
-        if (isInitialLoad) return;
-
         if (selectedId && selectedId.length > 0) {
-            if (!isCopyFromOrMonthly) {
+            if (!isCopyFromOrMonthly && !isInitialLoad) {
                 await loadDropdown({
                     type: 'Make',
                     selectElem: $row.find('.ddlMake'),
@@ -180,24 +199,25 @@ async function WireAllEvents() {
                 });
             }
             try {
-                await fetchApproxRate(selectedId, $row);
-                await fetchPendingQty(selectedId, $row);
-                await fetchTotal_Qty(selectedId, $row);
-                await fetchTECH_DESC(selectedId, $row);
-                await fetchCurrentStock(selectedId, $row);
-                await fetchAvgConsumption(selectedId, $row);
+                if (!isInitialLoad) {
+                    await fetchItemAllDetails(selectedId, $row);
+                }
             } catch (err) {
                 console.error('Error in fetch chain:', err);
             }
         }
     });
 
+    //================Save=============
     $("#btnSaves").click(async function (e) {
         e.preventDefault();
         
         if (!await Validate()) return;
 
         const payload = await CollectFormData();
+        if (!payload && payload.length < 0) {
+            return;
+        }
         $("#btnSaves").prop("disabled", true);
 
         saveUpdate(payload);
@@ -216,6 +236,10 @@ async function WireAllEvents() {
         }
         isInitialLoad = false;
         await addRow();
+        ApprovalFields();
+
+        calculateTotalAmount();
+        $tbody.find('tr:last .ddlItem').focus();
     });
 
     //=============Delete Row Button Click==========
@@ -230,9 +254,18 @@ async function WireAllEvents() {
         if (isLastRow) {
             const $lastRow = $tbody.find('tr:last');
             if ($lastRow.length > 0 && $lastRow.find('.btn-add-action').length === 0) {
-                $lastRow.find('td:last').prepend(
-                    `<button type="button" class="act-btn add btn-add-action" title="Add Row"><i class="fa fa-plus-circle"></i></button>`
-                );
+                const $wrap = $lastRow.find('.action-wrap');
+
+                //$lastRow.find('td:last').prepend(
+                //    `<button type="button" class="act-btn add btn-add-action" title="Add Row"><i class="fa fa-plus-circle"></i></button>`
+                //);
+                $wrap.prepend(`
+                <button type="button"
+                        class="act-btn add btn-add-action"
+                        title="Add Row">
+                    <i class="fa fa-plus-circle"></i>
+                </button>
+            `);
             }
         }
 
@@ -357,8 +390,64 @@ async function WireAllEvents() {
         e.preventDefault();
         calculateTotalAmount();
     });
-}
 
+    //====================Remove the red border from required instruction======
+    $(document).on('change', '#DtRequiredDate', function () {
+        clearInvalid($('#txtRequiredDate'));
+    });
+    //=============== Enter Key Focus =============
+    $(document).on('keydown', 'input, textarea, select', function (e) {
+        if (e.key !== "Enter") return;
+
+        e.preventDefault();
+        moveToNext(this);
+    });
+    $(document).on('select2:select', 'select', function () {
+        const $select = $(this);
+
+        setTimeout(() => {
+            moveToNext($select);
+        }, 0);
+    });
+    $(document).on('keydown', '.select2-container', function (e) {
+        if (e.key !== "Enter") return;
+
+        e.preventDefault();
+
+        const $select = $(this).prev('select');
+
+        $select.select2('close');
+
+        setTimeout(() => {
+            moveToNext($select);
+        }, 0);
+    });
+    $(document).on('select2:close', 'select', function () {
+
+        const el = this;
+
+        setTimeout(() => {
+            moveToNext(el);
+        }, 50);   // important delay for new rows
+    });
+
+    //===========Track the save status for sending approval==========
+    $(document).on('change, input', '#PurchaseRequestForm input, #PurchaseRequestForm select, #tblItemDetailsPR input, #tblItemDetailsPR select', function (e) {
+        if (!e.originalEvent) return;
+        isSaved = false;
+    });
+}
+function moveToNext(current) {
+
+    const $focusable = $('input:visible, select:visible, textarea:visible')
+        .filter(':enabled');
+
+    const index = $focusable.index(current);
+
+    if (index > -1 && index + 1 < $focusable.length) {
+        $focusable.eq(index + 1).focus();
+    }
+}
 //===================Collect Form Data===========
 async function CollectFormData() {
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -371,6 +460,9 @@ async function CollectFormData() {
    
     const Code = $.trim($('#TxtCode').val());
     const rowsData = collectRowsData();
+    if (!rowsData || rowsData.length === 0) {
+        return null;
+    }
     //const AttachmentsRowsData = collectPurchaseDocumentsData();
     const AttachmentsRowsData = getUploadedFiles();
     const Header = {
@@ -422,10 +514,10 @@ function collectRowsData() {
 
         const rowLabel = `row ${index + 1}`;
 
-        if (!validateItemRow($row, rowLabel)) {
-            hasError = true;
-            return false; // exit .each loop
-        }
+        //if (!validateItemRow($row, rowLabel)) {
+        //    hasError = true;
+        //    return false; // exit .each loop
+        //}
 
         // Build and push rowData as before...
         const $ddlItem = $row.find('.ddlItem');
@@ -441,6 +533,23 @@ function collectRowsData() {
             ITEM_CODE = parseInt($ddlItem.val());
             $row.find('td:first').text(ITEM_CODE);
         }
+        let status = 1
+        if (isEdit) {
+            if (IsApprovalBody) {
+                if ($status.val() == 1 || $status.val() == 2 || $status.val() == 3) {}
+                else {
+                    setInvalid($status, "Status should be 1/2/3 for Open/Cancel/Close.");
+                    hasError = true;
+                    return false;
+                }
+            }
+            if ($('#ddlStatus').val() === 1) {
+                status = $status.val() === 0 ? 1 : $status.val();
+            } else {
+                status = $('#ddlStatus').val();
+            }
+            
+        }
 
         const rowData = {
             ITEM_CODE,
@@ -453,7 +562,9 @@ function collectRowsData() {
             APROX_RATE: parseFloat($row.find('.approx-rate').val()) || 0,
 
             APROV_CODE: parseInt($approvalStatus.val()) || 0,
-            APROV_STATUS: $approvalStatus.find("option:selected").text().trim() || "",
+            APROV_STATUS: $approvalStatus.val() === ""
+            ? ""
+            : $approvalStatus.find("option:selected").text().trim(),
 
             APROV_REMARKS: $row.find('.approval-remarks').val()?.trim() || "",
             STD_REQ: parseFloat($row.find('.std-req').val()) || 0,
@@ -478,7 +589,8 @@ function collectRowsData() {
             WORK_TYPE: $workType.find('option:selected').text().trim() || "",
 
             REMARKS: $row.find('.remarks').val()?.trim() || "",
-            STATUS: parseInt($status.val()) || 0,
+            //STATUS: parseInt($status.val()) || 0,
+            STATUS: status,
             MONTHLY: $row.find('.monthly').val()
         };
 
@@ -486,6 +598,24 @@ function collectRowsData() {
     });
 
     return hasError ? [] : rows;
+}
+
+function collectFile(file) {
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+
+        uploadedFiles.push({
+            FILE_NAME: file.name,
+            FILE_DATA: e.target.result.split(',')[1] // base64 only
+        });
+    };
+
+    reader.readAsDataURL(file);
+}
+function getUploadedFiles() {
+    return uploadedFiles;
 }
 //=================Save================
 function saveUpdate(payload) {
@@ -496,9 +626,15 @@ function saveUpdate(payload) {
         data: JSON.stringify(payload),
         success: function (response) {
             if (response.success) {
+                isSaved = true;
                 showToast("Saved successfully!", { type:"success" });
-                setTimeout(() => window.location.href = '/PurchaseRequestList/Index', 1000);
-
+                //setTimeout(() => window.location.href = '/PurchaseRequestList/Index', 1000);
+                setFormReadOnly();
+                isReadOnly = true;
+                if (isReadOnly) {
+                    const vNo = $('#NumDocNo').val();
+                    checkApprovalStatus(vType, vNo , DBTableName);
+                }
             } else {
                 showToast(response.message || "Save failed.", { type:"error" });
             }
@@ -593,22 +729,30 @@ async function bindHeaderData(header){
         status: header.status ?? 0,
         place: header.placE_CODE ?? 0,
         //plan: header.plaN_NO ?? 0,
-        requester: header.owneR_CODE ?? "",
+        //requester: header.owneR_CODE ?? "",
     });
     fetchPlanList(header.plaN_NO)
+    fetchRequesterList(header.owneR_CODE)
 }
 async function ItemTableData(details) {
     const $tbody = $('#tblItemDetailsPR tbody');
     $tbody.empty();
     if (details && details.length > 0) {
+        console.log("details", details);
         isInitialLoad = true;
         for (const item of details) {
             await addRow(item);
+            ApprovalFields();
+
+            calculateTotalAmount();
         }
     }
     else {
         isInitialLoad = false;
         await addRow();
+        ApprovalFields();
+
+        calculateTotalAmount();
     }
 }
 async function AttachmentTableData(attachments){
@@ -681,10 +825,56 @@ async function bindHeaderDropDowns(data = {}) {
         bindDropdown('PurchaseRequest', 'Department', '#ddlDepartment', '-- Select Department --', data.dept || null, null, false, viewMode, true),
         bindDropdown('PurchaseRequest', 'DocStatus', '#ddlStatus', '-- Select Status --', data.status || null, null, true, null, true),
         bindDropdown('PurchaseRequest', 'Place', '#ddlPlace', '-- Select Place --', data.place || null, null, false, null, true),
-        bindDropdown('PurchaseRequest', 'Requester', '#ddlRequester', '-- Select Requester --', data.requester || null, null, false, null, true)
+        //bindDropdown('PurchaseRequest', 'Requester', '#ddlRequester', '-- Select Requester --', data.requester || null, null, false, null, true)
     ]);
 }
 
+function fetchRequesterList(selectedValue = null) {
+    $.ajax({
+        url: '/PurchaseRequest/GetRequesterList',
+        type: 'GET',
+        dataType: 'json',
+        success: function (response) {
+            if (response) {
+                console.log("response: ", response);
+                const $ddl = $('#ddlRequester');
+                let html = '<option value="">-- Select Requester --</option>';
+                $.each(response.data, function (i, item) {
+                    html += `<option 
+                                value="${item.Code}" 
+                                data-name="${item.Name}" 
+                                data-designation="${item.Designation}">
+                                ${item.Name} | ${item.Code} | ${item.Designation}
+                            </option>`;
+                });
+                $ddl.html(html);
+                $ddl.select2({
+                    placeholder: '-- Select Requester --',
+                    allowClear: true,
+                    templateSelection: function (option) {
+                        if (!option.id) return option.text;
+
+                        const name = $(option.element).data('name');
+                        return `${name}`;
+                    }
+                });
+                $ddl.on('select2:open', function () {
+                    setTimeout(function () {
+                        let searchBox = document.querySelector('.select2-container--open .select2-search__field');
+
+                        if (searchBox) {
+                            searchBox.focus();
+                        }
+                    }, 0);
+                });
+                $ddl.val(selectedValue || '').trigger('change');
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error loading Requester:", error);
+        }
+    });
+}
 function fetchPlanList(selectedValue = null) {
     $.ajax({
         url: '/PurchaseRequest/GetPlanList',
@@ -699,7 +889,7 @@ function fetchPlanList(selectedValue = null) {
                 });
                 $ddl.html(html);
                 $ddl.select2({
-                    placeholder: '-- Select Item --',
+                    placeholder: '-- Select Plan/Complain --',
                     allowClear: true,
                     templateSelection: function (option) {
                         if (!option.id) return option.text;
@@ -720,7 +910,7 @@ function fetchPlanList(selectedValue = null) {
             }
         },
         error: function (xhr, status, error) {
-            console.error("Error loading Items:", error);
+            console.error("Error loading Plan/Complain:", error);
         }
     });
 }
@@ -728,6 +918,7 @@ function fetchPlanList(selectedValue = null) {
 async function loadDropdown({ type, selectElem, defaultText = "- Select -", selectedValue = null, extraData = null }) {
     await bindDropdown('PurchaseRequest', type, selectElem, defaultText, selectedValue, null, false, extraData, true);
 }
+
 function initSelect2($ddl) {
     $ddl.select2({
         placeholder: '-- Select Item --',
@@ -798,10 +989,10 @@ async function addRow(data = {}) {
     const row = `
                 <tr class="no-border-input">
                         <td style="display:none;">${data.iteM_CODE || ''}</td>
-                        <td><select class="erppagetable-control ddlItem" style="width:300px" ></select></td>
-                        <td><select class="erppagetable-control ddlMake" style="width:200px" ></select></td>
+                        <td class="freeze-item"><select class="erppagetable-control ddlItem"></select></td>
+                        <td><select class="erppagetable-control ddlMake"></select></td>
                         <td>
-                            <input type="text" class="erppagetable-control unit-name" value="${data.uniT_NAME || ''}" readonly />
+                            <input type="text" class="erppagetable-control unit-name" value="${data.uniT_NAME || ''}" disabled />
                             <input type="hidden" class="unit-code" value="${data.uniT_CODE || ''}" />
                         </td>
                         <td><input type="text" class="erppagetable-control tech-desc" value="${data.tecH_DESC || ''}"/></td>
@@ -810,37 +1001,24 @@ async function addRow(data = {}) {
                             oninput="allowOnlyNumbers(this); SetMaxlength(this, 18, 2);"
                             value="${data.aproX_RATE || ''}" />
                         </td>
-                       <td><select class="erppagetable-control approvalStatus"></select></td>
+                       <td>
+                            <select class="erppagetable-control approvalStatus">
+                                <option value="">--Select--</option>
+                                <option value="Yes" ${(data.aproV_STATUS || '').toUpperCase() === "APPROVED" ? "selected" : ""}>Approved</option>
+                                <option value="No" ${(data.aproV_STATUS || '').toUpperCase() === "HOLD" ? "selected" : ""}>Hold</option>
+                                <option value="No" ${(data.aproV_STATUS || '').toUpperCase() === "REJECT" ? "selected" : ""}>Reject</option>
+                            </select>
+                        </td>
                         <td><input type="text" class="erppagetable-control approval-remarks" value="${data.aproV_REMARKS || ''}"/></td>
-                        <td>
-                            <input type="text" class="erppagetable-control std-req"
-                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
-                            value="${data.stD_REQ || ''}" readonly/>
-                        </td>
-                        <td>
-                            <input type="text" class="erppagetable-control current-stock"
-                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
-                            value="${data.cuR_STK || ''}" readonly/>
-                        </td>
-                        <td class="td-avgCons">
-                            <input type="text" class="erppagetable-control avg-consumption" 
-                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
-                            value="${data.avG_CONS || ''}" readonly/>
-                        </td>
-                        <td>
-                            <input type="text" class="erppagetable-control pending-po-qty"
-                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
-                            value="${data.opeN_POQTY || ''}" readonly/>
-                        </td>
                         <td  class="td-open-req-qty">
                             <input type="text" class="erppagetable-control open-req-qty"
                             oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
-                            value="${data.opeN_RQQTY || ''}" readonly/>
+                            value="${data.opeN_RQQTY || 0}" disabled/>
                         </td>
                         <td>
                             <input type="text" class="erppagetable-control user-qty"
                             oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
-                            value="${data.useR_QTY || ''}" readonly/>
+                            value="${data.useR_QTY || ''}" disabled/>
                         </td>
                         <td>
                             <input type="text" class="erppagetable-control required-qty"
@@ -849,7 +1027,14 @@ async function addRow(data = {}) {
                         </td>
                         <td><input type="text" class="erppagetable-control req-reason" value="${data.reQ_REASON || ''}" maxlength="200"/></td>
                         <td><select class="erppagetable-control ddlplaceuse" style="width:300px"></select></td>
-                        <td><select class="erppagetable-control priority-type"></select></td>
+                        <td>
+                            <select class="erppagetable-control priority-type">
+                                <option value="">--Select--</option>
+                                <option value="Yes" ${(data.prioritY_TYPE || '').toUpperCase() === "LOW" ? "selected" : ""}>Low</option>
+                                <option value="No" ${(data.prioritY_TYPE || '').toUpperCase() === "MEDIUM" ? "selected" : ""}>Medium</option>
+                                <option value="No" ${(data.prioritY_TYPE || '').toUpperCase() === "HIGH" ? "selected" : ""}>High</option>
+                            </select>
+                        </td>
                         <td>
                             <select class="erppagetable-control scrap-type">
                                 <option value="">--Select--</option>
@@ -857,17 +1042,38 @@ async function addRow(data = {}) {
                                 <option value="No" ${data.scraP_TYPE === "No" ? "selected" : ""}>No</option>
                             </select>
                         </td>
-                        <td><select class="erppagetable-control work-type"></select>
+                        <td>
+                            <select class="erppagetable-control work-type">
+                                <option value="">--Select--</option>
+                                <option value="Yes" ${(data.worK_TYPE || '').toUpperCase() === "MODIFICATION" ? "selected" : ""}>Modification</option>
+                                <option value="No" ${(data.worK_TYPE || '').toUpperCase() === "NEW" ? "selected" : ""}>New</option>
+                                <option value="No" ${(data.worK_TYPE || '').toUpperCase() === "OTHER" ? "selected" : ""}>Other</option>
+                                <option value="No" ${(data.worK_TYPE || '').toUpperCase() === "REPAIR" ? "selected" : ""}>Repair</option>
+                                <option value="No" ${(data.worK_TYPE || '').toUpperCase() === "REPLACEMENT" ? "selected" : ""}>Replacement</option>
+                            </select>
                         </td>
                         <td><input type="text" class="erppagetable-control remarks" value="${data.remarks || ''}"/></td>
-                        <td class="td-status">
-                          <select class="erppagetable-control status">
-                            <option value="">--Select--</option>
-                            <option value="1" ${data.status == 1 ? "selected" : ""}>Pending</option>
-                            <option value="2" ${data.status == 2 ? "selected" : ""}>Approved</option>
-                            <option value="3" ${data.status == 3 ? "selected" : ""}>Rejected</option>
-                          </select>
+                        <td>
+                            <input type="text" class="erppagetable-control std-req"
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
+                            value="${data.stD_REQ || ''}" disabled/>
                         </td>
+                        <td>
+                            <input type="text" class="erppagetable-control current-stock"
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
+                            value="${data.cuR_STK || ''}" disabled/>
+                        </td>
+                        <td class="td-avgCons">
+                            <input type="text" class="erppagetable-control avg-consumption" 
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
+                            value="${data.avG_CONS || ''}" disabled/>
+                        </td>
+                        <td>
+                            <input type="text" class="erppagetable-control pending-po-qty"
+                            oninput="allowOnlyNumbers(this); SetMaxlength(this, 15, 4);"
+                            value="${data.opeN_POQTY || ''}" disabled/>
+                        </td>
+                        <td class="td-status"><input type="text" class="erppagetable-control status" value="${data.status || ''}"/></td>
                         <td style="display:none;"><input type="text" class="erppagetable-control monthly" value="${data.isMonthly ? 'MONTHLY' : ''}"/></td>
                     <td class="action-col">
                        <div class="action-wrap">
@@ -892,192 +1098,72 @@ async function addRow(data = {}) {
     );
 
     const itemId = data.iteM_CODE || $row.find('.ddlItem').val();
-
-    await Promise.all([
-        loadDropdown({
-            type: 'Make',
-            selectElem: $row.find('.ddlMake'),
-            defaultText: "- Select Make-",
-            selectedValue: data.makE_CODE || null,
-            extraData: itemId
-        }),
-        loadDropdown({
-            type: 'PlaceUse',
-            selectElem: $row.find('.ddlplaceuse'),
-            defaultText: "- Select Place of Use-",
-            selectedValue: data.placE_Code || null,
-        }),
-        loadDropdown({
-            type: 'Priority',
-            selectElem: $row.find('.priority-type'),
-            defaultText: "- Select Priority -",
-            selectedValue: data.prioritY_CODE || null,
-        }),
-        loadDropdown({
-            type: 'WorkType',
-            selectElem: $row.find('.work-type'),
-            defaultText: "- Select Work Type -",
-            selectedValue: data.worK_TYPECODE || null,
-        }),
-        loadDropdown({
-            type: 'ApprovalStatus',
-            selectElem: $row.find('.approvalStatus'),
-            defaultText: "- Select Status -",
-            selectedValue: data.aproV_CODE || null,
-        })
-    ]);
     
-
-    ApprovalFields();
-    calculateTotalAmount();
-}
-
-//=============Validate Item Table============
-function validateItemRow() {
-    const rowCount = $tbody.find('tr').length;
-
-    if (rowCount > 0) {
-        const $lastRow = $tbody.find('tr:last');
-        if (!validateRequiredField($lastRow.find('.ddlItem'), 'Item')) return false;
-        if (!validateRequiredField($lastRow.find('.required-qty'), 'Required Quantity')) return false;
-        if (!validateRequiredField($lastRow.find('.req-reason'), 'Requirement Reason')) return false;
-        if (!validateRequiredField($lastRow.find('.ddlplaceuse'), 'Place of Use')) return false;
-        if (!validateRequiredField($lastRow.find('.priority-type'), 'Priority Type')) return false;
-        if (!validateRequiredField($lastRow.find('.scrap-type'), 'Scrap Type')) return false;
-        if (!validateRequiredField($lastRow.find('.work-type'), 'Work Type')) return false;
+        await Promise.all([
+            loadDropdown({
+                type: 'Make',
+                selectElem: $row.find('.ddlMake'),
+                defaultText: "- Select Make-",
+                selectedValue: data.makE_CODE || null,
+                extraData: itemId
+            }),
+            loadDropdown({
+                type: 'PlaceUse',
+                selectElem: $row.find('.ddlplaceuse'),
+                defaultText: "- Select Place of Use-",
+                selectedValue: data.placE_Code || null,
+            }),
+            //loadDropdown({
+            //    type: 'Priority',
+            //    selectElem: $row.find('.priority-type'),
+            //    defaultText: "- Select Priority -",
+            //    selectedValue: data.prioritY_CODE || null,
+            //}),
+            //loadDropdown({
+            //    type: 'WorkType',
+            //    selectElem: $row.find('.work-type'),
+            //    defaultText: "- Select Work Type -",
+            //    selectedValue: data.worK_TYPECODE || null,
+            //}),
+            //loadDropdown({
+            //    type: 'ApprovalStatus',
+            //    selectElem: $row.find('.approvalStatus'),
+            //    defaultText: "- Select Status -",
+            //    selectedValue: data.aproV_CODE || null,
+            //})
+        ]);
+    if (isReadOnly) {
+        if (data.isPOGenerated === true) {
+            $row.addClass('po-generated-row');
+        }
+        if (data.isOrderRcvd === true) {
+            $row.addClass('order-received-row');
+        }
     }
-
-    return true;
-}
-
-function collectFile(file) {
-
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-
-        uploadedFiles.push({
-            FILE_NAME: file.name,
-            FILE_DATA: e.target.result.split(',')[1] // base64 only
-        });
-    };
-
-    reader.readAsDataURL(file);
-}
-function getUploadedFiles() {
-    return uploadedFiles;
 }
 
 //================Fetch Records on behalf of item=============
-function fetchApproxRate(itemCode, $row) {
-    return $.ajax({
-        url: '/PurchaseRequest/GetApporxiateRate',
-        type: 'GET',
-        data: { Itemcode: itemCode },
-        success: function (response) {
+function fetchItemAllDetails(itemCode, $row) {
 
-            const rate = response?.rate;
-
-            if (rate !== undefined) {
-                $row.find('input.approx-rate').val(rate);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error("Error fetching rate:", error);
-        }
-    });
-}
-
-function fetchPendingQty(itemCode, $row) {
-    return $.ajax({
-        url: '/PurchaseRequest/GetPendingQty',
-        type: 'GET',
-        data: { Itemcode: itemCode },
-        success: function (response) {
-
-            const qty = response?.pendingQty;
-
-            if (qty !== undefined) {
-                $row.find('input.pending-po-qty').val(qty);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error("Error fetching pending qty:", error);
-        }
-    });
-}
-
-function fetchTotal_Qty(itemCode, $row) {
-    return $.ajax({
-        url: '/PurchaseRequest/GetTotal_Qty',
-        type: 'GET',
-        data: { Itemcode: itemCode },
-        success: function (response) {
-
-            const qty = response?.total_Qty;
-
-            if (qty !== undefined) {
-                $row.find('input.open-req-qty').val(qty);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error("Error fetching pending qty:", error);
-        }
-    });
-}
-
-function fetchCurrentStock(itemCode, $row) {
-    return $.ajax({
-        url: '/PurchaseRequest/GetCurrentStock',
-        type: 'GET',
-        data: { Itemcode: itemCode },
-        success: function (response) {
-            const qty = response?.currentStocklist;
-            if (qty !== undefined) {
-                $row.find('input.current-stock').val(qty);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error("Error fetching pending qty:", error);
-        }
-    });
-}
-
-function fetchAvgConsumption(itemCode, $row) {
     var docDate = document.getElementById("DtDocDate").value;
 
     return $.ajax({
-        url: '/PurchaseRequest/Getavgconsumption',
+        url: '/PurchaseRequest/GetItemAllDetails',
         type: 'GET',
         data: {
-            Itemcode: itemCode,
-            Vdate: docDate
+            itemCode: itemCode,
+            vDate: docDate
         },
-        success: function (response) {
-            const qty = response?.avgConsumption;
-            if (qty !== undefined) {
-                $row.find('input.avg-consumption').val(qty);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error("Error fetching pending qty:", error);
-        }
-    });
-}
+        success: function (res) {
 
-function fetchTECH_DESC(itemCode, $row) {
-    return $.ajax({
-        url: '/PurchaseRequest/GetTECH_DESC',
-        type: 'GET',
-        data: { Itemcode: itemCode },
-        success: function (response) {
-            const tecH_DESC = response?.tecH_DESC;
-            if (tecH_DESC !== undefined) {
-                $row.find('input.tech-desc').val(tecH_DESC);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error("Error fetching pending tecH_DESC:", error);
+            const d = res.data;
+            console.log(d);
+            $row.find('input.approx-rate').val(d.rate || 0);
+            $row.find('input.pending-po-qty').val(d.pendingQty || 0);
+            $row.find('input.open-req-qty').val(d.total_Qty || 0);
+            $row.find('input.current-stock').val(d.currentStocklist || 0);
+            $row.find('input.avg-consumption').val(d.avgConsumption || 0);
+            $row.find('input.tech-desc').val(d.tecH_DESC);
         }
     });
 }
@@ -1105,6 +1191,11 @@ async function Validate() {
     if (!(await checkValidDate())) {
         return false;
     }
+
+    if (rowId && !isReadOnly && $('#ddlStatus').val() > 1) {
+        return true;
+    }
+
     //1. Required Date Validation
     if (requiredDate < docDate) {
         setInvalid($('#DtRequiredDate'), "Required Date should be greater than Document date.");
@@ -1152,6 +1243,7 @@ async function Validate() {
 
     if (!hasItemRecord) {
         showToast('No Item Record to save.', { type: 'warning' });
+        $rows.find('.ddlItem').focus();
         return false;
     }
 
@@ -1219,7 +1311,7 @@ async function Validate() {
 
             //8. Monthly requirements
             const isMonthly = await CheckMonthlyReq(itemCode);
-            if (isMonthly) {
+            if (!IsApprovalBody && isMonthly) {
                 setInvalid(itemInput, 'This Item is a Monthly Requirement Item, So You Can not Make a Requistion');
                 isValid = false;
                 return false;
@@ -1257,9 +1349,10 @@ async function Validate() {
                     reqQtyInput,
                     `Sufficient Stock (Stock + Pending Order) available for '${itemtext}'. Remove the request.`
                 );
-
-                isValid = false;
-                return false;
+                if (compCode !== "2") {
+                    isValid = false;
+                    return false;
+                }
             }
 
             //13. Required row fields
@@ -1373,12 +1466,7 @@ function checkDuplicateItems(currentSelect, silent = false) {
 
     if (duplicate) {
 
-        // ✅ ONLY visual marking
         $(currentSelect).addClass("is-invalid");
-        // OR whatever your CSS class is
-
-        // ❌ DO NOT use setInvalid if it shows messages
-
         if (!silent) {
             showToast("Duplicate item found!", {type:"warning"});
         }
@@ -1858,7 +1946,9 @@ async function LoadMonthlyRequirementData() {
             
             //await Promise.all(res.data.map(r => addRow(r)));
             await Promise.all(res.data.map(r => addRow({ ...r, isMonthly: true })));
-            
+            ApprovalFields();
+
+            calculateTotalAmount();
             let hasDuplicate = false;
             const seen = new Map();
 
@@ -1879,7 +1969,7 @@ async function LoadMonthlyRequirementData() {
 
             // single toastr
             if (hasDuplicate) {
-                showToast("Duplicate items found and marked. Please remove them!", { type:"warning" });
+                showToast("Duplicate items found and marked. Please remove them!", { type: "warning" });
             }
 
         } else {
@@ -2166,7 +2256,13 @@ async function addRowsToMainTable(selectedRowsData) {
         let isBlank = true;
 
         firstRowInputs.each(function () {
-            if ($(this).val().trim() !== '') {
+            //if ($(this).val().trim() !== '') {
+            //    isBlank = false;
+            //    return false;
+            //}
+            const val = $.trim($(this).val() || '');
+
+            if (val !== '' && val !== '0') {
                 isBlank = false;
                 return false;
             }
@@ -2186,6 +2282,9 @@ async function addRowsToMainTable(selectedRowsData) {
             : false;
 
         await addRow(row);
+        ApprovalFields();
+
+        calculateTotalAmount();
 
         if (isMonthly) {
 
@@ -2281,4 +2380,225 @@ function SetMaxlength(selector, numeric, decimal) {
     if (!regex.test(value)) {
         $(selector).val(value.slice(0, -1));
     }
+}
+
+//====================Print Report===========
+async function PrintRequest() {
+
+    let items = [];
+
+    $('#tblItemDetailsPR tbody tr').each(function () {
+        let itemCode = $(this).find('.ddlItem').val();
+
+        if (itemCode) {
+            items.push({
+                ItemCode: parseInt(itemCode)
+            });
+        }
+    });
+
+    let model = {
+        VNo: $('#NumDocNo').val(),
+        Items: items
+    };
+
+    //$.ajax({
+    //    url: '/PurchaseRequest/PrintRequest',
+    //    type: 'POST',
+    //    contentType: 'application/json',
+    //    data: JSON.stringify(model),
+    //    success: function (res) {
+    //        if (res.success) {
+    //            alert("Saved Successfully");
+    //            console.log(res.approvedBy);
+    //        } else {
+    //            alert(res.message);
+    //        }
+    //    }
+    //});
+    try {
+        const res = await $.ajax({
+            url: '/PurchaseRequest/PrintRequest',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(model)
+        });
+
+        if (res.success) {
+            return res.approvedBy;
+        }
+
+        throw new Error(res.message);
+
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
+async function PRReport() {
+
+    var reportName = "storereqslip";
+    var vNo = $('#NumDocNo').val();
+    var approvedBy = await PrintRequest();
+    console.log(approvedBy);
+    // Crystal Report Formula
+    var formula =
+        "{prequest1.COMP_CODE} = " + window.globalVariables.compCode +
+        " and {prequest1.BRANCH_CODE} = " + window.globalVariables.branchCode +
+        " and {prequest1.YEAR_CODE} = " + window.globalVariables.yearCode +
+        " and {prequest1.V_TYPE} = 'STPI' "+
+        " and {prequest1.V_NO} = " + vNo;
+
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: window.database.db,
+        Parameters: {
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.add1,
+            comp_add2: window.globalVariables.add2,
+            RPTNAME: "Requistion Slip",
+            approvedBy: approvedBy
+        }
+    };
+
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+    $.ajax({
+        url: 'http://localhost:34088/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (response) {
+            console.log('PDF response:', response);
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+        }
+    });
+}
+
+//===================Approval===================
+$(document).on('click', '#btn_Sendapproval', function () {
+    var FromName = window.location.pathname.split('/')[1];
+    $.ajax({
+        url: '/Approval/CheckPendingUser',
+        type: 'POST',
+        data: {
+            vNo: $('#NumDocNo').val(),
+            vType: vType
+        },
+        success: function (response) {
+            console.log('Response:', response);
+            // Pending with another user
+            if (response.success === false) {
+                showToast(`Pending With Another User (${response.userCode})`,
+                    { type: "warning" });
+                return;
+            }
+            if (!SendApproveValidation()) return;
+            if (!CheckSaved()) return;
+            // Approval_Code = 5
+            if (response.approvalCode8 === true) {
+                OpenApprovalModal({
+                    DocType: vType,
+                    DocNo: $('#NumDocNo').val(),
+                    TableName: DBTableName
+                });
+                return;
+            }
+            // Approval_Code != 8
+            OpenSendForApprovalModal({
+                DocType: vType,
+                DocNo: $('#NumDocNo').val(),
+                UserCode: null,
+                UserName: null,
+                DocDate: null,
+                TableName: DBTableName,
+                FromName, FromName
+            });
+
+        },
+        error: function (xhr, status, error) {
+            console.log(error);
+            alert('Error while checking approval status.');
+        }
+    });
+
+});
+$(document).on('click', '#btn_Approved', function () {
+    if (!SendApproveValidation()) return;
+    if (!CheckSaved()) return;
+    OpenApprovalModal({
+        DocType: vType,
+        DocNo: $('#NumDocNo').val(),
+        TableName: DBTableName
+    });
+});
+
+function SendApproveValidation() {
+    if (IsApprovalBody) {
+        let isValid = true;
+
+        $('#tblItemDetailsPR tbody tr').each(function () {
+
+            const $row = $(this);
+
+            const itemCode = $row.find('.ddlItem').val();
+            const itemName = $row.find('.ddlItem option:selected').text();
+
+            const approxRate = $row.find('.approx-rate').val().trim();
+            const approvalStatus = $row.find('.approvalStatus').val();
+            
+            if (itemCode && !approvalStatus) {
+
+                setInvalid($row.find('.approvalStatus'), `Please select Approval Status of Item => ${itemName}`);
+                isValid = false;
+                return false;   // break each loop
+            }
+
+            if (itemCode && approxRate === "") {
+
+                setInvalid($row.find('.approx-rate'), `Approx. Rate required for ${itemName}.`);
+                isValid = false;
+                return false;
+            }
+
+        });
+        return isValid;
+    }
+    else {
+        return true;
+    }
+}
+function CheckSaved() {
+
+    if (!isSaved) {
+        showToast("Please save the record before sending for approval.", {
+            type: "warning"
+        });
+        return false;
+    }
+
+    return true;
 }

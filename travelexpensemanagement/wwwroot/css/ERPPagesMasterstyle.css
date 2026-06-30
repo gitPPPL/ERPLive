@@ -880,7 +880,23 @@
         color: #fff;
         cursor: pointer;
     }
+.erppage-split-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
 
+@media (max-width: 1024px) {
+    .erppage-split-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .erppage-split-3 {
+        grid-template-columns: 1fr;
+    }
+}
 /* Status Container */
 .erppage-toggle-container {
     display: flex;
@@ -942,7 +958,50 @@
         transition: .3s;
         box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
     }
+/*table First columns fixed and position sticky*/
+.fixed-grid-table th.freeze-item,
+.fixed-grid-table td.freeze-item {
+    position: sticky;
+    left: 0;
+    background: #161616;
+    z-index: 5;
+    /* ✅ FORCE TEXT WRAP */
+    word-break: break-word;
+    overflow-wrap: break-word;
+    /* IMPORTANT FOR WRAP TO WORK */
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
+
+/*.fixed-grid-table th.freeze-item {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: #2e7d32;
+    color: #fff;
+    white-space: normal;
+    word-break: break-word;
+    min-width: 250px;
+    max-width: 250px;
+}
+
+.fixed-grid-table td.freeze-item {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background: #fff;
+    white-space: normal;
+    word-break: break-word;
+    min-width: 250px;
+    max-width: 250px;
+}*/
+
+/*table First columns fixed and position sticky End*/
 /* ON State */
 .erppage-toggle input:checked + .erppage-toggle-slider {
     background: linear-gradient(135deg,#2f7d32,#1b5e20);
@@ -1007,17 +1066,17 @@
 }
 
     .erppagetabledynamic-table thead th {
-        background: linear-gradient(135deg, #2f7d32, #1b5e20);
+        background: linear-gradient(135deg, #0f0f0f, #1f2224);
         color: #fff;
         padding: 8px 12px;
         font-weight: 600;
         text-align: left;
-        border: 1px solid #256329;
+       /* border: 1px solid #256329;*/
         white-space: nowrap;
     }
 
     .erppagetabledynamic-table tbody td {
-        padding: 8px 12px;
+        padding: 4px 8px;
         border: 1px solid #e5e7eb;
         color: #374151;
         background: #fff;
@@ -1035,7 +1094,7 @@
 
     .erppagetabledynamic-table tbody td:first-child {
         font-weight: 600;
-        color: #1b5e20;
+        color: #254dc3;
         font-size: 12px;
     }
 
@@ -1211,6 +1270,62 @@
     flex: 0 0 100%;
     max-width: 100%;
 }
+
+.erppagescol-6 .erppagetabledynamic-wrapper {
+    min-height: 130px;
+    background-color: #e1e1e1;
+}
+
+.erppagescol-6 {
+    display: flex;
+    flex-direction: column;
+}
+.erppage-tablefield {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+    .erppage-tablefield .erppage-label {
+        width: auto;
+        margin-bottom: 2px;
+    }
+
+    .erppage-tablefield .erppagetabledynamic-wrapper {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .erppage-tablefield .erppagetabledynamic-table {
+        width: 100%;
+        table-layout: fixed;
+    }
+.erppagesrow {
+    align-items: stretch;
+}
+
+.erppagescol-6 {
+    display: flex;
+}
+
+    .erppagescol-6 .erppage-tablefield {
+        flex: 1;
+    }
+#itemTable td,
+#vendorTable td {
+    word-break: break-word;
+    white-space: normal;
+}
+
+#itemTable {
+    table-layout: fixed;
+}
+
+    #itemTable th:last-child,
+    #itemTable td:last-child {
+        width: 80px;
+    }
 @media (max-width: 768px) {
     .erppagescolumn,
     [class*="erppagescol-"] {
@@ -1439,7 +1554,7 @@
     padding: 3px 8px;
     transition: 0.2s;
     box-sizing: border-box;
-    font-size: 12px;
+    font-size: 11px;
     color: #2c2c2c;
     border-left: 3px solid #ff2626;
 }
@@ -1539,8 +1654,8 @@ select.erppage-input {
 }
 
 .erppage-checkbox-input {
-    width: 12px;
-    height: 12px;
+    width: 11px;
+    height: 11px;
     accent-color: #2f7d32; /* ERP Green Theme */
     cursor: pointer;
     margin: 0;
@@ -1559,7 +1674,7 @@ select.erppage-input {
 /* date input takes full space */
 .erppage-dateinput {
     width: 100%;
-    height: 30px;
+    height: 25px;
     padding-right: 35px; /* 🔥 space for checkbox */
 }
 .erppage-checkbox-inside {
@@ -1902,7 +2017,7 @@ input[type="number"] {
     /* Select/Input inside group */
     .erppage-inputgroup .erppage-input {
         flex: 1;
-        height: 30px;
+        height: 24px;
     }
 
     /* Button inside group */
@@ -1943,7 +2058,18 @@ input[type="number"] {
         background: linear-gradient(135deg, #1e40af, #1e3a8a);
         
     }
-
+.erppage-toast-error {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #dc2626;
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 6px;
+    z-index: 999999;
+    font-size: 13px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
     
 .erppage-btn-common-disabled {
     color: #2359da !important;
@@ -1958,6 +2084,28 @@ input[type="number"] {
     }
 
 
+.erppage-btn-common-pending {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+}
+
+    .erppage-btn-common-pending:hover {
+        background: linear-gradient(135deg, #d97706, #b45309);
+        color: #fff;
+    }
+
+.erppage-btn-common-pending-disabled {
+    color: #d97706 !important;
+    font-weight: 600;
+    border: 1px solid #d97706 !important;
+    background: #fff;
+}
+
+    /* Prevent hover effect on disabled */
+    .erppage-btn-common-pending-disabled:hover {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #fff !important;
+    }
 .erppage-btn-print {
     background: linear-gradient(135deg, #374151, #111827);
     color: #fff;
@@ -2020,7 +2168,7 @@ input[type="number"] {
     align-items: center;
     gap: 8px;
     border: none;
-    padding: 4px 8px;
+    padding: 3px 8px;
     border-radius: 6px;
     font-size: 12px;
     cursor: pointer;
@@ -2081,9 +2229,9 @@ input[type="number"] {
     flex: 0 0 calc(25% - 9px);
     max-width: calc(25% - 9px);
 }
-.erppagesrow + .erppagesrow {
+/*.erppagesrow + .erppagesrow {
     margin-top: 18px;
-}
+}*/
 /*Split pages into 9:3 start*/
 .erppage-split {
     display: grid;

@@ -360,6 +360,7 @@ function checkModificationDays(options) {
         rowId = null,
         vType = null,
         onAllowed = null,
+        onBlocked = null,
         url = `/${controller}/${action}`
     } = options;
 
@@ -375,6 +376,10 @@ function checkModificationDays(options) {
 
                 if (response.isAllowed === 0) {
                     showToast(response.message, { type: "warning" });
+                    if (typeof onBlocked === "function") {
+                        onBlocked();
+                    }
+                    return;
                 }
                 else {
 
@@ -392,11 +397,19 @@ function checkModificationDays(options) {
 
             } else {
                 showToast(response.message, { type: "error" });
+                if (typeof onBlocked === "function") {
+                    onBlocked();
+                }
+                return;
             }
         },
 
         error: function () {
             showToast("An error occurred!", { type: "error" });
+            if (typeof onBlocked === "function") {
+                onBlocked();
+            }
+            return;
         }
     });
 }

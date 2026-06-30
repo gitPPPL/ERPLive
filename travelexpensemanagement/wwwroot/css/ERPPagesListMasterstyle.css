@@ -50,7 +50,9 @@
     position: relative;
     display: inline-block;
 }
-
+.ui-widget.ui-widget-content {
+    z-index: 9999999999;
+}
 /* Three Dot Button */
 .erppage-dropdownaction-btn {
     background: #c6d8ff !important;
@@ -310,9 +312,14 @@
 }
 
 /* TABLE */
-.excel-table {
+/*.excel-table {
     table-layout: auto;
     width: max-content;
+    min-width: 100%;
+}*/
+.excel-table {
+    table-layout: fixed;
+    width: 100%;
     min-width: 100%;
 }
 .width-table td {
@@ -403,8 +410,8 @@
     border: none;
     background: none;
     cursor: pointer;
-    margin: 0 3px;
-    font-size: 12px;
+    /* margin: 0 3px; */
+    font-size: 14px;
 }
 
     .act-btn.edit {

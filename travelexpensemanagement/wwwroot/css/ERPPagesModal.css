@@ -85,6 +85,16 @@
     .erppagesmodal-close:hover {
         background: rgba(255,255,255,0.25);
     }
+/*Draggable modal*/
+.erppage-modal-drag {
+    position: absolute !important;
+}
+
+    .erppage-modal-drag .erppagesmodal-header {
+        cursor: move;
+        user-select: none;
+    }
+
 
 /* Body */
 .erppagesmodal-body {
@@ -194,12 +204,12 @@
 }
 
 .erppagesmodal-btn {
-    background: linear-gradient(135deg, #2f7d32, #1b5e20);
+    background: linear-gradient(135deg, #2f7d32, #1c5e31);
     color: #fff;
     border: none;
-    border-radius: 10px;
-    padding: 6px 14px;
-    font-size: 13px;
+    border-radius: 4px;
+    padding: 3px 14px;
+    font-size: 12px;
     font-weight: 500;
     display: inline-flex;
     align-items: center;

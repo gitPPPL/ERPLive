@@ -67,6 +67,7 @@ builder.Services.AddScoped<IParameterMasterListRepository, ParameterMasterListRe
 builder.Services.AddScoped<IParameterMasterRepository, ParameterMasterRepository>();
 builder.Services.AddScoped<IPurchaseRequestListRepository, PurchaseRequestListRepository>();
 builder.Services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
+builder.Services.AddScoped<IApprovalService, ApprovalService>();
 
 // Gete Entry Transaction repositories
 

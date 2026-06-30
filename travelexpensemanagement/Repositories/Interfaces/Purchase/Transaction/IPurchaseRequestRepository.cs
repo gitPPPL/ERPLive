@@ -29,5 +29,6 @@ namespace travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction
         RepositoryResponseData<List<ItemWisePurchaseQuotationHistoryModel>> GetItemWisePurchaseQuotationHistory(int itemCode);
         RepositoryResponseData<List<LastTenPurchaseHistoryModel>> GetItemWisePurchaseReceiptHistory(int itemCode);
         RepositoryResponseData<List<LastTenPurchaseHistoryModel>> GetItemWisePurchaseHistory(int itemCode);
+        RepositoryResponseData<string> PRPrintRequest(PRPrintModel model);
     }
 }

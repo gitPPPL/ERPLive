@@ -388,7 +388,7 @@ body {
 /* TOPBAR */
 
 .ERPPageLayout-topbar {
-    height: 55px;
+    height: 70px;
     background: #fff;
     border-bottom: 1px solid #dce5d8;
     display: flex;
@@ -407,15 +407,15 @@ body {
 /* ICON BUTTON */
 
 .ERPPageLayout-icon-btn {
-    width: 42px;
-    height: 42px;
+    width: 35px;
+    height: 35px;
     border: none;
-    background: #edf4ea;
-    border-radius: 12px;
+    background: #ebebeb;
+    border-radius: 8px;
     color: #1C5E31;
     cursor: pointer;
     transition: 0.25s;
-    font-size: 15px;
+    font-size: 14px;
 }
 
     .ERPPageLayout-icon-btn:hover {
@@ -431,20 +431,20 @@ body {
 
 .ERPPageLayout-user-btn {
     border: none;
-    background: #edf4ea;
-    padding: 4px 10px;
-    border-radius: 14px;
+    background: #ebebeb;
+    padding: 3px 6px;
+    border-radius: 28px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
     color: #1C5E31;
     font-weight: 500;
 }
 
     .ERPPageLayout-user-btn img {
-        width: 36px;
-        height: 36px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
     }
 
@@ -470,15 +470,15 @@ body {
         align-items: center;
         gap: 12px;
         text-decoration: none;
-        padding: 12px;
+        padding: 8px;
         border-radius: 10px;
         color: #1C5E31;
         transition: 0.25s;
-        font-size: 14px;
+        font-size: 12px;
     }
 
         .ERPPageLayout-user-menu a:hover {
-            background: #edf4ea;
+            background: #ebebeb;
         }
 
 .ERPPageLayout-content {
