@@ -265,7 +265,7 @@
     background: #fff;
     border-radius: 12px;
     border: 1px solid #d5d7ff;
-    padding: 14px;
+    padding: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
     margin-top: 8px;
 }
@@ -274,9 +274,9 @@
     text-align: center;
     color: #6c73a8;
     margin: 0;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .erppageattachmentsectiondropzone {
@@ -292,12 +292,13 @@
 }
 
 .erppageattachmentsectioncloud {
-    font-size: 25px;
+    font-size: 20px;
     color: #d6d9ff;
 }
 
 .erppageattachmentsectiondragtext {
-    color: #8f96c2;
+    color: #6e78b7;
+    font-size: 12px;
 }
 
 .erppageattachmentsectionor {
@@ -313,7 +314,8 @@
     border-radius: 4px;
     padding: 4px 8px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 400;
+    font-size: 11px;
 }
 
     .erppageattachmentsectionbrowsebtn:hover {
@@ -321,14 +323,14 @@
     }
 
 .erppageattachmentsectionheader {
-    font-size: 15px;
+    font-size: 13px;
     color: #9098c0;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     font-weight: 600;
 }
 
 .erppageattachmentsectionfilelist {
-    max-height: 120px;
+    max-height: 150px;
     overflow-y: auto;
     padding-right: 5px;
 }
@@ -352,15 +354,19 @@
     margin-bottom: 6px;
 }
 
+    .erppageattachmentsectionfileitem:hover {
+        background: #ebecfd;
+    }
+
 .erppageattachmentsectionicon {
-    width: 35px;
-    height: 35px;
-    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-size: 11px;
+    font-size: 8px;
     font-weight: 700;
 }
 
@@ -370,8 +376,7 @@
 
 .erppageattachmentsectionfilename {
     color: #4f587b;
-    font-size: 14px;
-    margin-bottom: 8px;
+    font-size: 12px;
 }
 
 .erppageattachmentsectionprogress {
@@ -396,21 +401,22 @@
 }
 
     .erppageattachmentsectionactions button {
-        border: none;
         cursor: pointer;
-        border-radius: 6px;
-        padding: 7px 10px;
-        font-size: 12px;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 11px;
     }
 
 .erppageattachmentsectionview {
-    background: #e9f1ff;
+    background: #c8dcff;
     color: #346bff;
+    border: 1px solid #346bff;
 }
 
 .erppageattachmentsectiondelete {
     background: #ffe9e9;
     color: #df4343;
+    border: 1px solid #df4343;
 }
 /* PDF - Orange */
 .erppageattachmentsectionpdf {
@@ -2079,7 +2085,7 @@ input[type="number"] {
 .erppage-actions {
     position: fixed;
     bottom: 0;
-    left: 280px;
+    left: 0;
     right: 0;
     display: flex;
     justify-content: flex-end;

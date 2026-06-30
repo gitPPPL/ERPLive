@@ -4,7 +4,7 @@
 }
 .erppagesmodal-content {
     border: none;
-    border-radius: 16px;
+    border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 12px 30px rgba(0,0,0,0.15);
     background: #f9fafb;
@@ -35,7 +35,7 @@
     }
 /* Header */
 .erppagesmodal-header {
-    background: linear-gradient(135deg, #142966, #4680ff);
+    background: linear-gradient(135deg, #007bff, #4680ff);
     color: #fff;
     padding: 6px 10px;
     display: flex;
