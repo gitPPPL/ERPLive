@@ -44,7 +44,34 @@
     font-size: 12px;
 }
 /*button More*/
-
+.erppagebtn_approved {
+    color: #2f7d32;
+    font-weight: bold;
+    background-color: #ffffff;
+    padding: 2px 8px;
+    border: none;
+    font-weight: 600;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.erppagebtn_sendapproval {
+    color: #ffffff;
+    /* font-weight: bold; */
+    background-color: #66a644;
+    padding: 2px 8px;
+    border: none;
+    font-weight: 400;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
 /* Dropdown Wrapper */
 .erppage-dropdownaction {
     position: relative;
@@ -313,8 +340,13 @@
 }
 .width-table td {
     padding: 4px 6px;
-}   
-
+}
+.excel-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: linear-gradient(135deg,#232323,#0f0f0f);
+}
     /* HEADER */
     .excel-table th {
         position: sticky;
@@ -617,11 +649,16 @@ button:focus {
     overflow: visible !important;
     gap: 6px;
 }
-.fixed-grid-wrapper,
+/*.fixed-grid-wrapper,
 .excel-wrapper,
 .erppagelist-container {
     overflow-x: auto !important;
     overflow-y: auto;
+    position: relative;
+}*/
+.excel-wrapper.fixed-grid-wrapper {
+    max-height: 500px; /* or 400px/600px */
+    overflow: auto;
     position: relative;
 }
 
@@ -633,7 +670,7 @@ button:focus {
 
 .excel-table tbody tr:nth-child(odd) td,
 .excel-table tbody tr:nth-child(odd) th {
-    background-color: #e4f1ff;
+    background-color: #ffffff;
 }
 
 /* Hover effect for full row including action column */
@@ -646,9 +683,10 @@ button:focus {
     white-space: nowrap;
 }
 .fixed-grid-table thead th.action-col {
-    z-index: 99;
-    background: linear-gradient(135deg, #232323, #0f0f0f);
-    color: #fff;
+    position: sticky;
+    right: 0;
+    top: 0;
+    z-index: 50;
 }
 .fixed-grid-table tbody tr:hover td.action-col {
     background: #f2f2f2;
@@ -1120,3 +1158,49 @@ button:focus {
         white-space: nowrap;
     }
 }
+
+
+/*table color*/
+.po-generated-row,
+.po-generated-row td,
+.po-generated-row input,
+.po-generated-row select,
+.po-generated-row textarea {
+    background-color: #ffdea2 !important;
+}
+
+    .po-generated-row .select2-container--default .select2-selection--single {
+        background: #ffdea2 !important;
+        border: 1px solid #ffdea2 !important;
+    }
+
+    .po-generated-row .select2-selection__rendered {
+        background: #ffdea2 !important;
+        color: #000 !important;
+    }
+
+    .po-generated-row .select2-selection__arrow {
+        background: #ffdea2 !important;
+    }
+
+.order-received-row,
+.order-received-row td,
+.order-received-row input,
+.order-received-row select,
+.order-received-row textarea {
+    background-color: #bbffd0 !important;
+}
+
+    .order-received-row .select2-container--default .select2-selection--single {
+        background: #bbffd0 !important;
+        border: 1px solid #bbffd0 !important;
+    }
+
+    .order-received-row .select2-selection__rendered {
+        background: #bbffd0 !important;
+        color: #000 !important;
+    }
+
+    .order-received-row .select2-selection__arrow {
+        background: #bbffd0 !important;
+    }

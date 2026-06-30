@@ -618,7 +618,7 @@
 .erppage-readonly select {
     pointer-events: none;
     user-select: none;
-    background-color: #e5e5e5 !important;
+    background-color: #e5e5e5;
     cursor: not-allowed;
     color: #5e5e5e;
 }
@@ -690,9 +690,9 @@
 .erppage-readonly .select2-container--default .select2-selection--single,
 .erppage-readonly .select2-container--default .select2-selection--single .select2-selection__rendered,
 .erppage-readonly .select2-container--default .select2-selection--single .select2-selection__arrow {
-    background-color: #e5e5e5 !important;
-    color: #6b6b6b !important;
-    border-color: #cfcfcf !important;
+    background-color: #e5e5e5;
+    color: #6b6b6b;
+    border-color: #cfcfcf;
 }
 #erp-center-toast-container {
     position: fixed;
@@ -936,6 +936,13 @@
         transition: .3s;
         box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
     }
+
+.fixed-grid-table thead th.freeze-item {
+    position: sticky;
+    left: 0;
+    top: 0;
+    z-index: 50;
+}
 /*table First columns fixed and position sticky*/
 .fixed-grid-table th.freeze-item,
 .fixed-grid-table td.freeze-item {
