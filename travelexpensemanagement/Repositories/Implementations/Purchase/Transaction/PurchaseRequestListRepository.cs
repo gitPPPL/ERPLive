@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
 using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseRequestModel;
@@ -13,10 +14,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        public PurchaseRequestListRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService)
+        private readonly LogService.LogService _logService;
+        public PurchaseRequestListRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, LogService.LogService logService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
+            _logService = logService;
         }
         public RepositoryResponse DeletePurchaseRequest(int docId)
         {
@@ -34,6 +37,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
 
                             cmd.Parameters.AddWithValue("@Action", "DELETE");
                             cmd.Parameters.AddWithValue("@V_NO", docId);
+                            cmd.Parameters.AddWithValue("@V_Type", "STPI");
                             cmd.Parameters.AddWithValue("@COMP_CODE", getGlobalCode.PubCompCode);
                             cmd.Parameters.AddWithValue("@YEAR_CODE", getGlobalCode.PubFYearCode);
                             cmd.Parameters.AddWithValue("@BRANCH_CODE", getGlobalCode.PubBranchCode);
@@ -41,6 +45,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                             {
                                 cmd.ExecuteNonQuery();
                                 tran.Commit();
+                                _logService.InsertLog("PREQUEST1", "Purchase Request", "Transaction", "Delete", "STPI", docId.ToString(), null);
                                 return new RepositoryResponse { status = true, message = " Purchase Request deleted successfully." };
                             }
                             catch (Exception ex)
@@ -444,6 +449,34 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                 return new RepositoryResponseList<Header> { status = false, message = "Error fetching Purchase Request" + ex.Message };
             }
             return new RepositoryResponseList<Header> { status = true, data = PurchaseHeader, totalCount = totalCount };
+        }
+
+        public RepositoryResponseData<bool> CheckApprovalStatusForDelete(int vNo)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            try
+            {
+                using (var con = _dbConnection.GetErpConnection())
+                using (var cmd = new SqlCommand("sp_PurchaseReq1", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "CheckApprovalStatus");
+                    cmd.Parameters.AddWithValue("@V_NO", vNo);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@USER_CODE", gv.PubUserId);
+
+                    con.Open();
+                    var result = cmd.ExecuteScalar();
+                    bool isOpen = result != null && result != DBNull.Value && result.ToString().ToUpper() == "OPEN";
+                    return new RepositoryResponseData<bool> { status = true, data = isOpen };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new RepositoryResponseData<bool> { status = false, message = ex.Message, data = false };
+            }
         }
     }
 }

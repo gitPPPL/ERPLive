@@ -1,7 +1,11 @@
 ﻿using Microsoft.Data.SqlClient;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
+using StackExchange.Redis;
 using System.Data;
+using System.Threading.Tasks;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
 using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseRequestModel;
@@ -12,10 +16,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        public PurchaseRequestRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService)
+        private readonly LogService.LogService _logService;
+        public PurchaseRequestRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, LogService.LogService logService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
+            _logService = logService;
         }
         public RepositoryResponseData<bool> CheckIsApprovalBody()
         {
@@ -261,20 +267,20 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             return new RepositoryResponseData<decimal> { data = avgConsumption };
         }
         
-        public RepositoryResponse SaveData(PurchaseRequest_model request)
+        public async Task<RepositoryResponse> SaveData(PurchaseRequest_model request)
         {
             if (request?.Header == null)
                 return new RepositoryResponse { status = false, message = "Input model is null" };
 
             var action = request.Header.action == "INSERT" ? "Insert" : "Update";
-            var result = SubmitRequest(request.Header, request.ItamDetails, request.PurchaseDocuments, action);
+            var result = await SubmitRequest(request.Header, request.ItamDetails, request.PurchaseDocuments, action);
 
             return result == "Success"
                 ? new RepositoryResponse { status = true }
                 : new RepositoryResponse { status = false, message = result };
         }
 
-        private string SubmitRequest(Header header, List<ItamDetails> itamDetails, List<PurchaseRequestModel.PurchaseDocuments> purchaseDocuments, string action)
+        private async Task<string> SubmitRequest(Header header, List<ItamDetails> itamDetails, List<PurchaseRequestModel.PurchaseDocuments> purchaseDocuments, string action)
         {
             {
                 try
@@ -466,6 +472,61 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                                 }
 
                                 tran.Commit();
+                                
+                                //==============Delete from Approval Status===============
+                                if(header.STATUS > 1)
+                                {
+                                    string delApprovalRecord = $@" Delete from APPROVAL_STATUS Where V_TYPE=@V_TYPE and V_NO=@V_NO and comp_code=@comp_code and year_code=@year_code and branch_code=@branch_code;
+                                                                   Delete from APPROVAL_STATUS2 Where V_TYPE=@V_TYPE and V_NO=@V_NO and comp_code=@comp_code and year_code=@year_code and branch_code=@branch_code";
+                                    using (SqlCommand pubCmd = new SqlCommand(delApprovalRecord, conn))
+                                    {
+                                        pubCmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                                        pubCmd.Parameters.AddWithValue("@V_TYPE", "STPI");
+                                        pubCmd.Parameters.AddWithValue("@V_NO", header.V_NO);
+                                        pubCmd.Parameters.AddWithValue("@year_code", g.PubFYearCode);
+                                        pubCmd.Parameters.AddWithValue("@branch_code", g.PubBranchCode);
+                                        pubCmd.ExecuteNonQuery();
+                                    }
+                                }
+                                //==============Delete from Approval Status===============
+
+                                //===============Update Approval Status==================
+                                var FinalApprovalBody = await CheckIsFinalApprovalBodyAsync();
+                                if (FinalApprovalBody.data)
+                                {
+                                    using (SqlCommand cmd = new SqlCommand($@"select 1 from approval_status where user_Code=@USER_CODE  
+                                                                            and V_Type='STPI' and V_No=@V_NO and COMP_CODE=@COMP_CODE and Branch_Code=@Branch_Code 
+                                                                            and Year_Code=@Year_Code", conn))
+                                    {
+                                        //cmd.CommandType = CommandType.StoredProcedure;
+                                        //cmd.Parameters.AddWithValue("@Action", "IsFinalApprovalBody");
+                                        cmd.Parameters.AddWithValue("@USER_CODE", g.PubUserId);
+                                        cmd.Parameters.AddWithValue("@V_TYPE", "STPI");
+                                        cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
+                                        cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                                        cmd.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
+                                        cmd.Parameters.AddWithValue("@Year_Code", g.PubFYearCode);
+
+                                        object result = await cmd.ExecuteScalarAsync();
+
+                                        if (result != null && result != DBNull.Value)
+                                        {
+                                            string updateQuery = $@" Update approval_status set STATUS='CLOSE', CLOSE_DATE=format(getdate(),'yyyy-MM-dd HH:mm'),Approval_code=8,
+                                                                 Approval_remark='Approved',remarks='Document Approved' where V_Type='STPI' and V_No=@V_NO 
+                                                                 and COMP_CODE=@COMP_CODE and Branch_Code=@Branch_Code and Year_Code=@Year_Code";
+                                            var pubCmd = new SqlCommand(updateQuery, conn);
+                                            cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
+                                            cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                                            cmd.Parameters.AddWithValue("@Branch_Code", g.PubBranchCode);
+                                            cmd.Parameters.AddWithValue("@Year_Code", g.PubFYearCode);
+                                            pubCmd.ExecuteNonQuery();
+                                        }
+                                    }
+                                }
+                                //===============Update Approval Status==================
+                                string mode = action == "insert" ? "Insert" : "Update";
+                                _logService.InsertLog("PREQUEST1", "Purchase Request", "Transaction", mode, "STPI", header.V_NO.ToString(), header.V_DATE);
+                                _logService.InsertLog("PREQUEST2", "Purchase Request", "Transaction", mode, "STPI", header.V_NO.ToString(), header.V_DATE);
                                 return "Success";
                             }
                             catch (Exception ex)
@@ -1403,6 +1464,60 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             catch (Exception ex)
             {
                 return new RepositoryResponseData<string> { status = false, message = ex.Message };
+            }
+        }
+        public RepositoryResponseData<(bool isExist, string userName)> CheckApprovalStatus(int vNo)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            bool isExist = false;
+            string userName = "";
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+                    using (SqlCommand cmd = new SqlCommand("sp_PurchaseReq1", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "CheckApprovalStatus");
+                        cmd.Parameters.AddWithValue("@V_NO", vNo);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@USER_CODE", gv.PubUserId);
+                        var result = cmd.ExecuteScalar();
+                        isExist = result != null;
+                    }
+                    if (isExist)
+                    {
+                        using (SqlCommand cmd = new SqlCommand("sp_PurchaseReq1", con))
+                        {
+                            cmd.CommandType = CommandType.StoredProcedure;
+                            cmd.Parameters.AddWithValue("@Action", "GetPenApprovUserName");
+                            cmd.Parameters.AddWithValue("@V_NO", vNo);
+                            cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                            cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                            cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+                            cmd.Parameters.AddWithValue("@USER_CODE", gv.PubUserId);
+                            var result = cmd.ExecuteScalar();
+                            userName = result?.ToString() ?? "";
+                        }
+                    }
+                    return new RepositoryResponseData<(bool, string)>
+                    {
+                        status = true,
+                        data = (isExist, userName)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new RepositoryResponseData<(bool, string)>
+                {
+                    status = false,
+                    message = ex.Message,
+                    data = (false, "")
+                };
             }
         }
     }

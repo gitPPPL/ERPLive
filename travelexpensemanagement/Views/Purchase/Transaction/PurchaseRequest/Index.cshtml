@@ -3,51 +3,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
-<style>
-    .po-generated-row,
-    .po-generated-row td,
-    .po-generated-row input,
-    .po-generated-row select,
-    .po-generated-row textarea {
-        background-color: orange !important;
-    }
 
-        .po-generated-row .select2-container--default .select2-selection--single {
-            background: orange !important;
-            border: 1px solid orange !important;
-        }
-
-        .po-generated-row .select2-selection__rendered {
-            background: orange !important;
-            color: #000 !important;
-        }
-
-        .po-generated-row .select2-selection__arrow {
-            background: orange !important;
-        }
-
-        .order-received-row,
-        .order-received-row td,
-        .order-received-row input,
-        .order-received-row select,
-        .order-received-row textarea {
-            background-color: forestgreen !important;
-        }
-
-        .order-received-row .select2-container--default .select2-selection--single {
-            background: forestgreen !important;
-            border: 1px solid forestgreen !important;
-            }
-
-        .order-received-row .select2-selection__rendered {
-            background: forestgreen !important;
-                color: #000 !important;
-            }
-
-        .order-received-row .select2-selection__arrow {
-            background: forestgreen !important;
-            }
-</style>
 
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
@@ -58,18 +14,20 @@
         <div class="erppage-header-title">Purchase Request</div>
     </div>
     <div class="erppage-header-right">
+        
         <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="PRReport()">
             <i class="fa fa-print"></i>Print
         </button>
+        
         <button type="button"
                 id="btn_Sendapproval"
-                style="display:none;">
-            Send For Approval
+                style="display:none;" class="erppagebtn_sendapproval">
+            <i class="fa fa-share"></i>Send For Approval
         </button>
-
         <button type="button"
                 id="btn_Approved"
-                style="display:none;color:green;font-weight:bold;">
+                style="display:none;"
+                 class="erppagebtn_approved">
             Approved
         </button>
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PurchaseRequestList")', isReadOnly)">
@@ -171,13 +129,13 @@
                 </div>
 
                 <div class="erppage-internalaction" style="margin:0px;">
-                    <button id="btn-lastTenPurchaseOrder" type="button" class="erppage-btn erppage-btn-common">
+                    <button id="btn-lastTenPurchaseOrder" type="button" class="erppage-btn erppage-btn-common-disabled">
                         <i class="fa fa-calendar"></i><span>Last 10 Purchase Order</span>
                     </button>
-                    <button id="btn-lastTenPurchases" type="button" class="erppage-btn erppage-btn-common">
+                    <button id="btn-lastTenPurchases" type="button" class="erppage-btn erppage-btn-common-disabled">
                         <i class="fa fa-calendar"></i><span>Last 10 Purchases</span>
                     </button>
-                    <button id="btn-lastTenPurchaseRequest" type="button" class="erppage-btn erppage-btn-common">
+                    <button id="btn-lastTenPurchaseRequest" type="button" class="erppage-btn erppage-btn-common-disabled">
                         <i class="fa fa-calendar"></i><span>Last 10 Purchase Request</span>
                     </button>
                     <button id="btn-lastTenConsumption" type="button" class="erppage-btn erppage-btn-common">
@@ -186,32 +144,7 @@
                 </div>
             </div>
            
-            <div class="erppage-container">
-                @*  <div class="erppage-tab-content" id="attachment">
-                    <fieldset class="erppage-fieldset">
-                        <div class="excel-wrapper fixed-grid-wrapper">
-                            <table id="tblAttachmentPR" class="excel-table fixed-grid-table resizable-table">
-                                <colgroup>
-                                    <col style="display:none;">
-                                    <col style="width:400px;">
-                                    <col style="width:350px;">
-                                    <col style="width:120px;">
-                                </colgroup>
-                                <thead>
-                                    <tr>
-                                        <th class="hidden-col">Code</th>
-                                        <th>File Name</th>
-                                        <th>File Upload</th>
-                                        <th class="action-col">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </fieldset>
-                </div> *@
-                
-            </div>
+           
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Item Detail</legend>
                     <div class="excel-wrapper fixed-grid-wrapper">
@@ -496,21 +429,21 @@
 
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblLastTenPurchaseRequest"
-                           class="excel-table fixed-grid-table resizable-table">
+                           class="excel-table fixed-grid-table width-table resizable-table">
 
                         <colgroup>
-                            <col style="width:100px;">
-                            <col style="width:220px;">
-                            <col style="width:120px;">
-                            <col style="width:120px;">
-                            <col style="width:180px;">
-                            <col style="width:150px;">
-                            <col style="width:80px;">
-                            <col style="width:100px;">
+                            <col style="width: 79px;">
+                            <col style="width: 181px;">
+                            <col style="width: 76px;">
+                            <col style="width: 75px;">
+                            <col style="width: 89px;">
+                            <col style="width: 69px;">
+                            <col style="width: 51px;">
+                            <col style="width: 63px;">
                             <col style="width:200px;">
-                            <col style="width:250px;">
-                            <col style="width:250px;">
-                            <col style="width:100px;">
+                            <col style="width: 102px;">
+                            <col style="width: 153px;">
+                            <col style="width: 57px;">
                         </colgroup>
 
                         <thead>
@@ -568,7 +501,7 @@
 
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblLastTenConsumption"
-                           class="excel-table fixed-grid-table resizable-table">
+                           class="excel-table fixed-grid-table width-table resizable-table">
 
                         <colgroup>
                             <col style="width:100px;">
@@ -641,27 +574,27 @@
 
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblLastTenPurchaseHistory"
-                           class="excel-table fixed-grid-table resizable-table">
+                           class="excel-table fixed-grid-table width-table resizable-table">
 
                         <colgroup>
-                            <col style="width:100px;">
-                            <col style="width:120px;">
-                            <col style="width:120px;">
-                            <col style="width:220px;">
-                            <col style="width:220px;">
-                            <col style="width:150px;">
-                            <col style="width:80px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:120px;">
-                            <col style="width:250px;">
-                            <col style="width:100px;">
+                            <col style="width: 76px;">
+                            <col style="width: 77px;">
+                            <col style="width: 77px;">
+                            <col style="width: 173px;">
+                            <col style="width: 183px;">
+                            <col style="width: 73px;">
+                            <col style="width: 51px;">
+                            <col style="width: 63px;">
+                            <col style="width: 70px;">
+                            <col style="width: 74px;">
+                            <col style="width: 66px;">
+                            <col style="width: 69px;">
+                            <col style="width: 65px;">
+                            <col style="width: 64px;">
+                            <col style="width: 58px;">
+                            <col style="width: 65px;">
+                            <col style="width: 73px;">
+                            <col style="width: 61px;">
                         </colgroup>
 
                         <thead>
@@ -726,27 +659,27 @@
 
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblLastTenOrderHistory"
-                           class="excel-table fixed-grid-table resizable-table">
+                           class="excel-table fixed-grid-table width-table resizable-table">
 
                         <colgroup>
-                            <col style="width:100px;">
-                            <col style="width:120px;">
-                            <col style="width:120px;">
-                            <col style="width:220px;">
-                            <col style="width:220px;">
-                            <col style="width:150px;">
-                            <col style="width:80px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:100px;">
-                            <col style="width:120px;">
-                            <col style="width:250px;">
-                            <col style="width:100px;">
+                            <col style="width: 79px;">
+                            <col style="width: 79px;">
+                            <col style="width: 82px;">
+                            <col style="width: 173px;">
+                            <col style="width: 182px;">
+                            <col style="width: 70px;">
+                            <col style="width: 51px;">
+                            <col style="width: 64px;">
+                            <col style="width: 68px;">
+                            <col style="width: 66px;">
+                            <col style="width: 71px;">
+                            <col style="width: 70px;">
+                            <col style="width: 63px;">
+                            <col style="width: 71px;">
+                            <col style="width: 62px;">
+                            <col style="width: 77px;">
+                            <col style="width: 70px;">
+                            <col style="width: 69px;">
                         </colgroup>
 
                         <thead>

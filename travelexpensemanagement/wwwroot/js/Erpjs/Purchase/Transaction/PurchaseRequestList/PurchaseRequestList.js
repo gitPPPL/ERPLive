@@ -56,13 +56,13 @@ $(document).ready(async function () {
 									<i class="fa fa-edit"></i>
 								</button>`;
 				}
-				actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${vNo}')"><i class="fa fa-eye"></i></button>`;
+				actions += `<button class="act-btn view btn-view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${vNo}')"><i class="fa fa-eye"></i></button>`;
 
 				if (window.permissions.canDelete) {
-					actions += `<button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteTemp('${vNo}')"><i class="fa fa-trash"></i></button>`;
+					actions += `<button class="act-btn delete btn-delete" title="Delete" style="cursor:pointer;" onclick="deleteTemp('${vNo}')"><i class="fa fa-trash"></i></button>`;
 				}
 				if (window.permissions.canDocDetail) {
-					actions += `<button class="act-btn document" title="document" style="cursor:pointer;" onclick="showImpExpExpensePopup('${vNo}')"><i class="fa fa-file-alt"></i></button>`;
+					actions += `<button class="act-btn document btn-document" title="document" style="cursor:pointer;" onclick="showImpExpExpensePopup('${vNo}')"><i class="fa fa-file-alt"></i></button>`;
 				}
 				tbody.append(`
 				<tr>
@@ -166,8 +166,10 @@ $(document).on('click', '.btn-edit', function () {
 
 			validateDepartmentAccess(deptCode, function (canProceed3) {
 				if (!canProceed3) return;
-
-				AddOrEditFunction(no);
+				checkApprovalStatusForEdit(no, function (canProceed4) {
+					if (!canProceed4) return;
+					AddOrEditFunction(no);
+				})
 			});
 		});
 	});
@@ -271,18 +273,129 @@ function validateDepartmentAccess(deptCode, callback) {
 		}
 	});
 }
+
+function checkApprovalStatusForEdit(vno, callback) {
+	$.ajax({
+		url: '/PurchaseRequest/CheckApprovalStatus',
+		type: 'GET',
+		data: { VNO: vno },
+		dataType: 'json',
+		success: function (res) {
+
+			if (!res.success) {
+				showToast(res.message || "Error while checking approval status.", { type: "error" });
+				callback(false);
+				return;
+			}
+
+			if (res.isExist) {
+				showToast(`Document already in Approval process at User: ${res.userName}, Edit not allowed.`, { type: "warning" });
+				callback(false); 
+				return;
+			}
+
+			// pending approval exists
+			callback(true);
+		},
+		error: function () {
+			showToast("Server error while checking approval status.", { type: "error" });
+			callback(false);
+		}
+	});
+}
 //===========Edit End===========
 function viewMenuDetails(code) {
 	window.location.href = '/PurchaseRequest/Index?id=' + encodeURIComponent(code) + '&mode=view';
 }
 
+//================Delete==================
 function deleteTemp(docId) {
-	deleteRecord("PurchaseRequestList", docId, {
-		action: "Delete",
-		text: "This will permanently delete the Purchase Request details.",
-		successCallback: PRPagination.load
+
+	// STEP 1: Validate first
+	$.ajax({
+		url: `/PurchaseRequestList/CheckApprovalStatusForDelete`,
+		type: 'GET',
+		data: { docId: docId },
+
+		success: function (response) {
+
+			if (!response.success) {
+				Swal.fire('Failed', response.message, 'warning');
+				return;
+			}
+
+			// STEP 2: Prepare message
+			let swalText = "This will permanently delete the Purchase Request Details.";
+			let cancelBtn = true;
+			let confirmBtn = true;
+			let swalTitle = "Are you sure?";
+			if (response.isOpen) {
+				swalText = "This document is currently under approval and cannot be deleted.";
+				cancelBtn = false;
+				confirmBtn = false;
+				swalTitle = "Can't delete!!";
+			}
+
+			// STEP 3: Show only ONE popup
+			Swal.fire({
+				title: swalTitle,
+				html: swalText,
+				icon: 'warning',
+				showCancelButton: cancelBtn,
+				showConfirmButton: confirmBtn,
+				confirmButtonColor: '#d33',
+				cancelButtonColor: '#3085d6',
+				confirmButtonText: 'Yes, delete it!',
+				cancelButtonText: 'Cancel'
+			}).then((result) => {
+
+				if (!result.isConfirmed) return;
+
+				// STEP 4: Delete
+				$.ajax({
+					url: `/PurchaseRequestList/Delete`,
+					type: 'POST',
+					data: { docId: docId },
+
+					success: function (res) {
+
+						if (res.success) {
+
+							Swal.fire({
+								icon: 'success',
+								title: 'Deleted!',
+								text: res.message || 'Deleted successfully',
+								showConfirmButton: false,   // Hide the OK button
+								timer: 2000,                 // Auto close
+							});
+							setTimeout(() => {
+								QCMasterPagination.load();
+							}, 2000);
+						} else {
+							Swal.fire('Failed', res.message, 'warning');
+						}
+					},
+
+					error: function () {
+						Swal.fire('Error!', 'Error in deleting.', 'error');
+					}
+				});
+
+			});
+		},
+
+		error: function () {
+			Swal.fire('Error!', 'Something went wrong.', 'error');
+		}
 	});
 }
+//function deleteTemp(docId) {
+//	deleteRecord("PurchaseRequestList", docId, {
+//		action: "Delete",
+//		text: "This will permanently delete the Purchase Request details.",
+//		successCallback: PRPagination.load
+//	});
+//}
 // ================= Download Excel =================
 //document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
 //	e.preventDefault();

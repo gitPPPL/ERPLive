@@ -121,5 +121,15 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = ex.Message });
             }
         }
+
+        [HttpGet]
+        public JsonResult CheckApprovalStatusForDelete(int docId)
+        {
+            if (docId <= 0)
+                return Json(new { success = false, message = "Invalid VNo" });
+
+            var result = _IPRListRepository.CheckApprovalStatusForDelete(docId);
+            return Json(new { success = result.status, isOpen = result.data, message = result.message });
+        }
     }
 }

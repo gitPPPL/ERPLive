@@ -15,7 +15,6 @@ body {
 /* =========================================
    OVERLAY
 ========================================= */
-
 .ERPPageLayout-overlay {
     position: fixed;
     inset: 0;
@@ -31,6 +30,24 @@ body {
 /* =========================================
    SIDEBAR
 ========================================= */
+.ERPPageLayout-sidebar {
+    transform: translateX(0);
+    transition: transform .3s ease;
+}
+
+    .ERPPageLayout-sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+
+.ERPPageLayout-main {
+    margin-left: 260px;
+    transition: margin-left .3s ease;
+}
+
+    .ERPPageLayout-main.expanded {
+        margin-left: 0;
+    }
+
 
 .ERPPageLayout-sidebar {
     width: 280px;
@@ -47,7 +64,6 @@ body {
 }
 
     /* SCROLLBAR */
-
     .ERPPageLayout-sidebar::-webkit-scrollbar {
         width: 6px;
     }
@@ -58,7 +74,6 @@ body {
     }
 
 /* LOGO */
-
 .ERPPageLayout-logo {
     display: flex;
     align-items: center;
@@ -93,10 +108,7 @@ body {
     overflow: hidden;
 }
 
-    
-
 /* COMPANY INFO */
-
 .ERPPageLayout-company-info {
     margin: 14px 16px 8px;
     padding: 12px 14px;
@@ -143,7 +155,6 @@ body {
     }
 
 /* SEARCH */
-
 .ERPPageLayout-search {
     padding: 5px 15px;
     position: relative;
@@ -209,7 +220,6 @@ body {
     }
 
 /* MENU */
-
 .ERPPageLayout-menu {
     list-style: none;
     padding: 4px 10px;
@@ -221,7 +231,6 @@ body {
     }
 
         /* ACTIVE BAR */
-
         .ERPPageLayout-menu li.active::before {
             content: '';
             position: absolute;
@@ -234,7 +243,6 @@ body {
         }
 
 /* MENU LINK */
-
 .ERPPageLayout-menu-link {
     display: flex;
     align-items: center;
@@ -263,7 +271,6 @@ body {
     }
 
 /* ACTIVE */ 
-
 .ERPPageLayout-menu li.active > .ERPPageLayout-menu-link {
     background: linear-gradient(135deg,#1C5E31,#2d7b46);
     color: #fff;
@@ -275,9 +282,6 @@ body {
     }
 
 /* SUBMENU */
-
-
-
 .ERPPageLayout-submenu {
     list-style: none;
     display: none;
@@ -291,7 +295,6 @@ body {
     }
 
     /* THIRD LEVEL */
-
     .ERPPageLayout-submenu .ERPPageLayout-submenu {
         margin-left: 12px;
         padding-left: 14px;
@@ -299,7 +302,6 @@ body {
     }
 
     /* SUBMENU LINKS */
-
     .ERPPageLayout-submenu li {
         margin-top: 2px;
     }
@@ -323,7 +325,6 @@ body {
     /* =========================================
    LEVEL 2 MENU (SECOND LEVEL) GREEN STYLE
 ========================================= */
-
     .ERPPageLayout-submenu > li > a {
         border-radius: 10px;
         transition: 0.25s ease;
@@ -344,7 +345,6 @@ body {
                 color: #fff !important;
             }
 /* ARROW */
-
 .ERPPageLayout-arrow {
     transition: 0.3s;
     font-size: 13px;
@@ -355,7 +355,6 @@ body {
 }
 
 /* CURRENT ACTIVE PAGE */
-
 .ERPPageLayout-menu-link.active-page {
     background: linear-gradient(135deg,#1C5E31,#2d7b46);
     color: #fff !important;
@@ -376,7 +375,6 @@ body {
 /* =========================================
    MAIN
 ========================================= */
-
 .ERPPageLayout-main {
     margin-left: 280px;
     min-height: 100vh;
@@ -386,7 +384,6 @@ body {
 }
 
 /* TOPBAR */
-
 .ERPPageLayout-topbar {
     height: 70px;
     background: #fff;
@@ -405,7 +402,6 @@ body {
 }
 
 /* ICON BUTTON */
-
 .ERPPageLayout-icon-btn {
     width: 35px;
     height: 35px;
@@ -424,7 +420,6 @@ body {
     }
 
 /* USER */
-
 .ERPPageLayout-user {
     position: relative;
 }
@@ -488,9 +483,7 @@ body {
     overflow-x: hidden;
 }
 
-
 /* RESPONSIVE */
-
 @media(max-width:992px) {
 
     .ERPPageLayout-sidebar {

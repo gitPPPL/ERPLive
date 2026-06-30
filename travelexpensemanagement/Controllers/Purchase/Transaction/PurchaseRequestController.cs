@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Office.Word;
+﻿using AngleSharp.Common;
+using DocumentFormat.OpenXml.Office.Word;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -198,12 +199,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
         //=============================================
         [HttpPost]
-        public IActionResult SavedData([FromBody] PurchaseRequest_model request)
+        public async Task<IActionResult> SavedData([FromBody] PurchaseRequest_model request)
         {
             if (request?.Header == null)
                 return Json(new { success = false, message = "Input model is null" });
 
-            var result = _IPRRepository.SaveData(request);
+            var result = await _IPRRepository.SaveData(request);
 
             return result.status
                 ? Json(new { success = true })
@@ -503,6 +504,23 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return Json(new { success = result.status, message = result.message, approvedBy = result.data });
         }
 
+        [HttpGet]
+        public JsonResult CheckApprovalStatus(int VNO)
+        {
+            var result = _IPRRepository.CheckApprovalStatus(VNO);
+
+            if (!result.status)
+            {
+                return Json(new { success = false, message = result.message });
+            }
+
+            return Json(new
+            {
+                success = true,
+                userName = result.data.userName,
+                isExist = result.data.isExist
+            });
+        }
     }
 
 }

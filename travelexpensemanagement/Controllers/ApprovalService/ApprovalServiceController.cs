@@ -148,9 +148,14 @@ namespace travelexpensemanagement.Controllers
                 {
                     await con.OpenAsync();
                     // 1. Existing Pending User Check
-                    using (SqlCommand cmd = new SqlCommand(@"SELECT TOP 1 USER_CODE FROM APPROVAL_STATUS
-                        WHERE V_NO = @V_NO AND V_TYPE = @V_TYPE AND COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND STATUS = 'Open'
-                        AND USER_CODE <> @CURRENT_USER", con))
+                    //using (SqlCommand cmd = new SqlCommand(@"SELECT TOP 1 USER_CODE FROM APPROVAL_STATUS
+                    //    WHERE V_NO = @V_NO AND V_TYPE = @V_TYPE AND COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND STATUS = 'Open'
+                    //    AND USER_CODE <> @CURRENT_USER", con))
+                    using (SqlCommand cmd = new SqlCommand(@"SELECT TOP 1 a.USER_CODE, b.FULL_NAME FROM APPROVAL_STATUS a
+                                                            left join USER_MAST b on b.CODE = a.user_code
+                                                            WHERE a.V_NO = @V_NO AND a.V_TYPE = @V_TYPE AND a.COMP_CODE = @COMP_CODE 
+                                                            AND a.YEAR_CODE = @YEAR_CODE AND a.BRANCH_CODE = @BRANCH_CODE AND a.STATUS = 'Open'
+                                                            AND a.USER_CODE <> @CURRENT_USER", con))
                     {
                         cmd.Parameters.AddWithValue("@V_NO", vNo);
                         cmd.Parameters.AddWithValue("@V_TYPE", vType);
@@ -158,15 +163,30 @@ namespace travelexpensemanagement.Controllers
                         cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
                         cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
                         cmd.Parameters.AddWithValue("@CURRENT_USER", gv.PubUserId);
-                        var pendingUser = await cmd.ExecuteScalarAsync();
+                        //var pendingUser = await cmd.ExecuteScalarAsync();
 
-                        if (pendingUser != null)
+                        //if (pendingUser != null)
+                        //{
+                        //    return Json(new
+                        //    {
+                        //        success = false,
+                        //        userCode = pendingUser.ToString()
+                        //    });
+                        //}
+                        using (var reader = await cmd.ExecuteReaderAsync())
                         {
-                            return Json(new
+                            if (await reader.ReadAsync())
                             {
-                                success = false,
-                                userCode = pendingUser.ToString()
-                            });
+                                var userCode = reader["USER_CODE"]?.ToString();
+                                var fullName = reader["FULL_NAME"]?.ToString();
+
+                                return Json(new
+                                {
+                                    success = false,
+                                    userCode,
+                                    fullName
+                                });
+                            }
                         }
                     }
                     // 2. Approval_Code = 8 Check
@@ -310,7 +330,7 @@ namespace travelexpensemanagement.Controllers
                         cmd.Parameters.AddWithValue("@SEND_NAME", gv.PubUserName);
 
                         cmd.Parameters.AddWithValue("@USER_CODE", Convert.ToInt32(model.SendTo));
-                        cmd.Parameters.AddWithValue("@USER_NAME", "");
+                        cmd.Parameters.AddWithValue("@USER_NAME", model.SendToUserName);
 
                         cmd.Parameters.AddWithValue("@DOC_NAME", docName);
                         cmd.Parameters.AddWithValue("@DOC_ID", doc_id);
@@ -638,6 +658,7 @@ namespace travelexpensemanagement.Controllers
         public string? DocType { get; set; }
         public int? DocNo { get; set; }
         public string? SendTo { get; set; }
+        public string? SendToUserName { get; set; }
         public string? Remarks { get; set; }
         public string? tableName { get; set; }
         public string? FromName { get; set; }

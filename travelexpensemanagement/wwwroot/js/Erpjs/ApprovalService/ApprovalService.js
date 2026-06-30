@@ -206,6 +206,7 @@ function BindApprovalRemarks() {
 
 $(document).on('click', '#btn_Sendapp', function () {
     var sendTo = $('#ddlsendto').val();
+    var sendToUserName = $('#ddlsendto').find("option:selected").text().trim();
     //var remarks = $('#ddlsendRemarks option:selected').text();
     var remarks = $('#ddlsendRemarks').val();
     if (!sendTo) {
@@ -220,6 +221,7 @@ $(document).on('click', '#btn_Sendapp', function () {
         DocType: ApprovalData.DocType,
         DocNo: ApprovalData.DocNo,
         SendTo: sendTo,
+        SendToUserName: sendToUserName,
         Remarks: remarks,
         tableName: ApprovalData.TableName,
         FromName: ApprovalData.FromName

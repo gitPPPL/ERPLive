@@ -9,5 +9,6 @@ namespace travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction
         Task<RepositoryResponseData<List<object>>> GetDataCopyFormAsync();
         Task<RepositoryResponseData<List<ItamDetails>>> GetMonthlyRequirementAsync(int deptId);
         RepositoryResponse DeletePurchaseRequest(int docId);
+        RepositoryResponseData<bool> CheckApprovalStatusForDelete(int vNo);
     }
 }

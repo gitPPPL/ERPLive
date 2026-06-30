@@ -61,7 +61,7 @@ async function InitPage(rowId) {
         fetchPlanList();
         fetchRequesterList();
     }
-    
+
     //addAttachmentRow({ index: 0 });
 
 }
@@ -82,7 +82,7 @@ async function CheckIsApprovalBody() {
         }
     } catch (error) {
         console.error('Error checking approval stage:', error);
-        showToast('An error occurred while checking the approval stage.', { type:"error" });
+        showToast('An error occurred while checking the approval stage.', { type: "error" });
     }
 }
 
@@ -144,7 +144,7 @@ async function WireAllEvents() {
         const selectedValue = this.value;
         const docDate = $('#DtDocDate').val();
         if (!docDate) {
-            showToast('Please select a valid Doc Date before proceeding.', { type:"warning"});
+            showToast('Please select a valid Doc Date before proceeding.', { type: "warning" });
             $("#DtDocDate").focus();
             return;
         }
@@ -178,7 +178,7 @@ async function WireAllEvents() {
                 }
             }
         }
-        
+
         const $row = $(this).closest('tr');
 
         const unitName = $(this).find(':selected').data('uname') || '';
@@ -211,7 +211,7 @@ async function WireAllEvents() {
     //================Save=============
     $("#btnSaves").click(async function (e) {
         e.preventDefault();
-        
+
         if (!await Validate()) return;
 
         const payload = await CollectFormData();
@@ -221,7 +221,7 @@ async function WireAllEvents() {
         $("#btnSaves").prop("disabled", true);
 
         saveUpdate(payload);
-        
+
     });
 
     //=============Add Row Button Click==========
@@ -349,37 +349,37 @@ async function WireAllEvents() {
         GetLastTenOrderHistory();
     });
     //============Item Wise Purchase Request==========
-    $(document).on('click','#btn-itemWise-PurchaseRequest', function (e) {
+    $(document).on('click', '#btn-itemWise-PurchaseRequest', function (e) {
         e.preventDefault();
         let itemCode = $(this).closest(".erppage-dropdownaction-menu").data("itemcode");
         getItemWisePurchaseRequest(itemCode);
     });
     //============Item Wise Consumption History==========
-    $(document).on('click','#btn-itemWise-ConsumptionHistory', function (e) {
+    $(document).on('click', '#btn-itemWise-ConsumptionHistory', function (e) {
         e.preventDefault();
         let itemCode = $(this).closest(".erppage-dropdownaction-menu").data("itemcode");
         getItemWiseConsumptionHistory(itemCode);
     });
     //============Item Wise Purchase Order History==========
-    $(document).on('click','#btn-itemWise-PurchaseOrder', function (e) {
+    $(document).on('click', '#btn-itemWise-PurchaseOrder', function (e) {
         e.preventDefault();
         let itemCode = $(this).closest(".erppage-dropdownaction-menu").data("itemcode");
         getItemWisePurchaseOrder(itemCode);
     });
     //============Item Wise Purchase Quotation History==========
-    $(document).on('click','#btn-itemWise-PurchaseQuotation', function (e) {
+    $(document).on('click', '#btn-itemWise-PurchaseQuotation', function (e) {
         e.preventDefault();
         let itemCode = $(this).closest(".erppage-dropdownaction-menu").data("itemcode");
         getItemWisePurchaseQuotation(itemCode);
     });
     //============Item Wise Purchase Receipt History==========
-    $(document).on('click','#btn-itemWise-PurchaseReceiptHistory', function (e) {
+    $(document).on('click', '#btn-itemWise-PurchaseReceiptHistory', function (e) {
         e.preventDefault();
         let itemCode = $(this).closest(".erppage-dropdownaction-menu").data("itemcode");
         getItemWisePurchaseReceiptHistory(itemCode);
     });
     //============Item Wise Purchase Receipt History==========
-    $(document).on('click','#btn-itemWise-PurchaseHistory', function (e) {
+    $(document).on('click', '#btn-itemWise-PurchaseHistory', function (e) {
         e.preventDefault();
         let itemCode = $(this).closest(".erppage-dropdownaction-menu").data("itemcode");
         getItemWisePurchaseHistory(itemCode);
@@ -402,35 +402,7 @@ async function WireAllEvents() {
         e.preventDefault();
         moveToNext(this);
     });
-    $(document).on('select2:select', 'select', function () {
-        const $select = $(this);
-
-        setTimeout(() => {
-            moveToNext($select);
-        }, 0);
-    });
-    $(document).on('keydown', '.select2-container', function (e) {
-        if (e.key !== "Enter") return;
-
-        e.preventDefault();
-
-        const $select = $(this).prev('select');
-
-        $select.select2('close');
-
-        setTimeout(() => {
-            moveToNext($select);
-        }, 0);
-    });
-    $(document).on('select2:close', 'select', function () {
-
-        const el = this;
-
-        setTimeout(() => {
-            moveToNext(el);
-        }, 50);   // important delay for new rows
-    });
-
+    
     //===========Track the save status for sending approval==========
     $(document).on('change, input', '#PurchaseRequestForm input, #PurchaseRequestForm select, #tblItemDetailsPR input, #tblItemDetailsPR select', function (e) {
         if (!e.originalEvent) return;
@@ -457,7 +429,7 @@ async function CollectFormData() {
         approvStatus = 'Approved';
         approvRemarks = 'Document Approved.';
     }
-   
+
     const Code = $.trim($('#TxtCode').val());
     const rowsData = collectRowsData();
     if (!rowsData || rowsData.length === 0) {
@@ -466,20 +438,20 @@ async function CollectFormData() {
     //const AttachmentsRowsData = collectPurchaseDocumentsData();
     const AttachmentsRowsData = getUploadedFiles();
     const Header = {
-        DOC_ID : $.trim($('#TxtCode').val()),
-        V_NO : parseFloat($.trim($('#NumDocNo').val())) || 0,
-        V_DATE : formatDate($("#DtDocDate").val()),
-        DEPT_CODE : parseInt($('#ddlDepartment').val()) || 0,
-        TARGET_DATE : formatDate($("#DtRequiredDate").val()),
-        REASON : $.trim($('#txtRequiredDate').val()),
-        PLACE_CODE : parseInt($('#ddlPlace').val()) || 0,
-        URGENT_REQUEST : $('#chkUrgentRequest').prop('checked') ? 1 : 0,
-        STATUS : parseInt($('#ddlStatus').val()) || 0,
-        OWNER_CODE : parseInt($.trim($('#ddlRequester').val())) || 0,
-        OWNER_NAME : $.trim($('#ddlRequester option:selected').text()) || "",
-        PLAN_NO : parseInt($.trim($('#ddlPlanComplain').val())) || 0,
+        DOC_ID: $.trim($('#TxtCode').val()),
+        V_NO: parseFloat($.trim($('#NumDocNo').val())) || 0,
+        V_DATE: formatDate($("#DtDocDate").val()),
+        DEPT_CODE: parseInt($('#ddlDepartment').val()) || 0,
+        TARGET_DATE: formatDate($("#DtRequiredDate").val()),
+        REASON: $.trim($('#txtRequiredDate').val()),
+        PLACE_CODE: parseInt($('#ddlPlace').val()) || 0,
+        URGENT_REQUEST: $('#chkUrgentRequest').prop('checked') ? 1 : 0,
+        STATUS: parseInt($('#ddlStatus').val()) || 0,
+        OWNER_CODE: parseInt($.trim($('#ddlRequester').val())) || 0,
+        OWNER_NAME: $.trim($('#ddlRequester option:selected').text()) || "",
+        PLAN_NO: parseInt($.trim($('#ddlPlanComplain').val())) || 0,
         PLAN_TYPE: $('#ddlPlanComplain option:selected').data('plantype') || "",
-        REMARKS : $.trim($('#txtRemarks').val()),
+        REMARKS: $.trim($('#txtRemarks').val()),
         FAPROV_STATUS: approvStatus,
         FAPROV_REMARKS: approvRemarks,
         ACTION: (!Code || Code.trim() === '') ? 'INSERT' : 'UPDATE'
@@ -497,7 +469,7 @@ function collectRowsData() {
     const rows = [];
     let hasError = false;
     const $allRows = $('#tblItemDetailsPR tbody tr');
-   
+
 
     function isRowEmpty($row) {
         const itemVal = $row.find('.ddlItem').val();
@@ -536,7 +508,7 @@ function collectRowsData() {
         let status = 1
         if (isEdit) {
             if (IsApprovalBody) {
-                if ($status.val() == 1 || $status.val() == 2 || $status.val() == 3) {}
+                if ($status.val() == 1 || $status.val() == 2 || $status.val() == 3) { }
                 else {
                     setInvalid($status, "Status should be 1/2/3 for Open/Cancel/Close.");
                     hasError = true;
@@ -548,7 +520,7 @@ function collectRowsData() {
             } else {
                 status = $('#ddlStatus').val();
             }
-            
+
         }
 
         const rowData = {
@@ -563,8 +535,8 @@ function collectRowsData() {
 
             APROV_CODE: parseInt($approvalStatus.val()) || 0,
             APROV_STATUS: $approvalStatus.val() === ""
-            ? ""
-            : $approvalStatus.find("option:selected").text().trim(),
+                ? ""
+                : $approvalStatus.find("option:selected").text().trim(),
 
             APROV_REMARKS: $row.find('.approval-remarks').val()?.trim() || "",
             STD_REQ: parseFloat($row.find('.std-req').val()) || 0,
@@ -627,16 +599,16 @@ function saveUpdate(payload) {
         success: function (response) {
             if (response.success) {
                 isSaved = true;
-                showToast("Saved successfully!", { type:"success" });
-                //setTimeout(() => window.location.href = '/PurchaseRequestList/Index', 1000);
+                showToast("Saved successfully!", { type: "success" });
                 setFormReadOnly();
                 isReadOnly = true;
+                setTimeout(() => window.location.href = '/PurchaseRequest/Index?id=' + encodeURIComponent($('#NumDocNo').val()) + '&mode=view', 1000);
                 if (isReadOnly) {
                     const vNo = $('#NumDocNo').val();
-                    checkApprovalStatus(vType, vNo , DBTableName);
+                    checkApprovalStatus(vType, vNo, DBTableName);
                 }
             } else {
-                showToast(response.message || "Save failed.", { type:"error" });
+                showToast(response.message || "Save failed.", { type: "error" });
             }
         },
         error: function (xhr, status, error) {
@@ -649,7 +621,7 @@ function saveUpdate(payload) {
                 errorMessage = "Unexpected error: " + xhr.statusText;
             }
 
-            showToast("Error: ", errorMessage, { type:"error" });
+            showToast("Error: ", errorMessage, { type: "error" });
 
         },
         complete: function () {
@@ -667,9 +639,9 @@ function setFormReadOnly() {
     $('.btn-add-action, .btn-delete-action').addClass('disabled').css('pointer-events', 'none');
     $('#dropZone')
         .css({
-            'pointer-events': 'none', 
+            'pointer-events': 'none',
             //'opacity': '0.65',      
-            'cursor': 'not-allowed'   
+            'cursor': 'not-allowed'
         });
 }
 
@@ -684,7 +656,7 @@ async function GetVNo() {
         $('#NumDocNo').val(data.v_NO);
     }
     catch (e) {
-        showToast('Error loading Document Number: ' + e.message, { type:"warning" });
+        showToast('Error loading Document Number: ' + e.message, { type: "warning" });
     }
 }
 
@@ -698,7 +670,7 @@ async function LoadFormByID(id) {
         });
 
         if (!res.success) {
-            showToast(res.message || "Failed to load data.", { type:"error" });
+            showToast(res.message || "Failed to load data.", { type: "error" });
             return;
         }
 
@@ -708,14 +680,14 @@ async function LoadFormByID(id) {
         await bindHeaderData(header);
         await ItemTableData(details);
         await AttachmentTableData(attachments);
-        
+
     } catch (err) {
-        showToast("Something went wrong while loading the form.", { type:"error" });
+        showToast("Something went wrong while loading the form.", { type: "error" });
         //console.error(err);
     }
 }
 
-async function bindHeaderData(header){
+async function bindHeaderData(header) {
     $('#TxtCode').val(header.doC_ID || '');
     $('#NumDocNo').val(header.v_NO || '');
     $('#DtDocDate').val(formatDate(header.v_DATE));
@@ -755,7 +727,7 @@ async function ItemTableData(details) {
         calculateTotalAmount();
     }
 }
-async function AttachmentTableData(attachments){
+async function AttachmentTableData(attachments) {
     //const $attachmentBody = $('#tblAttachmentPR tbody');
     //$attachmentBody.empty();
 
@@ -955,7 +927,7 @@ function fetchDDlItems(selector, deptId, selectedValue = null) {
         url: '/PurchaseRequest/GetddlItems',
         type: 'GET',
         dataType: 'json',
-        data: {deptid: deptId },
+        data: { deptid: deptId },
         success: function (response) {
             if (response) {
                 let html = '<option value="">-- Select Item --</option>';
@@ -1087,10 +1059,10 @@ async function addRow(data = {}) {
 
     const $row = $(row);
     $tbody.append($row);
-    
+
     // 🔥 IMPORTANT: bind item after row is added
     const deptId = $('#ddlDepartment').val();
-    
+
     await fetchDDlItems(
         $row.find('.ddlItem'),
         deptId,
@@ -1098,40 +1070,40 @@ async function addRow(data = {}) {
     );
 
     const itemId = data.iteM_CODE || $row.find('.ddlItem').val();
-    
-        await Promise.all([
-            loadDropdown({
-                type: 'Make',
-                selectElem: $row.find('.ddlMake'),
-                defaultText: "- Select Make-",
-                selectedValue: data.makE_CODE || null,
-                extraData: itemId
-            }),
-            loadDropdown({
-                type: 'PlaceUse',
-                selectElem: $row.find('.ddlplaceuse'),
-                defaultText: "- Select Place of Use-",
-                selectedValue: data.placE_Code || null,
-            }),
-            //loadDropdown({
-            //    type: 'Priority',
-            //    selectElem: $row.find('.priority-type'),
-            //    defaultText: "- Select Priority -",
-            //    selectedValue: data.prioritY_CODE || null,
-            //}),
-            //loadDropdown({
-            //    type: 'WorkType',
-            //    selectElem: $row.find('.work-type'),
-            //    defaultText: "- Select Work Type -",
-            //    selectedValue: data.worK_TYPECODE || null,
-            //}),
-            //loadDropdown({
-            //    type: 'ApprovalStatus',
-            //    selectElem: $row.find('.approvalStatus'),
-            //    defaultText: "- Select Status -",
-            //    selectedValue: data.aproV_CODE || null,
-            //})
-        ]);
+
+    await Promise.all([
+        loadDropdown({
+            type: 'Make',
+            selectElem: $row.find('.ddlMake'),
+            defaultText: "- Select Make-",
+            selectedValue: data.makE_CODE || null,
+            extraData: itemId
+        }),
+        loadDropdown({
+            type: 'PlaceUse',
+            selectElem: $row.find('.ddlplaceuse'),
+            defaultText: "- Select Place of Use-",
+            selectedValue: data.placE_Code || null,
+        }),
+        //loadDropdown({
+        //    type: 'Priority',
+        //    selectElem: $row.find('.priority-type'),
+        //    defaultText: "- Select Priority -",
+        //    selectedValue: data.prioritY_CODE || null,
+        //}),
+        //loadDropdown({
+        //    type: 'WorkType',
+        //    selectElem: $row.find('.work-type'),
+        //    defaultText: "- Select Work Type -",
+        //    selectedValue: data.worK_TYPECODE || null,
+        //}),
+        //loadDropdown({
+        //    type: 'ApprovalStatus',
+        //    selectElem: $row.find('.approvalStatus'),
+        //    defaultText: "- Select Status -",
+        //    selectedValue: data.aproV_CODE || null,
+        //})
+    ]);
     if (isReadOnly) {
         if (data.isPOGenerated === true) {
             $row.addClass('po-generated-row');
@@ -1215,7 +1187,7 @@ async function Validate() {
     //3. Maximum two requests
     const isWithinMaxRequest = await checkMaxRequestCount(docNo, vDate)
     if (!IsApprovalBody && !isWithinMaxRequest) {
-        showToast("Max. Limit Exceeds.", {type:"warning"});
+        showToast("Max. Limit Exceeds.", { type: "warning" });
         isValid = false;
         return false;
     }
@@ -1225,7 +1197,7 @@ async function Validate() {
     let $rows = $('#tblItemDetailsPR tbody tr');
 
     $rows.each(function () {
-        const $row = $(this); 
+        const $row = $(this);
         const itemCode = $row.find('.ddlItem').val();
 
         if (itemCode && itemCode.trim() !== '') {
@@ -1251,14 +1223,14 @@ async function Validate() {
     for (const row of $rows) {
 
         const $row = $(row);
-        
+
         const itemInput = $row.find('.ddlItem');
         const itemCode = itemInput.val();
         const itemtext = itemInput.find("option:selected").text().trim();
-        
+
         const makeInput = $row.find('.ddlMake');
         const makeCode = makeInput.val();
-        
+
         const reqQtyInput = $row.find('.required-qty');
         const reqQtyVal = reqQtyInput.val();
 
@@ -1281,7 +1253,7 @@ async function Validate() {
         if (itemCode && itemCode.length > 0) {
 
             //5. Check Already Sent Request
-            const requestNo = await GetRequestNo(itemCode); 
+            const requestNo = await GetRequestNo(itemCode);
 
             if (requestNo && requestNo.length > 0) {
 
@@ -1290,13 +1262,13 @@ async function Validate() {
                     `Request already sent for ${itemtext} in ${departName} (Req No: ${requestNo})`
                 );
                 isValid = false;
-                return false; 
+                return false;
             }
 
             //6. Required Make Code
             if (!validateRequiredField(makeInput, `Make For ${itemtext}`)) {
                 isValid = false;
-                return false; 
+                return false;
             }
 
             //7. Valid Make Code
@@ -1360,8 +1332,8 @@ async function Validate() {
                 (!validateRequiredField($row.find('.priority-type'), 'Priority Type')) ||
                 (!validateRequiredField($row.find('.scrap-type'), 'Scrap Type')) ||
                 (!validateRequiredField($row.find('.work-type'), 'Work Type'))) {
-                    isValid = false;
-                    return false;
+                isValid = false;
+                return false;
             }
 
             //For Approval Body
@@ -1380,7 +1352,7 @@ async function Validate() {
             }
 
             //16. Approval Status
-            if ((approvalStatus === "HOLD" || approvalStatus === "REJECT") && !approvalRemarks ) {
+            if ((approvalStatus === "HOLD" || approvalStatus === "REJECT") && !approvalRemarks) {
                 setInvalid(
                     approvalRemarksInput,
                     `Reason for ${approvalStatus.toUpperCase()} of ${itemtext} is required.`
@@ -1422,7 +1394,7 @@ async function checkValidDate() {
     }
 }
 //======================Validation Helper Methods==============
-    //========Request Number=========
+//========Request Number=========
 async function GetRequestNo(itemCode) {
     const deptCode = $('#ddlDepartment').val();
     const vNo = $('#NumDocNo').val();
@@ -1448,7 +1420,7 @@ async function GetRequestNo(itemCode) {
     });
 }
 
-    //========Duplicate=========
+//========Duplicate=========
 function checkDuplicateItems(currentSelect, silent = false) {
 
     const value = currentSelect.value;
@@ -1468,7 +1440,7 @@ function checkDuplicateItems(currentSelect, silent = false) {
 
         $(currentSelect).addClass("is-invalid");
         if (!silent) {
-            showToast("Duplicate item found!", {type:"warning"});
+            showToast("Duplicate item found!", { type: "warning" });
         }
     } else {
         $(currentSelect).removeClass("is-invalid");
@@ -1476,7 +1448,7 @@ function checkDuplicateItems(currentSelect, silent = false) {
 
     return duplicate;
 }
-    //========Item Make Code=======
+//========Item Make Code=======
 async function GetItemMake(itemCode, makeCode) {
 
     return $.ajax({
@@ -1489,7 +1461,7 @@ async function GetItemMake(itemCode, makeCode) {
     }).then(function (res) {
 
         if (res.success) {
-            return res.exists;  
+            return res.exists;
         } else {
             console.error(res.message);
             return false;
@@ -1501,7 +1473,7 @@ async function GetItemMake(itemCode, makeCode) {
     });
 }
 
-    //========Monthly Req=========
+//========Monthly Req=========
 async function CheckMonthlyReq(itemCode) {
 
     return $.ajax({
@@ -1513,7 +1485,7 @@ async function CheckMonthlyReq(itemCode) {
     }).then(function (res) {
 
         if (res.success) {
-            return res.exists;  
+            return res.exists;
         } else {
             console.error(res.message);
             return false;
@@ -1525,7 +1497,7 @@ async function CheckMonthlyReq(itemCode) {
     });
 }
 
-    //========Max Request Limit=====
+//========Max Request Limit=====
 async function checkMaxRequestCount(vNo, vDate) {
     try {
         const response = await $.ajax({
@@ -1541,19 +1513,19 @@ async function checkMaxRequestCount(vNo, vDate) {
         if (response.success) {
             return response.isWithinLimit; // Return the entire response object
         } else {
-            showToast(response.message || "Failed to check request count.", { type:"error" });
+            showToast(response.message || "Failed to check request count.", { type: "error" });
             return null;
         }
     } catch (error) {
         console.error("Error checking max request count:", error);
-        showToast("An error occurred while checking the request count.", { type:"error" });
+        showToast("An error occurred while checking the request count.", { type: "error" });
         return null;
     }
 }
 
 //=====================Modals===================
 
-    //=============Purchase Request History===========
+//=============Purchase Request History===========
 function GetLastTenPurchaseRequest() {
     var itemCodes = [];
 
@@ -1574,7 +1546,7 @@ function GetLastTenPurchaseRequest() {
         return;
     }
     if (itemCodes.length === 0) {
-        showToast("No Items Available!.", {type:"warning"});
+        showToast("No Items Available!.", { type: "warning" });
         return;
     }
 
@@ -1585,7 +1557,7 @@ function GetLastTenPurchaseRequest() {
         data: {
             itemCodes: itemCodes
         },
-        dataType:'JSON',
+        dataType: 'JSON',
         success: function (response) {
 
             if (response.success) {
@@ -1595,7 +1567,7 @@ function GetLastTenPurchaseRequest() {
                 $("#lastTenPurchaseRequestModal").modal("show");
             }
             else {
-                showToast(response.message, { type:"warning" });
+                showToast(response.message, { type: "warning" });
             }
         }
     });
@@ -1640,7 +1612,7 @@ function bindLastTenPurchaseRequestGrid(data) {
     });
 }
 
-    //=============Consumption History===========
+//=============Consumption History===========
 function GetLastTenConsumptionDetails() {
 
     var itemCodes = [];
@@ -1668,7 +1640,7 @@ function GetLastTenConsumptionDetails() {
     }
 
     $.ajax({
-        url: '/PurchaseRequest/GetLastTenConsumptionDetails', 
+        url: '/PurchaseRequest/GetLastTenConsumptionDetails',
         type: 'GET',
         traditional: true,
         data: {
@@ -1732,7 +1704,7 @@ function bindLastTenConsumptionGrid(data) {
     });
 }
 
-    //=============Purchase History===========
+//=============Purchase History===========
 function GetLastTenPurchaseHistory() {
 
     var itemCodes = [];
@@ -1925,8 +1897,8 @@ function bindLastTenOrderGrid(data) {
         `);
     });
 }
-    
-    //===========Load Monthly Data========
+
+//===========Load Monthly Data========
 async function LoadMonthlyRequirementData() {
 
     const DEPT_CODE = parseInt($('#ddlDepartment').val()) || 0;
@@ -1940,10 +1912,10 @@ async function LoadMonthlyRequirementData() {
 
         if (res.success) {
             isMonthlyRequirementLoad = true;
-            
+
             $tbody.empty();
             isCopyFromOrMonthly = true;
-            
+
             //await Promise.all(res.data.map(r => addRow(r)));
             await Promise.all(res.data.map(r => addRow({ ...r, isMonthly: true })));
             ApprovalFields();
@@ -1974,16 +1946,16 @@ async function LoadMonthlyRequirementData() {
 
         } else {
             console.error("Error from server:", res.message);
-            showToast(res.message || "Failed to load data.", { type:"error" });
+            showToast(res.message || "Failed to load data.", { type: "error" });
         }
 
     } catch (err) {
         console.error("Failed to load data", err);
-        showToast("Something went wrong while loading the form.", { type:"error" });
+        showToast("Something went wrong while loading the form.", { type: "error" });
     }
 }
 
-    //==========Item Wise History==========
+//==========Item Wise History==========
 function getItemWisePurchaseRequest(itemCode) {
 
     $.ajax({
@@ -2176,7 +2148,7 @@ function getItemWisePurchaseHistory(itemCode) {
         }
     });
 }
-    //======================Copy From================
+//======================Copy From================
 function LoadCopyForm() {
     return $.ajax({
         url: '/PurchaseRequestList/GetDataCopyForm',
@@ -2184,7 +2156,7 @@ function LoadCopyForm() {
         data: {},
         success: function (res) {
             if (res.success) {
-                
+
                 $('#tblpurchasequotationmodal tbody').empty();
                 res.data.forEach(function (item) {
                     var row = '<tr>';
@@ -2210,12 +2182,12 @@ function LoadCopyForm() {
 
             } else {
                 console.error("Error from server:", res.message);
-                showToast(res.message || "Failed to load data.", { type:"error" });
+                showToast(res.message || "Failed to load data.", { type: "error" });
             }
         },
         error: function (err) {
             console.error("Failed to load data", err);
-            showToast("Something went wrong while loading the form.", { type:"error" });
+            showToast("Something went wrong while loading the form.", { type: "error" });
         }
     });
 }
@@ -2243,9 +2215,9 @@ function getSelectedRows() {
 
     if (selectedRowsData.length > 0) {
         addRowsToMainTable(selectedRowsData);
-        showToast(selectedRowsData.length + " row(s) copied successfully.", { type:"success" });
+        showToast(selectedRowsData.length + " row(s) copied successfully.", { type: "success" });
     } else {
-        showToast("No rows selected.", { type:"warning"});
+        showToast("No rows selected.", { type: "warning" });
     }
 }
 
@@ -2447,7 +2419,7 @@ async function PRReport() {
         "{prequest1.COMP_CODE} = " + window.globalVariables.compCode +
         " and {prequest1.BRANCH_CODE} = " + window.globalVariables.branchCode +
         " and {prequest1.YEAR_CODE} = " + window.globalVariables.yearCode +
-        " and {prequest1.V_TYPE} = 'STPI' "+
+        " and {prequest1.V_TYPE} = 'STPI' " +
         " and {prequest1.V_NO} = " + vNo;
 
     var formulaFields = {
@@ -2512,7 +2484,7 @@ $(document).on('click', '#btn_Sendapproval', function () {
             console.log('Response:', response);
             // Pending with another user
             if (response.success === false) {
-                showToast(`Pending With Another User (${response.userCode})`,
+                showToast(`Pending With Another User : ${response.fullName} (${response.userCode})`,
                     { type: "warning" });
                 return;
             }
@@ -2569,7 +2541,7 @@ function SendApproveValidation() {
 
             const approxRate = $row.find('.approx-rate').val().trim();
             const approvalStatus = $row.find('.approvalStatus').val();
-            
+
             if (itemCode && !approvalStatus) {
 
                 setInvalid($row.find('.approvalStatus'), `Please select Approval Status of Item => ${itemName}`);

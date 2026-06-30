@@ -12,7 +12,7 @@ namespace travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction
         RepositoryResponseData<string> GetTECH_DESC(int itemCode);
         RepositoryResponseData<decimal?> GetCurrentStock(int itemCode);
         RepositoryResponseData<decimal> GetAvgConsumption(int itemCode, DateTime vDate);
-        RepositoryResponse SaveData(PurchaseRequest_model request);
+        Task<RepositoryResponse> SaveData(PurchaseRequest_model request);
         Task<RepositoryResponseData<string>> GetPurchaseRequestsAsync(int itemCode, int deptCode, int vNo);
         Task<RepositoryResponseData<bool>> GetItemMakeAsync(int itemCode, int makeCode);
         Task<RepositoryResponseData<bool>> CheckMonthlyReqAsync(int itemCode);
@@ -30,5 +30,6 @@ namespace travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction
         RepositoryResponseData<List<LastTenPurchaseHistoryModel>> GetItemWisePurchaseReceiptHistory(int itemCode);
         RepositoryResponseData<List<LastTenPurchaseHistoryModel>> GetItemWisePurchaseHistory(int itemCode);
         RepositoryResponseData<string> PRPrintRequest(PRPrintModel model);
+        RepositoryResponseData<(bool isExist, string userName)> CheckApprovalStatus(int vNo);
     }
 }
