@@ -221,7 +221,7 @@ async function SaveData(saveDt) {
 
         const v = response;
 
-        if (v?.status == "success") {
+        if (v?.status == true) {
 
             toastr.success("Data Insert Successfully");
 
@@ -240,17 +240,7 @@ async function SaveData(saveDt) {
         }
 
     } catch (error) {
-
-        console.log("===== AJAX ERROR START =====");
-        console.log("Error Object:", error);
-        console.log("Response Text:", error?.responseText);
-        console.log("Status:", error?.status);
-        console.log("===== AJAX ERROR END =====");
-
-        toastr.error(
-            error?.responseText ||
-            "Error occurred while saving. Please contact admin."
-        );
+        toastr.error( error?.responseText || "Error occurred while saving. Please contact admin." );
     }
 }
 
@@ -351,3 +341,254 @@ async function collectFormData() {
 
 
 
+async function DDLCityMast() {
+    try {
+        const res = await fetch('/PurchaseOrder/DDLCityMast');
+        const data = await res.json();
+        const ddl = $('#TxtCity1PD');
+        ddl.empty().append('<option value="">-- Select City Name --</option>');
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading City:", error);
+    }
+}
+
+
+async function GetDocData(MasterTblId, readOnly) {
+    try {
+        const response = await $.ajax({
+            url: '/PurchaseOrder/GetPurchaseOrderRecordsById',
+            type: 'GET',
+            data: { id: MasterTblId }
+        });
+
+        console.log("response", response);
+
+        if (!response || !response.status) {
+            toastr.error('No data returned.');
+            return;
+        }
+
+        if (readOnly === 'true') {
+            disableAllFields();
+            $('.btn-add-row-last').hide();
+            $('#btn-save, #cancelBtn').hide();
+        } else {
+            enableAllFields();
+            $('#btn-save, #cancelBtn').show();
+            $('.btn-add-row-last').show();
+        }
+
+        await fillFormFields(response.header);
+        await fillItemDetailsTable(response.detail);
+
+        $('#fileList').empty();
+
+        const attachments = Array.isArray(response.attachment) ? response.attachment : [];
+
+        if (attachments.length === 0) {
+            $('#fileList').html(`
+                <div class="text-muted text-center">
+                    No attachments found.
+                </div>
+            `);
+        } else {
+
+            attachments.forEach((att, idx) => {
+
+                const fileName =
+                    att.FILE_NAME ||
+                    att.FileName ||
+                    att.fileName ||
+                    `File_${idx + 1}`;
+
+                let filePath =
+                    att.FILE_Path ||
+                    att.FilePath ||
+                    att.filePath ||
+                    '';
+
+                // safe URL
+                if (filePath && !filePath.startsWith('http') && !filePath.startsWith('/')) {
+                    filePath = '/' + filePath;
+                }
+
+                const ext = (fileName.split('.').pop() || '').toLowerCase();
+
+                let icon = '📄';
+
+                if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) icon = '🖼️';
+                else if (ext === 'pdf') icon = '📕';
+
+                $('#fileList').append(`
+                    <div class="file-item erp-file-row"
+                         data-id="${att.ID || idx}">
+
+                        <div class="file-icon">
+                            ${icon}
+                        </div>
+
+                        <div class="file-info">
+                            <div class="file-name-text">${fileName}</div>
+                        </div>
+
+                        <div class="file-actions">
+
+                            ${filePath ? `
+                                <button type="button"
+                                        class="view-file"
+                                        onclick="window.open('${filePath}', '_blank')">
+                                    View
+                                </button>
+                            ` : ''}
+
+                            <button type="button"
+                                    class="delete-file"
+                                    data-id="${att.ID || idx}">
+                                Delete
+                            </button>
+
+                        </div>
+
+                    </div>
+                `);
+            });
+        }
+
+    } catch (error) {
+        console.error(error);
+        toastr.error('Failed to load data.');
+    }
+}
+
+async function fillFormFields(data) {
+
+    console.log("header data", data);
+
+    if (!Array.isArray(data) || data.length === 0) {
+        toastr.error("Invalid or empty data array");
+        return;
+    }
+    const d = data[0];
+    $('#txtDocNo').val(d.V_NO || '');
+    $('#TxtDocId').val(d.DOC_ID || '');
+    $('#dtDocDate').val((d.V_DATE || '').substring(0, 10));
+    $('#DtDeliveryDate').val((d.DELIVERY_DATE || '').substring(0, 10));
+    $('#DtValidateDate').val((d.VALIDITY_DATE || '').substring(0, 10));
+    $('#ddlDocType').val(d.V_TYPE || '');
+    $('#ddlPlace').val(d.PLACE_CODE || '');
+    $('#ddWBNo').val(d.WB_NO || '');
+
+    $('#ddlPartyName').val(d.PARTY_CODE || '').trigger('change');
+    $('#ddlShipFrom').val(d.SHIP_CODE || '').trigger('change');
+
+    // Billing Address
+    $('#TxtAdd1PD').val(d.BILL_ADD1 || '');
+    $('#TxtAdd2PD').val(d.BILL_ADD2 || '');
+    $('#TxtAdd3PD').val(d.BILL_ADD3 || '');
+    $('#TxtCity1PD').val(d.BILL_CITY || '');
+    $('#NumPincodePD').val(d.BILL_PINCODE || '');
+    $('#TxtGSTPD').val(d.BILL_GST || '');
+
+    // Shipping Address
+    $('#TxtAdd1SD').val(d.SHIP_ADD1 || '');
+    $('#TxtAdd2SD').val(d.SHIP_ADD2 || '');
+    $('#TxtAdd3SD').val(d.SHIP_ADD3 || '');
+    $('#TxtCity1SD').val(d.SHIP_CITY || '');
+    $('#NumPincodeSD').val(d.SHIP_PINCODE || '');
+
+    // Financials
+
+    $('#NumTotalNosIt').val(d.NOS || '');
+    $('#NumQtyIt').val(d.QTY || '');
+    $('#NumAmountIt').val(d.AMOUNT || '');
+    $('#NumPackingAmtIt').val(d.PACK_AMT || '');
+    $('#NumDiscAmtIt').val(d.DISC_AMT || '');
+    $('#NumCgstAmtIt').val(d.CGST_AMT || '');
+    $('#NumSgstAmtIt').val(d.SGST_AMT || '');
+    $('#NumIgstAmtIt').val(d.IGST_AMT || '');
+    $('#NumVatAmtIt').val(d.VAT_AMT || '');
+    $('#NumCessAmtIt').val(d.CESS_AMT || '');
+    $('#NumTCSIt').val(d.TCS_AMT || '');
+    $('#TxtOtherAmtSod').val(d.OTH_AMT || '');
+    $('#NumNetAmtIt').val(d.NET_AMT || '');
+
+
+    $('#ddlPriceType').val(d.PRICE_TYPE || '');
+    $('#txtPartyRef').val(d.PARTY_REF || '');
+    $('#ddlCurrency').val(d.IMPORT_CURRENCY || '');
+    $('#NumExRate').val(d.EXRATE || '');
+
+
+    // Terms
+    $('#txtDeliveryTerm').val(d.DELIVERY_TERM || '');
+    $('#txtTransportTerm').val(d.TRANSPORT_TERM || '');
+    $('#ddlPaymentTerm').val(d.PAYTERM_CODE || '');
+    $('#txtPaymentTerm').val(d.PAYMENT_TERM || '');
+    $('#txtPriceTerm').val(d.PRICE_TERM || '');
+    $('#txtRemarksTC').val(d.REMARKS || '');
+    $('#txtPartySauda').val(d.PARTY_NAME || '');
+
+
+}
+
+async function fillItemDetailsTable(data) {
+    const $tbody = $('#tblItemRecordPO tbody');
+    $tbody.empty();
+    for (let index = 0; index < data.length; index++) {
+        const item = data[index];
+        const idx = index + 1;
+        addItemRecordRow();
+        await bindDropdownData(idx);
+
+        console.log(data, item.ITEM_CODE);
+
+        $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE).trigger('change');
+        $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
+        $(`#ddlImake${idx}`).val(item.MAKE_CODE).trigger('change');
+        $(`#ddlTax${idx}`).val(item.TAX_CODE).trigger('change');
+        $(`#ddlDepartment${idx}`).val(item.DEPT_CODE).trigger('change');
+
+        $(`#TxtNos${idx}`).val(item.NOS);
+        $(`#TxtQty${idx}`).val(item.QTY);
+        $(`#txtAdjQtySauda${idx}`).val(item.ADJ_QTY);
+        $(`#ddlUnit${idx}`).val(item.UOM_CODE);
+        $(`#TxtRate${idx}`).val(item.RATE);
+        $(`#TxtExrate${idx}`).val(item.IMPORT_RATE);
+        $(`#TxtCalcRate${idx}`).val(item.CALC_RATE);
+        $(`#TxtAmount${idx}`).val(item.AMOUNT);
+        $(`#TxtPackPercent${idx}`).val(item.PACK_PER);
+        $(`#TxtPack${idx}`).val(item.PACK_AMT);
+        $(`#TxtDiscPercent${idx}`).val(item.DISC_PER);
+        $(`#TxtDisc${idx}`).val(item.DISC_AMT);
+
+        $(`#TxtCgstPercent${idx}`).val(item.CGST_PER);
+        $(`#TxtCgst${idx}`).val(item.CGST_AMT);
+        $(`#TxtSgstPercent${idx}`).val(item.SGST_PER);
+        $(`#TxtSgst${idx}`).val(item.SGST_AMT);
+        $(`#TxtIgstPercent${idx}`).val(item.IGST_PER);
+        $(`#TxtIgst${idx}`).val(item.IGST_AMT);
+        $(`#TxtVatPercent${idx}`).val(item.VAT_PER);
+        $(`#TxtVat${idx}`).val(item.VAT_AMT);
+        $(`#TxtCessPercent${idx}`).val(item.CESS_PER);
+        $(`#TxtCess${idx}`).val(item.CESS_AMT);
+        $(`#TxtTcsPer${idx}`).val(item.TCS_PER);
+        $(`#TxtTcsAmt${idx}`).val(item.TCS_AMT);
+        $(`#TxtOthPer${idx}`).val(item.OTH_PER);
+        $(`#TxtOthAmt${idx}`).val(item.OTH_AMT);
+        $(`#TxtOthPer2${idx}`).val(item.TOTAL_PER2);
+        $(`#TxtOthAmt2${idx}`).val(item.TOTAL_AMT2);
+        $(`#TxtNetAmt${idx}`).val(item.NET_AMT);
+        $(`#TxtLdRate${idx}`).val(item.LAND_RATE);
+
+        $(`#TxtRemarks${idx}`).val(item.REMARKS);
+        $(`#TxtAppLevel${idx}`).val(item.PREORITY_LEVEL);
+        $(`#TxtAppRemarks${idx}`).val(item.PREORITY_REMARKS);
+        $(`#TxtMthRate${idx}`).val(item.RATE_MONTHLY);
+        $(`#TxtQtrRate${idx}`).val(item.RATE_QUARTERLY);
+        $(`#TxtAnlRate${idx}`).val(item.RATE_ANNUALY);
+        $(`#TxtSpclRate${idx}`).val(item.RATE_SPECIAL);
+    }
+}

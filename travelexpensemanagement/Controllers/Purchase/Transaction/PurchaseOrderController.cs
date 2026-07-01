@@ -12,13 +12,14 @@ using System.Linq.Expressions;
 using System.Net.Mail;
 using System.Text.Json;
 using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.Inventory.Master;
 using travelexpensemanagement.Models.Purchase.Transaction;
 using static travelexpensemanagement.Controllers.Master.StateMasterController;
-
+using travelexpensemanagement.Common.DropdownService;
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
     public class PurchaseOrderController : Controller
@@ -28,13 +29,15 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly GlobalValidationdate _globalValidationdate;
-        public PurchaseOrderController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
+        private readonly DropdownService _dropdownService;
+        public PurchaseOrderController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, DropdownService dropdownService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _moduleService = moduleService;
             _globalValidationdate = globalValidationdate;
+            _dropdownService = dropdownService;
         }
         public IActionResult Index()
         {
@@ -522,17 +525,17 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = " data save failed." });
 
 
-                var result = await saveValidateData(POmodel) as JsonResult;
+                //var result = await saveValidateData(POmodel) as JsonResult;
 
-                if (result is JsonResult json)
-                {
-                    dynamic data = json.Value;
+                //if (result is JsonResult json)
+                //{
+                //    dynamic data = json.Value;
 
-                    if (data.status == false)
-                    {
-                        return Json(new  { status = false, message = data.message  });
-                    }
-                }
+                //    if (data.status == false)
+                //    {
+                //        return Json(new  { status = false, message = data.message  });
+                //    }
+                //}
 
 
                 using (var con = _dbcontext.GetErpConnection())
@@ -1241,7 +1244,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
 
 
-
         public async Task<IActionResult> saveValidateData([FromBody] PurchaseOrder POmodel)
         {
             if (POmodel == null)
@@ -1293,7 +1295,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                             " AND ISNULL(IS_DEFAULT,0)=1 " +
                             "AND COMP_CODE = " + usersessionDt.PubCompCode + ")");
 
-                        // Foreign currency validation
                         if (!string.IsNullOrEmpty(POmodel.ImportCurrency) && state_type != "Import")
                         {
                             return Json(new  { status = false, message = "Party belongs to India. Foreign currency/Ex-Rate not applicable. Please remove." });
@@ -1388,6 +1389,19 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             catch (Exception ex)
             {
                 return Json(new { status = false, message = "Error: " + ex.Message });
+            }
+        }
+
+
+
+        public JsonResult DDLCityMast()
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                string query = "select CODE , NAME from CITY_MAST  where active = 1 ";
+                var DDLCityMast = _dropdownService.GetDropdownList(query);
+                return Json(DDLCityMast);
             }
         }
 
