@@ -1086,7 +1086,6 @@
     let LoginDate = globalVars.LoginDate;
     let isLoading = false;
 
-
     $(document).ready(function () {
 
         LoadDropdown()
@@ -2387,229 +2386,8 @@
 
 
 
-    function addItemRecordRow() {
-    let tbody = $('#tblItemRecordPO tbody');
-    let rowCount = tbody.find('tr').length + 1;
-
-    let newRow = `
-        <tr class="no-border-input" id="row${rowCount}">
-            <td class="d-None"><input class="form-control" id="TxtCode${rowCount}" /></td>
-            <td>
-                <select style="min-width: 500px;" class="form-control" id="ddlItemname${rowCount}">
-                    <option value="">-select item Name-</option>
-                </select>
-            </td>
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlImake${rowCount}">
-                    <option value="">-select Make-</option>
-                </select>
-            </td>
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlUnit${rowCount}" disabled>
-                    <option value="">-select Unit-</option>
-                </select>
-            </td>
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlIplaceofUse${rowCount}">
-                    <option value="">-select Place of Use-</option>
-                </select>
-            </td>
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="ddlDepartment${rowCount}">
-                    <option value="">-select department-</option>
-                </select>
-            </td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtNos${rowCount}"     maxlength="15"  /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtQty${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtRate${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtExrate${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" readonly id="TxtAmount${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtPackPercent${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtPack${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtDiscPercent${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtDisc${rowCount}" /></td>
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="ddlTax${rowCount}">
-                    <option value="">-select Tax Type-</option>
-                </select>
-            </td>
-             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtCgstPercent${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtCgst${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtSgstPercent${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtSgst${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtIgstPercent${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtIgst${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  id="TxtVatPercent${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtVat${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  oninput="allowOnlyNumbers(this)" id="TxtCessPercent${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtCess${rowCount}"  /></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsPer${rowCount}" readonly/></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsAmt${rowCount}" readonly/></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthAmt${rowCount}" readonly/></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer2${rowCount}" readonly/></td>
-            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthAmt2${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  id="TxtNetAmt${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtLdRate${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtRemarks${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtAppLevel${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAppRemarks${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtStatus${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqtype${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqno${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtApptype${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAppno${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSaudatype${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSaudano${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtMthRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtQtrRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAnlRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSpclRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtCalcRate${rowCount}" readonly /></td>
-            <td class="action-col">
-                <div class="action-wrap">
-                    <button class="act-btn add btn-add-action btn-Itemadd-action" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus-circle"></i></button>
-                    <button class="act-btn delete btn-delete-action btn-Itemdelete-action" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
-                </div>
-            </td>
-        </tr>
-        `;
-    tbody.append(newRow);
-    bindDropdownData(rowCount);
-    setEnterKeyFocusOnTable(itemRecords, rowCount);
-}
-
-function addAttachmentRow(data = {}) {
-    const $list = $('#fileList');
-
-    const filePath = data.FILE_Path ? resolveFileUrl(data.FILE_Path) : '';
-    const fileName = data.FILE_NAME || '';
-
-    // safer extension logic (use filename, not path)
-    const ext = (fileName.split('.').pop() || '').toLowerCase();
-
-    let icon = '📄';
-
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) icon = '🖼️';
-    else if (ext === 'pdf') icon = '📕';
-
-    const item = $(`
-        <div class="file-item">
-
-            <div class="file-icon">
-                ${icon}
-            </div>
-
-            <div class="file-info">
-
-                <input type="file" class="file-input" />
-
-                <input type="hidden" class="existing-file-path" value="${filePath}" />
-                <input type="hidden" class="existing-file-name" value="${fileName}" />
-
-                <div class="file-name-text">
-                    ${fileName || 'No file selected'}
-                </div>
-
-                ${filePath ? `
-                    <a href="${filePath}" target="_blank" class="file-link">
-                        Download
-                    </a>
-                ` : ''}
-
-            </div>
-
-            <div class="file-actions">
-                <i class="fa fa-plus add-file"></i>
-                <i class="fa fa-trash delete-file"></i>
-            </div>
-
-        </div>
-    `);
-
-    $list.append(item);
-
-    const $fileInput = item.find('.file-input');
-    const $fileNameText = item.find('.file-name-text');
-    const $link = item.find('.file-link');
-    const $icon = item.find('.file-icon');
-
-    // If existing file → hide input
-    if (filePath) {
-        $fileInput.hide();
-    }
-
-    // =========================
-    // FILE CHANGE HANDLER
-    // =========================
-    $fileInput.on('change', function () {
-        const file = this.files[0];
-        if (!file) return;
-
-        const url = URL.createObjectURL(file);
-
-        const newExt = (file.name.split('.').pop() || '').toLowerCase();
-
-        let newIcon = '📄';
-
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(newExt)) newIcon = '🖼️';
-        else if (newExt === 'pdf') newIcon = '📕';
-
-        $fileNameText.text(file.name);
-
-        if ($link.length) {
-            $link.attr('href', url);
-        } else {
-            $fileNameText.after(`
-                <a href="${url}" target="_blank" class="file-link">
-                    Preview
-                </a>
-            `);
-        }
-
-        $icon.text(newIcon);
-    });
-
-    // =========================
-    // DELETE ROW
-    // =========================
-    item.find('.delete-file').on('click', function () {
-        item.remove();
-    });
-}
-
-
-function GetPlaceList(selectedValue = null) {
-    $.ajax({
-        url: '@Url.Action("GetPlaceMast", "PurchaseOrder")',
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            if (response.status) {
-                const $dropdown = $('#ddlPlace');
-                $dropdown.empty();
-                $dropdown.append('<option selected disabled value="">- Select Place -</option>');
-
-                $.each(response.data, function (index, item) {
-                    $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                });
-
-                if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
-                    $dropdown.val(selectedValue).trigger('change');
-                } else {
-                    $dropdown.prop('selectedIndex', 0);
-                }
-            } else {
-                toastr.error("Place Load failed");
-            }
-        },
-        error: function (xhr, status, error) {
-            toastr.error("Place Load failed: " + error);
-        }
-    });
-}
-
-function GetCurrencyList(selectedValue = null) {
+    
+    function GetCurrencyList(selectedValue = null) {
     $.ajax({
         url: '@Url.Action("GetCurrencyMast", "PurchaseOrder")',
         type: 'GET',
@@ -2638,8 +2416,8 @@ function GetCurrencyList(selectedValue = null) {
         }
     });
 }
-
-function GetShipFromList(selectedValue = null) {
+    
+    function GetShipFromList(selectedValue = null) {
     $.ajax({
         url: '@Url.Action("GetPartyList", "PurchaseOrder")',
         type: 'GET',
@@ -2682,8 +2460,8 @@ function GetShipFromList(selectedValue = null) {
         }
     });
 }
-
-function GetPartyList(selectedValue = null) {
+    
+    function GetPartyList(selectedValue = null) {
     $.ajax({
         url: '@Url.Action("GetPartyList", "PurchaseOrder")',
         type: 'GET',
@@ -2733,8 +2511,8 @@ function GetPartyList(selectedValue = null) {
         }
     });
 }
-
-function GetPayTermList(selectedValue = null) {
+    
+    function GetPayTermList(selectedValue = null) {
     $.ajax({
         url: '@Url.Action("GetPayTermList", "PurchaseOrder")',
         type: 'GET',
