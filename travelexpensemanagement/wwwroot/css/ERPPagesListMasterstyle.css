@@ -32,6 +32,16 @@
         font-size: 13px;
     }
 
+.erppagesubfieldset {
+    width: 100%;
+    border: 1px solid #66a644;
+    border-left: 3px solid #1c5e31;
+    border-radius: 8px;
+    padding: 6px;
+    background: #fafcff;
+    box-sizing: border-box;
+    margin-top: 10px;
+}
 /* BUTTON */
 .erppagelist-btn {
     display: inline-flex;
@@ -748,7 +758,7 @@ button:focus {
 .erppage-search-inputdropdown {
     position: relative;
     width: 100%;
-    min-width: 220px;
+    /*min-width: 220px;*/
 }
 
 .erppage-search-inputdropdown-control {
@@ -810,7 +820,7 @@ button:focus {
     border: 1px solid #ffffff;
     color: #0f0f0f;
     border-radius: 20px;
-    padding: 2px 8px;
+    /*padding: 2px 8px;*/
     font-size: 12px;
     white-space: nowrap;
 }
@@ -1183,7 +1193,7 @@ button:focus {
         background: #ffe5b6 !important;
     }
 
-.order-received-row,
+/*.order-received-row,
 .order-received-row td,
 .order-received-row input,
 .order-received-row select,
@@ -1202,6 +1212,29 @@ button:focus {
     }
 
     .order-received-row .select2-selection__arrow {
+        background: #cdf9da !important;
+    }
+*/
+
+.order-received-row,
+.order-received-row td,
+.order-received-row input,
+.order-received-row select,
+.order-received-row textarea {
+    background-color: #cdf9da !important;
+}
+
+    .order-received-row td .select2-container .select2-selection--single {
+        background: #cdf9da !important;
+        border: 1px solid #cdf9da !important;
+    }
+
+    .order-received-row td .select2-container .select2-selection__rendered {
+        background: #cdf9da !important;
+        color: #000 !important;
+    }
+
+    .order-received-row td .select2-container .select2-selection__arrow {
         background: #cdf9da !important;
     }
 

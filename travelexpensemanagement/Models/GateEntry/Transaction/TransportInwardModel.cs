@@ -83,6 +83,9 @@
         //==================Correction===============
         public IFormFile Attachment { get; set; }
         public bool RemoveAttachment { get; set; }
+
+        public string? IMG_FILE { get; set; }
+        public string? ImageBase64 { get; set; }
     }
     public class RcRequest
     {

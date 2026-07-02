@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Drawing;
+using iText.StyledXmlParser.Jsoup.Select;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Text;
@@ -21,15 +23,18 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private int? userLevel;
+        private readonly GlobalValidationdate _globalValidationdate;
+
         public PurchaseBillPassEntryController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
     DropdownService dropdownService, DbHelper dbHelper,
-    ModuleService.ModuleService moduleService)
+    ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
         }
         public IActionResult Index()
         {
@@ -40,49 +45,28 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return View("~/Views/Purchase/Transaction/PurchaseBillPassEntry/Index.cshtml");
         }
 
-        public int GetNextV_NO(string yearCode)
-        {
-            string newV_NO = "00000";
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                con.Open();
-
-                // Execute query to get PREFIXYR
-                string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = '" + yearCode + "'";
-                SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con);
-                string prefixYR = prefixCmd.ExecuteScalar()?.ToString() ?? "0000";
-
-                // Execute query to get last V_NO
-                string lastV_NO_Query = "SELECT TOP 1 V_NO FROM PURCHASE1 ORDER BY V_NO DESC";
-                SqlCommand lastVnoCmd = new SqlCommand(lastV_NO_Query, con);
-                string lastV_NO = lastVnoCmd.ExecuteScalar()?.ToString();
-
-                int lastNumber = 0;
-                if (!string.IsNullOrEmpty(lastV_NO) && lastV_NO.Length >= 9)
-                {
-                    string numericPart = lastV_NO.Substring(lastV_NO.Length - 5);
-                    int.TryParse(numericPart, out lastNumber);
-                }
-
-                // Increment and format the new V_NO
-                string newRunningNo = (lastNumber + 1).ToString("D5");
-                newV_NO = prefixYR + newRunningNo;
-            }
-
-            return Convert.ToInt32(newV_NO);
-        }
-
+        //============VType========================
         public IActionResult GetDocTypeList()
         {
-            string query = "SELECT CODE,NAME FROM DOCTYPE_MAST WHERE DOCTYPE in ('PurchaseInvoice','Service Order') ORDER BY NAME DESC";
+            string query = "SELECT CODE,NAME FROM DOCTYPE_MAST WHERE DOCTYPE in ('PurchaseInvoice','Service Order') ORDER BY NAME";
             var moduelList = _dropdownService.GetDropdownList(query);
             return Json(moduelList);
         }
-        public IActionResult GetMrnNoList(int cCode, int bCode, int yCode, string vType)
+
+        //============VNO========================
+        [HttpGet]
+        public JsonResult GetVNo(string vType)
+        {
+            var result = _globalValidationdate.GetVNo(vType, "PURCHASE1");
+            return Json(new { status = true, V_NO = result });
+        }
+
+        //============MRN List========================
+        [HttpGet]
+        public async Task<IActionResult> GetMrnNoList(string vType)
         {
             // Determine the MRN type based on vType
-            string mrntype = vType;
+            string mrntype = "";
 
             switch (vType)
             {
@@ -104,167 +88,304 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 default:
                     return Json(new List<object>());
             }
-            string query = "SELECT V_NO,DOC_ID FROM PURCHASE1 WHERE COMP_CODE= '" + cCode + "' AND BRANCH_CODE = '" + bCode + "' AND YEAR_CODE ='" + yCode + "' AND V_TYPE = '" + vType + "'";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
+
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = $@"SELECT V_NO as Value, DOC_ID as Text, V_TYPE as vType FROM PURCHASE1 WHERE COMP_CODE= {gv.PubCompCode} AND BRANCH_CODE = {gv.PubBranchCode} AND YEAR_CODE ={gv.PubFYearCode} 
+                            AND V_TYPE = '{mrntype}' order by V_NO";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
         }
 
+        //============Party List With Supplier Nature========================
+        [HttpGet]
+        public async Task<IActionResult> GetPartyListNatureSupplier(string vType)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = $@"select Code as Value, Name as Text, ADD1, ADD2, CITY_CODE, GSTIN, PINCODE 
+                                from SUBGROUP_MAST where NATURE in ('Supplier') and COMP_CODE={gv.PubCompCode} and ACTIVE=1 order by name";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+
+        //============Dr Ac List By Vtype========================
+        [HttpGet]
+        public async Task<IActionResult> GetDrAcListByVtype(string vType)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = $@"select SUBGROUP_MAST.code as Value, SUBGROUP_MAST.name as Text, SUBGROUP_MAST.ADD1, SUBGROUP_MAST.ADD2, 
+                                SUBGROUP_MAST.CITY_CODE, SUBGROUP_MAST.GSTIN 
+                                from SUBGROUP_MAST 
+                                LEFT JOIN DOC_GLMAST ON DOC_GLMAST.COMP_CODE = SUBGROUP_MAST.COMP_CODE 
+                                AND DOC_GLMAST.AC_CODE=SUBGROUP_MAST.CODE 
+                                where SUBGROUP_MAST.NATURE='Others' and SUBGROUP_MAST.COMP_CODE={gv.PubCompCode} and SUBGROUP_MAST.ACTIVE=1
+                                AND DOC_GLMAST.DOC_CODE='{vType}' order by name";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+
+        //============Party Dr Cr Ac List========================
+        [HttpGet]
+        public async Task<IActionResult> GetPartyDrCrAcList()
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = $@"select a.code as Value, a.name as Text, a.ADD1, a.ADD2, a.CITY_CODE, a.GSTIN 
+                            from SUBGROUP_MAST a where a.COMP_CODE={gv.PubCompCode} and ACTIVE=1 order by name";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+
+        //============Transport GST List========================
+        [HttpGet]
+        public async Task<IActionResult> GetTranGSTByFrtCrAc(int? frtCrAcCode)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            string query = "";
+            if(frtCrAcCode!= null && frtCrAcCode > 0)
+            {
+                query += $@"Select a.GSTIN as Value, a.GSTIN as Text from SUBGROUP_ADDRESS a 
+                left join TRANSPORT_MAST b on a.CODE=b.PARTY_CODE and a.COMP_CODE=b.COMP_CODE 
+                where a.COMP_CODE={gv.PubCompCode} and a.CODE={frtCrAcCode} group by a.GSTIN order by a.GSTIN";
+            }
+            else
+            {
+                query += $@"Select 'URP' as Value, 'URP' as Text";
+            }
+                var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+
+        //============Item List========================
+        [HttpGet]
+        public async Task<IActionResult> GetItemList()
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            string query = $@"Select a.CODE as Value, a.name as Text, c.NAME as unit, c.CODE as ucode from item_mast a 
+                            left join ITEM_MAKE b on a.code=b.ITEM_CODE and b.COMP_CODE=a.COMP_CODE
+                            left join ITEMUNIT_MAST c on a.UNIT_CODE=c.CODE and b.comp_code=a.COMP_CODE
+                            left join item_group d on a.GROUP_CODE=d.CODE and c.COMP_CODE=a.COMP_CODE
+                            left join ITEM_MGROUP e on d.MGROUP_CODE=e.CODE and d.COMP_CODE=a.COMP_CODE
+                            where a.comp_code={gv.PubCompCode} and e.MGROUP_TYPE in('Store','Raw')
+                            group by a.name ,a.CODE , c.NAME ,c.CODE order by a.name";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+
+        //============Add List========================
+        [HttpGet]
+        public async Task<IActionResult> GetAddList(int shipFromCode)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            string query = $@"select address_id Value, add1 Text from SUBGROUP_ADDRESS 
+                                where code={shipFromCode} and COMP_CODE={gv.PubCompCode} order by ADDRESS_ID";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+
+        //================Department List=================
+        [HttpGet]
+        public async Task<IActionResult> GetDepartmentList()
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            string query = $@"select name,code from ITEMDEPT_MAST where COMP_CODE={gv.PubCompCode} order by name";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+
+        //================City List=================
+        [HttpGet]
+        public async Task<IActionResult> GetCityList()
+        {
+            string query = $@"select code as Value, NAME as Text from CITY_MAST where ACTIVE=1 order by Name";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+
+        //================State List=================
+        [HttpGet]
+        public async Task<IActionResult> GetStateList()
+        {
+            string query = $@"select code as Value, NAME as Text from STATE_MAST where ACTIVE = 1 order by name";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+
+        //================Currency List=================
+        [HttpGet]
+        public async Task<IActionResult> GetCurrencyList()
+        {
+            string query = $@"SELECT CODE as Value, SHORTNAME as Text FROM CURRENCY_MAST ORDER BY code";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+        
+        //==================Tax Type List==================
+        [HttpGet]
+        public async Task<IActionResult> GetTaxList()
+        {
+            string query = $@"select name as Text, code as Value, CGST_PER,SGST_PER,IGST_PER,isnull(VAT_PER,0)VAT_PER,TDS_PER,TCS_PER,OTH_PER,
+                            isnull(OTH_PER2,0)OTH_PER2 from TAX_MAST
+                            where ACTIVE = 1 order by name";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+
+        //================Status List=================
         public IActionResult GetStatusList()
         {
-            string query = "SELECT CODE,NAME FROM DOCSTATUS_MAST WHERE V_TYPE = 'Document' ORDER BY NAME";
+            string query = "SELECT CODE,NAME FROM DOCSTATUS_MAST WHERE V_TYPE = 'Document' ORDER BY CODE";
             var moduelList = _dropdownService.GetDropdownList(query);
             return Json(moduelList);
         }
 
-        public IActionResult GetPoList(int cCode, int yCode, int bCode)
+        //public IActionResult GetPoList(int cCode, int yCode, int bCode)
+        //{
+        //    string query = "SELECT V_TYPE,DOC_ID FROM PO_MAST WHERE COMP_CODE = '" + cCode + "' AND YEAR_CODE='" + yCode + "' AND BRANCH_CODE='" + bCode + "'";
+        //    var moduelList = _dropdownService.GetDropdownList(query);
+        //    return Json(moduelList);
+        //}
+
+        //public IActionResult GetPartyListNatureOther(int cCode)
+        //{
+        //    string query = "SELECT CODE,NAME FROM SUBGROUP_MAST WHERE COMP_CODE='" + cCode + "' AND NATURE='Others' AND ACTIVE=1 ORDER BY NAME ";
+        //    var moduelList = _dropdownService.GetDropdownList(query);
+        //    return Json(moduelList);
+        //}
+        public IActionResult GetTransportList()
         {
-            string query = "SELECT V_TYPE,DOC_ID FROM PO_MAST WHERE COMP_CODE = '" + cCode + "' AND YEAR_CODE='" + yCode + "' AND BRANCH_CODE='" + bCode + "'";
+            var gv = _globalVariableService.GetGlobalVariables();
+            string query = $@"select code, ltrim(name) from TRANSPORT_MAST 
+                                where COMP_CODE={gv.PubCompCode} and ACTIVE=1 order by ltrim(name)";
             var moduelList = _dropdownService.GetDropdownList(query);
             return Json(moduelList);
         }
+        //public JsonResult GetCityList()
+        //{
+        //    var city = new List<object>();
 
-        public IActionResult GetPartyListNatureSupplier(int cCode)
-        {
-            string query = "SELECT CODE,NAME FROM SUBGROUP_MAST WHERE COMP_CODE='" + cCode + "' AND NATURE='Supplier' AND ACTIVE=1 ORDER BY NAME ";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
-        public IActionResult GetPartyListNatureOther(int cCode)
-        {
-            string query = "SELECT CODE,NAME FROM SUBGROUP_MAST WHERE COMP_CODE='" + cCode + "' AND NATURE='Others' AND ACTIVE=1 ORDER BY NAME ";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
-        public IActionResult GetTransportList(int cCode)
-        {
-            string query = "SELECT CODE,NAME FROM [dbo].[TRANSPORT_MAST] WHERE COMP_CODE='" + cCode + "'";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
-        public JsonResult GetCityList()
-        {
-            var city = new List<object>();
+        //    using (SqlConnection conn = _dbConnection.GetErpConnection())
+        //    {
+        //        string query = "SELECT CODE, NAME FROM CITY_MAST";
+        //        SqlCommand cmd = new SqlCommand(query, conn);
+        //        conn.Open();
+        //        SqlDataReader reader = cmd.ExecuteReader();
+        //        while (reader.Read())
+        //        {
+        //            city.Add(new
+        //            {
+        //                Value = reader["Code"].ToString(),
+        //                Text = reader["Name"].ToString()
+        //            });
+        //        }
 
-            using (SqlConnection conn = _dbConnection.GetErpConnection())
-            {
-                string query = "SELECT CODE, NAME FROM CITY_MAST";
-                SqlCommand cmd = new SqlCommand(query, conn);
-                conn.Open();
-                SqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    city.Add(new
-                    {
-                        Value = reader["Code"].ToString(),
-                        Text = reader["Name"].ToString()
-                    });
-                }
+        //    }
+        //    return Json(city);
+        //}
+        //public IActionResult GetTransitNoByParty(int cCode, int bCode, int yCode, int pCode)
+        //{
+        //    //var query = "SELECT V_NO,DOC_ID FROM WAYBILL1 WHERE  COMP_CODE='" + cCode + "' AND YEAR_CODE='" + yCode + "' AND BRANCH_CODE='" + bCode + "' AND PARTY_CODE='" + pCode + "' ";
+        //    var queryBuilder = new StringBuilder();
+        //    queryBuilder.Append("SELECT V_NO,DOC_ID FROM WAYBILL1 ");
+        //    queryBuilder.Append("WHERE COMP_CODE='").Append(cCode).Append("' ");
+        //    queryBuilder.Append("AND YEAR_CODE='").Append(yCode).Append("' ");
+        //    queryBuilder.Append("AND BRANCH_CODE='").Append(bCode).Append("' ");
+        //    queryBuilder.Append("AND PARTY_CODE='").Append(pCode).Append("'");
+        //    string query = queryBuilder.ToString();
 
-            }
-            return Json(city);
-        }
-        public IActionResult GetTransitNoByParty(int cCode, int bCode, int yCode, int pCode)
-        {
-            //var query = "SELECT V_NO,DOC_ID FROM WAYBILL1 WHERE  COMP_CODE='" + cCode + "' AND YEAR_CODE='" + yCode + "' AND BRANCH_CODE='" + bCode + "' AND PARTY_CODE='" + pCode + "' ";
-            var queryBuilder = new StringBuilder();
-            queryBuilder.Append("SELECT V_NO,DOC_ID FROM WAYBILL1 ");
-            queryBuilder.Append("WHERE COMP_CODE='").Append(cCode).Append("' ");
-            queryBuilder.Append("AND YEAR_CODE='").Append(yCode).Append("' ");
-            queryBuilder.Append("AND BRANCH_CODE='").Append(bCode).Append("' ");
-            queryBuilder.Append("AND PARTY_CODE='").Append(pCode).Append("'");
-            string query = queryBuilder.ToString();
+        //    var moduelList = _dropdownService.GetDropdownList(query);
+        //    return Json(moduelList);
+        //}
+        //public IActionResult GetAddressListByBillToParty(int pCode)
+        //{
+        //    var cCode = _globalVariableService.GetGlobalVariables().PubCompCode;
+        //    var query = "SELECT ADDRESS_ID,ADD1 FROM [SUBGROUP_ADDRESS] WHERE  COMP_CODE='" + cCode + "' AND CODE='" + pCode + "'";
+        //    var moduelList = _dropdownService.GetDropdownList(query);
+        //    return Json(moduelList);
+        //}
 
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
-        public IActionResult GetAddressListByBillToParty(int pCode)
-        {
-            var cCode = _globalVariableService.GetGlobalVariables().PubCompCode;
-            var query = "SELECT ADDRESS_ID,ADD1 FROM [SUBGROUP_ADDRESS] WHERE  COMP_CODE='" + cCode + "' AND CODE='" + pCode + "'";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
+        //[HttpGet]
+        //public IActionResult GetAddressByDocId(string docCODE)
+        //{
+        //    var cCode = _globalVariableService.GetGlobalVariables().PubCompCode;
 
-        [HttpGet]
-        public IActionResult GetAddressByDocId(string docCODE)
-        {
-            var cCode = _globalVariableService.GetGlobalVariables().PubCompCode;
+        //    var addressDetails = new
+        //    {
+        //        pcode = "",
+        //        add1 = "",
+        //        add2 = "",
+        //        add3 = "",
+        //        pincode = "",
+        //        gstin = "",
+        //        cityCode = ""
+        //    };
 
-            var addressDetails = new
-            {
-                pcode = "",
-                add1 = "",
-                add2 = "",
-                add3 = "",
-                pincode = "",
-                gstin = "",
-                cityCode = ""
-            };
+        //    try
+        //    {
+        //        string partyCode = null;
 
-            try
-            {
-                string partyCode = null;
+        //        using (SqlConnection conn = _dbConnection.GetErpConnection())
+        //        {
+        //            // Step 1: Get PARTY_CODE from PURCHASE1 using DOC_ID
+        //            using (SqlCommand cmd = new SqlCommand("SELECT PARTY_CODE FROM PURCHASE1 WHERE DOC_ID = @docId", conn))
+        //            {
+        //                cmd.Parameters.AddWithValue("@docId", docCODE);
 
-                using (SqlConnection conn = _dbConnection.GetErpConnection())
-                {
-                    // Step 1: Get PARTY_CODE from PURCHASE1 using DOC_ID
-                    using (SqlCommand cmd = new SqlCommand("SELECT PARTY_CODE FROM PURCHASE1 WHERE DOC_ID = @docId", conn))
-                    {
-                        cmd.Parameters.AddWithValue("@docId", docCODE);
+        //                conn.Open();
+        //                var result = cmd.ExecuteScalar();
+        //                if (result != null && result != DBNull.Value)
+        //                {
+        //                    partyCode = result.ToString();
+        //                }
+        //                conn.Close();
+        //            }
 
-                        conn.Open();
-                        var result = cmd.ExecuteScalar();
-                        if (result != null && result != DBNull.Value)
-                        {
-                            partyCode = result.ToString();
-                        }
-                        conn.Close();
-                    }
+        //            if (string.IsNullOrEmpty(partyCode))
+        //            {
+        //                return Json(new { success = false, message = "No PARTY_CODE found for the provided DOC_ID." });
+        //            }
 
-                    if (string.IsNullOrEmpty(partyCode))
-                    {
-                        return Json(new { success = false, message = "No PARTY_CODE found for the provided DOC_ID." });
-                    }
-
-                    // Step 2: Get Address List  from SUBGROUP_ADDRESS using PARTY_CODE
-                    GetAddressListByBillToParty(Convert.ToInt32(partyCode));
+        //            // Step 2: Get Address List  from SUBGROUP_ADDRESS using PARTY_CODE
+        //            GetAddressListByBillToParty(Convert.ToInt32(partyCode));
 
 
-                    // Step 3: Get Address from SUBGROUP_ADDRESS using PARTY_CODE
-                    using (SqlCommand cmd = new SqlCommand("SELECT TOP(1) CODE,ADD1, ADD2, ADD3, PINCODE, GSTIN, CITY_CODE FROM SUBGROUP_ADDRESS WHERE COMP_CODE = @COMP_CODE AND CODE = @PCODE", conn))
-                    {
-                        cmd.Parameters.AddWithValue("@COMP_CODE", cCode);
-                        cmd.Parameters.AddWithValue("@PCODE", partyCode);
+        //            // Step 3: Get Address from SUBGROUP_ADDRESS using PARTY_CODE
+        //            using (SqlCommand cmd = new SqlCommand("SELECT TOP(1) CODE,ADD1, ADD2, ADD3, PINCODE, GSTIN, CITY_CODE FROM SUBGROUP_ADDRESS WHERE COMP_CODE = @COMP_CODE AND CODE = @PCODE", conn))
+        //            {
+        //                cmd.Parameters.AddWithValue("@COMP_CODE", cCode);
+        //                cmd.Parameters.AddWithValue("@PCODE", partyCode);
 
-                        conn.Open();
-                        using (var reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                addressDetails = new
-                                {
-                                    pcode = reader["CODE"].ToString(),
-                                    add1 = reader["ADD1"].ToString(),
-                                    add2 = reader["ADD2"].ToString(),
-                                    add3 = reader["ADD3"].ToString(),
-                                    pincode = reader["PINCODE"].ToString(),
-                                    gstin = reader["GSTIN"].ToString(),
-                                    cityCode = reader["CITY_CODE"].ToString()
-                                };
-                            }
-                        }
-                        conn.Close();
-                    }
+        //                conn.Open();
+        //                using (var reader = cmd.ExecuteReader())
+        //                {
+        //                    if (reader.Read())
+        //                    {
+        //                        addressDetails = new
+        //                        {
+        //                            pcode = reader["CODE"].ToString(),
+        //                            add1 = reader["ADD1"].ToString(),
+        //                            add2 = reader["ADD2"].ToString(),
+        //                            add3 = reader["ADD3"].ToString(),
+        //                            pincode = reader["PINCODE"].ToString(),
+        //                            gstin = reader["GSTIN"].ToString(),
+        //                            cityCode = reader["CITY_CODE"].ToString()
+        //                        };
+        //                    }
+        //                }
+        //                conn.Close();
+        //            }
 
-                }
+        //        }
 
-                return Json(new { success = true, addressDetails });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Error retrieving address details", error = ex.Message });
-            }
-        }
+        //        return Json(new { success = true, addressDetails });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { success = false, message = "Error retrieving address details", error = ex.Message });
+        //    }
+        //}
         public IActionResult GetAddressByBillToParty(int cCode, int pCode)
         {
             var addressDetails = new
@@ -311,71 +432,71 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-        public IActionResult GetDocDetailsByTransitNo(int cCode, int yCode, int bCode, string docId)
-        {
-            var docDetails = new
-            {
-                formNoWB = "",
-                formDateWB = "",
-                expDateWB = "",
-                billNO = "",
-                billDate = ""
-            };
-            try
-            {
-                using (SqlConnection connection = _dbConnection.GetErpConnection())
-                {
-                    using (SqlCommand cmd = new SqlCommand("SELECT FORM_NO,FORM_DATE,EXPIRY_DATE, BILL_NO,BILL_DATE FROM WAYBILL1 WHERE COMP_CODE=@COMP_CODE AND YEAR_CODE=@YEAR_CODE AND BRANCH_CODE=@BRANCH_CODE AND V_NO = @DOC_ID", connection))
-                    {
-                        cmd.Parameters.AddWithValue("@COMP_CODE", cCode);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", yCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", bCode);
-                        cmd.Parameters.AddWithValue("@DOC_ID", docId);
-                        connection.Open();
-                        using (var reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                docDetails = new
-                                {
-                                    formNoWB = reader["FORM_NO"].ToString(),
-                                    formDateWB = reader["FORM_DATE"].ToString(),
-                                    expDateWB = reader["EXPIRY_DATE"].ToString(),
-                                    billNO = reader["BILL_NO"].ToString(),
-                                    billDate = reader["BILL_DATE"].ToString()
-                                };
+        //public IActionResult GetDocDetailsByTransitNo(int cCode, int yCode, int bCode, string docId)
+        //{
+        //    var docDetails = new
+        //    {
+        //        formNoWB = "",
+        //        formDateWB = "",
+        //        expDateWB = "",
+        //        billNO = "",
+        //        billDate = ""
+        //    };
+        //    try
+        //    {
+        //        using (SqlConnection connection = _dbConnection.GetErpConnection())
+        //        {
+        //            using (SqlCommand cmd = new SqlCommand("SELECT FORM_NO,FORM_DATE,EXPIRY_DATE, BILL_NO,BILL_DATE FROM WAYBILL1 WHERE COMP_CODE=@COMP_CODE AND YEAR_CODE=@YEAR_CODE AND BRANCH_CODE=@BRANCH_CODE AND V_NO = @DOC_ID", connection))
+        //            {
+        //                cmd.Parameters.AddWithValue("@COMP_CODE", cCode);
+        //                cmd.Parameters.AddWithValue("@YEAR_CODE", yCode);
+        //                cmd.Parameters.AddWithValue("@BRANCH_CODE", bCode);
+        //                cmd.Parameters.AddWithValue("@DOC_ID", docId);
+        //                connection.Open();
+        //                using (var reader = cmd.ExecuteReader())
+        //                {
+        //                    if (reader.Read())
+        //                    {
+        //                        docDetails = new
+        //                        {
+        //                            formNoWB = reader["FORM_NO"].ToString(),
+        //                            formDateWB = reader["FORM_DATE"].ToString(),
+        //                            expDateWB = reader["EXPIRY_DATE"].ToString(),
+        //                            billNO = reader["BILL_NO"].ToString(),
+        //                            billDate = reader["BILL_DATE"].ToString()
+        //                        };
 
-                            }
-                        }
-                    }
-                }
-                return Json(new { success = true, docDetails });
-            }
-            catch (Exception)
-            {
-                return Json(new { success = false, message = "Error retrieving the address by specfic address id" });
-            }
-        }
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        return Json(new { success = true, docDetails });
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return Json(new { success = false, message = "Error retrieving the address by specfic address id" });
+        //    }
+        //}
 
-        public IActionResult GetTexType()
-        {
-            var query = "SELECT CODE,NAME FROM TAX_MAST";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
+        //public IActionResult GetTexType()
+        //{
+        //    var query = "SELECT CODE,NAME FROM TAX_MAST";
+        //    var moduelList = _dropdownService.GetDropdownList(query);
+        //    return Json(moduelList);
+        //}
 
-        public IActionResult GetItemList(int cCode)
-        {
-            string query = "SELECT CODE,NAME FROM ITEM_MAST WHERE COMP_CODE = '" + cCode + "' AND ACTIVE=1 ORDER BY NAME";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
-        public IActionResult GetUOMList()
-        {
-            string query = "SELECT CODE,NAME FROM QCPUNIT_MAST WHERE ACTIVE=1 ORDER BY NAME";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
+        //public IActionResult GetItemList(int cCode)
+        //{
+        //    string query = "SELECT CODE,NAME FROM ITEM_MAST WHERE COMP_CODE = '" + cCode + "' AND ACTIVE=1 ORDER BY NAME";
+        //    var moduelList = _dropdownService.GetDropdownList(query);
+        //    return Json(moduelList);
+        //}
+        //public IActionResult GetUOMList()
+        //{
+        //    string query = "SELECT CODE,NAME FROM QCPUNIT_MAST WHERE ACTIVE=1 ORDER BY NAME";
+        //    var moduelList = _dropdownService.GetDropdownList(query);
+        //    return Json(moduelList);
+        //}
 
         public IActionResult GetDepartmentList(int cCode)
         {
@@ -942,157 +1063,157 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { success = false, message = "Error fetching quotation", error = ex.Message });
             }
         }
-        [HttpPost]
-        public async Task<IActionResult> SavePurchaseBillPassEntry([FromBody] PurchaseWrapper data)
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            int vNo = GetNextV_NO(globalVar.PubFYearCode);
-            var model = data.header;
-            string action = "INSERTANDUPDATE";
-            string subAction = "";
+        //[HttpPost]
+        //public async Task<IActionResult> SavePurchaseBillPassEntry([FromBody] PurchaseWrapper data)
+        //{
+        //    var globalVar = _globalVariableService.GetGlobalVariables();
+        //    int vNo = GetNextV_NO(globalVar.PubFYearCode);
+        //    var model = data.header;
+        //    string action = "INSERTANDUPDATE";
+        //    string subAction = "";
 
-            // Duplicate Check
-            if (IsDuplicatePurchaseEntry(vNo, Convert.ToInt32(globalVar.PubCompCode), Convert.ToInt32(globalVar.PubFYearCode)))
-            {
-                subAction = "UPDATE";
-            }
-            else
-            {
-                subAction = "INSERT";
-            }
+        //    // Duplicate Check
+        //    if (IsDuplicatePurchaseEntry(vNo, Convert.ToInt32(globalVar.PubCompCode), Convert.ToInt32(globalVar.PubFYearCode)))
+        //    {
+        //        subAction = "UPDATE";
+        //    }
+        //    else
+        //    {
+        //        subAction = "INSERT";
+        //    }
 
-            try
-            {
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-                    await con.OpenAsync();
-                    using (SqlCommand cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", con))
-                    {
-                        var docID = model.V_TYPE + model.V_NO;
+        //    try
+        //    {
+        //        using (SqlConnection con = _dbConnection.GetErpConnection())
+        //        {
+        //            await con.OpenAsync();
+        //            using (SqlCommand cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", con))
+        //            {
+        //                var docID = model.V_TYPE + model.V_NO;
 
-                        cmd.CommandType = CommandType.StoredProcedure;
+        //                cmd.CommandType = CommandType.StoredProcedure;
 
-                        // Core Parameters for PURCHASE1
-                        cmd.Parameters.AddWithValue("@Action", action);
-                        cmd.Parameters.AddWithValue("@SubAction", subAction);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                        cmd.Parameters.AddWithValue("@V_TYPE", model.V_TYPE ?? "");
-                        cmd.Parameters.AddWithValue("@V_NO", model.V_NO);
-                        cmd.Parameters.AddWithValue("@V_DATE", model.V_DATE);
-                        cmd.Parameters.AddWithValue("@PARTY_CODE", model.PARTY_CODE);
-                        //cmd.Parameters.AddWithValue("@NET_AMT", model.AMOUNT);
-                        cmd.Parameters.AddWithValue("@STATUS", model.STATUS);
-                        cmd.Parameters.AddWithValue("@DOC_ID", docID ?? "");
-
-
-                        // ➕ Start Adding All Additional Header Parameters
-
-                        cmd.Parameters.AddWithValue("@BILL_ADD1", model.BILL_ADD1 ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@BILL_ADD2", model.BILL_ADD2 ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@BILL_ADD3", model.BILL_ADD3 ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@BILL_CITY", model.BILL_CITY ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@BILL_GST", model.BILL_GST ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@DISP_ADDRESS", model.DISP_ADDRESS ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@DISP_CITY", model.DISP_CITY ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@SHIP_ADD1", model.SHIP_ADD1 ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@SHIP_ADD2", model.SHIP_ADD2 ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@SHIP_ADD3", model.SHIP_ADD3 ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@SHIP_CITY", model.SHIP_CITY ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@SHIP_GST", model.SHIP_GST ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@BILL_NO", model.BILL_NO ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@BILL_DATE", model.BILL_DATE ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@CHALL_NO", model.CHALL_NO ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@CHALL_DATE", model.CHALL_DATE ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@WAYBILL_NO", model.WAYBILL_NO ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@GR_DATE", model.GR_DATE ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@EWB_INVNO", model.EWB_INVNO ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@EWB_EXPDATE", model.EWB_EXPDATE ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@EXCH_RATE", model.EXCH_RATE ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@INPUT_TYPE", model.INPUT_TYPE ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@DEBIT_AC", model.DEBIT_AC ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@CREDIT_AC", model.CREDIT_AC ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@REMARKS", model.REMARKS ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@NAMOUNT", model.NAMOUNT ?? (object)DBNull.Value);
-
-                        // 🚚 Transport Information
-                        cmd.Parameters.AddWithValue("@TRANSPORT_NAME", model.TRANSPORT_NAME ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@TRUCK_NO", model.TRUCK_NO ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@CONTAINER_NO", model.CONTAINER_NO ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@GR_NO", model.GR_NO ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@SEALED_VEHICLE", model.SEALED_VEHICLE);
-
-                        // 🚛 Freight Details
-                        cmd.Parameters.AddWithValue("@FRTPAY_AMT", model.FRTPAY_AMT);
-                        cmd.Parameters.AddWithValue("@FRTPAY_TAXPER", model.FRTPAY_TAXPER);
-                        cmd.Parameters.AddWithValue("@FRTPAY_TAX", model.FRTPAY_TAX);
-                        cmd.Parameters.AddWithValue("@FRTPAY_DRAC", model.FRTPAY_DRAC ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@FRTPAY_CRAC", model.FRTPAY_CRAC ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@FRTPAY_NAR", model.FRTPAY_NAR ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@FRT_TDSPER", model.FRT_TDSPER);
-                        cmd.Parameters.AddWithValue("@FRT_TDS", model.FRT_TDS);
-
-                        // 🧾 Billing Info
-                        cmd.Parameters.AddWithValue("@TRP_GSTNO", model.TRP_GSTNO ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@TRP_TAXTYPE", model.TRP_TAXTYPE ?? (object)DBNull.Value);
-
-                        // 📦 WB Details
-                        cmd.Parameters.AddWithValue("@WB_AMT", model.WB_AMT);
-                        cmd.Parameters.AddWithValue("@WB_TDSPER", model.WB_TDSPER);
-                        cmd.Parameters.AddWithValue("@WB_TDS", model.WB_TDS);
-                        cmd.Parameters.AddWithValue("@WB_DRACT", model.WB_DRACT ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@WB_CRACT", model.WB_CRACT ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@WB_NARR", model.WB_NARR ?? (object)DBNull.Value);
-
-                        // 🏗️ Unloading Details
-                        cmd.Parameters.AddWithValue("@UL_AMT", model.UL_AMT);
-                        cmd.Parameters.AddWithValue("@UL_TDSPER", model.UL_TDSPER);
-                        cmd.Parameters.AddWithValue("@UL_TDS", model.UL_TDS);
-                        cmd.Parameters.AddWithValue("@UL_DRACT", model.UL_DRACT ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@UL_CRACT", model.UL_CRACT ?? (object)DBNull.Value);
-                        cmd.Parameters.AddWithValue("@UL_NARR", model.UL_NARR ?? (object)DBNull.Value);
+        //                // Core Parameters for PURCHASE1
+        //                cmd.Parameters.AddWithValue("@Action", action);
+        //                cmd.Parameters.AddWithValue("@SubAction", subAction);
+        //                cmd.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
+        //                cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
+        //                cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+        //                cmd.Parameters.AddWithValue("@V_TYPE", model.V_TYPE ?? "");
+        //                cmd.Parameters.AddWithValue("@V_NO", model.V_NO);
+        //                cmd.Parameters.AddWithValue("@V_DATE", model.V_DATE);
+        //                cmd.Parameters.AddWithValue("@PARTY_CODE", model.PARTY_CODE);
+        //                //cmd.Parameters.AddWithValue("@NET_AMT", model.AMOUNT);
+        //                cmd.Parameters.AddWithValue("@STATUS", model.STATUS);
+        //                cmd.Parameters.AddWithValue("@DOC_ID", docID ?? "");
 
 
+        //                // ➕ Start Adding All Additional Header Parameters
+
+        //                cmd.Parameters.AddWithValue("@BILL_ADD1", model.BILL_ADD1 ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@BILL_ADD2", model.BILL_ADD2 ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@BILL_ADD3", model.BILL_ADD3 ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@BILL_CITY", model.BILL_CITY ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@BILL_GST", model.BILL_GST ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@DISP_ADDRESS", model.DISP_ADDRESS ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@DISP_CITY", model.DISP_CITY ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@SHIP_ADD1", model.SHIP_ADD1 ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@SHIP_ADD2", model.SHIP_ADD2 ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@SHIP_ADD3", model.SHIP_ADD3 ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@SHIP_CITY", model.SHIP_CITY ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@SHIP_GST", model.SHIP_GST ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@BILL_NO", model.BILL_NO ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@BILL_DATE", model.BILL_DATE ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@CHALL_NO", model.CHALL_NO ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@CHALL_DATE", model.CHALL_DATE ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@WAYBILL_NO", model.WAYBILL_NO ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@GR_DATE", model.GR_DATE ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@EWB_INVNO", model.EWB_INVNO ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@EWB_EXPDATE", model.EWB_EXPDATE ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@EXCH_RATE", model.EXCH_RATE ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@INPUT_TYPE", model.INPUT_TYPE ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@DEBIT_AC", model.DEBIT_AC ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@CREDIT_AC", model.CREDIT_AC ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@REMARKS", model.REMARKS ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@NAMOUNT", model.NAMOUNT ?? (object)DBNull.Value);
+
+        //                // 🚚 Transport Information
+        //                cmd.Parameters.AddWithValue("@TRANSPORT_NAME", model.TRANSPORT_NAME ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@TRUCK_NO", model.TRUCK_NO ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@CONTAINER_NO", model.CONTAINER_NO ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@GR_NO", model.GR_NO ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@SEALED_VEHICLE", model.SEALED_VEHICLE);
+
+        //                // 🚛 Freight Details
+        //                cmd.Parameters.AddWithValue("@FRTPAY_AMT", model.FRTPAY_AMT);
+        //                cmd.Parameters.AddWithValue("@FRTPAY_TAXPER", model.FRTPAY_TAXPER);
+        //                cmd.Parameters.AddWithValue("@FRTPAY_TAX", model.FRTPAY_TAX);
+        //                cmd.Parameters.AddWithValue("@FRTPAY_DRAC", model.FRTPAY_DRAC ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@FRTPAY_CRAC", model.FRTPAY_CRAC ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@FRTPAY_NAR", model.FRTPAY_NAR ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@FRT_TDSPER", model.FRT_TDSPER);
+        //                cmd.Parameters.AddWithValue("@FRT_TDS", model.FRT_TDS);
+
+        //                // 🧾 Billing Info
+        //                cmd.Parameters.AddWithValue("@TRP_GSTNO", model.TRP_GSTNO ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@TRP_TAXTYPE", model.TRP_TAXTYPE ?? (object)DBNull.Value);
+
+        //                // 📦 WB Details
+        //                cmd.Parameters.AddWithValue("@WB_AMT", model.WB_AMT);
+        //                cmd.Parameters.AddWithValue("@WB_TDSPER", model.WB_TDSPER);
+        //                cmd.Parameters.AddWithValue("@WB_TDS", model.WB_TDS);
+        //                cmd.Parameters.AddWithValue("@WB_DRACT", model.WB_DRACT ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@WB_CRACT", model.WB_CRACT ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@WB_NARR", model.WB_NARR ?? (object)DBNull.Value);
+
+        //                // 🏗️ Unloading Details
+        //                cmd.Parameters.AddWithValue("@UL_AMT", model.UL_AMT);
+        //                cmd.Parameters.AddWithValue("@UL_TDSPER", model.UL_TDSPER);
+        //                cmd.Parameters.AddWithValue("@UL_TDS", model.UL_TDS);
+        //                cmd.Parameters.AddWithValue("@UL_DRACT", model.UL_DRACT ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@UL_CRACT", model.UL_CRACT ?? (object)DBNull.Value);
+        //                cmd.Parameters.AddWithValue("@UL_NARR", model.UL_NARR ?? (object)DBNull.Value);
 
 
-                        // Audit Fields
-                        cmd.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
-                        cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
-                        cmd.Parameters.AddWithValue("@EUSER", globalVar.PubUserId);
-                        cmd.Parameters.AddWithValue("@EDATE", DateTime.Now);
-                        cmd.Parameters.AddWithValue("@AED", model.AED ?? "A");
-                        cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID ?? "WEB");
-                        cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId ?? "127.0.0.1");
-                        cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
 
-                        // TVP for PURCHASE2
-                        DataTable dtPurchase2 = ConvertToPurchase2TVP(data.lineRows, docID);
-                        SqlParameter tvpParam = cmd.Parameters.AddWithValue("@PURCHASE2_TYPE", dtPurchase2);
-                        tvpParam.SqlDbType = SqlDbType.Structured;
-                        tvpParam.TypeName = "dbo.PURCHASE2_TYPE";
 
-                        // Convert QUOT3 to DataTable
-                        DataTable dtQuotation3 = await ConvertToPurchase3TVP(model.V_NO, model.V_TYPE, data.Attachement, docID);
-                        var tvpParam3 = cmd.Parameters.AddWithValue("@PURCHASE3_TYPE", dtQuotation3);
-                        tvpParam3.SqlDbType = SqlDbType.Structured;
-                        tvpParam3.TypeName = "dbo.PURCHASE3_TYPE";
+        //                // Audit Fields
+        //                cmd.Parameters.AddWithValue("@UUSER", globalVar.PubUserId);
+        //                cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
+        //                cmd.Parameters.AddWithValue("@EUSER", globalVar.PubUserId);
+        //                cmd.Parameters.AddWithValue("@EDATE", DateTime.Now);
+        //                cmd.Parameters.AddWithValue("@AED", model.AED ?? "A");
+        //                cmd.Parameters.AddWithValue("@WSID", globalVar.PubWorkStationID ?? "WEB");
+        //                cmd.Parameters.AddWithValue("@LIP", globalVar.PubLocalId ?? "127.0.0.1");
+        //                cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
 
-                        await cmd.ExecuteNonQueryAsync();
-                    }
-                }
+        //                // TVP for PURCHASE2
+        //                DataTable dtPurchase2 = ConvertToPurchase2TVP(data.lineRows, docID);
+        //                SqlParameter tvpParam = cmd.Parameters.AddWithValue("@PURCHASE2_TYPE", dtPurchase2);
+        //                tvpParam.SqlDbType = SqlDbType.Structured;
+        //                tvpParam.TypeName = "dbo.PURCHASE2_TYPE";
 
-                return Json(new { success = true, message = "Purchase saved successfully." });
-            }
-            catch (SqlException ex)
-            {
-                return Json(new { success = false, message = "SQL Error: " + ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Error: " + ex.Message });
-            }
-        }
+        //                // Convert QUOT3 to DataTable
+        //                DataTable dtQuotation3 = await ConvertToPurchase3TVP(model.V_NO, model.V_TYPE, data.Attachement, docID);
+        //                var tvpParam3 = cmd.Parameters.AddWithValue("@PURCHASE3_TYPE", dtQuotation3);
+        //                tvpParam3.SqlDbType = SqlDbType.Structured;
+        //                tvpParam3.TypeName = "dbo.PURCHASE3_TYPE";
+
+        //                await cmd.ExecuteNonQueryAsync();
+        //            }
+        //        }
+
+        //        return Json(new { success = true, message = "Purchase saved successfully." });
+        //    }
+        //    catch (SqlException ex)
+        //    {
+        //        return Json(new { success = false, message = "SQL Error: " + ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { success = false, message = "Error: " + ex.Message });
+        //    }
+        //}
         public DataTable ConvertToPurchase2TVP(List<PURCHASE2> list, string docID)
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
@@ -1336,6 +1457,86 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
+        //=====================================================================================================================
+        [HttpPost]
+        public IActionResult ValidateMRN(string mrnNo, string vType, int vNo)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
 
+                //-------------------------------------------------------
+                //Check Duplicate
+                //-------------------------------------------------------
+
+                string duplicateQuery = @"
+                    SELECT DISTINCT V_TYPE + CAST(V_NO AS VARCHAR)
+                    FROM PURCHASE2
+                    WHERE V_TYPE=@VType
+                    AND V_NO<>@VNo
+                    AND REF_NO=@MRNNo
+                    AND COMP_CODE=@CompCode
+                    AND BRANCH_CODE=@BranchCode
+                    AND YEAR_CODE=@YearCode";
+
+                SqlCommand cmd = new SqlCommand(duplicateQuery, con);
+
+                cmd.Parameters.AddWithValue("@VType", vType);
+                cmd.Parameters.AddWithValue("@VNo", vNo);
+                cmd.Parameters.AddWithValue("@MRNNo", mrnNo);
+                cmd.Parameters.AddWithValue("@CompCode", gv.PubCompCode);
+                cmd.Parameters.AddWithValue("@BranchCode", gv.PubBranchCode);
+                cmd.Parameters.AddWithValue("@YearCode", gv.PubFYearCode);
+
+                var billPassNo = cmd.ExecuteScalar();
+
+                if (billPassNo != null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "MRN No exists in Purchase Bill Pass Entry No : " + billPassNo
+                    });
+                }
+
+                //-------------------------------------------------------
+                //Check Approval
+                //-------------------------------------------------------
+
+                string approveQuery = @"
+                    SELECT FAPROV_STATUS
+                    FROM Purchase1
+                    WHERE V_TYPE=@RefType
+                    AND V_NO=@MRNNo
+                    AND COMP_CODE=@CompCode
+                    AND BRANCH_CODE=@BranchCode";
+
+                SqlCommand cmd2 = new SqlCommand(approveQuery, con);
+
+                cmd2.Parameters.AddWithValue("@RefType", vType);
+                cmd2.Parameters.AddWithValue("@MRNNo", mrnNo);
+                cmd2.Parameters.AddWithValue("@CompCode", gv.PubCompCode);
+                cmd2.Parameters.AddWithValue("@BranchCode", gv.PubBranchCode);
+
+                var status = Convert.ToString(cmd2.ExecuteScalar());
+
+                if (status != "Approved")
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "MRN No " + mrnNo + " not approved."
+                    });
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    mrnNo = mrnNo,
+                    refType = vType
+                });
+            }
+        }
     }
 }

@@ -84,7 +84,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                     CHALL_NO = reader["CHALL_NO"]?.ToString(),
                                     CHALL_DATE = reader["CHALL_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["CHALL_DATE"]) : DateTime.MinValue,
                                     DR_FROM_TPT = reader["DR_FROM_TPT"]?.ToString(),
-                                    REMARKS = reader["DR_FROM_TPT"]?.ToString(),  // Consider verifying this — REMARKS might be its own column
+                                    REMARKS = reader["REMARKS"]?.ToString(),  // Consider verifying this — REMARKS might be its own column
                                     STATUS = reader["STATUS"] != DBNull.Value ? Convert.ToInt32(reader["STATUS"]) : 0
                                 });
                             }

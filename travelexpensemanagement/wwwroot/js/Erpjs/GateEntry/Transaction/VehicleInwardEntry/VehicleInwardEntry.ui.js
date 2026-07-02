@@ -216,13 +216,31 @@ const VehicleUI = {
         this.chkDtdisable();
     },
     //========Image Preview=========
-    showImagePreview: function showImagePreview(path) {
-        if (path) {
-            const imgUrl = `/Uploads/VehicleInward/${path}`;
-            $('#imgPreview').attr('src', imgUrl);
+    //showImagePreview: function showImagePreview(path) {
+    //    if (path) {
+    //        const imgUrl = `/Uploads/VehicleInward/${path}`;
+    //        $('#imgPreview').attr('src', imgUrl);
+    //        $('#previewContainer').show();
+    //    } else {
+    //        $('#imgPreview').attr('src', '');
+    //        $('#previewContainer').hide();
+    //    }
+    //},
+    showImagePreview: function (base64) {
+
+        if (base64 && base64.trim() !== "") {
+
+            $('#imgPreview').attr(
+                'src',
+                'data:image/jpeg;base64,' + base64
+            );
+
             $('#previewContainer').show();
-        } else {
+        }
+        else {
+
             $('#imgPreview').attr('src', '');
+
             $('#previewContainer').hide();
         }
     },
@@ -371,7 +389,8 @@ const VehicleUI = {
         syncValidity(d.insU_EXPDT, 'chkValidity', 'DtValidity');
         syncValidity(d.ewB_DATE, 'chkFitmentValidity', 'DtFitmentValidity');
         syncValidity(d.chalL_DATE, 'chkTaxValidity', 'DtTaxValidity');
-        this.showImagePreview(d.imagepath);
+        //this.showImagePreview(d.imagepath);
+        this.showImagePreview(d.imageBase64);
     },
     //=========Driver Details=======
     bindDriverDetails: (data) => {

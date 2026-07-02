@@ -50,15 +50,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     {
                         try
                         {
-                            using (SqlCommand cmdOld = new SqlCommand("SELECT IMAGEPATH FROM GATE1 WHERE DOC_ID = @DOC_ID AND COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE", con, transaction))
-                            {
-                                cmdOld.Parameters.AddWithValue("@DOC_ID", docid);
-                                cmdOld.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode ?? (object)DBNull.Value);
-                                cmdOld.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode ?? (object)DBNull.Value);
-                                cmdOld.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
-                                oldFile = (await cmdOld.ExecuteScalarAsync())?.ToString();
-                            }
-
                             string[] deleteQueries = {
                             "DELETE FROM gate1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
                         };
@@ -77,46 +68,19 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 }
                             }
                             //=============Delete from img table
-                            bool isExist = false;
                             using (SqlCommand cmd = new SqlCommand("sp_TransportInwardEntry_Img", con, transaction))
                             {
                                 cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@Action", "IsExist");
+                                cmd.Parameters.AddWithValue("@Action", "Delete");
                                 cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
                                 cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
                                 cmd.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
                                 cmd.Parameters.AddWithValue("@V_TYPE", VType);
                                 cmd.Parameters.AddWithValue("@V_NO", VNo);
-                                var result = await cmd.ExecuteScalarAsync();
-                                isExist = Convert.ToInt32(result) == 1;
-                            }
-                            if (isExist)
-                            {
-                                using (SqlCommand cmd = new SqlCommand("sp_TransportInwardEntry_Img", con, transaction))
-                                {
-                                    cmd.CommandType = CommandType.StoredProcedure;
-                                    cmd.Parameters.AddWithValue("@Action", "Delete");
-                                    cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", userSession.PubBranchCode);
-                                    cmd.Parameters.AddWithValue("@V_TYPE", VType);
-                                    cmd.Parameters.AddWithValue("@V_NO", VNo);
-                                    await cmd.ExecuteNonQueryAsync();
-                                }
+                                await cmd.ExecuteNonQueryAsync();
                             }
                             transaction.Commit();
-                            //==========Delete img file
-                            if (!string.IsNullOrEmpty(oldFile))
-                            {
-                                string folder = System.IO.Path.Combine(_env.WebRootPath, "Uploads\\VehicleInward");
-                                string fullPath = System.IO.Path.Combine(folder, oldFile);
-
-                                if (System.IO.File.Exists(fullPath))
-                                {
-                                    System.IO.File.Delete(fullPath);
-                                }
-                            }
-                            //===========log insert
+                            ////===========log insert
                             _logService.InsertLog("GATE1", "Vehicle Inward", "Transaction", "Delete", VType, VNo.ToString(), null);
                             response.status = true;
                             response.message = "Data deleted successfully";
