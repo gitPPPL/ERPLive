@@ -31,7 +31,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         {
             return View("~/Views/QualityControl/Transaction/IncommingQCRMList/Index.cshtml");
         }
-        [HttpGet]
         public JsonResult GetQCIncommingQCEntryList(string searchTerm, int pageNumber = 1, int pageSize = 10)
         {
             var results = new List<object>();
@@ -143,6 +142,42 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     message = ex.Message
                 });
             }
+        }
+
+        [HttpPost]
+        public IActionResult CreateSession()
+        {
+            try
+            {
+                string userID = _globalVariableService.GetGlobalVariables().PubUserId.ToString();
+                string sessionId = $"{DateTime.Now:ddMMyyyyHHmmss}{userID}";
+                HttpContext.Session.SetString("SESSION_ID", sessionId);
+
+                return Json(new
+                {
+                    success = true,
+                    sessionId = sessionId
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult ClearSession()
+        {
+            HttpContext.Session.Clear();
+
+            return Json(new
+            {
+                success = true
+            });
         }
 
     }
