@@ -51,9 +51,10 @@
             <i class="fa-solid fa-print"></i> Print
         </button>
 
-        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "OutwardEntryList")', isReadOnly)">
-        <i class="fa-solid fa-arrow-left"></i>Back to list
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InwardEntryList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
+
     </div>
 </div>
 <div id="OutwardEntryForm">
@@ -238,28 +239,7 @@
             <tbody></tbody>
         </table>
     </div>
-@* 
-    <!-- Pagination (Same as First Table) -->
-    <div class="erppagelist-pagination">
-        <div class="pagination-left">
-            <select id="pageSizeSelectOutward" onchange="changeRowsPerPageOutward()">
-                <option value="5">5</option>
-                <option value="10" selected>10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-            </select>
-        </div>
 
-        <div class="pagination-center">
-            <button onclick="prevPageOutward()" class="page-nav" id="prevBtnOutward">‹</button>
-            <div id="pageNumbersOutward" class="page-numbers"></div>
-            <button onclick="nextPageOutward()" class="page-nav" id="nextBtnOutward">›</button>
-        </div>
-
-        <div class="pagination-right" id="pageInfoTextOutward">
-            Results: 0 - 0 of 0
-        </div>
-    </div> *@
 
 
 </div>

@@ -327,7 +327,7 @@
                 $("#ddlPartyNameByAddress").on("change", function () {
                     const partyId = $("#ddlPartyName").val();
                     const addId = $(this).val();
-                    //fetchPartyAddressDetails(partyId, addId);
+                
                     GetDataByPartyandAddressidCodeAsync(partyId, addId);
 
                 });
@@ -443,11 +443,6 @@
                         fetchDatabyRefNo(refno);
                     }
                 });
-
-
-
-
-
 
 
             } catch (err) {
