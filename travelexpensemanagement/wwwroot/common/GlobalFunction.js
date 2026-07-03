@@ -307,44 +307,7 @@ function InitializeERPFilterDropdown(config) {
         });
 
     }
-    //function RenderItems() {
 
-    //    list.innerHTML = "";
-
-    //    state.filteredItems.forEach(item => {
-
-    //        const checked =
-    //            state.selected.some(x => x.id === item.id);
-
-    //        const row =
-    //            document.createElement("div");
-
-    //        row.className =
-    //            "erppage-search-inputdropdown-item";
-
-    //        if (checked)
-    //            row.classList.add("selected");
-
-    //        row.innerHTML = `
-    //            <input type="checkbox"
-    //                   ${checked ? "checked" : ""}>
-
-    //            <span>${item.text}</span>
-    //        `;
-
-    //        row.addEventListener("click", function (e) {
-
-    //            e.stopPropagation();
-
-    //            ToggleItem(item);
-
-    //        });
-
-    //        list.appendChild(row);
-
-    //    });
-
-    //}
 
     function RenderSelected() {
 
@@ -433,7 +396,7 @@ function InitializeERPFilterDropdown(config) {
         RenderItems();
         RenderSelected();
 
-        TriggerChange();
+        TriggerChange(); 
     }
 
     function TriggerChange() {
@@ -624,7 +587,7 @@ function InitializeERPSingleDropdown(config) {
 
         selectedBox.innerHTML = `
 
-            <span class="erppage-search-inputdropdown-chip">
+            <span class="erppage-search-inputdropdown-chip-single">
 
                 ${state.selected.text}
 

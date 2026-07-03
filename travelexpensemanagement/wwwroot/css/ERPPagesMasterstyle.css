@@ -265,7 +265,7 @@
     background: #fff;
     border-radius: 12px;
     border: 1px solid #d5d7ff;
-    padding: 14px;
+    padding: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
     margin-top: 8px;
 }
@@ -274,9 +274,9 @@
     text-align: center;
     color: #6c73a8;
     margin: 0;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .erppageattachmentsectiondropzone {
@@ -292,12 +292,13 @@
 }
 
 .erppageattachmentsectioncloud {
-    font-size: 25px;
+    font-size: 20px;
     color: #d6d9ff;
 }
 
 .erppageattachmentsectiondragtext {
-    color: #8f96c2;
+    color: #6e78b7;
+    font-size: 12px;
 }
 
 .erppageattachmentsectionor {
@@ -313,7 +314,8 @@
     border-radius: 4px;
     padding: 4px 8px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 400;
+    font-size: 11px;
 }
 
     .erppageattachmentsectionbrowsebtn:hover {
@@ -321,14 +323,14 @@
     }
 
 .erppageattachmentsectionheader {
-    font-size: 15px;
+    font-size: 13px;
     color: #9098c0;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     font-weight: 600;
 }
 
 .erppageattachmentsectionfilelist {
-    max-height: 120px;
+    max-height: 150px;
     overflow-y: auto;
     padding-right: 5px;
 }
@@ -352,15 +354,19 @@
     margin-bottom: 6px;
 }
 
+    .erppageattachmentsectionfileitem:hover {
+        background: #ebecfd;
+    }
+
 .erppageattachmentsectionicon {
-    width: 35px;
-    height: 35px;
-    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-size: 11px;
+    font-size: 8px;
     font-weight: 700;
 }
 
@@ -370,8 +376,7 @@
 
 .erppageattachmentsectionfilename {
     color: #4f587b;
-    font-size: 14px;
-    margin-bottom: 8px;
+    font-size: 12px;
 }
 
 .erppageattachmentsectionprogress {
@@ -396,21 +401,22 @@
 }
 
     .erppageattachmentsectionactions button {
-        border: none;
         cursor: pointer;
-        border-radius: 6px;
-        padding: 7px 10px;
-        font-size: 12px;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 11px;
     }
 
 .erppageattachmentsectionview {
-    background: #e9f1ff;
+    background: #c8dcff;
     color: #346bff;
+    border: 1px solid #346bff;
 }
 
 .erppageattachmentsectiondelete {
     background: #ffe9e9;
     color: #df4343;
+    border: 1px solid #df4343;
 }
 /* PDF - Orange */
 .erppageattachmentsectionpdf {
@@ -618,7 +624,7 @@
 .erppage-readonly select {
     pointer-events: none;
     user-select: none;
-    background-color: #e5e5e5 !important;
+    background-color: #e5e5e5;
     cursor: not-allowed;
     color: #5e5e5e;
 }
@@ -690,9 +696,9 @@
 .erppage-readonly .select2-container--default .select2-selection--single,
 .erppage-readonly .select2-container--default .select2-selection--single .select2-selection__rendered,
 .erppage-readonly .select2-container--default .select2-selection--single .select2-selection__arrow {
-    background-color: #e5e5e5 !important;
-    color: #6b6b6b !important;
-    border-color: #cfcfcf !important;
+    background-color: #e5e5e5;
+    color: #6b6b6b;
+    border-color: #cfcfcf;
 }
 #erp-center-toast-container {
     position: fixed;
@@ -848,8 +854,8 @@
     .erppage-input-with-icon .erppageinputicon {
         position: static;
         transform: none;
-        width: 32px;
-        height: 32px;
+        width: 25px;
+        height: 25px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -936,6 +942,13 @@
         transition: .3s;
         box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
     }
+
+.fixed-grid-table thead th.freeze-item {
+    position: sticky;
+    left: 0;
+    top: 0;
+    z-index: 50;
+}
 /*table First columns fixed and position sticky*/
 .fixed-grid-table th.freeze-item,
 .fixed-grid-table td.freeze-item {
@@ -1764,8 +1777,8 @@ input[type="number"] {
     right: 0px;
     top: 50%;
     transform: translateY(-50%);
-    width: 28px;
-    height: 28px;
+    width: 25px;
+    height: 25px;
     border: none;
     border-radius: 5px;
     background: linear-gradient(135deg,#2f7d32,#1b5e20);
@@ -2025,6 +2038,30 @@ input[type="number"] {
     /* Prevent hover effect on disabled */
     .erppage-btn-common-pending-disabled:hover {
         background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #fff !important;
+    }
+
+.erppage-btn-common-active {
+    background: linear-gradient(135deg, #1c5e31, #66a644);
+    color: #fff;
+}
+
+    .erppage-btn-common-active:hover {
+        background: linear-gradient(135deg, #164b27, #4f8d34);
+        color: #fff;
+    }
+
+.erppage-btn-common-active-disabled {
+    color: #1c5e31 !important;
+    font-weight: 600;
+    border: 1px solid #1c5e31 !important;
+    background: #fff;
+}
+
+    /* Hover effect for disabled-style button */
+    .erppage-btn-common-active-disabled:hover {
+        /*background: linear-gradient(135deg, #1c5e31, #66a644);*/
+        background-color: #1c5e31;
         color: #fff !important;
     }
 .erppage-btn-print {

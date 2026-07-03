@@ -41,13 +41,13 @@
 
         <button type="button"
                 id="btn_Sendapproval"
-                style="display:none;">
+                style="display:none;" class="erppagebtn_sendapproval">
             Send For Approval
         </button>
 
         <button type="button"
                 id="btn_Approved"
-                style="display:none;color:green;font-weight:bold;">
+                style="display:none;" class="erppagebtn_approved">
             Approved
         </button>
 
@@ -75,7 +75,7 @@
                     <input type="text" class="erppage-input" id="TxtDocNo" placeholder="Enter Document No" readonly>
                 </div>
                 <div class="erppage-divfield">
-                    <div class="erppage-field">             
+                    <div class="erppage-divfield">             
 
                         <label for="InDate" class="erppage-label">In Date</label>
                         <input type="date" class="erppage-input" id="InDate" />
@@ -93,27 +93,26 @@
                         Report Date
                     </label>
 
-                    <div class="erppage-inline-group" style="width:100%;">
+                    <div class="erppage-inputgroup">
                         <input type="date" class="erppage-redinput" id="TxtRptDate">
                         <input type="time" class="erppage-redinput" id="TiRptDate">
                     </div>
                 </div>
             </div>
         </fieldset>
-        <div class="erppage-container">
-            <div class="erppage-tabs">
+
+        <div class="erppage-tabs">
                 <button class="erppage-tab active" data-tab="partydetails">Party Details</button>
                 <button class="erppage-tab" data-tab="shippinginfo">Shipping Info</button>
                 <button class="erppage-tab" data-tab="billchallan">Bill & Challan</button>
             </div>
-            <div class="erppage-tab-content active" id="partydetails">
+        <div class="erppage-tab-content active" id="partydetails">
                 <div class="erppage-accordion-header">Party Details</div>
                 <div class="erppage-accordion-body">
                     <fieldset class="erppage-fieldset">
-                        <div class="erppage-section-header">Party Details</div>
                         <div class="erppage-body">
                             <div class="erppage-grid4">
-                                <div class="erppage-field erppage-col-span-2">
+                                <div class="erppage-divfield erppage-col-span-2">
                                     <label for="ddlPartyName" class="erppage-label">Party Name</label>
                                     <select class="erppage-input erppage-required" id="ddlPartyName">
                                         <option value="">Select Party Name</option>
@@ -122,8 +121,8 @@
                                         <option value="" id="SelectAddress">Select address</option>
                                     </select>
                                 </div>
-                                <div class="erppage-field erppage-col-span-2">
-                                    <label for="TxtAddLine1" class="erppage-label">Address Line 1</label>
+                                <div class="erppage-divfield erppage-col-span-2">
+                                    <label for="TxtAddLine1" class="erppage-label">Addr. Line 1</label>
                                     <div class="erppage-inline-group" style="width:100%;">
                                         <input type="text" class="erppage-input" id="TxtAddLine1" placeholder="Enter Address" readonly>
 
@@ -132,21 +131,21 @@
                             </div>
                             <div class="erppage-grid4">
                                 
-                                <div class="erppage-field">
-                                    <label for="TxtAddLine2" class="erppage-label">Address Line 2</label>
+                                <div class="erppage-divfield">
+                                    <label for="TxtAddLine2" class="erppage-label">Addr. Line 2</label>
                                     <input type="text" class="erppage-input" id="TxtAddLine2" readonly>
                                 </div>
-                                <div class="erppage-field">
-                                    <label for="TxtAddLine3" class="erppage-label">Address Line 3</label>
+                                <div class="erppage-divfield">
+                                    <label for="TxtAddLine3" class="erppage-label">Addr. Line 3</label>
                                     <input type="text" class="erppage-input" id="TxtAddLine3" readonly>
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="ddlcity" class="erppage-label">City</label>
                                     <select class="erppage-input" id="ddlcity" disabled>
                                         <option>Select City</option>
                                     </select>
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="TxtState" class="erppage-label">State</label>
                                     <select class="erppage-input" id="TxtState" disabled>
                                         <option>Select State</option>
@@ -154,15 +153,15 @@
                                 </div>
                             </div>
                             <div class="erppage-grid4">
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="TxtPincode" class="erppage-label">Pincode</label>
                                     <input type="text" class="erppage-input" id="TxtPincode" readonly>
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="TxtGSTNo" class="erppage-label">GST No</label>
                                     <input type="text" class="erppage-input" id="TxtGSTNo" readonly>
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="TxtPAN" class="erppage-label">PAN</label>
                                     <input type="text" class="erppage-input" id="TxtPAN" readonly>
                                 </div>
@@ -171,40 +170,39 @@
                     </fieldset>
                 </div>
             </div>
-            <div class="erppage-tab-content" id="shippinginfo">
+        <div class="erppage-tab-content" id="shippinginfo">
                 <div class="erppage-accordion-header">Shipping Info</div>
                 <div class="erppage-accordion-body">
                     <fieldset class="erppage-fieldset">
-                        <div class="erppage-section-header">Shipping Info</div>
                         <div class="erppage-body">
                             <div class="erppage-grid4">
-                                <div class="erppage-field erppage-col-span-2">
+                                <div class="erppage-divfield erppage-col-span-2">
                                     <label for="ddlShipFrom" class="erppage-label">Ship From</label>
                                     <select class="erppage-input" id="ddlShipFrom">
                                         <option>Select Ship From</option>
                                     </select>
                                 </div>
-                                <div class="erppage-field erppage-col-span-2">
+                                <div class="erppage-divfield erppage-col-span-2">
                                     <label for="txtShipAddress" class="erppage-label">Ship Address</label>
                                     <input type="text" class="erppage-input" id="txtShipAddress" readonly>
                                 </div>
 
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="ShipBillNo" class="erppage-label">Ship. Bill No</label>
                                     <input type="text" class="erppage-input" id="ShipBillNo" maxlength="30">
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="ShipBillDate" class="erppage-label">Ship. Bill Date</label>
                                     <input type="date" class="erppage-input" id="ShipBillDate">
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="VehicleOutTime" class="erppage-label">Vehicle Out Time</label>
                                     <div class="erppage-inline-group" style="width:100%;">
                                         <input type="date" class="erppage-input" id="DtVehicleOutTime">
                                         <input type="time" class="erppage-input" id="TiVehicleOutTime">
                                     </div>
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="VehicleReturn" class="erppage-label">Vehicle Return</label>
                                     <select class="erppage-input" id="VehicleReturn">
                                         <option>NA</option>
@@ -212,7 +210,7 @@
                                     </select>
                                 </div>
 
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="ddlDocStatus" class="erppage-label">Doc Status</label>
                                     <select class="erppage-input" id="ddlDocStatus">
                                         <option>Select Doc Status</option>
@@ -223,14 +221,13 @@
                     </fieldset>
                 </div>
             </div>
-            <div class="erppage-tab-content" id="billchallan">
+        <div class="erppage-tab-content" id="billchallan">
                 <div class="erppage-accordion-header">Bill & Challan</div>
                 <div class="erppage-accordion-body">
                     <fieldset class="erppage-fieldset">
-                        <div class="erppage-section-header">Bill & Challan</div>
                         <div class="erppage-body">
                             <div class="erppage-grid4">
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="TxtPONo" class="erppage-label">PO No</label>
                                     @* <input type="text" class="erppage-input" id="TxtPONo" maxlength="9"> *@
 
@@ -239,7 +236,7 @@
                                     </select>
 
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="TxtBillNo" class="erppage-label">Party Bill No</label>
                                     <div class="erppage-input-with-icon">
                                         <input type="text" class="erppage-input"id="TxtBillNo" maxlength="10">
@@ -248,21 +245,21 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="DtPartyBillDate" class="erppage-label">Party Bill Date</label>
                                     <input type="date" class="erppage-input" id="DtPartyBillDate">
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="TxtChallanNo" class="erppage-label">Challan No</label>
                                     <input type="text" class="erppage-input" id="TxtChallanNo" maxlength="10">
                                 </div>
                             </div>
                             <div class="erppage-grid4">
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="TxtChallanDate" class="erppage-label">Challan Date</label>
                                     <input type="date" class="erppage-input" id="TxtChallanDate">
                                 </div>
-                                <div class="erppage-field">
+                                <div class="erppage-divfield">
                                     <label for="TxtBillAmt" class="erppage-label">Bill Amount</label>
                                     <input type="text" class="erppage-redinput numeric-only" id="TxtBillAmt" maxlength="14">
                                 </div>
@@ -272,11 +269,11 @@
                     </fieldset>
                 </div>
             </div>
-        </div>
+    
         @* Modal Popup  *@
         <div class="modal fade" id="ellipsisIcon" tabindex="-1" aria-labelledby="ellipsisIconLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl erppagesmodal">
-                <div class="modal-content erppagesmodal-content draggable-modal">
+            <div class="modal-dialog medium-modal erppagesmodal">
+                <div class="modal-content erppagesmodal-content erppage-modal-drag">
 
                     <!-- Header -->
                     <div class="erppagesmodal-header">
@@ -334,7 +331,7 @@
                         <!-- Table -->
                         <div class="erppagelist-container mt-3">
                             <div class="excel-wrapper">
-                                <table id="tblellipsisIconmodal" class="excel-table fixed-grid-table table-width">
+                                <table id="tblellipsisIconmodal" class="excel-table fixed-grid-table table-width resizable-table">
                                     <thead class="table-head">
                                         <tr>
                                             <th><input type="checkbox" id="selectAllPR" /></th>
@@ -350,7 +347,7 @@
                                             <th>Container Weight</th>
                                             <th>Container Size</th>
                                             <th>Tracking Entry No.</th>
-                                            <th style="display:none;">Action</th>
+                                            <th class="hidden-col">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -363,9 +360,8 @@
             </div>
         </div>
         <!-- Transport Details -->
-        <fieldset class="erppage-subfieldset">
-            <legend>Transport Details</legend>
-            <div class="erppage-subheader">Transport Details</div>
+        <fieldset class="erppagefieldset">
+            <legend class="erppagefieldset-legend">Transport Details</legend>
             <div class="erppage-body">
                 <!-- Row 1 -->
                 <div class="erppage-grid4">
@@ -378,13 +374,6 @@
                         <select class="erppage-input" id="TxtTransporter">
                             <option>Select Transport Name</option>
                         </select>
-
-                     @*    <input type="text" class="erppage-redinput" id="TxtTransporter" placeholder="Enter TransPort Name" maxlength="60" />
- *@
-
-
-
-
                     </div>
                     <div class="erppage-divfield">
                         <label for="TxtGRNo" class="erppage-label">GR No.</label>
@@ -412,17 +401,17 @@
                 </div>
                 <!-- Row 3 Buttons -->
                 <div class="erppage-internalaction">
-                    <button type="button" class="erppage-btn erppage-btn-save" id="btn_setting">
+                    <button type="button" class="erppage-btn erppage-btn-common-active-disabled" id="btn_setting">
                         <i class="fa fa-cog"></i>
                     </button>
-                    <button type="button" class="erppage-btn erppage-btn-common" data-bs-toggle="modal" id="btn_RCDetail" data-bs-target="#RCDetail">
+                    <button type="button" class="erppage-btn erppage-btn-common-disabled" data-bs-toggle="modal" id="btn_RCDetail" data-bs-target="#RCDetail">
                         RC Detail
                     </button>
 
-                    <button type="button" class="erppage-btn erppage-btn-save" id="btn_database">
+                    <button type="button" class="erppage-btn erppage-btn-common-active-disabled" id="btn_database">
                         <i class="fa fa-database"></i>
                     </button>
-                    <button type="button" class="erppage-btn erppage-btn-common" id="btn_FastagDetail" data-bs-toggle="modal" data-bs-target="#FastDetail">
+                    <button type="button" class="erppage-btn erppage-btn-common-disabled" id="btn_FastagDetail" data-bs-toggle="modal" data-bs-target="#FastDetail">
                         Fastag Detail
                     </button>
                 </div>
@@ -430,8 +419,8 @@
 
             <!-- RC Detail Modal -->
             <div class="modal fade" id="RCDetail" tabindex="-1" aria-labelledby="RCDetailLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl erppagesmodal">
-                    <div class="modal-content erppagesmodal-content draggable-modal">
+                <div class="modal-dialog medium-modal erppagesmodal">
+                    <div class="modal-content erppagesmodal-content erppage-modal-drag">
                         <!-- Header -->
                         <div class="erppagesmodal-header">
                             <div class="erppagesmodal-header-left">
@@ -449,7 +438,7 @@
                         <!-- Body -->
                         <div class="erppagelist-container">
                             <div class="excel-wrapper fixed-grid-wrapper">
-                                <table id="tblRCDetaillist" class="excel-table fixed-grid-table">
+                                <table id="tblRCDetaillist" class="excel-table fixed-grid-table table-width resizable-table">
                                     <colgroup>
                                         <col style="width:120px"> <!-- Client ID -->
                                         <col style="width:130px"> <!-- RC Number -->
@@ -582,8 +571,8 @@
             </div>
             <!-- Fastag Detail Modal -->
             <div class="modal fade" id="FastDetail" tabindex="-1" aria-labelledby="FastDetailLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl erppagesmodal">
-                    <div class="modal-content erppagesmodal-content draggable-modal">
+                <div class="modal-dialog medium-modal erppagesmodal">
+                    <div class="modal-content erppagesmodal-content erppage-modal-drag">
 
                         <!-- Header -->
                         <div class="erppagesmodal-header">
@@ -602,8 +591,21 @@
                         </div>
                         <!-- Body -->
                         <div class="erppagelist-container">
-                            <div class="excel-wrapper">
-                                <table id="tblFastagDetaillist" class="excel-table fixed-grid-table table-width">
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblFastagDetaillist" class="excel-table fixed-grid-table table-width resizable-table">
+                                    <colgroup>
+                                        <col style="width:120px;">
+                                        <col style="width:140px;">
+                                        <col style="width:150px;">
+                                        <col style="width:140px;">
+                                        <col style="width:170px;">
+                                        <col style="width:130px;">
+                                        <col style="width:180px;">
+                                        <col style="width:120px;">
+                                        <col style="width:160px;">
+                                        <col style="width:220px;">
+                                        <col style="width:130px;">
+                                    </colgroup>
                                     <thead class="table-head">
                                         <tr>
                                             <th>Client ID</th>
@@ -628,9 +630,8 @@
             </div>
         </fieldset>
         <!-- EWay Bill -->
-        <fieldset class="erppage-subfieldset">
-            <legend>EWay Bill Details</legend>
-            <div class="erppage-subheader">EWay Bill Details</div>
+        <fieldset class="erppagefieldset">
+            <legend class="erppagefieldset-legend">EWay Bill Details</legend>
             <div class="erppage-body">
                 <div class="erppage-grid4">
                     <div class="erppage-divfield">
@@ -753,7 +754,7 @@
                     <span>List of Documents to be send</span>
                 </button>
                 @* <button type="button" class="erppage-btn erppage-btn-danger" data-bs-toggle="modal" data-bs-target="#pendingorders" id="btnpendingorderno"> *@
-                <button type="button" class="erppage-btn erppage-btn-danger"  id="btnpendingorderno">
+                <button type="button" class="erppage-btn erppage-btn-common-pending-disabled"  id="btnpendingorderno">
                     <i class="fa fa-clock"></i>
                     <span>Pending Orders/Bill</span>
                 </button>
@@ -761,8 +762,8 @@
         </div>
         <!--Modal Popup-->
         <div class="modal fade" id="pendingorders" tabindex="-1" aria-labelledby="pendingordersLabel">
-            <div class="modal-dialog modal-xl erppagesmodal">
-                <div class="modal-content erppagesmodal-content draggable-modal">
+            <div class="modal-dialog medium-modal erppagesmodal">
+                <div class="modal-content erppagesmodal-content erppage-modal-drag">
                     <div class="erppagesmodal-header">
                         <div class="erppagesmodal-header-left">
                             <div class="erppagesmodal-header-icon">
@@ -782,7 +783,25 @@
                         </div>
                         <div class="erppagelist-container">
                             <div class="excel-wrapper">
-                                <table id="tblpendingordermodal" class="excel-table fixed-grid-table table-width">
+                                <table id="tblpendingordermodal" class="excel-table fixed-grid-table table-width resizable-table">
+                                    <colgroup>
+                                        <col style="width:40px;">   <!-- Select -->
+                                        <col style="width:120px;">  <!-- Item Code -->
+                                        <col style="width:220px;">  <!-- Item Name -->
+                                        <col style="width:80px;">   <!-- Unit -->
+                                        <col style="width:70px;">   <!-- Nos -->
+                                        <col style="width:100px;">  <!-- Quantity -->
+                                        <col style="width:130px;">  <!-- Balance Quantity -->
+                                        <col style="width:130px;">  <!-- Document Type -->
+                                        <col style="width:140px;">  <!-- Document No -->
+                                        <col style="width:130px;">  <!-- Document Date -->
+                                        <col style="width:90px;">   <!-- Rate -->
+                                        <col style="width:180px;">  <!-- Remarks -->
+                                        <col style="width:150px;">  <!-- Department -->
+                                        <col style="width:130px;">  <!-- Department Code -->
+                                        <col style="width:100px;">  <!-- Unit Code -->
+                                        <col style="width:80px;">   <!-- Empty -->
+                                    </colgroup>
                                     <thead class="table-head">
                                         <tr>
                                             <th><input type="checkbox" id="selectAllPR" class="rowCheckbox" /></th>
@@ -798,8 +817,8 @@
                                             <th>Rate</th>
                                             <th>Remarks</th>
                                             <th>Department</th>
-                                            <th style="display:none;">Department Code </th>
-                                            <th style="display:none;">Unit code</th>
+                                            <th class="hidden-col">Department Code </th>
+                                            <th class="hidden-col">Unit code</th>
                                             <th>Empty</th>
                                         </tr>
                                     </thead>
@@ -814,7 +833,7 @@
         </div>
         <div class="erppagelist-container">
             <div class="excel-wrapper fixed-grid-wrapper">
-                <table id="tblInwardEntry" class="excel-table fixed-grid-table">
+                <table id="tblInwardEntry" class="excel-table fixed-grid-table resizable-table">
                     <colgroup>
                         <col style="width:80px;">   <!-- Code -->
                         <col style="width:220px;">  <!-- Item Name -->
@@ -842,7 +861,7 @@
                             <th>Remarks</th>
                             <th>Reference Type</th>
                             <th>Reference No</th>
-                            <th>Action</th>
+                            <th class="action-col">Action</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

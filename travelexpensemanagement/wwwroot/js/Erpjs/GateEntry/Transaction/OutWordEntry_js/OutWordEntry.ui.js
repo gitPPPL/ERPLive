@@ -158,48 +158,50 @@ function addRow($tbody, data = {}) {
 
       <!-- Disabled Selects -->
       <td>
-        <select class="form-control itemName" disabled>
+        <select class="erppagetable-control itemName" disabled>
           <option value="">-- Select --</option>${selectItems}
         </select>
       </td>
 
       <td>
-        <select class="form-control department" >
+        <select class="erppagetable-control department" >
           <option value="">-- Select --</option>${selectDept}
         </select>
       </td>
 
       <td>
-        <select class="form-control unit" disabled>
+        <select class="erppagetable-control unit" disabled>
           <option value="">-- Select --</option>${selectunit}
         </select>
       </td>
 
       <!-- Enabled Inputs -->
       <td>
-        <input type="number" class="form-control no" value="${data.no || ''}" oninput="if(this.value.length > 10) this.value = this.value.slice(0,12)" />
+        <input type="number" class="erppagetable-control no" value="${data.no || ''}" oninput="if(this.value.length > 10) this.value = this.value.slice(0,12)" />
       </td>
       <td>
-      <input type="number" class="form-control quantity" value="${data.quantity || ''}" oninput="if(this.value.length > 14) this.value = this.value.slice(0,14)" />
+      <input type="number" class="erppagetable-control quantity" value="${data.quantity || ''}" oninput="if(this.value.length > 14) this.value = this.value.slice(0,14)" />
       </td>
 
       <td>
-        <input type="text" class="form-control remarks" maxlength="225" value="${data.remarks || ''}"/>
+        <input type="text" class="erppagetable-control remarks" maxlength="225" value="${data.remarks || ''}"/>
       </td>
 
       <!-- Readonly -->
       <td>
-        <input type="text" class="form-control ref-type" value="${data.refType || ''}" readonly/>
+        <input type="text" class="erppagetable-control ref-type" value="${data.refType || ''}" readonly/>
       </td>
 
       <td>
-        <input type="text" class="form-control ref-no" value="${data.refNo || ''}" readonly/>
+        <input type="text" class="erppagetable-control ref-no" value="${data.refNo || ''}" readonly/>
       </td>
 
       <td class="action-col">
-        <button class="act-btn delete" title="Delete Row" style="cursor:pointer;">
-          <i class="fa fa-trash btn-delete-action"></i>
-        </button> 
+        <div class="action-wrap">
+            <button class="act-btn delete" title="Delete Row" style="cursor:pointer;">
+              <i class="fa fa-trash btn-delete-action"></i>
+            </button> 
+        </div>
       </td>
     </tr>
     `);

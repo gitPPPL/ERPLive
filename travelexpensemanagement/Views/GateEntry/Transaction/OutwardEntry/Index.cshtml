@@ -51,7 +51,7 @@
             <i class="fa-solid fa-print"></i> Print
         </button>
 
-        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InwardEntryList")', isReadOnly)">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "OutwardEntryList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
 
@@ -115,9 +115,8 @@
                 </section>
             </div>
             
-            <fieldset class="erppage-subfieldset">
-                <legend>Party Details</legend>
-                <div class="erppage-subheader">Party Details</div>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Party Details</legend>
                 <div class="erppage-grid4">
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Party Name</label>
@@ -200,12 +199,8 @@
                 
                 @* <button id="btn-pending" type="button" class="erppage-btn erppage-btn-common"><i class="fa fa-tag"></i>Sticker</button> *@
             </div>
-        </fieldset>
-
-    </div>
-</div>
-<div class="erppagelist-container">
-    <div class="excel-wrapper fixed-grid-wrapper">
+            <div class="erppagelist-container">
+             <div class="excel-wrapper fixed-grid-wrapper">
         <table id="tblOutwardEntry" class="excel-table fixed-grid-table resizable-table">
 
            <colgroup>
@@ -239,10 +234,17 @@
             <tbody></tbody>
         </table>
     </div>
+    </div>
+        </fieldset>
 
-
-
+        
+    </div>
 </div>
+
+   
+
+
+
 <div class="erppage-actions">
     <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
         <i class="fa-solid fa-floppy-disk"></i>
@@ -252,7 +254,7 @@
 
 @* Modal Popup New *@
 <div class="modal fade" id="pendingorders" tabindex="-1" aria-labelledby="pendingordersLabel" aria-hidden="true">
-    <div class="modal-dialog erppagesmodal">
+    <div class="modal-dialog medium-modal erppagesmodal">
         <div class="modal-content erppagesmodal-content draggable-modal">
             <div class="erppagesmodal-header">
                 <div class="erppagesmodal-header-left">

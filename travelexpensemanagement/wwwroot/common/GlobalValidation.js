@@ -168,7 +168,7 @@ function showDocumentPopupjQuery(data, docCode) {
             <div class="erppagesmodal-body">
                     <div class="erppagelist-container">
                         <div class="excel-wrapper fixed-grid-wrapper">
-                            <table id="tblApprovalStageMaster" class="excel-table fixed-grid-table">
+                            <table id="tblApprovalStageMaster" class="excel-table table-width fixed-grid-table">
                                 <colgroup>
                                     <col style="display:none;" /> <!-- FIXED -->
                                     <col style="width: 120px;" />  <!-- Doc ID -->

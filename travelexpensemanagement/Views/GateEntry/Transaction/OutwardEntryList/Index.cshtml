@@ -86,7 +86,7 @@
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
 
-        <table id="tblOutwardEntryList" class="excel-table fixed-grid-table resizable-table">
+        <table id="tblOutwardEntryList" class="excel-table fixed-grid-table table-width resizable-table">
 
             <colgroup>
                 <col style="display:none;"> <!-- Code -->
@@ -234,29 +234,29 @@
                         <td>${item.partY_GST ?? ''}</td>
 
                     <td class="action-col">
-
+                    <div class="action-wrap">
                     @if(@canEdit)
                     {
 
-                        <button class="act-btn edit" onclick="edit('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>
+                            <button class="act-btn edit btn-edit" onclick="edit('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>
 
                     }
      
-                        <button class="act-btn view" onclick="view('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-eye"></i></button>
+                        <button class="act-btn view btn-view" onclick="view('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-eye"></i></button>
                        
                     @if(@canDelete)
                     {
-                            <button class="act-btn delete" onclick="deleteItem('${item.doC_ID}')"><i class="fa fa-trash"></i></button>
+                                <button class="act-btn delete btn-delete" onclick="deleteItem('${item.doC_ID}')"><i class="fa fa-trash"></i></button>
 
                     }
                         
                     @if(@canDocDetail)
                     {
-                            <button class="act-btn document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+                                <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
 
 
                     }
-
+                    </div>
              </td>
                 </tr>
             `);

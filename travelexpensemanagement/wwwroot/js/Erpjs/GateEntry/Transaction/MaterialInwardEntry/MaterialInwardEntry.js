@@ -690,53 +690,53 @@
     <tr class="no-border-input">
 
         <td>
-            <input type="text" class="form-control itemCode numeric-only"
+            <input type="text" class="erppagetable-control itemCode numeric-only"
                    style="${normalStyle}"
                    value="${data.itemCode ?? ''}" readonly />
         </td>
 
         <td>
-            <select class="form-control ItemName searchable-item"
+            <select class="erppagetable-control ItemName searchable-item"
                     style="${normalStyle}; width:350px;">
                 ${itemOptions}
             </select>
         </td>
 
         <td>
-            <select class="form-control DeptName" style="${normalStyle}">
+            <select class="erppagetable-control DeptName" style="${normalStyle}">
                 ${deptOptions}
             </select>
         </td>
 
         <td>
-            <select class="form-control unit" style="${normalStyle}">
+            <select class="erppagetable-control unit" style="${normalStyle}">
                 ${unitOptions}
             </select>
         </td>
 
         <td>
-            <input type="text" class="form-control nos numeric-only"
+            <input type="text" class="erppagetable-control nos numeric-only"
                    maxlength="4"
                    style="${normalStyle}"
                    value="${data.nos ?? ''}" />
         </td>
 
         <td>
-            <input type="text" class="form-control quantity numeric-only"
+            <input type="text" class="erppagetable-control quantity numeric-only"
                    maxlength="10"
                    style="${normalStyle}"
                    value="${data.qty ?? ''}" />
         </td>
 
         <td>
-            <input type="text" class="form-control shiprate numeric-only"
+            <input type="text" class="erppagetable-control shiprate numeric-only"
                    maxlength="13"
                    style="${normalStyle}"
                    value="${data.shipRate ?? ''}" />
         </td>
 
         <td>
-            <select class="form-control Empty">
+            <select class="erppagetable-control Empty">
                 <option value="">Select</option>
                 <option value="Yes" ${data.empty === 'Yes' ? 'selected' : ''}>Yes</option>
                 <option value="No" ${data.empty === 'No' ? 'selected' : ''}>No</option>
@@ -744,29 +744,31 @@
         </td>
 
         <td>
-            <input type="text" class="form-control remarks"
+            <input type="text" class="erppagetable-control remarks"
                    maxlength="225"
                    style="${normalStyle}"
                    value="${data.remarks ?? ''}" />
         </td>
 
         <td>
-            <input type="text" class="form-control refType"
+            <input type="text" class="erppagetable-control refType"
                    maxlength="4"
                    style="${normalStyle}"
                    value="${data.refType ?? ''}" readonly />
         </td>
 
         <td>
-            <input type="text" class="form-control refNo"
+            <input type="text" class="erppagetable-control refNo"
                    maxlength="9"
                    style="${normalStyle}"
                    value="${data.refNo ?? ''}" readonly />
         </td>
 
-        <td>
-            <i class="fa fa-plus btn-add-row text-success me-2" style="cursor:pointer;"></i>
-            <i class="fa fa-trash btn-delete-action text-danger" style="cursor:pointer;"></i>
+        <td class="action-col">
+            <div class="action-wrap">
+                <button class="act-btn add btn-add btn-add-row" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus-circle"></i></button>
+                <button class="act-btn delete btn-delete btn-delete-action" title=" Row" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
+            </div>
         </td>
 
     </tr>`;
