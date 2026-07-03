@@ -15,8 +15,7 @@ function setFormReadOnly() {
     // -------------------------
     // 2. Disable checkboxes, radios, file, date, time
     // -------------------------
-    form.find('input[type="checkbox"], input[type="radio"], input[type="file"], input[type="date"], input[type="time"]')
-        .prop('disabled', true);
+    form.find('input[type="checkbox"], input[type="radio"], input[type="file"], input[type="date"], input[type="time"]')  .prop('disabled', true);
 
     // -------------------------
     // 3. Disable selects

@@ -1141,15 +1141,15 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             if (!string.IsNullOrEmpty(status))
             {
                 string lastUser = GetText(
-                    "SELECT TOP 1 user_name FROM APPROVAL_STATUS " +
-                    "WHERE v_type='" + v_type + "'" +
-                    " AND v_no=" + v_no +
-                    " AND comp_code=" + GetGlobalCode.PubCompCode +
-                    " AND branch_code=" + GetGlobalCode.PubBranchCode +
-                    " AND year_code=" + GetGlobalCode.PubFYearCode +
-                    " AND status='OPEN'" +
-                    " AND USER_CODE <> " + GetGlobalCode.PubUserId +
-                    " ORDER BY srno DESC");
+                    " SELECT TOP 1 b.FULL_NAME FROM APPROVAL_STATUS a " +
+                    " left join USER_MAST b on a.user_code =  b.CODE  WHERE v_type='" + v_type + "'" +
+                    " AND a.v_no=" + v_no +
+                    " AND a.comp_code=" + GetGlobalCode.PubCompCode +
+                    " AND a.branch_code=" + GetGlobalCode.PubBranchCode +
+                    " AND a.year_code=" + GetGlobalCode.PubFYearCode +
+                    " AND a.status='OPEN'" +
+                    " AND a.USER_CODE <> " + GetGlobalCode.PubUserId +
+                    " ORDER BY a.srno DESC");
 
                 return Json(new  { status = false, message = $"This Document Approval is in process at User: {lastUser}. Edit not allowed."  });
             }
