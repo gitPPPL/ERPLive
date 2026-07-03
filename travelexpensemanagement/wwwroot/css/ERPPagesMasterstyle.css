@@ -2040,6 +2040,30 @@ input[type="number"] {
         background: linear-gradient(135deg, #f59e0b, #d97706);
         color: #fff !important;
     }
+
+.erppage-btn-common-active {
+    background: linear-gradient(135deg, #1c5e31, #66a644);
+    color: #fff;
+}
+
+    .erppage-btn-common-active:hover {
+        background: linear-gradient(135deg, #164b27, #4f8d34);
+        color: #fff;
+    }
+
+.erppage-btn-common-active-disabled {
+    color: #1c5e31 !important;
+    font-weight: 600;
+    border: 1px solid #1c5e31 !important;
+    background: #fff;
+}
+
+    /* Hover effect for disabled-style button */
+    .erppage-btn-common-active-disabled:hover {
+        /*background: linear-gradient(135deg, #1c5e31, #66a644);*/
+        background-color: #1c5e31;
+        color: #fff !important;
+    }
 .erppage-btn-print {
     background: linear-gradient(135deg, #374151, #111827);
     color: #fff;
@@ -2085,7 +2109,7 @@ input[type="number"] {
 .erppage-actions {
     position: fixed;
     bottom: 0;
-    left: 0;
+    left: 280px;
     right: 0;
     display: flex;
     justify-content: flex-end;
