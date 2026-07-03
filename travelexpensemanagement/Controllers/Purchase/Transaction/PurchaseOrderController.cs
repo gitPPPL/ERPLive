@@ -13,13 +13,14 @@ using System.Net.Mail;
 using System.Text.Json;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.Inventory.Master;
 using travelexpensemanagement.Models.Purchase.Transaction;
+using UglyToad.PdfPig.Content;
 using static travelexpensemanagement.Controllers.Master.StateMasterController;
-using travelexpensemanagement.Common.DropdownService;
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
     public class PurchaseOrderController : Controller
@@ -67,7 +68,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = "data load failed" });
             }
         }
-
         public async Task<IActionResult> GetMaxVNo(string V_type)
         {
             try
@@ -101,68 +101,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = "data load failed" });
             }
 
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetPlaceMast()
-        {
-            try
-            {
-                var UserLoginData = _globalValue.GetGlobalVariables();
-                var placelist = await _dbHelper.GetJsonDataAsync($@"select CODE, NAME from PLACE_MAST where COMP_CODE={UserLoginData.PubCompCode} order by NAME ");
-                return Json(new { status = true, data = placelist });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetCurrencyMast()
-        {
-            try
-            {
-                var currencylist = await _dbHelper.GetJsonDataAsync($@"select CODE, NAME from CURRENCY_MAST  order by NAME ");
-                return Json(new { status = true, data = currencylist });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetPartyList()
-        {
-            try
-            {
-                var UserLoginData = _globalValue.GetGlobalVariables();
-                var PartyList = await _dbHelper.GetJsonDataAsync($@"select distinct sg.CODE, sg.NAME, sg.ADD1,sg.ADD2,sg.ADD3,sg.PINCODE, isnull(cm.NAME, '') as CityName ,
-                sg.CITY_CODE,sg.GSTIN from SUBGROUP_MAST sg left join CITY_MAST cm on sg.CITY_CODE=cm.CODE  where sg.COMP_CODE={UserLoginData.PubCompCode}  and UPPER(NATURE)='SUPPLIER' and
-                sg.ACTIVE=1  order by NAME ");
-                return Json(new { status = true, data = PartyList });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = true, message = "data load failed" });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetPartyAddress(int partyCd)
-        {
-            try
-            {
-                var UserLoginData = _globalValue.GetGlobalVariables();
-                var PartyAddList = await _dbHelper.GetJsonDataAsync($@"select distinct sg.code, sg.ADD1,sg.ADD2,sg.ADD3,sg.PINCODE, isnull(cm.NAME, '') as CityName ,sg.CITY_CODE,sg.GSTIN from SUBGROUP_ADDRESS sg left join CITY_MAST cm on sg.CITY_CODE=cm.CODE  where sg.COMP_CODE={UserLoginData.PubCompCode}  and sg.code={partyCd} order by ADD1  ");
-                return Json(new { status = true, data = PartyAddList });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = true, message = "data load failed" });
-            }
-        }
+        }          
 
         [HttpGet]
         public async Task<IActionResult> GetItemList()
@@ -312,29 +251,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-        //[HttpPost]
-        //public IActionResult CalculationBySaudaNo([FromBody] SaudaCalculationRequest model)
-        //{
-        //    try
-        //    {        
-        //        string btn = model.Btn;
-        //        int saudaNo = model.SaudaNo ?? 0;
-        //        string saudaType = model.SaudaType ?? "";
-        //        int stateCode = model.StateCode ?? 0;
-        //        int cityCode = model.CityCode ?? 0;
-        //        DateTime effectiveDate = model.EffectiveDate ?? DateTime.Now;  
-
-        //        List<Order2> itemList = model.Orders ?? new List<Order2>();
-        //        CalculateSaudaRate(btn, saudaType, saudaNo, stateCode, cityCode, effectiveDate, itemList);
-
-        //        return Json(new { status = true, data = itemList });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { status = false, message = ex.Message });
-        //    }
-        //}
-
         [HttpPost]
         public JsonResult CalculationBySaudaNo([FromBody] SaudaCalculationRequest model)
         {
@@ -357,25 +273,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = ex.Message });
             }
         }
-
-
-        [HttpGet]
-        public async Task<IActionResult> GetSaudaList(int partyCd)
-        {
-            try
-            {
-                if (partyCd != null && partyCd <= 0)
-                {
-                    return Json(new { status = true, data = "" });
-                }
-                var SaudaNO = await _dbHelper.GetJsonDataAsync($@" SELECT distinct DOC_ID, V_NO, V_TYPE FROM SAUDA WHERE PARTY_CODE={partyCd}  and COMP_CODE={_globalValue.GetGlobalVariables().PubCompCode} and BRANCH_CODE = 1 and STATUS = 1 order by V_NO ");
-                return Json(new { status = true, data = SaudaNO });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = "data load failed" });
-            }
-        }
+         
 
         [HttpGet]
         public async Task<IActionResult> GetSaudaDetail(string docid)
@@ -525,17 +423,17 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = " data save failed." });
 
 
-                //var result = await saveValidateData(POmodel) as JsonResult;
+                var result = await saveValidateData(POmodel) as JsonResult;
 
-                //if (result is JsonResult json)
-                //{
-                //    dynamic data = json.Value;
+                if (result is JsonResult json)
+                {
+                    dynamic data = json.Value;
 
-                //    if (data.status == false)
-                //    {
-                //        return Json(new  { status = false, message = data.message  });
-                //    }
-                //}
+                    if (data.status == false)
+                    {
+                        return Json(new { status = false, message = data.message });
+                    }
+                }
 
 
                 using (var con = _dbcontext.GetErpConnection())
@@ -544,9 +442,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     var usersessionDt = _globalValue.GetGlobalVariables();
                     DataTable purchaseOrderTable = FillDataTable(POmodel.ItemRecords, "[dbo].[Type_Order2]");
 
-
-                    // 🔥 REPLACE FillDataTable with this
-
                     DataTable purchaseOrderAttachmentTable = new DataTable();
 
                     purchaseOrderAttachmentTable.Columns.Add("FILE_Path", typeof(string));
@@ -554,7 +449,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     purchaseOrderAttachmentTable.Columns.Add("SRNO", typeof(int));
 
                     int srno = 1;
-
 
                     if (POmodel.Attachments != null)
                     {
@@ -1155,7 +1049,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
  
             return results;
         }
-
         private void ValidatePurchaseRequest()
         {
             string copyVType = "";
@@ -1242,7 +1135,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             var result = await _globalValidationdate.CheckValidDate("ORDER1", vdate, vtype, vno);
             return Ok(result);
         }
-
 
         public async Task<IActionResult> saveValidateData([FromBody] PurchaseOrder POmodel)
         {
@@ -1392,8 +1284,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
-
         public JsonResult DDLCityMast()
         {
             var getdata = _globalValue.GetGlobalVariables();
@@ -1405,7 +1295,371 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
+        public JsonResult DDlPartyList()
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                string sql = $@"select distinct sg.CODE, sg.NAME  
+                from SUBGROUP_MAST sg left join CITY_MAST cm on sg.CITY_CODE=cm.CODE  where sg.COMP_CODE={getdata.PubCompCode}  and UPPER(NATURE)='SUPPLIER' and
+                sg.ACTIVE=1  order by NAME ";
 
+                var DDlPartyList = _dropdownService.GetDropdownList(sql);
+                return Json(DDlPartyList);
+            }
+        }
+        public JsonResult GetCurrencyMast()
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                string sql = $@"select CODE, NAME from CURRENCY_MAST  order by NAME ";
+
+                var GetCurrencyMast = _dropdownService.GetDropdownList(sql);
+                return Json(GetCurrencyMast);
+            }
+        }
+        public JsonResult GetPlaceMast()
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                string sql = $@"select CODE, NAME from PLACE_MAST where COMP_CODE={getdata.PubCompCode} order by NAME ";
+
+                var GetPlaceMast = _dropdownService.GetDropdownList(sql);
+                return Json(GetPlaceMast);
+            }
+        }
+        public JsonResult GetPartyAddress(int Partycode)
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                string sql = $@"select ADDRESS_ID , ADD1 from SUBGROUP_ADDRESS  where CODE = "+ Partycode + " and COMP_CODE = "+ getdata.PubCompCode + "  ";
+
+                var GetPartyAddress = _dropdownService.GetDropdownList(sql);
+                return Json(GetPartyAddress);
+            }
+        }
+
+        public JsonResult GetDataByPartyCode(int PartyCode, string v_type , int v_no)
+         {
+            var getdata = _globalValue.GetGlobalVariables();
+
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                con.Open();
+
+
+                string queryadd = "";
+
+                if (v_type != "DORD")
+                {
+                    queryadd = "and a.NATURE in ('supplier','vendor')";
+                }
+                                // -------------------- 1st QUERY (Supplier Master) --------------------
+                string query1 = @" select a.CODE,ltrim(rtrim(a.name))Name,a.ADD1,a.ADD2,a.ADD3,a.CITY_CODE,a.PINCODE,a.GSTIN from SUBGROUP_MAST a  
+                left join  CITY_MAST c on c.CODE = a.CITY_CODE where a.comp_code= @CompCode and a.active=1 and a.CODE = @PartyId  " + queryadd +  "  ; ";
+                             
+
+
+                object Partydetails = null;
+
+                using (SqlCommand cmd = new SqlCommand(query1, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@PartyId", PartyCode);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            Partydetails = new
+                            {
+                                CODE = reader["CODE"].ToString(),
+                                Name = reader["Name"].ToString(),
+                                ADD1 = reader["ADD1"].ToString(),
+                                ADD2 = reader["ADD2"].ToString(),
+                                ADD3 = reader["ADD3"].ToString(),
+                                CITY_CODE = reader["CITY_CODE"].ToString(),
+                                PINCODE = reader["PINCODE"].ToString(),
+                                GSTIN = reader["GSTIN"].ToString()                      
+                            };
+                        }
+                    }
+                }
+
+                object SaudaDetails = null;
+
+
+                if (v_type == "RORD"  && v_no > 0)
+                {
+                    string query2 = @" SELECT top 1  b.Name AS P_Name,c.ShortName,a.Qty,a.Rate,a.Remark,a.FRT_TERM FROM Sauda a
+                    LEFT JOIN Subgroup_Mast b  ON a.Party_Code = b.Code AND a.Comp_Code = b.Comp_Code
+                    LEFT JOIN Item_Mast c ON a.Item_Code = c.Code  AND a.Comp_Code = c.Comp_Code ";
+
+                    //WHERE a.V_TYPE = 'PAUD'
+                    //AND a.V_NO = @VNo AND a.COMP_CODE = @CompCode AND a.BRANCH_CODE = @BranchCode; ";
+                            
+
+                    using (SqlCommand cmd = new SqlCommand(query2, con))
+                    {
+                        cmd.Parameters.AddWithValue("@PartyId", PartyCode);
+                        cmd.Parameters.AddWithValue("@VNo", v_no);
+                        cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                SaudaDetails = new
+                                {
+                                    P_Name = reader["P_Name"].ToString(),
+                                    ShortName = reader["ShortName"].ToString(),
+                                    Qty = reader["Qty"].ToString(),
+                                    Rate = reader["Rate"].ToString(),
+                                    Remark = reader["Remark"].ToString(),
+                                    FRT_TERM = reader["FRT_TERM"].ToString()
+                                };
+                            }
+                        }
+                    }
+                }
+
+
+                string PartyCountry = getText("select state_type from STATE_MAST where CODE=(select state_code from SUBGROUP_ADDRESS where CODE= " +  PartyCode +"   and isnull(IS_DEFAULT,0)=1)");
+
+                // -------------------- FINAL RESPONSE --------------------
+                return Json(new { Partydetails = Partydetails , SaudaDetails  = SaudaDetails , PartyCountry  = PartyCountry });
+            }
+        }
+
+        public JsonResult GetSaudaList(int partyCd)
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                string sql = $@" SELECT distinct  V_NO, V_TYPE FROM SAUDA WHERE PARTY_CODE={partyCd}  and 
+                COMP_CODE={_globalValue.GetGlobalVariables().PubCompCode} and BRANCH_CODE = {getdata.PubBranchCode} and STATUS = 1 order by V_NO ";
+
+                var GetSaudaList = _dropdownService.GetDropdownList(sql);
+                return Json(GetSaudaList);
+            }
+        }
+
+        [HttpGet]
+        public async Task<object> GetDataByOrder(int V_NO)
+        {
+            var GetGlobalCode = _globalValue.GetGlobalVariables();
+            var Datalist = new List<object>();
+            try
+            {
+                using (SqlConnection con = _dbcontext.GetErpConnection())
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd3 = new SqlCommand("[dbo].[sp_PurchaseOrder]", con))
+                    {
+                        cmd3.CommandType = CommandType.StoredProcedure;
+                        cmd3.Parameters.AddWithValue("@Action", "Order");
+                        cmd3.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                        cmd3.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+                        cmd3.Parameters.AddWithValue("@SaudaNo", V_NO);
+
+                        using (SqlDataReader rdr = cmd3.ExecuteReader())
+                        {
+                            if (rdr.HasRows)
+                            {
+                                while (rdr.Read())
+                                {
+                                    var OrderNo = rdr["OrderNo"]?.ToString();
+                                    var Party = rdr["Party"]?.ToString();
+                                    var ItemName = rdr["ItemName"]?.ToString();
+                                    var Quantity = rdr["Quantity"]?.ToString();
+                                    var Rate = rdr["Rate"]?.ToString();
+                                                                  
+                                        Datalist.Add(new
+                                        {
+                                            OrderNo = OrderNo,
+                                            Party = Party,
+                                            ItemName = ItemName,
+                                            Quantity = Quantity,
+                                            Rate = Rate
+                                        });
+                                    
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return (new { success = true, data = Datalist });
+            }
+            catch (Exception ex)
+            {
+                return (new { success = false, message = "Error fetching attachment data", error = ex.Message });
+            }
+        }
+
+        public JsonResult GetDataByShipPartyCode(int PartyCode)
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                con.Open();
+                
+
+        
+                // -------------------- 1st QUERY (Supplier Master) --------------------
+                string query1 = @" select a.CODE,ltrim(rtrim(a.name))Name,a.ADD1,a.ADD2,a.ADD3,a.CITY_CODE,a.PINCODE,a.GSTIN from SUBGROUP_MAST a  
+                left join  CITY_MAST c on c.CODE = a.CITY_CODE where a.comp_code= @CompCode and a.active=1 and a.CODE = @PartyId   ; ";
+
+                object Partydetails = null;
+
+                using (SqlCommand cmd = new SqlCommand(query1, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@PartyId", PartyCode);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            Partydetails = new
+                            {
+                                CODE = reader["CODE"].ToString(),
+                                Name = reader["Name"].ToString(),
+                                ADD1 = reader["ADD1"].ToString(),
+                                ADD2 = reader["ADD2"].ToString(),
+                                ADD3 = reader["ADD3"].ToString(),
+                                CITY_CODE = reader["CITY_CODE"].ToString(),
+                                PINCODE = reader["PINCODE"].ToString(),
+                                GSTIN = reader["GSTIN"].ToString()
+                            };
+                        }
+                    }
+                }
+  
+                // -------------------- FINAL RESPONSE --------------------
+                return Json(new { Partydetails = Partydetails});
+            }
+        }
+
+        public JsonResult GetDataByPartyAddressID(int PartyCode, int AddressCode)
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                con.Open();              
+        
+                // -------------------- 1st QUERY (Supplier Master) --------------------
+                    string query1 = @" SELECT   a.Add1, a.Add2, a.Add3,  a.GSTIN, a.City_Code,a.Pincode  FROM Subgroup_Address a
+                        LEFT JOIN STATE_MAST b   ON a.STATE_CODE = b.Code
+                        LEFT JOIN CITY_MAST c   ON a.CITY_CODE = c.Code
+                        WHERE   a.Comp_Code = @CompCode  AND a.Code = @PartyId AND a.Address_Id = @AddressId;   ; ";
+
+                object PartyAddress = null;
+
+                using (SqlCommand cmd = new SqlCommand(query1, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@PartyId", PartyCode);
+                    cmd.Parameters.AddWithValue("@AddressId", AddressCode);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            PartyAddress = new
+                            {
+                                Add1 = reader["Add1"].ToString(),
+                                Add2 = reader["Add2"].ToString(),
+                                Add3 = reader["Add3"].ToString(),
+                                GSTIN = reader["GSTIN"].ToString(),
+                                City_Code = reader["City_Code"].ToString(),
+                                Pincode = reader["Pincode"].ToString()                 
+                            };
+                        }
+                    }
+                }
+
+                // -------------------- FINAL RESPONSE --------------------
+                return Json(new { PartyAddress = PartyAddress });
+            }
+        }
+
+
+        [HttpGet]
+        public async Task<object> GetModificationData(int V_NO)
+        {
+            var globalCode = _globalValue.GetGlobalVariables();
+            var dataList = new List<object>();
+
+            try
+            {
+                using (SqlConnection con = _dbcontext.GetErpConnection())
+                {
+                    await con.OpenAsync();
+
+                    using (SqlCommand cmd = new SqlCommand("[dbo].[sp_PurchaseOrder]", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue("@Action", "MODIFICATIONHISTORY");
+                        cmd.Parameters.AddWithValue("@COMP_CODE", globalCode.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", globalCode.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@V_NO", V_NO);
+
+                        using (SqlDataReader rdr = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await rdr.ReadAsync())
+                            {
+                                dataList.Add(new
+                                {
+                                    V_NO = rdr["V_NO"]?.ToString(),
+                                    VDate = rdr["VDate"]?.ToString(),
+                                    PartyName = rdr["PartyName"]?.ToString(),
+                                    PRICE_TYPE = rdr["PRICE_TYPE"]?.ToString(),
+                                    PARTY_REF = rdr["PARTY_REF"]?.ToString(),
+                                    QTY = rdr["QTY"]?.ToString(),
+                                    AMOUNT = rdr["AMOUNT"]?.ToString(),
+                                    PACK_AMT = rdr["PACK_AMT"]?.ToString(),
+                                    DISC_AMT = rdr["DISC_AMT"]?.ToString(),
+                                    CGST_AMT = rdr["CGST_AMT"]?.ToString(),
+                                    SGST_AMT = rdr["SGST_AMT"]?.ToString(),
+                                    IGST_AMT = rdr["IGST_AMT"]?.ToString(),
+                                    OTH_AMT = rdr["OTH_AMT"]?.ToString(),
+                                    VAT_AMT = rdr["VAT_AMT"]?.ToString(),
+                                    CESS_AMT = rdr["CESS_AMT"]?.ToString(),
+                                    NET_AMT = rdr["NET_AMT"]?.ToString(),
+                                    DELIVERY_TERM = rdr["DELIVERY_TERM"]?.ToString(),
+                                    PAYMENT_TERM = rdr["PAYMENT_TERM"]?.ToString(),
+                                    REMARKS = rdr["REMARKS"]?.ToString()         
+                                });
+                            }
+                        }
+                    }
+                }
+
+                return new
+                {
+                    success = true,
+                    data = dataList
+                };
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    success = false,
+                    message = "Error fetching modification data.",
+                    error = ex.Message
+                };
+            }
+        }
 
     }
 }

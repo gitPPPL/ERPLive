@@ -132,112 +132,62 @@ $('#btn-save').on('click', async function (e) {
 
 
 
-$('#ddlPartyName').on('change', function () {
-
-    var partyCode = $(this).val();
-    var selectedOption = $(this).find('option:selected');
-    var shipCode = $('#ddlShipFrom').val();
-
-
-    console.log("selectedOption", selectedOption);
-
-    if (partyCode) {
-
-        $('#TxtAdd1PD').val(selectedOption.data('add1'));
-        $('#TxtAdd2PD').val(selectedOption.data('add2'));
-        $('#TxtAdd3PD').val(selectedOption.data('add3'));
-        $('#NumPincodePD').val(selectedOption.data('pincode'));
-        $('#TxtCity1PD').val(selectedOption.data('citycode'));
-
-        $('#TxtGSTPD').val(selectedOption.data('gstin'));
-
-        GetPartyAddress(partyCode, '#ddlAddressbyparty');
-        GetSaudaList(partyCode);
-        GetWeighBridgeNo(partyCode);
-
-        if (!shipCode) {
-
-            GetShipFromList(partyCode);
-
-            $('#TxtAdd1SD').val(selectedOption.data('add1'));
-            $('#TxtAdd2SD').val(selectedOption.data('add2'));
-            $('#TxtAdd3SD').val(selectedOption.data('add3'));
-            $('#NumPincodeSD').val(selectedOption.data('pincode'));
-            $('#TxtCity1SD').val(selectedOption.data('cityname'));
-            $('#TxtGSTSD').val(selectedOption.data('gstin'));
-
-            GetPartyAddress(partyCode, '#ddlAddressbypartySD');
-        }
-
-    } else {
-
-        $('#TxtAdd1PD').val('');
-        $('#TxtAdd2PD').val('');
-        $('#TxtAdd3PD').val('');
-        $('#NumPincodePD').val('');
-        $('#TxtCity1PD').val('');
-        $('#TxtCityID').val('');
-        $('#TxtGSTPD').val('');
-
-        $('#ddlAddressbyparty').empty().append('<option value="">-Select Address-</option>');
-        $('#ddSaudaNo').empty().append('<option value="">-Select Sauda No.-</option>');
-        $('#ddWBNo').empty().append('<option value="">-Select WeighBridge No.-</option>');
-
-        if (!shipCode) {
-
-            $('#TxtAdd1SD').val('');
-            $('#TxtAdd2SD').val('');
-            $('#TxtAdd3SD').val('');
-            $('#NumPincodeSD').val('');
-            $('#TxtCity1SD').val('');
-            $('#TxtGSTSD').val('');
-
-            $('#ddlAddressbypartySD').empty().append('<option value="">-Select Address-</option>');
-        }
+$('#ddlPartyName').on('change', async function () {
+    let PartyCode = $('#ddlPartyName').val();
+    if (!PartyCode) {
+        return;
     }
-});
+    await GetSaudanoList(PartyCode)
+    await Promise.allSettled([
+        GetPartyAddress(PartyCode),     
+        GetDatabbyPartycode(),     
+ 
+    ]);
 
-$('#ddlShipFrom').on('change', function () {
-    var shipCode = $(this).val();
-    var selectedOption = $(this).find('option:selected');
-    if (shipCode) {
-        $('#TxtAdd1SD').val(selectedOption.data('add1'));
-        $('#TxtAdd2SD').val(selectedOption.data('add2'));
-        $('#TxtAdd3SD').val(selectedOption.data('add3'));
-        $('#NumPincodeSD').val(selectedOption.data('pincd'));
-        $('#TxtCity1SD').val(selectedOption.data('cityname'));
-        $('#TxtGSTSD').val(selectedOption.data('gstin'));
-        GetPartyAddress(shipCode, '#ddlAddressbypartySD');
-    } else {
-        $('#TxtAdd1SD').val('');
-        $('#TxtAdd2SD').val('');
-        $('#TxtAdd3SD').val('');
-        $('#NumPincodeSD').val('');
-        $('#TxtCity1SD').val('');
-        $('#TxtGSTSD').val('');
-        $('#ddlAddressbypartySD').empty().append('<option value="">-Select Address-</option>');
-    }
 });
 
 
-$(document).on('change', '#ddlAddressbyparty, #ddlAddressbypartySD', function () {
-    const selectedOption = $(this).find('option:selected');
-    const dropdownId = $(this).attr('id');
-
-    if (dropdownId === 'ddlAddressbyparty') {
-        $('#TxtAdd1PD').val(selectedOption.text().trim());
-        $('#TxtAdd2PD').val(selectedOption.data('add2'));
-        $('#TxtAdd3PD').val(selectedOption.data('add3'));
-        $('#NumPincodePD').val(selectedOption.data('pincd'));
-        $('#TxtCity1PD').val(selectedOption.data('citycd'));
-        $('#TxtGSTPD').val(selectedOption.data('gstin'));
-
-    } else {
-        $('#TxtAdd1SD').val(selectedOption.text().trim());
-        $('#TxtAdd2SD').val(selectedOption.data('add2'));
-        $('#TxtAdd3SD').val(selectedOption.data('add3'));
-        $('#NumPincodeSD').val(selectedOption.data('pincd'));
-        $('#TxtCity1SD').val(selectedOption.data('cityname'));
-        $('#TxtGSTSD').val(selectedOption.data('gstin'));
-    }
+$('#ddlShipFrom').on('change', async function () { 
+    if (SelectShipParty == false) return;
+    let PartyCode = $('#ddlShipFrom').val();
+    await GetShipPartyAddress(PartyCode);
+    await LoadDatabyShipCode(PartyCode);    
 });
+
+$('#btnorders').on('click', async function () {
+    if (!validateRequiredField('#ddSaudaNo', 'Sauda No')) return;
+    await LoadOrdersModal();
+});
+
+
+
+$('#ddlAddressbyparty').on('change', async function () {
+    const docId = getQueryParam('id');
+    if (docId) return;
+    let PartyCode = $('#ddlPartyName').val();
+    let AddressCode = $('#ddlAddressbyparty').val();
+    if (!PartyCode || !AddressCode) {
+        return;
+    }
+     GetPartyAddressDetails(PartyCode, AddressCode);
+});
+
+$('#ddlAddressbypartySD').on('change', async function () {
+    const docId = getQueryParam('id');
+    if (docId) return;
+    let PartyCode = $('#ddlShipFrom').val();
+    let AddressCode = $('#ddlAddressbypartySD').val();
+    if (!PartyCode || !AddressCode) {
+        return;
+    }
+    GetShipPartyAddressDetails(PartyCode, AddressCode);
+});
+
+
+
+$('#btn_ModificationOrder').on('click', function () {
+    loadModificationdata();
+});
+
+
+

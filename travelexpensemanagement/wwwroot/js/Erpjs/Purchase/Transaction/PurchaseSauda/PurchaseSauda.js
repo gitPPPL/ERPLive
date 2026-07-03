@@ -654,6 +654,11 @@ function renderPurchaseModification(data) {
             </tr>
         `);
     } else {
+
+        const modalElement = document.getElementById('modificationModal');
+        const myModal = new bootstrap.Modal(modalElement);
+        myModal.show();
+
         data.forEach(item => {
             tbody.append(`
                 <tr>
@@ -669,7 +674,5 @@ function renderPurchaseModification(data) {
         });
     }
 
-    const modalElement = document.getElementById('modificationModal');
-    const myModal = new bootstrap.Modal(modalElement);
-    myModal.show();
+
 }

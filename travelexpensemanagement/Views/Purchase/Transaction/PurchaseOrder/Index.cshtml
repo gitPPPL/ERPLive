@@ -26,6 +26,7 @@
         </button>
     </div>
 </div>
+
 <div id="PurchaseOrderForm">
     <input type="hidden" class="form-control" id="TxtCode" name="CODE">
     <div class="erppage-container">
@@ -166,7 +167,12 @@
                         <div class="erppage-grid2">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">City</label>
-                                <input type="text" class="erppage-input" id="TxtCity1SD" placeholder="Enter City" readonly>
+
+
+                                   <select class="erppage-input erppage-required" id="TxtCity1SD">
+                                        <option value="">-Select City-</option>
+                                    </select>
+
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">GST</label>
@@ -258,7 +264,7 @@
                                 <label id="LblSaudaNo" class="erppage-label">Sauda No</label>
                                 <div class="erppageinputicon-wrapper">
                                     <select class="erppage-input erppage-select" id="ddSaudaNo">
-                                        <option value="">Select WB No</option>
+                                
                                     </select>
                                     <span class="erppageinputicon" id="BtnCalculation">
                                         <i class="fa-solid fa-c"></i>
@@ -375,10 +381,15 @@
                         </li>
                     </ul>
                 </div>
-                <button type="button" id="btnPOModHistory" class="erppage-btn erppage-btn-common-disabled">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                    <span>PO Modification History</span>
-                </button>
+
+
+
+               <button type="button" class="erppage-btn erppage-btn-common" id="btn_ModificationOrder" >
+                        <i class="fa fa-pencil-square-o"></i>
+                        <span id="modification_count" style="display:none;"></span>
+                    </button>
+
+
                 <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" data-bs-toggle="modal" data-bs-target="#PendingRequestModal">
                     <i class="fa-solid fa-hourglass-half"></i>
                     <span>Pending Request</span>
@@ -548,7 +559,6 @@
 
 
 
-
             <fieldset class="erppagefieldset" id="SaudaDetail">
                 <legend class="erppagefieldset-legend">Sauda Details</legend>
                     <div class="row">
@@ -566,46 +576,14 @@
                         </div>
                         <div class="col-md-4">
                             <div class="btn-right">
-                                <button id="btn-orders" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ordersModal">
-                                    <i class="fa fa-shopping-cart"></i>Orders
-                                </button>
+                                    <button id="btnorders" type="button" class="btn btn-primary">
+                                    <i class="fa fa-shopping-cart"></i> Orders
+                                    </button>
                             </div>
                         </div>
                     </div>
-                    <!--Modul Popup-->
-                    <div class="modal fade" id="ordersModal" tabindex="-1" aria-labelledby="ordersModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <!-- or modal-xl / modal-sm -->
-                            <div class="modal-content draggable-modal">
-                                <div class="popup-header">
-                                    <h5 class="popup-title" id="ordersModalLabel">Orders</h5>
-                                    <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- Add your order content here -->
-                                    <div class="card">
-                                        <div class="table-responsive">
-                                            <table id="tblPOMaster" class="table-width">
-                                                <thead class="table-head">
-                                                    <tr>
-                                                        <th style="display:none;">VNo</th>
-                                                        <th>Order No</th>
-                                                        <th>Party</th>
-                                                        <th>Item Name</th>
-                                                        <th>Quantity</th>
-                                                        <th>Rate</th>
-                                                        <th style="display:none;">Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody></tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
+                              
 
-                            </div>
-                        </div>
-                    </div>
                     <div class="row">
                         <div class="col-md-2">
                             <div class="form-group">
@@ -646,6 +624,121 @@
                     </div>
                
             </fieldset>
+
+                     <!--Modul Popup-->
+            <div class="modal fade" id="ordersModal" tabindex="-1" aria-labelledby="ordersModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <!-- or modal-xl / modal-sm -->
+                            <div class="modal-content draggable-modal">
+                                <div class="popup-header">
+                                    <h5 class="popup-title" id="ordersModalLabel">Orders</h5>
+                                    <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Add your order content here -->
+                                    <div class="card">
+                                        <div class="table-responsive">
+                                            <table id="tblPOMaster" class="table-width">
+                                                <thead class="table-head">
+                                                    <tr>
+                                                        <th style="display:none;">VNo</th>
+                                                        <th>Order No</th>
+                                                        <th>Party</th>
+                                                        <th>Item Name</th>
+                                                        <th>Quantity</th>
+                                                        <th>Rate</th>
+                                                        <th style="display:none;">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    
+ <div class="modal fade" id="modificationModal" tabindex="-1" aria-labelledby="modificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                       <i class="fa fa-pencil-square-o"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="modificationModalLabel">Modification</h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="erppagesmodal-body">
+               
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="modificationList" class="excel-table fixed-grid-table width-table resizable-table">
+                            <colgroup>
+                            <col style="width:80px;">   <!-- V.TYPE -->
+                            <col style="width:140px;">  <!-- V.NO -->
+                            <col style="width:120px;">  <!-- V.Date -->
+                            <col style="width:220px;">  <!-- Party Name -->
+                            <col style="width:120px;">  <!-- Price Type -->
+                            <col style="width:220px;">  <!-- Party Ref -->
+                            <col style="width:100px;">  <!-- Qty -->
+                            <col style="width:120px;">  <!-- Amount -->
+                            <col style="width:80px;">   <!-- Pack -->
+                            <col style="width:80px;">   <!-- Disc -->
+                            <col style="width:80px;">   <!-- CGST -->
+                            <col style="width:80px;">   <!-- SGST -->
+                            <col style="width:80px;">   <!-- IGST -->
+                            <col style="width:80px;">   <!-- OTH -->
+                            <col style="width:80px;">   <!-- VAT -->
+                            <col style="width:80px;">   <!-- CESS -->
+                            <col style="width:80px;">   <!-- VAT -->
+                            <col style="width:120px;">  <!-- NETAMT -->
+                            <col style="width:120px;">  <!-- Del.Term -->
+                            <col style="width:120px;">  <!-- PayTerm -->
+                            </colgroup>
+                        <thead>
+                            <tr>
+                                <th>V.TYPE</th>
+                                <th>V.NO</th>
+                                <th>V.Date</th>
+                                <th>Party Name</th>
+                                <th>Price Type</th>
+                                <th>Party Ref</th>
+                                <th>Qty</th>
+                                <th>Amount</th>
+                                <th>Pack</th>
+                                <th>Disc</th>
+                                <th>CGST</th>
+                                <th>SGST</th>
+                                <th>IGST</th>
+                                <th>OTH</th>
+                                <th>VAT</th>
+                                <th>CESS</th>
+                                <th>VAT</th>
+                                <th>NETAMT</th>
+                                <th>Del.Term</th>
+                                <th>PayTerm</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>   
+
+
 
         </fieldset>
         <div class="erppage-actions">
@@ -1021,6 +1114,56 @@
         </div>
     </div>
 
+
+
+
+    <div class="modal fade" id="showpurchasehistoryModal" tabindex="-1" aria-labelledby="showpurchasehistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-truck"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="showpurchasehistoryModalLabel">Dispatch Delivery Planning</h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="erppagesmodal-body">
+               
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblshowpurchasehistoryList" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:150px;">  
+                            <col style="width:150px;">  
+                            <col style="width:120px;">  
+                            <col style="width:250px;">  
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Bill No</th>
+                                <th>Bill Date</th>
+                                <th>Quantity</th>
+                                <th>Party Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>   
+
+
+
+
+
     <ul id="customContextMenu" class="custom-context-menu" style="display:none;">
         <li data-action="exporttoexcel" data-bs-toggle="modal" data-bs-target="#ExportToExcel">Export To Excel</li>
         <li data-action="purchasereceipthistory" data-bs-toggle="modal" data-bs-target="#purchasereceipthistory">Show/Set QC Parameter</li>
@@ -1054,7 +1197,7 @@
 
 <script src="~/js/erpjs/purchase/transaction/purchaseorder/purchaseorderapi.js"></script>
 <script src="~/js/erpjs/purchase/transaction/purchaseorder/purchaseorderinit.js"></script>
-
+<script src="~/js/erpjs/purchase/transaction/purchaseorder/purchaseorder.js"></script>
 
 
 <script>
@@ -1085,9 +1228,10 @@
     var globalVars = window.globalVariables || {};
     let LoginDate = globalVars.LoginDate;
     let isLoading = false;
+    let SelectShipParty = true;
+    let Calculation = true;
 
     $(document).ready(function () {
-
         LoadDropdown()
 
         $(async function () {
@@ -1125,7 +1269,6 @@
             const VType = $(this).val();
             Wb_SaudaDdl_Make_enabledisable(VType);
             GetDocid(VType);
-
         });
 
         $('#chkDeliveryDate').on('change', function () {
@@ -1217,7 +1360,7 @@
                 console.error('Error during calculation:', err);
             }
         });
-
+   
         //Attachment
 
         browseBtn.addEventListener("click", function () {
@@ -1309,7 +1452,6 @@
 
             $(`#ddlTax${idx}`).val(item.taxCode || '');
 
-
             $(`#ddlDepartment${idx}`).val(item.deptCode || '');
             $(`#TxtNos${idx}`).val(item.nos || '');
             $(`#TxtQty${idx}`).val(item.qty || '');
@@ -1368,25 +1510,6 @@
          });
 
          return items;
-    }
-
-    function Wb_SaudaDdl_Make_enabledisable(VType)
-    {
-        if(VType=="RORD")
-        {
-        $('#ddSaudaNo').show();
-        $('#ddWBNo').show();
-        $('#LblWbNo').show();
-        $('#LblSaudaNo').show();
-        $('#BtnCalculation').show();
-        }
-        else{
-        $('#ddSaudaNo').hide();
-        $('#ddWBNo').hide();
-        $('#LblWbNo').hide();
-        $('#LblSaudaNo').hide();
-        $('#BtnCalculation').hide();
-        }
     }
 
     function quotationRtApproval() {
@@ -1461,53 +1584,38 @@
                     V_NO:        $(row[1]).text().trim(),
                     V_TYPE:      $(row[2]).text().trim(),
                     V_DATE:      $(row[3]).text().trim(),
-
                     ITEM_CODE:   $(row[4]).attr('value'),
                     itemName:    $(row[4]).text().trim(),
-
                     UOM_CODE:    $(row[5]).attr('value'),
                     Unit:        $(row[5]).text().trim(),
-
                     MAKE_CODE:   $(row[6]).attr('value'),
                     make:        $(row[6]).text().trim(),
-
                     TECH_DESC:   $(row[7]).text().trim(),
                     QTY:         $(row[8]).text().trim(),
                     RATE:        $(row[9]).text().trim(),
                     AMOUNT:      $(row[10]).text().trim(),
-
                     PACK_PER:    $(row[11]).text().trim(),
                     PACK_AMT:    $(row[12]).text().trim(),
                     FREIGHT:     $(row[13]).text().trim(),
-
                     DISC_PER:    $(row[14]).text().trim(),
                     DISC_AMT:    $(row[15]).text().trim(),
-
                     TAX_CODE:    $(row[16]).attr('value'),
                     taxType:     $(row[16]).text().trim(),
-
                     CGST_PER:    $(row[17]).text().trim(),
                     CGST_AMT:    $(row[18]).text().trim(),
-
                     SGST_PER:    $(row[19]).text().trim(),
                     SGST_AMT:    $(row[20]).text().trim(),
-
                     IGST_PER:    $(row[21]).text().trim(),
                     IGST_AMT:    $(row[22]).text().trim(),
-
                     CESS_PER:    $(row[23]).text().trim(),
                     CESS_AMT:    $(row[24]).text().trim(),
-
                     OTH_EXPS:    $(row[25]).text().trim(),
                     LD_RATE:     $(row[26]).text().trim(),
                     NET_AMT:     $(row[27]).text().trim(),
-
                     PARTY_CODE:  $(row[28]).attr('value'),
                     party:       $(row[28]).text().trim(),
-
                     REQ_NO:      $(row[29]).text().trim(),
                     REQ_TYPE:    $(row[30]).text().trim(),
-
                     APROV_REMARKS: $(row[31]).text().trim(),
                     STATUS:      $(row[32]).text().trim()
                 };
@@ -2037,40 +2145,6 @@
         });
     }
 
-    function GetSaudaList(partyCd, selectedValue = null) {
-        $.ajax({
-            url: '@Url.Action("GetSaudaList", "PurchaseOrder")',
-            type: 'GET',
-            dataType: 'json',
-            data: { partyCd: partyCd },
-            success: function(response) {
-                if (response.status) {
-                    const $dropdown = $('#ddSaudaNo');
-                    $dropdown.empty(response.data);
-                     $dropdown.append('<option selected disabled value="">- Select Sauda No. -</option>');
-
-                    $.each(response.data, function(index, item) {
-                        $dropdown.append(`<option
-                        data-saudaType="${item.V_TYPE}"
-                        value="${item.DOC_ID}">${item.V_NO}
-                        </option>`);
-                    });
-
-                    if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
-                        $dropdown.val(selectedValue).trigger('change');
-                    } else {
-                        $dropdown.prop('selectedIndex', 0);
-                    }
-                } else {
-                    toastr.error("Sauda Load failed");
-                }
-            },
-            error: function(xhr, status, error) {
-                toastr.error("Sauda Load failed: " + error);
-            }
-        });
-    }
-
     function bindUnitOnItemSelect(itemSelect, unitSelect) {
         itemSelect.on('change', function () {
             const selectedOption = $(this).find('option:selected');
@@ -2161,6 +2235,10 @@
     }
       
     function calculateAllRows() {
+
+        if (Calculation === false) return;
+
+
         let totalNos = 0,
             totalQty = 0,
             totalRate=0,
@@ -2237,6 +2315,10 @@
     }
 
     function calculateAllTotals() {
+
+           if (Calculation === false) return;
+
+
         let totalNos = 0,
             totalQty = 0,
             totalAmount = 0,
@@ -2383,163 +2465,47 @@
             });
         });
     }
+        
+    async function GetPartyAddress(Partycode) {
+    try {
 
 
+        const data = await $.ajax({
+            url: '/PurchaseOrder/GetPartyAddress',
+            method: 'GET',
+            data: { Partycode: Partycode }
+        });
 
-    
-    function GetCurrencyList(selectedValue = null) {
-    $.ajax({
-        url: '@Url.Action("GetCurrencyMast", "PurchaseOrder")',
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            if (response.status) {
-                const $dropdown = $('#ddlCurrency');
-                $dropdown.empty();
-                $dropdown.append('<option selected disabled value="">- Select Currency -</option>');
+        const ddl = $('#ddlAddressbyparty');
+        ddl.empty().append('<option value="">-- Select Address --</option>');
 
-                $.each(response.data, function (index, item) {
-                    $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                });
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
 
-                if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
-                    $dropdown.val(selectedValue).trigger('change');
-                } else {
-                    $dropdown.prop('selectedIndex', 0);
-                }
-            } else {
-                toastr.error("Currency Load failed");
-            }
-        },
-        error: function (xhr, status, error) {
-            toastr.error("Currency Load failed: " + error);
-        }
-    });
+    } catch (error) {
+        console.error("Error loading Place:", error);
+    }
 }
-    
-    function GetShipFromList(selectedValue = null) {
-    $.ajax({
-        url: '@Url.Action("GetPartyList", "PurchaseOrder")',
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            if (response.status) {
-                const $dropdown = $('#ddlShipFrom');
-                $dropdown.empty();
-                $dropdown.append('<option selected disabled value="">- Select Party -</option>');
 
-                $.each(response.data, function (index, item) {
-                    $dropdown.append(`<option
-                                data-add1="${item.ADD1}"
-                                data-add2="${item.ADD2}"
-                                data-add3="${item.ADD3}"
-                                data-cityName="${item.CityName}"
-                                data-GstIn="${item.GSTIN}"
-                                data-cityCd="${item.CITY_CODE}"
-                                data-pinCd="${item.PINCODE}"
-                        value="${item.CODE}">${item.NAME}
-                        </option>`);
-                });
+    async function GetShipPartyAddress(Partycode) {
+    try {
+        const data = await $.ajax({
+            url: '/PurchaseOrder/GetPartyAddress',
+            method: 'GET',
+            data: { Partycode: Partycode }
+        });
 
-                $dropdown.select2({
-                    placeholder: "- Select Party -",
-                    allowClear: true
-                });
+        const ddl = $('#ddlAddressbypartySD');
+        ddl.empty().append('<option value="">-- Select Address --</option>');
 
-                if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
-                    $dropdown.val(selectedValue).trigger('change');
-                } else {
-                    $dropdown.prop('selectedIndex', 0);
-                }
-            } else {
-                toastr.error("Party Load failed");
-            }
-        },
-        error: function (xhr, status, error) {
-            toastr.error("Party Load failed: " + error);
-        }
-    });
-}
-    
-    function GetPartyList(selectedValue = null) {
-    $.ajax({
-        url: '@Url.Action("GetPartyList", "PurchaseOrder")',
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            console.log("response", response);
-            if (response.status) {
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
 
-                const $dropdown = $('#ddlPartyName');
-                $dropdown.empty();
-                $dropdown.append('<option selected disabled value="">- Select Party -</option>');
-
-                $.each(response.data, function (index, item) {
-
-                    $dropdown.append(`
-                        <option
-                            value="${item.CODE}"
-                            data-add1="${item.ADD1 || ''}"
-                            data-add2="${item.ADD2 || ''}"
-                            data-add3="${item.ADD3 || ''}"
-                            data-cityname="${item.CityName || ''}"
-                            data-citycode="${item.CITY_CODE || ''}"
-                            data-gstin="${item.GSTIN || ''}"
-                            data-pincode="${item.PINCODE || ''}">
-                            ${item.NAME}
-                        </option>
-                    `);
-                });
-
-                $dropdown.select2({
-                    placeholder: "- Select Party -",
-                    allowClear: true
-                });
-
-                if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length) {
-                    $dropdown.val(selectedValue).trigger('change');
-                } else {
-                    $dropdown.val('').trigger('change');
-                }
-
-            } else {
-                toastr.error("Party Load failed");
-            }
-        },
-        error: function (xhr, status, error) {
-            toastr.error("Party Load failed : " + error);
-        }
-    });
-}
-    
-    function GetPayTermList(selectedValue = null) {
-    $.ajax({
-        url: '@Url.Action("GetPayTermList", "PurchaseOrder")',
-        type: 'GET',
-        dataType: 'json',
-        success: function (response) {
-            if (response.status) {
-                const $dropdown = $('#ddlPaymentTerm');
-                $dropdown.empty();
-                $dropdown.append('<option selected disabled value="">- Select payment Term -</option>');
-
-                $.each(response.data, function (index, item) {
-                    $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                });
-
-                if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
-                    $dropdown.val(selectedValue).trigger('change');
-                } else {
-                    $dropdown.prop('selectedIndex', 0);
-                }
-            } else {
-                toastr.error("payment term Load failed");
-            }
-        },
-        error: function (xhr, status, error) {
-            toastr.error("payment term Load failed: " + error);
-        }
-    });
+    } catch (error) {
+        console.error("Error loading Place:", error);
+    }
 }
 
 

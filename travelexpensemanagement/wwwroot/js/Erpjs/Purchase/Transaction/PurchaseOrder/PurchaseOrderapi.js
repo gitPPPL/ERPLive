@@ -78,13 +78,11 @@ async function handleDocLoad() {
 
         const today = new Date();
         const todayDate = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0');
-        // $('#dtDocDate').val(todayDate);
+
         $('#DtDeliveryDate').val(todayDate);
         $('#DtValidateDate').val(todayDate);
     }
 }
-
-
 function TransitReport() {
 
     if (!rowId) {
@@ -333,21 +331,6 @@ async function collectFormData() {
     };
 }
 
-async function DDLCityMast() {
-    try {
-        const res = await fetch('/PurchaseOrder/DDLCityMast');
-        const data = await res.json();
-        const ddl = $('#TxtCity1PD');
-        ddl.empty().append('<option value="">-- Select City Name --</option>');
-        data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}</option>`);
-        });
-    } catch (error) {
-        console.error("Error loading City:", error);
-    }
-}
-
-
 async function GetDocData(MasterTblId, readOnly) {
     try {
         const response = await $.ajax({
@@ -584,17 +567,6 @@ async function fillItemDetailsTable(data) {
         $(`#TxtSpclRate${idx}`).val(item.RATE_SPECIAL);
     }
 }
-function LoadDropdown() {
-    GetPlaceList();
-    GetCurrencyList();
-    GetShipFromList();
-    GetPartyList();
-    addItemRecordRow();
-    addAttachmentRow();
-    GetPayTermList();
-    DDLCityMast();
-}
-
 function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
@@ -786,8 +758,6 @@ function SetFYDate(inputId, loginDate) {
     });
 }
 
-
-
 function addItemRecordRow() {
     let tbody = $('#tblItemRecordPO tbody');
     let rowCount = tbody.find('tr').length + 1;
@@ -879,7 +849,6 @@ function addItemRecordRow() {
     bindDropdownData(rowCount);
     setEnterKeyFocusOnTable(itemRecords, rowCount);
 }
-
 function addAttachmentRow(data = {}) {
     const $list = $('#fileList');
 
@@ -980,41 +949,259 @@ function addAttachmentRow(data = {}) {
 }
 
 
-async function GetPlaceList(selectedValue = null) {
+async function GetDatabbyPartycode() {
     try {
-        const response = await $.ajax({
-            url: '/PurchaseOrder/GetPlaceMast',
-            type: 'GET',
-            dataType: 'json'
+
+        let PartyCode = $('#ddlPartyName').val();
+        let v_type = $('#ddlDocType').val();
+        let v_no = $('#ddSaudaNo option:selected').text();
+        const docId = getQueryParam('id');
+
+        const data = await $.ajax({
+            url: '/PurchaseOrder/GetDataByPartyCode',
+            method: 'GET',
+            data: { PartyCode: PartyCode, v_type: v_type, v_no: v_no }
         });
 
-        if (response && response.status === true) {
+        $('#TxtAdd1PD').val(data.partydetails.adD1);
+        $('#TxtAdd2PD').val(data.partydetails.adD2);
+        $('#TxtAdd3PD').val(data.partydetails.adD3);
+        $('#NumPincodePD').val(data.partydetails.pincode);
+        $('#TxtCity1PD').val(data.partydetails.citY_CODE);
+        $('#TxtGSTPD').val(data.partydetails.gstin);
+             
+        if (!docId) {
+            
 
-            const $dropdown = $('#ddlPlace');
-            $dropdown.empty();
-
-            $dropdown.append('<option value="">- Select Place -</option>');
-
-            $.each(response.data, function (i, item) {
-                $dropdown.append(
-                    new Option(item.NAME, item.CODE)
-                );
-            });
-
-            if (selectedValue) {
-                $dropdown.val(selectedValue);
-            } else {
-                $dropdown.val('');
-            }
-
-            $dropdown.trigger('change');
-        }
-        else {
-            toastr.error(response?.message || "Failed to load Place list.");
+            $('#ddlShipFrom').val(data.partydetails.code).trigger('change');
+            $('#TxtAdd1SD').val(data.partydetails.adD1);
+            $('#TxtAdd2SD').val(data.partydetails.adD2);
+            $('#TxtAdd3SD').val(data.partydetails.adD3);
+            $('#NumPincodeSD').val(data.partydetails.pincode);
+            $('#TxtCity1SD').val(data.partydetails.citY_CODE);
+            $('#TxtGSTSD').val(data.partydetails.gstin);
         }
 
+        if (v_type == "RORD" && v_no != "") {
+
+                $('#txtPartySauda').val(data.saudaDetails.p_Name);
+                $('#txtItemNameSauda').val(data.saudaDetails.shortName);
+                $('#txtQuantitySauda').val(data.saudaDetails.qty);
+                $('#NumRateSauda').val(data.saudaDetails.rate);
+                $('#txtPriceSauda').val(data.saudaDetails.frT_TERM);
+                $('#txtAdjQtySauda').val(data.saudaDetails.qty);
+                $('#TxtRemarksSauda').val(data.saudaDetails.remark);
+        }
+         
+        if (data.partyCountry === "Import") {
+
+            $('#ddlCurrency').prop('disabled', true);
+            $('#NumExRate').prop('readonly', true);
+        } else
+        {
+            $('#ddlCurrency').prop('disabled', false);
+            $('#NumExRate').prop('readonly', false);
+        }
     } catch (error) {
-        console.log("AJAX Error:", error);
-        toastr.error("Place Load failed.");
+        console.error("Error loading Place:", error);
     }
+}
+
+function Wb_SaudaDdl_Make_enabledisable(VType) {
+    if (VType == "RORD") {
+        document.getElementById("SaudaDetail").style.display = "block";
+    }
+    else {
+        document.getElementById("SaudaDetail").style.display = "none";
+    }
+}
+
+
+async function LoadOrdersModal() {
+    let V_NO = $('#ddSaudaNo option:selected').text();
+
+
+    const response = await $.ajax({
+        url: '/PurchaseOrder/GetDataByOrder',
+        method: 'GET',
+        data: { V_NO: V_NO }
+    });
+
+    console.log(response);
+
+    const tbody = $("#tblPOMaster tbody");
+    tbody.empty();
+
+    if (response.success && response.data.length > 0) {
+
+        response.data.forEach(item => {
+            tbody.append(`
+                <tr>
+                    <td>${item.orderNo}</td>
+                    <td>${item.party}</td>
+                    <td>${item.itemName}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.rate}</td>
+                </tr>
+            `);
+        });
+
+        const modal = new bootstrap.Modal(document.getElementById("ordersModal"));
+        modal.show();
+
+    }
+    else
+    {
+        toastr.info(`Data Not Found For This Sauda No ${V_NO}`);
+    }
+}
+
+
+async function LoadDatabyShipCode(PartyCode) {
+    try {
+
+        const data = await $.ajax({
+            url: '/PurchaseOrder/GetDataByShipPartyCode',
+            method: 'GET',
+            data: { PartyCode: PartyCode}
+        });          
+        $('#TxtAdd1SD').val(data.partydetails.adD1);
+        $('#TxtAdd2SD').val(data.partydetails.adD2);
+        $('#TxtAdd3SD').val(data.partydetails.adD3);
+        $('#NumPincodeSD').val(data.partydetails.pincode);
+        $('#TxtCity1SD').val(data.partydetails.citY_CODE);
+        $('#TxtGSTSD').val(data.partydetails.gstin);
+    }    
+    
+    catch (error)
+    {
+    console.error("Error loading Place:", error);
+    }
+
+}
+
+
+
+async function GetPartyAddressDetails(PartyCode, AddressCode) {
+    try {
+        const data = await $.ajax({
+            url: '/PurchaseOrder/GetDataByPartyAddressID',
+            method: 'GET',
+            data: {
+                PartyCode: PartyCode,
+                AddressCode: AddressCode
+            }
+        });
+
+        console.log("PartyAddress", data);
+
+        $('#TxtAdd1PD').val(data.partyAddress.add1);
+        $('#TxtAdd2PD').val(data.partyAddress.add2);
+        $('#TxtAdd3PD').val(data.partyAddress.add3);
+        $('#NumPincodePD').val(data.partyAddress.pincode);
+        $('#TxtCity1PD').val(data.partyAddress.city_Code);
+        $('#TxtGSTPD').val(data.partyAddress.gstin);
+
+    }
+    catch (xhr) {
+        console.error("Status:", xhr.status);
+        console.error("Response:", xhr.responseJSON || xhr.responseText);
+    }
+}
+
+async function GetShipPartyAddressDetails(PartyCode, AddressCode) {
+    try {
+
+
+
+
+        const data = await $.ajax({
+            url: '/PurchaseOrder/GetDataByPartyAddressID',
+            method: 'GET',
+            data: {
+                PartyCode: PartyCode,
+                AddressCode: AddressCode
+            }
+        });
+
+
+
+        $('#TxtAdd1SD').val(data.partyAddress.add1);
+        $('#TxtAdd2SD').val(data.partyAddress.add2);
+        $('#TxtAdd3SD').val(data.partyAddress.add3);
+        $('#NumPincodeSD').val(data.partyAddress.pincode);
+        $('#TxtCity1SD').val(data.partyAddress.city_Code);
+        $('#TxtGSTSD').val(data.partyAddress.gstin);
+    }
+    catch (xhr) {
+        console.error("Status:", xhr.status);
+        console.error("Response:", xhr.responseJSON || xhr.responseText);
+    }
+}
+
+
+
+async function loadPurchaseHistory() {
+
+    try {
+        const V_NO = $('#txtDocNo').val()?.trim();
+        const V_date = $('#dtDocDate').val()?.trim();
+
+        if (!V_NO) {
+            toastr.info("Please enter document number");
+            return;
+        }
+
+        const res = await $.ajax({
+            url: '/PurchaseSaudaList/GetDataByPurchaseHistory',
+            method: 'GET',
+            data: { V_NO: V_NO }
+        });
+
+        console.log("Full response:", res);
+
+        if (res.success) {
+
+            const data = res.data || [];
+
+            if (!data || data.length === 0) {
+                toastr.info("Purchase History Not Found For this Doc No = " + V_NO + " and Doc Date " + V_date);
+                return;
+            }
+            renderPurchaseHistory(data);
+        }
+
+    } catch (err) {
+        console.error("AJAX Error:", err);
+        toastr.info("Something went wrong while fetching data");
+    }
+}
+
+function renderPurchaseHistory(data) {
+
+    const tbody = $('#tblshowpurchasehistoryList tbody');
+    tbody.empty();
+
+    if (!data || data.length === 0) {
+        tbody.append(`
+            <tr>
+                <td colspan="4" class="text-center">No data found</td>
+            </tr>
+        `);
+    } else {
+        data.forEach(item => {
+            tbody.append(`
+                <tr>
+                    <td>${item.doc_id ?? ''}</td>
+                    <td>${item.vdate ?? ''}</td>
+                    <td>${item.qty ?? ''}</td>
+                    <td>${item.party_name ?? ''}</td>
+                </tr>
+            `);
+        });
+    }
+
+    const modalElement = document.getElementById('showpurchasehistoryModal');
+    const myModal = new bootstrap.Modal(modalElement);
+    myModal.show();
 }
