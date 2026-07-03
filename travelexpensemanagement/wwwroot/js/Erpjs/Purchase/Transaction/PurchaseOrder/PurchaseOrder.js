@@ -297,6 +297,3 @@ function renderPurchaseModification(data) {
     const myModal = new bootstrap.Modal(modalElement);
     myModal.show();
 }
-
-
-

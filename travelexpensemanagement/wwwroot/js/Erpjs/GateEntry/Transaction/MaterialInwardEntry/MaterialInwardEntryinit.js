@@ -5,7 +5,13 @@ const rowId = urlParams.get('id');
 const mode = urlParams.get('mode');
 const isReadOnly = (mode === 'view');
 const vtype = urlParams.get('vtype');
-const PubDefEWaybillAmt = 50000;
+const PubDefEWaybillAmt = 50000; 
+
+
+var globalVars = window.globalVariables || {};
+var database = window.database || "";
+
+
 var PubUserLevel = '@PubUserLevel';
 var LoginDate = '@logindate';
 var itemList = [];
@@ -15,27 +21,33 @@ var unitList = [];
 $(document).ready(async function () {
 
     await LoadDropDown();
+
+    SetFYDate('InDate', LoginDate);
+
+    if (PubUserLevel == 1) {
+        $('#InDate').prop('disabled', false);
+        $('#InTime').prop('disabled', false);
+    }
+    else {
+        $('#InDate').prop('disabled', true);
+        $('#InTime').prop('disabled', true);
+    }
+
     if (rowId) {
         await LoadFormByID(rowId, vtype);
-        await Approvalbtn();
+
+        checkApprovalStatus(vtype, rowId, 'GATE1');
+
         $('#ddlDocType').prop('disabled', true);
         $('#InDate').prop('disabled', true);
         $('#InTime').prop('disabled', true);
         $('.erppagelist-toolbar-end').show();
         if (mode === "view") {
-            setFormReadOnly();  
-            await Approvalbtn();
+            setFormReadOnly();   
+           // checkApprovalStatus(vtype, rowId, 'GATE1');
         }
     }
     else {
-        if (PubUserLevel == 1) {
-            $('#InDate').prop('disabled', false);
-            $('#InTime').prop('disabled', false);
-        }
-        else {
-            $('#InDate').prop('disabled', true);
-            $('#InTime').prop('disabled', true);
-        }
 
         $('#ddlDocStatus').prop('disabled', true);
         let today = new Date().toISOString().split('T')[0];
@@ -457,7 +469,6 @@ $(document).ready(async function () {
             $('#TxtContainerNo').addClass('is-invalid').focus();
             return false;
         }
-
     });
 
     $('#btn_backtolist').on('click', function () {
@@ -506,13 +517,6 @@ $(document).ready(async function () {
         $('#TxtContainerNo').val(row.containeR_NO);
     });
 
-    $("#btn_approval").on('click', function () {
-        openApprovalModal();
-    });
-
-    $("#btn_Sendapproval").on('click', function () {
-        sendopenApprovalModal();
-    });
 
     $('#btn_Sendapp').on('click', function () {
         SendApproval();
@@ -608,5 +612,62 @@ $(document).ready(async function () {
             showToast('Error loading data.', { type: 'error' });
         }
     });
+    //kks
+
+    $(document).on('click', '#btn_Sendapproval', function () {
+        var FromName = window.location.pathname.split('/')[1];
+        $.ajax({
+            url: '/Approval/CheckPendingUser',
+            type: 'POST',
+            data: {
+                vNo: rowId,
+                vType: vtype
+            },
+            success: function (response) {
+                console.log('Response:', response);
+                // Pending with another user
+                if (response.success === false) {
+                    showToast(`Pending With Another User (${response.userCode})`,
+                        { type: "warning" });
+                    return;
+                }
+                // Approval_Code = 5
+                if (response.approvalCode8 === true) {
+                    OpenApprovalModal({
+                        DocType: vtype,
+                        DocNo: rowId,
+                        TableName: 'GATE1'
+                    });
+                    return;
+                }
+                // Approval_Code != 8
+                OpenSendForApprovalModal({
+                    DocType: vtype,
+                    DocNo: rowId,
+                    UserCode: null,
+                    UserName: null,
+                    DocDate: null,
+                    TableName: 'GATE1', 
+                    FromName, FromName
+                });
+               
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+                alert('Error while checking approval status.');
+            }
+        });
+
+    });
+
+    $(document).on('click', '#btn_Approved', function () {
+        OpenApprovalModal({
+            DocType: vtype,
+            DocNo: rowId,
+            TableName: 'GATE1'
+        });
+    });
+
+    //kks
 
 });

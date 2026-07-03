@@ -33,6 +33,18 @@ builder.Services.AddScoped<IMasterDataService, MasterDataService>();
 
 //  Repository Registration (IMPORTANT)
 
+builder.Services.AddScoped<
+    travelexpensemanagement.Repositories.Interfaces.IApprovalService,
+    travelexpensemanagement.Repositories.Implementations.ApprovalService>();
+
+
+
+
+
+
+
+
+
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
 builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListRepository>();

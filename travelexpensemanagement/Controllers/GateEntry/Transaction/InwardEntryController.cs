@@ -56,6 +56,17 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         }
         public IActionResult Index()
         {
+
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+
+            ViewBag.GlobalVariables = globalVariables;
+            ViewBag.DatabaseName = databaseName;
+
             TempData["LoginDate"] = _globalVariableService.GetGlobalVariables().PubLoginDate;
             TempData["PubUserLevel"] = _globalVariableService.GetGlobalVariables().PubUserLevel;
             return View("~/Views/GateEntry/Transaction/InwardEntry/Index.cshtml");

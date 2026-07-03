@@ -1,6 +1,4 @@
-﻿
-
-    function isItemInMainTable(itemCode) {
+﻿    function isItemInMainTable(itemCode) {
         let exists = false;
         $('#tblInwardEntry tbody tr').each(function () {
         const code = $(this).find('td:eq(0)').text().trim();
@@ -131,7 +129,11 @@
                 showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });            
             }
         }        
-        
+
+   
+
+
+
         const Header = {
         V_TYPE: $('#ddlDocType').val(),
         V_NO: V_NO,
@@ -505,8 +507,8 @@
 
         }
     }
-function populateTable(data) {
-    console.log("selected Row", data);
+   function populateTable(data) {
+
     const tbody = $("#tblellipsisIconmodal tbody");
     tbody.empty();
 
@@ -514,7 +516,7 @@ function populateTable(data) {
 
     data.forEach(function (row) {
 
-        const key = `${data.refNo}_${row.iteM_CODE}`;
+        const key = `${row.saudA_NO}_${row.iteM_CODE}`;
 
         if (uniqueRows.has(key)) {
             return; // Skip duplicate row
@@ -626,6 +628,35 @@ function populateTable(data) {
     });
 }
 
+   async function checkValidDate() {
+        const data = {
+            vdate: $("#InDate").val(),
+            vtype: $("#ddlDocType").val(),
+            vno: $("#TxtDocNo").val()
+        };
+        try {
+            const response = await fetch('/InwardEntry/CheckValidDate', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+            const result = await response.json();
+
+            if (result.status === false) {
+            showToast("result.message", { type: "warning" });
+            return false;
+            }
+
+            return true;
+
+        } catch (error) {
+        showToast("result.message", { type: "warning" });
+        return false;
+        }
+   } 
    function addRow($tbody, data = {}) {
 
     const isINMS = $('#ddlDocType').val() === 'INMS';
@@ -659,7 +690,9 @@ function populateTable(data) {
     <tr class="no-border-input">
 
         <td>
-            <input type="text" class="form-control itemCode numeric-only"  style="${normalStyle}" value="${data.itemCode ?? ''}" readonly />
+            <input type="text" class="form-control itemCode numeric-only"
+                   style="${normalStyle}"
+                   value="${data.itemCode ?? ''}" readonly />
         </td>
 
         <td>
@@ -711,7 +744,10 @@ function populateTable(data) {
         </td>
 
         <td>
-            <input type="text" class="form-control remarks" maxlength="225" style="${normalStyle}" value="${data.remarks ?? ''}" />
+            <input type="text" class="form-control remarks"
+                   maxlength="225"
+                   style="${normalStyle}"
+                   value="${data.remarks ?? ''}" />
         </td>
 
         <td>
@@ -893,29 +929,15 @@ function populateTable(data) {
                     .removeClass('erppage-redinput')
                     .addClass('erppage-input');
             }
-
             $('#ddlDocType').val(header.v_TYPE || '');
-
-       /*     $('#TxtPONo').val(header.disP_PLAN_NO || '');*/
-
             $('#TxtPONo').val(header.disP_PLAN_NO || '').trigger('change');
-
             $('#TxtTransporter').val(header.transporT_CODE || '');
-            $('#ddlPartyName').val(header.partY_CODE || '');
             $('#TxtCode').val(header.doC_ID || '');
             $('#TxtDocNo').val(header.v_NO || '');
             $('#InDate').val(formatDate(header.v_DATE) || '');
             $('#DtVehicleOutTime').val(formatDate(header.Out_Date) || '');
             $('#InTime').val(header.v_TIME || '');
-
-
-          //  $('#ddlPartyName').val(header.partY_CODE).trigger('change');
-
-
-
-
-
-
+            $('#ddlPartyName').val(header.partY_CODE).trigger('change');
             $('#TxtAddLine1').val(header.add1 || '');
             $('#TxtAddLine2').val(header.add2 || '');
             $('#TxtAddLine3').val(header.add3 || '');
@@ -977,7 +999,6 @@ function populateTable(data) {
                 });
             });
 
-
             await DDlPartyAdd(header.partY_CODE);
             $('#ddladdressline1').val(header.partY_ADDRESSID || '');
 
@@ -989,10 +1010,3 @@ function populateTable(data) {
         showToast("Something went wrong while loading the form.", { type: "error" });
     }
 }
-
-
-
-
-
-
-

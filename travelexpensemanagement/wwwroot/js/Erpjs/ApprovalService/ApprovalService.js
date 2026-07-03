@@ -9,10 +9,19 @@
                 tableName: tableName
             }
         });
+
+        // If your API returns success = false
+        if (res.success === false) {
+            alert(res.message || "Something went wrong.");
+            return;
+        }
+
         console.log("Approval Status:", res.message);
+
         // Hide buttons first
         $('#btn_Sendapproval').hide().prop('disabled', true);
         $('#btn_Approved').hide().prop('disabled', true);
+
         switch (res.message) {
             case "GetData":
                 ApprovalWindowData = {
@@ -20,48 +29,58 @@
                     DocNo: vNo,
                     TableName: tableName
                 };
+
                 $('#btn_Approved')
                     .text('Send For Approval')
                     .show()
                     .prop('disabled', false);
                 break;
+
             case "NullData":
                 $('#btn_Sendapproval')
                     .show()
                     .prop('disabled', false);
                 break;
+
             case "DocumentApproved":
                 $('#btn_Approved')
                     .text('Approved')
                     .show()
                     .prop('disabled', true);
                 break;
-            //case "PendingWithOtherUser":
-            //    $('#btn_Approved').hide();
-            //    $('#btn_Sendapproval').hide();
-            //    showToast(
-            //        "This document is pending approval with another user.",
-            //        { type: "warning" }
-            //    );
-            //    break;
 
             case "PendingWithOtherUser":
                 $('#btn_Approved').hide();
 
                 $('#btn_Sendapproval')
                     .show()
-                    .prop('disabled', false); 
+                    .prop('disabled', false);
 
                 break;
 
+            default:
+                alert("Unknown response: " + res.message);
+                break;
         }
     }
     catch (error) {
+        console.error("Approval Error:", error);
 
-        console.error('Approval Error:', error);
-
+        // Show error to the user
+        if (error.responseJSON && error.responseJSON.message) {
+            alert(error.responseJSON.message);
+        } else if (error.responseText) {
+            alert(error.responseText);
+        } else {
+            alert("An unexpected error occurred while checking approval status.");
+        }
     }
 }
+
+
+
+
+
 var ApprovalData = {
     DocType: '',
     DocNo: 0,

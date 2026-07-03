@@ -354,46 +354,6 @@ async function fetchTransitno(
     }
 }
 
-
-//async function fetchTransitno(v_type, v_no, partycode, ExpiryDate, selectedTransit, mode) {
-//    try {
-
-//        const queryParams = new URLSearchParams({
-//            v_type,
-//            v_no,
-//            partycode,
-//            ExpiryDate,
-//            mode
-//        });
-
-//        const response = await fetch(`/InwardEntry/DDlTransitNo?${queryParams.toString()}`);
-
-//        if (!response.ok)
-//            throw new Error(`HTTP error! Status: ${response.status}`);
-
-//        const result = await response.json();
-
-//        const ddl = $('#ddlTransit');
-
-//        // ✅ build HTML once (FAST)
-//        let options = '<option value="">-- Select Transit No --</option>';
-
-//        if (result.status && Array.isArray(result.data)) {
-//            options += result.data
-//                .map(x => `<option value="${x}">${x}</option>`)
-//                .join('');
-//        }
-
-//        ddl.html(options);
-
-//        // ✅ set value WITHOUT triggering change (IMPORTANT)
-//        ddl.val(selectedTransit || '');
-
-//    } catch (error) {
-//        showToast("Error loading Transit Numbers", { type: "error" });
-//    }
-//}
-
 async function GetVNo(Vtype) {
     try {
         const res = await fetch(`/InwardEntry/GetVNo?Vtype=${encodeURIComponent(Vtype)}`);
@@ -1140,4 +1100,103 @@ async function GetTransitnodata(TransitNo) {
         console.error("Error fetching Transit Data:", error);
         showToast("Error fetching Transit Data", { type: "error" });
     }
+}
+
+function SetFYDate(inputId, loginDate) {
+    var $input = $('#' + inputId);
+    var d = new Date(loginDate);
+
+    // Determine the financial year start year
+    var fyStartYear = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+
+    var minDate = fyStartYear + '-04-01';  // FY start
+    var maxDate = loginDate;               // Cannot select beyond login date
+
+    // Set attributes and default value
+    $input.attr('min', minDate)
+        .attr('max', maxDate)
+        .val(maxDate);
+
+    // Validate user input
+    $input.on('change', function () {
+        var selectedDate = new Date(this.value);
+        var min = new Date(minDate);
+        var max = new Date(maxDate);
+
+        if (selectedDate < min || selectedDate > max) {
+            toastr.info('Please select a date within the Financial Year and not greater than Login Date.');
+            this.value = maxDate;
+        }
+    });
+}
+
+function TransitReport() {
+
+    if (!rowId) {
+        showToast(`Please save the data before printing the report.`, { type: "info" });
+        return;
+    }
+
+    var reportName = "Rpt_Gate_Inward";
+
+    var v_no = $('#TxtDocNo').val();
+    var v_type = $('#ddlDocType').val();
+    var v_typetext = $('#ddlDocType option:selected').text();
+    var formula =
+        "{Gatepass1.comp_code} = " + globalVars.CompCode +
+        " and {GATEPASS1.YEAR_CODE} = " + globalVars.FYearCode +
+        " and {GATEPASS1.BRANCH_CODE} = " + globalVars.BranchCode +
+        " and {GATEPASS1.V_NO} = " + v_no +
+        " and {GATEPASS1.V_TYPE} = '" + v_type + "'";
+
+    var payload = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: database,
+        Parameters: {
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",         
+            RPTNAME: v_typetext 
+        }
+    };
+
+    var now = new Date();
+    var timestamp =
+        String(now.getDate()).padStart(2, '0') +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getFullYear()).slice(-2) + "_" +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
+
+    $.ajax({
+        url: 'http://localhost:24085/Report/PendingQCReport', 
+        type: 'POST',
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: { responseType: 'blob' }, 
+
+        success: function (response) {
+ 
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        error: function (xhr, status, error) {
+            if (xhr.status === 0) {
+                console.error("Cannot connect to API. Is the backend running?");
+            } else {
+                console.error('Error generating report:', xhr.status, xhr.statusText, error);
+                xhr.responseText && console.error('Response:', xhr.responseText);
+            }
+        }
+    });
 }

@@ -24,6 +24,8 @@
             try {
                 await LoadDropDowns();
                 SetFYDate('DtDocDate', LoginDate);
+
+
                 if (PubUserLevel == 1) {
                     $('#DtDocDate').prop('disabled', false);
                     $('#DtTxtDocDate').prop('disabled', false);
@@ -54,12 +56,8 @@
                 
                     let now = new Date();
                     $('#DtTxtDocDate').val(now.toTimeString().slice(0, 8));
-
                     var today = new Date().toISOString().split('T')[0];
                     $('#DtExpectedDateReturn').val(today);
-
-
-
 
                 }
 

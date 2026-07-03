@@ -263,6 +263,10 @@ async function FetchPendindorderno(PartyCode, Type, v_date) {
         showToast(`Failed to load pending orders`, { type: "error" });
     }
 }
+
+
+
+
 function TransitReport() {
 
     if (!rowId) {
@@ -271,17 +275,10 @@ function TransitReport() {
     }
 
     var reportName = "gatepass1";
-        // Get input values
+
     var v_no = $('#NumDocNo').val();
     var v_type = $('#ddlDocType').val();
 
-    // Ensure global variables exist
-
-
-
-
-
-    // Build Crystal Reports selection formula
     var formula =
         "{GATE1.comp_code} = " + globalVars.CompCode +
         " and {GATE1.Year_code} = " + globalVars.FYearCode +
@@ -289,7 +286,7 @@ function TransitReport() {
         " and {GATE1.V_no} = " + v_no +
         " and {GATE1.v_type} = '" + v_type + "'";
 
-    // Prepare the payload for the API
+
     var payload = {
         Reportname: reportName,
         selectionFormula: formula,
@@ -306,7 +303,7 @@ function TransitReport() {
         }
     };
 
-    // Timestamp for file name
+
     var now = new Date();
     var timestamp =
         String(now.getDate()).padStart(2, '0') +
@@ -316,20 +313,20 @@ function TransitReport() {
         String(now.getMinutes()).padStart(2, '0') +
         String(now.getSeconds()).padStart(2, '0');
 
-    // AJAX call to the Crystal Report API
+ 
     $.ajax({
-        url: 'http://localhost:34089/Report/PendingQCReport', // check port
+        url: 'http://localhost:24085/Report/PendingQCReport', 
         type: 'POST',
         data: JSON.stringify(payload),
         contentType: "application/json",
-        xhrFields: { responseType: 'blob' }, // Important for PDF
+        xhrFields: { responseType: 'blob' }, 
 
         success: function (response) {
-            // Convert response to a Blob
+ 
             var file = new Blob([response], { type: 'application/pdf' });
             var fileName = `${reportName}_${timestamp}.pdf`;
 
-            // Trigger download
+
             var link = document.createElement('a');
             link.href = URL.createObjectURL(file);
             link.download = fileName;
