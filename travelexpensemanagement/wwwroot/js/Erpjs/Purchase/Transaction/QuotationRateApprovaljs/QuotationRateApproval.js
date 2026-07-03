@@ -12,6 +12,9 @@ const selectedItemSet = new Set();
 const urlParams = new URLSearchParams(window.location.search);
 let isReadOnly = urlParams.get('readOnly') === 'true';
 
+let isApprovalUser = false;
+let isFinalApprovalUser = false;
+
 $(async function () {
     try {
         await GetDocTypeAsync();
@@ -29,6 +32,10 @@ $(document).ready(function () {
 
     $(document).on('click', '#QuotRtDetail', '#attach-del', function(){
         $(this).closest('tr').remove();
+    });
+
+    $('#browseBtn').on('click', function () {
+        $('#fileInput').trigger('click');
     });
 
     $(document).on('click', '#attach-Row', function () {
@@ -175,120 +182,121 @@ $(document).ready(function () {
             .val(checked ? new Date().toISOString().split('T')[0] : '');
     });
 
-    $('#ddlItem').on('change', function () {
+    //$('#ddlItem').on('change', function () {
 
-    
-        let code = $(this).val();
-        let name = $('#ddlItem option:selected').text();
 
-        if (!code) return;
+    //    let code = $(this).val();
+    //    let name = $('#ddlItem option:selected').text();
 
-        if (selectedItemSet.has(code)) {
-            
-            return;
-        }
+    //    if (!code) return;
 
-        addItemToTable(code, name);
+    //    if (selectedItemSet.has(code)) {
 
-        requestAnimationFrame(() => {
-            flushItemTable();
-            
-        });
+    //        return;
+    //    }
 
-        $(this).val(null).trigger('change');
+    //    addItemToTable(code, name);
 
-    });
+    //    requestAnimationFrame(() => {
+    //        flushItemTable();
 
-    function addItem(selectedItemCode, selectedItemName) {
+    //    });
 
-        if (selectedItemSet.has(selectedItemCode)) return;
+    //    $(this).val(null).trigger('change');
 
-        selectedItemSet.add(selectedItemCode);
+    //});
 
-        const rowHtml = `
-            <tr data-code="${selectedItemCode}">
-                <td>${selectedItemName}</td>
-                <td class="action-col">
-                    <div class="action-wrap">
-                        <button type="button" class="act-btn delete btn-itemRemove">
-                            <i class="fa fa-trash btn-delete"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-        setTimeout(() => {
-            $('#itemTable tbody')[0].insertAdjacentHTML('beforeend', rowHtml);
-        }, 0);
 
-        $('#ddlItem').val(null).trigger('change');
-    }
+    //function addItem(selectedItemCode, selectedItemName) {
 
-    let itemBuffer = [];
+    //    if (selectedItemSet.has(selectedItemCode)) return;
 
-    function addItemToTable(code, name) {
+    //    selectedItemSet.add(selectedItemCode);
 
-        if (selectedItemSet.has(code)) return;
+    //    const rowHtml = `
+    //        <tr data-code="${selectedItemCode}">
+    //            <td>${selectedItemName}</td>
+    //            <td class="action-col">
+    //                <div class="action-wrap">
+    //                    <button type="button" class="act-btn delete btn-itemRemove">
+    //                        <i class="fa fa-trash btn-delete"></i>
+    //                    </button>
+    //                </div>
+    //            </td>
+    //        </tr>
+    //    `;
+    //    setTimeout(() => {
+    //        $('#itemTable tbody')[0].insertAdjacentHTML('beforeend', rowHtml);
+    //    }, 0);
 
-        selectedItemSet.add(code);
+    //    $('#ddlItem').val(null).trigger('change');
+    //}
+
+    //let itemBuffer = [];
+
+    //function addItemToTable(code, name) {
+
+    //    if (selectedItemSet.has(code)) return;
+
+    //    selectedItemSet.add(code);
        
 
-        itemBuffer.push(`
-            <tr data-code="${code}">
-                <td>${name}</td>
-                <td>
-                    <button type="button" class="act-btn delete btn-itemRemove">
-                            <i class="fa fa-trash btn-delete"></i>
-                    </button>
-                </td>
-            </tr>
-        `);
-    }
+    //    itemBuffer.push(`
+    //        <tr data-code="${code}">
+    //            <td>${name}</td>
+    //            <td>
+    //                <button type="button" class="act-btn delete btn-itemRemove">
+    //                        <i class="fa fa-trash btn-delete"></i>
+    //                </button>
+    //            </td>
+    //        </tr>
+    //    `);
+    //}
 
-    function flushItemTable() {
+    //function flushItemTable() {
 
-        if (itemBuffer.length === 0) return;
+    //    if (itemBuffer.length === 0) return;
 
-        $('#itemTable tbody')[0].insertAdjacentHTML(
-            'beforeend',
-            itemBuffer.join('')
-        );
+    //    $('#itemTable tbody')[0].insertAdjacentHTML(
+    //        'beforeend',
+    //        itemBuffer.join('')
+    //    );
 
-        itemBuffer = [];
-    }
+    //    itemBuffer = [];
+    //}
 
-    function isItemAlreadyAdded(itemCode) {
-        return $('#itemTable tbody tr').filter(function () {
-            return $(this).data('code') == itemCode;
-        }).length > 0;
-    }
+    //function isItemAlreadyAdded(itemCode) {
+    //    return $('#itemTable tbody tr').filter(function () {
+    //        return $(this).data('code') == itemCode;
+    //    }).length > 0;
+    //}
 
-    $(document).on('click', '.btn-itemRemove', function () {
+    //$(document).on('click', '.btn-itemRemove', function () {
 
-        const code = $(this).closest('tr').data('code');
+    //    const code = $(this).closest('tr').data('code');
 
-        selectedItemSet.delete(code);
+    //    selectedItemSet.delete(code);
 
-        $(this).closest('tr').remove();
-    });
+    //    $(this).closest('tr').remove();
+    //});
 
-    $('#ddlVendor').on('change', function () {
-            let selectedvendorName = $('#ddlVendor option:selected').text();
-            let selectedvendorId = $('#ddlVendor').val();
-        if (selectedvendorId && !isVendorAlreadyAdded(selectedvendorId)) {
-            $('#vendorTable tbody').append(`
-            <tr data-code="${selectedvendorId}">
-                <td>${selectedvendorName}</td>
-                <td class="action-col">
-                    <div class="action-wrap">
-                        <button type="button" class="act-btn delete btn-vendeorRemove"> <i class="fa fa-trash"></i></button>
-                    </div>
-                </td>
-                </tr>
-        `);
-        $('#ddlVendor').val("");
-        }
-    });
+    //$('#ddlVendor').on('change', function () {
+    //        let selectedvendorName = $('#ddlVendor option:selected').text();
+    //        let selectedvendorId = $('#ddlVendor').val();
+    //    if (selectedvendorId && !isVendorAlreadyAdded(selectedvendorId)) {
+    //        $('#vendorTable tbody').append(`
+    //        <tr data-code="${selectedvendorId}">
+    //            <td>${selectedvendorName}</td>
+    //            <td class="action-col">
+    //                <div class="action-wrap">
+    //                    <button type="button" class="act-btn delete btn-vendeorRemove"> <i class="fa fa-trash"></i></button>
+    //                </div>
+    //            </td>
+    //            </tr>
+    //    `);
+    //    $('#ddlVendor').val("");
+    //    }
+    //});
 
     $(document).on('click', '#vendorTable tbody .btn-vendeorRemove', function () {
         $(this).closest('tr').remove();
@@ -377,6 +385,23 @@ $(document).ready(function () {
 
     $(document).on('click', function () {
         $('#customContextMenu').hide();
+    });
+
+    //=======Excel===========
+    $(document).on("click", "[data-action='exporttoexcel']", function () {
+
+        var vType = $("#ddlDocType").val();   // Document Type
+        var vNo = $("#txtDocNo").val();       // Document No
+
+        if (!vType || !vNo) {
+            alert("Please select document first.");
+            return;
+        }
+
+        window.location.href = "/QuotationRateApproval/ExportToExcel?vType="
+            + encodeURIComponent(vType)
+            + "&vNo="
+            + encodeURIComponent(vNo);
     });
 
 });
@@ -629,15 +654,21 @@ function FilterDataList() {
     const toDate = isToSelected ? $('#dtTo').val() : null;
     const GroupId = $('#txtGroupNo').val().trim();
     const sortType = $('#ddlSortedBy').val();
+    const vendor = ERPFilterDropdownManager["ddlVendor"].GetValue();
+    const vendorList = ERPFilterDropdownManager["ddlVendor"].GetValue().map(x => x.id.toString());
     
     // Collect vendor IDs
-    const vendorList = [];
-    $('#vendorTable tbody tr').each(function () {
-        const id = $(this).data('code');
-        if (id) vendorList.push(id.toString());
-    });
+    //const vendorList = [];
+    //$('#vendorTable tbody tr').each(function () {
+    //    const id = $(this).data('code');
+    //    if (id) vendorList.push(id.toString());
+    //});
 
-    const itemList = Array.from(selectedItemSet);
+    //const itemList = Array.from(selectedItemSet);
+
+    const selectedItems = ERPFilterDropdownManager["ddlItem"].GetValue();
+    const itemList = ERPFilterDropdownManager["ddlItem"].GetValue().map(x => x.id.toString());
+
     const payload = {
         VDate: toNullableDate($('#dtDocDate').val()),
         FromDt: toNullableDate(fromDate),
@@ -654,17 +685,21 @@ function FilterDataList() {
         contentType: 'application/json',
         data: JSON.stringify(payload),
         success: function (response) {
+            console.log("Full Response:", response);
             if (
                 response.status === true &&
                 Array.isArray(response.data) &&
                 response.data.length > 0
             ) {
                 applyOldVBPriority(response.data);
-                //fillItemDetailsTableForFill(response.data);
-                fillItemDetailsTableForFill(response.data, 1, false);
-                //selectedItemSet.clear();
-                //$('#itemTable tbody').empty();
-                //$('#ddlItem').val(null).trigger('change');
+                isApprovalUser = response.isApprovalUser;
+                isFinalApprovalUser = response.isFinalApprovalUser;
+                fillItemDetailsTableForFill(response.data, 1, true);
+                disableFinalApprovalFields();
+                ERPFilterDropdownManager["ddlVendor"].Clear();
+                ERPFilterDropdownManager["ddlItem"].Clear();
+                $('#ddlItem').val(null).trigger('change');
+               
             } else {
                 showToast("No Data Found", { type: "warning" });
             }
@@ -693,9 +728,13 @@ function GetDocData(MasterTblId, readOnly) {
         data: { id: MasterTblId },
         success: function (res) {
             if (res.status) {
+                isApprovalUser = res.isApprovalUser;
+                isFinalApprovalUser = res.isFinalApprovalUser;
                 fillFormFields(res.detail[0]);
                 fillItemDetailsTable(res.detail);
+                disableFinalApprovalFields();
                 loadAttachmentsForEdit(res.attachment);
+                
                 if (readOnly) {
                     applyReadOnlyMode();
                 }
@@ -872,7 +911,7 @@ function getItemDetailsFromTable() {
         const getText = (field) => $(`#row-${rowIndex}-${field}`).text().trim();
         const getVal = (field) => $(`#row-${rowIndex}-${field}`).attr('value');
         const getSelect = (field) => $(`#row-${rowIndex}-${field}`).val();
-
+       
         const detail = {
             PARTY_CODE: parseIntSafe(getText('PARTY_CODE')),
             ITEM_CODE: parseIntSafe(getVal('ITEM_CODE')),
@@ -984,92 +1023,75 @@ function GetDocid(VType) {
     });
 }
 
-function GetVendorList(selectedValue = null) {
+function GetVendorList() {
+
     $.ajax({
-        url:'/QuotationRateApproval/GetVendorName',
+
+        url: '/QuotationRateApproval/GetVendorName',
         type: 'GET',
         dataType: 'json',
         success: function (response) {
-            if (response.status) {
-                const $dropdown = $('#ddlVendor');
-                $dropdown.empty();
-                $dropdown.append('<option selected disabled>- Select party -</option>');
+            console.log("Vendor Loaded", response);
+            const vendorData = response.data.map(x => ({
 
-                $.each(response.data, function (index, item) {
-                    $dropdown.append(`<option value="${item.CODE}">${item.NAME}</option>`);
-                });
+                id: x.CODE,
 
-                $dropdown.select2({
-                    placeholder: "- Select Party -",
-                    allowClear: true
-                });
+                text: x.NAME
 
-                $dropdown.on('select2:open', function () {
-                    setTimeout(function () {
-                        let searchField = document.querySelector('.select2-container--open .select2-search__field');
-                        if (searchField) {
-                            searchField.focus();
-                            searchField.click();
-                        }
-                    }, 100);
-                });
+            }));
 
-                if (selectedValue && $dropdown.find(`option[value="${selectedValue}"]`).length > 0) {
-                    $dropdown.val(selectedValue).trigger('change');
-                } else {
-                    $dropdown.prop('selectedIndex', 0);
+            InitializeERPFilterDropdown({
+
+                id: "ddlVendor",
+
+                placeholder: " Select Vendor ",
+
+                data: vendorData,
+
+                onChange: function (vendor) {
+
+                    console.log(vendor);
+
                 }
-            } else {
-                showToast("Vendor Load failed: ", { type: "error" });
-            }
-        },
-        error: function (xhr, status, error) {
-            showToast("Vendor Load failed: " + error, { type: "error" });
+
+            });
+
         }
+
     });
+
 }
 
 function GetItemList() {
 
-    $('#ddlItem').select2({
-        placeholder: "Search Item",
-        allowClear: true,
-        minimumInputLength: 0,
+    $.ajax({
+        url: '/QuotationRateApproval/GetItemName',
+        type: 'GET',
+        dataType: 'json',
 
-        ajax: {
-            url: '/QuotationRateApproval/GetItemName',
-            dataType: 'json',
-            delay: 250,
-            global: false,
+        success: function (response) {
 
-            data: function (params) {
-                return {
-                    search: params.term || '',
-                    page: params.page || 1
-                };
-            },
+            const dropdownData = response.data.map(x => ({
+                id: x.value,
+                text: x.text
+            }));
 
-            processResults: function (response, params) {
+            InitializeERPFilterDropdown({
 
-                params.page = params.page || 1;
+                id: "ddlItem",
 
-                return {
-                    results: response.data.map(x => ({
-                        id: x.value,
-                        text: x.text
-                    })),
-                    pagination: {
-                        more: response.pagination.more
-                    }
-                };
-            },
+                placeholder: "- Select Item -",
 
-            cache: true
+                data: dropdownData,
+
+                onChange: function (selectedItems) {
+
+                    console.log("Selected Items", selectedItems);
+
+                }
+            });
+
         }
-    });
-
-    $('#ddlItem').on('select2:open', function () {
-        document.querySelector('.select2-search__field').focus();
     });
 }
 
@@ -1168,8 +1190,7 @@ function fillItemDetailsTable(data, ApprvlStage = 1, append = false) {
         <td id="row-${index}-ITEM_CODE" class="freeze-item" value="${item.ITEM_CODE}">${item.ItemName}</td>
         <td id="row-${index}-MAKE_CODE" value="${item.MAKE_CODE}">${item.make}</td>
         <td id="row-${index}-UOM_CODE" value="${item.UOM_CODE}">${item.Unit}</td>
-        <td id="row-${index}-UOM_CODE" value="${item.V_NO}">${item.V_NO}</td>
-        <td id="row-${index}-V_NO_DUP" style="display:none;">${item.V_NO}</td>
+        <td id="row-${index}-V_NO" value="${item.V_NO}">${item.V_NO}</td>
         <td id="row-${index}-QTY">${item.QTY}</td>
         <td id="row-${index}-RATE">${item.RATE}</td>
         <td id="row-${index}-AMOUNT" style="display:none;">${item.AMOUNT}</td>
@@ -1237,9 +1258,6 @@ function fillItemDetailsTable(data, ApprvlStage = 1, append = false) {
         <td style="display:none;" id="row-${index}-OTHEXP_UR">${item.OTHEXP_UR}</td>
         <td style="display:none;" id="row-${index}-BULKDISC_UR">${item.BULKDISC_UR}</td>
         <td style="display:none;" id="row-${index}-AUTOPO_FLG">${item.AUTOPO_FLG}</td>
-        <td>
-            <i class="fa fa-trash btn-delete-action" id="QuotRtDetail" title="Delete Row"></i>
-        </td>
         </tr>
     `;
          
@@ -1541,25 +1559,24 @@ function validateData() {
         // At least one valid row
         validRowFound = true;
 
-        // Final Status Required
-        //if (!finalStatus) {
-        //    toastr.error(`Final Status is required for item ${itemName}`);
-        //    $(`#row-${rowIndex}-FAPROV_STATUS select`).focus();
-        //    return false;
-        //}
+        if (isApprovalUser && !finalStatus) {
+            showToast(`Final Approval Status of ${itemName} is required/Compulsory.`, { type: "warning" });
+            $(`#row-${rowIndex}-FAPROV_STATUS select`).focus();
+            return false;
+        }
 
-        //if (
-        //    (finalStatus === 'Hold' ||
-        //        finalStatus === 'Rejected' ||
-        //        finalStatus === 'Reject')
-        //    &&
-        //    !remarks
-        //) {
-        //    toastr.error(`Reason is required for HOLD/REJECT of item ${itemName}`);
-        //    return false;
-        //}
-
-        // Optional: Priority Required
+        // VB:
+        // If Status = Hold Or Reject And Remarks Is Nothing Then
+        if (
+            (finalStatus === "Hold" ||
+                finalStatus === "Reject" ||
+                finalStatus === "Rejected") &&
+            !remarks
+        ) {
+            showToast(`Reason of HOLD/REJECT of ${itemName} is required/Compulsory.`, { type: "warning" });
+            $(`#row-${rowIndex}-FAPROV_REMARKS`).focus();
+            return false;
+        }
         
     }
 
@@ -1703,5 +1720,14 @@ function applyOldVBPriority(data) {
             }
         }
     }
+}
+
+function disableFinalApprovalFields() {
+
+    $('#tblItemDetailsQR tbody td[id$="-FAPROV_STATUS"] select')
+        .prop('disabled', !isApprovalUser);
+
+    $('#tblItemDetailsQR tbody input[id$="-FAPROV_REMARKS"]')
+        .prop('disabled', !isApprovalUser);
 }
 

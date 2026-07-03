@@ -66,6 +66,8 @@ builder.Services.AddScoped<IItemMarketRateRepository, ItemMarketRateRepository>(
 builder.Services.AddScoped<IItemMarketRateListRepository, ItemMarketRateListRepository>();
 builder.Services.AddScoped<IPurchaseQuotationRepository, PurchaseQuotationRepository>();
 builder.Services.AddScoped<IPurchaseQuotationListRepository, PurchaseQuotationListRepository>();
+builder.Services.AddScoped<IQuotationRateApprovalRepository, QuotationRateApprovalRepository>();
+builder.Services.AddScoped<IQuotationRateApprovalListRepository, QuotationRateApprovalListRepository>();
 
 
 // Gete Entry Transaction repositories

@@ -52,11 +52,12 @@
                         <div class="erppage-tablefield">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Select Item</label>
-                                <select id="ddlItem" class="erppage-input">
+                               @*  <select id="ddlItem" class="erppage-input">
                                     <option>Select Item</option>
-                                </select>
+                                </select> *@
+                                <div id="ddlItem" class="erppage-search-inputdropdown"></div>
                             </div>
-                            <div class="erppage-tablefield">
+                           @*  <div class="erppage-tablefield">
                                 <div class="erppagetabledynamic-wrapper">
                                     <table id="itemTable" class="erppagetabledynamic-table">
                                         <thead>
@@ -69,7 +70,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
+                            </div> *@
                             <div class="erppage-grid2">
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Date From</label>
@@ -96,11 +97,12 @@
                         <div class="erppage-tablefield">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Vendor</label>
-                                <select id="ddlVendor" class="erppage-input">
+                                @* <select id="ddlVendor" class="erppage-input">
                                     <option>Select Vendor</option>
-                                </select>
+                                </select> *@
+                                <div id="ddlVendor" class="erppage-search-inputdropdown"></div>
                             </div>
-                            <div class="erppage-tablefield">
+                            @* <div class="erppage-tablefield">
                                 <div class="erppagetabledynamic-wrapper">
                                     <table id="vendorTable" class="erppagetabledynamic-table">
                                         <thead>
@@ -113,7 +115,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
+                            </div> *@
                             <div class="erppage-grid2">
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Group No</label>
@@ -260,8 +262,8 @@
                                     <th>Rate Special</th>
                                     <th>Req Type</th>
                                     <th>Req No</th>
-                                    <th>Final Approval Status</th>
-                                    <th>Final Approval Remarks</th>
+                                    <th id="thFinalStatus">Final Approval Status</th>
+                                    <th id="thFinalRemarks">Final Approval Remarks</th>
                                     <th class="hidden-col">Technical Description</th>
                                     <th class="hidden-col">UOM Code</th>
                                     <th class="hidden-col">Ref No</th>
@@ -279,7 +281,6 @@
                                     <th class="hidden-col">Approval Code</th>
                                     <th class="hidden-col">Approval Status</th>
                                     <th class="hidden-col">Approval Remarks</th>
-                                    
                                     <th class="hidden-col">Pack UR</th>
                                     <th class="hidden-col">Disc UR</th>
                                     <th class="hidden-col">Freight UR</th>
@@ -539,7 +540,7 @@
         </div>
     </div>
 </div>
-
+<script src="~/common/globalfunction.js"></script>
 <script src="~/js/erpjs/purchase/transaction/quotationrateapprovaljs/quotationrateapproval.js"></script>
 <script>
     var compCode = '@ViewBag.CompCode';

@@ -80,6 +80,7 @@
 	  <Content Remove="wwwroot\js\classie.js" />
 	  <Content Remove="wwwroot\js\common-pages.js" />
 	  <Content Remove="wwwroot\js\demo-12.js" />
+	  <Content Remove="wwwroot\js\Erpjs\Purchase\Transaction\PurchaseReceiptMRNjs\crjfwwhs.ryl~" />
 	  <Content Remove="wwwroot\js\GlobalToaster.js" />
 	  <Content Remove="wwwroot\js\GlobalValidation.js" />
 	  <Content Remove="wwwroot\js\jquery.mCustomScrollbar.concat.min.js" />

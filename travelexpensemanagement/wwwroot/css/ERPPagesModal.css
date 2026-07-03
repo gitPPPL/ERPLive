@@ -1,11 +1,10 @@
 ﻿/* Modal */
-
 .erppagesmodal {
     max-width: 1000px;
 }
 .erppagesmodal-content {
     border: none;
-    border-radius: 16px;
+    border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 12px 30px rgba(0,0,0,0.15);
     background: #f9fafb;
@@ -13,7 +12,7 @@
 .erppagesmodal-radio-group {
     display: flex;
     align-items: center;
-    gap: 30px; /* increase spacing */
+    gap: 30px; 
     margin: 12px 0;
 }
 
@@ -36,7 +35,7 @@
     }
 /* Header */
 .erppagesmodal-header {
-    background: linear-gradient(135deg, #142966, #4680ff);
+    background: linear-gradient(135deg, #007bff, #4680ff);
     color: #fff;
     padding: 6px 10px;
     display: flex;
@@ -85,6 +84,15 @@
     .erppagesmodal-close:hover {
         background: rgba(255,255,255,0.25);
     }
+/*Draggable modal*/
+.erppage-modal-drag {
+    position: relative !important;
+}
+
+    .erppage-modal-drag .erppagesmodal-header {
+        cursor: move;
+        user-select: none;
+    }
 
 /* Body */
 .erppagesmodal-body {
@@ -96,11 +104,11 @@
 
     /* Chrome, Edge, Safari */
     .erppagesmodal-body::-webkit-scrollbar {
-        width: 6px; /* thin scrollbar */
+        width: 6px;
     }
 
     .erppagesmodal-body::-webkit-scrollbar-track {
-        background: transparent; /* no big gray background */
+        background: transparent; 
     }
 
     .erppagesmodal-body::-webkit-scrollbar-thumb {
@@ -132,21 +140,19 @@
         position: absolute;
         top: -13px;
         left: 18px;
-        display: inline-flex; /* width fits content */
+        display: inline-flex; 
         align-items: center;
         gap: 6px;
-        white-space: nowrap; /* prevent text wrap */
+        white-space: nowrap; 
         background: linear-gradient(135deg, #232323, #0f0f0f);
-        /*background: linear-gradient(135deg, #2f7d32, #1b5e20);*/
         color: #fff;
         font-size: 13px;
         font-weight: 600;
         padding: 6px 14px;
         border-radius: 20px;
-        width: auto; /* only content width */
-        max-width: max-content; /* optional */
+        width: auto; 
+        max-width: max-content; 
     }
-
 /* Group */
 .erppagesmodal-group {
     display: flex;
@@ -194,12 +200,12 @@
 }
 
 .erppagesmodal-btn {
-    background: linear-gradient(135deg, #2f7d32, #1b5e20);
+    background: linear-gradient(135deg, #2f7d32, #1c5e31);
     color: #fff;
     border: none;
-    border-radius: 10px;
-    padding: 6px 14px;
-    font-size: 13px;
+    border-radius: 4px;
+    padding: 3px 14px;
+    font-size: 12px;
     font-weight: 500;
     display: inline-flex;
     align-items: center;
