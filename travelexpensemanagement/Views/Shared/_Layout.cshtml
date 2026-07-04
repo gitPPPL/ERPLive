@@ -227,12 +227,22 @@
 	</div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.10/lottie.min.js"></script>
 	<script>
-		$(document).ajaxStart(function () {
-			showLoader();
-		});
+		// $(document).ajaxStart(function () {
+		// 	showLoader();
+		// });
 
-		$(document).ajaxStop(function () {
-			hideLoader();
+		// $(document).ajaxStop(function () {
+		// 	hideLoader();
+		// });
+        $(document).ajaxSend(function (event, xhr, settings) {
+			if (settings.type === "POST") {
+				showLoader();
+			}
+		});
+		$(document).ajaxComplete(function (event, xhr, settings) {
+			if (settings.type === "POST") {
+				hideLoader();
+			}
 		});
 
 		let loaderTimeout;

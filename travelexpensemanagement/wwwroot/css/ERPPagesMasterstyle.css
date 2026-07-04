@@ -1,4 +1,20 @@
 ﻿/* ===== HEADER UPGRADE ===== */
+.ui-autocomplete {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 9999;
+}
+.ui-menu .ui-menu-divider {
+    margin: 5px 0;
+    height: 0;
+    font-size: 0;
+    line-height: 0;
+    border-width: 1px 0 0 0;
+    display: none;
+}
+
+
 .erppage-header {
     background: linear-gradient(135deg, #2d7b46, #1C5E31);
     color: #fff;

@@ -1,12 +1,12 @@
-﻿using travelexpensemanagement.Models.Admin.Setup;
-using travelexpensemanagement.Models.GateEntry.Transaction;
+﻿using travelexpensemanagement.Models.GateEntry.Transaction;
+using travelexpensemanagement.Repositories;
 
-namespace travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction
+public interface ICourierTrackingEntryListRepository
 {
+    RepositoryResponseList<GetCourierTrackingModel> GetCourierTrackingEntryList(
+        string searchTerm,
+        int pageNumber,
+        int pageSize);
 
-    public interface IApprovalService
-    {
-        RepositoryResponseList<GetCourierTrackingModel> GetCourierTrackingEntryList(string searchTerm, int pageNumber, int pageSize);
-        Task<RepositoryResponse> DeleteCourierTrackingEntry(string vNo, string docType);
-    }
+    Task<RepositoryResponse> DeleteCourierTrackingEntry(string vNo, string docType);
 }

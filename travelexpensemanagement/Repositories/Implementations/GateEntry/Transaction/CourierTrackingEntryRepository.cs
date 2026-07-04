@@ -116,5 +116,15 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             }
             return model;
         }
+
+        public RepositoryResponseList<GetCourierTrackingModel> GetCourierTrackingEntryList(string searchTerm, int pageNumber, int pageSize)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<RepositoryResponse> DeleteCourierTrackingEntry(string vNo, string docType)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

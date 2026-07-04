@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Spire.Doc.Documents;
 using System;
@@ -13,9 +14,11 @@ namespace travelexpensemanagement.Common.DropdownService
     public class DropdownService
     {
         private readonly DataBaseConnection _dbConnection;
-        public DropdownService(DataBaseConnection dbConnection)
+        private readonly IMemoryCache _memoryCache;
+        public DropdownService(DataBaseConnection dbConnection, IMemoryCache memoryCache)
         {
             _dbConnection = dbConnection;
+            _memoryCache = memoryCache;
         }
         public List<object> GetDropdownList(string query)
         {
@@ -210,27 +213,136 @@ namespace travelexpensemanagement.Common.DropdownService
             });
         }
         // Party
-        public List<DropdownModel> GetParty(string compCode)
+
+
+        public List<DropdownModel> SearchParty(string compCode, string term)
         {
-            string query = @"SELECT DISTINCT Code AS Value, Name AS Text 
-                 FROM (
-                    SELECT Code, Name FROM SUBGROUP_MAST WHERE Comp_code = @CompCode
-                    AND Nature NOT IN ('CASH','BANK','OTHERS')
-                    AND Name IS NOT NULL AND Name <> '' AND Code IS NOT NULL AND Code <> '0'
+            string query = @"
+SELECT TOP (50)
+       Value,
+       Text
+FROM
+(
+    SELECT Code AS Value,
+           Name AS Text
+    FROM SUBGROUP_MAST
+    WHERE Comp_code=@CompCode
+      AND Nature NOT IN ('CASH','BANK','OTHERS')
 
-                    UNION ALL
+    UNION
 
-                    SELECT Party_Code, Party_Name FROM COURIER_TRACKING  WHERE Comp_code = @CompCode
-                    AND Party_Name IS NOT NULL AND Party_Name <> ''
-                    AND Party_Code IS NOT NULL AND Party_Code <> '0'
-                 ) x
-                 ORDER BY Name";
+    SELECT Party_Code,
+           Party_Name
+    FROM COURIER_TRACKING
+    WHERE Comp_code=@CompCode
+) X
+WHERE (@Term='' OR Text LIKE @Term + '%')
+ORDER BY Text";
 
             return ExecuteDropdown(query, new[]
             {
-                new SqlParameter("@CompCode", compCode)
-            });
+        new SqlParameter("@CompCode", compCode),
+        new SqlParameter("@Term", term ?? "")
+    });
         }
+
+        //        public List<DropdownModel> GetParty(string compCode)
+        //        {
+        //            string cacheKey = $"Party_{compCode}";
+
+        //            if (_memoryCache.TryGetValue(cacheKey, out List<DropdownModel> partyList))
+        //            {
+        //                return partyList;
+        //            }
+
+        //            string query = @" 
+        //SELECT Code AS Value, Name AS Text
+        //FROM SUBGROUP_MAST
+        //WHERE Comp_code = @CompCode
+        //  AND Nature NOT IN ('CASH','BANK','OTHERS')
+        //  AND Name IS NOT NULL
+        //  AND Name <> ''
+        //  AND Code IS NOT NULL
+        //  AND Code <> '0'
+
+        //UNION
+
+        //SELECT Party_Code AS Value, Party_Name AS Text
+        //FROM COURIER_TRACKING
+        //WHERE Comp_code = @CompCode
+        //  AND Party_Name IS NOT NULL
+        //  AND Party_Name <> ''
+        //  AND Party_Code IS NOT NULL
+        //  AND Party_Code <> '0'
+
+        //ORDER BY Text;";
+
+        //            partyList = ExecuteDropdown(query, new[]
+        //            {
+        //        new SqlParameter("@CompCode", compCode)
+        //    });
+
+        //            var options = new MemoryCacheEntryOptions()
+        //                .SetSlidingExpiration(TimeSpan.FromMinutes(20))
+        //                .SetAbsoluteExpiration(TimeSpan.FromHours(2));
+
+        //            _memoryCache.Set(cacheKey, partyList, options);
+
+        //            return partyList;
+        //        }
+
+
+        //        public List<DropdownModel> SearchParty(string compCode, string term)
+        //        {
+        //            string query = @"
+        //    SELECT TOP (20) Value,Text
+        //    FROM
+        //    (
+        //        SELECT Code AS Value,
+        //               Name AS Text
+        //        FROM SUBGROUP_MAST
+        //        WHERE Comp_code=@CompCode
+        //          AND Nature NOT IN ('CASH','BANK','OTHERS')
+
+        //        UNION
+
+        //        SELECT Party_Code,
+        //               Party_Name
+        //        FROM COURIER_TRACKING
+        //        WHERE Comp_code=@CompCode
+        //    ) X
+        //    WHERE Text LIKE @Term + '%'
+        //    ORDER BY Text";
+
+        //            return ExecuteDropdown(query, new[]
+        //            {
+        //        new SqlParameter("@CompCode", compCode),
+        //        new SqlParameter("@Term", term ?? "")
+        //    });
+        //        }
+
+
+        //public List<DropdownModel> GetParty(string compCode)
+        //{
+        //    string query = @"SELECT top 100 Code AS Value, Name AS Text 
+        //         FROM (
+        //            SELECT Code, Name FROM SUBGROUP_MAST WHERE Comp_code = @CompCode
+        //            AND Nature NOT IN ('CASH','BANK','OTHERS')
+        //            AND Name IS NOT NULL AND Name <> '' AND Code IS NOT NULL AND Code <> '0'
+
+        //            UNION ALL
+
+        //            SELECT Party_Code, Party_Name FROM COURIER_TRACKING  WHERE Comp_code = @CompCode
+        //            AND Party_Name IS NOT NULL AND Party_Name <> ''
+        //            AND Party_Code IS NOT NULL AND Party_Code <> '0'
+        //         ) x
+        //         ORDER BY Name";
+
+        //    return ExecuteDropdown(query, new[]
+        //    {
+        //        new SqlParameter("@CompCode", compCode)
+        //    });
+        //}
         // Courier
         public List<DropdownModel> GetCourier()
         {

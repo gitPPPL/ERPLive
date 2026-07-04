@@ -1,19 +1,42 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 {
     public class CourierTrackingEntryListController : Controller
     {
-        private readonly IApprovalService _repository;
+        //private readonly CourierTrackingEntryListRepository _repository;
 
-        public CourierTrackingEntryListController(IApprovalService repository)
+        //public CourierTrackingEntryListController(ICourierTrackingEntryListRepository repository)
+        //{
+        //    _repository = (CourierTrackingEntryListRepository?)repository;
+        //}
+        //public IActionResult Index()
+        //{
+        //    return View("~/Views/GateEntry/Transaction/CourierTrackingEntryList/Index.cshtml");
+        //}
+
+
+        private readonly GlobalVariableService _globalVariableService;
+        private readonly DropdownService _dropdownService;
+
+        private int? userLevel;
+        private readonly ICourierTrackingEntryListRepository _repository;
+        public CourierTrackingEntryListController(GlobalVariableService globalVariableService,
+            DropdownService dropdownService, ICourierTrackingEntryListRepository repository)
         {
+            _globalVariableService = globalVariableService;
+            _dropdownService = dropdownService;
+
             _repository = repository;
         }
         public IActionResult Index()
         {
             return View("~/Views/GateEntry/Transaction/CourierTrackingEntryList/Index.cshtml");
+        
         }
 
         [HttpGet]

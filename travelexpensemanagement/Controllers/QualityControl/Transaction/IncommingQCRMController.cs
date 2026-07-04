@@ -15,6 +15,7 @@ using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.QualityControl.Transaction;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Transaction
@@ -692,13 +693,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                     }
                                 }
                                 // 5. EXTRA LOGIC (VB style future extension)
-
-                                //decimal deductQty = item.RESULT;
-                                //string itemName = item
-                                //decimal TotalResutl = QcResultWeight;
-
-
-                                //if (finaldeductrate > 0) Or landedrate>0 
                                 if (finaldeductrate > 0 || landedRate > 0)
                                 {
                                     if (deductType == "Fix" && deductQty == "Fix")
@@ -706,7 +700,16 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                         deductAmt = QcResultWeight * finaldeductrate;
                                         deductAmt = Math.Round(deductAmt, 0);
                                         // Narration
-                                        deductNarr = $"{Parameter}: {QcResultWeight:0.#####} * {finaldeductrate:0.00} = {deductAmt:0}";
+                                        //deductNarr = $"{Parameter}: {QcResultWeight:0.#####} * {finaldeductrate:0.00} = {deductAmt:0}";
+
+                                        if (deductAmt > 0)
+                                        {
+                                            deductNarr = $"{Parameter}: {QcResultWeight:0.#####} * {finaldeductrate:0.00} = {deductAmt:0}";
+                                        }
+                                        else
+                                        {
+                                            deductNarr = "";
+                                        }   
                                     }
                                     else if (deductType == "Fix" && deductQty == "%")
                                     {
@@ -715,20 +718,35 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                         {
                                             decimal deductQtyValue = (QcResultWeight * accessPercentage) / 100m;
                                             deductAmt = Math.Round(deductQtyValue * finaldeductrate, 2);
-                                            deductNarr = $"{Parameter}: {QcResultWeight:0.#####} % {accessPercentage:0.####} = {deductQtyValue:0.00} * {finaldeductrate:0.00} = {deductAmt:0.00}";
+
+                                            if (deductAmt > 0)
+                                            {
+                                                deductNarr = $"{Parameter}: {QcResultWeight:0.#####} % {accessPercentage:0.####} = {deductQtyValue:0.00} * {finaldeductrate:0.00} = {deductAmt:0.00}";
+                                            }
+                                            else
+                                            {
+                                                deductNarr = "";
+                                            }
+                                            //deductNarr = $"{Parameter}: {QcResultWeight:0.#####} % {accessPercentage:0.####} = {deductQtyValue:0.00} * {finaldeductrate:0.00} = {deductAmt:0.00}";
                                         }
                                     }
                                     else if (deductType == "Landed" && deductQty == "%")
                                     {
                                         decimal accessPercentage = item.RESULT - StdResult;
-
                                         if (accessPercentage > 0)
                                         {
                                             decimal deductQtyValue = (QcResultWeight * accessPercentage) / 100m;
 
                                             deductAmt = Math.Round(deductQtyValue * landedRate, 2);
-
-                                            deductNarr = $"{Parameter}: {QcResultWeight:0.#####} % {accessPercentage:0.####} = {deductQtyValue:0.00} * {landedRate:0.00} = {deductAmt:0.00}";
+                                            if (deductAmt > 0)
+                                            {
+                                                deductNarr = $"{Parameter}: {QcResultWeight:0.#####} % {accessPercentage:0.####} = {deductQtyValue:0.00} * {landedRate:0.00} = {deductAmt:0.00}";
+                                            }
+                                            else
+                                            {
+                                                deductNarr = "";
+                                            }
+                                            //deductNarr = $"{Parameter}: {QcResultWeight:0.#####} % {accessPercentage:0.####} = {deductQtyValue:0.00} * {landedRate:0.00} = {deductAmt:0.00}";
                                         }
                                     }
 
@@ -736,7 +754,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                     {
                                         decimal deductAmtGraceBaseLanded = 0;
                                         StringBuilder narr = new StringBuilder();
-
                                         foreach (var r in ranges)
                                         {
                                             decimal accessPercentage = 0;
@@ -785,46 +802,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                         deductAmt = Math.Round(deductAmtGraceBaseLanded, 2);
                                         deductNarr = $"{Parameter}:{narr}";
                                     }
-
-                                    //else if (deductType == "GraceBaseLanded")
-                                    //{
-                                    //    //int rowCount = model.Details.Count;
-                                    //    decimal accessPercentage = 0;
-                                    //    decimal deductAmtGraceBaseLanded = 0;
-                                    //    StringBuilder narr = new StringBuilder();
-
-                                    //    foreach (var r in ranges)
-                                    //    {
-                                    //        if (item.RESULT > r.FROM_RESULT && r.TO_RESULT <= item.RESULT)
-                                    //        {
-                                    //            accessPercentage = r.TO_RESULT - r.FROM_RESULT;
-                                    //        }
-                                    //        else if (item.RESULT < r.TO_RESULT)
-                                    //        {
-                                    //            accessPercentage = item.RESULT - r.FROM_RESULT;
-                                    //        }
-                                    //        decimal deductQtyValue = Math.Round((QcResultWeight * accessPercentage) / 100m, 2);
-                                    //        decimal dedRate = 0;
-                                    //        if (r.DEDUCT_TYPE == "Base")
-                                    //        {
-                                    //            dedRate = Math.Round(landedRate - r.DEDUCT_RATE, 2);
-                                    //        }
-                                    //        else if (r.DEDUCT_TYPE == "Landed Half")
-                                    //        {
-                                    //            dedRate = Math.Round(landedRate / 2m, 2);
-                                    //        }
-                                    //        else
-                                    //        {
-                                    //            dedRate = landedRate;
-                                    //        }
-                                    //        //deductAmt = Math.Round(deductQtyValue * dedRate, 2);
-                                    //        decimal rowAmount = Math.Round(deductQtyValue * dedRate, 2);
-                                    //        deductAmtGraceBaseLanded += rowAmount;
-                                    //        deductNarr =
-                                    //            $"{Parameter}: Access={accessPercentage:0.##}, Qty={deductQtyValue:0.00}, Rate={dedRate:0.00}, Amount={deductAmtGraceBaseLanded:0.00}";
-                                    //    }
-                                    //    deductNarr = narr.ToString();
-                                    //}
                                     else if (deductType == "ColDiff")
                                     {
                                         decimal accessPercentage = item.RESULT - StdResult;
@@ -914,9 +891,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 item.DEDUCT_TYPE = deductType;
                                 item.MATCHED_SRNO = srno;
                                 item.DEDUCT_NARR = deductNarr;
-
-                                // (optional if you add field)
-                                // item.DEDUCT_NARR = deductNarr;
                             }
 
                             tran.Commit();
@@ -1629,7 +1603,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 cmd.ExecuteNonQuery();
                             }
                             // Insert into QC_TEMP1
-
                             string insertQuery = @"
                                 INSERT INTO QC_TEMP1
                                 (
@@ -1665,7 +1638,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                   AND qc.YEAR_CODE = @YEAR_CODE
                                   AND qc.COMP_CODE = @COMP_CODE
                                   AND qc.BRANCH_CODE = @BRANCH_CODE";
-
                             using (SqlCommand cmd = new SqlCommand(insertQuery, con, tran))
                             {
                                 cmd.Parameters.AddWithValue("@V_NO", model.VNo);
@@ -1673,10 +1645,8 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
                                 cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
                                 cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
-
                                 cmd.ExecuteNonQuery();
                             }
-
                             // Get RID List
                             List<RidItem> ridList = new List<RidItem>();
                             string ridQuery = @"
@@ -1713,9 +1683,10 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                     break;
                                 string columnName = $"T{columnNo}";
 
+
                                 string updateQuery = $@"
                                     UPDATE T
-                                    SET T.{columnName}=Q.RESULT
+                                    SET T.{columnName}=CAST(Q.RESULT AS DECIMAL(18,2))
                                     FROM QC_TEMP1 T
                                     INNER JOIN QC2 Q
                                     ON T.QCID=Q.QC_CODE
@@ -1746,43 +1717,99 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 columnNo++;
                             }
 
+                            List<DEDUCT_AMTItem> DEDUCT_AMTItemList = new List<DEDUCT_AMTItem>();
 
+                            string DEDUCT_AMTQuery = @"Select QC_CODE, QCP_CODE,RID, DEDU_AMT1, DEDU_NARR1 from QC2 where V_NO=@V_NO AND V_TYPE=@V_TYPE 
+                            AND YEAR_CODE=@YEAR_CODE AND COMP_CODE=@COMP_CODE AND BRANCH_CODE=@BRANCH_CODE";
 
-
-                            tran.Commit();
-                            var requestData = new
+                            using (SqlCommand cmd = new SqlCommand(DEDUCT_AMTQuery, con, tran))
                             {
-                                Reportname = "Rpt_QcRM",         
-                                Database = "ERPDB",               
+                                cmd.Parameters.AddWithValue("@V_NO", model.VNo);
+                                cmd.Parameters.AddWithValue("@V_TYPE", model.VType);
+                                cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+                                cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                                cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
 
-                                selectionFormula =
-                                "{QC1.COMP_CODE} = " + gv.PubCompCode +
-                                " AND {QC1.YEAR_CODE} = " + gv.PubFYearCode +
-                                " AND {QC1.BRANCH_CODE} = " + gv.PubBranchCode +
-                                " AND {QC1.V_TYPE} = '" + model.VType + "'" +
-                                " AND {QC1.V_NO} = " + model.VNo,
-
-                                Parameters = new
+                                using (SqlDataReader dr = cmd.ExecuteReader())
                                 {
-                                    comp_name = gv.PubCompCode,
-                                    comp_add1 = gv.Address1,
-                                    comp_add2 = gv.Address2,
-                                    RPTNAME = "Quality Report of Raw Material",
-                                    T1 = ridList.Count > 0 ? ridList[0].ItemName : "",
-                                    T2 = ridList.Count > 1 ? ridList[1].ItemName : "",
-                                    T3 = ridList.Count > 2 ? ridList[2].ItemName : "",
-                                    T4 = ridList.Count > 3 ? ridList[3].ItemName : "",
-                                    T5 = ridList.Count > 4 ? ridList[4].ItemName : "",
-                                    T6 = ridList.Count > 5 ? ridList[5].ItemName : "",
-                                    T7 = ridList.Count > 6 ? ridList[6].ItemName : "",
-                                    T8 = ridList.Count > 7 ? ridList[7].ItemName : ""
+                                    while (dr.Read())
+                                    {
+                                        DEDUCT_AMTItemList.Add(new DEDUCT_AMTItem
+                                        {
+                                            QC_CODE = Convert.ToInt32(dr["QC_CODE"]),
+                                            QCP_CODE = Convert.ToInt32(dr["QCP_CODE"]),
+                                            DEDU_AMT1 = Convert.ToInt32(dr["DEDU_AMT1"]),
+                                            RID = Convert.ToInt32(dr["RID"]),
+                                            DEDU_NARR1 = dr["DEDU_NARR1"].ToString()
+                                        });
+                                    }
                                 }
-                            };
-                            return Json(new
+                            }
+
+                            var grouped = DEDUCT_AMTItemList.GroupBy(x => new { x.QC_CODE, x.QCP_CODE });
+                            foreach (var g in grouped)
                             {
-                                success = true,
-                                report = requestData
-                            });
+                                decimal totalAmt = g.Sum(x => x.DEDU_AMT1);
+                                string narration = string.Join(
+                                     ", ",
+                                     g.OrderBy(x => x.RID)
+                                      .Where(x => !string.IsNullOrWhiteSpace(x.DEDU_NARR1))
+                                      .Select(x => x.DEDU_NARR1)
+                                );
+
+                                string updateDeduct = @" UPDATE QC_TEMP1 SET DEDUCT_AMT=@DEDUCT_AMT, DEDUCT_NAR=@DEDUCT_NAR WHERE QCID=@QC_CODE
+                                AND QCPID=@QCP_CODE AND V_NO=@V_NO AND V_TYPE=@V_TYPE AND YEAR_CODE=@YEAR_CODE AND COMP_CODE=@COMP_CODE
+                                AND BRANCH_CODE=@BRANCH_CODE";
+
+                                using (SqlCommand cmd = new SqlCommand(updateDeduct, con, tran))
+                                {
+                                    cmd.Parameters.AddWithValue("@DEDUCT_AMT", totalAmt);
+                                    cmd.Parameters.AddWithValue("@DEDUCT_NAR", narration);
+
+                                    cmd.Parameters.AddWithValue("@QC_CODE", g.Key.QC_CODE);
+                                    cmd.Parameters.AddWithValue("@QCP_CODE", g.Key.QCP_CODE);
+
+                                    cmd.Parameters.AddWithValue("@V_NO", model.VNo);
+                                    cmd.Parameters.AddWithValue("@V_TYPE", model.VType);
+                                    cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+                                    cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+                            tran.Commit();
+                                var requestData = new
+                                {
+                                   Reportname = "Rpt_QcRM",         
+                                   Database = "ERPDB",               
+                                   selectionFormula =
+                                   "{QC1.COMP_CODE} = " + gv.PubCompCode +
+                                   " AND {QC1.YEAR_CODE} = " + gv.PubFYearCode +
+                                   " AND {QC1.BRANCH_CODE} = " + gv.PubBranchCode +
+                                   " AND {QC1.V_TYPE} = '" + model.VType + "'" +
+                                   " AND {QC1.V_NO} = " + model.VNo,
+                                   Parameters = new
+                                   {
+                                       comp_name = gv.PubCompCode,
+                                       comp_add1 = gv.Address1,
+                                       comp_add2 = gv.Address2,
+                                       RPTNAME = "Quality Report of Raw Material",
+                                       T1 = ridList.Count > 0 ? ridList[0].ItemName : "",
+                                       T2 = ridList.Count > 1 ? ridList[1].ItemName : "",
+                                       T3 = ridList.Count > 2 ? ridList[2].ItemName : "",
+                                       T4 = ridList.Count > 3 ? ridList[3].ItemName : "",
+                                       T5 = ridList.Count > 4 ? ridList[4].ItemName : "",
+                                       T6 = ridList.Count > 5 ? ridList[5].ItemName : "",
+                                       T7 = ridList.Count > 6 ? ridList[6].ItemName : "",
+                                       T8 = ridList.Count > 7 ? ridList[7].ItemName : ""
+                                   }
+                                };
+                                    return Json(new
+                                 {
+                                       success = true,
+                                        report = requestData
+                                 });
                         }
                         catch
                         {
@@ -1809,17 +1836,21 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             public string ItemName { get; set; }
         }
 
+        public class DEDUCT_AMTItem
+        {
+            public int DEDU_AMT1 { get; set; }
+            public string DEDU_NARR1 { get; set; }
+            public int QC_CODE { get; set; }
+            public int QCP_CODE { get; set; }
+            public int RID { get; set; }
+        }
+
         public class PrintReportModel
         {
             public string? VType { get; set; }
             public int? VNo { get; set; }
         }
         //=========================================Report End Block===================================
-
-
-
-
-
 
         public class QCParameterModel
         {

@@ -2,11 +2,21 @@
     ViewBag.Title = "Approved Received List";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<style>
+    .pending-approval {
+        background-color: orange;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+</style>
 <div id="erp-toast-container"></div>
 <div class="erppagelist-header">
     <div class="erppagelist-title">
         <i class="fa fa-list"></i>
-        <span>Approved Received List</span>
+        <span>Pending Approved List</span>
     </div>
     <div class="erppagelist-header-right">
         <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "Dashboard")'">
@@ -24,8 +34,6 @@
     <div class="excel-wrapper fixed-grid-wrapper">
         <table id="tblApprovedReceivedList" class="excel-table fixed-grid-table sortable-table resizable-table">
             <colgroup>
-                <col style="display:none;">
-                <col style="width:40px;">
                 <col style="width: 122px;">
                 <col style="width: 91px;">
                 <col style="width: 68px;">
@@ -43,19 +51,18 @@
             <thead>
                 <tr>
                     <th class="hidden-col">Code</th>
-                    <th><input type="checkbox"></th>
-                    <th>Document Name</th>
-                    <th>Voucher No</th>
+                    <th>Doc Name</th>
+                    <th>Vch No.</th>
                     <th>Sender</th>
-                    <th>Send Date</th>
-                    <th>Document Status</th>
-                    <th>Approval Status</th>
+                    <th>Sent On</th>
+                    <th>Doc Status</th>
+                    <th>Approval</th>
                     <th>Remarks</th>
-                    <th>New/Modify</th>
-                    <th>Department</th>
+                    <th>New/Mod</th>
+                    <th>Dept.</th>
                     <th>Originator</th>
-                    <th>Origin Date</th>
-                    <th>Voucher Type</th>
+                    <th>Orig. Date</th>
+                    <th>Vch Type</th>
                     <th class="action-col">Action</th>
                 </tr>
             </thead>
@@ -66,19 +73,13 @@
 
 <script>
     $(document).ready(function () {
-
         loadDocumentStages();
-
         $('#searchBox').on('keyup', function () {
             loadDocumentStages();
         });
-
     });
-
     function loadDocumentStages() {
-
         const searchTerm = $('#searchBox').val();
-
         $.ajax({
             url: '/ApprovalReceivedList/GetApprovalList',
             type: 'GET',
@@ -86,117 +87,53 @@
             data: {
                 searchTerm: searchTerm
             },
-
             success: function (res) {
-
                 console.log('Response:', res);
-
                 const docs = res.data || [];
                 const tbody = $('#tblApprovedReceivedList tbody');
-
                 tbody.empty();
-
                 if (docs.length === 0) {
-
                     tbody.append(`
                         <tr>
-                            <td colspan="16" class="text-center text-muted">
-                                No records found.
-                            </td>
+                            <td colspan="16" class="text-center text-muted">No records found.</td>
                         </tr>
                     `);
-
                     return;
                 }
-
                 docs.forEach(doc => {
-
-                    const formattedSendDate =
-                        doc.sendDate ? formatDate(doc.sendDate) : '';
-
-                    const formattedOriginDate =
-                        doc.originDate ? formatDate(doc.originDate) : '';
-
+                    const formattedSendDate = doc.sendDate ? formatDate(doc.sendDate) : '';
+                    const formattedOriginDate = doc.originDate ? formatDate(doc.originDate) : '';
                     tbody.append(`
                         <tr>
-
                             <td style="display:none;" class="usercode">
                                 ${doc.user_code || ''}
                             </td>
-
-                            <td>
-                                <input type="checkbox" />
-                            </td>
-
-                            <td>
-                                ${doc.docName || ''}
-                            </td>
-
-                            <td class="vNo">
-                                ${doc.vNo || ''}
-                            </td>
-
-                            <td>
-                                ${doc.sendName || ''}
-                            </td>
-
-                            <td>
-                                ${formattedSendDate}
-                            </td>
-
-                            <td>
-                                ${doc.documentStatus || 'N/A'}
-                            </td>
-
-                            <td>
-                                ${doc.approvalStatus || 'N/A'}
-                            </td>
-
-                            <td>
-                                ${doc.remarkName || 'N/A'}
-                            </td>
-
-                            <td>
-                                ${doc.newModify || 'N/A'}
-                            </td>
-
-                            <td>
-                                ${doc.department || 'N/A'}
-                            </td>
-
-                            <td>
-                                ${doc.originName || ''}
-                            </td>
-
-                            <td>
-                                ${formattedOriginDate}
-                            </td>
-
-                            <td style="display:none;" class="formName">
-                                ${doc.form_name || ''}
-                            </td>
-
-                            <td class="vType">
-                                ${doc.vType || ''}
-                            </td>
-
-                            <td class="action-col">
-                                <button class="act-btn view"
-                                        title="View"
-                                        onclick="viewbtn(this)">
-                                    <i class="fa fa-eye"></i>
-                                </button>
-                            </td>
-
+                            <td>${doc.docName || ''}</td>
+                            <td class="vNo">${doc.vNo || ''}</td>
+                            <td>${doc.sendName || ''}</td>
+                            <td>${formattedSendDate}</td>
+                            <td>${doc.documentStatus || 'N/A'}</td>
+                            <td>${doc.approvalStatus || 'N/A'}</td>
+                            <td>${doc.remarkName || 'N/A'}</td>
+                            <td>${doc.newModify || 'N/A'}</td>
+                            <td>${doc.department || 'N/A'}</td>
+                            <td>${doc.originName || ''}</td>
+                            <td>${formattedOriginDate}</td>
+                            <td style="display:none;" class="formName">${doc.form_name || ''} </td>
+                            <td class="vType"> ${doc.vType || ''}</td>
+                                <td class="action-col">
+        <button class="act-btn pending-approval"
+                title="Pending"
+                onclick="viewbtn(this)">
+            <i class="fa fa-eye"></i> Pending
+        </button>
+    </td>
                         </tr>
                     `);
                 });
             },
-
             error: function (xhr) {
-
                 console.error(xhr);
-
                 toastr.error(
                     'Error loading document stages: ' +
                     (xhr.responseJSON?.message || xhr.statusText)
@@ -204,48 +141,29 @@
             }
         });
     }
-
     function formatDate(date) {
-
         if (!date)
             return '';
-
         const d = new Date(date);
-
         const day = ("0" + d.getDate()).slice(-2);
         const month = ("0" + (d.getMonth() + 1)).slice(-2);
         const year = d.getFullYear();
-
         return `${day}/${month}/${year}`;
     }
 
     function Approvedpopup(button) {
-
-        var checkedRows =
-            $('#tblApprovedReceivedList tbody input[type="checkbox"]:checked');
-
+        var checkedRows = $('#tblApprovedReceivedList tbody input[type="checkbox"]:checked');
         if (checkedRows.length === 0) {
-
             toastr.warning(
                 'Please select at least one document.'
             );
-
             return;
         }
-
         $('#ApprovedModal').modal('show');
-
-        const row =
-            checkedRows.first().closest('tr');
-
-        const userCode =
-            row.find('.usercode').text().trim();
-
-        const vNo =
-            row.find('.vNo').text().trim();
-
-        const vType =
-            row.find('.vType').text().trim();
+        const row = checkedRows.first().closest('tr');
+        const userCode = row.find('.usercode').text().trim();
+        const vNo = row.find('.vNo').text().trim();
+        const vType = row.find('.vType').text().trim();
 
         $.ajax({
             url: '/ApprovalReceivedList/GetForwardto',
@@ -255,19 +173,13 @@
                 userCode: userCode,
                 vType: vType
             },
-
             success: function (data) {
-
                 var ddl = $('#ddlForwardTo');
-
                 ddl.empty();
-
                 ddl.append(
                     '<option value="">-- Select Forward To --</option>'
                 );
-
                 $.each(data, function (index, item) {
-
                     ddl.append(
                         '<option value="' + item.value + '">' +
                         item.text +
@@ -275,11 +187,8 @@
                     );
                 });
             },
-
             error: function (xhr, status, error) {
-
                 console.error(xhr.responseText);
-
                 toastr.error(
                     'Error loading users: ' + error
                 );
@@ -288,31 +197,17 @@
     }
 
     function viewbtn(button) {
-
-        const row =
-            $(button).closest('tr');
-
-        const vNo =
-            row.find('.vNo').text().trim();
-
-        const vType =
-            row.find('.vType').text().trim();
-
-        const formName =
-            row.find('.formName').text().trim();
-
+        const row = $(button).closest('tr');
+        const vNo = row.find('.vNo').text().trim();
+        const vType = row.find('.vType').text().trim();
+        const formName = row.find('.formName').text().trim();
         if (!vNo || !vType || !formName) {
-
             toastr.error(
                 'Missing data for navigation.'
             );
-
             return;
         }
-
-        const url =
-            `/${formName}/Index?id=${vNo}&vtype=${vType}`;
-
+        const url =`/${formName}/Index?id=${vNo}&vtype=${vType}`;
         window.location.href = url;
     }
 </script>

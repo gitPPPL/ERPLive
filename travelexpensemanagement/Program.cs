@@ -23,6 +23,7 @@
 
     // Add services
     builder.Services.AddControllersWithViews();
+    builder.Services.AddMemoryCache();
 
     builder.Services.AddScoped<DataBaseConnection>();
     builder.Services.AddScoped<GlobalValidationdate>();
@@ -38,7 +39,7 @@
     //Master page repositories
     // Gete Entry Transaction repositories
     builder.Services.AddScoped<ICourierTrackingEntryRepository, CourierTrackingEntryRepository>();
-    builder.Services.AddScoped<travelexpensemanagement.Repositories.Interfaces.IApprovalService, travelexpensemanagement.Repositories.Implementations.ApprovalService>();
+    builder.Services.AddScoped<ICourierTrackingEntryListRepository, CourierTrackingEntryListRepository>();
     builder.Services.AddScoped<IVehicleInwardRepository, VehicleInwardRepository>();
     builder.Services.AddScoped<IVehicleInwardListRepository, VehicleInwardListRepository>();
     builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
@@ -57,7 +58,6 @@
     builder.Services.AddScoped<IStoreWeighbridgeEntryRepository, StoreWeighbridgeEntryRepository>();
     builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridgeEntryListRepository>();
     //Weighbridge Transaction repositories
-
 
 
 

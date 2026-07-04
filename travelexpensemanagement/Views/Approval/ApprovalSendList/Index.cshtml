@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Approved Send List";
+    ViewBag.Title = "Approved List";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <style>
@@ -11,7 +11,7 @@
 <div class="erppagelist-header">
     <div class="erppagelist-title">
         <i class="fa fa-list"></i>
-        <span>Approved Send List</span>
+        <span>Approved List</span>
     </div>
     <div class="erppagelist-header-right">
         <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "Dashboard")'">
@@ -46,7 +46,6 @@
             <thead>
                 <tr>
                     <th style="display:none;">Code</th>
-                    @* <td><input type="checkbox"></td> *@
                     <th>Document Name</th>
                     <th>Voucher No</th>
                     <th>Sender</th>
@@ -59,7 +58,6 @@
                     <th>Originator</th>
                     <th>Origin Date</th>
                     <th>Voucher Type</th>
-                   @*  <th class="action-col">Action</th> *@
                 </tr>
             </thead>
             <tbody></tbody>
@@ -78,7 +76,6 @@
     // Load main grid
         function loadDocumentStages() {
         const searchTerm = $('#searchBox').val();
-
         $.ajax({
             url: '/ApprovalSendList/GetApprovalList',
             type: 'GET',
@@ -94,22 +91,14 @@
 
                 if (docs.length === 0) {
                     tbody.append(`<tr>
-                        <td colspan="14" class="text-center text-muted">
-                            No records found.
-                        </td>
+                        <td colspan="14" class="text-center text-muted">No records found.</td>
                     </tr>`);
                     return;
                 }
-
                 docs.forEach(doc => {
 
-                    const formattedSendDate = doc.sendDate
-                        ? formatDate(doc.sendDate)
-                        : '';
-
-                    const formattedOriginDate = doc.originDate
-                        ? formatDate(doc.originDate)
-                        : '';
+                    const formattedSendDate = doc.sendDate ? formatDate(doc.sendDate) : '';
+                    const formattedOriginDate = doc.originDate ? formatDate(doc.originDate) : '';
                     tbody.append(`
                         <tr>
                             <td style="display:none;" class="usercode">${doc.user_code || ''}</td>
@@ -143,5 +132,4 @@
         const year = d.getFullYear();
         return `${day}/${month}/${year}`;
     }
-
 </script>

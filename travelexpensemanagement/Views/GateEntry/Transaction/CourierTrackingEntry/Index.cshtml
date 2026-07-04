@@ -37,7 +37,15 @@
             <div class="erppage-grid4">
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Party Name</label>
-                    <select class="erppage-redinput" id="ddlPartyName"></select>
+                    @* <select class="erppage-redinput" id="ddlPartyName"></select> *@
+                    @* <input type="text" id="ddlPartyName" class="form-control" placeholder="Search Party Name" /> *@
+                    <input type="text"
+                           id="ddlPartyName"
+                           class="form-control"
+                           placeholder="Search Party Name" />
+
+                    <input type="hidden" id="hdnPartyCode" />
+
                 </div>
 
                 <div class="erppage-divfield">
@@ -128,7 +136,6 @@
         let dd = String(today.getDate()).padStart(2, '0');
         let formattedDate = yyyy + '-' + mm + '-' + dd;
         $('#DtDocDate').val(formattedDate);
-
         const params = new URLSearchParams(window.location.search);
         const docNo = params.get('id');
         const docType = params.get('type');
@@ -143,7 +150,8 @@
         // Bind all dropdowns (ONE LINE EACH)
         bindDropdown('CourierTrackingEntry','DocType', '#ddlDocType', '-- Select Doc Type --');
         bindDropdown('CourierTrackingEntry','City', '#ddlCity', '-- Select City --');
-        bindDropdown('CourierTrackingEntry','Party', '#ddlPartyName', '-- Select Party Name --');
+        // bindDropdown('CourierTrackingEntry','Party', '#ddlPartyName', '-- Select Party Name --');
+        bindDropdownNew('CourierTrackingEntry','Party','#ddlPartyName','Search Party Name' );
         bindDropdown('CourierTrackingEntry','Courier', '#ddlCourierName', '-- Select Courier --');
         bindDropdown('CourierTrackingEntry','Employee', '#ddlReceivedBy', '-- Select Received --');
         bindDropdown('CourierTrackingEntry','Purpose', '#ddlPurpose', '-- Select Purpose --');
@@ -219,7 +227,7 @@
     function bindCourierTracking(data) {
         bindDropdown('CourierTrackingEntry','DocType', '#ddlDocType', '-- Select Doc Type --', data.vType);
         bindDropdown('CourierTrackingEntry','City', '#ddlCity', '-- Select City --', data.city);
-        bindDropdown('CourierTrackingEntry','Party', '#ddlPartyName', '-- Select Party Name --', data.partyName);
+        bindDropdownNew('CourierTrackingEntry','Party', '#ddlPartyName', '-- Select Party Name --', data.partyName);
         bindDropdown('CourierTrackingEntry','Courier', '#ddlCourierName', '-- Select Courier --', data.courierName);
         bindDropdown('CourierTrackingEntry','Employee', '#ddlReceivedBy', '-- Select Received By --', data.receivedBy);
         bindDropdown('CourierTrackingEntry','Purpose', '#ddlPurpose', '-- Select Purpose --', data.purpose);
@@ -251,6 +259,7 @@
         $('#CourierTrackingEntryForm select').prop('disabled', true);
         $('#btn-save').hide();
     }
+     
       
 </script>
 
