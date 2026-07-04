@@ -1,55 +1,4 @@
-﻿function calculateTaxAmounts(rowId) {
-    const rate = parseFloat($(`#TxtRate${rowId}`).val()) || 0;
-    const qty = parseFloat($(`#TxtQty${rowId}`).val()) || 0;
-    const amount = rate * qty;
-
-    const discPer = parseFloat($(`#TxtDiscPercent${rowId}`).val()) || 0;
-    const discAmt = (amount * discPer) / 100;
-    $(`#TxtDisc${rowId}`).val(discAmt.toFixed(2));
-
-    const packPer = parseFloat($(`#TxtPackPercent${rowId}`).val()) || 0;
-    const packAmt = (amount * packPer) / 100;
-    $(`#TxtPack${rowId}`).val(packAmt.toFixed(2));
-
-    const taxableAmount = amount - discAmt + packAmt;
-
-    const cgstPer = parseFloat($(`#TxtCgstPercent${rowId}`).val()) || 0;
-    const sgstPer = parseFloat($(`#TxtSgstPercent${rowId}`).val()) || 0;
-    const igstPer = parseFloat($(`#TxtIgstPercent${rowId}`).val()) || 0;
-    const cessPer = parseFloat($(`#TxtCessPercent${rowId}`).val()) || 0;
-    const tcsPer = parseFloat($(`#TxtTcsPer${rowId}`).val()) || 0;
-    const vatPer = parseFloat($(`#TxtVatPercent${rowId}`).val()) || 0;
-    const othPer1 = parseFloat($(`#TxtOthPer${rowId}`).val()) || 0;
-    const othPer2 = parseFloat($(`#TxtOthPer2${rowId}`).val()) || 0;
-
-    const cgstAmt = (taxableAmount * cgstPer) / 100;
-    const sgstAmt = (taxableAmount * sgstPer) / 100;
-    const igstAmt = (taxableAmount * igstPer) / 100;
-    const cessAmt = (taxableAmount * cessPer) / 100;
-    const tcsAmt = (taxableAmount * tcsPer) / 100;
-    const vatAmt = (taxableAmount * vatPer) / 100;
-    const othAmt1 = (taxableAmount * othPer1) / 100;
-    const othAmt2 = (taxableAmount * othPer2) / 100;
-
-    const totalTax = cgstAmt + sgstAmt + igstAmt + cessAmt + tcsAmt + vatAmt + othAmt1 + othAmt2;
-    const netAmt = taxableAmount + totalTax;
-
-    // Update DOM
-    $(`#TxtAmount${rowId}`).val(amount.toFixed(2));
-    $(`#TxtCgst${rowId}`).val(cgstAmt.toFixed(2));
-    $(`#TxtSgst${rowId}`).val(sgstAmt.toFixed(2));
-    $(`#TxtIgst${rowId}`).val(igstAmt.toFixed(2));
-    $(`#TxtCess${rowId}`).val(cessAmt.toFixed(2));
-    $(`#TxtTcsAmt${rowId}`).val(tcsAmt.toFixed(2));
-    $(`#TxtVat${rowId}`).val(vatAmt.toFixed(2));
-    $(`#TxtOthAmt${rowId}`).val(othAmt1.toFixed(2));
-    $(`#TxtOthAmt2${rowId}`).val(othAmt2.toFixed(2));
-    $(`#TxtNetAmt${rowId}`).val(netAmt.toFixed(2));
-
-    calculateAllTotals(); // Recalculate footer totals
-}
-
-
+﻿
 async function handleDocLoad() {
     const docId = getQueryParam('id');
     const readOnly = getQueryParam('readOnly');
@@ -356,8 +305,28 @@ async function GetDocData(MasterTblId, readOnly) {
             $('.btn-add-row-last').show();
         }
 
+        Calculation = false;
+        SelectShipParty = false;
+
         await fillFormFields(response.header);
-        await fillItemDetailsTable(response.detail);
+
+
+        console.log("Before fillFormFields");
+        await fillFormFields(response.header);
+        console.log("After fillFormFields");
+
+        console.log("Before fillItemDetailsTable", response.detail);
+         fillItemDetailsTable(response.detail);
+        console.log("After fillItemDetailsTable");
+
+
+
+
+
+        //await fillItemDetailsTable(response.detail);
+
+        Calculation = true;
+        SelectShipParty = true;
 
         $('#fileList').empty();
 
@@ -510,68 +479,92 @@ async function fillFormFields(data) {
 }
 
 async function fillItemDetailsTable(data) {
+
     const $tbody = $('#tblItemRecordPO tbody');
     $tbody.empty();
+
+    if (!Array.isArray(data) || data.length === 0)
+        return;
+
     for (let index = 0; index < data.length; index++) {
+
         const item = data[index];
         const idx = index + 1;
+
         addItemRecordRow();
+
         await bindDropdownData(idx);
 
-        console.log(data, item.ITEM_CODE);
+        // Small delay if dropdowns are loaded through AJAX
+        await new Promise(resolve => setTimeout(resolve, 100));
 
+        // Dropdowns
         $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE).trigger('change');
         $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
         $(`#ddlImake${idx}`).val(item.MAKE_CODE).trigger('change');
-        $(`#ddlTax${idx}`).val(item.TAX_CODE).trigger('change');
         $(`#ddlDepartment${idx}`).val(item.DEPT_CODE).trigger('change');
+        $(`#ddlTax${idx}`).val(item.TAX_CODE);
 
+        // Textboxes
+        $(`#TxtCode${idx}`).val(item.ITEM_CODE);
         $(`#TxtNos${idx}`).val(item.NOS);
         $(`#TxtQty${idx}`).val(item.QTY);
-        $(`#txtAdjQtySauda${idx}`).val(item.ADJ_QTY);
         $(`#ddlUnit${idx}`).val(item.UOM_CODE);
+
         $(`#TxtRate${idx}`).val(item.RATE);
         $(`#TxtExrate${idx}`).val(item.IMPORT_RATE);
         $(`#TxtCalcRate${idx}`).val(item.CALC_RATE);
         $(`#TxtAmount${idx}`).val(item.AMOUNT);
+
         $(`#TxtPackPercent${idx}`).val(item.PACK_PER);
         $(`#TxtPack${idx}`).val(item.PACK_AMT);
+
         $(`#TxtDiscPercent${idx}`).val(item.DISC_PER);
         $(`#TxtDisc${idx}`).val(item.DISC_AMT);
 
         $(`#TxtCgstPercent${idx}`).val(item.CGST_PER);
         $(`#TxtCgst${idx}`).val(item.CGST_AMT);
+
         $(`#TxtSgstPercent${idx}`).val(item.SGST_PER);
         $(`#TxtSgst${idx}`).val(item.SGST_AMT);
+
         $(`#TxtIgstPercent${idx}`).val(item.IGST_PER);
         $(`#TxtIgst${idx}`).val(item.IGST_AMT);
+
         $(`#TxtVatPercent${idx}`).val(item.VAT_PER);
         $(`#TxtVat${idx}`).val(item.VAT_AMT);
+
         $(`#TxtCessPercent${idx}`).val(item.CESS_PER);
         $(`#TxtCess${idx}`).val(item.CESS_AMT);
+
         $(`#TxtTcsPer${idx}`).val(item.TCS_PER);
         $(`#TxtTcsAmt${idx}`).val(item.TCS_AMT);
+
         $(`#TxtOthPer${idx}`).val(item.OTH_PER);
         $(`#TxtOthAmt${idx}`).val(item.OTH_AMT);
+
         $(`#TxtOthPer2${idx}`).val(item.TOTAL_PER2);
         $(`#TxtOthAmt2${idx}`).val(item.TOTAL_AMT2);
+
         $(`#TxtNetAmt${idx}`).val(item.NET_AMT);
         $(`#TxtLdRate${idx}`).val(item.LAND_RATE);
 
         $(`#TxtRemarks${idx}`).val(item.REMARKS);
         $(`#TxtAppLevel${idx}`).val(item.PREORITY_LEVEL);
         $(`#TxtAppRemarks${idx}`).val(item.PREORITY_REMARKS);
+
         $(`#TxtMthRate${idx}`).val(item.RATE_MONTHLY);
         $(`#TxtQtrRate${idx}`).val(item.RATE_QUARTERLY);
         $(`#TxtAnlRate${idx}`).val(item.RATE_ANNUALY);
         $(`#TxtSpclRate${idx}`).val(item.RATE_SPECIAL);
+
+        console.log(`Row ${idx} loaded successfully`);
     }
 }
 function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
 }
-
 function handleBack(redirectUrl, isReadOnly = false) {
 
     if (isReadOnly) {
@@ -594,7 +587,6 @@ function handleBack(redirectUrl, isReadOnly = false) {
         }
     });
 }
-
 function isDuplicateFile(file) {
 
     const fileName = file.name;
@@ -619,7 +611,6 @@ function isDuplicateFile(file) {
 
     return false;
 }
-
 function renderFileList() {
 
     const attachBody = $("#fileList");
@@ -734,7 +725,6 @@ function renderFileList() {
             `);
     }
 }
-
 function SetFYDate(inputId, loginDate) {
     var $input = $('#' + inputId);
     var d = new Date(loginDate);
@@ -757,7 +747,6 @@ function SetFYDate(inputId, loginDate) {
         }
     });
 }
-
 function addItemRecordRow() {
     let tbody = $('#tblItemRecordPO tbody');
     let rowCount = tbody.find('tr').length + 1;
@@ -948,7 +937,6 @@ function addAttachmentRow(data = {}) {
     });
 }
 
-
 async function GetDatabbyPartycode() {
     try {
 
@@ -1006,7 +994,6 @@ async function GetDatabbyPartycode() {
         console.error("Error loading Place:", error);
     }
 }
-
 function Wb_SaudaDdl_Make_enabledisable(VType) {
     if (VType == "RORD") {
         document.getElementById("SaudaDetail").style.display = "block";
@@ -1015,7 +1002,6 @@ function Wb_SaudaDdl_Make_enabledisable(VType) {
         document.getElementById("SaudaDetail").style.display = "none";
     }
 }
-
 
 async function LoadOrdersModal() {
     let V_NO = $('#ddSaudaNo option:selected').text();
@@ -1056,7 +1042,6 @@ async function LoadOrdersModal() {
     }
 }
 
-
 async function LoadDatabyShipCode(PartyCode) {
     try {
 
@@ -1079,8 +1064,6 @@ async function LoadDatabyShipCode(PartyCode) {
     }
 
 }
-
-
 
 async function GetPartyAddressDetails(PartyCode, AddressCode) {
     try {
@@ -1139,8 +1122,6 @@ async function GetShipPartyAddressDetails(PartyCode, AddressCode) {
     }
 }
 
-
-
 async function loadPurchaseHistory() {
 
     try {
@@ -1176,7 +1157,6 @@ async function loadPurchaseHistory() {
         toastr.info("Something went wrong while fetching data");
     }
 }
-
 function renderPurchaseHistory(data) {
 
     const tbody = $('#tblshowpurchasehistoryList tbody');

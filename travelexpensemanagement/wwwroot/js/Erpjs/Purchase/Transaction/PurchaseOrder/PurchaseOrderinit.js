@@ -1,5 +1,4 @@
 ﻿
-
 $(document).on('input', '[id^=TxtRate], [id^=TxtQty], [id^=TxtCess], [id^=TxtPack], [id^=TxtDisc]', function () {
     const $input = $(this);
     const rowId = $input.closest('tr').attr('id').replace('row', '');
@@ -38,13 +37,11 @@ $(document).on('change', '[id^=ddlTax]', function () {
     calculateTaxAmounts(rowId);
 });
 
-
 $(document).on('click', '[id^=TxtRate], [id^=TxtQty]', function () {
     const $select = $(this);
     const rowId = $select.closest('tr').attr('id').replace('row', '');
     calculateTaxAmounts(rowId);
 });
-
 
 $('#btn-save').on('click', async function (e) {
     e.preventDefault();
@@ -130,8 +127,6 @@ $('#btn-save').on('click', async function (e) {
     }
 });
 
-
-
 $('#ddlPartyName').on('change', async function () {
     let PartyCode = $('#ddlPartyName').val();
     if (!PartyCode) {
@@ -146,11 +141,13 @@ $('#ddlPartyName').on('change', async function () {
 
 });
 
-
 $('#ddlShipFrom').on('change', async function () { 
-    if (SelectShipParty == false) return;
+
     let PartyCode = $('#ddlShipFrom').val();
     await GetShipPartyAddress(PartyCode);
+
+    if (SelectShipParty == false) return;
+
     await LoadDatabyShipCode(PartyCode);    
 });
 
@@ -158,8 +155,6 @@ $('#btnorders').on('click', async function () {
     if (!validateRequiredField('#ddSaudaNo', 'Sauda No')) return;
     await LoadOrdersModal();
 });
-
-
 
 $('#ddlAddressbyparty').on('change', async function () {
     const docId = getQueryParam('id');
@@ -183,11 +178,6 @@ $('#ddlAddressbypartySD').on('change', async function () {
     GetShipPartyAddressDetails(PartyCode, AddressCode);
 });
 
-
-
 $('#btn_ModificationOrder').on('click', function () {
     loadModificationdata();
 });
-
-
-

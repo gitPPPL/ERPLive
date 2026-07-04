@@ -23,15 +23,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
     <div class="erppage-header-right">
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PurchaseOrderList")', readOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
@@ -1249,7 +1240,6 @@
         $(async function () {
             try {
                 await GetDocTypeAsync();
-              //  $('#ddlDocType').prop('selectedIndex', 0);
                 handleDocLoad();
             } catch (error) {
                 toastr.error('Failed to load document types: ' + error);
@@ -1440,7 +1430,6 @@
 </script>
 
 <script>
-
 
     async function fillItemDetailsTableBySaudaNo(data) {
         const $tbody = $('#tblItemRecordPO tbody');
@@ -2244,141 +2233,7 @@
         ]).then(() => {
             bindUnitOnItemSelect(itemSelect, unitSelect);
         });
-    }
-      
-    function calculateAllRows() {
-
-        if (Calculation === false) return;
-
-
-        let totalNos = 0,
-            totalQty = 0,
-            totalRate=0,
-            totalAmount = 0,
-            totalPackAmt = 0,
-            totalDiscAmt = 0,
-            totalCgstAmt = 0,
-            totalSgstAmt = 0,
-            totalIgstAmt = 0,
-            totalVatAmt = 0,
-            totalCessAmt = 0,
-            totalTcsAmt = 0,
-            totalOtherAmt = 0,
-            totalNetAmt = 0;
-
-        $('#tblItemRecordPO tbody tr').each(function () {
-            const $row = $(this);
-            const idx = $row.attr('id').replace('row', '');
-
-            totalNos      = parseFloat($(`#TxtNos${idx}`).val()) || 0;
-            totalQty      = parseFloat($(`#TxtQty${idx}`).val()) || 0;
-            totalRate     = parseFloat($(`#TxtRate${idx}`).val()) || 0;
-            totalAmount   = totalQty + totalRate ;
-            $(`#TxtAmount${idx}`).val(totalAmount);
-            // $(`#TxtNetAmt${idx}`).val(totalAmount);
-
-
-            // totalPackAmt  += parseFloat($(`#TxtPack${idx}`).val()) || 0;
-            // totalDiscAmt  += parseFloat($(`#TxtDisc${idx}`).val()) || 0;
-            // totalCgstPer  += parseFloat($(`#TxtCgstPercent${idx}`).val()) || 0;
-            // totalSgstAmt  += parseFloat($(`#TxtSgst${idx}`).val()) || 0;
-            // totalIgstAmt  += parseFloat($(`#TxtIgst${idx}`).val()) || 0;
-            // totalVatAmt   += parseFloat($(`#TxtVat${idx}`).val()) || 0;
-            // totalCessAmt  += parseFloat($(`#TxtCess${idx}`).val()) || 0;
-            // totalTcsAmt   += parseFloat($(`#TxtTcsAmt${idx}`).val()) || 0;
-            // totalOtherAmt += parseFloat($(`#TxtOthAmt${idx}`).val()) || 0;
-            // totalOtherAmt += parseFloat($(`#TxtOthAmt2${idx}`).val()) || 0;
-            // totalNetAmt   += parseFloat($(`#TxtNetAmt${idx}`).val()) || 0;
-           PackPer = parseFloat($(`#TxtPackPercent${idx}`).val()) || 0;
-           DiscPer  = parseFloat($(`#TxtDiscPercent${idx}`).val()) || 0;
-           CgstPer  = parseFloat($(`#TxtCgstPercent${idx}`).val()) || 0;
-           SgstPer  = parseFloat($(`#TxtSgstPercent${idx}`).val()) || 0;
-           IgstPer  = parseFloat($(`#TxtIgstPercent${idx}`).val()) || 0;
-           VatPer   = parseFloat($(`#TxtVatPercent${idx}`).val()) || 0;
-           CessPer  = parseFloat($(`#TxtCessPercent${idx}`).val()) || 0;
-
-           CgstAmt= (totalAmount*CgstPer)/100;
-           SgstAmt= (totalAmount*SgstPer)/100;
-           IgstAmt= (totalAmount*IgstPer)/100;
-           DiscAmt= (totalAmount*PackPer)/100;
-
-
-           $(`#TxtCgst${idx}`).val(CgstAmt);
-           $(`#TxtSgst${idx}`).val(SgstAmt);
-           $(`#TxtIgst${idx}`).val(IgstAmt);
-           $(`#TxtNetAmt${idx}`).val((totalAmount+CgstAmt+SgstAmt+IgstAmt)-DiscAmt);
-
-
-         });
-
-        $('#NumTotalNosIt').val(totalNos.toFixed(2));
-        $('#NumQtyIt').val(totalQty.toFixed(2));
-        $('#NumAmountIt').val(totalAmount.toFixed(2));
-        $('#NumPackingAmtIt').val(totalPackAmt.toFixed(2));
-        $('#NumDiscAmtIt').val(totalDiscAmt.toFixed(2));
-        $('#NumCgstAmtIt').val(totalCgstAmt.toFixed(2));
-        $('#NumSgstAmtIt').val(totalSgstAmt.toFixed(2));
-        $('#NumIgstAmtIt').val(totalIgstAmt.toFixed(2));
-        $('#NumVatAmtIt').val(totalVatAmt.toFixed(2));
-        $('#NumCessAmtIt').val(totalCessAmt.toFixed(2));
-        $('#NumTCSIt').val(totalTcsAmt.toFixed(2));
-        $('#NumOtherAmtIt').val(totalOtherAmt.toFixed(2));
-        $('#NumNetAmtIt').val(totalNetAmt.toFixed(2));
-    }
-
-    function calculateAllTotals() {
-
-           if (Calculation === false) return;
-
-
-        let totalNos = 0,
-            totalQty = 0,
-            totalAmount = 0,
-            totalPackAmt = 0,
-            totalDiscAmt = 0,
-            totalCgstAmt = 0,
-            totalSgstAmt = 0,
-            totalIgstAmt = 0,
-            totalVatAmt = 0,
-            totalCessAmt = 0,
-            totalTcsAmt = 0,
-            totalOtherAmt = 0,
-            totalNetAmt = 0;
-
-        $('#tblItemRecordPO tbody tr').each(function () {
-            const $row = $(this);
-            const idx = $row.attr('id').replace('row', '');
-
-            totalNos      += parseFloat($(`#TxtNos${idx}`).val()) || 0;
-            totalQty      += parseFloat($(`#TxtQty${idx}`).val()) || 0;
-            totalAmount   += parseFloat($(`#TxtAmount${idx}`).val()) || 0;
-            totalPackAmt  += parseFloat($(`#TxtPack${idx}`).val()) || 0;
-            totalDiscAmt  += parseFloat($(`#TxtDisc${idx}`).val()) || 0;
-            totalCgstAmt  += parseFloat($(`#TxtCgst${idx}`).val()) || 0;
-            totalSgstAmt  += parseFloat($(`#TxtSgst${idx}`).val()) || 0;
-            totalIgstAmt  += parseFloat($(`#TxtIgst${idx}`).val()) || 0;
-            totalVatAmt   += parseFloat($(`#TxtVat${idx}`).val()) || 0;
-            totalCessAmt  += parseFloat($(`#TxtCess${idx}`).val()) || 0;
-            totalTcsAmt   += parseFloat($(`#TxtTcsAmt${idx}`).val()) || 0;
-            totalOtherAmt += parseFloat($(`#TxtOthAmt${idx}`).val()) || 0;
-            totalOtherAmt += parseFloat($(`#TxtOthAmt2${idx}`).val()) || 0;
-            totalNetAmt   += parseFloat($(`#TxtNetAmt${idx}`).val()) || 0;
-        });
-
-        $('#NumTotalNosIt').val(totalNos.toFixed(2));
-        $('#NumQtyIt').val(totalQty.toFixed(2));
-        $('#NumAmountIt').val(totalAmount.toFixed(2));
-        $('#NumPackingAmtIt').val(totalPackAmt.toFixed(2));
-        $('#NumDiscAmtIt').val(totalDiscAmt.toFixed(2));
-        $('#NumCgstAmtIt').val(totalCgstAmt.toFixed(2));
-        $('#NumSgstAmtIt').val(totalSgstAmt.toFixed(2));
-        $('#NumIgstAmtIt').val(totalIgstAmt.toFixed(2));
-        $('#NumVatAmtIt').val(totalVatAmt.toFixed(2));
-        $('#NumCessAmtIt').val(totalCessAmt.toFixed(2));
-        $('#NumTCSIt').val(totalTcsAmt.toFixed(2));
-        $('#NumOtherAmtIt').val(totalOtherAmt.toFixed(2));
-        $('#NumNetAmtIt').val(totalNetAmt.toFixed(2));
-    }
+    }      
 
     function formatDate(dateStr) {
       if (!dateStr) return '';
@@ -2519,6 +2374,5 @@
         console.error("Error loading Place:", error);
     }
 }
-
 
 </script>

@@ -1,5 +1,4 @@
 ﻿
-
 async function LoadDropdown() {
     try {
         await Promise.allSettled([
@@ -209,7 +208,6 @@ async function DDLTxtCity1SDt() {
     }
 }
 
-
 async function GetSaudanoList(partyCd) {
     try {
         const data = await $.ajax({
@@ -265,7 +263,6 @@ async function loadModificationdata() {
         toastr.info("Something went wrong while fetching data");
     }
 }
-
 function renderPurchaseModification(data) {
     console.log("Rendering Purchase Modification Data:", data);
     const tbody = $('#modificationList tbody');
@@ -296,4 +293,168 @@ function renderPurchaseModification(data) {
     const modalElement = document.getElementById('modificationModal');
     const myModal = new bootstrap.Modal(modalElement);
     myModal.show();
+}
+function calculateAllRows() {
+
+    if (Calculation === false) return;
+
+    let totalNos = 0,
+        totalQty = 0,
+        totalRate = 0,
+        totalAmount = 0,
+        totalPackAmt = 0,
+        totalDiscAmt = 0,
+        totalCgstAmt = 0,
+        totalSgstAmt = 0,
+        totalIgstAmt = 0,
+        totalVatAmt = 0,
+        totalCessAmt = 0,
+        totalTcsAmt = 0,
+        totalOtherAmt = 0,
+        totalNetAmt = 0;
+
+    $('#tblItemRecordPO tbody tr').each(function () {
+        const $row = $(this);
+        const idx = $row.attr('id').replace('row', '');
+
+        totalNos = parseFloat($(`#TxtNos${idx}`).val()) || 0;
+        totalQty = parseFloat($(`#TxtQty${idx}`).val()) || 0;
+        totalRate = parseFloat($(`#TxtRate${idx}`).val()) || 0;
+        totalAmount = totalQty + totalRate;
+        $(`#TxtAmount${idx}`).val(totalAmount);
+
+        PackPer = parseFloat($(`#TxtPackPercent${idx}`).val()) || 0;
+        DiscPer = parseFloat($(`#TxtDiscPercent${idx}`).val()) || 0;
+        CgstPer = parseFloat($(`#TxtCgstPercent${idx}`).val()) || 0;
+        SgstPer = parseFloat($(`#TxtSgstPercent${idx}`).val()) || 0;
+        IgstPer = parseFloat($(`#TxtIgstPercent${idx}`).val()) || 0;
+        VatPer = parseFloat($(`#TxtVatPercent${idx}`).val()) || 0;
+        CessPer = parseFloat($(`#TxtCessPercent${idx}`).val()) || 0;
+
+        CgstAmt = (totalAmount * CgstPer) / 100;
+        SgstAmt = (totalAmount * SgstPer) / 100;
+        IgstAmt = (totalAmount * IgstPer) / 100;
+        DiscAmt = (totalAmount * PackPer) / 100;
+
+        $(`#TxtCgst${idx}`).val(CgstAmt);
+        $(`#TxtSgst${idx}`).val(SgstAmt);
+        $(`#TxtIgst${idx}`).val(IgstAmt);
+        $(`#TxtNetAmt${idx}`).val((totalAmount + CgstAmt + SgstAmt + IgstAmt) - DiscAmt);
+    });
+
+    $('#NumTotalNosIt').val(totalNos.toFixed(2));
+    $('#NumQtyIt').val(totalQty.toFixed(2));
+    $('#NumAmountIt').val(totalAmount.toFixed(2));
+    $('#NumPackingAmtIt').val(totalPackAmt.toFixed(2));
+    $('#NumDiscAmtIt').val(totalDiscAmt.toFixed(2));
+    $('#NumCgstAmtIt').val(totalCgstAmt.toFixed(2));
+    $('#NumSgstAmtIt').val(totalSgstAmt.toFixed(2));
+    $('#NumIgstAmtIt').val(totalIgstAmt.toFixed(2));
+    $('#NumVatAmtIt').val(totalVatAmt.toFixed(2));
+    $('#NumCessAmtIt').val(totalCessAmt.toFixed(2));
+    $('#NumTCSIt').val(totalTcsAmt.toFixed(2));
+    $('#NumOtherAmtIt').val(totalOtherAmt.toFixed(2));
+    $('#NumNetAmtIt').val(totalNetAmt.toFixed(2));
+}
+function calculateAllTotals() {
+
+    if (Calculation === false) return;
+
+    let totalNos = 0,
+        totalQty = 0,
+        totalAmount = 0,
+        totalPackAmt = 0,
+        totalDiscAmt = 0,
+        totalCgstAmt = 0,
+        totalSgstAmt = 0,
+        totalIgstAmt = 0,
+        totalVatAmt = 0,
+        totalCessAmt = 0,
+        totalTcsAmt = 0,
+        totalOtherAmt = 0,
+        totalNetAmt = 0;
+
+    $('#tblItemRecordPO tbody tr').each(function () {
+        const $row = $(this);
+        const idx = $row.attr('id').replace('row', '');
+
+        totalNos += parseFloat($(`#TxtNos${idx}`).val()) || 0;
+        totalQty += parseFloat($(`#TxtQty${idx}`).val()) || 0;
+        totalAmount += parseFloat($(`#TxtAmount${idx}`).val()) || 0;
+        totalPackAmt += parseFloat($(`#TxtPack${idx}`).val()) || 0;
+        totalDiscAmt += parseFloat($(`#TxtDisc${idx}`).val()) || 0;
+        totalCgstAmt += parseFloat($(`#TxtCgst${idx}`).val()) || 0;
+        totalSgstAmt += parseFloat($(`#TxtSgst${idx}`).val()) || 0;
+        totalIgstAmt += parseFloat($(`#TxtIgst${idx}`).val()) || 0;
+        totalVatAmt += parseFloat($(`#TxtVat${idx}`).val()) || 0;
+        totalCessAmt += parseFloat($(`#TxtCess${idx}`).val()) || 0;
+        totalTcsAmt += parseFloat($(`#TxtTcsAmt${idx}`).val()) || 0;
+        totalOtherAmt += parseFloat($(`#TxtOthAmt${idx}`).val()) || 0;
+        totalOtherAmt += parseFloat($(`#TxtOthAmt2${idx}`).val()) || 0;
+        totalNetAmt += parseFloat($(`#TxtNetAmt${idx}`).val()) || 0;
+    });
+
+    $('#NumTotalNosIt').val(totalNos.toFixed(2));
+    $('#NumQtyIt').val(totalQty.toFixed(2));
+    $('#NumAmountIt').val(totalAmount.toFixed(2));
+    $('#NumPackingAmtIt').val(totalPackAmt.toFixed(2));
+    $('#NumDiscAmtIt').val(totalDiscAmt.toFixed(2));
+    $('#NumCgstAmtIt').val(totalCgstAmt.toFixed(2));
+    $('#NumSgstAmtIt').val(totalSgstAmt.toFixed(2));
+    $('#NumIgstAmtIt').val(totalIgstAmt.toFixed(2));
+    $('#NumVatAmtIt').val(totalVatAmt.toFixed(2));
+    $('#NumCessAmtIt').val(totalCessAmt.toFixed(2));
+    $('#NumTCSIt').val(totalTcsAmt.toFixed(2));
+    $('#NumOtherAmtIt').val(totalOtherAmt.toFixed(2));
+    $('#NumNetAmtIt').val(totalNetAmt.toFixed(2));
+}
+function calculateTaxAmounts(rowId) {
+    const rate = parseFloat($(`#TxtRate${rowId}`).val()) || 0;
+    const qty = parseFloat($(`#TxtQty${rowId}`).val()) || 0;
+    const amount = rate * qty;
+
+    const discPer = parseFloat($(`#TxtDiscPercent${rowId}`).val()) || 0;
+    const discAmt = (amount * discPer) / 100;
+    $(`#TxtDisc${rowId}`).val(discAmt.toFixed(2));
+
+    const packPer = parseFloat($(`#TxtPackPercent${rowId}`).val()) || 0;
+    const packAmt = (amount * packPer) / 100;
+    $(`#TxtPack${rowId}`).val(packAmt.toFixed(2));
+
+    const taxableAmount = amount - discAmt + packAmt;
+
+    const cgstPer = parseFloat($(`#TxtCgstPercent${rowId}`).val()) || 0;
+    const sgstPer = parseFloat($(`#TxtSgstPercent${rowId}`).val()) || 0;
+    const igstPer = parseFloat($(`#TxtIgstPercent${rowId}`).val()) || 0;
+    const cessPer = parseFloat($(`#TxtCessPercent${rowId}`).val()) || 0;
+    const tcsPer = parseFloat($(`#TxtTcsPer${rowId}`).val()) || 0;
+    const vatPer = parseFloat($(`#TxtVatPercent${rowId}`).val()) || 0;
+    const othPer1 = parseFloat($(`#TxtOthPer${rowId}`).val()) || 0;
+    const othPer2 = parseFloat($(`#TxtOthPer2${rowId}`).val()) || 0;
+
+    const cgstAmt = (taxableAmount * cgstPer) / 100;
+    const sgstAmt = (taxableAmount * sgstPer) / 100;
+    const igstAmt = (taxableAmount * igstPer) / 100;
+    const cessAmt = (taxableAmount * cessPer) / 100;
+    const tcsAmt = (taxableAmount * tcsPer) / 100;
+    const vatAmt = (taxableAmount * vatPer) / 100;
+    const othAmt1 = (taxableAmount * othPer1) / 100;
+    const othAmt2 = (taxableAmount * othPer2) / 100;
+
+    const totalTax = cgstAmt + sgstAmt + igstAmt + cessAmt + tcsAmt + vatAmt + othAmt1 + othAmt2;
+    const netAmt = taxableAmount + totalTax;
+
+    // Update DOM
+    $(`#TxtAmount${rowId}`).val(amount.toFixed(2));
+    $(`#TxtCgst${rowId}`).val(cgstAmt.toFixed(2));
+    $(`#TxtSgst${rowId}`).val(sgstAmt.toFixed(2));
+    $(`#TxtIgst${rowId}`).val(igstAmt.toFixed(2));
+    $(`#TxtCess${rowId}`).val(cessAmt.toFixed(2));
+    $(`#TxtTcsAmt${rowId}`).val(tcsAmt.toFixed(2));
+    $(`#TxtVat${rowId}`).val(vatAmt.toFixed(2));
+    $(`#TxtOthAmt${rowId}`).val(othAmt1.toFixed(2));
+    $(`#TxtOthAmt2${rowId}`).val(othAmt2.toFixed(2));
+    $(`#TxtNetAmt${rowId}`).val(netAmt.toFixed(2));
+
+    calculateAllTotals(); // Recalculate footer totals
 }

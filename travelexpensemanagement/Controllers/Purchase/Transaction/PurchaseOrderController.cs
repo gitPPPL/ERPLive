@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Asn1.X509.Qualified;
+using Org.BouncyCastle.Bcpg;
 using Org.BouncyCastle.Utilities;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
@@ -20,6 +21,7 @@ using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.Inventory.Master;
 using travelexpensemanagement.Models.Purchase.Transaction;
 using UglyToad.PdfPig.Content;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static travelexpensemanagement.Controllers.Master.StateMasterController;
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
@@ -423,17 +425,17 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = " data save failed." });
 
 
-                var result = await saveValidateData(POmodel) as JsonResult;
+                //var result = await saveValidateData(POmodel) as JsonResult;
 
-                if (result is JsonResult json)
-                {
-                    dynamic data = json.Value;
+                //if (result is JsonResult json)
+                //{
+                //    dynamic data = json.Value;
 
-                    if (data.status == false)
-                    {
-                        return Json(new { status = false, message = data.message });
-                    }
-                }
+                //    if (data.status == false)
+                //    {
+                //        return Json(new { status = false, message = data.message });
+                //    }
+                //}
 
 
                 using (var con = _dbcontext.GetErpConnection())
@@ -1591,7 +1593,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
         [HttpGet]
         public async Task<object> GetModificationData(int V_NO)
         {
@@ -1660,6 +1661,20 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 };
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     }
 }
