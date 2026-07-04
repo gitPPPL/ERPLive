@@ -1,29 +1,19 @@
 ﻿
 @using System.Text.Json
 
-
-
-
 @{
     ViewBag.Title = "Inward Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var logindate = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
     var PubUserLevel = Convert.ToInt32(TempData["PubUserLevel"]);
-
-
-        var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData
-             ?? new Models.UserSessionData();
-        var databaseName = ViewBag.DatabaseName as string;
-        var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0; // Ensure proper type conversion
-
-         
-
-
-
-
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData
+    ?? new Models.UserSessionData();
+    var databaseName = ViewBag.DatabaseName as string;
+    var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0; 
 }
 
 <div id="erp-toast-container"></div>
+
 <div class="erppage-header">
     <div class="erppage-header-left">
         <div class="erppage-header-icon">
@@ -58,7 +48,6 @@
     </div>
 </div>
 
-
 <div id="InwardEntryForm">
     <input type="hidden" class="form-control" id="TxtCode" name="CODE">
     <div class="erppage-container">
@@ -74,6 +63,7 @@
                     <label for="TxtDocNo" class="erppage-label">Document No</label>
                     <input type="text" class="erppage-input" id="TxtDocNo" placeholder="Enter Document No" readonly>
                 </div>
+
                 <div class="erppage-divfield">
                     <div class="erppage-divfield">             
 
@@ -105,7 +95,11 @@
                 <button class="erppage-tab active" data-tab="partydetails">Party Details</button>
                 <button class="erppage-tab" data-tab="shippinginfo">Shipping Info</button>
                 <button class="erppage-tab" data-tab="billchallan">Bill & Challan</button>
-            </div>
+        </div>
+
+
+
+
         <div class="erppage-tab-content active" id="partydetails">
                 <div class="erppage-accordion-header">Party Details</div>
                 <div class="erppage-accordion-body">
@@ -170,6 +164,9 @@
                     </fieldset>
                 </div>
             </div>
+
+
+
         <div class="erppage-tab-content" id="shippinginfo">
                 <div class="erppage-accordion-header">Shipping Info</div>
                 <div class="erppage-accordion-body">
@@ -878,34 +875,26 @@
     </div>
 </div>
 
-
-
-
 <script>
-    // Passing only required variables to JS
     window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
-        CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
-        UserId = globalVariables.PubUserId,
-        UserName = globalVariables.PubUserName,
-        UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
-        FYearCode = globalVariables.PubFYearCode,
-        BranchCode = globalVariables.PubBranchCode,
-        LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
-        CompanyName = globalVariables.CompanyName,
-        Address1 = globalVariables.Address1,
-        Address2 = globalVariables.Address2,
-        GST = globalVariables.gstin,
-        PAN = globalVariables.PAN,
-        Phone = globalVariables.Phone,
-        Email = globalVariables.Email
+            CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
+            UserId = globalVariables.PubUserId,
+            UserName = globalVariables.PubUserName,
+            UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
+            FYearCode = globalVariables.PubFYearCode,
+            BranchCode = globalVariables.PubBranchCode,
+            LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
+            CompanyName = globalVariables.CompanyName,
+            Address1 = globalVariables.Address1,
+            Address2 = globalVariables.Address2,
+            GST = globalVariables.gstin,
+            PAN = globalVariables.PAN,
+            Phone = globalVariables.Phone,
+            Email = globalVariables.Email
     }));
 
     window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
 </script>
-
-
-
-
 
 <script src="~/js/Erpjs/GateEntry/Transaction/MaterialInwardEntry/MaterialInwardEntry.js"></script>
 <script src="~/js/Erpjs/GateEntry/Transaction/MaterialInwardEntry/MaterialInwardEntryinit.js"></script>

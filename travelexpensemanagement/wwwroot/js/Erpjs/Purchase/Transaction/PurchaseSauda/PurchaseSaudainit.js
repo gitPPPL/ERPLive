@@ -18,6 +18,7 @@ let attachmentIndex = Date.now();
 const browseBtn = document.getElementById("browseBtn");
 const fileInput = document.getElementById("fileInput");
 const dropZone = document.getElementById("dropZone");
+
 let selectedFiles = [];
 
 $(document).ready(async function () {
@@ -45,6 +46,9 @@ $(document).ready(async function () {
     LoadDropDown() .then(() => {
             if (rowId) {
                 return LoadFormByID(rowId).then(() => {
+
+                    checkApprovalStatus("paud", rowId, 'ORDER1');
+
 
                    const v_no = $('#txtDocNo').val(); 
 
@@ -539,6 +543,42 @@ $(document).ready(async function () {
         });
 
         renderFileList();
+    });
+
+
+    $(document).on('click', '#btn_Sendapproval', function () {
+        var FromName = window.location.pathname.split('/')[1];
+        $.ajax({
+            url: '/Approval/CheckPendingUser',
+            type: 'POST',
+            data: { vNo: rowId, vType: "Paud" },
+            success: function (response) {
+                console.log('Response:', response);
+                // Pending with another user
+                if (response.success === false) {
+                    showToast(`Pending With Another User (${response.userCode})`,
+                        { type: "warning" });
+                    return;
+                }
+                // Approval_Code = 5
+                if (response.approvalCode8 === true) {
+                    OpenApprovalModal({ DocType: "Paud", DocNo: rowId, TableName: 'SAUDA' });
+                    return;
+                }
+                // Approval_Code != 8
+                OpenSendForApprovalModal({ DocType: "Paud", DocNo: rowId, UserCode: null, UserName: null, DocDate: null, TableName: 'SAUDA',  FromName, FromName });
+
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+                alert('Error while checking approval status.');
+            }
+        });
+
+    });
+
+    $(document).on('click', '#btn_Approved', function () {
+        OpenApprovalModal({ DocType: "Paud", DocNo: rowId, TableName: 'SAUDA' });
     });
 
 });

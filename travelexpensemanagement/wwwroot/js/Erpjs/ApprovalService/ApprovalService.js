@@ -77,10 +77,6 @@
     }
 }
 
-
-
-
-
 var ApprovalData = {
     DocType: '',
     DocNo: 0,
@@ -148,6 +144,7 @@ function createSendForApprovalModal() {
     </div>`;
     $('body').append(modalHtml);
 }
+
 window.OpenSendForApprovalModal = function (data) {
     ApprovalData = data;
     createSendForApprovalModal();
@@ -348,6 +345,7 @@ function createApprovalModal() {
 
     $('body').append(html);
 }
+
 window.OpenApprovalModal = function (data) {
     ApprovalWindowData = data;
     createApprovalModal();

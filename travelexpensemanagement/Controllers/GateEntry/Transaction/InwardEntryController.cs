@@ -1583,16 +1583,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         //    }
         //}
 
-
-
-
-
-
-
-
-
-
-
         public async Task<JsonResult> GetTransitData(int VoucherNo)
         {
             var data = await _inwardEntryRepository.GetGetTransitDataCode(VoucherNo);

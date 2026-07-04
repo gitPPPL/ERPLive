@@ -26,16 +26,13 @@ namespace travelexpensemanagement.Controllers
         {
             return View();
         }
+
         [HttpGet]
         public async Task<IActionResult> CheckApprovalStatus(string v_type,int v_no, string tableName)
         {
             string status = await _approvalService.GetApprovalStatus(v_type, v_no, tableName);
 
-            return Json(new
-            {
-                success = true,
-                message = status
-            });
+            return Json(new { success = true, message = status });
         }
         public JsonResult DDlSendTo(string v_type)
         {
@@ -240,21 +237,21 @@ namespace travelexpensemanagement.Controllers
                     string docName = "";
 
                     string query = $@"
-                SELECT 
-                    G.V_TYPE,
-                    G.V_NO,
-                    G.DOC_ID,
-                    G.UUSER AS ORIGIN_CODE,
-                    G.UDATE AS ORIGIN_DATE,
-                    G.EDATE AS SEND_DATE,
-                    ISNULL(D.NAME,'') AS DOC_NAME
-                FROM {model.tableName} G
-                LEFT JOIN DOCTYPE_MAST D ON D.CODE = G.V_TYPE
-                WHERE G.V_NO = @V_NO
-                  AND G.V_TYPE = @V_TYPE
-                  AND G.YEAR_CODE = @YEAR_CODE
-                  AND G.BRANCH_CODE = @BRANCH_CODE
-                  AND G.COMP_CODE = @COMP_CODE";
+                        SELECT 
+                        G.V_TYPE,
+                        G.V_NO,
+                        G.DOC_ID,
+                        G.UUSER AS ORIGIN_CODE,
+                        G.UDATE AS ORIGIN_DATE,
+                        G.EDATE AS SEND_DATE,
+                        ISNULL(D.NAME,'') AS DOC_NAME
+                        FROM {model.tableName} G
+                        LEFT JOIN DOCTYPE_MAST D ON D.CODE = G.V_TYPE
+                        WHERE G.V_NO = @V_NO
+                        AND G.V_TYPE = @V_TYPE
+                        AND G.YEAR_CODE = @YEAR_CODE
+                        AND G.BRANCH_CODE = @BRANCH_CODE
+                        AND G.COMP_CODE = @COMP_CODE";
 
                     using (SqlCommand fetchCmd = new SqlCommand(query, con))
                     {
@@ -522,7 +519,6 @@ namespace travelexpensemanagement.Controllers
                 });
             }
         }
-
 
 
         //[HttpPost]
