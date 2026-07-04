@@ -343,3 +343,31 @@ function getCurrentDateYMD() {
     const yyyy = today.getFullYear();
     return `${yyyy}-${mm}-${dd}`;
 };
+
+
+function checkPermission(controllerName) {
+
+    $.ajax({
+        url: '/Permission/GetCurrentMenuPermission',
+        type: 'GET',
+        data: {
+            controllerName: controllerName
+        },
+        success: function (res) {
+
+            if (!res.success)
+                return;
+
+            $("#button_add").toggle(res.add);
+            $("#button_edit").toggle(res.edit);
+            $("#button_delete").toggle(res.delete);
+            $("#button_print").toggle(res.print);
+            $("#button_export").toggle(res.export);
+            $("#button_mail").toggle(res.mail);
+            $("#button_approval").toggle(res.approval);
+            $("#button_document").toggle(res.docdetail);
+        }
+    });
+}
+
+

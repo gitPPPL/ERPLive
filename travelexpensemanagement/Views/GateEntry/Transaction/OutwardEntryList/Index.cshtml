@@ -1,37 +1,6 @@
 ﻿@{
     ViewBag.Title = "Outward Entry List";
     Layout = "~/Views/Shared/_Layout.cshtml";
-
-
-
-    var currentMenu = ViewBag.CurrentMenu as string;
-    bool canAdd = false;
-    bool canEdit = false;
-    bool canDelete = false;
-    bool canPrint = false;
-    bool canExport = false;
-    bool canMail = false;
-    bool canApproval = false;
-    bool canDocDetail = false;
-
-    foreach (var permission in Model.UserMenuPermissions)
-    {
-        if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
-        {
-            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
-            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
-            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
-            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
-            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
-            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
-            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
-            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
-            break;
-        }
-    }
-
-
-
 }
 
 <!-- HEADER -->
@@ -44,13 +13,11 @@
     <div class="erppagelist-header-right">
 
 
-        @if (canAdd == true)
-        {
-            <button type="button" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "OutwardEntry")'">
+
+        <button id="button_add" type="button" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "OutwardEntry")'">
                 <i class="fa fa-plus"></i>Add New
             </button>
-        }
-    
+     
     </div>
 </div>
 
@@ -63,22 +30,17 @@
 
     <div class="erppagelist-actions">
 
-        @if(@canPrint)
-        {
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btn_Report">
+
+
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="button_print">
             <i class="fa fa-print"></i>Print
         </button>
-        }
+        
 
-        @if(@canExport)
-        {
-            <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btn_exportExcel">
-                <i class="fa fa-file-excel"></i>Export
-            </button>
-        }
-
-
-    
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="button_export">
+            <i class="fa fa-file-excel"></i>Export
+        </button>
+            
     </div>
 </div>
 
@@ -150,7 +112,13 @@
     let pageSize = 10;
     let totalCount = 0;
 
+    var controllerName = window.location.pathname.split('/')[1];
+
+
     $(document).ready(function () {
+
+       checkPermission(controllerName);
+
         loadAlloutward();
         $('#searchBox').on('keyup', function () {
             currentPage = 1;
@@ -160,15 +128,17 @@
         $('#pageSizeSelect').on('change', function () {
             pageSize = parseInt($(this).val());
             currentPage = 1;
+
+ 
             loadAlloutward();
         });
 
-        $('#btn_exportExcel').on('click', function () {
+        $('#button_export').on('click', function () {
             let text = $('#searchBox').val();
             window.location.href = '/OutwardEntryList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
         });
 
-        $('#btn_Report').on('click', function () {
+        $('#button_print').on('click', function () {
             let text = $('#searchBox').val();
             window.open('/OutwardEntryList/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
         });
@@ -235,27 +205,14 @@
 
                     <td class="action-col">
                     <div class="action-wrap">
-                    @if(@canEdit)
-                    {
-
-                            <button class="act-btn edit btn-edit" onclick="edit('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>
-
-                    }
-     
-                        <button class="act-btn view btn-view" onclick="view('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-eye"></i></button>
-                       
-                    @if(@canDelete)
-                    {
-                                <button class="act-btn delete btn-delete" onclick="deleteItem('${item.doC_ID}')"><i class="fa fa-trash"></i></button>
-
-                    }
-                        
-                    @if(@canDocDetail)
-                    {
-                                <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+    
+                        <button class="act-btn edit btn-edit" onclick="edit('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>                    
+                       <button class="act-btn view btn-view" onclick="view('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-eye"></i></button>                 
+                       <button class="act-btn delete btn-delete" onclick="deleteItem('${item.doC_ID}')"><i class="fa fa-trash"></i></button>
+                      <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
 
 
-                    }
+                 
                     </div>
              </td>
                 </tr>

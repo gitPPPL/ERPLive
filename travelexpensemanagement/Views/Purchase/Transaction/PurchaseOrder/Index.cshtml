@@ -2163,77 +2163,7 @@
         });
     }
 
-    function bindDropdownData(rowCount) {
-        const itemSelect = $(`#ddlItemname${rowCount}`);
-        const makeSelect = $(`#ddlImake${rowCount}`);
-        const unitSelect = $(`#ddlUnit${rowCount}`);
-        const departmentSelect = $(`#ddlDepartment${rowCount}`);
-        const taxSelect = $(`#ddlTax${rowCount}`);
-        const placeofUse = $(`#ddlIplaceofUse${rowCount}`);
-
-        const loadDropdown = (url, selectElem, defaultText, formatter) => {
-            return new Promise((resolve, reject) => {
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (response) {
-                        if (response.status) {
-                            selectElem.empty().append(`<option value="">${defaultText}</option>`);
-                            $.each(response.data, function (i, item) {
-                                selectElem.append(formatter(item));
-                            });
-
-                            selectElem.select2({
-                                width: '300px',
-                                placeholder: defaultText,
-                                allowClear: true,
-                                minimumResultsForSearch: selectElem.is(itemSelect) ? 0 : -1 // Only enable search for itemSelect
-                            });
-
-                            resolve();
-                        } else {
-                            toastr.error(`${defaultText} Load failed`);
-                            resolve();
-                        }
-                    },
-                    error: reject
-                });
-            });
-        };
-
-        return Promise.all([
-            loadDropdown('@Url.Action("GetMakeList", "PurchaseOrder")', makeSelect, "- Select Make -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-            loadDropdown('@Url.Action("GetUnitList", "PurchaseOrder")', unitSelect, "- Select Unit -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-            loadDropdown('@Url.Action("GetDepartmentList", "PurchaseOrder")', departmentSelect, "- Select Department -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-            loadDropdown('@Url.Action("GetMachineMastList", "PurchaseOrder")', placeofUse, "- Select Place Of Use -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-
-            loadDropdown('@Url.Action("GetItemList", "PurchaseOrder")',
-                itemSelect,
-                "- Select Item -",
-                item => `<option
-                    data-unitCd="${item.UNIT_CODE}"
-                    data-unitname="${item.UNIT_NAME}"
-                    value="${item.CODE}">${item.NAME}</option>`
-            ),
-
-
-            loadDropdown('@Url.Action("GetTaxList", "PurchaseOrder")', taxSelect, "- Select Tax -", item => `
-                <option
-                    value="${item.CODE}"
-                    data-CSgstPer="${item.CSGST_PER}"
-                    data-IgstPer="${item.IGST_PER}"
-                    data-TdsPer="${item.TDS_PER}"
-                    data-TcsPer="${item.TCS_PER}"
-                    data-VatPer="${item.VAT_PER}"
-                    data-OtherPer1="${item.OTH_PER}"
-                    data-OtherPer2="${item.OTH_PER2}">
-                    ${item.NAME}
-                </option>`)
-        ]).then(() => {
-            bindUnitOnItemSelect(itemSelect, unitSelect);
-        });
-    }      
+  
 
     function formatDate(dateStr) {
       if (!dateStr) return '';
@@ -2309,29 +2239,6 @@
                });
      }
 
-    function setEnterKeyFocusOnTable(sequence, rowCount) {
-        sequence.forEach((id, index) => {
-            let elementId = `#${id}${rowCount}`;
-            $(document).on('keydown', elementId, function (e) {
-                if (e.key === 'Enter' || e.key === 'Tab' || e.keyCode === 13 || e.keyCode === 9) {
-                    e.preventDefault();
-
-                    let nextIndex = index + 1;
-                    if (nextIndex < sequence.length) {
-                        let nextElementId = `#${sequence[nextIndex]}${rowCount}`;
-                        if ($(nextElementId).length) {
-                            $(nextElementId).focus();
-                        }
-                    } else {
-
-                        addItemRecordRow();
-                        setEnterKeyFocus(sequence, rowCount + 1);
-                        $(`#${sequence[0]}${rowCount + 1}`).focus();
-                    }
-                }
-            });
-        });
-    }
         
     async function GetPartyAddress(Partycode) {
     try {
