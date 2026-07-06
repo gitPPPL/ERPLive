@@ -308,22 +308,11 @@ async function GetDocData(MasterTblId, readOnly) {
         Calculation = false;
         SelectShipParty = false;
 
-        await fillFormFields(response.header);
+        //await Promise.all([
+        //    fillFormFields(response.header),
+        //    fillItemDetailsTable(response.detail)
+        //]);
 
-
-        console.log("Before fillFormFields");
-        await fillFormFields(response.header);
-        console.log("After fillFormFields");
-
-        console.log("Before fillItemDetailsTable", response.detail);
-         fillItemDetailsTable(response.detail);
-        console.log("After fillItemDetailsTable");
-
-
-
-
-
-        //await fillItemDetailsTable(response.detail);
 
         Calculation = true;
         SelectShipParty = true;

@@ -12,8 +12,6 @@
 
     <div class="erppagelist-header-right">
 
-
-
         <button id="button_add" type="button" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "OutwardEntry")'">
                 <i class="fa fa-plus"></i>Add New
             </button>
@@ -114,12 +112,12 @@
 
     var controllerName = window.location.pathname.split('/')[1];
 
-
     $(document).ready(function () {
 
-       checkPermission(controllerName);
+          checkPermission(controllerName, function () {
+            loadAlloutward();
+        });
 
-        loadAlloutward();
         $('#searchBox').on('keyup', function () {
             currentPage = 1;
             loadAlloutward();
@@ -128,8 +126,6 @@
         $('#pageSizeSelect').on('change', function () {
             pageSize = parseInt($(this).val());
             currentPage = 1;
-
- 
             loadAlloutward();
         });
 
@@ -144,6 +140,8 @@
         });
 
     });
+
+
     // ================= LOAD DATA =================
      function loadAlloutward() {
         $.ajax({
@@ -156,11 +154,6 @@
                 pageSize: pageSize
             },
             success: function (res) {
-
-                console.log("List data",res);
-
-
-
                 if (!res.success) {
                     toastr.error("Failed to load data.");
                     return;
@@ -205,11 +198,26 @@
 
                     <td class="action-col">
                     <div class="action-wrap">
-    
-                        <button class="act-btn edit btn-edit" onclick="edit('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>                    
-                       <button class="act-btn view btn-view" onclick="view('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-eye"></i></button>                 
-                       <button class="act-btn delete btn-delete" onclick="deleteItem('${item.doC_ID}')"><i class="fa fa-trash"></i></button>
-                      <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+
+                            <button class="act-btn delete permission-delete"
+                            onclick="deleteItem('${item.doC_ID}')">
+                            <i class="fa fa-trash"></i>
+                            </button>
+
+                            <button class="act-btn view btn-view"
+                            onclick="view('${item.v_NO}','${item.v_TYPE}')">
+                            <i class="fa fa-eye"></i>
+                            </button>
+
+                            <button class="act-btn delete permission-delete"
+                            onclick="deleteItem('${item.doC_ID}')">
+                            <i class="fa fa-trash"></i>
+                            </button>
+
+                            <button class="act-btn document btn-document"
+                            onclick="showDocumentPopup('${item.doC_ID}')">
+                            <i class="fa fa-file"></i>
+                            </button>
 
 
                  
@@ -217,6 +225,10 @@
              </td>
                 </tr>
             `);
+
+            applyGridPermission();
+
+
         });
     }
     // ================= PAGINATION (VISITOR STYLE) =================

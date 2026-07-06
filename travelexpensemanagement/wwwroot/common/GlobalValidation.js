@@ -240,6 +240,8 @@ function enforceMaxlength(selector) {
 $(document).ready(function () {
     enforceMaxlength('input[type="number"][data-maxlength]');
 });
+
+
 //How to call
 //<input type="number" class="form-control" id="FLAG_A" name="FLAG_A" data-maxlength="5">
 
@@ -344,8 +346,7 @@ function getCurrentDateYMD() {
     return `${yyyy}-${mm}-${dd}`;
 };
 
-
-function checkPermission(controllerName) {
+function checkPermission(controllerName, callback) {
 
     $.ajax({
         url: '/Permission/GetCurrentMenuPermission',
@@ -358,6 +359,8 @@ function checkPermission(controllerName) {
             if (!res.success)
                 return;
 
+            permission = res;
+
             $("#button_add").toggle(res.add);
             $("#button_edit").toggle(res.edit);
             $("#button_delete").toggle(res.delete);
@@ -366,8 +369,19 @@ function checkPermission(controllerName) {
             $("#button_mail").toggle(res.mail);
             $("#button_approval").toggle(res.approval);
             $("#button_document").toggle(res.docdetail);
+
+            applyGridPermission();
+
+            if (callback)
+                callback();
         }
     });
 }
+function applyGridPermission() {
 
+    if (!permission)
+        return;
 
+    $(".permission-edit").toggle(permission.edit);
+    $(".permission-delete").toggle(permission.delete);
+}
