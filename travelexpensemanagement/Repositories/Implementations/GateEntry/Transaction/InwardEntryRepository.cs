@@ -278,41 +278,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             return response;
         }
-       
-        //public async Task<RepositoryResponseList<int>> DDlTransitNoAsync(  string v_type,  int v_no,  int partycode, DateTime ExpiryDate, string mode = "")
-        //{
-        //    var getdata = _globalVariableService.GetGlobalVariables();
-        //    var dataList = new List<int>();
-
-        //    using (SqlConnection con = _dbConnection.GetErpConnection())
-        //    {
-        //        await con.OpenAsync();
-
-        //        using (SqlCommand cmd = new SqlCommand("sp_InwardEntry", con))
-        //        {
-        //            cmd.CommandType = CommandType.StoredProcedure;
-        //            cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = getdata.PubCompCode;
-        //            cmd.Parameters.Add("@V_Type", SqlDbType.NVarChar, 10).Value = (object)v_type ?? DBNull.Value;
-        //            cmd.Parameters.Add("@V_No", SqlDbType.Int).Value = v_no;
-        //            cmd.Parameters.Add("@PARTY_CODE", SqlDbType.Int).Value = partycode;
-        //            cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = getdata.PubBranchCode;
-        //            cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 50).Value = "DDlTransitNo";
-        //            cmd.Parameters.Add("@SaveAction", SqlDbType.NVarChar, 50).Value = mode;
-        //            cmd.Parameters.Add("@EWB_EXPDATE", SqlDbType.Date).Value = Convert.ToDateTime(ExpiryDate).AddMonths(-1);
-
-        //            using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-        //            {
-        //                while (await reader.ReadAsync())
-        //                {
-        //                    dataList.Add(Convert.ToInt32(reader["V_No"]));
-        //                }
-        //            }
-        //        }
-        //    }
-        //    return new RepositoryResponseList<int>  {  status = true, message = "Success",  totalCount = dataList.Count, data = dataList  };
-        //}
-
-
 
 public async Task<RepositoryResponseList<int>> DDlTransitNoAsync(  string v_type,  int v_no,  int partycode, DateTime ExpiryDate, string mode = "")
     {

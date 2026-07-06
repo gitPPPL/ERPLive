@@ -381,7 +381,60 @@ function applyGridPermission() {
 
     if (!permission)
         return;
-
     $(".permission-edit").toggle(permission.edit);
     $(".permission-delete").toggle(permission.delete);
+}
+
+let Entrypermission = null;
+
+function checkPermissionForEntryPage(controllerName) {
+
+    $.ajax({
+        url: '/Permission/GetCurrentEntryPagePermission',
+        type: 'GET',
+        data: {
+            controllerName: controllerName
+        },
+        success: function (res) {
+            console.log(res);
+            if (!res.success)
+                return;
+            Entrypermission = res;
+            $("#button_add").toggle(res.add);
+            $("#button_edit").toggle(res.edit);
+            $("#button_delete").toggle(res.delete);
+            $("#button_print").toggle(res.print);
+            $("#button_export").toggle(res.export);
+            $("#button_mail").toggle(res.mail);
+            $("#button_approval").toggle(res.approval);
+            $("#button_document").toggle(res.docdetail);
+            $(".permission-edit").toggle(res.edit);
+            $(".permission-delete").toggle(res.delete);
+            applyGridPermissionforEntryPage();
+        }
+    });
+}
+function applyGridPermissionforEntryPage() {
+    if (!Entrypermission) return;
+    $(".permission-edit").toggle(Entrypermission.edit);
+    $(".permission-delete").toggle(Entrypermission.delete);
+}
+function SetFYDate(inputId, loginDate) {
+    var $input = $('#' + inputId);
+    var d = new Date(loginDate);
+    var fyStartYear = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+    var minDate = fyStartYear + '-04-01';  
+    var maxDate = loginDate;           
+    $input.attr('min', minDate).attr('max', maxDate).val(maxDate);
+
+    $input.on('change', function () {
+        var selectedDate = new Date(this.value);
+        var min = new Date(minDate);
+        var max = new Date(maxDate);
+
+        if (selectedDate < min || selectedDate > max) {
+            toastr.info('Please select a date within the Financial Year and not greater than Login Date.');
+            this.value = maxDate;
+        }
+    });
 }

@@ -1,28 +1,22 @@
-﻿
-
-const urlParams = new URLSearchParams(window.location.search);
+﻿const urlParams = new URLSearchParams(window.location.search);
 const rowId = urlParams.get('id');
 const mode = urlParams.get('mode');
 const isReadOnly = (mode === 'view');
 const vtype = urlParams.get('vtype');
 const PubDefEWaybillAmt = 50000; 
-
-
 var globalVars = window.globalVariables || {};
+let LoginDate = globalVars.LoginDate;
 var database = window.database || "";
-
-
 var PubUserLevel = '@PubUserLevel';
-var LoginDate = '@logindate';
 var itemList = [];
 var deptList = [];
 var unitList = [];
+var controllerName = window.location.pathname.split('/')[1];
 
 $(document).ready(async function () {
-
-    await LoadDropDown();
-
     SetFYDate('InDate', LoginDate);
+    checkPermissionForEntryPage(controllerName);
+    await LoadDropDown();
 
     if (PubUserLevel == 1) {
         $('#InDate').prop('disabled', false);
@@ -35,25 +29,18 @@ $(document).ready(async function () {
 
     if (rowId) {
         await LoadFormByID(rowId, vtype);
-
         checkApprovalStatus(vtype, rowId, 'GATE1');
-
-        $('#ddlDocType').prop('disabled', true);
-        $('#InDate').prop('disabled', true);
-        $('#InTime').prop('disabled', true);
         $('.erppagelist-toolbar-end').show();
         if (mode === "view") {
             setFormReadOnly();   
-           // checkApprovalStatus(vtype, rowId, 'GATE1');
         }
     }
     else {
-
         $('#ddlDocStatus').prop('disabled', true);
         let today = new Date().toISOString().split('T')[0];
-        $('#InDate').attr('min', LoginDate);
         $('#TxtRptDate').val(today);
         let now = new Date();
+
         $('#InTime').val(now.toTimeString().slice(0, 8));
         $('#TiRptDate').val(now.toTimeString().slice(0, 8));
         GetVNo($('#ddlDocType').val());
@@ -191,34 +178,6 @@ $(document).ready(async function () {
             }
         });
     });
-
-    //$('#TxtVehicleNo').on('focusout', function () {
-
-    //    var VehicleNo = $.trim($(this).val());
-
-    //    if (VehicleNo === '') {
-    //        return;
-    //    }
-
-    //    $.ajax({
-    //        url: '/InwardEntry/Getvehicleno',
-    //        type: 'GET',
-    //        data: {
-    //            TruckNo: VehicleNo              
-    //        },
-    //        success: function (response) {
-    //            console.log('Response:', response);
-    //            if (response.success) {
-               
-    //            } 
-    //        },
-    //        error: function (xhr, status, error) {
-    //            console.error(error);
-    //            showToast('Error while Vehicle No data.', { type: 'error' });
-    //        }
-    //    });
-    //});
-
 
     $('#TxtWbSlipNo').on('change', function () {
 
@@ -517,7 +476,6 @@ $(document).ready(async function () {
         $('#TxtContainerNo').val(row.containeR_NO);
     });
 
-
     $('#btn_Sendapp').on('click', function () {
         SendApproval();
     });
@@ -525,7 +483,6 @@ $(document).ready(async function () {
     $('#btn_approvalok').on('click', function () {
         SendWindowApproval();
     });
-
 
     $(document).on('change', '#ddlTransit', function () {
         const transitNo = $(this).val();
@@ -612,6 +569,7 @@ $(document).ready(async function () {
             showToast('Error loading data.', { type: 'error' });
         }
     });
+
     //kks
 
     $(document).on('click', '#btn_Sendapproval', function () {

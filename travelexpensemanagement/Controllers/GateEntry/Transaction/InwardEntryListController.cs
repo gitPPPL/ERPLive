@@ -46,14 +46,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         public IActionResult Index()
         {
             ViewBag.CurrentMenu = "Material Inward";
-            var permissions = _moduleService.GetUserMenuPermissions();
-            var userLevel = _moduleService.GetUserLevel();
-            var model = new UserMenuPermissionsViewModel
-            {
-                UserMenuPermissions = permissions,
-                UserLevel = userLevel,
-            };
-            return View("~/Views/GateEntry/Transaction/InwardEntryList/Index.cshtml", model);
+
+            return View("~/Views/GateEntry/Transaction/InwardEntryList/Index.cshtml");
         }
 
         [HttpGet]

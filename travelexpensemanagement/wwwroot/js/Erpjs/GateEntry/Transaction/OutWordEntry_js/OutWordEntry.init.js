@@ -1,30 +1,35 @@
 ﻿
 
-        let itemMap = { };
-        let UnitMap = { };
-        let DeptMap = {};
-        let pendingData = [];
-        let currentPage = 1;
-        let rowsPerPage = 10;
-        const urlParams = new URLSearchParams(window.location.search);
-        const rowId = urlParams.get('id');
-        const vtype = urlParams.get('VType');
-        const $tbody = $("#tblOutwardEntry tbody");
-        const form = $('#OutwardEntryForm');
-        const mode = urlParams.get('mode');
-        const isReadOnly = (mode === 'view');
-        var globalVars = window.globalVariables || {};
-        var database = window.database || "";
-        let PubUserLevel = globalVars.UserLevel;
-        let CompCode = globalVars.CompCode;
-        let LoginDate = globalVars.LoginDate;
+    let itemMap = { };
+    let UnitMap = { };
+    let DeptMap = {};
+    let pendingData = [];
+    let currentPage = 1;
+    let rowsPerPage = 10;
+    const urlParams = new URLSearchParams(window.location.search);
+    const rowId = urlParams.get('id');
+    const vtype = urlParams.get('VType');
+    const $tbody = $("#tblOutwardEntry tbody");
+    const form = $('#OutwardEntryForm');
+    const mode = urlParams.get('mode');
+    const isReadOnly = (mode === 'view');
+    var globalVars = window.globalVariables || {};
+    var database = window.database || "";
+    let PubUserLevel = globalVars.UserLevel;
+    let CompCode = globalVars.CompCode;
+    let LoginDate = globalVars.LoginDate;
+    var controllerName = window.location.pathname.split('/')[1];
 
     $(document).ready(function () {
         (async () => {
             try {
+
+                checkPermissionForEntryPage(controllerName);
+
+
+
                 await LoadDropDowns();
                 SetFYDate('DtDocDate', LoginDate);
-
 
                 if (PubUserLevel == 1) {
                     $('#DtDocDate').prop('disabled', false);
