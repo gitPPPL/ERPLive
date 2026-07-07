@@ -26,16 +26,14 @@
         <button type="button" class="erppage-btn erppage-btn-copy" id="button_print" onclick="TransitReport();">
             <i class="fa-solid fa-print"></i> Print
         </button>
-@* 
-        Approval Code  *@
+        
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail" id="button_mail">
+         <i class="fa fa-envelope"></i>Mail
+        </button>
 
         <button type="button" id="btn_Sendapproval" style="display:none;" class="erppagebtn_sendapproval"> Send For Approval </button>
 
         <button type="button"  id="btn_Approved" style="display:none;" class="erppagebtn_approved">  Approved </button>
-
-
-
-
 
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InwardEntryList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list

@@ -5,30 +5,36 @@ const rowId = urlParams.get('id');
 const mode = urlParams.get('mode');
 const isReadOnly = urlParams.get('readOnly') === 'true';
 let itemNameOptions = '';
-let PubUserLevel = '@PubUserLevel';
-let LoginDate = '@logindate';
+
+var globalVars = window.globalVariables || {};
+let LoginDate = globalVars.LoginDate;
+var database = window.database || "";
 
 $(document).ready(function () {
+
+    SetFYDate('DtDocDate', LoginDate);
+
+    const today = new Date().toISOString().split('T')[0]; 
+    $("#DtFrom").val(today);
+    $("#DtTo").val(today);
+
     LoadDropDown().then(() => {
         if (rowId) {
             LoadFormByID(rowId);
             document.getElementById("DtDocDate").disabled = true;
             document.getElementById("ddlShift").disabled = true;
             document.getElementById("ddlProdPlace").disabled = true;
+
+            if (mode === "view") {
+                setFormReadOnly();
+                $('#FlakesQCEntryForm').after('<span class="badge bg-secondary ms-2">Read‑Only Mode</span>');
+            }
+        }
+        else {
+            GetVNo();     
+            document.getElementById('DtTime').value = ((d => `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`)(new Date()));
         }
     });
-
-    if (!rowId) {
-        GetVNo();
-        // $('#DtDocDate').attr('min', LoginDate);
-        document.getElementById('DtDocDate').valueAsDate = new Date();
-        document.getElementById('DtTime').value = ((d => `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`)(new Date()));
-    }
-
-    if (mode === "view") {
-        setFormReadOnly();
-        $('#FlakesQCEntryForm').after('<span class="badge bg-secondary ms-2">Read‑Only Mode</span>');
-    }
 
     $('#btn_Copy').on('click', function () {
         const docDate = $('#DtDocDate').val();
@@ -184,4 +190,16 @@ $(document).ready(function () {
     });
 
     bindRowValueChange();
+
+    $('#chkFullName').on('change', function () {
+        var check = $(this).is(':checked');
+        if (check == true) {
+            DDLItem(check);
+        }
+        else {
+            DDLItem();
+        }
+
+    });
+
 });

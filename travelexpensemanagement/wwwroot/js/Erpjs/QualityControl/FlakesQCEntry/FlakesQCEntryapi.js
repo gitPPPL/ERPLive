@@ -67,9 +67,9 @@ async function LoadDropDown() {
             DDLPordPlace(),
             DDLChemist(),
             DDLQCIncharge(),
-            loadItemNameDropdown()
+            loadItemNameDropdown(),
+            DDLItem()
         ]);
-
 
     } catch (error) {
         console.error("Error loading dropdowns:", error);
@@ -392,3 +392,178 @@ function bindRowValueChange() {
     });
 
 }
+
+function TransitReport() {
+
+    if (!rowId) {
+        showToast("Please save the data before printing the report.", { type: "info" });
+        return;
+    }
+
+    let reportName = "";
+    let RPTNAME = "";
+
+    const v_no = $('#NumDocNo').val();
+    const ProdPlace = $('#ddlProdPlace').val();
+
+    let FromDate = $('#DtFrom').val();
+    let ToDate = $('#DtTo').val();
+
+    // Convert yyyy-MM-dd -> dd/MM/yyyy
+    if (FromDate) {
+        const f = FromDate.split('-');
+        FromDate = `${f[2]}/${f[1]}/${f[0]}`;
+    }
+
+    if (ToDate) {
+        const t = ToDate.split('-');
+        ToDate = `${t[2]}/${t[1]}/${t[0]}`;
+    }
+
+    let formula = "";
+    let payload = "";
+
+    if (globalVars.CompCode == "1") {
+
+        if (ProdPlace == "31") {
+            reportName = "QC_PEPL_POLY";
+            RPTNAME = "POLYMER SORTER QC REPORT";
+        }
+        else if (ProdPlace == "33") {
+            reportName = "QC_PEPL_COL";
+            RPTNAME = "COLOR SORTER QC REPORT";
+        }
+        else if (ProdPlace == "38") {
+            reportName = "QC_PEPL_FLOT";
+            RPTNAME = "FLOATING LINE QC REPORT";
+        }
+        else {
+            reportName = "QC_PEPL";
+            RPTNAME = "WASHLINE QC REPORT";
+        }
+
+        formula =
+            " {PROD2_QC.V_TYPE} = 'SFQC' " +
+            " AND {PROD2_QC.V_No} = " + v_no +
+            " AND {PROD2_QC.COMP_CODE} = " + globalVars.CompCode +
+            " AND {PROD2_QC.YEAR_CODE} = " + globalVars.FYearCode +
+            " AND {PROD2_QC.BRANCH_CODE} = " + globalVars.BranchCode + " ";    
+
+
+
+         payload = {
+            Reportname: reportName,
+            selectionFormula: formula,
+            Database: database,
+            Parameters: {
+                comp_name: globalVars.CompanyName || "",
+                comp_add1: globalVars.Address1 || "",
+                comp_add2: globalVars.Address2 || "",
+                F1: `From Date ${FromDate} To ${ToDate}`,
+                RPTNAME: RPTNAME
+            }
+        };
+
+    }
+
+    else {
+
+        reportName = "QC_Flakes";
+        RPTNAME = "Flakes QC Report";
+
+        formula =
+            " {PROD2_QC.V_TYPE} = 'SFQC' " +
+            " AND {PROD2_QC.V_No} = " + v_no +
+            " AND {PROD2_QC.COMP_CODE} = " + globalVars.CompCode +
+            " AND {PROD2_QC.YEAR_CODE} = " + globalVars.FYearCode +
+            " AND {PROD2_QC.BRANCH_CODE} = " + globalVars.BranchCode + " ";    
+
+        payload = {
+            Reportname: reportName,
+            selectionFormula: formula,
+            Database: database,
+            Parameters: {
+                comp_name: globalVars.CompanyName || "",
+                comp_add1: globalVars.Address1 || "",
+                comp_add2: globalVars.Address2 || "",
+                F1: `From Date ${FromDate} To ${ToDate}`,
+                RPTNAME: RPTNAME
+            }
+        };
+
+    }
+
+
+
+    const now = new Date();
+
+    const timestamp =
+        String(now.getDate()).padStart(2, '0') +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getFullYear()).slice(-2) + "_" +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
+
+    $.ajax({
+        url: "http://localhost:24085/Report/PendingQCReport",
+        type: "POST",
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: "blob"
+        },
+
+        success: function (response) {
+
+            const blob = new Blob([response], {
+                type: "application/pdf"
+            });
+
+            const fileName = `${reportName}_${timestamp}.pdf`;
+
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+
+            document.body.appendChild(link);
+            link.click();
+
+            URL.revokeObjectURL(link.href);
+            document.body.removeChild(link);
+        },
+
+        error: function (xhr, status, error) {
+
+            console.error("Status:", xhr.status);
+            console.error("Error:", error);
+
+            if (xhr.responseText) {
+                console.error(xhr.responseText);
+            }
+
+            showToast("Failed to generate report.", { type: "error" });
+        }
+    });
+}
+
+
+async function DDLItem(Cheackbox = false)
+{
+    try {
+        const response = await fetch(`/FlakesQCEntry/DDLItem?Cheackbox=${Cheackbox}`);
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        const ddl = $('#ddlItem');
+        ddl.empty().append('<option value="">-- Select Item Name --</option>');
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading Item Name:", error);
+        toastr.error('Error loading Item Name: ' + error.message);
+    }
+}
+
+

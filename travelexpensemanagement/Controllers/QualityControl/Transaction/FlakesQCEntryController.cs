@@ -36,8 +36,17 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         }
         public IActionResult Index()
         {
-            TempData["LoginDate"] = _globalVariableService.GetGlobalVariables().PubLoginDate;
-            TempData["PubUserLevel"] = _globalVariableService.GetGlobalVariables().PubUserLevel;
+
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+
+            ViewBag.GlobalVariables = globalVariables;
+            ViewBag.DatabaseName = databaseName;
+
             return View("~/Views/QualityControl/Transaction/FlakesQCEntry/Index.cshtml");
         }
         public JsonResult GetVNo()
@@ -64,14 +73,26 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                 return Json(DDLInspBylist);
             }
         }
-        public JsonResult DDLItem()
+        public JsonResult DDLItem(Boolean Cheackbox)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "Select a.Code,a.name from item_mast a " +
+                string query = "";
+
+                if(Cheackbox == true)
+                {
+                    query = "Select a.Code,a.NAME from item_mast a " +
                     " left join ITEM_GROUP b on a.GROUP_CODE=b.CODE and b.COMP_CODE=" + getdata.PubCompCode + " and b.SALE_GROUP in ('Flakes')" +
-                    " where a.Active=1 and a.comp_code= " + getdata.PubCompCode + "  and a.shortname <> '' group by a.NAME,a.CODE order by a.NAME asc";
+                    " where a.Active=1 and a.comp_code= " + getdata.PubCompCode + "  and a.NAME <> '' group by a.NAME,a.CODE order by a.NAME asc";
+                }
+                else
+                {
+                    query = "Select a.Code,a.SHORTNAME from item_mast a " +
+                    " left join ITEM_GROUP b on a.GROUP_CODE=b.CODE and b.COMP_CODE=" + getdata.PubCompCode + " and b.SALE_GROUP in ('Flakes')" +
+                    " where a.Active=1 and a.comp_code= " + getdata.PubCompCode + "  and a.SHORTNAME <> '' group by a.SHORTNAME,a.CODE order by a.SHORTNAME asc";
+                }
+                       
 
                 var DDLInspBylist = _dropdownService.GetDropdownList(query);
 
@@ -143,5 +164,14 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             var result = _flakesQCEntryRepository.SubmitRequest(  request.Header, request.Deatils,  action);
             return result == "Success"  ? Json(new { success = true }) : Json(new { success = false, message = result });
         }
+
+
+
+
+
+
+
+
+
     }
 }
