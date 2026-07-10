@@ -1,0 +1,261 @@
+﻿namespace travelexpensemanagement.Models.Purchase.Transaction
+{
+    public class PurchaseBillPassEntryModel
+    {
+        public class PurchaseDetailsDto
+        {
+            public int? V_No { get; set; }
+
+            public decimal? DeductAmt { get; set; }
+            public string DeductNarr { get; set; }
+
+            public string BILL_NO { get; set; }
+            public DateTime? BILL_DATE { get; set; }
+            public string CHALL_NO { get; set; }
+            public DateTime? CHALL_DATE { get; set; }
+            public string WAYBILL_NO { get; set; }
+            public string TRANSIT_NO { get; set; }
+            public decimal? EXCH_RATE { get; set; }
+
+            public int? PARTY_CODE { get; set; }
+            public string Party { get; set; }
+
+            public string BILL_ADD1 { get; set; }
+            public string BILL_ADD2 { get; set; }
+            public string BILL_ADD3 { get; set; }
+            public string BILL_CITY { get; set; }
+            public string BILL_GST { get; set; }
+            public string BILL_PINCODE { get; set; }
+            public string BILL_STATE { get; set; }
+
+            public int? SHIP_CODE { get; set; }
+            public string ShipTo { get; set; }
+            public string SHIP_ADD1 { get; set; }
+            public string SHIP_ADD2 { get; set; }
+            public string SHIP_ADD3 { get; set; }
+            public string SHIP_CITY { get; set; }
+            public string SHIP_GST { get; set; }
+            public string SHIP_PINCODE { get; set; }
+            public string SHIP_STATE { get; set; }
+
+            public string REMARKS { get; set; }
+
+            public int? TRANSPORT_CODE { get; set; }
+            public string Transport { get; set; }
+            public string TRANSPORT_NAME { get; set; }
+            public string TRUCK_NO { get; set; }
+            public string CONTAINER_NO { get; set; }
+
+            public string GR_NO { get; set; }
+            public DateTime? GR_DATE { get; set; }
+
+            public decimal? FRTPAY_AMT { get; set; }
+            public decimal? FRTPAY_TAXPER { get; set; }
+            public decimal? FRTPAY_TAX { get; set; }
+
+            public string FRTPAY_NAR { get; set; }
+
+            public string? HOLD_PAY { get; set; }
+            public string HOLD_REASON { get; set; }
+            public DateTime? HOLD_DATE { get; set; }
+
+            public decimal? TCS_PER { get; set; }
+            public decimal? TCS_AMT { get; set; }
+
+            public DateTime? EWB_DATE { get; set; }
+            public DateTime? EWB_EXPDATE { get; set; }
+
+            public string EWB_INVNO { get; set; }
+        }
+        public class PurchaseItemDto
+        {
+            public string ITEM_CODE { get; set; }
+            public string ITEM_NAME { get; set; }
+            public string Unit { get; set; }
+            public string HSN_CODE { get; set; }
+            public decimal NOS { get; set; }
+            public decimal RECD_QTY { get; set; }
+            public decimal BILL_QTY { get; set; }
+            public decimal USD_RATE { get; set; }
+            public decimal EXCH_RATE { get; set; }
+            public decimal RATE { get; set; }
+            public decimal PACK_PER { get; set; }
+            public decimal PACK_AMT { get; set; }
+            public decimal DISC_PER { get; set; }
+            public decimal DISC_AMT { get; set; }
+            public string TaxType { get; set; }
+            public decimal CGST_PER { get; set; }
+            public decimal SGST_PER { get; set; }
+            public decimal IGST_PER { get; set; }
+            public decimal VAT_PER { get; set; }
+            public decimal OTH_AMT { get; set; }
+            public string PO_TYPE { get; set; }
+            public string PO_NO { get; set; }
+            public string REF_TYPE { get; set; }
+            public int REF_NO { get; set; }
+            public string REQ_TYPE { get; set; }
+            public string REQ_NO { get; set; }
+            public string KANTA_TYPE { get; set; }
+            public string KANTA_NO { get; set; }
+            public string Make { get; set; }
+            public string Department { get; set; }
+            public string DEPT_CODE { get; set; }
+            public string TAX_CODE { get; set; }
+            public string Make_Code { get; set; }
+            public string UOM_CODE { get; set; }
+        }
+
+        //------------- CR / DR NOTE --------
+
+        public class DebitNoteRequest
+        {
+            public string VType { get; set; }
+            public int VNo { get; set; }
+            public DateTime vDate { get; set; }
+            public int billToPartyCode { get; set; }
+            public string billToPartyName { get; set; }
+            public decimal txtQualityDiffDebitAmt { get; set; }
+            public decimal txtQualityDiffDebitTax { get; set; }
+
+            public List<DebitNoteItem> Items { get; set; } = new();
+
+            public decimal totalRcvdQty { get; set; }
+            public decimal totalBillQty { get; set; }
+            public decimal totalNetAmt { get; set; }
+            public decimal totalTCSAmt { get; set; }
+            public decimal totalPackingAmt { get; set; }
+            public bool isSealedVehicle { get; set; }
+
+            public int mrnNo { get; set; }
+            public string mrnType { get; set; }
+
+            public int inputType { get; set; }
+            public decimal FreightAmountPay { get; set; }
+            public decimal FreightTax { get; set; }
+            public decimal FreightTaxPercent { get; set; }
+        }
+        public class DebitNoteItem
+        {
+            public int ItemCode { get; set; }
+
+            public decimal Amount { get; set; }
+
+            public decimal CGSTPer { get; set; }
+
+            public decimal SGSTPer { get; set; }
+
+            public decimal IGSTPer { get; set; }
+
+            public decimal RecdQty { get; set; }
+
+            public decimal BillQty { get; set; }
+
+            public string PoType { get; set; }
+
+            public int PoNo { get; set; }
+
+            public decimal LandRate { get; set; }
+
+            public decimal PORate { get; set; }
+
+            public decimal POLandRate { get; set; }
+
+            public string ItemName { get; set; }
+
+            public string Unit { get; set; }
+
+        }
+        public class DebitNoteResponse
+        {
+            public decimal RateDiffDebitAmt { get; set; }
+            public decimal RateDiffDebitTax { get; set; }
+            public string RateDiffDebitNarration { get; set; }
+
+            public decimal QualityDiffDebitAmt { get; set; }
+            public decimal QualityDiffDebitTax { get; set; }
+            public string QualityDiffDebitNarration { get; set; }
+
+            public decimal WeightDiffDebitAmt { get; set; }
+            public decimal WeightDiffDebitTax { get; set; }
+            public string WeightDiffDebitNarration { get; set; }
+
+            public decimal QCDebitAmt { get; set; }
+            public decimal QCDebitTax { get; set; }
+            public string QCDebitNarration { get; set; }
+
+            public decimal txtFrtTaxVal { get; set; }
+            public int frtDrAcCode { get; set; }
+
+            public HashSet<string> Warnings { get; set; } = new();
+        }
+        public class DebitNoteCalculationState
+        {
+            public decimal RateDiffDrGAmt { get; set; }
+            public decimal RateDiffDrGTax { get; set; }
+            public string RateDiffDrNarr { get; set; } = string.Empty;
+
+            public decimal QltDiffDrAmt { get; set; }
+            public decimal QltDiffDrTax { get; set; }
+            public string QltDiffDrNarr { get; set; } = string.Empty;
+
+            public decimal Q15DrAmt { get; set; }
+            public decimal Q15DrTax { get; set; }
+            public string Q15Narr { get; set; } = string.Empty;
+
+            public decimal QtyDiffGAmt { get; set; }
+            public decimal QtyDiffGTax { get; set; }
+            public string QtyDiffNarr { get; set; } = string.Empty;
+
+            public decimal QCDrAmt { get; set; }
+            public decimal QCDrTax { get; set; }
+            public string QCDrNarr { get; set; } = string.Empty;
+
+            public decimal frtAmt { get; set; }
+            public decimal frtTax { get; set; }
+            public string frtNarr { get; set; } = string.Empty;
+        }
+        public class Q15Result
+        {
+            public decimal Amount { get; set; }
+
+            public decimal Tax { get; set; }
+
+            public string Narration { get; set; } = string.Empty;
+
+            public decimal DiscItemRate { get; set; }
+        }
+        public class RMDiscountDetails
+        {
+            public bool SaudaExists { get; set; }
+            public decimal DiscRate { get; set; }
+            public decimal Rate { get; set; }
+            public decimal AbovePer { get; set; }
+            public decimal AboveAmt { get; set; }
+        }
+        public class OrderRateDetailsDto
+        {
+            public bool Exists { get; set; }
+            public decimal LandRate { get; set; }
+            public decimal Rate { get; set; }
+            public decimal Qty { get; set; }
+        }
+        public class QCDetailsDto
+        {
+            public decimal DeductAmount { get; set; }
+            public string Narration { get; set; } = string.Empty;
+        }
+        public class SaudaInfo
+        {
+            public int ItemCode { get; set; }
+            public decimal Qty { get; set; }
+            public decimal Rate { get; set; }
+            public DateTime VDate { get; set; }
+        }
+        public class NaturalBottleDto
+        {
+            public bool OnlyNatural { get; set; }
+
+            public int ItemCode { get; set; }
+        }
+    }
+}

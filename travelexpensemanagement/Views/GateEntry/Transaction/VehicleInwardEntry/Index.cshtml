@@ -2,14 +2,7 @@
     ViewBag.Title = "Vehicle Inward Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="circle-loader" style="display: none;">
-    <div class="container">
-        Loading...
-        <div class="spinner-part"></div>
-        <div class="spinner-part"></div>
-        <div class="spinner-part"></div>
-    </div>
-</div>
+
 
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
@@ -20,6 +13,20 @@
         <div class="erppage-header-title">Vehicle Inward Entry</div>
     </div>
     <div class="erppage-header-right">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="VehicleReport()" id="button_print">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button type="button"
+                id="btn_Sendapproval"
+                style="display:none;" class="erppagebtn_sendapproval">
+            <i class="fa fa-share"></i>Send For Approval
+        </button>
+        <button type="button"
+                id="btn_Approved"
+                style="display:none;"
+                class="erppagebtn_approved">
+            Approved
+        </button>
         <button id="btnbacklist" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "VehicleInwardEntryList")', readOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -60,9 +67,8 @@
                 </div>
             </div>
         </fieldset>
-        <fieldset class="erppage-subfieldset">
-            <legend>Vehicle Details</legend>
-            <div class="erppage-subheader">Vehicle Details</div>
+        <fieldset class="erppagefieldset">
+            <legend class="erppagefieldset-legend">Vehicle Details</legend>
             <div class="erppage-grid2">
                 <div class="erppage-divfield">
                     <label class="erppage-label">Vehicle No</label>
@@ -173,10 +179,9 @@
                 </div>
             </div>
         </fieldset>
-        <fieldset class="erppage-subfieldset">
-            <legend>Customer Details</legend>
-            <div class="erppage-subheader">Customer Details</div>
-            <div class="erppage-grid4">
+        <fieldset class="erppagefieldset">
+            <legend class="erppagefieldset-legend">Customer Details</legend>
+            <div class="erppage-grid3">
                 <div class="erppage-divfield">
                     <label class="erppage-label">DO No</label>
                     <select class="erppage-input" id="ddlDONo">
@@ -184,7 +189,7 @@
                     </select>
                 </div>
                 <div class="erppage-divfield erppage-col-span-2">
-                    <label class="erppage-label">Customer Name</label>
+                    <label class="erppage-label">Cust. Name</label>
                     <select class="erppage-redinput erppage-required" id="ddlCustomerName">
                         <option value="">Select Customer Name</option>
                     </select>
@@ -223,11 +228,11 @@
                     <textarea type="text" class="erppage-textarea" maxlength="500" id="TxtVehicleRemarks" placeholder="Enter Vehicle Remarks"></textarea>
                 </div>
                 <div class="erppage-btn-group-right erppage-col-span-2">
-                    <button class="erppage-btn erppage-btn-copy">
+                    <button class="erppage-btn erppage-btn-common-disabled">
                         <i class="fa fa-barcode"></i>
                         <span>Barcode</span>
                     </button>
-                    <button class="erppage-btn erppage-btn-copy">
+                    <button class="erppage-btn erppage-btn-common-disabled">
                         <i class="fa fa-sticky-note"></i>
                         <span>Sticker</span>
                     </button>

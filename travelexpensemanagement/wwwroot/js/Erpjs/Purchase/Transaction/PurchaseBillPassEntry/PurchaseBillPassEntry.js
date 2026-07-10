@@ -1,4 +1,8 @@
-﻿const rowsData = [];
+﻿
+let pubDefPOInMRN = null;
+let compCode = null;
+
+const rowsData = [];
 let rowsAttachment = [];
 let rowIndex = 0;
 
@@ -6,19 +10,21 @@ const urlParams = new URLSearchParams(location.search);
 const rowId = parseInt(urlParams.get('id'));
 const isReadOnly = urlParams.get('readOnly') === 'true';
 
-const compCode = window.compCode;
+//const compCode = window.compCode;
 const branchCode = window.branchCode;
 const yearCode = window.yearCode;
 
 $(document).ready(function () {
+    $('#ddlDocType').focus();
     //Added by Sumesh
-    InitializeERPSingleDropdown({
-        id: "TxtMRNNo2",
-        placeholder: "Select MRN",
-        data: []
-    });
+    //InitializeERPSingleDropdown({
+    //    id: "TxtMRNNo2",
+    //    placeholder: "Select MRN",
+    //    data: []
+    //});
 
     toggleDate();
+    //getGlobalDetails();
 
     if (!isNaN(rowId) && rowId > 0) {
         loadFullQuotationByVno(rowId);
@@ -34,8 +40,6 @@ $(document).ready(function () {
     loadCityList('#ddlCityPD');
     loadCityList('#ddlCitySF');
     loadTransportList();
-    loadStateList('#ddlStatePD');
-    loadStateList('#ddlStateSF');
     loadPartyDrCrAcList('#ddlCreditAC');
     loadPartyDrCrAcList('#ddlFreightDebitAC');
     loadPartyDrCrAcList('#ddlFreightCreditAC');
@@ -48,11 +52,12 @@ $(document).ready(function () {
     let frtCrAcCode = $('#ddlFreightCreditAC').val();
     loadTranGSTByFrtCrAc(frtCrAcCode);
     const currentDate = getCurrentDateYMD();
-    $('#DtDocDate, #DtBillDate, #DtGRDate, #DtBillDateLD, #DtHoldDateCRDRNote, #DtBLDate, #Dtsysdate, #DtChDate, #DtPlDate').val(currentDate);
+    $('#DtDocDate, #DtBillDate, #DtGRDate, #DtBillDateLD, #DtHoldDateCRDRNote, #DtBLDate, #Dtsysdate, #DtChDate, #DtPlDate, #DtHoldDate').val(currentDate);
     wireEvents();
 });
 //=====================EVENTS=============================
 function wireEvents() {
+    //------------ VType Change --------
     $('#ddlDocType').on('change', function () {
         const vType = $(this).val();
         console.log("vType: ", vType);
@@ -62,77 +67,119 @@ function wireEvents() {
         loadDrAcListByVtype('#ddlDebitAC', vType);
     })
 
+    //--------------- MRN Change ------------
     $('#TxtMRNNo2').on('change', function () {
-        const mrnType = $(this).find("option:selected").data("vtype");
-        console.log("mrnType: ", mrnType);
-        $('#TxtMRNNo1').val(mrnType);
-    })
+        var mrnTypeNo = $(this).find("option:selected").text().trim();
 
+        var mrnType = $(this).find("option:selected").data("vtype");
+        if (mrnTypeNo === "")
+            return;
+
+        $.ajax({
+            url: "/PurchaseBillPassEntry/ValidateMRN",
+            type: "POST",
+            data: {
+                mrnTypeNo: mrnTypeNo,
+                vType: $("#ddlDocType").val(),
+                vNo: $("#NumDocNo").val()
+            },
+            dataType: 'json',
+            success: function (response) {
+
+                if (!response.success) {
+
+                    showToast(response.message, { type: "warning" });
+
+                    //clearForm();
+
+                    $("#TxtMRNNo2").focus();
+                    return;
+                }
+
+                //Fill Correct MRN
+                $("#TxtMRNNo2").val(response.mrnNo);
+                $('#TxtMRNNo1').val(mrnType);
+
+                //Load MRN Data
+                LoadMRNData(mrnType, response.mrnNo);
+
+            },
+            error: function () {
+                alert("Error occurred.");
+            }
+
+        });
+
+    });
+
+    //---------- Frieght Cr Ac Change --------
     $('#ddlFreightCreditAC').on('change', function () {
         const frtCrAcCode = $(this).val();
         loadTranGSTByFrtCrAc(frtCrAcCode);
     })
 
+    //---------- Ship List Change ------
     $('#ddlShipFrom1').on('change', function () {
         const shipFromCode = $(this).val();
-        loadAddList(shipFromCode);
+        loadAddList(shipFromCode, '#ddlShipFromAddress');
     })
 
+    //--------- Bill From List Change --------
     $('#ddlBillFrom').on('change', function () {
         const billFromCode = $(this).val();
-        loadAddList(billFromCode);
+        loadAddList(billFromCode, '#ddlBillFromAddress');
     })
 
-    $('#TxtAdd1PD').change(function () {
-        var selectedVal = $(this).val();
-        var selectedtxt = $(this).text();
-        var PCode = $(this).data('pcode');
+    //$('#TxtAdd1PD').change(function () {
+    //    var selectedVal = $(this).val();
+    //    var selectedtxt = $(this).text();
+    //    var PCode = $(this).data('pcode');
 
-        $.ajax({
-            url: '/PurchaseBillPassEntry/GetAddressByBillToParty',
-            type: 'GET',
-            data: { cCode: compCode, pCode: PCode, addressId: selectedVal },
-            success: function (response) {
-                var res = response.addressDetails;
-                $('#TxtAdd2PD').val(res.add2);
-                $('#TxtAdd3PD').val(res.add3);
-                $('#TxtGSTNo').val(res.gstin);
-                if ($('#ddlCityPD option[value="' + res.cityCode + '"]').length === 0) {
-                    $('#ddlCityPD').append($('<option>', {
-                        value: res.cityCode,
-                        text: res.cityName
-                    }));
-                }
-                $('#ddlCityPD').val(res.cityCode);
+    //    $.ajax({
+    //        url: '/PurchaseBillPassEntry/GetAddressByBillToParty',
+    //        type: 'GET',
+    //        data: { cCode: compCode, pCode: PCode, addressId: selectedVal },
+    //        success: function (response) {
+    //            var res = response.addressDetails;
+    //            $('#TxtAdd2PD').val(res.add2);
+    //            $('#TxtAdd3PD').val(res.add3);
+    //            $('#TxtGSTNo').val(res.gstin);
+    //            if ($('#ddlCityPD option[value="' + res.cityCode + '"]').length === 0) {
+    //                $('#ddlCityPD').append($('<option>', {
+    //                    value: res.cityCode,
+    //                    text: res.cityName
+    //                }));
+    //            }
+    //            $('#ddlCityPD').val(res.cityCode);
 
-                // shipto address
-                $('#TxtAdd1SF').val(res.add1);
-                $('#TxtAdd2SF').val(res.add2);
-                $('#TxtAdd3SF').val(res.add3);
-                $('#TxtGSTNoSF').val(res.gstin);
-                if ($('#ddlCitySF option[value="' + res.cityCode + '"]').length === 0) {
-                    $('#ddlCitySF').append($('<option>', {
-                        value: res.cityCode,
-                        text: res.cityName
-                    }));
-                }
-                $('#ddlCitySF').val(res.cityCode);
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error loading Item make: ' + error);
-            }
-        });
-    })
+    //            // shipto address
+    //            $('#TxtAdd1SF').val(res.add1);
+    //            $('#TxtAdd2SF').val(res.add2);
+    //            $('#TxtAdd3SF').val(res.add3);
+    //            $('#TxtGSTNoSF').val(res.gstin);
+    //            if ($('#ddlCitySF option[value="' + res.cityCode + '"]').length === 0) {
+    //                $('#ddlCitySF').append($('<option>', {
+    //                    value: res.cityCode,
+    //                    text: res.cityName
+    //                }));
+    //            }
+    //            $('#ddlCitySF').val(res.cityCode);
+    //        },
+    //        error: function (xhr, status, error) {
+    //            toastr.error('Error loading Item make: ' + error);
+    //        }
+    //    });
+    //})
 
+    //---------- Ship Address Change -----------
     $('#ddlShipFromAddress').change(function () {
         var selectedVal = $(this).val();
-        var selectedtxt = $(this).text();
-        var PCode = $(this).data('pcode');
+        var code = $('#ddlShipFrom1').val();
 
         $.ajax({
             url: '/PurchaseBillPassEntry/GetAddressByBillToParty',
             type: 'GET',
-            data: { cCode: compCode, pCode: PCode, addressId: selectedVal },
+            data: { code: code, addressId: selectedVal },
             success: function (response) {
                 var res = response.addressDetails;
                 // shipto address
@@ -140,13 +187,53 @@ function wireEvents() {
                 $('#TxtAdd2SF').val(res.add2);
                 $('#TxtAdd3SF').val(res.add3);
                 $('#TxtGSTNoSF').val(res.gstin);
+                $('#TxtPincodeSF').val(res.pincode);
+                loadCityList('#ddlCitySF', res.cityCode)
             },
             error: function (xhr, status, error) {
-                toastr.error('Error loading Item make: ' + error);
+                toastr.error('Error loading ship address: ' + error);
             }
         });
     })
 
+    //---------- Bill Address Change ----------
+    $('#ddlBillFromAddress').change(function () {
+        var selectedVal = $(this).val();
+        var code = $('#ddlBillFrom').val();
+
+        $.ajax({
+            url: '/PurchaseBillPassEntry/GetAddressByBillToParty',
+            type: 'GET',
+            data: { code: code, addressId: selectedVal },
+            success: function (response) {
+                var res = response.addressDetails;
+                // shipto address
+                $('#TxtAdd1PD').val(res.add1);
+                $('#TxtAdd2PD').val(res.add2);
+                $('#TxtAdd3PD').val(res.add3);
+                $('#TxtAdd3PD').val(res.gstin);
+                $('#NumPincodeBL').val(res.pincode);
+                loadCityList('#ddlCityPD', res.cityCode)
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Error loading bill address: ' + error);
+            }
+        });
+    })
+
+    //--------- Ship City Change ----------
+    $('#ddlCitySF').on('change', function () {
+        const cCode = parseInt($(this).val()) || 0;
+        loadStateList('#ddlStateSF', cCode);
+    })
+
+    //-------- Bill City Change ----------
+    $('#ddlCityPD').on('change', function () {
+        const cCode = parseInt($(this).val()) || 0;
+        loadStateList('#ddlStatePD', cCode);
+    })
+
+    //--------- Save Click --------
     $('#btn-save').click(function (e) {
         e.preventDefault();
 
@@ -340,6 +427,7 @@ function wireEvents() {
         });
     });
 
+    //---------- Attachment handler --------
     $('#btnAddAttachment').on('click', function () {
         let fileName = $('#txtFileName').val().trim();
         const fileInput = $('#fileUpload')[0].files[0];
@@ -414,9 +502,76 @@ function wireEvents() {
 
         row.remove();
     });
+
+    ////--------- Item Change ---------
+    $(document).on("change", ".item-name", function () {
+
+        const $row = $(this).closest("tr");
+
+        const selectedOption = $(this).find("option:selected");
+
+        const uomCode = selectedOption.data("ucode");
+        const uomName = selectedOption.data("unit");
+
+        $row.find(".uom-code").val(uomCode || "");
+        $row.find(".uom-name").val(uomName || "");
+    });
+
+    //--------- Calculation on row values change change ------------
+    $(document).on("change", ".usd-rate,.exch-rate,.rate,.bill-qty, .recd-qty, .pack-per, .disc-per, .cess-per, .oth-amt, .pack-amt, .disc-amt, .cgst-amt, " +
+        ".sgst-amt, .igst-amt, .cess-amt, .vat-per, .vat-amt", async function () {
+
+        await processRow($(this).closest("tr"), {
+            calculateAmount: true,
+            calculateTaxes: true
+        });
+    });
+
+    //--------- Calculation on amount change ------------
+    $(document).on("change", ".amount", async function () {
+
+        const $row = $(this).closest("tr");
+
+        const qty = parseFloat($row.find(".bill-qty").val()) || 0;
+        const amount = parseFloat($row.find(".amount").val()) || 0;
+
+        const rate = qty > 0
+            ? amount / qty
+            : 0;
+
+        $row.find(".rate").val(rate.toFixed(6));
+
+        await processRow($(this).closest("tr"), {
+            calculateAmount: true,
+            calculateTaxes: true
+        });
+    });
+
+    //--------- Calculation on cgst%, sgst%, igst% change ------------
+    $(document).on("change", ".cgst-per,.sgst-per,.igst-per", async function () {
+        await processRow($(this).closest("tr"), {
+            calculateTaxes: true
+        });
+    });
 }
 
-//=====================GENERATE VNO=============================
+async function processRow($row, {calculateAmount = false, calculateTaxes = false} = {}) {
+
+    const itemCode = Number($row.find(".item-name").val()) || 0;
+
+    if (calculateAmount) {
+        await calculateAmt($row, itemCode);
+    }
+
+    if (calculateTaxes) {
+        calculateTax($row, itemCode);
+    }
+
+    calculateItemTotals();
+    calculateLandAmount($row, itemCode);
+    await CalcDrCrNote();
+}
+//------------- GENERATE VNO -----------------
 async function GetVNo(vType) {
     try {
         const res = await fetch(`/PurchaseBillPassEntry/GetVNo?vType=${encodeURIComponent(vType)}`);
@@ -433,6 +588,7 @@ async function GetVNo(vType) {
 
 //=====================DROPDOWNS=============================
 //Commmented By Sumesh
+//--------- DOCTYPE -----------
 function loadDocTypeList() {
     docTypeMap = {};
     return $.ajax({
@@ -455,67 +611,34 @@ function loadDocTypeList() {
     });
 }
 
+//--------- MRN -----------
 function loadMRNList(vType) {
-
-    // If no Doc Type selected, initialize empty dropdown
-    if (!vType) {
-
-        InitializeERPSingleDropdown({
-            id: "TxtMRNNo2",
-            placeholder: "Select MRN",
-            data: []
-        });
-
-        $('#TxtMRNNo1').val('');
-        return;
-    }
-
     $.ajax({
         url: '/PurchaseBillPassEntry/GetMrnNoList',
         type: 'GET',
         dataType: 'json',
         data: { vType: vType },
-
         success: function (res) {
+            if (res.success) {
+                console.log("mrnList: ", res.data);
+                var ddl = $('#TxtMRNNo2');
+                ddl.empty();
+                ddl.append('<option value="">--Select MRN No--</option>');
 
-            if (!res.success)
-                return;
-
-            const dropdownData = res.data.map(item => ({
-                id: item.Value,
-                text: item.Text,
-                vType: item.vType
-            }));
-
-            InitializeERPSingleDropdown({
-
-                id: "TxtMRNNo2",
-
-                placeholder: "Select MRN",
-
-                data: dropdownData,
-
-                onChange: function (selectedItem) {
-
-                    $('#TxtMRNNo1').val(selectedItem.vType);
-
-                }
-
-            });
-
+                $.each(res.data, function (index, item) {
+                    ddl.append(`<option data-vtype="${item.vType}" value="${item.Value}">${item.Text}</option>`);
+                });
+                //initSelect2(ddl);
+            }
         },
-
         error: function (xhr, status, error) {
-
-            toastr.error("Error loading MRN List : " + error);
-
+            toastr.error('Error loading MRN list: ' + error);
         }
-
     });
-
 }
 
-function loadPartyListNatureSupplier(dropdownId, isInitSelect2 = false) {
+//--------- SUPPLIER PARTY -----------
+function loadPartyListNatureSupplier(dropdownId, isInitSelect2 = false, selectedValue = null) {
     return $.ajax({
         url: '/PurchaseBillPassEntry/GetPartyListNatureSupplier',
         type: 'GET',
@@ -530,6 +653,10 @@ function loadPartyListNatureSupplier(dropdownId, isInitSelect2 = false) {
         if (isInitSelect2) {
             initSelect2(ddl);
         }
+        // Set selected value if provided
+        if (selectedValue !== null && selectedValue !== undefined && selectedValue !== "") {
+            ddl.val(selectedValue).trigger('change');
+        }
         return res;
     }).catch(function (xhr, status, error) {
         toastr.error('Error loading Party list: ' + error);
@@ -537,6 +664,7 @@ function loadPartyListNatureSupplier(dropdownId, isInitSelect2 = false) {
     });
 }
 
+//--------- DR AC BY VTYPE-----------
 function loadDrAcListByVtype(dropdownId, vType) {
     return $.ajax({
         url: '/PurchaseBillPassEntry/GetDrAcListByVtype',
@@ -558,7 +686,8 @@ function loadDrAcListByVtype(dropdownId, vType) {
     });
 }
 
-function loadPartyDrCrAcList(dropdownId) {
+//--------- PARTY DR CR -----------
+function loadPartyDrCrAcList(dropdownId, selectedValue = null) {
     return $.ajax({
         url: '/PurchaseBillPassEntry/GetPartyDrCrAcList',
         type: 'GET',
@@ -571,6 +700,10 @@ function loadPartyDrCrAcList(dropdownId) {
             ddl.append(`<option value="${item.Value}">${item.Text}</option>`);
         });
         initSelect2(ddl);
+        // Set selected value if provided
+        if (selectedValue !== null && selectedValue !== undefined && selectedValue !== "") {
+            ddl.val(selectedValue).trigger('change');
+        }
         return res;
     }).catch(function (xhr, status, error) {
         toastr.error('Error loading Cr Ac list: ' + error);
@@ -578,6 +711,7 @@ function loadPartyDrCrAcList(dropdownId) {
     });
 }
 
+//--------- TRANSPORT GST -----------
 function loadTranGSTByFrtCrAc(frtCrAcCode) {
     return $.ajax({
         url: '/PurchaseBillPassEntry/GetTranGSTByFrtCrAc',
@@ -599,7 +733,8 @@ function loadTranGSTByFrtCrAc(frtCrAcCode) {
     });
 }
 
-function loadItemList(dropdownId) {
+//--------- ITEM -----------
+function loadItemList(dropdownId, selectedValue = null) {
     return $.ajax({
         url: '/PurchaseBillPassEntry/GetItemList',
         type: 'GET',
@@ -609,8 +744,12 @@ function loadItemList(dropdownId) {
         ddl.empty();
         ddl.append('<option value="">-- Select --</option>');
         res.data.forEach(item => {
-            ddl.append(`<option value="${item.Value}">${item.Text}</option>`);
+            ddl.append(`<option value="${item.Value}" data-unit="${item.unit}" data-ucode="${item.ucode}">${item.Text}</option>`);
         });
+        // Set selected value if provided
+        if (selectedValue !== null && selectedValue !== undefined && selectedValue !== "") {
+            ddl.val(selectedValue).trigger('change');
+        }
         return res;
     }).catch(function (xhr, status, error) {
         toastr.error('Error loading Item list: ' + error);
@@ -618,7 +757,8 @@ function loadItemList(dropdownId) {
     });
 }
 
-function loadAddList(shipFromCode) {
+//--------- ADDRESS -----------
+function loadAddList(shipFromCode, selector) {
     return $.ajax({
         url: '/PurchaseBillPassEntry/GetAddList',
         type: 'GET',
@@ -626,7 +766,7 @@ function loadAddList(shipFromCode) {
         data: { shipFromCode: shipFromCode },
         success: function (res) {
             const data = res.data;
-            var ddl = $('#ddlShipFromAddress');
+            var ddl = $(selector);
             ddl.empty();
             ddl.append('<option value="">-- Select Address --</option>');
 
@@ -640,7 +780,8 @@ function loadAddList(shipFromCode) {
     });
 }
 
-function loadCityList(dropdownId) {
+//--------- CITY -----------
+function loadCityList(dropdownId, selectedValue = null) {
     return $.ajax({
         url: '/PurchaseBillPassEntry/GetCityList',
         type: 'GET',
@@ -652,6 +793,9 @@ function loadCityList(dropdownId) {
             $.each(data, function (index, item) {
                 ddl.append('<option value="' + item.Value + '">' + item.Text + '</option>');
             });
+            if (selectedValue !== null && selectedValue !== undefined && selectedValue !== "") {
+                ddl.val(selectedValue).trigger('change');
+            }
         },
         error: function (xhr, status, error) {
             console.error('Error loading city list: ' + error);
@@ -659,18 +803,24 @@ function loadCityList(dropdownId) {
     });
 }
 
-function loadStateList(dropdownId) {
+//--------- STATE -----------
+function loadStateList(dropdownId, cCode, selectedValue = null) {
     return $.ajax({
         url: '/PurchaseBillPassEntry/GetStateList',
         type: 'GET',
+        data: { cCode: cCode },
+        dataType: 'json',
         success: function (res) {
             const data = res.data;
             var ddl = $(dropdownId);
             ddl.empty();
-            ddl.append('<option value="">-- Select State --</option>');
+            //ddl.append('<option value="">-- Select State --</option>');
             $.each(data, function (index, item) {
-                ddl.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+                ddl.append('<option value="' + item.Value + '" selected>' + item.Text + '</option>');
             });
+            if (selectedValue !== null && selectedValue !== undefined && selectedValue !== "") {
+                ddl.val(selectedValue).trigger('change');
+            }
         },
         error: function (xhr, status, error) {
             console.error('Error loading state list: ' + error);
@@ -678,6 +828,7 @@ function loadStateList(dropdownId) {
     });
 }
 
+//--------- CURRENCY -----------
 function loadCurrencyList() {
     return $.ajax({
         url: '/PurchaseBillPassEntry/GetCurrencyList',
@@ -697,7 +848,8 @@ function loadCurrencyList() {
     });
 }
 
-function loadTaxTypeList(dropdownId) {
+//--------- TAX -----------
+function loadTaxTypeList(dropdownId, selectedValue = null) {
     return $.ajax({
         url: '/PurchaseBillPassEntry/GetTaxList',
         type: 'GET',
@@ -728,6 +880,10 @@ function loadTaxTypeList(dropdownId) {
                 </option>
             `);
         });
+        // Set selected value if provided
+        if (selectedValue !== null && selectedValue !== undefined && selectedValue !== "") {
+            ddl.val(selectedValue).trigger('change');
+        }
         return res;
     }).catch(function (xhr, status, error) {
         toastr.error('Error loading tax list: ' + error);
@@ -735,6 +891,7 @@ function loadTaxTypeList(dropdownId) {
     });
 }
 
+//--------- STATUS -----------
 function loadStatusList() {
     statusMap = {};
     return $.ajax({
@@ -757,6 +914,7 @@ function loadStatusList() {
     });
 }
 
+//--------- TRANSPORT -----------
 function loadTransportList() {
     return $.ajax({
         url: '/PurchaseBillPassEntry/GetTransportList',
@@ -776,6 +934,33 @@ function loadTransportList() {
     });
 }
 
+//--------- DEPARTMENT -----------
+function loadDepartmentList(dropdownId, selectedValue = null) {
+    return $.ajax({
+        url: '/PurchaseBillPassEntry/GetDepartmentList',
+        type: 'GET',
+        dataType: 'json',
+    }).then(function (res) {
+        const ddl = $(dropdownId);
+        ddl.empty();
+        ddl.append('<option value="">-- Select --</option>');
+        console.log("Tax list: ", res.data);
+        res.data.forEach(item => {
+            ddl.append(`
+                <option value="${item.Value}">${item.Text}</option>
+            `);
+        });
+        // Set selected value if provided
+        if (selectedValue !== null && selectedValue !== undefined && selectedValue !== "") {
+            ddl.val(selectedValue).trigger('change');
+        }
+        return res;
+    }).catch(function (xhr, status, error) {
+        toastr.error('Error loading department list: ' + error);
+        return [];
+    });
+}
+//=========== DROPDOWN END ============
 function convertToDateInputFormat(dateTimeStr) {
     if (!dateTimeStr) return '';
 
@@ -983,171 +1168,136 @@ function loadFullQuotationByVno(VNo) {
     });
 }
 
-function addNewRowBelow() {
-
-    let lastRow = $('#tblItemRecordPBPE tbody tr:last');
-    if (lastRow.length > 0) {
-        let lastRowId = lastRow.find('select[id^="ITEM_NAME"]').attr('id');
-        if (lastRowId) {
-            let lastIndex = lastRowId.split('_')[1];
-
-            let itemNameVal = $(`#ITEM_NAME_${lastIndex}`).val();
-            let itemCodeVal = $(`#HSN_CODE_${lastIndex}`).val();
-
-            if (!itemNameVal) {
-                toastr.warning('Please select an Item Name before adding a new row.');
-                $(`#ITEM_NAME_${lastIndex}`).focus();
-                return;
-            }
-            if (!itemCodeVal || itemCodeVal.trim() === '') {
-                toastr.warning('Please enter an Item Code before adding a new row.');
-                $(`#HSN_CODE_${lastIndex}`).focus();
-                return;
-            }
-        }
-    }
-
-    rowIndex++;
-
-    const newRowData = {
-        ITEM_NAME: '',
-        HSN_CODE: '',
-        UOM_NAME: '',
-        NOS: '',
-        RECD_QTY: '',
-        BILL_QTY: '',
-        USD_RATE: '',
-        EXCH_RATE: '',
-        RATE: '',
-        AMOUNT: '',
-        RCM_YN: '',
-        INPUT_YN: '',
-        TAX_CODE: '',
-        PACK_PER: '',
-        PACK_AMT: '',
-        DISC_PER: '',
-        DISC_AMT: '',
-        CGST_PER: '',
-        CGST_AMT: '',
-        SGST_PER: '',
-        SGST_AMT: '',
-        IGST_PER: '',
-        IGST_AMT: '',
-        CESS_PER: '',
-        CESS_AMT: '',
-        VAT_PER: '',
-        VAT_AMT: '',
-        OTH_AMT: '',
-        NET_AMT: '',
-        MAKE_CODE: '',
-        DEPT_CODE: '',
-        REMARKS: '',
-        LAND_RATE: '',
-        LAND_AMT: '',
-        POLAND_RATE: '',
-        PO_RATE: '',
-        PO_TYPE: '',
-        PO_NO: '',
-        KANTA_TYPE: '',
-        KANTA_NO: '',
-        REQ_TYPE: '',
-        REQ_NO: '',
-        REF_TYPE: '',
-        REF_NO: ''
-    };
-
-    rowsData.push(newRowData);
-
-    const rowHtml = `
-        <tr>
-            <td class="freeze-item">
-                <select style="min-width: 150px; max-width: 300px;"  class="form-control" id="ITEM_NAME_${rowIndex}" name="ITEM_NAME[${rowIndex}]" class="form-control-sm">
-                    <option value="">-- Select Item --</option>
-                </select>
-            </td>   
-            <td><input style="min-width: 100px; max-width: 200px;" class="form-control" id="HSN_CODE_${rowIndex}" name="HSN_CODE[${rowIndex}]" type="text" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="UOM_NAME_${rowIndex}" name="UOM_NAME[${rowIndex}]" type="number" class="form-control-sm" disabled/></td>            
-            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="NOS_${rowIndex}" name="NOS[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="RECD_QTY_${rowIndex}" name="RECD_QTY[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="BILL_QTY_${rowIndex}" name="BILL_QTY[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="USD_RATE_${rowIndex}" name="USD_RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="EXCH_RATE_${rowIndex}" name="EXCH_RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="RATE_${rowIndex}" name="RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="AMOUNT_${rowIndex}" name="AMOUNT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="RCM_YN_${rowIndex}" name="RCM_YN[${rowIndex}]" class="form-control-sm">
-                    <option value="">-- Select --</option>
-                    <option value="YES">YES</option>
-                    <option value="NO">NO</option>
-                </select>
-            </td>
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="INPUT_YN_${rowIndex}" name="INPUT_YN[${rowIndex}]" class="form-control-sm">
-                    <option value="">-- Select --</option>
-                    <option value="YES">YES</option>
-                    <option value="NO">NO</option>
-                </select>
-
-            </td>
-            <td>
-                 <select style="min-width: 100px; max-width: 200px;" class="form-control" id="TAX_CODE_${rowIndex}" name="TAX_CODE[${rowIndex}]" class="form-control-sm">
-                    <option value="">-- Select Tax Type --</option>
-                </select>
-            </td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="PACK_PER_${rowIndex}" name="PACK_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="PACK_AMT_${rowIndex}" name="PACK_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="DISC_PER_${rowIndex}" name="DISC_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="DISC_AMT_${rowIndex}" name="DISC_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="CGST_PER_${rowIndex}" name="CGST_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="CGST_AMT_${rowIndex}" name="CGST_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="SGST_PER_${rowIndex}" name="SGST_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="SGST_AMT_${rowIndex}" name="SGST_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="IGST_PER_${rowIndex}" name="IGST_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="IGST_AMT_${rowIndex}" name="IGST_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="CESS_PER_${rowIndex}" name="CESS_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="CESS_AMT_${rowIndex}" name="CESS_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="VAT_PER_${rowIndex}" name="VAT_PER[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="VAT_AMT_${rowIndex}" name="VAT_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="OTH_AMT_${rowIndex}" name="OTH_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="NET_AMT_${rowIndex}" name="NET_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="MAKE_CODE_${rowIndex}" name="MAKE_CODE[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="DEPT_CODE_${rowIndex}" name="DEPT_CODE[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="REMARKS_${rowIndex}" name="REMARKS[${rowIndex}]" type="text" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="LAND_RATE_${rowIndex}" name="LAND_RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="LAND_AMT_${rowIndex}" name="LAND_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="POLAND_RATE_${rowIndex}" name="POLAND_RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="PO_RATE_${rowIndex}" name="PO_RATE[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="PO_TYPE_${rowIndex}" name="PO_TYPE[${rowIndex}]" type="text" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="PO_NO_${rowIndex}" name="PO_NO[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="KANTA_TYPE_${rowIndex}" name="KANTA_TYPE[${rowIndex}]" type="text" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="KANTA_NO_${rowIndex}" name="KANTA_NO[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="REQ_TYPE_${rowIndex}" name="REQ_TYPE[${rowIndex}]" type="text" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="REQ_NO_${rowIndex}" name="REQ_NO[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;"  class="form-control" id="REF_TYPE_${rowIndex}" name="REF_TYPE[${rowIndex}]" type="text" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="REF_NO_${rowIndex}" name="REF_NO[${rowIndex}]" type="number" class="form-control-sm" /></td>
-
-
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="DR_NOTE_AMT_${rowIndex}" name="DR_NOTE_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="CR_NOTE_AMT_${rowIndex}" name="CR_NOTE_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="QLTY_DIFF_DR_AMT_${rowIndex}" name="QLTY_DIFF_DR_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="RATE_DIFF_DR_AMT_${rowIndex}" name="RATE_DIFF_DR_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="QC_DIFF_DR_AMT_${rowIndex}" name="QC_DIFF_DR_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="QTY_DIFF_DR_AMT_${rowIndex}" name="QTY_DIFF_DR_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td><input style="min-width: 50px; max-width: 200px;"  class="form-control" id="OTHER_DR_AMT_${rowIndex}" name="OTHER_DR_AMT[${rowIndex}]" type="number" class="form-control-sm" /></td>
-            <td class="action-col">
-                <i class="fas fa-trash ms-2 text-danger" onclick="deleteRow(this)" style="cursor:pointer;"></i>
-                <i class="fas fa-plus-circle ms-2 text-success add-row-icon" onclick="addNewRowBelow()" style="cursor:pointer;"></i>
-            </td>
-        </tr>`;
-    // Remove existing add icons from all rows (but leave delete icons untouched)
-    $('#tblItemRecordPBPE tbody tr .add-row-icon').remove();
-    $('#tblItemRecordPBPE tbody').append(rowHtml);
-    // Load dropdowns for new row
-    loadItemList(`#ITEM_NAME_${rowIndex}`);
-    //loadUOMList(`#UOM_NAME_${rowIndex}`);
-    loadTaxTypeList(`#TAX_CODE_${rowIndex}`);
+function parseNullableDate(dateStr) {
+    if (!dateStr) return null;
+    const date = new Date(dateStr);
+    return isNaN(date.getTime()) ? null : date.toISOString();
 }
 
+//------------------ ADD ROW ---------------
+function createRowHtml(data = {}) {
+
+    return `
+        <tr>
+
+            <td class="freeze-item"><select class="form-control form-control-sm item-name" disabled></select></td>
+
+            <td><input class="form-control form-control-sm hsn-code" type="text" value="${data.hsN_CODE || ''}"/></td>
+            <td>
+                <input class="form-control form-control-sm uom-code" type="hidden" value="${data.uoM_CODE || ''}" disabled/>
+                <input class="form-control form-control-sm uom-name" type="text" value="${data.unit || ''}" disabled/>
+            </td>
+
+            <td><input class="form-control form-control-sm nos" type="number" value="${data.nos || ''}"/></td>
+            <td><input class="form-control form-control-sm recd-qty" type="number" value="${data.recD_QTY || ''}"/></td>
+            <td><input class="form-control form-control-sm bill-qty" type="number" value="${data.bilL_QTY || ''}"/></td>
+
+            <td><input class="form-control form-control-sm usd-rate" type="number" value="${data.usD_RATE || ''}"/></td>
+            <td><input class="form-control form-control-sm exch-rate" type="number" value="${data.excH_RATE || ''}"/></td>
+            <td><input class="form-control form-control-sm rate" type="number" value="${data.rate || ''}"/></td>
+            <td><input class="form-control form-control-sm amount" type="number" value="${data.amount || ''}"/></td>
+
+            <td>
+                <select class="form-control form-control-sm rcm-yn">
+                    <option value="">-- Select --</option>
+                    <option value="YES" ${(data.rcM_YN || '').toUpperCase() === 'YES' ? 'selected' : ''}>YES</option>
+                    <option value="NO" ${(data.rcM_YN || '').toUpperCase() === 'NO' ? 'selected' : ''}>NO</option>
+                </select>
+            </td>
+
+            <td>
+                <select class="form-control form-control-sm input-yn">
+                    <option value="">-- Select --</option>
+                    <option value="YES" ${(data.inpuT_YN || '').toUpperCase() === 'YES' ? 'selected' : ''}>YES</option>
+                    <option value="NO" ${(data.inpuT_YN || '').toUpperCase() === 'NO' ? 'selected' : ''}>NO</option>
+                </select>
+            </td>
+
+            <td><select class="form-control form-control-sm tax-code"></select></td>
+
+            <td><input class="form-control form-control-sm pack-per" type="number" value="${data.pacK_PER || ''}"/></td>
+            <td><input class="form-control form-control-sm pack-amt" type="number" value="${data.pacK_AMT || ''}"/></td>
+
+            <td><input class="form-control form-control-sm disc-per" type="number" value="${data.disC_PER || ''}"/></td>
+            <td><input class="form-control form-control-sm disc-amt" type="number" value="${data.disC_AMT || ''}"/></td>
+
+            <td><input class="form-control form-control-sm cgst-per" type="number" value="${data.cgsT_PER || ''}"/></td>
+            <td><input class="form-control form-control-sm cgst-amt" type="number" value="${data.cgsT_AMT || ''}"/></td>
+
+            <td><input class="form-control form-control-sm sgst-per" type="number" value="${data.sgsT_PER || ''}"/></td>
+            <td><input class="form-control form-control-sm sgst-amt" type="number" value="${data.sgsT_AMT || ''}"/></td>
+
+            <td><input class="form-control form-control-sm igst-per" type="number" value="${data.igsT_PER || ''}"/></td>
+            <td><input class="form-control form-control-sm igst-amt" type="number" value="${data.igsT_AMT || ''}"/></td>
+
+            <td><input class="form-control form-control-sm cess-per" type="number" value="${data.cesS_PER || ''}"/></td>
+            <td><input class="form-control form-control-sm cess-amt" type="number" value="${data.cesS_AMT || ''}"/></td>
+
+            <td><input class="form-control form-control-sm vat-per" type="number" value="${data.vaT_PER || ''}"/></td>
+            <td><input class="form-control form-control-sm vat-amt" type="number" value="${data.vaT_AMT || ''}"/></td>
+
+            <td><input class="form-control form-control-sm oth-amt" type="number" value="${data.otH_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm net-amt" type="number" value="${data.neT_AMT || ''}"/></td>
+
+            <td>
+                <input class="form-control form-control-sm make-code" type="hidden" value="${data.make_Code || ''}"/>
+                <input class="form-control form-control-sm make-name" type="text" value="${data.make || ''}"/>
+            </td>
+            <td>
+                <select class="form-control form-control-sm dept-code"></select>
+            </td>
+
+            <td><input class="form-control form-control-sm remarks" type="text" value="${data.remarks || ''}"/></td>
+
+            <td><input class="form-control form-control-sm land-rate" type="number" value="${data.lanD_RATE || ''}"/></td>
+            <td><input class="form-control form-control-sm land-amt" type="number" value="${data.lanD_AMT || ''}"/></td>
+
+            <td><input class="form-control form-control-sm poland-rate" type="number" value="${data.polanD_RATE || ''}"/></td>
+            <td><input class="form-control form-control-sm po-rate" type="number" value="${data.pO_RATE || ''}"/></td>
+
+            <td><input class="form-control form-control-sm po-type" type="text" value="${data.pO_TYPE || ''}"/></td>
+            <td><input class="form-control form-control-sm po-no" type="number" value="${data.pO_NO || ''}"/></td>
+
+            <td><input class="form-control form-control-sm kanta-type" type="text" value="${data.kantA_TYPE || ''}"/></td>
+            <td><input class="form-control form-control-sm kanta-no" type="number" value="${data.kantA_NO || ''}"/></td>
+
+            <td><input class="form-control form-control-sm req-type" type="text" value="${data.reQ_TYPE || ''}"/></td>
+            <td><input class="form-control form-control-sm req-no" type="number" value="${data.reQ_NO || ''}"/></td>
+
+            <td><input class="form-control form-control-sm ref-type" type="text" value="${data.reF_TYPE || ''}"/></td>
+            <td><input class="form-control form-control-sm ref-no" type="number" value="${data.reF_NO || ''}"/></td>
+
+            <td><input class="form-control form-control-sm dr-note-amt" type="number" value="${data.dr_notE_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm cr-note-amt" type="number" value="${data.cr_notE_AMT || ''}"/></td>
+
+            <td><input class="form-control form-control-sm qlty-diff-dr-amt" type="number" value="${data.qlty_diff_dR_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm rate-diff-dr-amt" type="number" value="${data.rate_diff_dR_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm qc-diff-dr-amt" type="number" value="${data.qc_diff_dR_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm qty-diff-dr-amt" type="number" value="${data.qty_diff_dR_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm other-dr-amt" type="number" value="${data.other_dR_AMT || ''}"/></td>
+
+            <td class="action-col">
+                <i class="fas fa-trash text-danger delete-row"></i>
+                <i class="fas fa-plus-circle text-success add-row"></i>
+            </td>
+
+        </tr>
+    `;
+}
+async function addNewRowBelow(data = null) {
+    data = data || {};
+    let rowHtml = createRowHtml(data || {});
+    $("#tblItemRecordPBPE tbody").append(rowHtml);
+
+    // IMPORTANT: now bind dropdowns AFTER row is in DOM
+    const $lastRow = $("#tblItemRecordPBPE tbody tr:last");
+
+    await loadItemList($lastRow.find(".item-name"), data.iteM_CODE || null);
+    loadTaxTypeList($lastRow.find(".tax-code"), data.taX_CODE || null);
+    loadDepartmentList($lastRow.find(".dept-code"), data.depT_CODE || null);
+}
+
+//-------------- DELETE ROW -----------
 function deleteRow(el) {
     // Remove row
     $(el).closest('tr').remove();
@@ -1165,13 +1315,7 @@ function deleteRow(el) {
     }
 }
 
-function parseNullableDate(dateStr) {
-    if (!dateStr) return null;
-    const date = new Date(dateStr);
-    return isNaN(date.getTime()) ? null : date.toISOString();
-}
-
-//==============================================Helper===============================
+//-------- SELECT2 HELPER -------------
 function initSelect2($ddl) {
     $ddl.select2({
         placeholder: '-- Select --',
@@ -1188,6 +1332,7 @@ function initSelect2($ddl) {
     });
 }
 
+//-------- DATE WITH CHK HELPER -------------
 function toggleDate() {
 
     $('.erppage-checkbox-input').each(function () {
@@ -1208,53 +1353,20 @@ function toggleDate() {
     });
 
 }
-
-
-
+function setDateControl(dateValue, dateInputId, checkBoxId) {
+    if (!dateValue || dateValue === "") {
+        const currentDate = getCurrentDateYMD();
+        $(dateInputId).val(currentDate);
+        $(dateInputId).prop('disabled', true);
+        $(checkBoxId).prop('checked', false);
+    } else {
+        $(dateInputId).val(formatDateYMD(dateValue));
+        $(dateInputId).prop('disabled', false);
+        $(checkBoxId).prop('checked', true);
+    }
+}
 //============================================ MRN No Change=============================
-$('#TxtMRNNo2').on('change', function () {
 
-    var mrnNo = $("#TxtMRNNo2").val().trim();
-
-    if (mrnNo === "")
-        return;
-
-    $.ajax({
-        url: "/PurchaseBillPassEntry/ValidateMRN",
-        type: "POST",
-        data: {
-            mrnNo: mrnNo,
-            vType: $("#ddlDocType").val(),
-            vNo: $("#NumDocNo").val()
-        },
-        dataType:'json',
-        success: function (response) {
-
-            if (!response.success) {
-
-                showToast(response.message, {type:"warning"});
-
-                //clearForm();
-
-                $("#TxtMRNNo2").focus();
-                return;
-            }
-
-            //Fill Correct MRN
-            $("#TxtMRNNo2").val(response.mrnNo);
-            //$("#TxtRefType").val(response.refType);
-
-            //Load MRN Data
-            //loadMRNData(response.refType, response.mrnNo);
-
-        },
-        error: function () {
-            alert("Error occurred.");
-        }
-
-    });
-
-});
 function clearForm() {
 
     $("#tblItemRecordPBPE tbody").empty();
@@ -1297,4 +1409,657 @@ function clearForm() {
 
     $("#TxtReason").val("");
 
+}
+
+//----------------------- HEADER DATA BY MRN NO ---------------
+function LoadMRNData(vType, vNo) {
+    $.ajax({
+        url: '/PurchaseBillPassEntry/GetPurchaseDetailsByMRN',
+        type: 'GET',
+        data: { vType: vType, vNo: vNo },
+        dataType: 'json',
+        success: function (response) {
+            if (response.success) {
+                console.log("MRN Data: ", response.data);
+                const data = response.data;
+                const currentDate = getCurrentDateYMD();
+
+                $('#TxtBillNo').val(data.bilL_NO || '');
+                setDateControl(data.bilL_DATE, '#DtBillDate', '#chkBillDate');
+
+                $('#TxtChallanNo').val(data.chalL_NO || '');
+                setDateControl(data.chalL_DATE, '#DtChDate', '#chkChDate');
+                //==============WayBill Details
+                $('#TxtWaybillNo').val(data.waybilL_NO || '');
+                $('#TxtWayBillInvNo').val(data.ewB_INVNO || '');
+                if (!data.ewB_DATE || data.ewB_DATE === "") {
+                    $('#DtWaybillDate').val(formatDateYMD(data.ewB_DATE) || '');
+                }
+                else {
+                    $('#DtWaybillDate').val(currentDate);
+                }
+                if (!data.ewB_EXPDATE || data.ewB_EXPDATE === "") {
+                    $('#DtWaybillExpiry').val(formatDateYMD(data.ewB_EXPDATE) || '');
+                }
+                else {
+                    $('#DtWaybillExpiry').val(currentDate);
+                }
+
+                $('#NumExRate').val(data.excH_RATE || '');
+
+                loadPartyDrCrAcList('#ddlCreditAC', data.partY_CODE);
+                //================Bill Details
+                loadPartyListNatureSupplier('#ddlBillFrom', false, data.partY_CODE);
+                $('#TxtAdd1PD').val(data.bilL_ADD1 || '');
+                $('#TxtAdd2PD').val(data.bilL_ADD2 || '');
+                $('#TxtAdd3PD').val(data.bilL_ADD3 || '');
+                loadCityList('#ddlCityPD', data.bilL_CITY);
+                $('#NumPincodeBL').val(data.bilL_PINCODE || '');
+                $('#TxtGSTNo').val(data.bilL_GST || '');
+                loadStateList('#ddlStateSF', data.bilL_STATE);
+
+                //===============Ship Details
+                loadPartyListNatureSupplier('#ddlShipFrom1', true, data.shiP_CODE);
+                $('#TxtAdd1SF').val(data.shiP_ADD1 || '');
+                $('#TxtAdd2SF').val(data.shiP_ADD2 || '');
+                $('#TxtAdd3SF').val(data.shiP_ADD3 || '');
+                loadCityList('#ddlCitySF', data.shiP_CITY);
+                $('#TxtPincodeSF').val(data.shiP_PINCODE || '');
+                $('#TxtGSTNoSF').val(data.shiP_GST || '');
+                loadStateList('#ddlStatePD', data.shiP_STATE)
+
+                $('#txtRemarks').val(data.remarks || '');
+
+                //==============Logistic Details=======
+                $('#txtVehicleNo').val(data.trucK_NO || '');
+                $('#txtContainerNo').val(data.containeR_NO || '');
+                $('#txtGRNo').val(data.gR_NO || '');
+                setDateControl(data.gR_DATE, '#DtGRDate', '#chkGRDate');
+
+                $('#NumFreightPay').val(data.frtpaY_AMT || '');
+                $('#NumFrtTax1').val(data.frtpaY_TAXPER || '');
+                $('#NumFrtTax2').val(data.frtpaY_TAX || '');
+                $('#TxtFrtPayNarration').val(data.frtpaY_NAR || '');
+
+                $('#ddlPayment').val(data.holD_PAY || '');
+                $('#TxtReason').val(data.holD_REASON || '');
+                setDateControl(data.holD_DATE, '#DtHoldDate', '#chkHoldDate');
+
+                const paymentVal = $('#ddlPayment').val() || '';
+                if (paymentVal.toUpperCase() === "HOLD") {
+                    $('#ddlPayment').prop('disabled', true);
+                    $('#DtHoldDate').prop('disabled', true);
+                    $('#chkHoldDate').prop('disabled', true);
+                }
+
+                $('#NumTcs1').val(data.tcS_PER || '');
+                $('#NumTcs2').val(data.tcS_AMT || '');
+
+                GetPurchaseItemsByMRN(vType, vNo);
+            }
+            else {
+                showToast(response.message, { type: "error" });
+            }
+        },
+        error: function (error) {
+            showToast(error, { type: "error" });
+        }
+    });
+}
+
+//----------------------- ITEM DETAILS BY MRN NO ---------------
+async function GetPurchaseItemsByMRN(vType, vNo) {
+
+    try {
+
+        const response = await $.ajax({
+            url: '/PurchaseBillPassEntry/GetPurchaseItemsByMRN',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                vType,
+                vNo
+            }
+        });
+
+        if (!response.success) {
+            showToast(response.message, { type: "error" });
+            return;
+        }
+
+        console.log("Purchase Item List By MRN No:", response.data);
+
+        $("#tblItemRecordPBPE tbody").empty();
+
+        for (const item of response.data) {
+
+            item.rcM_YN = "NO";
+            item.inpuT_YN = "YES";
+
+            try {
+
+                // Get PO Rates
+                const rateData = await GetItemOrderRatesByPO(
+                    item.pO_TYPE,
+                    item.pO_NO,
+                    item.iteM_CODE
+                );
+
+                item.polanD_RATE = rateData.landRate;
+                item.pO_RATE = rateData.rate;
+
+                // Add Row
+                //const $row = await addNewRowBelow(item);
+                await addNewRowBelow(item);
+                let $row = $("#tblItemRecordPBPE tbody tr:last");
+
+                // Calculations
+                await calculateAmt($row, item.iteM_CODE);
+                calculateTax($row, item.iteM_CODE);
+                calculateLandAmount($row, item.iteM_CODE);
+
+                // HSN & Qty Check
+                const result = await GetHsnCodeAndQty(
+                    item.iteM_CODE,
+                    item.pO_TYPE,
+                    item.pO_NO
+                );
+
+                if (result.hsnCode !== item.hsN_CODE) {
+                    $row.find(".hsn-code")
+                        .css("background-color", "#f8d7da");
+                }
+
+                const recdQty =
+                    parseFloat($row.find(".recd-qty").val()) || 0;
+
+                if (parseFloat(result.qty) !== recdQty) {
+                    $row.find(".recd-qty")
+                        .css("background-color", "#f8d7da");
+                }
+
+            }
+            catch (err) {
+
+                console.error(err);
+                showToast(err.message || err, { type: "error" });
+
+            }
+        }
+
+        // Calculate once after all rows are loaded
+        calculateItemTotals();
+
+        await CalcDrCrNote();
+
+    }
+    catch (xhr) {
+
+        console.error(xhr);
+
+        showToast(
+            xhr.responseJSON?.message ||
+            xhr.responseText ||
+            "Unable to load Purchase Items.",
+            { type: "error" }
+        );
+    }
+}
+
+function GetItemOrderRatesByPO(poType, poNo, itemCode) {
+
+    return $.ajax({
+        url: '/PurchaseBillPassEntry/GetItemOrderRatesByPO',
+        type: 'GET',
+        dataType: 'json',
+        data: {
+            poType: poType,
+            poNo: poNo,
+            itemCode: itemCode
+        }
+    }).then(function (res) {
+
+        if (res.success) {
+            return {
+                landRate: res.landRate,
+                rate: res.rate,
+                exists: res.exists
+            };
+        } else {
+            throw new Error(res.message || "No data found");
+        }
+    });
+}
+
+//--------------------- ITEM AMOUNTS CALCULATIONS ----------------
+async function calculateAmt($row, itemCode) {
+    //=====================
+    //if (isReadOnly) {
+    //    return;
+    //}
+
+    // ---------- INPUTS ----------
+    let usdRate = parseFloat($row.find('.usd-rate').val()) || 0;
+
+    let billQty = parseFloat($row.find('.bill-qty').val()) || 0;
+    let rate = parseFloat($row.find('.rate').val()) || 0;
+    let exRate = parseFloat($row.find('.exch-rate').val()) || 0;
+
+    let pack = parseFloat($row.find('.pack-amt').val()) || 0;
+    let packPer = parseFloat($row.find('.pack-per').val()) || 0;
+    let disc = parseFloat($row.find('.disc-amt').val()) || 0;
+    let discPer = parseFloat($row.find('.disc-per').val()) || 0;
+    let cess = parseFloat($row.find('.cess-amt').val()) || 0;
+    let cessPer = parseFloat($row.find('.cess-per').val()) || 0;
+    let vat = parseFloat($row.find('.vat-amt').val()) || 0;
+    let vatPer = parseFloat($row.find('.vat-per').val()) || 0;
+
+    let taxCode = $row.find('.tax-code').val() || 0;
+
+    let cgst = parseFloat($row.find('.cgst-amt').val()) || 0;
+    let sgst = parseFloat($row.find('.sgst-amt').val()) || 0;
+    let igst = parseFloat($row.find('.igst-amt').val()) || 0;
+    let otherAmt = parseFloat($row.find('.oth-amt').val()) || 0;
+
+    //let itemCode = $row.find('.item-name').val() ;
+    let pob = 0;
+    let packAmt = 0;
+    let discount = 0;
+    let cessAmt = 0;
+    let vatAmt = 0;
+    let net = 0;
+    let basicAmt = 0;
+
+    if (itemCode > 0) {
+        // ------------RATE --------------
+        console.log("rateAmt before calc: ", rate);
+        console.log("exRate before calc: ", exRate);
+        if (exRate > 0) {
+            rate = usdRate * exRate;
+            console.log("rateAmt: ", rate);
+            $row.find('.rate').val(rate.toFixed(4));
+        }
+        // ---------- BASIC ----------
+        basicAmt = billQty * rate;
+        console.log("basicAmt: ", basicAmt);
+
+        // ---------- DISCOUNT ----------
+        discount = (discPer > 0) ? (basicAmt * discPer / 100) : disc;
+        console.log("discount: ", discount);
+
+        // ---------- PACKING ----------
+        if (taxCode > 0) {
+            let res = await GetPackOnBasic(taxCode);
+            pob = res.success ? res.data : 0;
+            console.log("pob: ", pob);
+        }
+        if (pob === 1) {
+            packAmt = (packPer > 0) ? (basicAmt * packPer / 100) : pack;
+        }
+        else {
+            packAmt = (packPer > 0) ? ((basicAmt - discount) * packPer / 100) : pack;
+        }
+        console.log("packAmt: ", packAmt);
+
+        // ---------- TAXABLE VALUE ----------
+        let grossAmt = basicAmt + packAmt - discount;
+        console.log("grossAmt: ", grossAmt);
+
+        // ---------- CESS/VAT ----------
+        cessAmt = (cessPer > 0) ? grossAmt * cessPer / 100 : cess;
+        console.log("cessAmt: ", cessAmt);
+
+        vatAmt = (vatPer > 0) ? grossAmt * vatPer / 100 : vat;
+        console.log("vatAmt: ", vatAmt);
+
+        // ---------- NET AMOUNT ----------
+        net = grossAmt + cgst + sgst + igst + cessAmt + vatAmt + otherAmt;
+        console.log("grossAmt: ", grossAmt);
+
+    }
+    // ---------- UPDATE UI ----------
+    $row.find('.amount').val(basicAmt.toFixed(2));
+    $row.find('.pack-amt').val(packAmt.toFixed(4));
+    $row.find('.disc-amt').val(discount.toFixed(4));
+
+    $row.find('.cess-amt').val(cessAmt.toFixed(4));
+    $row.find('.vat-amt').val(vatAmt.toFixed(4));
+
+    $row.find('.net-amt').val(net.toFixed(4));
+}
+
+function GetPackOnBasic(code) {
+
+    return $.ajax({
+        url: '/PurchaseBillPassEntry/GetPackOnBasic',
+        type: 'GET',
+        dataType: 'json',
+        data: {
+            code: code
+        }
+    });
+}
+
+//--------------------- ITEM TAX CALCULATIONS ----------------
+function calculateTax($row, itemCode) {
+
+    //If specialusercontrol.lblAction.Tag = 2 Then Return
+    //        If recal = False Then Return
+
+    const amount = parseFloat($row.find(".amount").val()) || 0;
+    const packAmt = parseFloat($row.find(".pack-amt").val()) || 0;
+    const discAmt = parseFloat($row.find(".disc-amt").val()) || 0;
+
+    const cgstPer = parseFloat($row.find(".cgst-per").val()) || 0;
+    const sgstPer = parseFloat($row.find(".sgst-per").val()) || 0;
+    const igstPer = parseFloat($row.find(".igst-per").val()) || 0;
+
+    const cessAmt = parseFloat($row.find(".cess-amt").val()) || 0;
+    const vatAmt = parseFloat($row.find(".vat-amt").val()) || 0;
+    const otherAmt = parseFloat($row.find(".oth-amt").val()) || 0;
+
+    let grossAmt = 0;
+
+    let cgst = parseFloat($row.find(".cgst-amt").val()) || 0;
+    let sgst = parseFloat($row.find(".sgst-amt").val()) || 0;
+    let igst = parseFloat($row.find(".igst-amt").val()) || 0;
+
+    if (itemCode > 0) {
+        grossAmt = amount + packAmt - discAmt;
+    }
+    // Recalculate only if user is not editing these fields
+    //if (currentField !== "cgst-amt" && currentField !== "sgst-amt") {
+    cgst = grossAmt * cgstPer / 100;
+    sgst = grossAmt * sgstPer / 100;
+
+    $row.find(".cgst-amt").val(cgst.toFixed(4));
+    $row.find(".sgst-amt").val(sgst.toFixed(4));
+    //}
+
+    //if (currentField !== "igst-amt") {
+    igst = grossAmt * igstPer / 100;
+    $row.find(".igst-amt").val(igst.toFixed(4));
+    //}
+
+    const netAmt =
+        grossAmt +
+        cgst +
+        sgst +
+        igst +
+        cessAmt +
+        vatAmt +
+        otherAmt;
+
+    $row.find(".net-amt").val(netAmt.toFixed(4));
+
+    // Equivalent of ReadOnly property
+    $row.find(".cgst-amt").prop("readonly", cgst <= 0);
+    $row.find(".sgst-amt").prop("readonly", cgst <= 0);
+    $row.find(".igst-amt").prop("readonly", igst <= 0);
+}
+
+function GetHsnCodeAndQty(itemCode, poType, poNo) {
+
+    return new Promise(function (resolve, reject) {
+
+        $.ajax({
+            url: '/PurchaseBillPassEntry/GetHsnCodeAndQty',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                itemCode: itemCode,
+                poType: poType,
+                poNo: poNo
+            },
+            success: function (response) {
+
+                if (response.success) {
+                    resolve(response.data);
+                }
+                else {
+                    reject(response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                reject(error || xhr.responseText);
+            }
+        });
+
+    });
+
+}
+
+//--------------------- ITEM TOTAL CALCULATIONS ----------------
+function calculateItemTotals() {
+
+    let totals = {
+        recQty: 0,
+        billQty: 0,
+        amount: 0,
+        packing: 0,
+        discount: 0,
+        cgst: 0,
+        sgst: 0,
+        igst: 0,
+        cess: 0,
+        vat: 0,
+        other: 0,
+        netAmt: 0
+    };
+
+    $("#tblItemRecordPBPE tbody tr").each(function () {
+
+        const row = $(this);
+
+        totals.recQty += parseFloat(row.find(".recd-qty").val()) || 0;
+        totals.billQty += parseFloat(row.find(".bill-qty").val()) || 0;
+        totals.amount += parseFloat(row.find(".amount").val()) || 0;
+        totals.packing += parseFloat(row.find(".pack-amt").val()) || 0;
+        totals.discount += parseFloat(row.find(".disc-amt").val()) || 0;
+        totals.cgst += parseFloat(row.find(".cgst-amt").val()) || 0;
+        totals.sgst += parseFloat(row.find(".sgst-amt").val()) || 0;
+        totals.igst += parseFloat(row.find(".igst-amt").val()) || 0;
+        totals.cess += parseFloat(row.find(".cess-amt").val()) || 0;
+        totals.vat += parseFloat(row.find(".vat-amt").val()) || 0;
+        totals.other += parseFloat(row.find(".oth-amt").val()) || 0;
+        totals.netAmt += parseFloat(row.find(".net-amt").val()) || 0;
+
+    });
+
+    //Display Totals
+    $("#NumReceivedQty").val(totals.recQty.toFixed(2));
+    $("#NumBillQty").val(totals.billQty.toFixed(2));
+    $("#NumAmount").val(totals.amount.toFixed(2));
+    $("#NumPacking").val(totals.packing.toFixed(2));
+    $("#NumDiscount").val(totals.discount.toFixed(2));
+
+    $("#NumCgst").val(totals.cgst.toFixed(2));
+    $("#NumSgst").val(totals.sgst.toFixed(2));
+    $("#NumIgst").val(totals.igst.toFixed(2));
+    $("#NumVat").val(totals.vat.toFixed(2));
+    $("#NumCess").val(totals.cess.toFixed(2));
+
+    $("#NumOtherAmt").val(totals.other.toFixed(2));
+    console.log("totals: ", totals);
+    //TCS Amount
+    const tcsAmt = parseFloat($("#NumTcs2").val()) || 0;
+
+    //Sub Total
+    const subTotal = totals.netAmt + tcsAmt;
+    console.log("subTotal: ", subTotal);
+
+    $("#NumSubTotal").val(subTotal.toFixed(2));
+
+    //Round Off
+    const rounded = Math.round(subTotal);
+    const roundOff = rounded - subTotal;
+    console.log("rounded: ", rounded);
+    console.log("roundOff: ", roundOff);
+
+    $("#NumRoundOff").val(roundOff.toFixed(2));
+    $("#NumNetAmount").val(rounded.toFixed(2));
+
+    //TDS 194Q
+    const tdsPer = parseFloat($("#TxtTds194q1").val()) || 0;
+
+    const tds194Q =
+        ((totals.amount + totals.packing - totals.discount) * tdsPer) / 100;
+    console.log("tds194Q: ", tds194Q);
+
+    $("#TxtTds194q2").val(tds194Q.toFixed(2));
+}
+
+//--------------------- ITEM LAND AMOUnT CALCULATIONS ----------------
+function calculateLandAmount($row, itemCode) {
+
+    //$("#tblItemRecordPBPE tbody tr").each(function () {
+
+    //const $row = $(this);
+
+    //const itemCode = $row.find(".item-name").val() || 0;
+    const billQty = parseFloat($row.find(".bill-qty").val()) || 0;
+    const rate = parseFloat($row.find(".rate").val()) || 0;
+
+    const packAmt = parseFloat($row.find(".pack-amt").val()) || 0;
+    const discAmt = parseFloat($row.find(".disc-amt").val()) || 0;
+
+    const cgst = parseFloat($row.find(".cgst-amt").val()) || 0;
+    const sgst = parseFloat($row.find(".sgst-amt").val()) || 0;
+    const igst = parseFloat($row.find(".igst-amt").val()) || 0;
+    const cess = parseFloat($row.find(".cess-amt").val()) || 0;
+
+    let packRate = 0;
+    let discRate = 0;
+    let taxRate = 0;
+
+    if (itemCode > 0) {
+        if (billQty > 0) {
+            packRate = packAmt / billQty;
+            discRate = discAmt / billQty;
+            taxRate = (cgst + sgst + igst + cess) / billQty;
+            console.log("taxRate: ", taxRate);
+        }
+    }
+
+    const landRate = rate + packRate - discRate + taxRate;
+    const landAmt = billQty * landRate;
+
+    console.log("landRate and landAmt", landRate, landAmt)
+
+    $row.find(".land-rate").val(landRate.toFixed(2));
+    $row.find(".land-amt").val(landAmt.toFixed(2));
+
+    //});
+
+}
+
+//------------------ CALCULATE DR/CR NOTE --------------
+
+function GetCrDrNoteRequest() {
+    const request = {
+        vType: $("#ddlDocType").val(),
+        vNo: $("#NumDocNo").val(),
+        vDate: $("#DtDocDate").val(),
+        billToPartyCode: parseInt($("#ddlBillFrom").val()) || 0,
+        billToPartyName: $("#ddlBillFrom").find("option:selected").text().trim(),
+        txtQualityDiffDebitAmt: parseFloat($("#TxtQualityDiffDebitAmt").val()) || 0,
+        txtQualityDiffDebitTax: parseFloat($("#TxtQualityDiffDebitTax").val()) || 0,
+        items: [],
+
+        totalRcvdQty: parseFloat($('#NumReceivedQty').val()) || 0,
+        totalBillQty: parseFloat($('#NumBillQty').val()) || 0,
+        totalNetAmt: parseFloat($('#NumNetAmount').val()) || 0,
+        totalTCSAmt: parseFloat($('#NumTcs2').val()) || 0,
+        totalPackingAmt: parseFloat($('#NumTcs2').val()) || 0,
+        isSealedVehicle: $('#ChkSealedVehicle').is(':checked'),
+
+        mrnType: $("#TxtMRNNo1").val(),
+        mrnNo: $("#TxtMRNNo2").val(),
+
+        inputType: $("#ddlInputType").val(),
+        FreightAmountPay: parseFloat($('#NumFreightPay').val()) || 0,
+        FreightTax: parseFloat($('#NumFrtTax2').val()) || 0,
+        FreightTaxPercent: parseFloat($('#NumFrtTax1').val()) || 0,
+    };
+
+    $("#tblItemRecordPBPE tbody tr").each(function () {
+
+        const $row = $(this);
+
+        request.items.push({
+            itemCode: parseInt($row.find(".item-name").val()) || 0,
+            itemName: $row.find(".item-name option:selected").text(),
+            unit: $row.find(".uom-name").val() || "",
+
+            amount: parseFloat($row.find(".amount").val()) || 0,
+
+            recdQty: parseFloat($row.find(".recd-qty").val()) || 0,
+            billQty: parseFloat($row.find(".bill-qty").val()) || 0,
+
+            cgstPer: parseFloat($row.find(".cgst-per").val()) || 0,
+            sgstPer: parseFloat($row.find(".sgst-per").val()) || 0,
+            igstPer: parseFloat($row.find(".igst-per").val()) || 0,
+
+            poType: $row.find(".po-type").val() || "",
+            poNo: parseInt($row.find(".po-no").val()) || 0,
+
+            landRate: parseFloat($row.find(".land-rate").val()) || 0,
+            poRate: parseFloat($row.find(".po-rate").val()) || 0,
+            poLandRate: parseFloat($row.find(".poland-rate").val()) || 0
+        });
+
+    });
+
+    return request;
+}
+
+async function CalcDrCrNote() {
+
+    const request = GetCrDrNoteRequest();
+
+    try {
+
+        const result = await $.ajax({
+            url: "/PurchaseBillPassEntry/CalculateDebitNote",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(request)
+        });
+
+        if (result.warnings && result.warnings.length > 0) {
+            console.log("result.warnings.length", result.warnings.length);
+            result.warnings.forEach(function (message) {
+                showToast(message, { type: "warning" });
+            });
+        }
+        console.log("DR/CR result: ", result)
+        //------------ Rate Debit --------------
+        $("#TxtRateDiffDebitAmt").val((result.rateDiffDebitAmt || 0).toFixed(2));
+        $("#TxtRateDiffDebitTax").val((result.rateDiffDebitTax || 0).toFixed(2));
+        $("#TxtRateDiffDebitNarration").val(result.rateDiffDebitNarration);
+
+        //------------ Quality Debit -------------
+        $("#TxtQualityDiffDebitAmt").val((result.qualityDiffDebitAmt || 0).toFixed(2));
+        $("#TxtQualityDiffDebitTax").val((result.qualityDiffDebitTax || 0).toFixed(2));
+        $("#TxtQualityDiffDebitNarration").val(result.qualityDiffDebitNarration);
+
+        //-------------- Weight Debit ---------------
+        $("#TxtWeightDebitAmt").val((result.weightDiffDebitAmt || 0).toFixed(2));
+        $("#TxtWeightDebitTax").val((result.weightDiffDebitTax || 0).toFixed(2));
+        $("#TxtWeightDebitNarration").val(result.weightDiffDebitNarration);
+
+        //-------------- QC Debit -------------
+        $("#TxtQCDebitNoteAmt").val((result.qcDebitAmt || 0).toFixed(2));
+        $("#TxtQCDebitNoteTax").val((result.qcDebitTax || 0).toFixed(2));
+        $("#TxtQCDebitNarration").val(result.qcDebitNarration);
+
+    }
+    catch (ex) {
+
+        console.error(ex);
+
+        showToast(
+            "Unable to calculate Debit Note.",
+            { type: "error" });
+    }
 }

@@ -1,8 +1,9 @@
 ﻿let docId = "";
 let readOnly; 
 let RemoveAttachment = false;
-
+var controllerName = window.location.pathname.split('/')[1];
 $(async function () {
+    checkPermissionForEntryPage(controllerName);
     try {
         docId = VehicleUI.getQueryParam('id');
         readOnly = VehicleUI.getQueryParam('readOnly');

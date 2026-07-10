@@ -1,5 +1,12 @@
-﻿let transitPagination;
+﻿var controllerName = window.location.pathname.split('/')[1];
+
+let transitPagination;
 $(document).ready(function () {
+
+	checkPermission(controllerName, function () {
+		transitPagination.load();
+	});
+
 	//===Yesterday Date for wayBillDate==
 	const yestDate = getYesterdayYMD();
 	$('#DtEWaybillDate').val(yestDate);
@@ -37,19 +44,19 @@ $(document).ready(function () {
 			const tbody = $('#tblTransitEntryList tbody');
 			tbody.empty();
 			if (!docs.length) {
-				tbody.append(`<tr><td colspan="12" class="text-center text-muted">No list found.</td></tr>'`);
+				tbody.append(`<tr><td class="text-center text-muted">No list found.</td></tr>'`);
 				return;
 			}
 
 			$.each(docs, function (index, item) {
-				let actions = '';
-				if (window.permissions.canEdit) {
-					actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>`;
-				}
-				actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-eye"></i></button>`;
-				if (window.permissions.canDelete) {
-					actions += `<button class="act-btn delete" title="Delete" style="cursor:pointer;" onclick="deleteTransit('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-trash"></i></button>`;
-				}
+				//let actions = '';
+				//if (window.permissions.canEdit) {
+				//	actions += `<button class="act-btn edit btn-edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>`;
+				//}
+				//actions += `<button class="act-btn view btn-view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-eye"></i></button>`;
+				//if (window.permissions.canDelete) {
+				//	actions += `<button class="act-btn delete btn-delete" title="Delete" style="cursor:pointer;" onclick="deleteTransit('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-trash"></i></button>`;
+				//}
 				tbody.append(`
 					<tr>
 						<td>${item.v_TYPE}</td>
@@ -62,9 +69,14 @@ $(document).ready(function () {
 						<td>${item.bilL_NO}</td>
 						<td>${item.bilL_DATE ? formatDateYMD(item.bilL_DATE) : ''}</td>
 						<td>${item.trucK_NO}</td>
-						<td class="action-col">${actions}</td>
+						<td class="action-col"><div class="action-wrap">
+							<button class="act-btn edit permission-edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-edit"></i></button>
+							<button class="act-btn view btn-view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-eye"></i></button>
+							<button class="act-btn delete permission-delete" title="Delete" style="cursor:pointer;" onclick="deleteTransit('${item.v_NO}', '${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
+						</div></td>
 					</tr>
 				`);
+				applyGridPermission();
 			});
 
 		}
@@ -223,7 +235,7 @@ function TransitReport() {
 }
 
 // ================= Download Excel =================
-document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
+document.getElementById("button_export").addEventListener("click", function (e) {
 	e.preventDefault();
 	window.location.href = "/TransitEntryList/ExportAllDocs";
 });

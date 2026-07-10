@@ -448,7 +448,7 @@ async function CollectFormData() {
         URGENT_REQUEST: $('#chkUrgentRequest').prop('checked') ? 1 : 0,
         STATUS: parseInt($('#ddlStatus').val()) || 0,
         OWNER_CODE: parseInt($.trim($('#ddlRequester').val())) || 0,
-        OWNER_NAME: $.trim($('#ddlRequester option:selected').text()) || "",
+        OWNER_NAME: $.trim($('#ddlRequester option:selected').data("name")) || "",
         PLAN_NO: parseInt($.trim($('#ddlPlanComplain').val())) || 0,
         PLAN_TYPE: $('#ddlPlanComplain option:selected').data('plantype') || "",
         REMARKS: $.trim($('#txtRemarks').val()),

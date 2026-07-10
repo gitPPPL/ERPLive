@@ -149,7 +149,7 @@ function showDocumentPopupjQuery(data, docCode) {
 
     const modalHTML = `
         <div class="modal fade" id="dynamicDocModal" tabindex="-1" aria-labelledby="docModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg erppagesmodal">
+    <div class="modal-dialog medium-modal erppagesmodal">
         <div class="modal-content erppagesmodal-content">
             <div class="erppagesmodal-header">
                 <div class="erppagesmodal-header-left">
@@ -167,7 +167,7 @@ function showDocumentPopupjQuery(data, docCode) {
             <div class="erppagesmodal-body">
                     <div class="erppagelist-container">
                         <div class="excel-wrapper fixed-grid-wrapper">
-                            <table id="tblApprovalStageMaster" class="excel-table fixed-grid-table">
+                            <table id="tblApprovalStageMaster" class="excel-table table-width fixed-grid-table resizable-table">
                                 <colgroup>
                                     <col style="display:none;" /> <!-- FIXED -->
                                     <col style="width: 120px;" />  <!-- Doc ID -->
@@ -184,7 +184,7 @@ function showDocumentPopupjQuery(data, docCode) {
                                 </colgroup>
                                 <thead>
                                     <tr>
-                                        <th style="display:none;">Code</th>
+                                        <th class="hidden-col">Code</th>
                                         <th>Doc id</th>
                                         <th>Created By</th>
                                         <th>Created On</th>
@@ -427,3 +427,86 @@ function checkModificationDays(options) {
     //        }
     //    })
     //}
+
+//===============================================Permission=====================
+let permission = null;
+
+function checkPermission(controllerName, callback) {
+
+    $.ajax({
+        url: '/Permission/GetCurrentMenuPermission',
+        type: 'GET',
+        data: {
+            controllerName: controllerName
+        },
+        success: function (res) {
+
+            if (!res.success)
+                return;
+
+            permission = res;
+
+            $("#button_add").toggle(res.add);
+            $("#button_edit").toggle(res.edit);
+            $("#button_delete").toggle(res.delete);
+            $("#button_print").toggle(res.print);
+            $("#button_export").toggle(res.export);
+            $("#button_mail").toggle(res.mail);
+            $("#button_approval").toggle(res.approval);
+            $("#button_document").toggle(res.docdetail);
+
+            applyGridPermission();
+
+            if (callback)
+                callback();
+        }
+    });
+}
+let Entrypermission = null;
+
+function checkPermissionForEntryPage(controllerName) {
+
+    $.ajax({
+        url: '/Permission/GetCurrentEntryPagePermission',
+        type: 'GET',
+        data: {
+            controllerName: controllerName
+        },
+        success: function (res) {
+            console.log(res);
+            if (!res.success)
+                return;
+            Entrypermission = res;
+
+            $("#button_add").toggle(res.add);
+            $("#button_edit").toggle(res.edit);
+            $("#button_delete").toggle(res.delete);
+            $("#button_print").toggle(res.print);
+            $("#button_export").toggle(res.export);
+            $("#button_mail").toggle(res.mail);
+            $("#button_approval").toggle(res.approval);
+            $("#button_document").toggle(res.docdetail);
+
+            $(".permission-edit").toggle(res.edit);
+            $(".permission-delete").toggle(res.delete);
+
+            applyGridPermissionforEntryPage();
+        }
+    });
+}
+function applyGridPermissionforEntryPage() {
+
+    if (!permission)
+        return;
+
+    $(".permission-edit").toggle(permission.edit);
+    $(".permission-delete").toggle(permission.delete);
+}
+function applyGridPermission() {
+
+    if (!permission)
+        return;
+
+    $(".permission-edit").toggle(permission.edit);
+    $(".permission-delete").toggle(permission.delete);
+}

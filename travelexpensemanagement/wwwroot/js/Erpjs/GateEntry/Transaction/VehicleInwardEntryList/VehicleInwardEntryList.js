@@ -1,8 +1,12 @@
 ﻿
+var controllerName = window.location.pathname.split('/')[1];
 
 let vehiclePagination;
+
 $(document).ready(function () {
-	
+	checkPermission(controllerName, function () {
+		vehiclePagination.load();
+	});
 	vehiclePagination = Pagination.create({
 		pageSize: 10,
 		paginationContainer: '#pageNumbers',
@@ -33,22 +37,22 @@ $(document).ready(function () {
 			const tbody = $('#tblPurchaseBillPassEntry tbody');
 			tbody.empty();
 			if (!docs.length) {
-				tbody.append(`<tr><td colspan="10" class="text-center text-muted">No list found.</td></tr>'`);
+				tbody.append(`<tr><td class="text-center text-muted">No list found.</td></tr>'`);
 				return;
 			}
 
 			$.each(docs, function (index, item) {
-				let actions = '';
-								if (window.permissions.canEdit) {
-									actions += `<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="checkModificationAllowed('${item.vdate}', '${item.docid}')"><i class="fa fa-edit"></i></button>`;
-								}
-								actions += `<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.docid}')"><i class="fa fa-eye"></i></button>`;
-								if (window.permissions.canDelete) {
-									actions += `<button class="act-btn delete" title="View" style="cursor:pointer;" onclick="deleteVehicleEntry('${item.docid}')"><i class="fa fa-trash"></i></button>`;
-								}
-								if (window.permissions.canDocDetail) {
-									actions += `<button class="act-btn document" title="document" style="cursor:pointer;" onclick="showImpExpExpensePopup('${item.docid}')"><i class="fa fa-file-alt"></i></button>`;
-								}
+				//let actions = '';
+				//				if (window.permissions.canEdit) {
+				//					actions += `<button class="act-btn edit btn-edit" title="Edit" style="cursor:pointer;" onclick="checkModificationAllowed('${item.vdate}', '${item.docid}')"><i class="fa fa-edit"></i></button>`;
+				//				}
+				//				actions += `<button class="act-btn view btn-view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.docid}')"><i class="fa fa-eye"></i></button>`;
+				//				if (window.permissions.canDelete) {
+				//					actions += `<button class="act-btn delete btn-delete" title="View" style="cursor:pointer;" onclick="deleteVehicleEntry('${item.docid}')"><i class="fa fa-trash"></i></button>`;
+				//				}
+				//				if (window.permissions.canDocDetail) {
+				//					actions += `<button class="act-btn document btn-document" title="document" style="cursor:pointer;" onclick="showImpExpExpensePopup('${item.docid}')"><i class="fa fa-file-alt"></i></button>`;
+				//				}
 				tbody.append(`
 					<tr>
 									<td class="d-none code">${item.docid}</td>
@@ -59,9 +63,15 @@ $(document).ready(function () {
 									<td>${item.partyname}</td>
 									<td>${item.truckno}</td>
 									<td>${item.transport}</td>
-									<td class="action-col">${actions}</td>
+									<td class="action-col"><div class="action-wrap">
+										<button class="act-btn edit permission-edit" title="Edit" style="cursor:pointer;" onclick="checkModificationAllowed('${item.vdate}', '${item.docid}')"><i class="fa fa-edit"></i></button>
+										<button class="act-btn view btn-view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.docid}')"><i class="fa fa-eye"></i></button>
+										<button class="act-btn delete permission-delete" title="Delete" style="cursor:pointer;" onclick="deleteVehicleEntry('${item.docid}')"><i class="fa fa-trash"></i></button>
+										<button class="act-btn document btn-document" title="document" style="cursor:pointer;" onclick="showImpExpExpensePopup('${item.docid}')"><i class="fa fa-file-alt"></i></button>
+									</div></td>
 								</tr>
 				`);
+				applyGridPermission();
 			});
 
 		}
@@ -109,7 +119,7 @@ function checkModificationAllowed(vDate, rowId) {
 
 
 // ================= Download Excel =================
-document.getElementById("btn-Export-Excel").addEventListener("click", function (e) {
+document.getElementById("button_export").addEventListener("click", function (e) {
 	e.preventDefault();
 	window.location.href = "/VehicleInwardEntryList/ExportAllDocs";
 });

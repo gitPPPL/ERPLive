@@ -1,138 +1,129 @@
 ﻿@{
-	ViewBag.Title = "Transit Entry List";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Transit Entry List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 
-	var currentMenu = ViewBag.CurrentMenu as string;
-	bool canAdd = false;
-	bool canEdit = false;
-	bool canDelete = false;
-	bool canPrint = false;
-	bool canExport = false;
-	bool canMail = false;
-	bool canApproval = false;
-	bool canDocDetail = false;
+    // var currentMenu = ViewBag.CurrentMenu as string;
+    // bool canAdd = false;
+    // bool canEdit = false;
+    // bool canDelete = false;
+    // bool canPrint = false;
+    // bool canExport = false;
+    // bool canMail = false;
+    // bool canApproval = false;
+    // bool canDocDetail = false;
 
-	foreach (var permission in Model.UserMenuPermissions)
-	{
-		if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
-		{
-			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
-			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
-			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
-			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
-			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
-			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
-			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
-			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
-			break;
-		}
-	}
+    // foreach (var permission in Model.UserMenuPermissions)
+    // {
+    // 	if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+    // 	{
+    // 		canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+    // 		canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+    // 		canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+    // 		canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+    // 		canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+    // 		canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+    // 		canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+    // 		canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+    // 		break;
+    // 	}
+    // }
 
-	var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
-	// var dbName = ViewBag.DatabaseName;
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
+    // var dbName = ViewBag.DatabaseName;
 
 }
 <div id="erp-toast-container"></div>
 <!-- HEADER -->
 <div class="erppagelist-header">
-	<div class="erppagelist-title">
-		<i class="fa fa-list"></i>
-		<span>Transit Entry List</span>
-	</div>
-	<div class="erppagelist-header-right">
-		@if (canAdd)
-		{
-			<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "TransitEntry")'">
-				<i class="fa fa-plus"></i>Add New
-			</button>
-		}
-	</div>
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Transit Entry List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "TransitEntry")'" id="button_add">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
 </div>
 <!-- TOOLBAR -->
 <div class="erppagelist-toolbar">
-	<div class="erppagelist-search-wrapper">
-		<i class="fa fa-search"></i>
-		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
-	</div>
-	<div class="erppagelist-actions">
-		<div class="erppage-divfield">
-			<label class="erppage-label">EWaybill Date</label>
-			<input type="date" class="erppage-input" id="DtEWaybillDate"/>
-		</div>
-		<button type="button" class="erppage-btn erppage-btn-copy" id="btnEWayBillImportData">
-			<i class="fa fa-download"></i>
-			<span>Import and save EWayBill Data</span>
-		</button>
-		@if (canPrint)
-		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="TransitReport()">
-				<i class="fa fa-print"></i> Print
-			</button>
-		}
-		@if (canExport)
-		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="btn-Export-Excel">
-				<i class="fa fa-file-excel"></i> Export
-			</button>
-		}
-	</div>
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+    </div>
+    <div class="erppagelist-actions">
+        <div class="erppage-divfield">
+            <label class="erppage-label">EWaybill Date</label>
+            <input type="date" class="erppage-input" id="DtEWaybillDate" />
+        </div>
+        <button type="button" class="erppage-btn erppage-btn-copy" id="btnEWayBillImportData">
+            <i class="fa fa-download"></i>
+            <span>Import and save EWayBill Data</span>
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="TransitReport()" id="button_print">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="button_export">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+    </div>
 </div>
 <div class="erppagelist-container">
-	<div class="excel-wrapper fixed-grid-wrapper">
-		<table id="tblTransitEntryList" class="excel-table fixed-grid-table">
-			<colgroup>
-				<col style="display:none;" /> <!-- Code, hidden -->
-				<col style="width: 40px;" />  <!-- V_Type -->
-				<col style="width: 80px;" />  <!-- V_No -->
-				<col style="width: 120px;" /> <!-- WayBill No -->
-				<col style="width: 90px;" /> <!-- Create Date -->
-				<col style="width: 90px;" /> <!-- Expiry_Date -->
-				<col style="width: 180px;" /> <!-- Party_Name -->
-				<col style="width: 140px;" /> <!-- Party_Gstin -->
-				<col style="width: 85px;" /> <!-- Bill_No -->
-				<col style="width: 100px;" /> <!-- Bill_Date -->
-				<col style="width: 80px;" />  <!-- Truck_No -->
-				<col style="width: 140px;" /> <!-- Action -->
-			</colgroup>
-			<thead>
-				<tr>
-					<th style="display:none;">Code</th>
-					<th>Doc Type</th>
-					<th>Doc No</th>
-					<th>WayBill No</th>
-					<th>Create Date</th>
-					<th>Expiry Date</th>
-					<th>Party Name</th>
-					<th>Party Gstin</th>
-					<th>Bill No</th>
-					<th>Bill Date</th>
-					<th>Truck No</th>
-					<th class="action-col">Action</th>
-				</tr>
-			</thead>
-			<tbody></tbody>
-		</table>
-	</div>
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblTransitEntryList" class="excel-table fixed-grid-table table-width resizable-table">
+            <colgroup>
+                <col style="display:none;"> <!-- Code, hidden -->
+                <col style="width: 75px;">  <!-- V_Type -->
+                <col style="width: 80px;">  <!-- V_No -->
+                <col style="width: 105px;"> <!-- WayBill No -->
+                <col style="width: 90px;"> <!-- Create Date -->
+                <col style="width: 90px;"> <!-- Expiry_Date -->
+                <col style="width: 180px;"> <!-- Party_Name -->
+                <col style="width: 140px;"> <!-- Party_Gstin -->
+                <col style="width: 85px;"> <!-- Bill_No -->
+                <col style="width: 100px;"> <!-- Bill_Date -->
+                <col style="width: 108px;">  <!-- Truck_No -->
+                <col style="width: 140px;"> <!-- Action -->
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="hidden-col">Code</th>
+                    <th>Doc Type</th>
+                    <th>Doc No</th>
+                    <th>WayBill No</th>
+                    <th>Create Date</th>
+                    <th>Expiry Date</th>
+                    <th>Party Name</th>
+                    <th>Party Gstin</th>
+                    <th>Bill No</th>
+                    <th>Bill Date</th>
+                    <th>Truck No</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-	<div class="erppagelist-pagination">
-		<div class="pagination-left">
-			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
-				<option value="5">5</option>
-				<option value="10" selected>10</option>
-				<option value="20">20</option>
-				<option value="50">50</option>
-			</select>
-		</div>
-		<div class="pagination-center">
-			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
-			<div id="pageNumbers" class="page-numbers"></div>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
 
-			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
-		</div>
-		<div class="pagination-right" id="pageInfoText">
-			Results: 0 - 0 of 0
-		</div>
-	</div>
+            <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
 </div>
 @* <script src="~/common/globalvalidation.js"></script> *@
 
@@ -140,20 +131,15 @@
 <script src="~/common/pagination.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/transitentrylist/transitentrylist.js"></script>
 <script>
-	window.permissions = {
-		canEdit: @canEdit.ToString().ToLower(),
-		canDelete: @canDelete.ToString().ToLower(),
-		canDocDetail: @canDocDetail.ToString().ToLower()
-	};
-	window.globalVariables = {
-		compCode: "@globalVariables?.PubCompCode",
-		yearCode: "@globalVariables?.PubFYearCode",
-		branchCode: "@globalVariables?.PubBranchCode",
-		companyName: "@globalVariables?.CompanyName",
-		add1: "@globalVariables?.Address1",
-		add2: "@globalVariables?.Address2"
-	};
-	window.database = {
-		db: "@ViewBag.DatabaseName"
-	}
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2"
+    };
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
 </script>

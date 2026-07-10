@@ -40,11 +40,11 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label" for="TxtMRNNo" style="width:50px;">MRN No</label>
                     <div class="erppage-inputgroup">
-                        @* <select class="erppage-input erppage-select" id="TxtMRNNo2" style="width:70%;">
+                        <select class="erppage-input erppage-select" id="TxtMRNNo2" style="width:70%;">
                             <option value="">Select Mrn No</option>
-                        </select> *@
-                        <div id="TxtMRNNo2" class="erppage-search-inputdropdown" style="width:66%;"></div>
-                        <input type="text" class="erppage-input" id="TxtMRNNo1">
+                        </select>
+                        @* <div id="TxtMRNNo2" class="erppage-search-inputdropdown" style="width:66%;"></div> *@
+                        <input type="text" class="erppage-input" id="TxtMRNNo1" style="width:30%;">
                     </div>
                 </div>
             </div>
@@ -70,9 +70,10 @@
                         <div class="erppage-grid1">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Add Line1</label>
-                                <select class="erppage-input erppage-select" id="TxtAdd1PD" disabled>
+                               @*  <select class="erppage-input erppage-select" id="TxtAdd1PD" disabled>
                                     <option value="">Select Billing Address</option>
-                                </select>
+                                </select> *@
+                                <input type="text" class="erppage-input" id="TxtAdd1PD" placeholder="Enter Address Line 1" disabled>
                             </div>
                         </div>
                         <div class="erppage-grid1">
@@ -282,17 +283,17 @@
                         <label class="erppage-label">Input Type</label>
                         <select class="erppage-input erppage-select" id="ddlInputType">
                             <option>Select Input Type</option>
-                            <option value="Central">Central</option>
+                            @* <option value="Central">Central</option> *@
                             <option value="GST Input">GST Input</option>
                             <option value="GST NA">GST NA</option>
                             <option value="Import">Import</option>
-                            <option value="Input Capital">Input Capital</option>
-                            <option value="Input GST">Input GST</option>
+                            @* <option value="Input Capital">Input Capital</option> *@
+                            @* <option value="Input GST">Input GST</option> *@
                             <option value="Input NA">Input NA</option>
-                            <option value="Input VAT">Input VAT</option>
-                            <option value="Local">Local</option>
+                            @* <option value="Input VAT">Input VAT</option> *@
+                            @* <option value="Local">Local</option> *@
                             <option value="RCM">RCM</option>
-                            <option value="Exempt">Exempt</option>
+                            @* <option value="Exempt">Exempt</option> *@
                         </select>
                     </div>
                 </div>
@@ -674,7 +675,13 @@
                                     <div class="erppage-grid2">
                                         <div class="erppage-divfield">
                                             <label class="erppage-label">GR Date</label>
-                                            <input type="date" class="erppage-input" id="DtGRDate">
+                                            @* <input type="date" class="erppage-input" id="DtGRDate"> *@
+                                            <div class="erppage-datebox">
+                                                <input type="date" class="erppage-input erppage-dateinput" id="DtGRDate">
+                                                <label class="erppage-checkbox-inside">
+                                                    <input type="checkbox" class="erppage-checkbox-input" id="chkGRDate">
+                                                </label>
+                                            </div>
                                         </div>
                                         <div class="erppage-divfield">
                                             <label class="erppage-label"></label>
@@ -888,13 +895,13 @@
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtQualityDiffDebit1">
+                                       id="TxtQualityDiffDebitAmt">
                             </div>
 
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtQualityDiffDebit2">
+                                       id="TxtQualityDiffDebitTax">
                             </div>
 
                             <div class="erppage-divfield">
@@ -917,20 +924,27 @@
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtRateDiffDebit1">
+                                       id="TxtRateDiffDebitAmt">
                             </div>
 
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtRateDiffDebit2">
+                                       id="TxtRateDiffDebitTax">
                             </div>
 
                             <div class="erppage-divfield">
-                                <input type="text"
+                                @* <input type="text"
                                        class="erppage-input"
                                        id="TxtRateDiffDebitNarration"
-                                       placeholder="Narration">
+                                       placeholder="Narration"
+                                /> *@
+                                <textarea type="text"
+                                       class="erppage-input"
+                                       id="TxtRateDiffDebitNarration"
+                                       placeholder="Narration"
+                                       style="height:200px;"
+                                ></textarea>
                             </div>
 
                         </div>
@@ -946,13 +960,13 @@
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtQCDebitNote1">
+                                       id="TxtQCDebitNoteAmt">
                             </div>
 
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtQCDebitNote2">
+                                       id="TxtQCDebitNoteTax">
                             </div>
 
                             <div class="erppage-divfield">
@@ -975,13 +989,13 @@
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtWeightDebit1">
+                                       id="TxtWeightDebitAmt">
                             </div>
 
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtWeightDebit2">
+                                       id="TxtWeightDebitTax">
                             </div>
 
                             <div class="erppage-divfield">
@@ -1004,13 +1018,13 @@
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtOtherDebit1">
+                                       id="TxtOtherDebitAmt">
                             </div>
 
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtOtherDebit2">
+                                       id="TxtOtherDebitTax">
                             </div>
 
                             <div class="erppage-divfield">
@@ -1031,14 +1045,14 @@
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtQualityCreditNote1"
+                                       id="TxtQualityCreditNoteAmt"
                                        value="0">
                             </div>
 
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtQualityCreditNote2"
+                                       id="TxtQualityCreditNoteVal"
                                        value="0">
                             </div>
 
@@ -1061,14 +1075,14 @@
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtQCCreditNote1"
+                                       id="TxtQCCreditNoteAmt"
                                        value="0">
                             </div>
 
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtQCCreditNote2"
+                                       id="TxtQCCreditNoteVal"
                                        value="0">
                             </div>
 
@@ -1091,14 +1105,14 @@
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtWeightCreditNote1"
+                                       id="TxtWeightCreditNoteAmt"
                                        value="0">
                             </div>
 
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtWeightCreditNote2"
+                                       id="TxtWeightCreditNoteVal"
                                        value="0">
                             </div>
 
@@ -1121,14 +1135,14 @@
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtRateDiffCreditNote1"
+                                       id="TxtRateDiffCreditNoteAmt"
                                        value="0">
                             </div>
 
                             <div class="erppage-divfield">
                                 <input type="number"
                                        class="erppage-input"
-                                       id="TxtRateDiffCreditNote2"
+                                       id="TxtRateDiffCreditNoteVal"
                                        value="0">
                             </div>
 
@@ -1148,9 +1162,10 @@
                                 <label class="erppage-label" for="ddlPayment">Payment</label>
                                 <select class="erppage-input erppage-select" id="ddlPayment">
                                     <option value="NA">NA</option>
-                                    <option value="Cash">Cash</option>
+                                    @* <option value="Cash">Cash</option>
                                     <option value="Bank">Bank</option>
-                                    <option value="Credit">Credit</option>
+                                    <option value="Credit">Credit</option> *@
+                                    <option value="Hold">Hold</option>
                                 </select>
                             </div>
 
@@ -1166,9 +1181,15 @@
                             <!-- Hold Date -->
                             <div class="erppage-divfield">
                                 <label class="erppage-label" for="DtHoldDate">Hold Date</label>
-                                <input type="date"
+                                @* <input type="date"
                                        class="erppage-input"
-                                       id="DtHoldDate">
+                                       id="DtHoldDate"> *@
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtHoldDate">
+                                    <label class="erppage-checkbox-inside">
+                                        <input type="checkbox" class="erppage-checkbox-input" id="chkHoldDate">
+                                    </label>
+                                </div>
                             </div>
 
                             <!-- Purchase Slip Button -->
