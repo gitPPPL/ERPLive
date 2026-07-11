@@ -19,14 +19,14 @@
 <div id="PurchaseBillPassEntryForm">
     <input type="hidden" class="form-control" id="TxtCode" name="CODE">
     <div class="erppage-container">
-        <fieldset class="erppage-fieldset">
+        <div class="erppage-fieldset">
             <div class="erppage-grid4">
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc Type</label>
                     <select class="erppage-input erppage-select" id="ddlDocType">
                         <option value="">Select DOC Type</option>
                     </select>
-                   
+
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc Date</label>
@@ -40,10 +40,9 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label" for="TxtMRNNo" style="width:50px;">MRN No</label>
                     <div class="erppage-inputgroup">
-                        @* <select class="erppage-input erppage-select" id="TxtMRNNo2" style="width:70%;">
+                        <select class="erppage-input erppage-select" id="TxtMRNNo2" style="width:70%;">
                             <option value="">Select Mrn No</option>
-                        </select> *@
-                        <div id="TxtMRNNo2" class="erppage-search-inputdropdown" style="width:66%;"></div>
+                        </select>
                         <input type="text" class="erppage-input" id="TxtMRNNo1">
                     </div>
                 </div>
@@ -55,13 +54,11 @@
                         <div class="erppage-grid1">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Bill From</label>
-                                <div class="erppage-inline-group">
-                                    <select class="erppage-input erppage-select" id="ddlBillFrom" disabled>
+                                <div class="erppage-inputgroup">
+                                    <select class="erppage-input erppage-width-93" id="ddlBillFrom" disabled>
                                         <option value="">Select Bill From</option>
                                     </select>
-                                    @* <div id="ddlBillFrom" class="erppage-search-inputdropdown"></div> *@
-                                    <select class="erppage-input erppage-select" id="ddlBillFromAddress">
-                                        <option value="">Select Bill Address</option>
+                                    <select class="erppage-input erppage-width-7" id="ddlBillFromAddress">
                                     </select>
                                 </div>
                             </div>
@@ -113,7 +110,7 @@
                         </div>
                         <div class="erppage-grid2">
                             <div class="erppage-divfield">
-                                <label class="erppage-label">Disp From Address</label>
+                                <label class="erppage-label">Disp Add.</label>
                                 <input type="text" class="erppage-input" id="TxtDispFromAdd" placeholder="Enter Dispatch Address">
                             </div>
                             <div class="erppage-divfield">
@@ -148,12 +145,11 @@
                         <div class="erppage-grid1">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Ship from</label>
-                                <div class="erppage-inline-group">
-                                    <select class="erppage-input erppage-select" id="ddlShipFrom1">
+                                <div class="erppage-inputgroup">
+                                    <select class="erppage-input erppage-width-93" id="ddlShipFrom1">
                                         <option value="">Select Ship from</option>
                                     </select>
-                                    <select class="erppage-input erppage-select" id="ddlShipFromAddress">
-                                        <option value="">Select Shipping Address</option>
+                                    <select class="erppage-input erppage-width-7" id="ddlShipFromAddress">
                                     </select>
                                 </div>
                             </div>
@@ -249,13 +245,12 @@
                             </label>
                         </div>
                     </div>
-
-                    @*<div class="erppage-divfield">
+                    <!--<div class="erppage-divfield">
                         <label class="erppage-label">Transit No</label>
                         <select class="erppage-input erppage-select" id="ddlTransitNo">
                             <option>Select Transit No</option>
                         </select>
-                    </div> *@
+                    </div>-->
                     <div class="erppage-divfield">
                         <label class="erppage-label">Waybill No</label>
                         <input type="text" class="erppage-input" id="TxtWaybillNo" placeholder="Enter Waybill No">
@@ -282,22 +277,21 @@
                         <label class="erppage-label">Input Type</label>
                         <select class="erppage-input erppage-select" id="ddlInputType">
                             <option>Select Input Type</option>
-                            <option value="Central">Central</option>
+                            @* <option value="Central">Central</option> *@
                             <option value="GST Input">GST Input</option>
                             <option value="GST NA">GST NA</option>
                             <option value="Import">Import</option>
-                            <option value="Input Capital">Input Capital</option>
-                            <option value="Input GST">Input GST</option>
+                            @* <option value="Input Capital">Input Capital</option> *@
+                            @* <option value="Input GST">Input GST</option> *@
                             <option value="Input NA">Input NA</option>
-                            <option value="Input VAT">Input VAT</option>
-                            <option value="Local">Local</option>
+                            @* <option value="Input VAT">Input VAT</option> *@
+                            @* <option value="Local">Local</option> *@
                             <option value="RCM">RCM</option>
-                            <option value="Exempt">Exempt</option>
+                            @* <option value="Exempt">Exempt</option> *@
                         </select>
                     </div>
                 </div>
             </fieldset>
-
             <div class="erppage-grid4">
                 <div class="erppage-divfield">
                     <label class="erppage-label">Debit A/c</label>
@@ -342,25 +336,25 @@
                     </button>
                     <ul class="dropdown-menu erppagedropdown-menu">
                         <li>
-                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#" id="">
+                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#purchaseorderModal">
                                 <i class="fa fa-shopping-cart"></i>
                                 <span>Purchase Order</span>
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#" id="">
+                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#RMPurchaseModal">
                                 <i class="fa fa-truck"></i>
-                                <span>Purchase Received</span>
+                                <span>RM Purchase (Indian)</span>
                             </a>
                         </li>
                     </ul>
                 </div>
-                <button type="button" class="erppage-btn erppage-btn-common-disabled">
+                <button type="button" class="erppage-btn erppage-btn-common-disabled" data-bs-toggle="modal" data-bs-target="#costallocationModal">
                     <i class="fa fa-calculator"></i>
                     <span>Cost Allocation</span>
                 </button>
-                <button type="button" class="erppage-btn erppage-btn-common-pending-disabled">
-                    <i class="fa fa-clock-o"></i>
+                <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" data-bs-toggle="modal" data-bs-target="#pendingapprovalModal">
+                    <i class="fa fa-clock"></i>
                     <span>List of Pending Approval</span>
                 </button>
                 <button type="button" class="erppage-btn erppage-btn-common-pending-disabled">
@@ -370,6 +364,10 @@
                 <button type="button" class="erppage-btn erppage-btn-common-disabled">
                     <i class="fa fa-ship"></i>
                     <span>RM Import Bill</span>
+                </button>
+                <button type="button" class="erppage-btn erppage-btn-common" data-bs-toggle="modal" data-bs-target="#calculateCrDrModal">
+                    <i class="fa fa-calculator"></i>
+                    <span>Calculate CrDr</span>
                 </button>
             </div>
             <fieldset class="erppagefieldset">
@@ -388,58 +386,58 @@
                         <input type="number" class="erppage-input" id="NumAmount" placeholder="Enter Amount">
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumPacking">Packing</label>
+                        <label class="erppage-label">Packing</label>
                         <input type="number" class="erppage-input" id="NumPacking" placeholder="Enter Packing Amt">
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumDiscount">Discount</label>
+                        <label class="erppage-label">Discount</label>
                         <input type="number" class="erppage-input" id="NumDiscount" placeholder="Enter Discount Amt">
                     </div>
                 </div>
                 <div class="erppage-grid5">
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumCgst">CGST</label>
+                        <label class="erppage-label">CGST</label>
                         <input type="number" class="erppage-input" id="NumCgst" placeholder="Enter CGST Amt">
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumSgst">SGST</label>
+                        <label class="erppage-label">SGST</label>
                         <input type="number" class="erppage-input" id="NumSgst" placeholder="Enter SGST Amt">
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumIgst">IGST</label>
+                        <label class="erppage-label">IGST</label>
                         <input type="number" class="erppage-input" id="NumIgst" placeholder="Enter IGST Amt">
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumVat">VAT</label>
+                        <label class="erppage-label">VAT</label>
                         <input type="number" class="erppage-input" id="NumVat" placeholder="Enter VAT Amt">
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumCess">CESS</label>
+                        <label class="erppage-label">CESS</label>
                         <input type="number" class="erppage-input" id="NumCess" placeholder="Enter CESS Amt">
                     </div>
                 </div>
                 <div class="erppage-grid5">
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumOtherAmt">Other Amt</label>
+                        <label class="erppage-label">Other Amt</label>
                         <input type="number" class="erppage-input" id="NumOtherAmt" placeholder="Enter Other Amt">
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumTcs">TCS</label>
+                        <label class="erppage-label">TCS</label>
                         <div class="erppage-inputgroup">
                             <input type="number" class="erppage-input" id="NumTcs1">
                             <input type="number" class="erppage-input" id="NumTcs2">
                         </div>
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumSubTotal">Sub Total</label>
+                        <label class="erppage-label">Sub Total</label>
                         <input type="number" class="erppage-input" id="NumSubTotal" placeholder="Enter Subtotal">
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumRoundOff">Round Off</label>
+                        <label class="erppage-label">Round Off</label>
                         <input type="number" class="erppage-input" id="NumRoundOff" placeholder="Enter Round Off">
                     </div>
                     <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumNetAmount">Net Amount</label>
+                        <label class="erppage-label">Net Amount</label>
                         <input type="number" class="erppage-input" id="NumNetAmount" placeholder="Enter Net Amount">
                     </div>
                 </div>
@@ -447,20 +445,20 @@
                     @* <legend class="erppagefieldset-legend">TDS &amp; Bank Details</legend> *@
                     <div class="erppage-grid3">
                         <div class="erppage-divfield">
-                            <label class="erppage-label" for="ddlTdsAccount">TDS A/c</label>
+                            <label class="erppage-label">TDS A/c</label>
                             <select class="erppage-input erppage-select" id="ddlTdsAccount">
                                 <option value="">Select TDS A/C</option>
                             </select>
                         </div>
                         <div class="erppage-divfield">
-                            <label class="erppage-label" for="TxtTds">TDS</label>
+                            <label class="erppage-label">TDS</label>
                             <div class="erppage-inputgroup">
                                 <input type="text" class="erppage-input" id="TxtTds1">
                                 <input type="text" class="erppage-input" id="TxtTds2">
                             </div>
                         </div>
                         <div class="erppage-divfield">
-                            <label class="erppage-label" for="TxtTds194q">TDS 194Q</label>
+                            <label class="erppage-label">TDS 194Q</label>
                             <div class="erppage-inputgroup">
                                 <input type="text" class="erppage-input" id="TxtTds194q1">
                                 <input type="text" class="erppage-input" id="TxtTds194q2">
@@ -469,27 +467,27 @@
                     </div>
                     <div class="erppage-grid3">
                         <div class="erppage-divfield">
-                            <label class="erppage-label" for="TxtBankRate">Bank Rate</label>
+                            <label class="erppage-label">Bank Rate</label>
                             <div class="erppage-inputgroup">
-                                <input type="text" class="erppage-input" id="TxtBankRate1">
-                                <input type="text" class="erppage-input" id="TxtBankRate2">
+                                <input type="text" class="erppage-input" id="TxtBankRate1" disabled>
+                                <input type="text" class="erppage-input" id="TxtBankRate2" disabled>
                             </div>
                         </div>
                         <div class="erppage-divfield">
-                            <label class="erppage-label" for="TxtPlNo">PL No &amp; Date</label>
+                            <label class="erppage-label">PL No &amp; Date</label>
                             <div class="erppage-inputgroup">
-                                <input type="text" class="erppage-input" id="ChkPlNo">
-                                <input type="date" class="erppage-input" id="DtPlDate">
+                                <input type="text" class="erppage-input" id="ChkPlNo" disabled>
+                                <input type="date" class="erppage-input" id="DtPlDate" disabled>
                             </div>
                         </div>
                         <div class="erppage-divfield">
-                            <label class="erppage-label" for="TxtDiffAmt">Diff Amt.</label>
-                            <input type="text" class="erppage-input" id="TxtDiffAmt" placeholder="Enter Difference Amount">
+                            <label class="erppage-label">Diff Amt.</label>
+                            <input type="text" class="erppage-input" id="TxtDiffAmt" placeholder="Enter Diff. Amount" disabled>
                         </div>
                     </div>
                     <div class="erppage-grid3">
                         <div class="erppage-divfield">
-                            <label class="erppage-label" for="TxtPartyUsd">Party Bill Amt(USD)</label>
+                            <label class="erppage-label">Party Bill Amt(USD)</label>
                             <input type="text" class="erppage-input" id="TxtPartyUsd" placeholder="Enter USD Amount">
                         </div>
                         <div class="erppage-divfield erppage-col-span-2 erppage-internalaction">
@@ -524,7 +522,7 @@
                             <div class="excel-wrapper fixed-grid-wrapper">
                                 <table id="tblItemRecordPBPE" class="excel-table fixed-grid-table width-table resizable-table">
                                     <colgroup>
-                                        <col style="display:none;">
+                                        <col class="hidden-col">
                                         <col style="width:250px;">
                                         <col style="width:120px;">
                                         <col style="width:90px;">
@@ -673,7 +671,12 @@
                                     <div class="erppage-grid2">
                                         <div class="erppage-divfield">
                                             <label class="erppage-label">GR Date</label>
-                                            <input type="date" class="erppage-input" id="DtGRDate">
+                                            <div class="erppage-datebox">
+                                                <input type="date" class="erppage-input erppage-dateinput" id="DtGRDate">
+                                                <label class="erppage-checkbox-inside">
+                                                    <input type="checkbox" class="erppage-checkbox-input" id="chkGRDate">
+                                                </label>
+                                            </div>
                                         </div>
                                         <div class="erppage-divfield">
                                             <label class="erppage-label"></label>
@@ -867,10 +870,10 @@
                                 <label class="erppage-label" style="width: max-content;">Quality Diff Debit</label>
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtQualityDiffDebit1">
+                                <input type="number" class="erppage-input" id="TxtQualityDiffDebitAmt">
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtQualityDiffDebit2">
+                                <input type="number" class="erppage-input" id="TxtQualityDiffDebitTax">
                             </div>
                             <div class="erppage-divfield">
                                 <input type="text" class="erppage-input" id="TxtQualityDiffDebitNarration" placeholder="Narration">
@@ -882,13 +885,13 @@
                                 <label class="erppage-label" style="width: max-content;">Rate Diff Debit</label>
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtRateDiffDebit1">
+                                <input type="number" class="erppage-input" id="TxtRateDiffDebitAmt">
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtRateDiffDebit2">
+                                <input type="number" class="erppage-input" id="TxtRateDiffDebitTax">
                             </div>
                             <div class="erppage-divfield">
-                                <input type="text" class="erppage-input" id="TxtRateDiffDebitNarration" placeholder="Narration">
+                                <textarea type="text" class="erppage-input" id="TxtRateDiffDebitNarration" placeholder="Narration"></textarea>
                             </div>
                         </div>
                         <!-- QC Debit Note -->
@@ -897,10 +900,10 @@
                                 <label class="erppage-label" style="width: max-content;">QC Debit Note</label>
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtQCDebitNote1">
+                                <input type="number" class="erppage-input" id="TxtQCDebitNoteAmt">
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtQCDebitNote2">
+                                <input type="number" class="erppage-input" id="TxtQCDebitNoteTax">
                             </div>
                             <div class="erppage-divfield">
                                 <input type="text" class="erppage-input" id="TxtQCDebitNarration" placeholder="Narration">
@@ -912,10 +915,10 @@
                                 <label class="erppage-label" style="width: max-content;">Weight Debit Note</label>
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtWeightDebit1">
+                                <input type="number" class="erppage-input" id="TxtWeightDebitAmt">
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtWeightDebit2">
+                                <input type="number" class="erppage-input" id="TxtWeightDebitTax">
                             </div>
                             <div class="erppage-divfield">
                                 <input type="text" class="erppage-input" id="TxtWeightDebitNarration" placeholder="Narration">
@@ -927,10 +930,10 @@
                                 <label class="erppage-label" style="width: max-content;">Others Debit Note</label>
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtOtherDebit1">
+                                <input type="number" class="erppage-input" id="TxtOtherDebitAmt">
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtOtherDebit2">
+                                <input type="number" class="erppage-input" id="TxtOtherDebitTax">
                             </div>
                             <div class="erppage-divfield">
                                 <input type="text" class="erppage-input" id="TxtOtherDebitNarration" placeholder="Narration">
@@ -942,10 +945,10 @@
                                 <label class="erppage-label" style="width: max-content;">Quality Credit Note</label>
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtQualityCreditNote1" value="0">
+                                <input type="number" class="erppage-input" id="TxtQualityCreditNoteAmt" value="0">
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtQualityCreditNote2" value="0">
+                                <input type="number" class="erppage-input" id="TxtQualityCreditNoteVal" value="0">
                             </div>
                             <div class="erppage-divfield">
                                 <input type="text" class="erppage-input" id="TxtQualityCreditNarration" placeholder="Narration">
@@ -957,10 +960,10 @@
                                 <label class="erppage-label" style="width: max-content;">QC Credit Note</label>
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtQCCreditNote1" value="0">
+                                <input type="number" class="erppage-input" id="TxtQCCreditNoteAmt" value="0">
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtQCCreditNote2" value="0">
+                                <input type="number" class="erppage-input" id="TxtQCCreditNoteVal" value="0">
                             </div>
                             <div class="erppage-divfield">
                                 <input type="text" class="erppage-input" id="TxtQCCreditNarration" placeholder="Narration">
@@ -972,10 +975,10 @@
                                 <label class="erppage-label" style="width: max-content;">Weight Credit Note</label>
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtWeightCreditNote1" value="0">
+                                <input type="number" class="erppage-input" id="TxtWeightCreditNoteAmt" value="0">
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtWeightCreditNote2" value="0">
+                                <input type="number" class="erppage-input" id="TxtWeightCreditNoteVal" value="0">
                             </div>
                             <div class="erppage-divfield">
                                 <input type="text" class="erppage-input" id="TxtWeightCreditNarration" placeholder="Narration">
@@ -987,10 +990,10 @@
                                 <label class="erppage-label" style="width: max-content;">Rate Diff Credit Note</label>
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtRateDiffCreditNote1" value="0">
+                                <input type="number" class="erppage-input" id="TxtRateDiffCreditNoteAmt" value="0">
                             </div>
                             <div class="erppage-divfield">
-                                <input type="number" class="erppage-input" id="TxtRateDiffCreditNote2" value="0">
+                                <input type="number" class="erppage-input" id="TxtRateDiffCreditNoteVal" value="0">
                             </div>
                             <div class="erppage-divfield">
                                 <input type="text" class="erppage-input" id="TxtRateDiffCreditNarration" placeholder="Narration">
@@ -1001,30 +1004,32 @@
                             <!-- Payment -->
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Payment</label>
-                                <select class="erppage-input erppage-select" id="ddlPaymentCRDRNote">
-                                    <option value="na">NA</option>
-                                    <option value="paid">Paid</option>
-                                    <option value="hold">Hold</option>
+                                <select class="erppage-input erppage-select" id="ddlPayment">
+                                    <option value="NA">NA</option>
+                                    @* <option value="Cash">Cash</option>
+                                    <option value="Bank">Bank</option>
+                                    <option value="Credit">Credit</option> *@
+                                    <option value="Hold">Hold</option>
                                 </select>
                             </div>
                             <!-- Reason -->
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Reason</label>
-                                <input type="text" class="erppage-input" id="TxtReasonCRDRNote" placeholder="Enter Reason">
+                                <input type="text" class="erppage-input" id="TxtReason" placeholder="Enter Reason">
                             </div>
                             <!-- Hold Date -->
                             <div class="erppage-divfield erppage-datefield">
                                 <label class="erppage-label">Hold Date</label>
                                 <div class="erppage-datebox">
-                                    <input type="date" class="erppage-input erppage-dateinput" id="DtHoldDateCRDRNote">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtHoldDate">
                                     <label class="erppage-checkbox-inside">
-                                        <input type="checkbox" class="erppage-checkbox-input" id="chkHoldDateCRDRNote">
+                                        <input type="checkbox" class="erppage-checkbox-input" id="chkHoldDate">
                                     </label>
                                 </div>
                             </div>
                             <!-- Purchase Slip Button -->
                             <div class="erppage-divfield erppage-align-bottom">
-                                <button type="button" class="erppage-btn erppage-btn-common-active" id="PurchaseSlipCRDRNote">
+                                <button type="button" class="erppage-btn erppage-btn-common-active" id="BtnPurchaseSlip">
                                     <i class="fa fa-file-text-o"></i>
                                     <span>Purchase Slip</span>
                                 </button>
@@ -1072,21 +1077,557 @@
                 </div>
                 <!--EPR-->
                 <div class="erppage-tab-content" id="epr">
-                    
+                    <div class="erppagelist-container">
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Doc. Type</label>
+                                <select class="erppage-input erppage-select" id="ddlDocumentType">
+                                    <option value="">Select Document Type</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <div class="erppage-filepicker">
+                                    <input type="text" class="erppage-input erppage-filepicker-name" placeholder="No file selected" readonly>
+                                    <label for="erpFile" class="erppage-filepicker-btn erppage-btn erppage-btn-common">
+                                        <i class="fa fa-paperclip"></i> Browse
+                                    </label>
+                                    <button type="button" class="erppage-filepicker-remove" title="Remove file">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                    <input type="file" id="erpFile" hidden>
+                                </div>
+                                <button type="button" id="SaveButtonDT" class="erppage-btn-green">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="excel-wrapper fixed-grid-wrapper">
+                            <table id="tblAttachmentEPR" class="excel-table fixed-grid-table width-table resizable-table">
+                                <colgroup>
+                                    <col style="width:280px;">
+                                    <col style="width:320px;">
+                                    <col style="width:120px;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>Document Type</th>
+                                        <th>File Upload</th>
+                                        <th class="action-col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="erppage-actions">
+                    <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Save</span>
+                    </button>
                 </div>
             </div>
 
+            <!--Modal popup-->
+            <!--Purchase Order-->
+            <div class="modal fade" id="purchaseorderModal" tabindex="-1" aria-labelledby="purchaseorderLabel" aria-hidden="true">
+                <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+                    <div class="modal-content erppagesmodal-content">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-copy"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="purchaseorderLabel">
+                                    Copy From Purchase Order
+                                </h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
 
-        </fieldset>
-        <div class="erppage-actions">
-            <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
-                <i class="fa-solid fa-floppy-disk"></i>
-                <span>Save</span>
-            </button>
+                        <div class="erppagesmodal-body">
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield">
+                                    <div class="erppagelist-search-wrapper">
+                                        <i class="fa fa-search"></i>
+                                        <input type="text" id="searchBoxPR" placeholder="Search..." />
+                                    </div>
+                                </div>
+
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label"></label>
+                                    <div class="erppage-checkbox-wrap">
+                                        <input type="checkbox" id="chkAppendPOModal" class="erppage-checkbox-input">
+                                        <label for="chkAppendPOModal" class="erppage-checkbox-label">Append</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblpurchaseordermodal" class="excel-table width-table fixed-grid-table resizable-table">
+                                    <colgroup>
+                                        <col style="width:50px;">
+                                        <col style="width:110px;">
+                                        <col style="width:110px;">
+                                        <col style="width:120px;">
+                                        <col style="width:120px;">
+                                        <col style="width:250px;">
+                                        <col style="width:80px;">
+                                        <col style="width:80px;">
+                                        <col style="width:100px;">
+                                        <col style="width:90px;">
+                                        <col style="width:110px;">
+                                        <col style="width:80px;">
+                                        <col style="width:80px;">
+                                        <col style="width:80px;">
+                                        <col style="width:80px;">
+                                        <col style="width:80px;">
+                                        <col style="width:100px;">
+                                        <col style="width:150px;">
+                                        <col style="width:150px;">
+                                        <col style="width:220px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col class="hidden-col">
+                                    </colgroup>
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllPR" /></th>
+                                            <th>Pono</th>
+                                            <th>Potype</th>
+                                            <th>Doc date</th>
+                                            <th>Item Code</th>
+                                            <th>Item Name</th>
+                                            <th>Unit</th>
+                                            <th>Nos</th>
+                                            <th>Balqty</th>
+                                            <th>Rate</th>
+                                            <th>Taxtype</th>
+                                            <th>Pack%</th>
+                                            <th>Disc%</th>
+                                            <th>Cgst%</th>
+                                            <th>Sgst%</th>
+                                            <th>Igst%</th>
+                                            <th>Oth Amt</th>
+                                            <th>Make</th>
+                                            <th>Department</th>
+                                            <th>Remarks</th>
+                                            <th>Reqtype</th>
+                                            <th>Reqno</th>
+                                            <th>Reftype</th>
+                                            <th>Refno</th>
+                                            <th>Deptcode</th>
+                                            <th>Makecode</th>
+                                            <th>Ucode</th>
+                                            <th>Taxcode</th>
+                                            <th class="hidden-col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                            <div class="erppagesmodal-action mt-2">
+                                <button type="button" class="erppagesmodal-btn" data-bs-dismiss="modal">
+                                    <i class="fa fa-copy"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--RM Purchase Modal-->
+            <div class="modal fade" id="RMPurchaseModal" tabindex="-1" aria-labelledby="RMPurchaseLabel" aria-hidden="true">
+                <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+                    <div class="modal-content erppagesmodal-content">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-copy"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="RMPurchaseLabel">Copy From RM Purchase</h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close"
+                                    data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="erppagesmodal-body">
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield">
+                                    <div class="erppagelist-search-wrapper">
+                                        <i class="fa fa-search"></i>
+                                        <input type="text" id="searchBoxQM" placeholder="Search..." />
+                                    </div>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label"></label>
+                                    <div class="erppage-checkbox-wrap">
+                                        <input type="checkbox" id="chkAppendRMP" class="erppage-checkbox-input">
+                                        <label for="chkAppendRMP" class="erppage-checkbox-label">Append</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblRMPurchaseModal" class="excel-table width-table fixed-grid-table resizable-table">
+                                    <colgroup>
+                                        <col style="width:50px;">
+                                        <col style="width:110px;">
+                                        <col style="width:110px;">
+                                        <col style="width:120px;">
+                                        <col style="width:120px;">
+                                        <col style="width:250px;">
+                                        <col style="width:80px;">
+                                        <col style="width:80px;">
+                                        <col style="width:100px;">
+                                        <col style="width:90px;">
+                                        <col style="width:110px;">
+                                        <col style="width:80px;">
+                                        <col style="width:80px;">
+                                        <col style="width:80px;">
+                                        <col style="width:80px;">
+                                        <col style="width:80px;">
+                                        <col style="width:100px;">
+                                        <col style="width:150px;">
+                                        <col style="width:150px;">
+                                        <col style="width:220px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col style="width:100px;">
+                                        <col class="hidden-col">
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllQM" /></th>
+                                            <th>Pono</th>
+                                            <th>Potype</th>
+                                            <th>Doc date</th>
+                                            <th>Item Code</th>
+                                            <th>Item Name</th>
+                                            <th>Unit</th>
+                                            <th>Nos</th>
+                                            <th>Balqty</th>
+                                            <th>Rate</th>
+                                            <th>Taxtype</th>
+                                            <th>Pack%</th>
+                                            <th>Disc%</th>
+                                            <th>Cgst%</th>
+                                            <th>Sgst%</th>
+                                            <th>Igst%</th>
+                                            <th>Oth Amt</th>
+                                            <th>Make</th>
+                                            <th>Department</th>
+                                            <th>Remarks</th>
+                                            <th>Reqtype</th>
+                                            <th>Reqno</th>
+                                            <th>Reftype</th>
+                                            <th>Refno</th>
+                                            <th>Deptcode</th>
+                                            <th>Makecode</th>
+                                            <th>Ucode</th>
+                                            <th>Taxcode</th>
+                                            <th class="hidden-col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                            <div class="erppagesmodal-action mt-2">
+                                <button type="button" class="erppagesmodal-btn"
+                                        data-bs-dismiss="modal">
+                                    <i class="fa fa-copy"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--TDS Calculator-->
+            <div class="modal fade" id="tdscalculationModal" tabindex="-1" aria-labelledby="tdscalculationLabel" aria-hidden="true">
+                <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+                    <div class="modal-content erppagesmodal-content">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-calculator"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="tdscalculationLabel">
+                                    TDS Calculation
+                                </h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close"
+                                    data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="erppagesmodal-body">
+                            <div class="erppage-grid4">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" for="NumNetAmt">Net Amt</label>
+                                    <input type="number" class="erppage-input" id="NumNetAmt" placeholder="Enter Net Amount">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" for="NumAdvTDS">(-) Adv TDS</label>
+                                    <input type="number" class="erppage-input" id="NumAdvTDS" placeholder="Enter Adv TDS">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" for="NumDrNote">(-) Dr Note</label>
+                                    <input type="number" class="erppage-input" id="NumDrNote" placeholder="Enter DR Note">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" for="NumCRNote">(+) CR Note</label>
+                                    <input type="number" class="erppage-input" id="NumCRNote" placeholder="Enter CR Note">
+                                </div>
+                            </div>
+                            <hr class="my-3">
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" for="NumTDSAmt">TDS Amt</label>
+                                    <input type="number" class="erppage-input" id="NumTDSAmt" placeholder="Enter TDS Amount">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Cost Allocation Modal-->
+            <div class="modal fade" id="costallocationModal" tabindex="-1" aria-labelledby="costallocationLabel" aria-hidden="true">
+                <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+                    <div class="modal-content erppagesmodal-content">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-sitemap"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="costallocationLabel">Cost Allocation
+                                </h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="erppagesmodal-body">
+                            <div class="erppage-grid2">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" for="TxtPartyNameCA">Party Name</label>
+                                    <input type="text" class="erppage-input" id="TxtPartyNameCA" placeholder="Enter Party Name">
+                                </div>
+                                <div class="erppage-internalaction">
+                                    <button type="button" class="erppage-btn erppage-btn-common" data-bs-dismiss="modal">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </button>
+                                    <button type="button" class="erppagesmodal-btn" data-bs-dismiss="modal">
+                                        <i class="fa fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" for="NumRefVno">Ref. VNo</label>
+                                    <input type="number" class="erppage-input" id="NumRefVno">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" for="TxtTotalAmtAllocated">Total Amt. to be Allocated</label>
+                                    <input type="text" class="erppage-input" id="TxtTotalAmtAllocated">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" for="NumSrNo">Sr. No</label>
+                                    <input type="number" class="erppage-input" id="NumSrNo">
+                                </div>
+                            </div>
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" for="DtSrDate">Sr. Date</label>
+                                    <input type="date" class="erppage-input" id="DtSrDate">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" for="NumBalAmount">Bal. Amount</label>
+                                    <input type="number" class="erppage-input" id="NumBalAmount">
+                                </div>
+                            </div>
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblpurchaseallocationmodal" class="excel-table width-table fixed-grid-table resizable-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="hidden-col"></th>
+                                            <th>Cost Center</th>
+                                            <th>Allocated Amt</th>
+                                            <th>Narration</th>
+                                            <th class="hidden-col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <div class="btn-add-row-last">
+                                    <i class="fa fa-plus btn-add-row" title="Add Row">
+                                        <span>Add New Row</span>
+                                    </i>
+                                </div>
+                                <div class="custom-pagination" id="tablePagination"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Pending Approval Modal-->
+            <div class="modal fade" id="pendingapprovalModal" tabindex="-1"
+                 aria-labelledby="pendingapprovalLabel" aria-hidden="true">
+                <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+                    <div class="modal-content erppagesmodal-content">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-clock-o"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="pendingapprovalLabel">List of Unapproved Purchase Bill</h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="erppagesmodal-body">
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblpendingapprovalmodal" class="excel-table width-table fixed-grid-table resizable-table">
+                                    <colgroup>
+                                        <col class="hidden-col">
+                                        <col style="width:100px;">
+                                        <col style="width:120px;">
+                                        <col style="width:120px;">
+                                        <col style="width:140px;">
+                                        <col style="width:120px;">
+                                        <col style="width:140px;">
+                                        <col style="width:100px;">
+                                        <col style="width:150px;">
+                                        <col style="width:220px;">
+                                        <col style="width:140px;">
+                                        <col style="width:120px;">
+                                        <col style="width:250px;">
+                                        <col style="width:120px;">
+                                        <col class="hidden-col">
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th class="hidden-col"></th>
+                                            <th>Type</th>
+                                            <th>Doc ID</th>
+                                            <th>VDate</th>
+                                            <th>Sent By</th>
+                                            <th>Sent Date</th>
+                                            <th>Sent To</th>
+                                            <th>Status</th>
+                                            <th>Approval Status</th>
+                                            <th>Remarks</th>
+                                            <th>Created By</th>
+                                            <th>Created Date</th>
+                                            <th>Party Name</th>
+                                            <th>Bill Amount</th>
+                                            <th class="hidden-col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Calculate CrDr Modal-->
+            <div class="modal fade" id="calculateCrDrModal" tabindex="-1" aria-labelledby="calculateCrDrLabel" aria-hidden="true">
+                <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+                    <div class="modal-content erppagesmodal-content">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-calculator"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="calculateCrDrLabel">
+                                    Calculate Cr Dr Note Amount
+                                </h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close"
+                                    data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="erppagesmodal-body">
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Dr Amt Header</label>
+                                    <input type="number" class="erppage-input" id="dramtheader">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Dr Amt Grid</label>
+                                    <input type="number" class="erppage-input" id="dramtgrid">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Dr Amt Diff</label>
+                                    <input type="number" class="erppage-input" id="NumDrAmtDiff">
+                                </div>
+                            </div>
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Cr Amt Header</label>
+                                    <input type="number" class="erppage-input" id="cramtheader">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Cr Amt Grid</label>
+                                    <input type="number" class="erppage-input" id="cramtgrid">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Cr Amt Diff</label>
+                                    <input type="number" class="erppage-input" id="NumcrAmtDiff">
+                                </div>
+                            </div>
+                            <div class="erppage-internalaction">
+                                <button type="button" class="erppage-btn erppage-btn-common-active">
+                                    <i class="fa fa-calculator"></i>
+                                    <span>Calculate</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const picker = document.querySelector('.erppage-filepicker');
+        const fileInput = picker.querySelector('#erpFile');
+        const textBox = picker.querySelector('.erppage-filepicker-name');
+        const removeBtn = picker.querySelector('.erppage-filepicker-remove');
 
+        fileInput.addEventListener('change', function () {
+            textBox.value = this.files.length ? this.files[0].name : '';
+        });
+
+        removeBtn.addEventListener('click', function () {
+            fileInput.value = '';
+            textBox.value = '';
+        });
+    });
+</script>
 
 <script>
     window.compCode = '@ViewBag.CompCode';

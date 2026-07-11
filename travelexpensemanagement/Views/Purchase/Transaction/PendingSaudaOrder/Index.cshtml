@@ -1,0 +1,155 @@
+﻿@{
+    ViewBag.Title = "Pending Sauda Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-hourglass-half"></i>
+        </div>
+        <div class="erppage-header-title">Pending Sauda Order</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PendingSaudaOrderList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="PendingSaudaOrderForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppagesrow">
+                <div class="erppagescol-3">
+                    <div class="erppage-grid1">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Doc Type</label>
+                            <select class="erppage-input erppage-select" id="ddlDocType">
+                                <option value="">Select Doc Type</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="erppage-grid1">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Doc Date</label>
+                            <input type="date" class="erppage-input" id="DtDocDate">
+                        </div>
+                    </div>
+                    <div class="erppage-grid1">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Doc No</label>
+                            <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No">
+                        </div>
+                    </div>
+                    <div class="erppage-grid1">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Tot. Records:</label>
+                            <input type="number" class="erppage-input" id="Numtotalrecords">
+                        </div>
+                    </div>
+                </div>
+                <div class="erppagescol-9">
+                    <fieldset class="erppagefieldset mt-0">
+                        <legend class="erppagefieldset-legend">Filter By</legend>
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Type</label>
+                                <select class="erppage-input erppage-select" id="ddlType">
+                                    <option value="">Select Type</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Source</label>
+                                <select class="erppage-input erppage-select" id="ddlSource">
+                                    <option value="">Select Source</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Status</label>
+                                <select class="erppage-input erppage-select" id="ddlStatus">
+                                    <option value="">Select Status</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">From</label>
+                                <input type="date" class="erppage-input" id="DtFrom">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">To</label>
+                                <input type="date" class="erppage-input" id="DtTo">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Item Search</label>
+                                <input type="text" class="erppage-input" id="txtitemsearch">
+                            </div>
+                        </div>
+                        <div class="erppage-internalaction">
+                            <button type="button" class="erppage-btn erppage-btn-common-active-disabled">
+                                <i class="fa fa-download"></i>
+                                <span>Load</span>
+                            </button>
+                        </div>
+                    </fieldset>
+                </div>
+                <fieldset class="erppage-fieldset mt-2">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblPendingSaudaOrder" class="excel-table fixed-grid-table table-width resizable-table">
+                            <colgroup>
+                                <col class="hidden-col">
+                                <col style="width:40px;">
+                                <col style="width:90px;">
+                                <col style="width: 86px;">
+                                <col style="width:100px;">
+                                <col style="width: 186px;">
+                                <col style="width: 182px;">
+                                <col style="width: 71px;">
+                                <col style="width: 52px;">
+                                <col style="width: 91px;">
+                                <col style="width:100px;">
+                                <col style="width: 86px;">
+                                <col style="width: 133px;">
+                                <col style="width: 64px;">
+                                <col style="width: 128px;">
+                                <col style="width: 90px;">
+                                <col style="width: 97px;">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="hidden-col">Code</th>
+                                    <th><input class="erppage-checkbox-input" type="checkbox" /></th>
+                                    <th>Ref Type</th>
+                                    <th>Ref No</th>
+                                    <th>Ref Date</th>
+                                    <th>Party Name</th>
+                                    <th>Item Name</th>
+                                    <th>Quantity</th>
+                                    <th>Rate</th>
+                                    <th>Adj Quantity</th>
+                                    <th>Bal Quantity</th>
+                                    <th>Remarks</th>
+                                    <th>Add Sauda Quantity</th>
+                                    <th>Status</th>
+                                    <th>Reason For Close</th>
+                                    <th>Validity Date</th>
+                                    <th>Delivery Date</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </fieldset>
+                <div class="erppage-container">
+                    <div class="erppage-actions">
+                        <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

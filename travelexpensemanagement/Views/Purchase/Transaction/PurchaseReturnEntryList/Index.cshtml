@@ -2,77 +2,109 @@
 	ViewBag.Title = "Purchase Return Entry List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-<fieldset>
-	<legend class="legend-field">Purchase Return Entry List</legend>
-
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Purchase Return Entry List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		<button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "PurchaseReturnEntry")'">
+			<i class="fa fa-plus"></i>Add New
+		</button>
+	</div>
+</div>
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search Module..." />
+	</div>
+	<div class="erppagelist-actions">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+			<i class="fa fa-print"></i> Print
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+			<i class="fa fa-file-excel"></i> Export
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+			<i class="fa fa-envelope"></i> Mail
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
+				data-tooltip="Approve Records">
+			<i class="fa fa-check-circle"></i> Approved
+		</button>
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblPurchaseReturnEntryList" class="excel-table fixed-grid-table resizable-table table-width">
+			<colgroup>
+				<col class="hidden-col">    
+				<col style="width: 73px;">   
+				<col style="width: 79px;">   
+				<col style="width: 81px;">   
+				<col style="width:200px;">   
+				<col style="width: 122px;">  
+				<col style="width: 81px;">   
+				<col style="width:220px;">   
+				<col style="width: 172px;">  
+				<col style="width: 82px;">   
+				<col style="width: 134px;">  
+				<col style="width:200px;">   
+				<col style="width: 68px;">   
+				<col style="width: 64px;">   
+				<col style="width:200px;">   
+				<col style="width: 115px;">  
+				<col style="width:100px;">   
+				<col style="width: 61px;">   
+				<col style="width:120px;">   
+			</colgroup>
+			<thead>
+				<tr>
+					<th class="hidden-col">Code</th>
+					<th>Doc Type</th>
+					<th>Doc No</th>
+					<th>Doc Date</th>
+					<th>Party Name</th>
+					<th>Bill Number</th>
+					<th>Bill Date</th>
+					<th>Bill Address 1</th>
+					<th>Bill Address 2</th>
+					<th>Bill City</th>
+					<th>Bill Gst</th>
+					<th>Ship To</th>
+					<th>Quantity</th>
+					<th>Amount</th>
+					<th>Remarks</th>
+					<th>Transport Name</th>
+					<th>Gate No</th>
+					<th>Status</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
 		</div>
-		 
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "PurchaseReturnEntry")'" type="button" class="btn btn-add">
-					<i class="fa fa-plus"></i>Add
-				</button>
-				<button class="btn btn-print" onclick="printCityMasterReport()">
-					<i class="fa fa-print"></i> Print
-				</button>
-				<button class="btn btn-export">
-					<i class="fas fa-file-export"></i> Export
-				</button>
-				<button class="btn btn-mail">
-					<i class="fa fa-envelope"></i> Mail
-				</button>
-				<button class="btn btn-approved">
-					<i class="fa fa-check"></i> Approved
-				</button>
-			</div>
+		<div class="pagination-center">
+			<button class="page-nav" id="prevBtn">‹</button>
+			<div id="tablePagination" class="page-numbers"></div>
+			<button class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
 		</div>
 	</div>
+</div>
 
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblPurchaseReturnEntryList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>Voucher No</th>
-						<th>Voucher Type</th>
-						<th>Voucher Date</th>
-						<th>Party Name</th>
-						<th>Bill Number</th>
-						<th>Bill Date</th>
-						<th>Bill Address 1</th>
-						<th>Bill Address 2</th>
-						<th>Bill City</th>
-						<th>Bill Gst</th>
-						<th>Ship To</th>
-						<th>Quantity</th>
-						<th>Amount</th>
-						<th>Remarks</th>
-						<th>Transport Name</th>
-						<th>Gate No</th>
-						<th>Status</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</fieldset>
 
 <script>
 	let currentPage = 1;
@@ -110,8 +142,8 @@
 				docs.forEach(doc => {
 					tbody.append(`
 						<tr>
-							<td>${doc.vNo || ''}</td>
 							<td>${doc.vType || ''}</td>
+							<td>${doc.vNo || ''}</td>
 							<td>${doc.vDate || ''}</td>
 							<td>${doc.partyName || ''}</td>
 							<td>${doc.billNo || ''}</td>
@@ -127,12 +159,12 @@
 							<td>${typeof doc.transportName === 'object' ? (doc.transportName.Name || '') : (doc.transportName || '')}</td>
 							<td>${doc.gateNo || ''}</td>
 							<td>${doc.status || ''}</td>
-							<td>
-								<div class="action-icons">
-									<i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.vType}', '${doc.vNo}')"></i>
-									<i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.vNo}')"></i>
-									<i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.vNo}')"></i>
-									<i class="fa fa-file btn-document" data-bs-toggle="tooltip" title="Document Details" onclick="showDocumentPopup('${doc.vNo}')"></i>
+							<td class="action-col">
+								<div class="action-wrap">
+									<button class="act-btn edit btn-edit" title="Edit Row" onclick="editDocStage('${doc.vType}', '${doc.vNo}')"><i class="fa fa-edit"></i></button>
+									<button class="act-btn view btn-view" title="View Row" onclick="viewDocStage('${doc.vNo}')"><i class="fa fa-eye"></i></button>
+									<button class="act-btn delete btn-delete" title="Delete Row" onclick="deleteDocStage('${doc.vNo}')"><i class="fa fa-trash"></i></button>
+									<button class="act-btn document btn-document" title="Document Row" onclick="showDocumentPopup('${doc.vNo}')"><i class="fa fa-file"></i></button>
 								</div>
 					</td>
 						</tr>

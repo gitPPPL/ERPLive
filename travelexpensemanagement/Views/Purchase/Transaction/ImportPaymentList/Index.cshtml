@@ -1,5 +1,5 @@
 ﻿@{
-	ViewBag.Title = "Purchase Bill Pass Entry List";
+	ViewBag.Title = "Import Payment List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 
 }
@@ -7,10 +7,10 @@
 <div class="erppagelist-header">
 	<div class="erppagelist-title">
 		<i class="fa fa-list"></i>
-		<span>Purchase Bill Pass Entry List</span>
+		<span>Import Payment List</span>
 	</div>
 	<div class="erppagelist-header-right">
-		<button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "PurchaseBillPassEntry")'">
+		<button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "ImportPaymentEntry")'">
 			<i class="fa fa-plus"></i>Add New
 		</button>
 	</div>
@@ -38,50 +38,20 @@
 </div>
 <div class="erppagelist-container">
 	<div class="excel-wrapper fixed-grid-wrapper">
-		<table id="tblPurchaseBillPassEntry" class="excel-table fixed-grid-table table-width resizable-table">
+		<table id="tblImportPaymentList" class="excel-table fixed-grid-table table-width resizable-table">
 			<colgroup>
-				<col class="hidden-col">
-				<col style="width: 72px;">
-				<col style="width: 79px;">
-				<col style="width: 137px;">
-				<col style="width:220px;">
-				<col style="width:220px;">
-				<col style="width: 73px;">
-				<col style="width: 78px;">
-				<col style="width: 90px;">
-				<col style="width: 87px;">
-				<col style="width: 69px;">
-				<col style="width: 61px;">
-				<col style="width: 110px;">
-				<col style="width: 134px;">
-				<col style="width: 84px;">
-				<col style="width: 137px;">
-				<col style="width: 91px;">
-				<col style="width: 71px;">
-				<col style="width: 65px;">
-				<col style="width:120px;">
+				<col class="hidden-col">          
+				<col style="width: 179px;">       
+				<col style="width: 636px;">       
+				<col style="width: 133px;">       
+				<col style="width:90px;">         
 			</colgroup>
 			<thead>
 				<tr>
 					<th class="hidden-col">Code</th>
-					<th>Doc Type</th>
 					<th>Doc No</th>
+					<th>Doc Type</th>
 					<th>Doc Date</th>
-					<th>Party Name</th>
-					<th>Ship To</th>
-					<th>Debit A/C</th>
-					<th>Credit A/C</th>
-					<th>Bill Quantity</th>
-					<th>Net Amount</th>
-					<th>Ref Type</th>
-					<th>Ref No</th>
-					<th>Bill No</th>
-					<th>Bill Date</th>
-					<th>Challan No</th>
-					<th>Challan Date</th>
-					<th>Dr From Trpt</th>
-					<th>Remarks</th>
-					<th>Status</th>
 					<th class="action-col">Action</th>
 				</tr>
 			</thead>
@@ -116,6 +86,11 @@
 
 	$(document).ready(function () {
 		loadPurchaseBillDirectStages();
+
+		$('#searchBox').on('keyup', function () {
+			currentPage = 1;
+			loadPurchaseBillDirectStages();
+		});
 	});
 
 	//Load main grid...............
@@ -123,7 +98,7 @@
 		const searchTerm = $('#searchBox').val();
 
 		$.ajax({
-			url: '/PurchaseBillPassEntryList/GetAllPurchaseBillPassEntry',
+			url: '/PurchaseBillPassEntryDirectList/GetAllPurchaseBillPassEntryDirect',
 			type: 'GET',
 			dataType: 'json',
 			data: {
@@ -136,11 +111,11 @@
 				const docs = res.purchaseBillDirect || res.purchaseBillDirect || [];
 				const totalCount = res.totalCount || 0;
 
-				const tbody = $('#tblPurchaseBillPassEntry tbody');
+				const tbody = $('#tblImportPaymentList tbody');
 				tbody.empty();
 
 				if (docs.length === 0) {
-					tbody.append(`<tr><td colspan="19" class="text-center text-muted">No records found.</td></tr>`);
+					tbody.append(`<tr><td class="text-center text-muted">No records found.</td></tr>`);
 					renderPagination(0, pageSize, currentPage);
 					return;
 				}
@@ -148,30 +123,15 @@
 				docs.forEach(doc => {
 					tbody.append(`
 						<tr>
-							<td style="display:none;">${doc.code || doc.doC_CODE || ''}</td>
-							<td>${doc.v_TYPE || ''}</td>
+							<td class="hidden-col">${doc.code || doc.doC_CODE || ''}</td>
 							<td>${doc.v_NO || ''}</td>
+							<td>${doc.v_TYPE || ''}</td>
 							<td>${doc.v_DATE || '0'}</td>
-							<td>${doc.partY_NAME || ''}</td>
-							<td>${doc.shiP_ADD1 || ''}</td>
-							<td>${doc.debiT_AC || '0'}</td>
-							<td>${doc.crediT_AC || ''}</td>
-							<td>${doc.bilL_QTY || ''}</td>
-							<td>${doc.amount || '0'}</td>
-							<td>${doc.reF_TYPE || ''}</td>
-							<td>${doc.reF_NO || ''}</td>
-							<td>${doc.bilL_NO || '0'}</td>
-							<td>${doc.bilL_DATE || ''}</td>
-							<td>${doc.chalL_NO || ''}</td>
-							<td>${doc.chalL_DATE || '0'}</td>
-							<td>${doc.dR_FROM_TPT || '0'}</td>
-							<td>${doc.remarks || '0'}</td>
-							<td>${doc.status || '0'}</td>
 							<td class="action-col">
 							  <div class="action-wrap">
-							     <button class="act-btn edit btn-edit" title="Edit Row" style="cursor:pointer;" onclick="editPruchaseBillPassEntry('${doc.v_NO}')"><i class="fa fa-edit"></i></button>
-							     <button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewPruchaseBillPassEntry('${doc.v_NO}')"><i class="fa fa-eye"></i></button>
-							     <button class="act-btn delete btn-delete" title="Delete Row" style="cursor:pointer;" onclick="deletePruchaseBillPassEntry('${doc.v_NO}')"><i class="fa fa-trash"></i></button>
+								 <button class="act-btn edit btn-edit" title="Edit Row" style="cursor:pointer;" onclick="editDocStage('${doc.v_NO}')"><i class="fa fa-edit"></i></button>
+								 <button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewDocStage('${doc.v_NO}')"><i class="fa fa-eye"></i></button>
+								 <button class="act-btn delete btn-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteDocStage('${doc.v_NO}')"><i class="fa fa-trash"></i></button>
 								 <button class="act-btn document btn-document" title="Document Details" style="cursor:pointer;" onclick="showDocumentPopup('${doc.v_NO}')"><i class="fa fa-file"></i></button>
 							  </div>
 							</td>
@@ -219,22 +179,48 @@
 
 	function goToPage(page) {
 		currentPage = page;
-		loadPurchaseBillDirectStages();
+		loadDocumentStages();
 	}
 
-	$('#searchBox').on('keyup', function () {
-		loadPurchaseBillDirectStages();
-	});
-
-	function editPruchaseBillPassEntry(docCode) {
-		window.location.href = `/PurchaseBillPassEntry/Index?id=${encodeURIComponent(docCode)}`;
+	function editDocStage(docCode) {
+		window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}`;
 	}
 
-	function viewPruchaseBillPassEntry(docCode) {
-		window.location.href = `/PurchaseBillPassEntry/Index?id=${encodeURIComponent(docCode)}&readOnly=true`;
+	function viewDocStage(docCode) {
+		window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}&readOnly=true`;
 	}
-	
-	function showDocumentPopup(docCode){
-		alert('There is no. Logic');
+
+	function deleteDocStage(docCode) {
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "You won't be able to revert this deletion!",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+			confirmButtonText: 'Yes, delete it!'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '/ApprovalStageMasterList/DeleteDocByCode',
+					type: 'POST',
+					data: { docCode: docCode },
+					success: function (response) {
+						if (response.success) {
+							toastr.success(response.message || "Record deleted successfully.");
+							loadDocumentStages();
+						} else {
+							toastr.warning("Delete failed.");
+						}
+					},
+					error: function () {
+						toastr.error("An error occurred while deleting.");
+					}
+				});
+			}
+		});
 	}
+
+
 </script>
+

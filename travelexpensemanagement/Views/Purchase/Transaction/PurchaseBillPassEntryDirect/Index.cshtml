@@ -2,867 +2,867 @@
     ViewBag.Title = "Purchase Bill Pass Entry Direct";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
-    <legend class="legend-field">Purchase Bill Pass Direct Entry</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "PurchaseBillPassEntryDirectList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-file-text-o"></i>
         </div>
+        <div class="erppage-header-title">Purchase Bill Pass Entry Direct</div>
     </div>
-    <form id="PurchaseBillPassEntryDirectForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlDocType">Doc Type</label>
-                    <select class="form-control" id="ddlDocType">
-                        <option>--Select DOC Type--</option>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PurchaseBillPassEntryDirectList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="PurchaseBillPassEntryDirectForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
                     </select>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="DtDocDate">Doc Date</label>
-                    <input type="date" class="form-control" id="DtDocDate" placeholder="Enter Doc Date">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="NumDocNo">Doc No</label>
-                    <input type="number" class="form-control" id="NumDocNo" placeholder="Enter Doc No">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="ddlPONo">PO No</label>
-                    <select class="form-control" id="ddlPONo">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">PO No</label>
+                    <select class="erppage-input erppage-select" id="ddlPONo">
                         <option value="">Select PO No</option>
                     </select>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub-height">
-                    <legend class="sub-legend">Party Details</legend>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="ddlBillFrom">Bill From</label>
-                                <select class="form-control" id="ddlBillFrom">
-                                    <option>Select Bill From</option>
+            <div class="erppagesrow">
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Bill Details</legend>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Bill From</label>
+                                <select class="erppage-input" id="ddlBillFrom">
+                                    <option value="">Select Bill From</option>
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="TxtAdd1PD">Add Line1</label>
-                                @* <input type="text" class="form-control" id="TxtAdd1PD" placeholder="Enter Address Line 1"> *@
-                                <select class="form-control" id="TxtAdd1PD">
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Add Line1</label>
+                                <select class="erppage-input erppage-select" id="TxtAdd1PD">
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="TxtAdd2PD">Add Line2</label>
-                                <input type="text" class="form-control" id="TxtAdd2PD" placeholder="Enter Address Line 2">
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Add Line2</label>
+                                <input type="text" class="erppage-input" id="TxtAdd2PD" placeholder="Enter Address Line 2">
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="ddlCity">City</label>
-                                <select class="form-control" id="ddlCity">
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">City</label>
+                                <select class="erppage-input erppage-select" id="ddlCity">
                                     <option value="">Select City</option>
                                 </select>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtGSTNo">GST No</label>
-                                <input type="text" class="form-control" id="TxtGSTNo" placeholder="Enter GST No">
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub-divide">
-                    <legend class="sub-legend">Account & Shipping Details</legend>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="ddlDebitAC">Debit A/c</label>
-                                <select class="form-control" id="ddlDebitAC">
-                                    <option>Select Debit A/C</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="ddlCreditAC">Credit A/c</label>
-                                <select class="form-control" id="ddlCreditAC">
-                                    <option>Select Credit Account</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="ddlShipFrom">Ship from</label>
-                                <select class="form-control" id="ddlShipFrom">
-                                    <option>Select Shipping Party</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtAdd1SF">Add Line1</label>
-                                <input type="text" class="form-control" id="TxtAdd1SF" placeholder="Enter Address Line 1">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtAdd2SF">Add Line2</label>
-                                <input type="text" class="form-control" id="TxtAdd2SF" placeholder="Enter Address Line 2">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="ddlCitySF">City</label>
-                                <select class="form-control" id="ddlCitySF">
-                                    <option>Select City</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtGSTNoSF">GST No</label>
-                                <input type="text" class="form-control" id="TxtGSTNoSF" placeholder="Enter GST Number">
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub-divide">
-                    <legend class="sub-legend">Document Details</legend>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtBillNo">Bill No</label>
-                                <input type="text" class="form-control" id="TxtBillNo" placeholder="Enter Bill No">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="DtBillDate">Bill Date</label>
-                                <input type="date" class="form-control" id="DtBillDate">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtChallanNo">Challan No</label>
-                                <input type="text" class="form-control" id="TxtChallanNo" placeholder="Enter Challan No">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="DtChallanDate">Challan Date</label>
-                                <input type="date" class="form-control" id="DtChallanDate">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="TxtWaybillNo">Waybill No</label>
-                                <input type="text" class="form-control" id="TxtWaybillNo" placeholder="Enter Waybill No">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="ddlTransitNo">Transit No</label>
-                                <select class="form-control" id="ddlTransitNo">
-                                    <option>Select Transit No</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="ddlStatus">Status</label>
-                                <select class="form-control" id="ddlStatus">
-                                    <option>--Select Status--</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="NumExRate">Ex-Rate(Rs/USD)</label>
-                                <input type="number" class="form-control" id="NumExRate" placeholder="Enter Ex-Rate(Rs/USD)">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="ddlInputType">Input Type</label>
-                                <select class="form-control" id="ddlInputType">
-                                    <option>--Select Input Type--</option>
-                                    <option>Central</option>
-                                    <option>GST Input</option>
-                                    <option>GST NA</option>
-                                    <option>Import</option>
-                                    <option>Input Capital</option>
-                                    <option>Input GST</option>
-                                    <option>Input NA</option>
-                                    <option>Input VAT</option>
-                                    <option>Local</option>
-                                    <option>RCM</option>
-                                    <option>Exempt</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="NumNetAmount">Net Amount</label>
-                                <input type="text" class="form-control" id="NumNetAmount" placeholder="Enter Net Amount">
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-        </div>
-       
-        @* Nav tabs start *@
-        <div class="navtab-form">
-            <ul class="nav nav-tabs" id="formTabs" role="tablist">
-                <li class="nav-item">
-                    <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">Item Record</button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Item Total</button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab">Logistic Details</button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" id="tab4-tab" data-bs-toggle="tab" data-bs-target="#tab4" type="button" role="tab">Cr/Dr Note</button>
-                </li>
-                <li class="nav-item">
-                    <button class="nav-link" id="tab5-tab" data-bs-toggle="tab" data-bs-target="#tab5" type="button" role="tab">Attachments</button>
-                </li>
-            </ul>
-            <div class="tab-content">
-                <!-- tab 1 -->
-                <div class="tab-pane fade show active" id="tab1">
-                    <div class="card">
-                        <div class="table-responsive">
-                            <table id="tblItemRecordPBPED" class="table-width">
-                                <thead class="table-head">
-                                    <tr>
-                                        <th style="display:none;">Code</th>
-                                        <th>Item Name</th>
-                                        <th>HSN Code</th>
-                                        <th>Unit</th>
-                                        <th>Nos</th>
-                                        <th>Rec Qty</th>
-                                        <th>Bill Qty</th>
-                                        <th>USD Rate</th>
-                                        <th>Ex Rate</th>
-                                        <th>Rate</th>
-                                        <th>Amount</th>
-                                        <th>RCM Y/N</th>
-                                        <th>Input Y/N</th>
-                                        <th>Tax Type</th>
-                                        <th>Pack%</th>
-                                        <th>Pack Amt</th>
-                                        <th>Disc %</th>
-                                        <th>Disc</th>
-                                        <th>CGST%</th>
-                                        <th>CGST</th>
-                                        <th>SGST%</th>
-                                        <th>SGST</th>
-                                        <th>IGST%</th>
-                                        <th>IGST</th>
-                                        <th>Cess%</th>
-                                        <th>Cess</th>
-                                        <th>VAT%</th>
-                                        <th>VAT</th>
-                                        <th>Oth Amt</th>
-                                        <th>Net Amt</th>
-                                        <th>Make</th>
-                                        <th>Department</th>
-                                        <th>Remarks</th>
-                                        <th>LD Rate</th>
-                                        <th>LD Amt</th>
-                                        <th>PO LDRate</th>
-                                        <th>PO Rate</th>
-                                        <th>PO Type</th>
-                                        <th>PO No</th>
-                                        <th>Kanta Type</th>
-                                        <th>Kanta No</th>
-                                        <th>Req Type</th>
-                                        <th>Req No</th>
-                                        <th>Ref Type</th>
-                                        <th>Ref No</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                        <!-- Pagination container -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="btn-add-row-last">
-                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
-                                </div>
-                                <div class="pagination-end">
-                                    <div class="custom-pagination" id="tablePaginationPBPE"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- tab 2 -->
-                <div class="tab-pane fade" id="tab2">
-                    <fieldset class="fieldset-sub">
-                        <legend class="sub-legend">Total</legend>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumReceivedQty">Received Qty</label>
-                                    <input type="number" class="form-control" id="NumReceivedQty" placeholder="Enter Received Qty">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumBillQty">Bill Qty</label>
-                                    <input type="number" class="form-control" id="NumBillQty" placeholder="Enter Bill Quantity">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumAmount">Amount</label>
-                                    <input type="number" class="form-control" id="NumAmount" placeholder="Enter Amount">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumPacking">Packing</label>
-                                    <input type="number" class="form-control" id="NumPacking" placeholder="Enter Packing Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumDiscount">Discount</label>
-                                    <input type="number" class="form-control" id="NumDiscount" placeholder="Enter Discount Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumCgst">CGST</label>
-                                    <input type="number" class="form-control" id="NumCgst" placeholder="Enter CGST Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumSgst">SGST</label>
-                                    <input type="number" class="form-control" id="NumSgst" placeholder="Enter SGST Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumIgst">IGST</label>
-                                    <input type="number" class="form-control" id="NumIgst" placeholder="Enter IGST Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumVat">VAT</label>
-                                    <input type="number" class="form-control" id="NumVat" placeholder="Enter VAT Amt">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumCess">CESS</label>
-                                    <input type="number" class="form-control" id="NumCess" placeholder="Enter CESS Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumOtherAmt">Other Amt</label>
-                                    <input type="number" class="form-control" id="NumOtherAmt" placeholder="Enter Other Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumTcs">TCS</label>
-                                    <div class="input-divide">
-                                        <input type="number" class="form-control" id="NumTcs1">
-                                        <input type="number" class="form-control" id="NumTcs2">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumSubTotal">Sub Total</label>
-                                    <input type="number" class="form-control" id="NumSubTotal" placeholder="Enter Subtotal">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumRoundOff">Round Off</label>
-                                    <input type="number" class="form-control" id="NumRoundOff" placeholder="Enter Round Off">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumNetAmount">Net Amount</label>
-                                    <input type="number" class="form-control" id="NumNetAmount" placeholder="Enter Net Amount">
-                                </div>
-                            </div>
-                        </div>
-                    </fieldset>
-                    <fieldset class="fieldset-sub">
-                        <legend class="sub-legend">TDS & Bank Details</legend>
-                        <div class="row">
-                            <!-- TDS A/c -->
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="ddlTdsAccount">TDS A/c</label>
-                                    <select class="form-control" id="ddlTdsAccount">
-                                        <option value="">Select TDS A/C</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="TxtTds">TDS</label>
-                                    <div class="input-divide">
-                                        <input type="text" class="form-control" id="TxtTds1">
-                                        <input type="text" class="form-control" id="TxtTds2">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="TxtTds194q">TDS 194Q</label>
-                                    <div class="input-divide">
-                                        <input type="text" class="form-control" id="TxtTds194q1">
-                                        <input type="text" class="form-control" id="TxtTds194q2">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="TxtBankRate">Bank Rate</label>
-                                    <div class="input-divide">
-                                        <input type="text" class="form-control" id="TxtBankRate1">
-                                        <input type="text" class="form-control" id="TxtBankRate2">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="TxtPlNo">PL No</label>
-                                    <input type="text" class="form-control" id="ChkPlNo">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="TxtPlNo">PL Date</label>
-                                    <input type="date" class="form-control" id="DtPlDate">
-                                </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">GST No</label>
+                                <input type="text" class="erppage-input" id="TxtGSTNo" placeholder="Enter GST No">
                             </div>
                         </div>
                     </fieldset>
                 </div>
-                <!--tab 3-->
-                <div class="tab-pane fade" id="tab3">
-                    <fieldset class="fieldset-sub">
-                        <legend class="sub-legend">Transport Information</legend>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="ddlTransportName">Transport Name</label>
-                                    <select class="form-control" id="ddlTransportName">
-                                        <option value="">Select Transport Name</option>
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Shipping Details</legend>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Ship from</label>
+                                <select class="erppage-input erppage-select" id="ddlShipFrom">
+                                    <option value="">Select Ship from</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Add Line1</label>
+                                <div class="erppage-inputgroup">
+                                    <input type="text" class="erppage-input erppage-width-93" id="TxtAdd1SF" placeholder="Enter Address Line 1">
+                                    <select class="erppage-input erppage-select erppage-width-7" id="TxtAdd1SF2">
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="txtVehicleNo">Vehicle No</label>
-                                    <input type="text" class="form-control" id="txtVehicleNo" placeholder="Enter Vehicle No">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="txtContainerNo">Container No</label>
-                                    <input type="text" class="form-control" id="txtContainerNo" placeholder="Enter Container No">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="txtGRNo">GR No</label>
-                                    <input type="text" class="form-control" id="txtGRNo" placeholder="Enter GR No">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="DtGRDate">GR Date</label>
-                                    <input type="date" class="form-control" id="DtGRDate">
-                                </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Add Line2</label>
+                                <input type="text" class="erppage-input" id="TxtAdd2SF" placeholder="Enter Address Line 2">
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <label class="checkbox-input">
-                                    <input type="checkbox" id="ChkSealedVehicle" />
-                                    Sealed Vehicle
-                                </label>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">City</label>
+                                <select class="erppage-input erppage-select" id="ddlCitySF">
+                                    <option value="">Select City</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">GST No</label>
+                                <input type="text" class="erppage-input" id="TxtGSTNoSF" placeholder="Enter GST Number">
                             </div>
                         </div>
                     </fieldset>
-                    <fieldset class="fieldset-sub">
-                        <legend class="sub-legend">Freight Details</legend>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="ddlFreightDebitAC">Freight Debit A/C</label>
-                                    <select class="form-control" id="ddlFreightDebitAC">
-                                        <option value="">Select Freight Debit A/C</option>
-                                    </select>
-                                </div>
+                </div>
+            </div>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Document Details</legend>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Bill No</label>
+                        <input type="text" class="erppage-input" id="TxtBillNo" placeholder="Enter Bill No">
+                    </div>
+                    <div class="erppage-divfield erppage-datefield">
+                        <label class="erppage-label">Bill Date</label>
+                        <input type="date" class="erppage-input" id="DtBillDate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Challan No</label>
+                        <input type="text" class="erppage-input" id="TxtChallanNo" placeholder="Enter Challan No">
+                    </div>
+                    <div class="erppage-divfield erppage-datefield">
+                        <label class="erppage-label">Ch Date</label>
+                        <input type="date" class="erppage-input" id="DtChallanDate">
+                    </div>
+                </div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Waybill No</label>
+                        <input type="text" class="erppage-input" id="TxtWaybillNo" placeholder="Enter Waybill No">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Transit No</label>
+                        <select class="erppage-input erppage-select" id="ddlTransitNo">
+                            <option value="">Select Transit No</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ex-Rate(Rs/USD)</label>
+                        <input type="number" class="erppage-input" id="NumExRate" placeholder="Enter Ex-Rate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Input Type</label>
+                        <select class="erppage-input erppage-select" id="ddlInputType">
+                            <option value="">Select Input Type</option>
+                            <option value="central">Central</option>
+                            <option value="gst input">GST Input</option>
+                            <option value="gst na">GST NA</option>
+                            <option value="import">Import</option>
+                            <option value="input capital">Input Capital</option>
+                            <option value="input gst">Input GST</option>
+                            <option value="input na">Input NA</option>
+                            <option value="input vat">Input VAT</option>
+                            <option value="local">Local</option>
+                            <option value="rcm">RCM</option>
+                            <option value="exempt">Exempt</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="erppage-grid4 mt-2">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Debit A/c</label>
+                    <select class="erppage-input erppage-select" id="ddlDebitAC">
+                        <option value="">Select Debit A/C</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Credit A/c</label>
+                    <select class="erppage-input erppage-select" id="ddlCreditAC">
+                        <option>Select Credit Account</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea class="erppage-input" id="txtRemarks" rows="1" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Net Amount</label>
+                    <input type="text" class="erppage-input" id="TxtNetAmount" placeholder="Enter Amount" disabled>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-select" id="ddlStatus" disabled>
+                        <option value="open" selected>Open</option>
+                        <option value="closed">Closed</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+            </div>
+            
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Total</legend>
+                <div class="erppage-grid5">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Received Qty</label>
+                        <input type="number" class="erppage-input" id="NumReceivedQty" placeholder="Enter Received Qty">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Bill Qty</label>
+                        <input type="number" class="erppage-input" id="NumBillQty" placeholder="Enter Bill Quantity">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Amount</label>
+                        <input type="number" class="erppage-input" id="NumAmount" placeholder="Enter Amount">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Packing</label>
+                        <input type="number" class="erppage-input" id="NumPacking" placeholder="Enter Packing Amt">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Discount</label>
+                        <input type="number" class="erppage-input" id="NumDiscount" placeholder="Enter Discount Amt">
+                    </div>
+                </div>
+                <div class="erppage-grid5">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CGST</label>
+                        <input type="number" class="erppage-input" id="NumCgst" placeholder="Enter CGST Amt">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">SGST</label>
+                        <input type="number" class="erppage-input" id="NumSgst" placeholder="Enter SGST Amt">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">IGST</label>
+                        <input type="number" class="erppage-input" id="NumIgst" placeholder="Enter IGST Amt">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">VAT</label>
+                        <input type="number" class="erppage-input" id="NumVat" placeholder="Enter VAT Amt">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CESS</label>
+                        <input type="number" class="erppage-input" id="NumCess" placeholder="Enter CESS Amt">
+                    </div>
+                </div>
+                <div class="erppage-grid5">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Other Amt</label>
+                        <input type="number" class="erppage-input" id="NumOtherAmt" placeholder="Enter Other Amt">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">TCS</label>
+                        <div class="erppage-inputgroup">
+                            <input type="number" class="erppage-input" id="NumTcs1">
+                            <input type="number" class="erppage-input" id="NumTcs2">
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Sub Total</label>
+                        <input type="number" class="erppage-input" id="NumSubTotal" placeholder="Enter Subtotal">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Round Off</label>
+                        <input type="number" class="erppage-input" id="NumRoundOff" placeholder="Enter Round Off">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Net Amount</label>
+                        <input type="number" class="erppage-input" id="NumNetAmount" placeholder="Enter Net Amount">
+                    </div>
+                </div>
+                <fieldset class="erppagesubfieldset">
+                    @* <legend class="erppagefieldset-legend">TDS &amp; Bank Details</legend> *@
+                    <div class="erppage-grid3">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">TDS A/c</label>
+                            <select class="erppage-input erppage-select" id="ddlTdsAccount">
+                                <option value="">Select TDS A/C</option>
+                            </select>
+                        </div>
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">TDS</label>
+                            <div class="erppage-inputgroup">
+                                <input type="text" class="erppage-input" id="TxtTds1">
+                                <input type="text" class="erppage-input" id="TxtTds2">
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="ddlFreightCreditAC">Freight Credit A/C</label>
-                                    <select class="form-control" id="ddlFreightCreditAC">
-                                        <option value="">Select Freight Credit A/C</option>
-                                    </select>
-                                </div>
+                        </div>
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">TDS 194Q</label>
+                            <div class="erppage-inputgroup">
+                                <input type="text" class="erppage-input" id="TxtTds194q1">
+                                <input type="text" class="erppage-input" id="TxtTds194q2">
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="NumFreightAmount">Freight Amount</label>
-                                    <input type="number" class="form-control" id="NumFreightAmount" placeholder="Enter Freight Amount">
-                                </div>
+                        </div>
+                    </div>
+                    <div class="erppage-grid3">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Bank Rate</label>
+                            <div class="erppage-inputgroup">
+                                <input type="text" class="erppage-input" id="TxtBankRate1" disabled>
+                                <input type="text" class="erppage-input" id="TxtBankRate2" disabled>
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="NumFrtTax">Frt Tax%</label>
-                                    <div class="input-divide">
-                                        <input type="number" class="form-control" id="NumFrtTax1">
-                                        <input type="number" class="form-control" id="NumFrtTax2">
+                        </div>
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">PL No &amp; Date</label>
+                            <div class="erppage-inputgroup">
+                                <input type="text" class="erppage-input" id="ChkPlNo" disabled>
+                                <input type="date" class="erppage-input" id="DtPlDate" disabled>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </fieldset>
+            <div class="erppage-container">
+                <div class="erppage-tabs">
+                    <button class="erppage-tab active" data-tab="itemrecord">Item Record</button>
+                    <button class="erppage-tab" data-tab="logisticdetails">Logistic Details</button>
+                    <button class="erppage-tab" data-tab="crdrnote">Cr/Dr Note</button>
+                    <button class="erppage-tab" data-tab="attachment">Attachment</button>
+                </div>
+                <!-- Item Record -->
+                <div class="erppage-tab-content active" id="itemrecord">
+                    <div class="erppage-accordion-body">
+                        <fieldset class="erppage-fieldset">
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblItemRecordPBPE" class="excel-table fixed-grid-table width-table resizable-table">
+                                    <colgroup>
+                                        <col class="hidden-col">                    
+                                        <col style="width:250px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:90px;">                   
+                                        <col style="width:80px;">                   
+                                        <col style="width:90px;">                   
+                                        <col style="width:90px;">                   
+                                        <col style="width:100px;">                  
+                                        <col style="width:100px;">                  
+                                        <col style="width:100px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:90px;">                   
+                                        <col style="width:90px;">                   
+                                        <col style="width:120px;">                  
+                                        <col style="width:80px;">                   
+                                        <col style="width:100px;">                  
+                                        <col style="width:80px;">                   
+                                        <col style="width:100px;">                  
+                                        <col style="width:80px;">                   
+                                        <col style="width:100px;">                  
+                                        <col style="width:80px;">                   
+                                        <col style="width:100px;">                  
+                                        <col style="width:80px;">                   
+                                        <col style="width:100px;">                  
+                                        <col style="width:80px;">                   
+                                        <col style="width:100px;">                  
+                                        <col style="width:80px;">                   
+                                        <col style="width:100px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:180px;">                  
+                                        <col style="width:180px;">                  
+                                        <col style="width:100px;">                  
+                                        <col style="width:100px;">                  
+                                        <col style="width:100px;">                  
+                                        <col style="width:100px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:120px;">                  
+                                        <col style="width:90px;">                   
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th class="hidden-col">Code</th>
+                                            <th class="freeze-item">Item Name</th>
+                                            <th>HSN Code</th>
+                                            <th>Unit</th>
+                                            <th>Nos</th>
+                                            <th>Rec Qty</th>
+                                            <th>Bill Qty</th>
+                                            <th>USD Rate</th>
+                                            <th>Ex Rate</th>
+                                            <th>Rate</th>
+                                            <th>Amount</th>
+                                            <th>RCM Y/N</th>
+                                            <th>Input Y/N</th>
+                                            <th>Tax Type</th>
+                                            <th>Pack%</th>
+                                            <th>Pack Amt</th>
+                                            <th>Disc %</th>
+                                            <th>Disc</th>
+                                            <th>CGST%</th>
+                                            <th>CGST</th>
+                                            <th>SGST%</th>
+                                            <th>SGST</th>
+                                            <th>IGST%</th>
+                                            <th>IGST</th>
+                                            <th>Cess%</th>
+                                            <th>Cess</th>
+                                            <th>VAT%</th>
+                                            <th>VAT</th>
+                                            <th>Oth Amount</th>
+                                            <th>Net Amount</th>
+                                            <th>Make</th>
+                                            <th>Department</th>
+                                            <th>Remarks</th>
+                                            <th>LD Rate</th>
+                                            <th>LD Amt</th>
+                                            <th>PO LDRate</th>
+                                            <th>PO Rate</th>
+                                            <th>PO Type</th>
+                                            <th>PO No</th>
+                                            <th>Kanta Type</th>
+                                            <th>Kanta No</th>
+                                            <th>Req Type</th>
+                                            <th>Req No</th>
+                                            <th>Ref Type</th>
+                                            <th>Ref No</th>
+                                            <th class="action-col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                <!-- Logistic Detail -->
+                <div class="erppage-tab-content" id="logisticdetails">
+                    <div class="erppage-accordion-body">
+                        <div class="erppagesrow">
+                            <div class="erppagescol-6">
+                                <fieldset class="erppagefieldset">
+                                    <legend class="erppagefieldset-legend">Transport Information</legend>
+                                    <div class="erppage-grid2">
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Transport Name</label>
+                                            <select class="erppage-input erppage-select" id="ddlTransportName">
+                                                <option value="">Select Transport Name</option>
+                                            </select>
+                                        </div>
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Vehicle No</label>
+                                            <input type="text" class="erppage-input" id="txtVehicleNo" placeholder="Enter Vehicle No">
+                                        </div>
                                     </div>
+                                    <div class="erppage-grid2">
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Container No</label>
+                                            <input type="text" class="erppage-input" id="txtContainerNo" placeholder="Enter Container No">
+                                        </div>
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">GR No</label>
+                                            <input type="text" class="erppage-input" id="txtGRNo" placeholder="Enter GR No">
+                                        </div>
+                                    </div>
+                                    <div class="erppage-grid2">
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">GR Date</label>
+                                            <div class="erppage-datebox">
+                                                <input type="date" class="erppage-input erppage-dateinput" id="DtGRDate">
+                                                <label class="erppage-checkbox-inside">
+                                                    <input type="checkbox" class="erppage-checkbox-input" id="chkGRDate">
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label"></label>
+                                            <div class="erppage-checkbox-wrap">
+                                                <input type="checkbox" id="ChkSealedVehicle" class="erppage-checkbox-input">
+                                                <label class="erppage-checkbox-label">Sealed Vehicle</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="erppagescol-6">
+                                <fieldset class="erppagefieldset">
+                                    <legend class="erppagefieldset-legend">Freight Details</legend>
+                                    <div class="erppage-grid2">
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Freight Debit A/C</label>
+                                            <select class="erppage-input erppage-select" id="ddlFreightDebitAC">
+                                                <option value="">Select Freight Debit A/C</option>
+                                            </select>
+                                        </div>
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Freight Credit A/C</label>
+                                            <select class="erppage-input erppage-select" id="ddlFreightCreditAC">
+                                                <option value="">Select Freight Credit A/C</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-grid2">
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Freight Amount</label>
+                                            <input type="number" class="erppage-input" id="NumFreightAmount" placeholder="Enter Freight Amount">
+                                        </div>
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Frt Tax%</label>
+                                            <div class="erppage-inputgroup">
+                                                <input type="number" class="erppage-input" id="NumFrtTax1">
+                                                <input type="number" class="erppage-input" id="NumFrtTax2">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-grid2">
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Frt Pay Narration</label>
+                                            <input type="text" class="erppage-input" id="TxtFrtPayNarration" placeholder="Enter Frt Pay Narration">
+                                        </div>
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">TDS on FRT%</label>
+                                            <div class="erppage-inputgroup">
+                                                <input type="number" class="erppage-input" id="NumTDSonFRT1">
+                                                <input type="number" class="erppage-input" id="NumTDSonFRT2">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="erppagesrow">
+                            <div class="erppagescol-6">
+                                <fieldset class="erppagefieldset">
+                                    <legend class="erppagefieldset-legend">WB Details</legend>
+                                    <div class="erppage-grid2">
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">WB Amount</label>
+                                            <input type="number" class="erppage-input" id="NumWBAmount" placeholder="Enter WB Amount">
+                                        </div>
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">WB TDS</label>
+                                            <div class="erppage-inputgroup">
+                                                <input type="number" class="erppage-input" id="NumWBTDS1" placeholder="%">
+                                                <input type="number" class="erppage-input" id="NumWBTDS2" placeholder="Value">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-grid2">
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">WB Debit A/c</label>
+                                            <select class="erppage-input erppage-select" id="ddlWBDebitAC">
+                                                <option value="">Select WB Debit A/C</option>
+                                            </select>
+                                        </div>
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">WB Credit A/c</label>
+                                            <select class="erppage-input erppage-select" id="ddlWBCreditAC">
+                                                <option value="">Select WB Credit A/C</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-grid1">
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">WB Narration</label>
+                                            <input type="text" class="erppage-input" id="TxtWBNarration" placeholder="Enter WB Narration">
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="erppagescol-6">
+                                <fieldset class="erppagefieldset">
+                                    <legend class="erppagefieldset-legend">Unloading Details</legend>
+                                    <div class="erppage-grid3">
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Unloading Amt</label>
+                                            <input type="number" class="erppage-input" id="NumUnloadAmt" placeholder="Enter Unload Amt">
+                                        </div>
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Unload TDS</label>
+                                            <div class="erppage-inputgroup">
+                                                <input type="number" class="erppage-input" id="NumUnloadTDS1" placeholder="%">
+                                                <input type="number" class="erppage-input" id="NumUnloadTDS2" placeholder="Value">
+                                            </div>
+                                        </div>
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Unload Debit A/c</label>
+                                            <select class="erppage-input erppage-select" id="ddlUnloadDebitAC">
+                                                <option value="">Select Unload Debit A/C</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-grid3">
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Unload Credit A/c</label>
+                                            <select class="erppage-input erppage-select" id="ddlUnloadCreditAC">
+                                                <option value="">Select Unload Debit A/C</option>
+                                            </select>
+                                        </div>
+                                        <div class="erppage-divfield">
+                                            <label class="erppage-label">Unload Narration</label>
+                                            <input type="text" class="erppage-input" id="TxtUnloadNarration" placeholder="Enter Unload Narration">
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                       
+                    </div>
+                </div>
+                <!--CR/Dr Note-->
+                <div class="erppage-tab-content" id="crdrnote">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Debit / Credit Notes</legend>
+                        <label class="erppage-checkbox-wrap" style="margin:0px;">
+                            <input type="checkbox" id="ChkDebitFromTransporter" class="erppage-checkbox-input">
+                            <span class="erppage-checkbox-label">
+                                Debit from Transporter
+                            </span>
+                        </label>
+                        <!-- Header -->
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"></label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Amount</label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Value</label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Narration</label>
+                            </div>
+                        </div>
+                        <!-- Quality Diff Debit -->
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" style="width: max-content;">Quality Diff Debit</label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtQualityDiffDebitAmt">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtQualityDiffDebitTax">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="text" class="erppage-input" id="TxtQualityDiffDebitNarration" placeholder="Narration">
+                            </div>
+                        </div>
+                        <!-- Rate Diff Debit -->
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" style="width: max-content;">Rate Diff Debit</label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtRateDiffDebitAmt">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtRateDiffDebitTax">
+                            </div>
+                            <div class="erppage-divfield">
+                                <textarea type="text" class="erppage-input" id="TxtRateDiffDebitNarration" placeholder="Narration"></textarea>
+                            </div>
+                        </div>
+                        <!-- QC Debit Note -->
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" style="width: max-content;">QC Debit Note</label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtQCDebitNoteAmt">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtQCDebitNoteTax">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="text" class="erppage-input" id="TxtQCDebitNarration" placeholder="Narration">
+                            </div>
+                        </div>
+                        <!-- Weight Debit Note -->
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" style="width: max-content;">Weight Debit Note</label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtWeightDebitAmt">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtWeightDebitTax">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="text" class="erppage-input" id="TxtWeightDebitNarration" placeholder="Narration">
+                            </div>
+                        </div>
+                        <!-- Others Debit Note -->
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" style="width: max-content;">Others Debit Note</label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtOtherDebitAmt">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtOtherDebitTax">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="text" class="erppage-input" id="TxtOtherDebitNarration" placeholder="Narration">
+                            </div>
+                        </div>
+                        <!-- Quality Credit Note -->
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" style="width: max-content;">Quality Credit Note</label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtQualityCreditNoteAmt" value="0">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtQualityCreditNoteVal" value="0">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="text" class="erppage-input" id="TxtQualityCreditNarration" placeholder="Narration">
+                            </div>
+                        </div>
+                        <!-- QC Credit Note -->
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" style="width: max-content;">QC Credit Note</label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtQCCreditNoteAmt" value="0">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtQCCreditNoteVal" value="0">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="text" class="erppage-input" id="TxtQCCreditNarration" placeholder="Narration">
+                            </div>
+                        </div>
+                        <!-- Weight Credit Note -->
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" style="width: max-content;">Weight Credit Note</label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtWeightCreditNoteAmt" value="0">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtWeightCreditNoteVal" value="0">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="text" class="erppage-input" id="TxtWeightCreditNarration" placeholder="Narration">
+                            </div>
+                        </div>
+                        <!-- Rate Diff Credit Note -->
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" style="width: max-content;">Rate Diff Credit Note</label>
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtRateDiffCreditNoteAmt" value="0">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="number" class="erppage-input" id="TxtRateDiffCreditNoteVal" value="0">
+                            </div>
+                            <div class="erppage-divfield">
+                                <input type="text" class="erppage-input" id="TxtRateDiffCreditNarration" placeholder="Narration">
+                            </div>
+                        </div>
+                        <!-- Bottom Section -->
+                        <div class="erppage-grid4">
+                            <!-- Payment -->
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Payment</label>
+                                <select class="erppage-input erppage-select" id="ddlPayment">
+                                    <option value="NA">NA</option>
+                                    <option value="Hold">Hold</option>
+                                </select>
+                            </div>
+                            <!-- Reason -->
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Reason</label>
+                                <input type="text" class="erppage-input" id="TxtReason" placeholder="Enter Reason">
+                            </div>
+                            <!-- Hold Date -->
+                            <div class="erppage-divfield erppage-datefield">
+                                <label class="erppage-label">Hold Date</label>
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtHoldDate">
+                                    <label class="erppage-checkbox-inside">
+                                        <input type="checkbox" class="erppage-checkbox-input" id="chkHoldDate">
+                                    </label>
                                 </div>
+                            </div>
+                            <!-- Purchase Slip Button -->
+                            <div class="erppage-divfield erppage-align-bottom">
+                                <button type="button" class="erppage-btn erppage-btn-common-active" id="BtnPurchaseSlip">
+                                    <i class="fa fa-file-text-o"></i>
+                                    <span>Purchase Slip</span>
+                                </button>
                             </div>
 
                         </div>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="TxtFrtPayNarration">Frt Pay Narration</label>
-                                    <input type="text" class="form-control" id="TxtFrtPayNarration" placeholder="Enter Frt Pay Narration">
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="NumTDSonFRT">TDS on FRT%</label>
-                                    <div class="input-divide">
-                                        <input type="number" class="form-control" id="NumTDSonFRT1">
-                                        <input type="number" class="form-control" id="NumTDSonFRT2">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </fieldset>
-                    <!-- WB Details -->
-                    <fieldset class="fieldset-sub">
-                        <legend class="sub-legend">WB Details</legend>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumWBAmount">WB Amount</label>
-                                    <input type="number" class="form-control" id="NumWBAmount" placeholder="Enter WB Amount">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="WBTDS">WB TDS</label>
-                                    <div class="input-divide">
-                                        <input type="number" class="form-control" id="NumWBTDS1" placeholder="%">
-                                        <input type="number" class="form-control" id="NumWBTDS2" placeholder="Value">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="ddlWBDebitAC">WB Debit A/c</label>
-                                    <select class="form-control" id="ddlWBDebitAC">
-                                        <option value="">Select WB Debit A/C</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="ddlWBCreditAC">WB Credit A/c</label>
-                                    <select class="form-control" id="ddlWBCreditAC">
-                                        <option value="">Select WB Credit A/C</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="TxtWBNarration">WB Narration</label>
-                                    <input type="text" class="form-control" id="TxtWBNarration" placeholder="Enter WB Narration">
-                                </div>
-                            </div>
-                        </div>
-                    </fieldset>
-                    <!-- Unloading Details -->
-                    <fieldset class="fieldset-sub">
-                        <legend class="sub-legend">Unloading Details</legend>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="NumUnloadAmt">Unloading Amt</label>
-                                    <input type="number" class="form-control" id="NumUnloadAmt" placeholder="Enter Unload Amt">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="UnloadTDS">Unload TDS</label>
-                                    <div class="input-divide">
-                                        <input type="number" class="form-control" id="NumUnloadTDS1" placeholder="%">
-                                        <input type="number" class="form-control" id="NumUnloadTDS2" placeholder="Value">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="ddlUnloadDebitAC">Unload Debit A/c</label>
-                                    <select class="form-control" id="ddlUnloadDebitAC">
-                                        <option value="">Select Unload Debit A/C</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="ddlUnloadCreditAC">Unload Credit A/c</label>
-                                    <select class="form-control" id="ddlUnloadCreditAC">
-                                        <option value="">Select Unload Debit A/C</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="TxtUnloadNarration">Unload Narration</label>
-                                    <input type="text" class="form-control" id="TxtUnloadNarration" placeholder="Enter Unload Narration">
-                                </div>
-                            </div>
-                        </div>
+
                     </fieldset>
                 </div>
-                <!--tab 4-->
-                <div class="tab-pane fade" id="tab4">
-                    <fieldset class="fieldset-sub">
-                        <legend class="sub-legend">Debit / Credit Notes</legend>
-                        <div class="offset-md-2 col-md-3">
-                            <label class="checkbox-input">
-                                <input type="checkbox" id="ChkDebitFromTransporter" />
-                                Debit from Transporter
-                            </label>
-                        </div>
-                        <!-- One Row = Label + 2 Inputs + Narration -->
-                        <div class="row mb-2">
-                            <div class="col-md-2">
-                                <div class="form-group-mt">
-                                    <label>Quality Diff Debit</label>
+                <!-- Attachment -->
+                <div class="erppage-tab-content" id="attachment">
+                    <div class="erppage-accordion-body">
+                        <div class="erppageattachmentsection">
+                            <div class="erppageattachmentsectionrow">
+                                <div class="erppageattachmentsectioncol">
+                                    <div class="erppageattachmentsectionuploadcard">
+                                        <h2 class="erppageattachmentsectiontitle">UPLOAD MULTIPLE FILES</h2>
+                                        <div class="erppageattachmentsectiondropzone" id="dropZone">
+                                            <div class="erppageattachmentsectioncloud">
+                                                <i class="fa fa-cloud"></i>
+                                            </div>
+                                            <div class="erppageattachmentsectiondragtext">
+                                                Drag & Drop your files here
+                                            </div>
+                                            <div class="erppageattachmentsectionor">
+                                                OR
+                                            </div>
+                                            <button type="button" class="erppageattachmentsectionbrowsebtn" id="browseBtn">
+                                                Browse Files
+                                            </button>
+                                            <input type="file" id="fileInput" multiple hidden>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-1"><input type="number" class="form-control" id="NumQDD1" value="0"></div>
-                            <div class="col-md-1"><input type="number" class="form-control" id="NumQDD2" value="0"></div>
-                            <div class="col-md-8"><input type="text" class="form-control" id="TxtQDDNarration" placeholder="Narration"></div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-md-2">
-                                <div class="form-group-mt">
-                                    <label>Rate Diff Debit</label>
-                                </div>
-                            </div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-md-2">
-                                <div class="form-group-mt">
-                                    <label>QC Debit Note</label>
-                                </div>
-                            </div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-md-2">
-                                <div class="form-group-mt">
-                                    <label>Weight Debit Note</label>
-                                </div>
-                            </div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-md-2">
-                                <div class="form-group-mt">
-                                    <label>Others Debit Note</label>
-                                </div>
-                            </div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-md-2">
-                                <div class="form-group-mt">
-                                    <label>Quality Credit Note</label>
-                                </div>
-                            </div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-md-2">
-                                <div class="form-group-mt">
-                                    <label>QC Credit Note</label>
-                                </div>
-                            </div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-md-2">
-                                <div class="form-group-mt">
-                                    <label>Weight Credit Note</label>
-                                </div>
-                            </div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
-                        </div>
-                        <div class="row mb-4">
-                            <div class="col-md-2">
-                                <div class="form-group-mt">
-                                    <label>Rate Diff Credit Note</label>
-                                </div>
-                            </div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-1"><input type="number" class="form-control" value="0"></div>
-                            <div class="col-md-8"><input type="text" class="form-control" placeholder="Narration"></div>
-                        </div>
-                        <!-- Payment, Reason, Hold Date -->
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="ddlPayment">Payment</label>
-                                    <select class="form-control" id="ddlPaymentCRDRNote">
-                                        <option>NA</option>
-                                        <option>Paid</option>
-                                        <option>Hold</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="TxtReason">Reason</label>
-                                    <input type="text" class="form-control" id="TxtReasonCRDRNote">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="DtHoldDate">Hold Date</label>
-                                    <input type="date" class="form-control" id="DtHoldDateCRDRNote">
-                                </div>
-                            </div>
-                        </div>
-                    </fieldset>
-                </div>
-                <!--tab 5-->
-                <div class="tab-pane fade" id="tab5">
-                    <div class="card">
-                        <div class="table-responsive">
-                            <table id="tblAttachmentPBPE" class="table-width">
-                                <thead class="table-head">
-                                    <tr>
-                                        <th style="display:none;">Code</th>
-                                        <th>File Name</th>
-                                        <th>File Upload</th>
-                                        <th>Preview</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                        <!-- Pagination container -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="btn-add-row-last">
-                                    <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
-                                </div>
-                                <div class="pagination-end">
-                                    <div class="custom-pagination" id="tablePaginationattachment"></div>
+                                <div class="erppageattachmentsectioncol">
+                                    <div class="erppageattachmentsectionfilecard">
+                                        <div class="erppageattachmentsectionheader">Uploaded Files</div>
+                                        <div class="erppageattachmentsectionfilelist" id="fileList">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+               
+
+                <div class="erppage-actions">
+                    <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Save</span>
+                    </button>
                 </div>
             </div>
+
         </div>
-    </form>
-</fieldset>
+    </div>
+</div>
+
+
+
 
 <script>
     // Global Variable getting from controller
@@ -1068,12 +1068,6 @@
         });
     })
 </script>
-
-
-
-
-
-
 <script>
     $(function () {
         $(".draggable-modal").draggable({

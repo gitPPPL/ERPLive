@@ -1,0 +1,172 @@
+﻿@{
+    ViewBag.Title = "Printing Requestion Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-print"></i>
+        </div>
+        <div class="erppage-header-title">Printing Requestion Entry</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PrintingRequestionList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="PrintingRequestionForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Place</label>
+                    <select class="erppage-input erppage-select" id="ddlPlace">
+                        <option value="">Select Place</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-select" id="ddlStatus">
+                        <option value="">Select Status</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Department</label>
+                    <select class="erppage-input erppage-select" id="ddlDepartment">
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Req. Date</label>
+                    <input type="date" class="erppage-input" id="DtRequiredDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Reason</label>
+                    <textarea typeof="text" class="erppage-input" id="TxtReason" placeholder="Enter Reason"></textarea>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-select" id="ddlStatus">
+                        <option value="">Select Status</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppage-grid2">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Request By</label>
+                    <div class="erppage-inputgroup">
+                        <select class="erppage-input erppage-select" id="ddlrequestby">
+                            <option value="">Select Request By</option>
+                        </select>
+                        <input type="text" class="erppage-input" id="Txtrequestby">
+                    </div> 
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea typeof="text" class="erppage-input" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Details</legend>
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblPrintingRequestionEntry" class="excel-table fixed-grid-table table-width resizable-table">
+                        <colgroup>
+                            <col class="hidden-col">                
+                            <col style="width:180px;">              
+                            <col style="width:220px;">              
+                            <col style="width:120px;">              
+                            <col style="width:100px;">              
+                            <col style="width:80px;">               
+                            <col style="width:120px;">              
+                            <col style="width:120px;">              
+                            <col style="width:100px;">              
+                            <col style="width:150px;">              
+                            <col style="width:180px;">              
+                            <col style="width:120px;">              
+                            <col style="width:120px;">              
+                            <col style="width:120px;">              
+                            <col style="width:220px;">              
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="hidden-col">Code</th>
+                                <th>Item Name</th>
+                                <th>Description</th>
+                                <th>Make</th>
+                                <th>Mat. Type</th>
+                                <th>Unit</th>
+                                <th>Req. Quantity</th>
+                                <th>Printing Type</th>
+                                <th>Finish</th>
+                                <th>Place of Use</th>
+                                <th>Reason</th>
+                                <th>Priority Type</th>
+                                <th>Work Type</th>
+                                <th>Scrap Type</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </fieldset>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Attachment</legend>
+                <div class="erppage-accordion-body">
+                    <div class="erppageattachmentsection">
+                        <div class="erppageattachmentsectionrow">
+                            <div class="erppageattachmentsectioncol">
+                                <div class="erppageattachmentsectionuploadcard">
+                                    <h2 class="erppageattachmentsectiontitle">UPLOAD MULTIPLE FILES</h2>
+                                    <div class="erppageattachmentsectiondropzone" id="dropZone">
+                                        <div class="erppageattachmentsectioncloud">
+                                            <i class="fa fa-cloud"></i>
+                                        </div>
+                                        <div class="erppageattachmentsectiondragtext">
+                                            Drag & Drop your files here
+                                        </div>
+                                        <div class="erppageattachmentsectionor">
+                                            OR
+                                        </div>
+                                        <button type="button" class="erppageattachmentsectionbrowsebtn" id="browseBtn">
+                                            Browse Files
+                                        </button>
+                                        <input type="file" id="fileInput" multiple hidden>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="erppageattachmentsectioncol">
+                                <div class="erppageattachmentsectionfilecard">
+                                    <div class="erppageattachmentsectionheader">Uploaded Files</div>
+                                    <div class="erppageattachmentsectionfilelist" id="fileList">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="erppage-container">
+                <div class="erppage-actions">
+                    <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Save</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

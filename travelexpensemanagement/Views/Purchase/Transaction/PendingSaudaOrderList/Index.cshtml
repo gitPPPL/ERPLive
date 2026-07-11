@@ -1,16 +1,15 @@
 ﻿@{
-	ViewBag.Title = "Machine Main Group Master List";
-	Layout = "~/Views/Shared/_Layout.cshtml";
-    var currentMenu = ViewBag.CurrentMenu as string;
+    ViewBag.Title = "Pending Sauda Order List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div id="erp-toast-container"></div>
 <div class="erppagelist-header">
     <div class="erppagelist-title">
         <i class="fa fa-list"></i>
-        <span>Machine Main Group Master List</span>
+        <span>Pending Sauda Order List</span>
     </div>
     <div class="erppagelist-header-right">
-        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "MachineMainGroupMaster")'">
+        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "PendingSaudaOrder")'">
             <i class="fa fa-plus"></i>Add New
         </button>
     </div>
@@ -30,28 +29,49 @@
         <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
             <i class="fa fa-envelope"></i> Mail
         </button>
-        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
-                data-tooltip="Approve Records">
+        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
             <i class="fa fa-check-circle"></i> Approved
         </button>
     </div>
 </div>
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
-        <table id="tblMachineMain" class="excel-table fixed-grid-table table-width resizable-table">
+        <table id="tblPendingSaudaOrderList" class="excel-table fixed-grid-table table-width resizable-table">
             <colgroup>
-                <col style="width: 60px;">
-                <col style="width: 134px;">
-                <col style="width: 133px;">
-                <col style="width: 90px;">
-                <col style="width: 90px;">
+                <col style="width:80px;">   
+                <col style="width: 82px;">  
+                <col style="width: 139px;"> 
+                <col style="width:90px;">   
+                <col style="width:100px;">  
+                <col style="width:100px;">  
+                <col style="width: 163px;"> 
+                <col style="width: 181px;"> 
+                <col style="width:80px;">   
+                <col style="width: 63px;">  
+                <col style="width:90px;">   
+                <col style="width:90px;">   
+                <col style="width: 111px;"> 
+                <col style="width: 106px;"> 
+                <col style="width: 67px;">  
+                <col style="width:80px;">   
             </colgroup>
             <thead>
                 <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Short Name</th>
-                    <th>Status</th>
+                    <th>Doc Type</th>
+                    <th>Doc No</th>
+                    <th>Doc Date</th>
+                    <th>Ref Type</th>
+                    <th>Ref No</th>
+                    <th>Ref Date</th>
+                    <th>Party Name</th>
+                    <th>Item Name</th>
+                    <th>Quantity</th>
+                    <th>Rate</th>
+                    <th>Adj Quantity</th>
+                    <th>Bal Quantity</th>
+                    <th>Remarks</th>
+                    <th>Add Quantity</th>
+                    <th>Reason</th>
                     <th class="action-col">Action</th>
                 </tr>
             </thead>
@@ -79,79 +99,23 @@
 </div>
 
 
-@* <fieldset>
-	<legend class="legend-field">Machine Main Group Master List</legend>
-	<div class="row">
-		<div class="col-lg-4">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control border-0" placeholder="Search Module..." aria-label="Search term">
-			</div>
-		</div>
-
-
-
-		<div class="col-lg-8 btn-align">
-			<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "MachineMainGroupMaster")'" type="submit" class="btn btn-primary">
-				<i class="fa fa-plus"></i>Add Machine Main
-			</button>
-			<button class="btn btn-print">
-				<i class="fa fa-print"></i> Print
-			</button>
-			<button class="btn btn-export"> 
-				<i class="fas fa-file-export"></i> Export
-			</button>
-			<button class="btn btn-mail">
-				<i class="fa fa-envelope"></i> Mail
-			</button>
-			<button class="btn btn-send"> 
-				<i class="fa fa-paper-plane"></i> Approval Send
-			</button>
-			<button class="btn btn-approved">
-				<i class="fa fa-check"></i> Approved
-			</button>
-		</div>
-
-
-
-	</div>
-	<div class="card shadow-sm border-0 mt-1">
-		<div class="table-responsive">
-			<table id="tblMachineMain" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th>Code</th>
-						<th>Name</th>
-						<th>Short Name</th>
-                        <th>Status</th>
-                        <th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-
-		<!-- Pagination container -->
-		<div class="row p-3">
-			<div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
-		</div>
-	</div>
-</fieldset> *@
-
-
 <script>
-
+    // Global Variable getting from controller
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
     let currentPage = 1;
     let pageSize = 10;
 
     $(document).ready(function () {
-        loadAllMachineMainGroups();
+        loadAllItemRateList();
     });
 
-    function loadAllMachineMainGroups() {
+    function loadAllItemRateList() {
         const searchTerm = $('#searchBox').val();
 
         $.ajax({
-            url: '/MachineMainGroupMasterList/GetMachineMainGroups', // 🔁 Update with your actual controller route
+            url: '/ItemMarketRateList/GetAllItemRateList',
             type: 'GET',
             dataType: 'json',
             data: {
@@ -160,44 +124,57 @@
                 pageSize: pageSize
             },
             success: function (res) {
-                console.log(res);
-                const lists = res.lists;
+                const lists = res.itemRates;
                 const totalCount = res.totalCount;
 
-                let tbody = $('#tblMachineMain tbody');
+                let tbody = $('#tblPendingSaudaOrderList tbody');
                 tbody.empty();
 
                 if (!lists || lists.length === 0) {
-                    tbody.append('<tr><td colspan="4" class="text-center text-muted">No records found.</td></tr>');
+                    tbody.append('<tr><td colspan="11" class="text-center text-muted">No records found.</td></tr>');
                     renderPagination(0, pageSize, currentPage);
                     return;
                 }
 
-                $.each(lists, function (index, item) {
+                   $.each(lists, function (index, item) {
                     tbody.append(`
                         <tr>
-                            <td>${item.code}</td>
-                            <td>${item.name || ''}</td>
-                            <td>${item.shortname || ''}</td>
-                            <td>${item.active === 1
-                                    ? '<span class="erppagestatus-badge erppagestatus-active"><i class="fa fa-check-circle"></i>&nbsp;Active</span>'
-                                    : '<span class="erppagestatus-badge erppagestatus-inactive"><i class="fa fa-times-circle"></i>&nbsp;Inactive</span>'
-                                }</td>
+                            <td>${item.v_TYPE || ''}</td>
+                            <td>${item.v_NO || ''}</td>
+                            <td>${item.v_DATE || ''}</td>
+                            <td>${item.ref_TYPE || ''}</td>
+                            <td>${item.ref_NO || ''}</td>
+                            <td>${item.ref_DATE || ''}</td>
+                            <td>${item.party_NAME || ''}</td>
+                            <td>${item.item_NAME || ''}</td>
+                            <td>${item.qty || ''}</td>
+                            <td>${item.rate || ''}</td>
+                            <td>${item.adj_QTY || ''}</td>
+                            <td>${item.bal_QTY || ''}</td>
+                            <td>${item.remarks || ''}</td>
+                            <td>${item.add_QTY || ''}</td>
+                            <td>${item.reason || ''}</td>
                             <td class="action-col">
-                              <div class="action-wrap">
-                                 <button class="act-btn edit btn-edit" title="Edit Row" style="cursor:pointer;" onclick="editMachineGroup(${item.code})"><i class="fa fa-edit"></i></button>
-                                 <button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewMachineGroup(${item.code})"><i class="fa fa-eye"></i></button>
-                                 <button class="act-btn delete btn-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteMachineGroup(${item.code})"><i class="fa fa-trash"></i></button>
-                              </div>
-                           </td>
+                                <div class="action-wrap">
+                                    <button class="act-btn edit btn-edit" title="Edit Row" onclick="editPendingSaudaOrder(${item.v_NO})">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button class="act-btn view btn-view" title="View Row" onclick="viewPendingSaudaOrder(${item.v_NO})">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                    <button class="act-btn delete btn-delete" title="Delete Row" onclick="deletePendingSaudaOrder(${item.v_NO}, '${item.v_TYPE}')">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
                     `);
-                });
+                 });
 
                 renderPagination(totalCount, pageSize, currentPage);
             },
             error: function (xhr) {
-                alert('Error loading data: ' + xhr.responseText);
+                toastr.error('Error loading UOM data: ' + xhr.responseText);
             }
         });
     }
@@ -236,27 +213,26 @@
 
     function goToPage(page) {
         currentPage = page;
-        loadAllMachineMainGroups();
+        loadAllItemRateList();
     }
 
     $('#searchBox').on('keyup', function () {
         currentPage = 1;
-        loadAllMachineMainGroups();
+        loadAllItemRateList();
     });
 
-
-
-    function editMachineGroup(rowId) {
-        window.location.href = '/MachineMainGroupMaster/Index?id=' + encodeURIComponent(rowId);
-    }
-    function viewMachineGroup(rowId) {
-        window.location.href = '/MachineMainGroupMaster/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+    function editPendingSaudaOrder(code) {
+        window.location.href = '/PendingSaudaOrder/Index?id=' + encodeURIComponent(code);
     }
 
-    function deleteMachineGroup(code) {
+    function viewPendingSaudaOrder(code) {
+        window.location.href = '/PendingSaudaOrder/Index?id=' + encodeURIComponent(code) + '&readOnly=true';
+    }
+
+    function deletePendingSaudaOrder(code,vType) {
         Swal.fire({
             title: 'Are you sure?',
-            text: "This action will permanently delete the Machine group.",
+            text: "This will permanently delete the quotation.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -266,21 +242,26 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: '/MachineMainGroupMaster/DeleteMachinMainGrpByCode',
+                    url: '/PendingSaudaOrderList/DeletePendingSaudaOrderByCode',
                     type: 'POST',
-                    data: { code: code },
+                    data: {
+                        code: code,
+                        vType: vType,
+                        compCode: compCode,
+                        branchCode: branchCode,
+                        yearCode: yearCode
+                    },
                     success: function (response) {
                         if (response.success) {
                             Swal.fire('Deleted!', response.message, 'success').then(() => {
-                                loadAllMachineMainGroups();
+                                loadAllItemRateList();
                             });
                         } else {
                             Swal.fire('Failed', response.message, 'warning');
                         }
                     },
-                    error: function (xhr, status, error) {
-                        console.error("Delete error:", status, error);
-                        Swal.fire('Error!', 'An error occurred while deleting record.', 'error');
+                    error: function () {
+                        Swal.fire('Error!', 'An error occurred while deleting.', 'error');
                     }
                 });
             }

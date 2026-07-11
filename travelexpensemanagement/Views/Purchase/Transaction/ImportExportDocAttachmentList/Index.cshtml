@@ -1,0 +1,136 @@
+﻿@{
+    ViewBag.Title = "Import Export Doc Attachment List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-paperclip"></i>
+        <span>Import Export Doc Attachment List</span>
+    </div>
+</div>
+<div class="erppage-fieldset">
+    <div class="erppage-container">
+        <div class="erppage-grid5">
+            <div class="erppage-divfield">
+                <label class="erppage-label">Type</label>
+                <select class="erppage-input erppage-select" id="ddltype">
+                    <option value="import">Import</option>
+                    <option value="export">Export</option>
+                </select>
+            </div>
+        </div>
+        <fieldset class="erppagefieldset">
+            <div class="erppage-grid5">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">From</label>
+                    <input type="date" class="erppage-input" id="Dtfrom" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">To</label>
+                    <input type="date" class="erppage-input" id="Dtto" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Party Name</label>
+                    <select class="erppage-input erppage-select" id="ddlpartyname">
+                        <option value="">Select Party Name</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Location</label>
+                    <select class="erppage-input erppage-select" id="ddllocation">
+                        <option value="">Select Location</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <div class="erppage-checkbox-wrap">
+                        <input type="checkbox" id="ChkSelectAll" class="erppage-checkbox-input">
+                        <label class="erppage-checkbox-label">Select All</label>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="erppage-internalaction mt-2">
+            <button type="button" id="btnviewdata" class="erppage-btn erppage-btn-common-active-disabled">
+                <i class="fa fa-eye"></i>
+                <span>View Data</span>
+            </button>
+            <button type="button" id="btnexportsave" class="erppage-btn erppage-btn-common">
+                <i class="fa fa-download"></i>
+                <span>Export & Save</span>
+            </button>
+        </div>
+        <div class="erppagelist-container">
+            <div class="excel-wrapper fixed-grid-wrapper">
+                <table id="tblImportExportDocAttachmentList" class="excel-table fixed-grid-table table-width resizable-table">
+                    <colgroup>
+                        <col class="hidden-col">          
+                        <col style="width:100px;">        
+                        <col style="width:110px;">        
+                        <col style="width:100px;">        
+                        <col style="width:110px;">        
+                        <col style="width:220px;">        
+                        <col style="width:100px;">        
+                        <col style="width:60px;">         
+                        <col style="width:90px;">         
+                        <col style="width:90px;">         
+                        <col style="width:90px;">         
+                        <col style="width:90px;">         
+                        <col style="width:90px;">         
+                        <col style="width:90px;">         
+                        <col style="width:90px;">         
+                        <col style="width:90px;">         
+                        <col style="width:90px;">         
+                        <col style="width:90px;">         
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th class="hidden-col">Code</th>
+                            <th>Sauda No</th>
+                            <th>Sauda Date</th>
+                            <th>Exim No</th>
+                            <th>Exim Date</th>
+                            <th>Party Name</th>
+                            <th>B E No.</th>
+                            <th>Chk</th>
+                            <th>P I Copy</th>
+                            <th>B L Copy</th>
+                            <th>B E Copy</th>
+                            <th>L C Copy</th>
+                            <th>Inv Copy</th>
+                            <th>D P Copy</th>
+                            <th>Sblc Copy</th>
+                            <th>Brc Copy</th>
+                            <th>Sb Copy</th>
+                            <th class="action-col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="erppagelist-pagination">
+                <div class="pagination-left">
+                    <select id="pageSizeSelect">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+                <div class="pagination-center">
+                    <button class="page-nav" id="prevBtn">‹</button>
+                    <div id="tablePagination" class="page-numbers"></div>
+                    <button class="page-nav" id="nextBtn">›</button>
+                </div>
+                <div class="pagination-right" id="pageInfoText">
+                    Results: 0 - 0 of 0
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+

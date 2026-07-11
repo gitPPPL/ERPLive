@@ -100,6 +100,7 @@ namespace travelexpensemanagement.Models.GateEntry.Transaction
         public int V_NO { get; set; }
         public string OUT_DATE { get; set; }  
         public string OUT_TIME { get; set; }  
+        public string OUT_ALLOWED { get; set; }  
         public string DOC_ID { get; set; }
         public string remarks { get; set; }
     }

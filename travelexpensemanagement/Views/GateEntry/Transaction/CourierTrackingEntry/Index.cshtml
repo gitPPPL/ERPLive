@@ -20,102 +20,106 @@
     <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
     <div class="erppage-container">
         <fieldset class="erppage-fieldset">
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Doc Type</label>
-                    <select class="erppage-input" id="ddlDocType"></select>
+            <div class="erppagesrow">
+                <div class="erppagescol-9">
+                    <fieldset class="erppagefieldset">
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Doc Type</label>
+                                <select class="erppage-input" id="ddlDocType"></select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Doc Date</label>
+                                <input type="date" class="erppage-input" id="DtDocDate">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Doc No</label>
+                                <input type="number" class="erppage-input" id="NumDocNo">
+                            </div>
+                        </div>
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Party Name</label>
+                                <select class="erppage-redinput" id="ddlPartyName"></select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">City</label>
+                                <select class="erppage-input" id="ddlCity"></select>
+                            </div>
+                        </div>
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Courier Name</label>
+                                <select class="erppage-redinput" id="ddlCourierName"></select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Docket No</label>
+                                <input type="text" class="erppage-redinput" id="TxtDocketNo">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Received By</label>
+                                <select class="erppage-input" id="ddlReceivedBy"></select>
+                            </div>
+                        </div>
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Purpose</label>
+                                <select class="erppage-input" id="ddlPurpose"></select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Weight (gm)</label>
+                                <input type="text" class="erppage-input" id="txtWeight">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Remarks</label>
+                                <textarea class="erppage-textarea" id="txtRemarks"></textarea>
+                            </div>
+                        </div>
+                    </fieldset>
                 </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Doc Date</label>
-                    <input type="date" class="erppage-input" id="DtDocDate">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Doc No</label>
-                    <input type="number" class="erppage-input" id="NumDocNo">
-                </div>
-            </div>
-            <div class="erppage-grid4">
-                <div class="erppage-divfield erppage-col-span-2">
-                    <label class="erppage-label">Party Name</label>
-                    <select class="erppage-redinput" id="ddlPartyName"></select>
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label">City</label>
-                    <select class="erppage-input" id="ddlCity"></select>
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Courier Name</label>
-                    <select class="erppage-redinput" id="ddlCourierName"></select>
-                </div>
-            </div>
-
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Docket No</label>
-                    <input type="text" class="erppage-redinput" id="TxtDocketNo">
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Received By</label>
-                    <select class="erppage-input" id="ddlReceivedBy"></select>
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Purpose</label>
-                    <select class="erppage-input" id="ddlPurpose"></select>
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Weight (gm)</label>
-                    <input type="text" class="erppage-input" id="txtWeight">
-                </div>
-            </div>
-            <div class="erppage-grid4">
-                <div class="erppage-divfield erppage-col-span-2">
-                    <label class="erppage-label">Remarks</label>
-                    <textarea class="erppage-textarea" id="txtRemarks"></textarea>
+                <div class="erppagescol-3">
+                    <fieldset class="erppagefieldset">
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">From</label>
+                                <input type="date" class="erppage-input" id="Dtfrom">
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">To</label>
+                                <input type="date" class="erppage-input" id="DtTo">
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">VType</label>
+                                <select class="erppage-input" id="ddlVtype"></select>
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Party</label>
+                                <select class="erppage-input" id="ddlParty"></select>
+                            </div>
+                        </div>
+                        <div class="erppage-internalaction mt-2">
+                            <button type="button" id="btn-print" class="erppage-btn erppage-btn-common-disabled">
+                                <i class="fa fa-print"></i>
+                                <span>Print</span>
+                            </button>
+                        </div>
+                    </fieldset>
                 </div>
             </div>
         </fieldset>
-        <fieldset class="erppage-subfieldset">
-            <div class="erppage-subheader">Print Option</div>
-            <div class="erppage-body">
-                <div class="erppage-grid4">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">From</label>
-                        <input type="date" class="erppage-input" id="Dtfrom">
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">To</label>
-                        <input type="date" class="erppage-input" id="DtTo">
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">VType</label>
-                        <select class="erppage-input" id="ddlVtype"></select>
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Party</label>
-                        <select class="erppage-input" id="ddlParty"></select>
-                    </div>
-                </div>
-            </div>
-            <div class="erppage-internalaction">
-                <button type="button" id="btn-print" class="erppage-btn erppage-btn-copy">
-                    <i class="fa fa-print"></i>
-                    <span>Print</span>
-                </button>
-            </div>
-        </fieldset>
-
-    </div>
-    <div class="erppage-actions">
-        <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
-            <i class="fa-solid fa-floppy-disk"></i>
-            <span>Save</span>
-        </button>
-    </div>
+      </div>
+   <div class="erppage-actions">
+       <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+           <i class="fa-solid fa-floppy-disk"></i>
+           <span>Save</span>
+       </button>
+   </div>
 </div>
 
 <script>
@@ -155,7 +159,7 @@
 
             if (selectedValue) {
                 $.post('/CourierTrackingEntry/GetDocNo', { docType: selectedValue, docName: selectedText },
-                function (response) 
+                function (response)
                 {
                     if (response.success)
                     {
@@ -225,7 +229,7 @@
         bindDropdown('CourierTrackingEntry','Purpose', '#ddlPurpose', '-- Select Purpose --', data.purpose);
 
         $('#DtDocDate').val(data.docDate ? formatDate(data.docDate) : '');
-        
+
         var docNo = '';
         if (data.docNo && data.docNo.length > 4) {
             docNo = data.docNo.substring(4);

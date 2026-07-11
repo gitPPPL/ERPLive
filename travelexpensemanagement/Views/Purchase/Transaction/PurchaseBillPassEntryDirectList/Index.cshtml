@@ -3,75 +3,111 @@
 	Layout = "~/Views/Shared/_Layout.cshtml";
 
 }
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Purchase Bill Pass Entry Direct List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		<button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "PurchaseBillPassEntryDirect")'">
+			<i class="fa fa-plus"></i>Add New
+		</button>
+	</div>
+</div>
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search Module..." />
+	</div>
+	<div class="erppagelist-actions">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+			<i class="fa fa-print"></i> Print
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+			<i class="fa fa-file-excel"></i> Export
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+			<i class="fa fa-envelope"></i> Mail
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
+				data-tooltip="Approve Records">
+			<i class="fa fa-check-circle"></i> Approved
+		</button>
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblPurchaseBillPassEntryDirect" class="excel-table fixed-grid-table table-width resizable-table">
+			<colgroup>
+				<col class="hidden-col">
+				<col style="width:100px;">  <!-- Doc No -->
+				<col style="width:90px;">   <!-- Doc Type -->
+				<col style="width:110px;">  <!-- Doc Date -->
+				<col style="width:220px;">  <!-- Party Name -->
+				<col style="width:220px;">  <!-- Ship To -->
+				<col style="width:120px;">  <!-- Debit A/C -->
+				<col style="width:120px;">  <!-- Credit A/C -->
+				<col style="width:90px;">   <!-- Bill Qty -->
+				<col style="width:110px;">  <!-- Net Amt -->
+				<col style="width:90px;">   <!-- Ref Type -->
+				<col style="width:90px;">   <!-- Ref No -->
+				<col style="width:120px;">  <!-- Bill No -->
+				<col style="width:110px;">  <!-- Bill Date -->
+				<col style="width:110px;">  <!-- Challan No -->
+				<col style="width:110px;">  <!-- Challan Date -->
+				<col style="width:110px;">  <!-- Dr From Trpt -->
+				<col style="width:180px;">  <!-- Remarks -->
+				<col style="width:90px;">   <!-- Status -->
+				<col style="width:120px;">  <!-- Action -->
+			</colgroup>
+			<thead>
+				<tr>
+					<th class="hidden-col">Code</th>
+					<th>Doc Type</th>
+					<th>Doc No</th>
+					<th>Doc Date</th>
+					<th>Party Name</th>
+					<th>Ship To</th>
+					<th>Debit A/C</th>
+					<th>Credit A/C</th>
+					<th>Bill_Qty</th>
+					<th>Net Amt</th>
+					<th>Ref_Type</th>
+					<th>Ref_No</th>
+					<th>Bill No</th>
+					<th>Bill Date</th>
+					<th>Challan No</th>
+					<th>Challan Date</th>
+					<th>Dr From Trpt</th>
+					<th>Remarks</th>
+					<th>Status</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+		<div class="pagination-center">
+			<button class="page-nav" id="prevBtn">‹</button>
+			<div id="tablePagination" class="page-numbers"></div>
+			<button class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
+	</div>
+</div>
 
-<fieldset>
-	<legend class="legend-field">Purchase Bill Pass Entry Direct List</legend>
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "PurchaseBillPassEntryDirect")'" type="submit" class="btn btn-add">
-					<i class="fa fa-plus"></i>Add
-				</button>
-				<button class="btn btn-print" onclick="printCityMasterReport()">
-					<i class="fa fa-print"></i> Print
-				</button>
-				<button class="btn btn-export">
-					<i class="fas fa-file-export"></i> Export
-				</button>
-				<button class="btn btn-mail">
-					<i class="fa fa-envelope"></i> Mail 
-				</button>
-				<button class="btn btn-approved">
-					<i class="fa fa-check"></i> Approved
-				</button>
-			</div>
-		</div>
-	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblPurchaseBillPassEntryDirect" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>Vno</th>
-						<th>Vtype</th>
-						<th>Vdate</th>
-						<th>Party Name</th>
-						<th>Ship To</th>
-						<th>Debit A/C</th>
-						<th>Credit A/C</th>
-						<th>Bill_Qty</th>
-						<th>Net Amt</th>
-						<th>Ref_Type</th>
-						<th>Ref_No</th>
-						<th>Bill No</th>
-						<th>Bill Date</th>
-						<th>Challan No</th>
-						<th>Challan Date</th>
-						<th>Dr From Trpt</th>
-						<th>Remarks</th>
-						<th>Status</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</fieldset>
 
 <script>
 
@@ -118,8 +154,8 @@
 					tbody.append(`
 						<tr>
 							<td style="display:none;">${doc.code || doc.doC_CODE || ''}</td>
-							<td>${doc.v_NO || ''}</td>
 							<td>${doc.v_TYPE || ''}</td>
+							<td>${doc.v_NO || ''}</td>
 							<td>${doc.v_DATE || '0'}</td>
 							<td>${doc.partY_NAME || ''}</td>
 							<td>${doc.shiP_ADD1 || ''}</td>
@@ -136,14 +172,13 @@
 							<td>${doc.dR_FROM_TPT || '0'}</td>
 							<td>${doc.remarks || '0'}</td>
 							<td>${doc.status || '0'}</td>
-							<td>
-							  <div class="action-icons">
-							  <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.v_NO}')"></i>
-							  <i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.v_NO}')"></i>
-							  <i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.v_NO}')"></i>
-							   <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showDocumentPopup('${doc.v_NO}')"></i>
+							<td class="action-col">
+							  <div class="action-wrap">
+								 <button class="act-btn edit btn-edit" title="Edit Row" style="cursor:pointer;" onclick="editDocStage('${doc.v_NO}')"><i class="fa fa-edit"></i></button>
+								 <button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewDocStage('${doc.v_NO}')"><i class="fa fa-eye"></i></button>
+								 <button class="act-btn delete btn-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteDocStage('${doc.v_NO}')"><i class="fa fa-trash"></i></button>
+								 <button class="act-btn document btn-document" title="Document Details" style="cursor:pointer;" onclick="showDocumentPopup('${doc.v_NO}')"><i class="fa fa-file"></i></button>
 							  </div>
-
 							</td>
 						</tr>
 					`);

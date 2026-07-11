@@ -2,8 +2,61 @@
 	ViewBag.Title = "Machine Sub Group Master";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+	<div class="erppage-header-left">
+		<div class="erppage-header-icon">
+			<i class="fa fa-cogs"></i>
+		</div>
+		<div class="erppage-header-title">Machine Sub Group Master</div>
+	</div>
+	<div class="erppage-header-right">
+		<button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "MachineSubGroupMasterList")', isReadOnly)">
+			<i class="fa-solid fa-arrow-left"></i>Back to list
+		</button>
+	</div>
+</div>
+<div id="MachineSubMasterform">
+	<input type="hidden" class="form-control" id="CODE" name="CODE">
+	<div class="erppage-container">
+		<div class="erppage-fieldset">
+			<div class="erppage-grid5">
+				<div class="erppage-divfield">
+					<label class="erppage-label">Machine Sub Group</label>
+					<input type="text" class="erppage-input" id="TxtMachineSub" placeholder="Enter Machine Sub Group">
+				</div>
+				<div class="erppage-divfield">
+					<label class="erppage-label">Short Name</label>
+					<input type="text" class="erppage-input" id="TxtShortName" placeholder="Enter Short Name">
+				</div>
+				<div class="erppage-divfield">
+					<label class="erppage-label">Machine Main Group</label>
+					<select class="erppage-input erppage-select" id="ddlMachineMain">
+						<option value="">Select Machine Main Group</option>
+					</select>
+				</div>
+				<div class="erppage-divfield erppage-col-span-2">
+					<label class="erppage-label"></label>
+					<div class="erppage-toggle-container">
+						<span class="erppage-toggle-text active" id="statusText">Active</span>
+						<label class="erppage-toggle">
+							<input type="checkbox" id="ACTIVE" value="1" checked>
+							<span class="erppage-toggle-slider"></span>
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="erppage-actions">
+				<button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
+					<i class="fa-solid fa-floppy-disk"></i>
+					<span>Save</span>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
 
-<fieldset>
+@* <fieldset>
 	<legend class="legend-field">Machine Sub Group Master</legend>
 	<div class="row">
 		<div class="offset-md-8 col-md-4 btn-right">
@@ -58,7 +111,7 @@
 
 	</form>
 
-</fieldset>
+</fieldset> *@
 
 <script>
 	$(document).ready(function () {
@@ -226,7 +279,7 @@
 
 
 @* Cancel Button Popup *@
-<script>
+@* <script>
 	document.getElementById("cancelBtn").addEventListener("click", function () {
 	  Swal.fire({
 		title: 'Are you sure?',
@@ -252,6 +305,6 @@
 		}
 	  });
 	});
-</script>
+</script> *@
 
 @* Cancel button end *@

@@ -2,8 +2,59 @@
 	ViewBag.Title = "Machine Main Group Master";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+	<div class="erppage-header-left">
+		<div class="erppage-header-icon">
+			<i class="fa fa-industry"></i>
+		</div>
+		<div class="erppage-header-title">Machine Main Group Master</div>
+	</div>
+	<div class="erppage-header-right">
+		<button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "MachineMainGroupMasterList")', isReadOnly)">
+			<i class="fa-solid fa-arrow-left"></i>Back to list
+		</button>
+	</div>
+</div>
+<div id="MachineMainGroupform">
+	<input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppage-grid5">
+				<div class="erppage-divfield">
+					<label class="erppage-label">Machine Group</label>
+					<input type="text" class="erppage-input" id="TxtMachineGroup" placeholder="Enter Machine Group">
+				</div>
+                <div class="erppage-divfield">
+					<label class="erppage-label">Short Name</label>
+					<input type="text" class="erppage-input" id="TxtShortName" placeholder="Enter Short Name">
+                </div>
+				<div class="erppage-divfield erppage-col-span-3">
+					<label class="erppage-label"></label>
+					<div class="erppage-toggle-container">
+						<span class="erppage-toggle-text active" id="statusText">Active</span>
+						<label class="erppage-toggle">
+							<input type="checkbox" id="ACTIVE" value="1" checked>
+							<span class="erppage-toggle-slider"></span>
+						</label>
+					</div>
+				</div>
+                
+            </div>
+			<div class="erppage-actions">
+				<button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
+					<i class="fa-solid fa-floppy-disk"></i>
+					<span>Save</span>
+				</button>
+			</div>
+           
+           
+          
+        </div>
+    </div>
+</div>
 
-<fieldset>
+@* <fieldset>
 	<legend class="legend-field">Machine Main Group Master</legend>
 	<div class="row">
 		<div class="offset-md-8 col-md-4 btn-right">
@@ -28,6 +79,7 @@
 					<input type="text" class="form-control" id="TxtShortName" name="ShortName" placeholder="Select Short Name">
 				</div>
 			</div>
+
 		</div>
 		<div class="row">
 			<div class="offset-md-7 col-md-2">
@@ -47,7 +99,7 @@
 
 	</form>
 
-</fieldset>
+</fieldset> *@
 
 <script>
 	$(document).ready(function () {
@@ -62,9 +114,20 @@
 			}
 		}
 
-		$('#cancelBtn').on('click', function () {
-			window.location.href = '/MachineMainGroupList/Index';
+		// Active Toggle
+		$('#ACTIVE').on('change', function () {
+			if ($(this).is(':checked')) {
+				$('#statusText').text('Active').addClass('active');
+			} else {
+				$('#statusText').text('Inactive').removeClass('active');
+			}
 		});
+
+
+		// $('#cancelBtn').on('click', function () {
+		// 	window.location.href = '/MachineMainGroupList/Index';
+		// });
+
 	});
 
 	function LoadMachineMainGroupById(code) {
@@ -84,8 +147,16 @@
 				$('#CODE').val(data.code);
 				$('#TxtMachineGroup').val(data.name);
 				$('#TxtShortName').val(data.shortname);
-				$('#ACTIVE').prop('checked', data.active === 1 || data.active === true);
-				$('#statusText').text(data.active ? 'Active' : 'Inactive');
+				const isActive = data.active == 1 || data.active === true || data.active === "1";
+
+				$('#ACTIVE').prop('checked', isActive);
+
+				if (isActive) {
+					$('#statusText').text('Active').addClass('active');
+				} else {
+					$('#statusText').text('Inactive').removeClass('active');
+				}
+
 			},
 			error: function (xhr, status, error) {
 				console.error("Error loading Machine Main Group by ID:", status, error);
@@ -96,7 +167,7 @@
 
 
 
-	$('#MachineMainGroupform').on('submit', function (e) {
+	$('#btn_save').on('click', function (e) {
 		e.preventDefault();
 
 		const code = parseInt($('#CODE').val()) || 0;
@@ -135,15 +206,21 @@
 			contentType: 'application/json',
 			data: JSON.stringify(machineData),
 			success: function (response) {
+
+				console.log(response);
+
 				if (response.success) {
 					toastr.success("Machine Group saved successfully!");
-					$('#MachineMainGroupform')[0].reset();
-					setTimeout(() => {
+
+					
+					//$('#MachineMainGroupform')[0].reset();
+
+					setTimeout(function () {
 						window.location.href = '/MachineMainGroupMasterList/Index';
 					}, 1000);
+
 				} else {
-					const message = response.message || "Something went wrong while saving.";
-					toastr.warning(message);
+					toastr.warning(response.message || "Something went wrong while saving.");
 				}
 			},
 			error: function (xhr) {
@@ -161,36 +238,4 @@
 
 </script>
 
-
-
-@* Cancel Button Popup *@
-<script>
-	document.getElementById("cancelBtn").addEventListener("click", function () {
-	  Swal.fire({
-		title: 'Are you sure?',
-		text: "Do you want to cancel all the changes?",
-		icon: 'warning',
-		showCancelButton: true,
-		confirmButtonText: 'Yes, cancel it!',
-		cancelButtonText: 'No, keep it',
-		reverseButtons: true
-	  }).then((result) => {
-		if (result.isConfirmed) {
-		  Swal.fire(
-			'Cancelled!',
-			'Your action has been cancelled.',
-			'success'
-		  )
-		} else if (result.dismiss === Swal.DismissReason.cancel) {
-		  Swal.fire(
-			'Resumed',
-			'Your action is still in progress.',
-			'info'
-		  )
-		}
-	  });
-	});
-</script>
-
-@* Cancel button end *@
 

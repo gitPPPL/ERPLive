@@ -2,7 +2,145 @@
     ViewBag.Title = "Truck Out Time Updation";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<fieldset>
+
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-clock"></i>
+        </div>
+        <div class="erppage-header-title">Truck Out Time Updation</div>
+    </div>
+    <div class="erppage-header-right">
+        @* <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PurchaseBillPassEntryList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button> *@
+    </div>
+</div>
+<div id="TruckOutTimeUpdationForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid5">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">From Date</label>
+                    <input type="date" class="erppage-input" id="DtFromDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">To Date</label>
+                    <input type="date" class="erppage-input" id="DtToDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Report Type</label>
+                    <select class="erppage-input erppage-select" id="ddlOutTime">
+                        <option value="">Select Type</option>
+                        <option value="Outward Pending">Outward Pending</option>
+                        <option value="Outward Allowed">Outward Allowed</option>
+                        <option value="All">All</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option>Select Type</option>
+                        <option value="Inward">Inward</option>
+                        <option value="Outward">Outward</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Vehicle No.</label>
+                    <select class="erppage-input erppage-select" id="ddlTxtVehicleNo">
+                        <option value="">Select Vehicle No.</option>
+                    </select>
+                </div>
+            </div>
+            @* <div class="erppage-grid3">
+               
+                <div class="erppage-divfield">
+                    <label class="erppage-label">QRCode No</label>
+                    <input type="text" class="erppage-input" id="TxtQRCodeNo">
+                </div>
+            </div> *@
+            <div class="erppage-internalaction mt-2">
+                <button type="button" class="erppage-btn erppage-btn-common-disabled" onclick="loadTruckOutData()">
+                    <i class="fa fa-download"></i>
+                    <span>Load Data</span>
+                </button>
+                <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                    <i class="fa fa-save"></i>
+                    <span>Update</span>
+                </button>
+                <button type="button" class="erppage-btn erppage-btn-danger">
+                    <i class="fa fa-close"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblTruckOutTimeUpdation" class="excel-table fixed-grid-table width-table resizable-table">
+                        <colgroup>
+                            <col class="hidden-col">
+                            <col class="hidden-col">
+                            <col style="width: 106px;">
+                            <col style="width: 77px;">
+                            <col style="width: 82px;">
+                            <col style="width: 133px;">
+                            <col style="width: 91px;">
+                            <col style="width: 66px;">
+                            <col style="width:110px;">
+                            <col style="width: 115px;">
+                            <col style="width: 74px;">
+                            <col style="width: 72px;">
+                            <col style="width:80px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="hidden-col">VNO_HIDDEN</th>
+                                <th class="hidden-col">DOC_ID</th>
+                                <th>Doc Type</th>
+                                <th>Doc No</th>
+                                <th>Doc Date</th>
+                                <th>Party Name</th>
+                                <th>Vehicle No</th>
+                                <th>In Time</th>
+                                <th>Out Date</th>
+                                <th>Out Time</th>
+                                <th>Remarks</th>
+                                <th>Out Allow</th>
+                                <th class="action-col">
+                                    <input type="checkbox" />
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="erppagelist-pagination">
+                    <div class="pagination-left">
+                        <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <div class="pagination-center">
+                        <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+                        <div id="pageNumbers" class="page-numbers"></div>
+                        <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+                    </div>
+                    <div class="pagination-right" id="pageInfoText">
+                        Results: 0 - 0 of 0
+                    </div>
+                </div>
+           </div>
+        </fieldset>
+    </div>
+</div>
+
+
+
+@* <fieldset>
     <legend class="legend-field">Truck Out Time Updation</legend>
     <div id="TruckOutTimeUpdationForm">
         <input type="hidden" class="form-control" id="TxtCode" name="CODE">
@@ -48,7 +186,7 @@
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="TxtVehicleNo">Vehicle No.</label>
-                    <select class="form-control" id="ddlTxtVehicleNo">
+                    <select class="form-control" style="width:300px !important" id="ddlTxtVehicleNo">
                         <option value="">Select Vehicle No</option>
                     </select>
                 </div>
@@ -68,82 +206,133 @@
         </div>
         <div class="card">
             <div class="table-responsive">
-                             
-                    <table id="tblTruckOutTimeUpdation" class="table-width">
-                        <thead class="table-head">
-                            <tr>
-                                <th style="display:none;">VNO_HIDDEN</th>
-                                <th style="display:none;">DOC_ID</th> 
-                                <th>Vno</th>
-                                <th>Inward Type</th>
-                                <th>Vdate</th>
-                                <th>Party Name</th>
-                                <th>Transport</th>
-                                <th>Vehicle No</th>
-                                <th>In Time</th>
-                                <th>Report Time</th>
-                                <th>Out Date</th>
-                                <th>Out Time</th>
-                                <th>Remarks</th>
-                                <th>Qrcode</th>
-                                <th>Out Allow</th>
-                                <th><input type="checkbox" /></th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-               
+
+                <table id="tblTruckOutTimeUpdation" class="table-width">
+                    <thead class="table-head">
+                        <tr>
+                            <th style="display:none;">VNO_HIDDEN</th>
+                            <th style="display:none;">DOC_ID</th>
+                            <th>Vno</th>
+                            <th>Inward Type</th>
+                            <th>Vdate</th>
+                            <th>Party Name</th>
+                            <th>Transport</th>
+                            <th>Vehicle No</th>
+                            <th>In Time</th>
+                            <th>Report Time</th>
+                            <th>Out Date</th>
+                            <th>Out Time</th>
+                            <th>Remarks</th>
+                            <th>Qrcode</th>
+                            <th>Out Allow</th>
+                            <th><input type="checkbox" /></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
             </div>
         </div>
         <div class="row">
-            <div class="col-md-12">
-                <div class="pagination-end">
-                    <div class="custom-pagination" id="tablePagination"></div>
+
+            <div class="erppagelist-pagination">
+                <div class="pagination-left">
+                    <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+                <div class="pagination-center">
+                    <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+                    <div id="pageNumbers" class="page-numbers"></div>
+                    <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+                </div>
+                <div class="pagination-right" id="pageInfoText">
+                    Results: 0 - 0 of 0
                 </div>
             </div>
+
         </div>
 
-        <div class="row">
-            <div class="offset-md-10 col-md-2">
-                <div class="btn-last">
-                    @* <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button> *@
-                </div>
-            </div>
-        </div>
     </div>
-</fieldset>
+</fieldset> *@
+
+<script src="/common/pagination.js"></script>
+<script src="/common/delete.js"></script>
 
 <script>
-    let currentPage = 1;
-    let pageSize = 10;
+    var truckPagination;
     $(document).ready(function () {
         const today = new Date();
         const yyyy = today.getFullYear();
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const dd = String(today.getDate()).padStart(2, '0');
-        const formattedDate = `${yyyy}-${mm}-${dd}`;  
+        const formattedDate = `${yyyy}-${mm}-${dd}`;
         $('#DtFromDate').val(formattedDate);
         $('#DtToDate').val(formattedDate);
-
         ddlVehicleNo();
+        truckPagination = Pagination.create({
+            pageSize: 10,
+            paginationContainer: "#pageNumbers",
+            infoContainer: "#pageInfoText",
+            loader: function (options) {
+                const fDate = formatDateForInput($('#DtFromDate').val());
+                const tDate = formatDateForInput($('#DtToDate').val());
+                $.ajax({
+                    url: '/TruckOutTimeUpdation/GetTruckOutRecords',
+                    type: 'GET',
+                    data: {
+                        FromDate: fDate,
+                        ToDate: tDate,
+                        DocType: $('#ddlDocType').val() || null,
+                        OutType: $('#ddlOutTime').val() || null,
+                        VehicleNo: $('#ddlTxtVehicleNo').val() || null,
+                        QrCode: $('#TxtQRCodeNo').val() || null,
+                        pageNumber: options.pageNumber,
+                        pageSize: options.pageSize
+                    },
+                    success: function (res) {
+                        options.callback(res);
+                    }
+                });
+            },
+            render: function (data) {
+                renderTruckTable(data);
+            }
+        });
+        $('#btn-save').on('click', function (e) {
+            e.preventDefault();
+            saveTruckOutUpdates();
+        });
     });
+
+      function loadTruckOutData() {
+            truckPagination.load();
+      }
+    function changeRowsPerPage() {
+        truckPagination.setPageSize(
+            parseInt($("#pageSizeSelect").val())
+        );
+    }
     async function ddlVehicleNo() {
         try {
             const response = await fetch('/TruckOutTimeUpdation/ddlVehicleNo');
             const data = await response.json();
             const ddl = $('#ddlTxtVehicleNo');
             ddl.empty();
-
-            ddl.append('<option value="" disabled selected>Select Employee</option>');
+            ddl.append('<option value="" disabled selected>Select Vehicle</option>');
             data.forEach(item => {
-
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                ddl.append(
+                    `<option value="${item.value}">${item.text}</option>`
+                );
             });
             ddl.select2({
-                placeholder: 'Select Employee',
-                allowClear: true,   
+                placeholder: 'Select Vehicle',
+                allowClear: true,
                 width: '100%',
-                matcher: function(params, data) {
+                matcher: function (params, data) {
                     if ($.trim(params.term) === '') {
                         return data;
                     }
@@ -152,203 +341,224 @@
                     return text.indexOf(term) > -1 ? data : null;
                 }
             });
-
-        } catch (err) {
-            console.error("Error loading Employee Code dropdown:", err);
-            toastr.error("Error loading Employee Code dropdown");
+        }
+        catch (err) {
+            toastr.error("Vehicle Loading Error");
         }
     }
     function formatDateForInput(dateStr) {
-        if (!dateStr) return '';
-
-        // agar already YYYY-MM-DD hai toh return karo
-        if (dateStr.includes('-')) return dateStr;
-
-        // convert DD/MM/YYYY → YYYY-MM-DD
+        if (!dateStr)
+            return '';
+        if (dateStr.includes('-'))
+            return dateStr;
         const parts = dateStr.split('/');
-        if (parts.length !== 3) return '';
-
+        if (parts.length != 3)
+            return '';
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
     }
-    function loadTruckOutData() {
+        function renderTruckTable(data) {
 
-         const fDate = formatDateForInput($('#DtFromDate').val());
-         const tDate = formatDateForInput($('#DtToDate').val());
+        const tbody = $('#tblTruckOutTimeUpdation tbody');
+        tbody.empty();
 
-        $.ajax({
-            url: '/TruckOutTimeUpdation/GetTruckOutRecords',
-            type: 'GET',
-            data: {
-                FromDate: fDate,
-                ToDate: tDate,
-                DocType: $('#ddlDocType').val() || null,
-                OutType: $('#ddlOutTime').val() || null,
-                VehicleNo: $('#ddlTxtVehicleNo').val() || null,
-                QrCode: $('#TxtQRCodeNo').val() || null,
-                pageNumber: currentPage,
-                pageSize: pageSize
-            },
+        if (data.length === 0) {
+            tbody.append('<tr><td  class="text-center">No records found</td></tr>');
+            return;
+        }
 
-            success: function (res) {
-                console.log('res', res)
-                const totalCount = res.totalCount || 0;
-                const data = res.data || [];
-                const tbody = $('#tblTruckOutTimeUpdation tbody');
-                tbody.empty();
+        $.each(data, function (i, item) {
 
-                if (data.length === 0) {
-                    tbody.append('<tr><td colspan="16">No records found</td></tr>');
-                    renderPagination(0, pageSize, currentPage);
-                    return;
-                }
+            const isAllowed = (item.ouT_ALLOWED || "").trim().toUpperCase() === "YES";
 
-                $.each(data, function (i, item) {
+            tbody.append(`
+            <tr>
+                <td style="display:none;">${item.v_NO}</td>
+                <td style="display:none;">${item.doc_id}</td>
+                <td>${item.in_Type}</td>
+                <td>${item.v_NO}</td>
+                
+                <td>${item.v_Date}</td>
+                <td>${item.partyName}</td>
 
-                    const hasOutDateTime = item.ouT_DATE && item.ouT_TIME;
-                    const isAllowed = item.ouT_ALLOWED === 'Yes';
+                <td>${item.trucK_NO}</td>
+                <td>${item.v_TIME}</td>
+               
 
-                    tbody.append(`
-                    <tr>
-                        <td style="display:none;">${item.v_NO}</td>
-                        <td style="display:none;">${item.doc_id}</td>
+                <td>
+                    <input type="date"
+                           class="form-control out-date"
+                           value="${formatDateForInput(item.ouT_DATE)}"
+                           ${isAllowed ? "" : "disabled"} />
+                </td>
 
-                        <td>${item.v_NO}</td>
-                        <td>${item.in_Type}</td>
-                        <td>${item.v_Date}</td>
-                        <td>${item.partyName}</td>
-                        <td>${item.transport}</td>
-                        <td>${item.trucK_NO}</td>
-                        <td>${item.v_TIME}</td>
-                        <td>${item.r_TIME}</td>
+                <td>
+                    <input type="time"
+                           class="form-control out-time"
+                           value="${item.ouT_TIME || ''}"
+                           ${isAllowed ? "" : "disabled"} />
+                </td>
 
-                        <td>
-                           <input type="date" class="form-control out-date"
-                            value="${formatDateForInput(item.ouT_DATE)}" disabled />
-                        </td>
-
-                        <td>
-                                <input type="time" class="form-control out-time"
-                                value="${item.ouT_TIME || ''}" disabled />
-                        </td>
-
-                        <td>
-                            <input type="text" class="form-control remarks"
-                            value="${item.remarks || ''}" disabled />
-
-                        </td>
-
-                        <td>${item.qrcodE_NO || ''}</td>
-                        <td>${isAllowed ? 'Yes' : 'No'}</td>
-
-                        
-
-                            <td>
-                            <input type="checkbox"
-                                ${item.ouT_ALLOWED !== 'Yes' ? 'disabled' : ''}
-                                onchange="onCheckboxChanged(this)" />
-                        </td>
+                <td>
+                    <input type="text"
+                           class="form-control remarks"
+                           value="${item.remarks || ''}"
+                           ${isAllowed ? "" : "disabled"} />
+                </td>
 
 
+                <td class="out-allow">${item.ouT_ALLOWED || ''}</td>
 
-                    </tr>
-                    `);
-                });
-                renderPagination(totalCount, pageSize, currentPage);
-            }
+                <td class="action-col">
+                    <div class="action-wrap">
+                        <input type="checkbox" onchange="onCheckboxChanged(this)"
+                               ${isAllowed ? "checked disabled" : ""} />
+                    </div>
+                </td>
+            </tr>`);
         });
     }
-    function onCheckboxChanged(checkbox) {
+    // function renderTruckTable(data) {
+    //     const tbody = $('#tblTruckOutTimeUpdation tbody');
+    //     tbody.empty();
+    //     if (data.length === 0) {
+    //         tbody.append('<tr><td colspan="16" class="text-center">No records found</td></tr>');
+    //         return;
+    //     }
+    //     $.each(data, function (i, item) {
+    //         //const isAllowed = item.ouT_ALLOWED === "Yes";
+    //         tbody.append(`
+    //         <tr>
+    //         <td style="display:none;">${item.v_NO}</td>
+    //         <td style="display:none;">${item.doc_id}</td>
+    //         <td>${item.v_NO}</td>
+    //         <td>${item.in_Type}</td>
+    //         <td>${item.v_Date}</td>
+    //         <td>${item.partyName}</td>
+    //         <td>${item.transport}</td>
+    //         <td>${item.trucK_NO}</td>
+    //         <td>${item.v_TIME}</td>
+    //         <td>${item.r_TIME}</td>
+    //         <td> <input type="date"  class="form-control out-date" value="${formatDateForInput(item.ouT_DATE)}" disabled /></td>
+    //         <td><input type="time" class="form-control out-time" value="${item.ouT_TIME || ''}" disabled /> </td>
+    //         <td><input type="text" class="form-control remarks" value="${item.remarks || ''}" disabled /> </td>
+    //         <td>${item.qrcodE_NO || ''}</td>
+    //         <td class="out-allow">${item.ouT_ALLOWED || ''}</td>
+    //         <td> <input type="checkbox"  onchange="onCheckboxChanged(this)"> </td>
+    //         </tr>`);
+    //     });
+    // }
 
-        const $row = $(checkbox).closest('tr');
+        function onCheckboxChanged(checkbox) {
 
-        if (checkbox.checked && !checkbox.disabled) {
+        if ($(checkbox).prop("disabled"))
+            return;
 
-            // ✅ Enable fields
-            $row.find('.out-date, .out-time, .remarks').prop('disabled', false);
+        const row = $(checkbox).closest("tr");
 
-            // ✅ Set current date & time
+        if (checkbox.checked) {
+
+            row.find(".out-date,.out-time,.remarks").prop("disabled", false);
+
             const now = new Date();
-            const currentDate = now.toISOString().split('T')[0];
-            const currentTime = now.toTimeString().slice(0, 5);
+            row.find(".out-date").val(now.toISOString().split("T")[0]);
+            row.find(".out-time").val(now.toTimeString().substring(0,5));
+            row.find(".out-allow").text("Yes");
+            row.attr("data-newlyChecked","true");
+        }
+        else {
 
-            $row.find('.out-date').val(currentDate);
-            $row.find('.out-time').val(currentTime);
+            row.find(".out-date,.out-time,.remarks").prop("disabled", true);
 
-            // Track row
-            $row.attr('data-newlyChecked', 'true');
+            row.find(".out-date").val("");
+            row.find(".out-time").val("");
 
-        } else {
+            row.find(".out-allow").text("");
 
-            // ❌ Disable again
-            $row.find('.out-date, .out-time, .remarks').prop('disabled', true);
-
-            // Optional reset
-            $row.find('.out-date').val('');
-            $row.find('.out-time').val('');
-
-            $row.removeAttr('data-newlyChecked');
+            row.removeAttr("data-newlyChecked");
         }
     }
-    function goToPage(page) {
-         debugger
-        currentPage = page;  
-        console.log("Current Page:", currentPage);
-        loadTruckOutData();
-    }
-    function renderPagination(total, pageSize, currentPage) {
-        const totalPages = Math.ceil(total / pageSize);
-        const pagination = $('#tablePagination');
-        pagination.empty();
-
-        if (totalPages <= 1) return;
-
-        let html = '';
-        if (currentPage > 1) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-        }
-        const startPage = Math.max(1, currentPage - 2);
-        const endPage = Math.min(totalPages, currentPage + 2);
-
-        for (let i = startPage; i <= endPage; i++) {
-            html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-        }
-
-        if (currentPage < totalPages) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-        }
-        pagination.html(html);
-    }
-    $('#btn-save').on('click', function (e) {
-        e.preventDefault(); 
-        saveTruckOutUpdates();
-    });
+    // function onCheckboxChanged(checkbox) {
+    //     const row = $(checkbox).closest('tr');
+    //     if (checkbox.checked) {
+    //         row.find('.out-date').prop('disabled', false);
+    //         row.find('.out-time').prop('disabled', false);
+    //         row.find('.remarks').prop('disabled', false);
+    //         const now = new Date();
+    //         const currentDate = now.toISOString().split('T')[0];
+    //         const currentTime = now.toTimeString().substring(0,5);
+    //         row.find('.out-date').val(currentDate);
+    //         row.find('.out-time').val(currentTime);
+    //         row.attr('data-newlyChecked','true');
+    //         row.find('.out-allow').text('Yes');
+    //     }
+    //     else {
+    //         row.find('.out-date').prop('disabled',true);
+    //         row.find('.out-time').prop('disabled',true);
+    //         row.find('.remarks').prop('disabled',true);
+    //         row.find('.out-date').val('');
+    //         row.find('.out-time').val('');
+    //         row.removeAttr('data-newlyChecked');
+    //         row.find('.out-allow').text('');
+    //     }
+    // }
     function saveTruckOutUpdates() {
+
         let rowsToSave = [];
+        let hasError = false;
 
-        $('#tblTruckOutTimeUpdation tbody tr[data-newlyChecked="true"]').each(function () {
-            const $row = $(this);
-            const vNo = parseInt($row.find('td').eq(0).text().trim());
-            const docId = $row.find('td').eq(1).text().trim();
+        $('#tblTruckOutTimeUpdation tbody tr[data-newlyChecked="true"]').each(function (index) {
 
-            const outDate = $row.find('.out-date').val();
-            const outTime = $row.find('.out-time').val();
-            const remarks = $row.find('.remarks').val();
+            const row = $(this);
 
-            if (!outDate || !outTime) return;
+            const vNo = parseInt(row.find('td').eq(0).text().trim());
+            const docId = row.find('td').eq(1).text().trim();
+
+            const outDate = row.find('.out-date').val();
+            const outTime = row.find('.out-time').val().trim();
+            const remarks = row.find('.remarks').val().trim();
+
+            // Out Date Validation
+            if (outDate === "") {
+                toastr.error("Out Date is required. Line No : " + (index + 1));
+                row.find('.out-date').focus();
+                hasError = true;
+                return false;
+            }
+
+            // Out Time Validation
+            if (outTime === "") {
+                toastr.error("Out Time is required. Line No : " + (index + 1));
+                row.find('.out-time').focus();
+                hasError = true;
+                return false;
+            }
+
+            // Time format validation (HH:mm)
+            var timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+            if (!timeRegex.test(outTime)) {
+                toastr.error("Invalid Time Format (HH:mm). Line No : " + (index + 1));
+                row.find('.out-time').focus();
+                hasError = true;
+                return false;
+            }
 
             rowsToSave.push({
                 V_NO: vNo,
                 DOC_ID: docId,
                 OUT_DATE: outDate,
                 OUT_TIME: outTime,
-                remarks: remarks
+                remarks: remarks,
+                OUT_ALLOWED: "Yes"
             });
+
         });
 
+        if (hasError)
+            return;
+
         if (rowsToSave.length === 0) {
-            toastr.warning('No rows selected');
+            toastr.warning("No rows selected.");
             return;
         }
 
@@ -359,18 +569,76 @@
             data: JSON.stringify(rowsToSave),
 
             success: function (res) {
-                //toastr.success('Saved Successfully');
-                 if (res.success) {
-                toastr.success(res.message);
-            } else {
-                toastr.warning(res.message);
-            }
-                loadTruckOutData();
+
+                if (res.success) {
+
+                    toastr.success(res.message);
+
+                    // Reload Grid
+                    truckPagination.load();
+
+                } else {
+
+                    toastr.warning(res.message);
+
+                }
+
             },
-            error: function () {
-                toastr.error('Error saving data');
+
+            error: function (xhr) {
+
+                toastr.error("Error while saving data.");
+
+                console.log(xhr.responseText);
+
             }
+
         });
+
     }
-    
+
+    // function saveTruckOutUpdates() {
+    //     let rowsToSave = [];
+    //     $('#tblTruckOutTimeUpdation tbody tr[data-newlyChecked="true"]').each(function () {
+    //         const row = $(this);
+    //         const vNo = parseInt(row.find('td').eq(0).text().trim());
+    //         const docId = row.find('td').eq(1).text().trim();
+    //         const outDate = row.find('.out-date').val();
+    //         const outTime = row.find('.out-time').val();
+    //         const remarks = row.find('.remarks').val();
+    //         if (!outDate || !outTime)
+    //             return;
+    //         rowsToSave.push({
+    //             V_NO: vNo,
+    //             DOC_ID: docId,
+    //             OUT_DATE: outDate,
+    //             OUT_TIME: outTime,
+    //             remarks: remarks,
+    //             OUT_ALLOWED: "Yes"
+    //         });
+    //     });
+    //     if (rowsToSave.length === 0) {
+    //         toastr.warning("No rows selected");
+    //         return;
+    //     }
+    //     $.ajax({
+    //         url: '/TruckOutTimeUpdation/SaveOutTimes',
+    //         type: 'POST',
+    //         contentType: 'application/json',
+    //         data: JSON.stringify(rowsToSave),
+    //         success: function (res) {
+    //             if (res.success) {
+    //                 toastr.success(res.message);
+    //             }
+    //             else {
+    //                 toastr.warning(res.message);
+    //             }
+    //             truckPagination.load();
+    //         },
+    //         error: function () {
+    //             toastr.error("Error saving data");
+    //         }
+    //     });
+
+    // }
 </script>

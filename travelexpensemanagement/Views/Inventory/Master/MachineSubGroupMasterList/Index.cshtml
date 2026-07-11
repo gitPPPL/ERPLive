@@ -2,8 +2,82 @@
 	ViewBag.Title = "Machine Sub Group Master List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Machine Sub Group Master List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		<button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "MachineSubGroupMaster")'">
+			<i class="fa fa-plus"></i>Add New
+		</button>
+	</div>
+</div>
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="tableSearch" placeholder="Search Module..." />
+	</div>
+	<div class="erppagelist-actions">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+			<i class="fa fa-print"></i> Print
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+			<i class="fa fa-file-excel"></i> Export
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+			<i class="fa fa-envelope"></i> Mail
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
+				data-tooltip="Approve Records">
+			<i class="fa fa-check-circle"></i> Approved
+		</button>
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblMachineSubGroup" class="excel-table fixed-grid-table table-width resizable-table">
+			<colgroup>
+				<col class="hidden-col">
+				<col style="width: 134px;">
+				<col style="width: 133px;">
+				<col style="width: 90px;">
+				<col style="width: 90px;">
+			</colgroup>
+			<thead>
+				<tr>
+					<th class="hidden-col">Code</th>
+					<th>Subgroup</th>
+					<th>MainGroup</th>
+					<th>Status</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+		<div class="pagination-center">
+			<button class="page-nav" id="prevBtn">‹</button>
+			<div id="tablePagination" class="page-numbers"></div>
+			<button class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
+	</div>
+</div>
 
-<fieldset>
+@* <fieldset>
 	<legend class="legend-field">Machine Sub Group Master List</legend>
 	<div class="row">
 		<div class="col-lg-4">
@@ -53,7 +127,9 @@
 			<div class="col-md-12 d-flex justify-content-center" id="tablePagination"></div>
 		</div>
 	</div>
-</fieldset>
+</fieldset> *@
+
+
 <script>
 
 	let currentPage = 1;
@@ -93,12 +169,18 @@
 							<td style="display:none;">${item.code}</td>
 							<td>${item.name || ''}</td>
 							<td>${item.shortname || ''}</td>
-							<td>${item.active === 1 ? 'Active' : 'Inactive'}</td>
-							<td>
-								<i class="fas fa-edit text-primary" style="cursor:pointer;" title="Edit" onclick="editMachineSubGroup(${item.code})"></i>
-								<i class="fas fa-eye text-secondary ms-2" style="cursor:pointer;" title="View" onclick="viewMachineSubGroup(${item.code})"></i>
-								<i class="fas fa-trash text-danger" style="cursor:pointer;" title="Delete" onclick="deleteMachineSubGroup(${item.code})"></i>
-							</td>
+							<td>${item.active === 1
+									? '<span class="erppagestatus-badge erppagestatus-active"><i class="fa fa-check-circle"></i>&nbsp;Active</span>'
+									: '<span class="erppagestatus-badge erppagestatus-inactive"><i class="fa fa-times-circle"></i>&nbsp;Inactive</span>'
+								}</td>
+
+							<td class="action-col">
+							  <div class="action-wrap">
+								 <button class="act-btn edit btn-edit" title="Edit Row" style="cursor:pointer;" onclick="editMachineSubGroup(${item.code})"><i class="fa fa-edit"></i></button>
+								 <button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewMachineSubGroup(${item.code})"><i class="fa fa-eye"></i></button>
+								 <button class="act-btn delete btn-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteMachineSubGroup(${item.code})"><i class="fa fa-trash"></i></button>
+							  </div>
+						    </td>
 						</tr>
 					`);
 				});

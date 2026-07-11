@@ -328,7 +328,27 @@ namespace travelexpensemanagement.Common.DropdownService
                 new SqlParameter("@CompCode", compCode)
             });
         }
-        
+
+        public List<DropdownModel> GetSupplierName(string compCode, string term)
+        {
+            string query = @"
+            SELECT TOP (50)
+                CODE AS Value,
+                NAME AS Text
+            FROM SUBGROUP_MAST
+            WHERE COMP_CODE = @CompCode
+              AND NATURE = 'Supplier'
+              AND ACTIVE = 1
+              AND (@Term = '' OR NAME LIKE @Term + '%')
+            ORDER BY NAME ASC";
+
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode),
+                new SqlParameter("@Term", term ?? "")
+            });
+        }
+
     }
 }
 
