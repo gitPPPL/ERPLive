@@ -158,8 +158,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                             }
                         }
                     }
-
-                    // --------- Second Call: Fetch Details (PREQUEST2)
+         
                     using (SqlCommand cmd2 = new SqlCommand("sp_FlexQCEntryExcru", con))
                     {
                         cmd2.CommandType = CommandType.StoredProcedure;
@@ -192,16 +191,16 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                     ASH_CONTENT = rdr["ASH_CONTENT"] != DBNull.Value ? Convert.ToDecimal(rdr["ASH_CONTENT"]) : 0,
                                     MOIS_CONTENT = rdr["MOIS_CONTENT"] != DBNull.Value ? Convert.ToDecimal(rdr["MOIS_CONTENT"]) : 0,
                                     PP = rdr["PP"] != DBNull.Value ? Convert.ToDecimal(rdr["PP"]) : 0,
-                                    HD = rdr["PP"] != DBNull.Value ? Convert.ToInt32(rdr["PP"]) : 0,
-                                    LD = rdr["LD"] != DBNull.Value ? Convert.ToInt32(rdr["LD"]) : 0,
-                                    COLOR_MIX = rdr["COLOR_MIX"] != DBNull.Value ? Convert.ToInt32(rdr["COLOR_MIX"]) : 0,
-                                    BOTTOM = rdr["BOTTOM"] != DBNull.Value ? Convert.ToInt32(rdr["BOTTOM"]) : 0,
+                                    HD = rdr["PP"] != DBNull.Value ? Convert.ToDecimal(rdr["PP"]) : 0,
+                                    LD = rdr["LD"] != DBNull.Value ? Convert.ToDecimal(rdr["LD"]) : 0,
+                                    COLOR_MIX = rdr["COLOR_MIX"] != DBNull.Value ? Convert.ToDecimal(rdr["COLOR_MIX"]) : 0,
+                                    BOTTOM = rdr["BOTTOM"] != DBNull.Value ? Convert.ToDecimal(rdr["BOTTOM"]) : 0,
                                     STATUS_CODE = rdr["STATUS_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["STATUS_CODE"]) : 0,
                                     STATUSS = rdr["STATUSS"]?.ToString(),
                                     REMARKS = rdr["REMARKS"]?.ToString(),
                                     REfType = rdr["REF_TYPE"]?.ToString(),
-                                    FOAM = rdr["FOAM"] != DBNull.Value ? Convert.ToInt32(rdr["FOAM"]) : 0,
-                                    RUBBER = rdr["RUBBER"] != DBNull.Value ? Convert.ToInt32(rdr["RUBBER"]) : 0,
+                                    FOAM = rdr["FOAM"] != DBNull.Value ? Convert.ToDecimal(rdr["FOAM"]) : 0,
+                                    RUBBER = rdr["RUBBER"] != DBNull.Value ? Convert.ToDecimal(rdr["RUBBER"]) : 0,
                                     Refcode = rdr["REF_NO"] != DBNull.Value ? Convert.ToInt32(rdr["REF_NO"]) : 0
                                 });
                             }

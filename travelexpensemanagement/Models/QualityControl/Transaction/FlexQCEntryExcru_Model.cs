@@ -55,7 +55,7 @@ namespace travelexpensemanagement.Models.QualityControl.Transaction
         public decimal? PP { get; set; }
         public string? REfType { get; set; }       
         public int? Refcode { get; set; }
-        public int? HD { get; set; }       
+        public decimal? HD { get; set; }       
          public int? STATUS_CODE { get; set; } 
         public string? STATUSS { get; set; }   
         public string? Ref_Type { get; set; }

@@ -103,7 +103,7 @@ function populateTableRowsFromData(details = []) {
 
         const cells = [
             `<td style="display:none;">${data.code}</td>`,
-            `<td><input type="text" class="form-control ITEM_CODE" value="${data.iteM_CODE}" readonly /></td>`,
+            `<td><input type="text" class="form-control ITEM_CODE" value="${data.iteM_CODE}" readonly style="width:300px; background-color:#dbeafe;" /></td>`,
             `<td><select class="form-control item-name-select" style="width:300px; background-color:#dbeafe; disabled">  <option value="">--Select--</option> ${itemNameOptions}  </select></td>`,
             `<td><input type="text" class="form-control ddlItem" value="${data.dept}" readonly style="width: 200px; background-color:#dbeafe;" /></td>`,
             `<td><input type="text" class="form-control BatchNo" value="${data.batchNo}" readonly style= "background-color:#dbeafe;" /></td>`,
@@ -111,25 +111,25 @@ function populateTableRowsFromData(details = []) {
             `<td><input type="text" class="form-control JUMBO_NO" value="${data.jumbO_NO}" readonly style="width: 60px;background-color:#dbeafe;" /></td>`,
             `<td><input type="number" class="form-control wbWt" value="${data.wbWt}" readonly style="width: 60px;background-color:#dbeafe;" /></td>`,
             `<td><input type="number" class="form-control grWt" value="${data.grWt}" readonly style="width: 60px;background-color:#dbeafe;" /></td>`,
-            `<td><input type="number" class="form-control trWt" value="${data.trWt}" readonly style="width: 60px;background-color:#dbeafe;" /></td>`,
+            `<td style="display:none;"><input type="number" class="form-control trWt" value="${data.trWt}" readonly style="width: 60px;background-color:#dbeafe;" /></td>`,
             `<td><input type="number" class="form-control NET_WT" value="${data.netWt}" readonly  style="width: 60px;background-color:#dbeafe;"/></td>`,
             `<td style="text-align:center; width:80px;">  <button type="button"  class="btn btn-sm btn-primary btn-row-action">  Copy  </button>  </td>`,
-            `<td><input type="number" class="form-control MFI" value="${data.MFI}" style="width: 60px;background-color:#d4edda;" /></td>`,
-            `<td><input type="number" class="form-control ASHContent" value="${data.asH_CONTENT}"  style="width: 60px;background-color:#d4edda;"/></td>`,
-            `<td><input type="number" class="form-control pp" value="${data.pp}"  style="width: 60px;background-color:#d4edda;"/></td>`,
-            `<td><input type="number" class="form-control HD" value="${data.HD}"  style="width: 60px;background-color:#d4edda;"/></td>`,
-            `<td><input type="number" class="form-control LD" value="${data.LD}"  style="width: 60px;background-color:#d4edda;"/></td>`,
-            `<td><input type="number" class="form-control COLOR_NAME" value="${data.colorMix}" style="background-color:#d4edda;"  /></td>`,
-            `<td><input type="number" class="form-control wrapper" value="${data.wrapper}" style="background-color:#d4edda;"  /></td>`,
-            `<td><input type="number" class="form-control FOAM" value="${data.foam}" style="background-color:#d4edda;"  /></td>`,
-            `<td><input type="number" class="form-control RUBBER" value="${data.rubber}" style="background-color:#d4edda;"  /></td>`,
-            `<td><input type="number" class="form-control MoisContent" value="${data.MoisContent}" style="background-color:#d4edda;"  /></td>`,
-            `<td><input type="number" class="form-control Bottom" value="${data.Bottom}" style="background-color:#d4edda;"  /></td>`,
-            `<td><select class="form-control status" style="width:300px; background-color:#dbeafe; disabled">  <option value="">--Select--</option> ${DDLGridStatuslist}  </select></td>`,                       
-            `<td><input type="text" class="form-control Remarks" value="${data.remarks}" style="background-color:#d4edda;" /></td>`,
-            `<td><input type="text" class="form-control Pord_Type" value="${data.refType}" readonly  style="background-color:#dbeafe;"/></td>`,
+            `<td><input type="text" class="form-control MFI" value="${data.MFI}"      maxlength="14" inputmode="decimal" style="width: 60px;background-color:#d4edda;" /></td>`,
+            `<td><input type="text" class="form-control ASHContent" value="${data.asH_CONTENT}"  maxlength="14" inputmode="decimal"  style="width: 60px;background-color:#d4edda;"/></td>`,
+            `<td><input type="text" class="form-control pp" value="${data.pp}"   maxlength="14" inputmode="decimal" style="width: 60px;background-color:#d4edda;"/></td>`,
+            `<td><input type="text" class="form-control HD" value="${data.HD}"  maxlength="14" inputmode="decimal"  style="width: 60px;background-color:#d4edda;"/></td>`,
+            `<td><input type="text" class="form-control LD" value="${data.LD}"  maxlength="14" inputmode="decimal" style="width: 60px;background-color:#d4edda;"/></td>`,
+            `<td><input type="text" class="form-control COLOR_NAME" value="${data.colorMix}"  maxlength="14" inputmode="decimal" style="background-color:#d4edda;"  /></td>`,
+            `<td style="display:none;"><input type="number" class="form-control wrapper" value="${data.wrapper}" style="background-color:#d4edda;"  /></td>`,
+            `<td style="display:none;"><input type="number" class="form-control FOAM" value="${data.foam}" style="background-color:#d4edda;"  /></td>`,
+            `<td style="display:none;"><input type="number" class="form-control RUBBER" value="${data.rubber}" style="background-color:#d4edda;"  /></td>`,
+            `<td><input type="text" class="form-control MoisContent" value="${data.MoisContent}"  maxlength="14" inputmode="decimal" style="background-color:#d4edda;"  /></td>`,
+            `<td><input type="text" class="form-control Bottom" value="${data.Bottom}"  maxlength="14" inputmode="decimal" style="background-color:#d4edda;"  /></td>`,
+            `<td><select class="form-control status" style="width:300px; background-color:#d4edda; disabled">  <option value="">--Select--</option> ${DDLGridStatuslist}  </select></td>`,
+            `<td><input type="text" class="form-control Remarks" value="${data.remarks}" maxlength="100"  style="background-color:#d4edda;" /></td>`,
+            `<td stylwe><input type="text" class="form-control Pord_Type" value="${data.refType}" readonly  style="background-color:#dbeafe;"/></td>`,
             `<td><input type="number" class="form-control REF_NO" value="${data.refNo}" readonly style="background-color:#dbeafe;" /></td>`,
-            `<td> <input type="text" class="form-control DEPT_CODE"  value="${data.depT_CODE}"  readonly style="background-color:#dbeafe;" />  </td>`
+            `<td style="display:none;"> <input type="text" class="form-control DEPT_CODE"  value="${data.depT_CODE}"  readonly style="background-color:#dbeafe;" />  </td>`
         ];
 
         const row = `<tr class="no-border-input">${cells.join('')}</tr>`;
@@ -150,10 +150,6 @@ function populateTableRowsFromData(details = []) {
 
 }
 function mapDetailToRowData(detail) {
-
-    console.log("mapDetailToRowData", detail);
-
-
 
     return {
         code: detail.refcode ?? '',
@@ -187,14 +183,12 @@ function mapDetailToRowData(detail) {
     };
 }
 function setFormReadOnly() {
-
     const form = $('#FlakesQCEntryForm'); form.find(':input').prop('disabled', true);
     form.find('textarea').css('background-color', '#f0f0f0');
     form.find('table tbody tr').css('background-color', '#f9f9f9');
     $('#tblFlakesQCEntry tbody tr').each(function () {
         $(this).find(':input').prop('disabled', true);
         $(this).css('background-color', '#f9f9f9');
-
         form.find('select').prop('disabled', true);
         $('#tblFlakesQCEntry tbody').find('select').prop('disabled', true);
     });

@@ -36,7 +36,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         }
         public IActionResult Index()
         {
-
             var globalVariables = _globalVariableService.GetGlobalVariables();
             string databaseName;
             using (var connection = _dbConnection.GetErpConnection())

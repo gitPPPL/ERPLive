@@ -97,7 +97,7 @@
             <div class="erppage-grid4">
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Remarks</label>
-                    <textarea typeof="text" class="erppage-textarea" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                    <textarea typeof="text" class="erppage-textarea" id="TxtRemarks" maxlength="100" placeholder="Enter Remarks"></textarea>
                 </div>
                 <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;justify-content: flex-start;">
                     <div class="erppage-internalaction" style="margin: 0;">
@@ -108,9 +108,8 @@
                     </div>
                 </div>
             </div>
-            <fieldset class="erppage-subfieldset">
-                <legend>Print Details</legend>
-                <div class="erppage-subheader">Print Details</div>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Print Details</legend>
                 <div class="erppage-grid4">
                     <div class="erppage-divfield">
                         <label class="erppage-label">From Date</label>
@@ -133,7 +132,7 @@
                 </div>
                 <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px;">
                     <div class="erppage-internalaction" style="margin: 0;">
-                        <button type="button" id="btn_summary" class="erppage-btn erppage-btn-print">
+                        <button type="button" id="btn_summary" class="erppage-btn erppage-btn-common-active-disabled">
                             <i class="fa fa-print"></i>
                             <span>Summary</span>
                         </button>
@@ -146,33 +145,36 @@
             </fieldset>
             <div class="erppagelist-container">
                 <div class="excel-wrapper fixed-grid-wrapper">
-                    <table id="tblFlakesQCEntry" class="excel-table fixed-grid-table">
+                    <table id="tblFlakesQCEntry" class="excel-table fixed-grid-table table-width resizable-table">
                         <colgroup>
                             <col style="display:none;">      <!-- Code -->
-                            <col style="width:100px;">        <!-- Item Code -->
-                            <col style="width:300px;">        <!-- Item Name -->
-                            <col style="width:180px;">        <!-- Department -->
-                            <col style="width:120px;">        <!-- Batch No -->
-                            <col style="width:120px;">        <!-- Bag No -->
-                            <col style="width:100px;">        <!-- WB Wt -->
-                            <col style="width:100px;">        <!-- WB Wt -->
-                            <col style="width:100px;">        <!-- Gr Wt -->
-                            <col style="width:100px;">        <!-- Tr Wt -->
-                            <col style="width:100px;">        <!-- Net Wt -->
-                            <col style="width:80px;">         <!-- Copy -->
-                            <col style="width:100px;">        <!-- MFI -->
-                            <col style="width:120px;">        <!-- Ash -->
-                            <col style="width:80px;">         <!-- PP -->
-                            <col style="width:80px;">         <!-- HD -->
-                            <col style="width:80px;">         <!-- LD -->
-                            <col style="width:120px;">        <!-- Color Mix -->
-                            <col style="width:120px;">        <!-- Moisture -->
-                            <col style="width:100px;">        <!-- Bottom -->
-                            <col style="width:100px;">        <!-- Status -->
-                            <col style="width:220px;">        <!-- Remarks -->
-                            <col style="width:120px;">        <!-- Ref Type -->
-                            <col style="width:120px;">        <!-- Ref No -->
-                            <col style="width:120px;">        <!-- Dept Code -->
+                            <col style="width:100px;">       <!-- Item Code -->
+                            <col style="width:300px;">       <!-- Item Name -->
+                            <col style="width:180px;">       <!-- Department -->
+                            <col style="width:120px;">       <!-- Batch No -->
+                            <col style="width:120px;">       <!-- Bag No -->
+                            <col style="width:120px;">       <!-- Jumbo No -->
+                            <col style="width:100px;">       <!-- WB Wt -->
+                            <col style="width:100px;">       <!-- Gr Wt -->
+                            <col style="display:none;">       <!-- Tr Wt -->
+                            <col style="width:100px;">       <!-- Net Wt -->
+                            <col style="width:80px;">        <!-- Copy -->
+                            <col style="width:100px;">       <!-- MFI -->
+                            <col style="width:120px;">       <!-- Ash -->
+                            <col style="width:80px;">        <!-- PP -->
+                            <col style="width:80px;">        <!-- HD -->
+                            <col style="width:80px;">        <!-- LD -->
+                            <col style="width:120px;">       <!-- Color Mix -->
+                            <col style="display:none;">       <!-- Wrapper -->
+                            <col style="display:none;">       <!-- Foam -->
+                            <col style="display:none;">       <!-- Rubber -->
+                            <col style="width:120px;">       <!-- Mois.Content -->
+                            <col style="width:100px;">       <!-- Bottom -->
+                            <col style="width:100px;">       <!-- Status -->
+                            <col style="width:220px;">       <!-- Remarks -->
+                            <col style="width:120px;">       <!-- Ref Type -->
+                            <col style="width:120px;">       <!-- Ref No -->
+                            <col style="display:none;">       <!-- Dept Code -->
                         </colgroup>
 
                         <thead class="table-head">
@@ -186,7 +188,7 @@
                             <th>Jumbo No</th>
                             <th>WB Wt.</th>
                             <th>Gr. Wt.</th>
-                            <th>Tr. Wt.</th>
+                            <th style="display:none">Tr. Wt.</th>
                             <th>Net Wt.</th>
                             <th></th>
                             <th>MFI</th>
@@ -195,16 +197,16 @@
                             <th>HD</th>
                             <th>LD</th>
                             <th>Color Mix</th>
-                            <th>Wrapper</th>
-                            <th>Foam</th>
-                            <th>Rubber</th>
+                            <th style="display:none">Wrapper</th>
+                            <th style="display:none">Foam</th>
+                            <th style="display:none">Rubber</th>
                             <th>Mois.Content</th>
                             <th>Bottom</th>
                             <th>Status</th>
                             <th>Remarks</th>
                             <th>Ref Type</th>
                             <th>Ref No</th>
-                            <th>Dept Code</th>
+                            <th style="display:none">Dept Code</th>
                         </tr>
                         </thead>
 
@@ -223,7 +225,7 @@
         </div>
         @* Modal Popup *@
         <div class="modal fade" id="CopyFromModal" tabindex="-1" aria-labelledby="CopyFromLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg erppagesmodal">
+            <div class="modal-dialog erppagesmodal erppage-modal-drag" >
                 <div class="modal-content erppagesmodal-content">
                     <div class="erppagesmodal-header">
                         <div class="erppagesmodal-header-left">
@@ -235,7 +237,7 @@
                         </button>
                     </div>
                     <div class="erppagesmodal-body">
-                        <div class="erppagesrow erppagesmodal-topbar">
+                        <div class="erppagesrow">
                             <div class="erppagescol-4">
                                 <div class="erppagesmodal-group">
                                     <input type="text" id="searchBoxCF" class="erppagesmodal-input" placeholder="Search Module..." />
@@ -257,7 +259,24 @@
                         </div>
                         <div class="erppagelist-container">
                             <div class="excel-wrapper fixed-grid-wrapper">
-                                <table id="tblCopyFrommodal" class="excel-table fixed-grid-table">
+                                <table id="tblCopyFrommodal" class="excel-table fixed-grid-table table-width resizable-table">
+                                    <colgroup>
+                                        <col style="width:40px;">   <!-- Checkbox -->
+                                        <col style="width: 66px;">   <!-- Bag No -->
+                                        <col style="width: 181px;">  <!-- Item Name -->
+                                        <col style="width:120px;">  <!-- Prod Place -->
+                                        <col style="width:100px;">  <!-- Lot No -->
+                                        <col style="width: 80px;">  <!-- Jumbo No -->
+                                        <col style="width: 62px;">   <!-- WB Qty -->
+                                        <col style="width: 78px;">   <!-- Gross Qty -->
+                                        <col style="width: 68px;">   <!-- Tare Qty -->
+                                        <col style="width: 65px;">   <!-- Qty -->
+                                        <col style="width: 62px;">  <!-- Voucher Type -->
+                                        <col style="width: 84px;">  <!-- Voucher No -->
+                                        <col class="hidden-col"> <!-- Item Code -->
+                                        <col class="hidden-col"> <!-- Dept Code -->
+                                        <col class="hidden-col"> <!-- Dept -->
+                                    </colgroup>
                                     <thead>
                                         <tr>
                                             <th><input type="checkbox" id="selectAllPR" /></th>
@@ -272,9 +291,9 @@
                                             <th> Qty </th>
                                             <th> Voucher Type </th>
                                             <th> Voucher No </th>                                                                                
-                                            <th hidden>Item Code</th>
-                                            <th hidden>Dept code</th>
-                                            <th hidden>Dept</th>
+                                            <th class="hidden-col">Item Code</th>
+                                            <th class="hidden-col">Dept code</th>
+                                            <th class="hidden-col">Dept</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
