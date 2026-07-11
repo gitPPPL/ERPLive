@@ -2,7 +2,7 @@
 async function LoadFormByID(id) {
     try {
         const res = await $.ajax({
-            url: '/FlakesQCEntryList/GetDataByCode',
+            url: '/FlexQCEntryExcruList/GetDataByCode',
             method: 'GET',
             data: { code: id }
         });
@@ -10,7 +10,9 @@ async function LoadFormByID(id) {
         if (res.success) {
             const header = res.data.header;
             const details = res.data.deatils;
+
             console.log('payload', res);
+
             $('#TxtCode').val(header.doC_ID || '');
             $('#NumDocNo').val(header.v_NO || '');
             $('#DtDocDate').val(formatDate(header.v_DATE) || '');
@@ -22,6 +24,7 @@ async function LoadFormByID(id) {
             $('#ddlProdPlace').val(header.placE_CODE || '').trigger('change');
             $('#TxtRemarks').val(header.remarks || '');
 
+            $tbody.empty();
             populateTableRowsFromData(details);
 
         } else {
@@ -33,20 +36,10 @@ async function LoadFormByID(id) {
         toastr.error("Something went wrong while loading the form.");
     }
 }
-function loadItemNameDropdown() {
-    $.ajax({
-        url: '/FlakesQCEntry/DDLGridItem',
-        method: 'GET',
-        success: function (data) {
-            itemNameOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
-        }
-    });
-
-}
 
 async function GetVNo() {
     try {
-        const res = await fetch('/FlakesQCEntry/GetVNo');
+        const res = await fetch('/FlexQCEntryExcru/GetVNo');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
@@ -65,17 +58,39 @@ async function LoadDropDown() {
             DDLChemist(),
             DDLQCIncharge(),
             loadItemNameDropdown(),
-            DDLItem()
+            DDLItem(),
+            DDLGridStatus()
         ]);
 
     } catch (error) {
         console.error("Error loading dropdowns:", error);
     }
 }
+function loadItemNameDropdown() {
+    $.ajax({
+        url: '/FlexQCEntryExcru/DDLGridItem',
+        method: 'GET',
+        success: function (data) {
+            itemNameOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+        }
+    });
+
+}
+function DDLGridStatus() {
+    $.ajax({
+        url: '/FlexQCEntryExcru/DDLGridStatus',
+        method: 'GET',
+        success: function (data) {
+            DDLGridStatuslist = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+        }
+    });
+
+
+}
 
 async function DDlInspBy() {
     try {
-        const response = await fetch('/FlakesQCEntry/DDLInspBy');
+        const response = await fetch('/FlexQCEntryExcru/DDLInspBy');
 
         if (!response.ok)
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -111,7 +126,7 @@ async function DDlInspBy() {
 
 async function DDLPordPlace() {
     try {
-        const response = await fetch('/FlakesQCEntry/DDLPordPlace');
+        const response = await fetch('/FlexQCEntryExcru/DDLPordPlace');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         const ddl = $('#ddlProdPlace');
@@ -127,7 +142,7 @@ async function DDLPordPlace() {
 
 async function DDLChemist() {
     try {
-        const response = await fetch('/FlakesQCEntry/DDLChemist');
+        const response = await fetch('/FlexQCEntryExcru/DDLChemist');
 
         if (!response.ok)
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -163,7 +178,7 @@ async function DDLChemist() {
 
 async function DDLQCIncharge() {
     try {
-        const response = await fetch('/FlakesQCEntry/DDLQCIncharge');
+        const response = await fetch('/FlexQCEntryExcru/DDLQCIncharge');
 
         if (!response.ok)
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -201,24 +216,18 @@ function fetchData(deptCode, shiftType, vDate) {
     const $tbody = $('#tblCopyFrommodal tbody');
     $tbody.empty();
 
-    $.ajax({
-        url: '/FlakesQCEntryList/GetDataCopyForm',
+    $.ajax({ url: '/FlexQCEntryExcruList/GetDataCopyForm',
         type: 'GET',
         dataType: 'json',
-        data: {
-            DeptCode: deptCode,
-            Shifttype: shiftType,
-            v_date: vDate
-        },
+        data: { DeptCode: deptCode, Shifttype: shiftType, v_date: vDate },
 
         beforeSend: function () {
-            // Optional loader
             $('#loader').show();
         },
 
         success: function (response) {
 
-            console.log("response", response);
+            console.log("fetchData response", response);
 
             if (response.success === false) {
                 toastr.info(`No Bags are Pending for QC of Date: ${vDate}, Shift: ${shiftType}`);
@@ -226,11 +235,8 @@ function fetchData(deptCode, shiftType, vDate) {
                 return;
             }
 
-            if (Array.isArray(response.data) && response.data.length > 0) {
-
-                // Build complete HTML first
+            if (Array.isArray(response.data) && response.data.length > 0) {       
                 let rows = '';
-
                 response.data.forEach(item => {
 
                     rows += `
@@ -243,11 +249,13 @@ function fetchData(deptCode, shiftType, vDate) {
                                 <td>${item.itemName ?? ''}</td>
                                 <td>${item.prodPlace ?? ''}</td>
                                 <td>${item.lotNo ?? ''}</td>
+                                   <td>${item.jumbo_No ?? ''}</td>
                                 <td>${item.wbQty ?? ''}</td>
+                             
                                 <td>${item.grossQty ?? ''}</td>
                                 <td>${item.tareQty ?? ''}</td>
                                 <td>${item.qty ?? ''}</td>
-                                <td>${item.vType ?? ''}</td>
+                                <td>${item.v_TYPE ?? ''}</td>
                                 <td>${item.vNo ?? ''}</td>
 
                                 <td hidden>${item.itemCode ?? ''}</td>
@@ -308,7 +316,7 @@ function fetchAndUpdateItemData($row, totalPpm) {
     $select.prop('disabled', true);
 
     $.ajax({
-        url: '/FlakesQCEntryList/GetDataTotalppmChangge',
+        url: '/FlexQCEntryExcruList/GetDataTotalppmChangge',
         method: 'POST',
         data: {
             totalPpm: totalPpm,
@@ -380,14 +388,6 @@ function fetchAndUpdateItemData($row, totalPpm) {
             $select.prop('disabled', false);
         }
     });
-}
-function bindRowValueChange() {
-    $tbody.on('input', '.HD, .DNR, .PC_LOWMELT, .CPRDN, .TIME1_WIDTH, .TIME2_WIDTH, .TIME3_WIDTH, .GLUE_CONTENT, .OTHERS', function () {
-        const $row = $(this).closest('tr');
-        const totalPpm = calculateTotalForRow($row);
-        fetchAndUpdateItemData($row, totalPpm);
-    });
-
 }
 function TransitReport() {
 
@@ -497,7 +497,7 @@ function TransitReport() {
 async function DDLItem(Cheackbox = false)
 {
     try {
-        const response = await fetch(`/FlakesQCEntry/DDLItem?Cheackbox=${Cheackbox}`);
+        const response = await fetch(`/FlexQCEntryExcru/DDLItem?Cheackbox=${Cheackbox}`);
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
@@ -511,9 +511,7 @@ async function DDLItem(Cheackbox = false)
         toastr.error('Error loading Item Name: ' + error.message);
     }
 }
-
 function summaryReport(btnName = "" ) {
-
     if (!rowId) {
         showToast("Please Save The Data Before Printing The Report.", { type: "info" });
         return;
@@ -521,10 +519,12 @@ function summaryReport(btnName = "" ) {
 
     let reportName = "";
 
-    if (btnName == "Summary") {
+    if (btnName == "Summary")
+    {
         reportName = "Flakes_QC2";
     }
-    else {
+    else
+    {
         reportName = "QC_Flakes";
     }
 
@@ -534,23 +534,20 @@ function summaryReport(btnName = "" ) {
     let FromDate = $('#DtFrom').val(); 
     let ToDate = $('#DtTo').val();
 
-    if (!FromDate || !ToDate) {
+    if (!FromDate || !ToDate)
+    {
         showToast("Please select From Date and To Date.", { type: "info" });
         return;
     }
 
-
-    // Dates for Crystal Report Formula
     const f = FromDate.split('-');
     const t = ToDate.split('-');
 
     const crystalFromDate = `DATE(${f[0]},${f[1]},${f[2]})`;
     const crystalToDate = `DATE(${t[0]},${t[1]},${t[2]})`;
 
-    // Dates for Report Header
     const displayFromDate = `${f[2]}/${f[1]}/${f[0]}`;
     const displayToDate = `${t[2]}/${t[1]}/${t[0]}`;
-
   
     const RPTNAME = "Flakes QC Report";
 

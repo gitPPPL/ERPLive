@@ -1,0 +1,400 @@
+﻿@{
+	ViewBag.Title = "Flakes QC Entry Exclusion List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-center-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Flakes QC Entry Exclusion List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		<button class="erppage-header-back" id="button_add" onclick="location.href='@Url.Action("Index", "FlexQCEntryExcru")'">
+			<i class="fa fa-plus"></i>Add New
+		</button>
+	</div>
+</div>
+
+
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+	</div>
+	<div class="erppagelist-actions">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" " data-tooltip="Print Report" id="button_print">
+			<i class="fa fa-print"></i>Print
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="button_export">
+			<i class="fa fa-file-excel"></i>Export
+		</button>			
+
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblFlakesQCList" class="excel-table fixed-grid-table">
+			<colgroup>
+				<col style="display:none;" /> 
+				<col style="width:140px;" />  
+				<col style="width:140px;" />    
+				<col style="width:150px;" />   
+				<col style="width:150px;" />   
+				<col style="width:150px;" />   
+				<col style="width:100px;" />   
+				<col style="width:200px;" />  
+				<col style="width:120px;" />    
+			</colgroup>
+			<thead>
+				<tr>
+					<th style="display:none;">Code</th>
+					<th>Voucher No</th>
+					<th>Voucher Type</th>
+					<th>Voucher Date</th>
+					<th>Employee</th>
+					<th>Place</th>
+					<th>Shift</th>
+					<th>Remarks</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+
+	</div>
+
+	<div class="erppagelist-pagination">
+
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+
+		<div class="pagination-center">
+			<button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+			<button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+		</div>
+
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
+
+	</div>
+</div>
+
+<script>
+
+	let currentPage = 1;
+	let pageSize = 10;
+	let totalCount = 0;
+	var controllerName = window.location.pathname.split('/')[1];
+
+	$(document).ready(function () {
+
+		// checkPermission(controllerName, function () {
+			loadAllMenus();
+		//});
+
+		// Search
+		$('#searchBox').on('keyup', function () {
+			currentPage = 1;
+			loadAllMenus();
+		});
+		// Page Size
+		$('#pageSizeSelect').on('change', function () {
+			pageSize = parseInt($(this).val());
+			currentPage = 1;
+			loadAllMenus();
+		});
+
+		$('#button_export').on('click', function () {
+			let text = $('#searchBox').val();
+			window.location.href = '/FlexQCEntryExcruList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+			window.open(url, '_blank', 'noopener,noreferrer');
+		});
+
+		$('#button_print').on('click', function () {
+			let text = $('#searchBox').val();
+			const url = '/FlexQCEntryExcruList/ExportToPdf?searchTerm=' + encodeURIComponent(text);
+			window.open(url, '_blank', 'noopener,noreferrer');
+		});
+
+	});
+
+	// ================= LOAD DATA =================
+	function loadAllMenus() {
+		const searchTerm = $('#searchBox').val();
+		$.ajax({
+			url: '/FlexQCEntryExcruList/GetList',
+			type: 'GET',
+			dataType: 'json',
+			data: {
+				searchTerm: searchTerm,
+				pageNumber: currentPage,
+				pageSize: pageSize
+			},
+			success: function (res) {
+				if (!res.success) {
+					toastr.error("Failed to load data.");
+					return;
+				}
+                console.log("Li9st data",res);
+				const list = res.lists || [];
+				totalCount = res.totalCount || 0;
+				let tbody = $('#tblFlakesQCList tbody');
+				tbody.empty();
+				if (list.length === 0) {
+					tbody.append(`<tr> <td colspan="9" class="text-center text-muted"> No list found. </td> </tr>`);
+					renderPagination();
+					return;
+				}
+
+				// Render Rows
+				$.each(list, function (index, item) {
+					tbody.append(`
+						<tr>
+
+							<td style="display:none;"> ${item.header.v_NO ?? ''} </td>
+							<td> ${item.header.v_NO ?? ''} </td>
+							<td> ${item.header.v_TYPE ?? ''} </td>
+							<td> ${formatDate(item.header.v_DATE)} </td>
+							<td> ${item.header.enmpName ?? ''} </td>
+							<td> ${item.header.place ?? ''} </td>
+							<td> ${item.header.shift ?? ''} </td>
+							<td> ${item.header.remarks ?? ''} </td>
+
+							<td class="action-col">
+								<button class="act-btn edit permission-edit" title="Edit" onclick="AddOrEditFunction('${item.header.v_NO}')"><i class="fa fa-edit"></i></button>
+								<button class="act-btn view btn-view" title="View Detail" onclick="viewMenuDetails('${item.header.v_NO}')"><i class="fa fa-eye"></i></button>
+								<button class="act-btn delete permission-delete"  title="Delete" onclick="deleteTemp('${item.header.v_NO}')"><i class="fa fa-trash"></i></button>
+								<button class="act-btn document btn-document"  title="Show Document" onclick="showDocumentPopup('${item.header.doC_ID}')"><i class="fa fa-file"></i></button>
+							</td>
+						</tr>
+					`);
+	               // applyGridPermission();
+				});
+				renderPagination();
+			},
+			error: function (xhr) {
+				toastr.error('Error loading menu list: ' + xhr.responseText);
+
+			}
+		});
+	}
+
+	// ================= FORMAT DATE =================
+	function formatDate(dateStr) {
+		if (!dateStr || dateStr === "0001-01-01T00:00:00") {
+			return '';
+		}
+		const date = new Date(dateStr);
+		if (isNaN(date.getTime())) {
+			return '';
+		}
+
+		const day = String(date.getDate()).padStart(2, '0');
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const year = date.getFullYear();
+
+		return `${day}-${month}-${year}`;
+
+	}
+	// ================= PAGINATION =================
+	function renderPagination() {
+		const totalPages = Math.ceil(totalCount / pageSize) || 1;
+		let html = '';
+		let maxVisible = 5;
+		let start = Math.max(
+			1,
+			currentPage - Math.floor(maxVisible / 2)
+		);
+		let end = start + maxVisible - 1;
+		if (end > totalPages) {
+			end = totalPages;
+			start = Math.max(
+				1,
+				end - maxVisible + 1
+			);
+		}
+
+		// First Page
+		if (start > 1) {
+
+			html += `
+				<span class="page-number"
+					  onclick="goToPage(1)">
+					1
+				</span>
+			`;
+
+			if (start > 2) {
+
+				html += `
+					<span class="dots">...</span>
+				`;
+
+			}
+
+		}
+
+		// Middle Pages
+		for (let i = start; i <= end; i++) {
+
+			html += `
+				<span class="page-number ${i === currentPage ? 'active' : ''}"
+					  onclick="goToPage(${i})">
+
+					${i}
+
+				</span>
+			`;
+
+		}
+
+		// Last Page
+		if (end < totalPages) {
+
+			if (end < totalPages - 1) {
+
+				html += `
+					<span class="dots">...</span>
+				`;
+
+			}
+
+			html += `
+				<span class="page-number"
+					  onclick="goToPage(${totalPages})">
+
+					${totalPages}
+
+				</span>
+			`;
+
+		}
+
+		$('#pageNumbers').html(html);
+
+		let startRecord = (currentPage - 1) * pageSize + 1;
+		let endRecord = Math.min(currentPage * pageSize, totalCount);
+
+		if (totalCount === 0) {
+
+			startRecord = 0;
+			endRecord = 0;
+
+		}
+
+		$('#pageInfoText').text(
+			`Results: ${startRecord} - ${endRecord} of ${totalCount}`
+		);
+
+		$('#prevBtn').prop(
+			'disabled',
+			currentPage === 1
+		);
+
+		$('#nextBtn').prop(
+			'disabled',
+			currentPage === totalPages
+		);
+
+	}
+
+	// ================= PAGE NAVIGATION =================
+	function goToPage(page) {
+		currentPage = page;
+		loadAllMenus();
+	}
+
+	function prevPage() {
+		if (currentPage > 1) {
+			currentPage--;
+			loadAllMenus();
+		}
+	}
+
+	function nextPage() {
+		const totalPages = Math.ceil(totalCount / pageSize);
+		if (currentPage < totalPages) {
+			currentPage++;
+			loadAllMenus();
+		}
+	}
+	// ================= EDIT =================
+	function AddOrEditFunction(code) {
+		window.location.href = '/FlexQCEntryExcru/Index?id=' + encodeURIComponent(code);
+	}
+
+	// ================= VIEW =================
+	function viewMenuDetails(code) {
+		window.location.href = '/FlexQCEntryExcru/Index?id=' + encodeURIComponent(code) + '&mode=view';
+	}
+
+	function deleteTemp(code) {
+
+		Swal.fire({
+			title: "Are you sure?",
+			text: "You want to delete this Inward Entry?",
+			icon: "warning",
+			showCancelButton: true,
+			confirmButtonColor: "#d33",
+			cancelButtonColor: "#3085d6",
+			confirmButtonText: "Yes, delete it!"
+		}).then((result) => {
+
+			if (result.isConfirmed) {
+
+				$.ajax({
+					url: '/FlexQCEntryExcruList/Delete',
+					type: 'DELETE',
+					data: { code: code },
+
+					success: function (res) {
+
+						if (res.success) {
+							toastr.success(res.message || "Deleted successfully");
+							loadAllMenus();
+						}
+						else {
+							toastr.error(res.message || 'Failed to delete.');
+						}
+					},
+
+					error: function () {
+						toastr.error('Error deleting record.');
+					}
+				});
+			}
+		});
+	}
+
+    function showDocumentPopup(docCode) {
+		$.ajax({
+			url: '/FlexQCEntryExcruList/DocDetailsCode',
+			type: 'GET',
+			dataType: 'json',
+			data: { docCode: docCode },
+			success: function (response) {
+				console.log(response);
+				if (response.success) {
+					showDocumentPopupjQuery(response.data, docCode);
+				} else {
+					toastr.error(response.message || "Failed to get document details.");
+				}
+			},
+			error: function (xhr, status, error) {
+				console.log(xhr.responseText);
+				toastr.error("Error fetching document details.");
+			}
+		});
+	}
+
+</script>

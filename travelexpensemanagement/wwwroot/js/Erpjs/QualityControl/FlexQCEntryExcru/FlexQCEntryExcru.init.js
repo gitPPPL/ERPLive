@@ -5,6 +5,7 @@ const rowId = urlParams.get('id');
 const mode = urlParams.get('mode');
 const isReadOnly = urlParams.get('readOnly') === 'true';
 let itemNameOptions = '';
+let DDLGridStatuslist = '';
 
 var globalVars = window.globalVariables || {};
 let LoginDate = globalVars.LoginDate;
@@ -48,13 +49,15 @@ $(document).ready(function () {
 
     $('#CopyData').on('click', function () {
         const selectedRows = getSelectedRowsData();
+        populateTableRowsFromData(selectedRows);
+
         if (selectedRows.length > 0) {
             var modalEl = document.getElementById('CopyFromModal');
             var modalInstance = bootstrap.Modal.getInstance(modalEl);
             if (modalInstance) {
                 modalInstance.hide();
             }
-            addSelectedRowsToTable(selectedRows);
+  
             document.getElementById("DtDocDate").disabled = true;
             document.getElementById("ddlShift").disabled = true;
             document.getElementById("ddlProdPlace").disabled = true;
@@ -137,37 +140,20 @@ $(document).ready(function () {
             return;
         }
 
-        let hasValidationError = false;
-
-        $("#tblFlakesQCEntry tbody tr").each(function (index, row) {
-            const itemCode = $(row).find(".ITEM_CODE").val().trim();
-
-            if (itemCode !== "") {
-                const total = $(row).find(".TIME4_WIDTH").val().trim();
-
-
-                if (!total) {
-                    toastr.warning(`Row ${index + 1}:  Total   Fields.`);
-                    $(row).find(".TIME4_WIDTH").focus();
-                    hasValidationError = true;
-                    return false;
-                }
-            }
-        });
-
-        if (hasValidationError) return;
-
         $("#btn-saves").prop("disabled", true);
 
         $.ajax({
-            url: '/FlakesQCEntry/SavedData',
+            url: '/FlexQCEntryExcru/SavedData',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: function (response) {
                 if (response.success) {
                     toastr.success("Saved successfully!");
-                    setTimeout(() => window.location.href = '/FlakesQCEntryList/Index', 1000);
+
+                    setTimeout(function () { window.location.href = '/FlexQCEntryExcru/Index?id=' + V_NO  + '&mode=view'; }, 3000);     
+
+                  //  setTimeout(() => window.location.href = '/FlexQCEntryExcruList/Index', 1000);
                 } else {
                     toastr.error(response.message || "Save failed.");
                 }
@@ -189,8 +175,6 @@ $(document).ready(function () {
         });
     });
 
-    bindRowValueChange();
-
     $('#chkFullName').on('change', function () {
         var check = $(this).is(':checked');
         if (check == true) {
@@ -208,6 +192,29 @@ $(document).ready(function () {
 
     $('#btn_detail').on('click', function () {
         summaryReport();
+    });
+
+    $(document).on('click', '.btn-row-action', function () {
+
+        const $currentRow = $(this).closest('tr');
+        const $previousRow = $currentRow.prev('tr');
+
+        if ($previousRow.length === 0)
+        {
+            console("No previous row found.");
+            return;
+        }
+
+        const previousStatus = $previousRow.find('.status').val();
+        const previousRemarks = $previousRow.find('.Remarks').val();
+        const currentStatus = $currentRow.find('.status').val();
+        const currentRemarks = $currentRow.find('.Remarks').val();
+
+        if ( (!currentStatus || currentStatus.trim() === '') && (!currentRemarks || currentRemarks.trim() === ''))
+        {
+            $currentRow.find('.status').val(previousStatus);
+            $currentRow.find('.Remarks').val(previousRemarks);
+        }
     });
 
 });
