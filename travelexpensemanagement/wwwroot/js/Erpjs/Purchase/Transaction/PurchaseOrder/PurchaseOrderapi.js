@@ -2,14 +2,12 @@
 async function handleDocLoad() {
     const docId = getQueryParam('id');
     const readOnly = getQueryParam('readOnly');
-    console.log("LoginDate", LoginDate);
+
     SetFYDate('dtDocDate', LoginDate);
+
     if (docId) {
-
         await GetDocData(docId, readOnly);
-
         $('#SaudaDetail').show();
-
         $('#ddlDocType').prop('disabled', true);
         $('#ddlStatus').prop('disabled', false);
         var VTpeU = docId.substring(0, 4);
@@ -280,6 +278,7 @@ async function collectFormData() {
     };
 }
 
+
 async function GetDocData(MasterTblId, readOnly) {
     try {
         const response = await $.ajax({
@@ -308,7 +307,8 @@ async function GetDocData(MasterTblId, readOnly) {
         Calculation = false;
         SelectShipParty = false;
 
-            fillFormFields(response.header),
+        fillFormFields(response.header),
+
             fillItemDetailsTable(response.detail)
 
 
@@ -467,6 +467,8 @@ async function fillFormFields(data) {
 
 async function fillItemDetailsTable(data) {
 
+    console.log("Table Data", data);
+
     const $tbody = $('#tblItemRecordPO tbody');
     $tbody.empty();
 
@@ -475,33 +477,24 @@ async function fillItemDetailsTable(data) {
 
     for (let index = 0; index < data.length; index++) {
 
+        // Create Row
+        addItemRecordRow();
+
         const item = data[index];
         const idx = index + 1;
 
-        addItemRecordRow();
-
-        await bindDropdownData(idx);
-
-        // Small delay if dropdowns are loaded through AJAX
-        await new Promise(resolve => setTimeout(resolve, 100));
-
         // Dropdowns
-        $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE).trigger('change');
         $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
         $(`#ddlImake${idx}`).val(item.MAKE_CODE).trigger('change');
+        $(`#ddlUnit${idx}`).val(item.UOM_CODE).trigger('change');
+        $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE).trigger('change');
         $(`#ddlDepartment${idx}`).val(item.DEPT_CODE).trigger('change');
-        $(`#ddlTax${idx}`).val(item.TAX_CODE);
+        $(`#ddlTax${idx}`).val(item.TAX_CODE).trigger('change');
 
-
-        $(`#TxtLdRate${idx}`).val(item.LAND_RATE ?? '');
-
-
-        // Textboxes
+        // Inputs
         $(`#TxtCode${idx}`).val(item.ITEM_CODE);
         $(`#TxtNos${idx}`).val(item.NOS);
         $(`#TxtQty${idx}`).val(item.QTY);
-        $(`#ddlUnit${idx}`).val(item.UOM_CODE);
-
         $(`#TxtRate${idx}`).val(item.RATE);
         $(`#TxtExrate${idx}`).val(item.IMPORT_RATE);
         $(`#TxtCalcRate${idx}`).val(item.CALC_RATE);
@@ -538,9 +531,10 @@ async function fillItemDetailsTable(data) {
         $(`#TxtOthAmt2${idx}`).val(item.TOTAL_AMT2);
 
         $(`#TxtNetAmt${idx}`).val(item.NET_AMT);
-    
+        $(`#TxtLdRate${idx}`).val(item.LAND_RATE);
 
         $(`#TxtRemarks${idx}`).val(item.REMARKS);
+
         $(`#TxtAppLevel${idx}`).val(item.PREORITY_LEVEL);
         $(`#TxtAppRemarks${idx}`).val(item.PREORITY_REMARKS);
 
@@ -548,8 +542,6 @@ async function fillItemDetailsTable(data) {
         $(`#TxtQtrRate${idx}`).val(item.RATE_QUARTERLY);
         $(`#TxtAnlRate${idx}`).val(item.RATE_ANNUALY);
         $(`#TxtSpclRate${idx}`).val(item.RATE_SPECIAL);
-
-        console.log(`Row ${idx} loaded successfully`);
     }
 }
 function addItemRecordRow() {
@@ -557,33 +549,36 @@ function addItemRecordRow() {
     let rowCount = tbody.find('tr').length + 1;
 
     let newRow = `
-        <tr class="no-border-input" id="row${rowCount}">
-            <td class="d-None"><input class="form-control" id="TxtCode${rowCount}" /></td>
-            <td>
-                <select style="min-width: 500px;" class="form-control" id="ddlItemname${rowCount}">
-                    <option value="">-select item Name-</option>
-                </select>
-            </td>
+        <tr class="no-border-input" id="row${rowCount}"> <td class="d-None"><input class="form-control" id="TxtCode${rowCount}" /></td>         
+        <td>
+
+        <select style="min-width:500px;" class="form-control" id="ddlItemname${rowCount}">
+         <option value="">-Select Item Name-</option> ${itemNameOptions}
+        </select>
+
+        </td>
             <td>
                 <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlImake${rowCount}">
-                    <option value="">-select Make-</option>
+                    <option value="">-select Make-</option> ${MakeNameOptions}
                 </select>
             </td>
             <td>
-                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlUnit${rowCount}" disabled>
-                    <option value="">-select Unit-</option>
+                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlUnit${rowCount}" >
+                    <option value="">-select Unit-</option> ${UnitOptions}
                 </select>
             </td>
             <td>
                 <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlIplaceofUse${rowCount}">
-                    <option value="">-select Place of Use-</option>
+                    <option value="">-select Place of Use-</option>${PlaceOptions}
                 </select>
             </td>
+
             <td>
                 <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="ddlDepartment${rowCount}">
-                    <option value="">-select department-</option>
+                    <option value="">-select department-</option>${DepartmentOptions}
                 </select>
             </td>
+
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtNos${rowCount}"     maxlength="15"  /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtQty${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtRate${rowCount}" /></td>
@@ -593,11 +588,13 @@ function addItemRecordRow() {
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtPack${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtDiscPercent${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtDisc${rowCount}" /></td>
+
             <td>
                 <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="ddlTax${rowCount}">
-                    <option value="">-select Tax Type-</option>
+                    <option value="">-select Tax Type-</option>${TaxTypeOptions}
                 </select>
             </td>
+
              <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtCgstPercent${rowCount}" readonly/></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtCgst${rowCount}" readonly /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtSgstPercent${rowCount}" readonly/></td>
@@ -608,11 +605,11 @@ function addItemRecordRow() {
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtVat${rowCount}" readonly /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  oninput="allowOnlyNumbers(this)" id="TxtCessPercent${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtCess${rowCount}"  /></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsPer${rowCount}" readonly/></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsAmt${rowCount}" readonly/></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer${rowCount}" readonly/></td>
+            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsPer${rowCount}" readonly/></td>
+            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsAmt${rowCount}" readonly/></td>
+            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer${rowCount}" readonly/></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthAmt${rowCount}" readonly/></td>
-            <td  class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer2${rowCount}" readonly/></td>
+            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer2${rowCount}" readonly/></td>
             <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthAmt2${rowCount}" readonly/></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  id="TxtNetAmt${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtLdRate${rowCount}" /></td>
@@ -640,80 +637,10 @@ function addItemRecordRow() {
         </tr>
         `;
     tbody.append(newRow);
-    bindDropdownData(rowCount);
+
     setEnterKeyFocusOnTable(itemRecords, rowCount);
 }
-function bindDropdownData(rowCount) {
-    const itemSelect = $(`#ddlItemname${rowCount}`);
-    const makeSelect = $(`#ddlImake${rowCount}`);
-    const unitSelect = $(`#ddlUnit${rowCount}`);
-    const departmentSelect = $(`#ddlDepartment${rowCount}`);
-    const taxSelect = $(`#ddlTax${rowCount}`);
-    const placeofUse = $(`#ddlIplaceofUse${rowCount}`);
 
-    const loadDropdown = (url, selectElem, defaultText, formatter) => {
-        return new Promise((resolve, reject) => {
-            $.ajax({
-                url: url,
-                type: 'GET',
-                dataType: 'json',
-                success: function (response) {
-                    if (response.status) {
-                        selectElem.empty().append(`<option value="">${defaultText}</option>`);
-                        $.each(response.data, function (i, item) {
-                            selectElem.append(formatter(item));
-                        });
-
-                        selectElem.select2({
-                            width: '300px',
-                            placeholder: defaultText,
-                            allowClear: true,
-                            minimumResultsForSearch: selectElem.is(itemSelect) ? 0 : -1 // Only enable search for itemSelect
-                        });
-
-                        resolve();
-                    } else {
-                        toastr.error(`${defaultText} Load failed`);
-                        resolve();
-                    }
-                },
-                error: reject
-            });
-        });
-    };
-
-    return Promise.all([
-        loadDropdown('@Url.Action("GetMakeList", "PurchaseOrder")', makeSelect, "- Select Make -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-        loadDropdown('@Url.Action("GetUnitList", "PurchaseOrder")', unitSelect, "- Select Unit -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-        loadDropdown('@Url.Action("GetDepartmentList", "PurchaseOrder")', departmentSelect, "- Select Department -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-        loadDropdown('@Url.Action("GetMachineMastList", "PurchaseOrder")', placeofUse, "- Select Place Of Use -", item => `<option value="${item.CODE}">${item.NAME}</option>`),
-
-        loadDropdown('@Url.Action("GetItemList", "PurchaseOrder")',
-            itemSelect,
-            "- Select Item -",
-            item => `<option
-                    data-unitCd="${item.UNIT_CODE}"
-                    data-unitname="${item.UNIT_NAME}"
-                    value="${item.CODE}">${item.NAME}</option>`
-        ),
-
-
-        loadDropdown('@Url.Action("GetTaxList", "PurchaseOrder")', taxSelect, "- Select Tax -", item => `
-                <option
-                    value="${item.CODE}"
-                    data-CSgstPer="${item.CSGST_PER}"
-                    data-IgstPer="${item.IGST_PER}"
-                    data-TdsPer="${item.TDS_PER}"
-                    data-TcsPer="${item.TCS_PER}"
-                    data-VatPer="${item.VAT_PER}"
-                    data-OtherPer1="${item.OTH_PER}"
-                    data-OtherPer2="${item.OTH_PER2}">
-                    ${item.NAME}
-                </option>`)
-    ]).then(() => {
-        bindUnitOnItemSelect(itemSelect, unitSelect);
-    });
-}    
 function setEnterKeyFocusOnTable(sequence, rowCount) {
     sequence.forEach((id, index) => {
         let elementId = `#${id}${rowCount}`;
@@ -1263,3 +1190,67 @@ function renderPurchaseHistory(data) {
     const myModal = new bootstrap.Modal(modalElement);
     myModal.show();
 }
+
+
+async function fillItemDetailsTableBySaudaNo(data) {
+    const $tbody = $('#tblItemRecordPO tbody');
+    $tbody.empty();
+    console.log(data);
+
+    for (let index = 0; index < data.length; index++) {
+        const item = data[index];
+        const idx = index + 1;
+
+        console.log("Item data", data);
+
+        addItemRecordRow();
+
+        $(`#ddlIplaceofUse${idx}`).val(item.placeUse || '');
+        $(`#ddlItemname${idx}`).val(item.itemCode).trigger('change.select2');
+        $(`#ddlImake${idx}`).val(item.makeCode).trigger('change.select2');
+        $(`#ddlUnit${idx}`).val(item.uomCode || '').trigger('change');
+
+        // $(`#ddlTax${idx}`).val(item.taxCode || '').trigger('change');
+
+        $(`#ddlTax${idx}`).val(item.taxCode || '');
+
+        $(`#ddlDepartment${idx}`).val(item.deptCode || '');
+        $(`#TxtNos${idx}`).val(item.nos || '');
+        $(`#TxtQty${idx}`).val(item.qty || '');
+        $(`#txtAdjQtySauda${idx}`).val(item.adjQty || '');
+        $(`#TxtRate${idx}`).val(item.rate || '');
+        $(`#TxtExrate${idx}`).val(item.importRate || '');
+        $(`#TxtCalcRate${idx}`).val(item.calcRate || '');
+        $(`#TxtAmount${idx}`).val(item.amount || '');
+        $(`#TxtPackPercent${idx}`).val(item.packPer || '');
+        $(`#TxtPack${idx}`).val(item.packAmt || '');
+        $(`#TxtDiscPercent${idx}`).val(item.discPer || '');
+        $(`#TxtDisc${idx}`).val(item.discAmt || '');
+        $(`#TxtCgstPercent${idx}`).val(item.cgstPer || '');
+        $(`#TxtCgst${idx}`).val(item.cgstAmt || '');
+        $(`#TxtSgstPercent${idx}`).val(item.sgstPer || '');
+        $(`#TxtSgst${idx}`).val(item.sgstAmt || '');
+        $(`#TxtIgstPercent${idx}`).val(item.igstPer || '');
+        $(`#TxtIgst${idx}`).val(item.igstAmt || '');
+        $(`#TxtVatPercent${idx}`).val(item.vatPer || '');
+        $(`#TxtVat${idx}`).val(item.vatAmt || '');
+        $(`#TxtCessPercent${idx}`).val(item.cessPer || '');
+        $(`#TxtCess${idx}`).val(item.cessAmt || '');
+        $(`#TxtTcsPer${idx}`).val(item.tcsPer || '');
+        $(`#TxtTcsAmt${idx}`).val(item.tcsAmt || '');
+        $(`#TxtOthPer${idx}`).val(item.othPer || '');
+        $(`#TxtOthAmt${idx}`).val(item.othAmt || '');
+        $(`#TxtOthPer2${idx}`).val(item.othPer2 || '');
+        $(`#TxtOthAmt2${idx}`).val(item.othAmt2 || '');
+        $(`#TxtNetAmt${idx}`).val(item.netAmt || '');
+        $(`#TxtLdRate${idx}`).val(item.landRate || '');
+        $(`#TxtRemarks${idx}`).val(item.remarks || '');
+        $(`#TxtAppLevel${idx}`).val(item.preorityLevel || '');
+        $(`#TxtAppRemarks${idx}`).val(item.preorityRemarks || '');
+        $(`#TxtMthRate${idx}`).val(item.rateMonthly || '');
+        $(`#TxtQtrRate${idx}`).val(item.rateQuarterly || '');
+        $(`#TxtAnlRate${idx}`).val(item.rateAnnualy || '');
+        $(`#TxtSpclRate${idx}`).val(item.rateSpecial || '');
+    }
+}
+

@@ -1,18 +1,21 @@
 ﻿
 async function LoadDropdown() {
     try {
-        await Promise.allSettled([
+        await Promise.all([
             DDlPartyList(),
             DDlShipPartyList(),
             GetCurrencyList(),
             GetPayTermList(),
             DDLCityMast(),
             GetPlaceList(),
-            DDLTxtCity1SDt()
+            DDLTxtCity1SDt(),
+            loadItemNameDropdown(),
+            loadMakeDropdown(),
+            loadUnitDropdown(),
+            loadPlaceDropdown(),
+            loadDepartmentDropdown(),
+            loadTaxTypeDropdown()
         ]);
-
-        addItemRecordRow();
-        addAttachmentRow();
 
     } catch (error) {
         console.log("Dropdown load failed:", error);
@@ -458,3 +461,68 @@ function calculateTaxAmounts(rowId) {
 
     calculateAllTotals(); // Recalculate footer totals
 }
+
+function loadItemNameDropdown() {
+    $.ajax({
+        url: '/PurchaseOrder/DDLGridItem',
+        method: 'GET',
+        success: function (data) {
+            itemNameOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+        }
+    });
+}
+function loadMakeDropdown(ItemCode = 0) {
+    $.ajax({
+        url: '/PurchaseOrder/DDLGridMake',
+        method: 'GET',
+        data: {
+            ItemCode: ItemCode
+        },
+        success: function (data) {
+            MakeNameOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+        }
+    });
+
+}
+function loadUnitDropdown() {
+    $.ajax({
+        url: '/PurchaseOrder/DDLUnitList',
+        method: 'GET',
+        success: function (data) {
+            UnitOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+        }
+    });
+
+}
+function loadPlaceDropdown() {
+    $.ajax({
+        url: '/PurchaseOrder/DDLPlaceList',
+        method: 'GET',
+        success: function (data) {
+            PlaceOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+        }
+    });
+
+}
+function loadDepartmentDropdown() {
+    $.ajax({
+        url: '/PurchaseOrder/DDLDepartmentList',
+        method: 'GET',
+        success: function (data) {
+            DepartmentOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+        }
+    });
+
+}
+function loadTaxTypeDropdown() {
+    $.ajax({
+        url: '/PurchaseOrder/DDLTaxTypeList',
+        method: 'GET',
+        success: function (data) {
+            TaxTypeOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+        }
+    });
+
+}
+
+

@@ -195,9 +195,6 @@ async function DDLDispatchForm() {
 }
 
 
-
-
-
 async function GetVNo() {
     try {
         const res = await fetch('/PurchaseSauda/GetVNo');
@@ -214,8 +211,6 @@ async function GetVNo() {
 }
 
 
-
-
 function setFormReadOnly() {
     const form = $('#PurchaseSaudaForm');
     form.find('input, select, textarea, button').prop('disabled', true);
@@ -228,8 +223,6 @@ function setFormReadOnly() {
     const v_no = $('#TxtCode').val();
     GetFinalUser(v_no);
 }
-
-
 
 
 async function checkValidDate() {
@@ -262,9 +255,6 @@ async function checkValidDate() {
     }
 }
 
-
-
-
 function recalculateNetRate() {
     const baseRate = parseFloat($('#numRate').val()) || 0;
     const discountPercent = parseFloat($('#numDiscount').val()) || 0;
@@ -296,8 +286,6 @@ function formatDate(dateStr) {
 
     return `${year}-${month}-${day}`;
 }
-
-
 
 
 async function LoadDropDown() {

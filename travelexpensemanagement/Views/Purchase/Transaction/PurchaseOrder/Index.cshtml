@@ -1233,6 +1233,12 @@
     let isLoading = false;
     let SelectShipParty = true;
     let Calculation = true;
+    let itemNameOptions = '';
+    let MakeNameOptions = '';
+    let UnitOptions = '';
+    let PlaceOptions = '';
+    let DepartmentOptions = '';
+    let TaxTypeOptions = '';
 
     $(document).ready(function () {
         LoadDropdown()
@@ -1296,16 +1302,7 @@
            await fillItemDetailsTable(quotationrateList)
         });
 
-        $(document).on('change', '[id^=ddlItemname]', function () {
-            const $select = $(this);
-            const selectedOption = $select.find('option:selected');
-            const rowId = $select.closest('tr').attr('id').replace('row', '');
-
-            const unit = selectedOption.data('unitname') || '';
-            const unitcode = selectedOption.data('unitcd') || '';
-
-        });
-
+  
         $(document).on('click', '.btn-purchaseCopy',async function(){
         const selectedItems = getPurchaseData();
         console.log('a');
@@ -1431,67 +1428,7 @@
 
 <script>
 
-    async function fillItemDetailsTableBySaudaNo(data) {
-        const $tbody = $('#tblItemRecordPO tbody');
-        $tbody.empty();
-        console.log(data);
 
-        for (let index = 0; index < data.length; index++) {
-            const item = data[index];
-            const idx = index + 1;
-
-            console.log("Item data",data);
-
-            addItemRecordRow();
-            await bindDropdownData(idx);
-
-            $(`#ddlIplaceofUse${idx}`).val(item.placeUse || '');
-            $(`#ddlItemname${idx}`) .val(item.itemCode) .trigger('change.select2');
-            $(`#ddlImake${idx}`)  .val(item.makeCode) .trigger('change.select2');
-            $(`#ddlUnit${idx}`).val(item.uomCode || '').trigger('change');
-           // $(`#ddlTax${idx}`).val(item.taxCode || '').trigger('change');
-
-            $(`#ddlTax${idx}`).val(item.taxCode || '');
-
-            $(`#ddlDepartment${idx}`).val(item.deptCode || '');
-            $(`#TxtNos${idx}`).val(item.nos || '');
-            $(`#TxtQty${idx}`).val(item.qty || '');
-            $(`#txtAdjQtySauda${idx}`).val(item.adjQty || '');
-            $(`#TxtRate${idx}`).val(item.rate || '');
-            $(`#TxtExrate${idx}`).val(item.importRate || '');
-            $(`#TxtCalcRate${idx}`).val(item.calcRate || '');
-            $(`#TxtAmount${idx}`).val(item.amount || '');
-            $(`#TxtPackPercent${idx}`).val(item.packPer || '');
-            $(`#TxtPack${idx}`).val(item.packAmt || '');
-            $(`#TxtDiscPercent${idx}`).val(item.discPer || '');
-            $(`#TxtDisc${idx}`).val(item.discAmt || '');         
-            $(`#TxtCgstPercent${idx}`).val(item.cgstPer || '');
-            $(`#TxtCgst${idx}`).val(item.cgstAmt || '');
-            $(`#TxtSgstPercent${idx}`).val(item.sgstPer || '');
-            $(`#TxtSgst${idx}`).val(item.sgstAmt || '');
-            $(`#TxtIgstPercent${idx}`).val(item.igstPer || '');
-            $(`#TxtIgst${idx}`).val(item.igstAmt || '');
-            $(`#TxtVatPercent${idx}`).val(item.vatPer || '');
-            $(`#TxtVat${idx}`).val(item.vatAmt || '');
-            $(`#TxtCessPercent${idx}`).val(item.cessPer || '');
-            $(`#TxtCess${idx}`).val(item.cessAmt || '');
-            $(`#TxtTcsPer${idx}`).val(item.tcsPer || '');
-            $(`#TxtTcsAmt${idx}`).val(item.tcsAmt || '');
-            $(`#TxtOthPer${idx}`).val(item.othPer || '');
-            $(`#TxtOthAmt${idx}`).val(item.othAmt || '');
-            $(`#TxtOthPer2${idx}`).val(item.othPer2 || '');
-            $(`#TxtOthAmt2${idx}`).val(item.othAmt2 || '');
-            $(`#TxtNetAmt${idx}`).val(item.netAmt || '');
-            $(`#TxtLdRate${idx}`).val(item.landRate || '');         
-            $(`#TxtRemarks${idx}`).val(item.remarks || '');
-            $(`#TxtAppLevel${idx}`).val(item.preorityLevel || '');
-            $(`#TxtAppRemarks${idx}`).val(item.preorityRemarks || '');
-            $(`#TxtMthRate${idx}`).val(item.rateMonthly || '');
-            $(`#TxtQtrRate${idx}`).val(item.rateQuarterly || '');
-            $(`#TxtAnlRate${idx}`).val(item.rateAnnualy || '');
-            $(`#TxtSpclRate${idx}`).val(item.rateSpecial || '');
-        }
-    }
 
     async function collectGridDetail() {
          const items = [];
@@ -1635,7 +1572,6 @@
             const item = data[index];
             const idx = index + 1;
             addItemRecordRow();
-            await bindDropdownData(idx);
 
             isLoading = true;
 
@@ -1769,9 +1705,7 @@
             const item = data[index];
             const idx = index + 1;
 
-            addItemRecordRow();
-
-            await bindDropdownData(idx);
+            addItemRecordRow();    
             console.log('a');
             $(`#ddlItemname${idx}`).val(item.ITEM_CODE);
             $(`#ddlUnit${idx}`).val(item.UOM_CODE || '');
@@ -1832,7 +1766,7 @@
             const idx = index + 1;
 
             addItemRecordRow();
-            await bindDropdownData(idx);
+
             $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
             $(`#ddlImake${idx}`).val(item.MakeCode).trigger('change');
             $(`#TxtQty${idx}`).val(item.Qty);

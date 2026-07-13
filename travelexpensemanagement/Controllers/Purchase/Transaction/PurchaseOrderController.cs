@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Asn1.X509.Qualified;
 using Org.BouncyCastle.Bcpg;
@@ -11,6 +12,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq.Expressions;
 using System.Net.Mail;
+using System.Reflection.Emit;
 using System.Text.Json;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
@@ -104,46 +106,98 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
 
         }          
+             
 
-        [HttpGet]
-        public async Task<IActionResult> GetItemList()
+        public JsonResult DDLGridItem()
         {
-            try
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
             {
-                var itemlist = await _dbHelper.GetJsonDataAsync($@"select CODE, NAME,HSN_CODE,UNIT_NAME,UNIT_CODE from item_mast where COMP_CODE ={_globalValue.GetGlobalVariables().PubCompCode} order by NAME");
-                return Json(new { status = true, data = itemlist });
+                string query = "Select a.Code,a.name from item_mast a left join ITEM_GROUP b on a.GROUP_CODE=b.CODE and b.COMP_CODE= " + getdata.PubCompCode + "     where  " +
+                    " a.comp_code=" + getdata.PubCompCode + " and a.name <> ''  group by a.name,a.CODE order by a.name";
+
+                var DDLGridItemList = _dropdownService.GetDropdownList(query);
+
+                return Json(DDLGridItemList);
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, messsage = "data load failed" });
-            }
+
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetMakeList()
-        {
-            try
-            {
-                var makelist = await _dbHelper.GetJsonDataAsync($@" select CODE, NAME from ITEMMAKE_MAST where COMP_CODE ={_globalValue.GetGlobalVariables().PubCompCode} order by NAME ");
-                return Json(new { status = true, data = makelist });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = "data load failed" });
-            }
-        }
 
-        [HttpGet]
-        public async Task<IActionResult> GetUnitList()
+
+
+
+
+        public JsonResult DDLGridMake(int ItemCode = 0)
         {
-            try
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
             {
-                var unitlist = await _dbHelper.GetJsonDataAsync($@"select CODE,NAME from ITEMUNIT_MAST where COMP_CODE={_globalValue.GetGlobalVariables().PubCompCode} order by name");
-                return Json(new { status = true, data = unitlist });
+
+                string query = "";
+                if(ItemCode == 0)
+                {
+                    query = @"SELECT a.MAKE_CODE  , b.NAME   FROM ITEM_MAKE a
+                    LEFT JOIN ITEMMAKE_MAST b ON a.MAKE_CODE = b.CODE AND b.COMP_CODE = " + getdata.PubCompCode + @"  WHERE a.COMP_CODE = " + getdata.PubCompCode;
+                }
+                else
+                {
+                    query = @"SELECT a.MAKE_CODE  , b.NAME   FROM ITEM_MAKE a
+                    LEFT JOIN ITEMMAKE_MAST b ON a.MAKE_CODE = b.CODE AND b.COMP_CODE = " + getdata.PubCompCode + @"  WHERE  a.ITEM_CODE = "+  ItemCode +"   and  a.COMP_CODE = " + getdata.PubCompCode ;
+
+                }
+
+                var DDLGridMake = _dropdownService.GetDropdownList(query);
+
+                return Json(DDLGridMake);
             }
-            catch (Exception ex)
+
+        }
+        public JsonResult DDLUnitList()
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
             {
-                return Json(new { status = false, message = "data load failed" });
+                string query = @"select CODE,NAME from ITEMUNIT_MAST where COMP_CODE="  + getdata.PubCompCode + "  order by name";
+
+                var DDLGridUnit = _dropdownService.GetDropdownList(query);
+
+                return Json(DDLGridUnit);
+            }
+
+        }
+        public JsonResult DDLPlaceList()
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                string query = @"select code,name from MACHINE_MAST where ACTIVE = 1 and COMP_CODE=" + getdata.PubCompCode + " and TYPE='Store' order by name  ";
+
+                var DDLPlaceList = _dropdownService.GetDropdownList(query);
+
+                return Json(DDLPlaceList);
+            }
+
+        }
+        public JsonResult DDLDepartmentList()
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                string query = @"select code ,name from ITEMDEPT_MAST where  COMP_CODE=" + getdata.PubCompCode + "  ";
+                var DDLDepartmentList = _dropdownService.GetDropdownList(query);
+                return Json(DDLDepartmentList);
+            }
+
+        }
+        public JsonResult DDLTaxTypeList()
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                string query = @"select code , name from TAX_MAST where ACTIVE = 1  ";
+                var DDLTaxTypeList = _dropdownService.GetDropdownList(query);
+                return Json(DDLTaxTypeList);
             }
         }
 

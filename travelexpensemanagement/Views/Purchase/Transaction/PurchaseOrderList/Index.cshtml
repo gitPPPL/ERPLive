@@ -139,7 +139,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
+
 <script>
 	var permissions = {
 		canEdit: @canEdit.ToString().ToLower(),
@@ -293,7 +293,7 @@
 
 		}
 
-	async function viewMenuDetails(rowId) {
+   async function viewMenuDetails(rowId) {
 	    	window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
 		}
 
