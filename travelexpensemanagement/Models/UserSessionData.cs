@@ -9,6 +9,7 @@
         public string PubWorkStationID { get; set; }
         public string PubLocalId { get; set; }
         public string PubFYearCode { get; set; }
+        public string PubCurrentMenuId { get; set; }
         public int PubBranchCode { get; set; }
         public DateTime PubLoginDate { get; set; }
         public DateTime PubSessiontime { get; set; }

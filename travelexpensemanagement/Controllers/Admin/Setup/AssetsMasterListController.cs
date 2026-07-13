@@ -43,7 +43,7 @@ namespace travelexpensemanagement.Controllers.Admin.Setup
                 UserMenuPermissions = permissions,
                 UserLevel = userLevel
             };
-            return View("~/Views/Admin/Setup/AssetsMasterList/Index.cshtml", model);
+            return View("~/Views/Admin/Setup/AssetsMasterList/Index.cshtml");
         }
 
         [HttpGet]

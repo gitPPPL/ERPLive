@@ -199,9 +199,11 @@
             success: function (response) {
                 if (response?.status) {
                     showToast("Inserted successfully!", { type: "success" });
-                    setTimeout(() => {
-                        window.location.href = '/VehicleInwardEntryList/Index';
-                    }, 1500);
+                    //setTimeout(() => {
+                    //    window.location.href = '/VehicleInwardEntryList/Index';
+                    //}, 1500);
+                    readOnly = 'true';
+                    VehicleUI.setReadOnly(readOnly);
                 } else {
                     showToast(response?.message || "Save failed. Please try again.", { type: "error" });
                 }
@@ -221,9 +223,11 @@
             success: function (response) {
                 if (response?.status) {
                     showToast("Updated successfully!", { type: "success" });
-                    setTimeout(() => {
-                        window.location.href = '/VehicleInwardEntryList/Index';
-                    }, 1500);
+                    //setTimeout(() => {
+                    //    window.location.href = '/VehicleInwardEntryList/Index';
+                    //}, 1500);
+                    readOnly = 'true';
+                    VehicleUI.setReadOnly(readOnly);
                 } else {
                     showToast("Update failed: " + (response?.message || "Unknown error."), { type: "error" });
                 }

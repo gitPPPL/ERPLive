@@ -2,7 +2,6 @@
 const urlParams = new URLSearchParams(location.search);
 const rowId = (urlParams.get('docId'));
 const isReadOnly = urlParams.get('readOnly') === 'true';
-
 let isMobileDataLoaded = false;
 let isMobileLoading = false;
 let mobileRequest = null;
@@ -14,16 +13,16 @@ let formState = {
 
 // ============ INIT ============
 function VisitorInit() {
-
     setCurrentDate();
     setCurrentTime();
     $("#NumDocNo").focus();
+    $("#button_print").hide();
     if (rowId) {
-
         loadEmpList().then(() => {
             initSelect2();  
             loadVisitorEntry(rowId);
             if (isReadOnly) {
+                $("#button_print").show();
                 setVisitorEntryFormReadOnly();
             }
         });
@@ -35,8 +34,7 @@ function VisitorInit() {
         });
     }
 
-    $('#VisitorEntryForm')
-        .off('submit')   
+    $('#VisitorEntryForm').off('submit')   
         .on('submit', function (e) {
             onFormSubmit(e);
         });
@@ -104,7 +102,6 @@ function VisitorInit() {
     });
 
     // ===== MOBILE AUTOFILL=====
-
     $('#NumMobileNo').off('blur').on('blur', function () {
 
         const mobile = $(this).val().trim();
@@ -119,31 +116,6 @@ function VisitorInit() {
                     showToast("Failed to fetch visitor data", { type: "error" });
                 });
         }, 200);
-    });
-
-    // ===== PRINT BUTTON(logic) =====
-    $('#btn_Print').off('click').on('click', function () {
-
-        const vType = 'VISI';
-        const vNo = $('#NumDocNo').val()?.trim();
-        const docId = $('#DOCID').val()?.trim();
-
-        if (!vNo || vNo === "0") {
-            showToast("Invalid document number", { type: "warning" });
-            return;
-        }
-
-        if (isReadOnly === true) {
-            openPrint(vNo, vType, docId);
-            return;
-        }
-
-        if (vNo && vType) {
-            openPrint(vNo, vType);
-            return;
-        }
-
-        showToast("Please save data first", { type: "warning" });
     });
 
     $('#ddlMeetEmployee, #TxtMeetOther').on('change input', function () {
@@ -164,6 +136,9 @@ function initSelect2() {
         placeholder: "Search Employee..",
         allowClear: true,
         width: '100%'
+    });
+    $('#ddlMeetEmployee').on('select2:open', function () {
+        document.querySelector('.select2-container--open .select2-search__field').focus();
     });
 }
 
@@ -349,7 +324,7 @@ async function onFormSubmit(e) {
             formState.isReadOnlyFromUrl = true;
 
             if (response.message.includes("Saved")) {
-
+                $("#button_print").show();
                 if (response.docId) {
                     $('#DOCID').val(response.docId);
                 }
@@ -357,6 +332,7 @@ async function onFormSubmit(e) {
                 showToast("Data Saved Successfully", { type: "success" });
 
             } else {
+                $("#button_print").show();
                 showToast("Data Updated Successfully", { type: "success" });
             }
 
@@ -475,7 +451,7 @@ function setVisitorEntryFormReadOnly() {
 
     // disable inputs
     form.find('input, select, textarea, button[type="submit"]').prop('disabled', true);
-    form.find('button').not('#btnbacklist , #btn_Print').prop('disabled', true);
+    form.find('button').not('#btnbacklist , #button_print').prop('disabled', true);
 
     // add readonly class
     form.addClass('erppage-readonly');
@@ -719,28 +695,63 @@ function removePhoto() {
 
 //=== Camera Code End=========
 
-//===Open Print======
-function openPrint(vNo, vType) {
+function PendingQCReport() {
+
+    var reportName = "VISITOR_SLIP";
+    // Crystal Report Formula
+    var SelForMul =
+        " {VISITOR.V_TYPE}='VISI'" +
+        " AND {VISITOR.V_NO}= " + $("#NumDocNo").val() +
+        " AND {VISITOR.COMP_CODE}= " + window.globalVariables.compCode +
+        " AND {VISITOR.BRANCH_CODE}= " + window.globalVariables.branchCode +
+        " AND {VISITOR.YEAR_CODE}= " + window.globalVariables.yearCode;
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: SelForMul,
+        Database: window.database.db,
+        Parameters: {
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.add1,
+            comp_add2: window.globalVariables.add2,
+            RPTNAME: "VISITOR SLIP"
+        }
+    };
+
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
     $.ajax({
-        url: '/VisitorEntry/PrintSlip',
-        type: 'GET',
-        data: { vNo: vNo, vType: vType },
-
-        success: function (res) {
-            // No Data Found case
-            if (res.success === false) {
-                showToast(res.message, { type: "warning" });
-                return;
-            }
-            const printWindow = window.open("", "_blank", "width=900,height=700");
-            printWindow.document.open();
-            printWindow.document.write(res.html || res);
-            printWindow.document.close();
+        url: 'http://localhost:34089/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
         },
+        success: function (response) {
+            console.log('PDF response:', response);
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
 
-        error: function () {
-            showToast("Error while printing", { type: "error" });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
         }
     });
 }
+
+
+
 

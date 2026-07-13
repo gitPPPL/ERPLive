@@ -5,7 +5,13 @@ const rowId = urlParams.get('id');
 const mode = urlParams.get('mode');
 const isReadOnly = (mode === 'view');
 const vtype = urlParams.get('vtype');
-const PubDefEWaybillAmt = 50000;
+const PubDefEWaybillAmt = 50000; 
+
+
+var globalVars = window.globalVariables || {};
+var database = window.database || "";
+
+
 var PubUserLevel = '@PubUserLevel';
 var LoginDate = '@logindate';
 var itemList = [];
@@ -15,29 +21,33 @@ var unitList = [];
 $(document).ready(async function () {
 
     await LoadDropDown();
+
+    SetFYDate('InDate', LoginDate);
+
+    if (PubUserLevel == 1) {
+        $('#InDate').prop('disabled', false);
+        $('#InTime').prop('disabled', false);
+    }
+    else {
+        $('#InDate').prop('disabled', true);
+        $('#InTime').prop('disabled', true);
+    }
+
     if (rowId) {
         await LoadFormByID(rowId, vtype);
-        //await Approvalbtn();
+
         checkApprovalStatus(vtype, rowId, 'GATE1');
+
         $('#ddlDocType').prop('disabled', true);
         $('#InDate').prop('disabled', true);
         $('#InTime').prop('disabled', true);
         $('.erppagelist-toolbar-end').show();
         if (mode === "view") {
-            setFormReadOnly();  
-            //await Approvalbtn();
-            checkApprovalStatus(vtype, rowId, 'GATE1');
+            setFormReadOnly();   
+           // checkApprovalStatus(vtype, rowId, 'GATE1');
         }
     }
     else {
-        if (PubUserLevel == 1) {
-            $('#InDate').prop('disabled', false);
-            $('#InTime').prop('disabled', false);
-        }
-        else {
-            $('#InDate').prop('disabled', true);
-            $('#InTime').prop('disabled', true);
-        }
 
         $('#ddlDocStatus').prop('disabled', true);
         let today = new Date().toISOString().split('T')[0];
@@ -507,13 +517,6 @@ $(document).ready(async function () {
         $('#TxtContainerNo').val(row.containeR_NO);
     });
 
-    //$("#btn_approval").on('click', function () {
-    //    openApprovalModal();
-    //});
-
-    //$("#btn_Sendapproval").on('click', function () {
-    //    sendopenApprovalModal();
-    //});
 
     $('#btn_Sendapp').on('click', function () {
         SendApproval();

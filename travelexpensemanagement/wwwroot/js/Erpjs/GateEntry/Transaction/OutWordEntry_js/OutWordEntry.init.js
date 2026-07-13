@@ -1,58 +1,67 @@
 ﻿
 
-    let itemMap = { };
-    let UnitMap = { };
-    let DeptMap = { };
-    let PubUserLevel='@PubUserLevel';
-    let CompCode='@CompCode';
-    let LoginDate = '@logindate';
-    let pendingData = [];
-    let currentPage = 1;
-    let rowsPerPage = 10;
-    const urlParams = new URLSearchParams(window.location.search);
-    const rowId = urlParams.get('id');
-    const vtype = urlParams.get('VType');
-    const $tbody = $("#tblOutwardEntry tbody");
-    const mode = urlParams.get('mode');
-    $(document).ready(function () {
+        let itemMap = { };
+        let UnitMap = { };
+        let DeptMap = {};
+        let pendingData = [];
+        let currentPage = 1;
+        let rowsPerPage = 10;
+        const urlParams = new URLSearchParams(window.location.search);
+        const rowId = urlParams.get('id');
+        const vtype = urlParams.get('VType');
+        const $tbody = $("#tblOutwardEntry tbody");
+        const form = $('#OutwardEntryForm');
+        const mode = urlParams.get('mode');
+        const isReadOnly = (mode === 'view');
+        var globalVars = window.globalVariables || {};
+        var database = window.database || "";
+        let PubUserLevel = globalVars.UserLevel;
+        let CompCode = globalVars.CompCode;
+        let LoginDate = globalVars.LoginDate;
 
+    $(document).ready(function () {
         (async () => {
             try {
                 await LoadDropDowns();
-                addRow($tbody);
+                SetFYDate('DtDocDate', LoginDate);
 
-                if (rowId) {
-                    $('#ddlDocType').prop('disabled', true);
+
+                if (PubUserLevel == 1) {
+                    $('#DtDocDate').prop('disabled', false);
+                    $('#DtTxtDocDate').prop('disabled', false);
+                }
+                else {
                     $('#DtDocDate').prop('disabled', true);
                     $('#DtTxtDocDate').prop('disabled', true);
+                }          
+
+
+                if (rowId) {
+
+                    $('#ddlDocType').prop('disabled', true);
+                    $('#ddlType').prop('disabled', true);
+
                     await LoadFormByID(rowId, vtype);
                     if (mode == 'view') {
                         setFormReadOnly();
-                    }
+                        form.addClass('erppage-readonly');
+                    } 
+
                 }
                 else {
                     const selectedVType = $("#ddlDocType").val();
                     if (selectedVType) {
                         await GetVNo(selectedVType, "GATE1");
-                    }
-
-                    if (PubUserLevel == 1) {
-                        $('#DtDocDate').prop('disabled', false);
-                        $('#DtTxtDocDate').prop('disabled', false);
-                    }
-                    else {
-                        $('#DtDocDate').prop('disabled', true);
-                        $('#DtTxtDocDate').prop('disabled', true);
-                    }
-
-                    let today = new Date().toISOString().split('T')[0];
-                    $('#DtTxtDocDate').attr('min', LoginDate);
-                    $('#DtDocDate').val(today);
+                    }             
+                
                     let now = new Date();
                     $('#DtTxtDocDate').val(now.toTimeString().slice(0, 8));
+                    var today = new Date().toISOString().split('T')[0];
+                    $('#DtExpectedDateReturn').val(today);
+
                 }
 
-                $("#btn-save").click(function (e) {
+                $("#btn-save").click(async function (e) {
                     e.preventDefault();
 
                     const V_DATE = formatDate($("#DtDocDate").val());
@@ -63,40 +72,54 @@
                     const ITEM_TYPE = $.trim($('#ddlType option:selected').text());
                     const PartyCode = parseInt($('#ddlPartyName').val()) || 0;
 
+                    if (!validateRequiredField('#NumDocNo', 'Please Enter a Doc No.')) return;
                     if (!validateRequiredField('#ddlDocType', 'Please select a Doc Type.')) return;
-                    if (!validateRequiredField('#DtDocDate', 'Please select a Voucher Date.')) return;
-                               
+                    if (!validateRequiredField('#DtDocDate', 'Please select a Doc Date.')) return;                             
+                    if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return; 
+                    if (!validateRequiredField('#TxtVehicleNo', 'Please Fill Vehicle No.')) return; 
+
+                    const checkdate = await checkValidDate(); 
+
+                    if (!checkdate) {
+                        return; 
+                    }
 
                     if (DocType === "OURT") {
 
-                        if (!validateRequiredField('#DtExpectedDateReturn', 'Please select Return Date.')) return;
-                        if (!validateRequiredField('#DtExpectedDateReturn', 'Invalid Return Date. Return date should not be less than Doc date.')) return;
-                        if (!validateRequiredField('#txtResponsiblePerson', 'Please enter Responsible Person Name.')) return; 
-                        
+                        if (!validateRequiredField('#DtExpectedDateReturn', 'Please Select Exp.Dt of Return.')) return;    
+
+                        if (RETURN_DATE < V_DATE) {                 
+                            showToast("Invalid Return Date. Return date should not be less than Doc date.", { type: "warning" });
+                            return;
+                        }    
+                                            
+                        if (!validateRequiredField('#txtResponsiblePerson', 'Please enter Responsible Person Name.')) return;                         
                     }
+     
 
-
-                    if (!validateRequiredField('#ddlPartyName', 'Please select a Party.')) return; 
-
-
-                    if (CompCode == 2) {
-                        if (DocType === "DocType" || ITEM_TYPE === "Sale") {
-                            if (!validateRequiredField('#ddlDocType', 'Please check DocType and Doc No')) return;                     
-                        }
-                          
-                        else {
-        
-                            if (DocType === "OUES" && ITEM_TYPE !== "E-Commerce Sale") {
-                                if (!validateRequiredField('#ddlDocType', 'Sale Type and Doctype mismatch.')) return; 
-                             
-                            }
-
+                    if (CompCode != 2)
+                    {
+                        if ((DocType === "OUSL" && ITEM_TYPE !== "Sale") || (DocType !== "OUSL" && ITEM_TYPE === "Sale")) {
+                            showToast("Please check DocType : " + DocType + " and Type : " + ITEM_TYPE  +" ", "Warning", { type: "warning" });
+                            return;
                         }
                     }
+                    else
+                    {
+                        if (DocType !== "OUNR" && ITEM_TYPE === "Sale") {
+                            showToast("Please check Sale Type and Doctype.", "Warning", { type: "warning" });
+                            return;
+                        }
+                    }
+
+                    if ((DocType === "OUES" && ITEM_TYPE !== "E-Commerce Sale") || (DocType !== "OUES" && ITEM_TYPE === "E-Commerce Sale")) {
+                        showToast("Please check DocType : "+ DocType +" and Type : "+ ITEM_TYPE +"", "Warning", { type: "warning" });
+                        return;
+                    } 
 
                     const rows = $("#tblOutwardEntry tbody tr");
                     let isValid = true;
-                    let hasAtLeastOneItem = false;
+                    let hasAtLeastOneItem = false;                                  
 
                     rows.each(function (index) {
                         const $row = $(this);
@@ -111,6 +134,13 @@
                         if (itemName) {
 
                             hasAtLeastOneItem = true;
+
+                            if (!itemName) {
+                                toastr.warning(`Please select Item Name in row ${index + 1}`);
+                                $row.find("select.itemName").focus();
+                                isValid = false;
+                                return false;
+                            }
 
                             if (!dept) {
                                 toastr.warning(`Please select Department in row ${index + 1}`);
@@ -158,14 +188,14 @@
 
                             }
                         }
-                    });
+                    });                                    
 
-                    if (!hasAtLeastOneItem) {
-                        toastr.warning("Please add at least one item.");
+                    if (!isValid) {
                         return;
                     }
 
-                    if (!isValid) {
+                    if (!hasAtLeastOneItem) {
+                        toastr.warning("Please Add One Row In Detail Section. ");
                         return;
                     }
 
@@ -200,6 +230,8 @@
 
                     $("#btn-save").prop("disabled", true);
 
+                    $("#btn-save").prop("disabled", true);
+
                     $.ajax({
                         url: '/OutwardEntry/SavedData',
                         type: 'POST',
@@ -208,35 +240,51 @@
 
                         success: function (response) {
 
-                            if (response.success) {
+                            console.log("Response:", response);
 
-                                toastr.success("Saved successfully!");
+                            if (response.success === true || response.success === "true") {
 
-                                setTimeout(() => {
-                                    window.location.href = '/OutwardEntryList/Index';
-                                }, 1000);
+                                if (response.message === "Save Successfully") {
+
+                                    showToast("Saved successfully!", { type: "success" });
+
+                                    setTimeout(function () {
+                                        window.location.href =  '/OutwardEntry/Index?id=' + V_NO + '&VType=' + encodeURIComponent(DocType) +
+                                            '&mode=view';
+                                    }, 3000);
+
+                                } else {
+
+                                    showToast(response.message || "Operation completed.", {
+                                        type: "warning"
+                                    });
+                                }
 
                             } else {
 
-                                toastr.warning(response.message || "Save failed.");
+                                showToast(response.message || "Failed to save data.", {
+                                    type: "error"
+                                });
                             }
                         },
 
-                        error: function (xhr) {
+                        error: function (xhr, status, error) {
 
                             let errorMessage = "Something went wrong.";
 
                             if (xhr.status === 400) {
-                                errorMessage = "Bad Request: " + xhr.responseText;
-                            }
-                            else if (xhr.status === 500) {
-                                errorMessage = "Server error: " + xhr.responseText;
-                            }
-                            else {
-                                errorMessage = "Unexpected error: " + xhr.statusText;
+                                errorMessage = "Bad Request: " + (xhr.responseText || error);
+
+                            } else if (xhr.status === 500) {
+                                errorMessage = "Server Error: " + (xhr.responseText || error);
+
+                            } else {
+                                errorMessage = "Unexpected Error: " + (error || xhr.statusText);
                             }
 
-                            toastr.error(errorMessage);
+                            console.error("AJAX Error:", xhr);
+
+                            showToast(errorMessage, { type: "error" });
                         },
 
                         complete: function () {
@@ -252,68 +300,129 @@
                     const $row = $(this).closest("tr");
                     const wasLast = $row.is(":last-child");
                     $row.remove();
-                    if (wasLast) {
-                        const $last = $tbody.find("tr:last");
-                        if ($last.length && !$last.find(".btn-add-action").length) {
-                            $last.find("td:last").prepend(
-                                `<i class="fa fa-plus btn-add-action text-success" title="Add Row" style="cursor:pointer;"></i>`
-                            );
-                        }
-                    }
+          
                 });
+
 
                 $("#ddlDocType").change(function () {
                     if (!rowId) GetVNo(this.value, "GATE1");
                     $('#ddlDocType').prop('disabled', true);
                     if (this.value === "OURT") {
-                        document.getElementById("Conditionnaldesignid").style.display = "flex";
+                        document.getElementById("Conditionnaldesignid").style.display = "contents";
                     } else {
                         document.getElementById("Conditionnaldesignid").style.display = "none";
                     }
 
                 });
 
-                $("#ddlPartyName").on("change", function () {
+                $("#ddlPartyName").on("change", async function () {
                     const partyId = $(this).val();
-                    $('#ddlDocType').prop('disabled', true);
-                    loadPartyAddresses(partyId);
-                    fetchPartyDetails(partyId);
+                    if (mode != 'view' && !rowId) {
+                        $('#ddlDocType').prop('disabled', true);
+                       await loadPartyAddresses(partyId);
+                       await fetchPartyDetails(partyId);
+                    } 
                 });
 
                 $("#ddlPartyNameByAddress").on("change", function () {
                     const partyId = $("#ddlPartyName").val();
                     const addId = $(this).val();
-                    fetchPartyAddressDetails(partyId, addId);
+                
+                    GetDataByPartyandAddressidCodeAsync(partyId, addId);
+
                 });
 
                 $("#btnpendingorderno").click(function () {
-                    const selectedValue = $('#ddlPartyName').val();
-                    const BILL_NO = $('#TxtWayBillNo').val();
+                    const selectedValue = $('#ddlPartyName').val();             
                     const v_date = $('#DtDocDate').val();
                     const typeText = $('#ddlType option:selected').text();
+                    if (!validateRequiredField('#ddlType', 'Please Select  Type.')) return;
+                    if (!validateRequiredField('#ddlPartyName', 'Please Select Party Name.')) return;                 
 
-                    FetchPendindorderno(selectedValue, typeText, v_date, BILL_NO);
+                    FetchPendindorderno(selectedValue, typeText, v_date);
                 });
+                 
+                $("#Btn_selectedData").click(async function () {
 
-                $("#Btn_selectedData").click(function () {
                     const selectedRows = getSelectedPendingRows();
-                    if (selectedRows.length === 0) {
+                    let condiiton = false;
+                    if (!selectedRows.length) {
                         toastr.info("Please select at least one row");
                         return;
                     }
-                    const $tbody = $("#tblOutwardEntry tbody");
-                    selectedRows.forEach(row => {
-                        addRow($tbody, {
-                            itemName: row.ItemCode,
-                            department: row.DeptCode || "",
-                            unit: row.UnitCode,
-                            quantity: parseFloat(row.Qty) || "",
-                            no: parseInt(row.nos) || "",
-                            remarks: row.remarks || "",
-                            refType: row.Vouchertype || "",
-                            refNo: row.VoucherNo || ""
+
+                    try {
+
+                        const deptCode = await $.ajax({
+                            url: "/OutwardEntryList/GetDeptCode",
+                            type: "GET"
                         });
-                    });
+
+                        const $tbody = $("#tblOutwardEntry tbody");
+
+                        const modalElement = document.getElementById('pendingorders');
+                        if (modalElement) {
+                            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                            if (modalInstance) modalInstance.hide();
+                        }
+                        $('#ddlType').prop('disabled', true);
+                        $('#ddlPartyName').prop('disabled', true);
+                        for (const row of selectedRows) {
+
+                            const itemCode = (row.ItemCode || "").trim();
+                            const voucherNo = (row.VoucherNo || "").trim();
+
+                            const exists = $tbody.find("tr").toArray().some(tr => {
+
+                                const existingItemCode = $(tr).find(".itemName").val();
+                                const existingRefNo = $(tr).find(".ref-no").val()?.trim() || "";
+
+                                return existingItemCode === itemCode && existingRefNo === voucherNo;
+                            });
+
+                            if (exists) {
+                                toastr.warning(`Item ${itemCode} with Ref No ${voucherNo} already exists.`);
+                                continue;
+                            }
+
+                            addRow($tbody, {
+                                code: itemCode,
+                                itemName: itemCode,
+                                department: deptCode || "",
+                                unit: row.UnitCode || "",
+                                quantity: row.PQty ? (row.PQty) : "",
+                                no: row.nos ? parseInt(row.nos) : "",
+                                remarks: row.remarks || "",
+                                refType: row.Vouchertype || "",
+                                refNo: voucherNo
+                            });
+                             condiiton = true;
+                        }
+
+                        // Load header from first row
+
+                        if (condiiton == true) {
+                            const $firstRow = $tbody.find("tr:first");
+                            if ($firstRow.length) {
+
+                                const refType = $firstRow.find(".ref-type").val() || "";
+                                const refNo = $firstRow.find(".ref-no").val() || "";
+                                if (refNo != '' && refType != '') {
+
+                                    const typeText = $('#ddlType option:selected').text();
+
+                                    await fetchPendingOrderHeaderData(refType, refNo, typeText);
+                                }
+                            }
+                        }
+
+
+                     
+                         
+                    } catch (err) {
+                        console.error(err);
+                        toastr.error("Failed to fetch data");
+                    }
                 });
 
                 $(document).on("change", ".row-checkbox", function () {
@@ -326,6 +435,15 @@
                     pendingData.forEach(row => row.selected = isChecked);
                     renderPendingTable();
                 });
+
+
+                $('#ddlREFNO').on("change", function () {
+                    var refno = this.value;
+                    if (refno) {
+                        fetchDatabyRefNo(refno);
+                    }
+                });
+
 
             } catch (err) {
                 console.error("Error initializing page:", err);

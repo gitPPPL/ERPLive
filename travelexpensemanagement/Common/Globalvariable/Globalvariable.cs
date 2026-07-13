@@ -31,6 +31,8 @@ namespace travelexpensemanagement.Common.Globalvariable
             var sessionYearCode = httpContext.Session.GetString("SessionYearCode");
             var sessionComp = httpContext.Session.GetString("COMP_CODE");
             var formattedDate = httpContext.Session.GetString("SessionLogindate");
+            
+            //var CurrentMenuId = httpContext.Session.GetString("CurrentMenuId");
 
             var CompanyData = GetCompanydata();
              string pubCompGSTIN = CompanyData.gstin;
@@ -71,6 +73,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                             PubBranchCode = 1,
                             PubLoginDate = loginDate,
                             PubSessiontime = DateTime.Now,
+                            //PubCurrentMenuId = CurrentMenuId,
 
                             // Company Info
                             CompanyName = CompanyData.CompanyName,

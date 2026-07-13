@@ -1,6 +1,7 @@
 ﻿@{
     ViewBag.Title = "Visitor Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 
 <div id="erp-toast-container"></div>
@@ -13,6 +14,9 @@
         <div class="erppage-header-title">Visitor Entry</div>
     </div>
     <div class="erppage-header-right">
+        <button type="button" class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print" onclick="PendingQCReport()">
+            <i class="fa fa-print"></i>Print
+        </button>
         <button type="button" id="btnbacklist" class="erppage-header-back" onclick="returnBack('@Url.Action("Index", "VisitorEntryList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list 
         </button> 
@@ -28,11 +32,11 @@
                 <div class="erppage9">
                     <div class="erppage-grid3 mb-2">
                         <div class="erppage-divfield">
-                            <label class="erppage-label">Document No</label>
+                            <label class="erppage-label">Doc No</label>
                             <input class="erppage-input" id="NumDocNo" placeholder="Enter Doc No" readonly/>
                         </div>
                         <div class="erppage-divfield">
-                            <label class="erppage-label">Document Date</label>
+                            <label class="erppage-label">Doc Date</label>
                             <input type="date" class="erppage-input" id="DtDocDate" />
                         </div>
                         <div class="erppage-divfield">
@@ -40,9 +44,8 @@
                             <input type="time" class="erppage-redinput" id="TMInTime" readonly />
                         </div>
                     </div>
-                    <fieldset class="erppage-subfieldset">
-                        <legend></legend>
-                        <div class="erppage-subheader">Basic Visitor Information</div>
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Basic Visitor Information</legend>
                         <div class="erppage-grid2">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Mobile No</label>
@@ -100,7 +103,7 @@
                                 <div class="erppage-datebox">
                                     <input type="date" class="erppage-input erppage-dateinput" id="DtOutDate">
                                     <label class="erppage-checkbox-inside">
-                                        <input type="checkbox" id="chkOutDate">
+                                        <input type="checkbox" class="erppage-checkbox-input" id="chkOutDate">
                                     </label>
                                 </div>
                             </div>
@@ -156,11 +159,25 @@
             <i class="fa-solid fa-floppy-disk"></i>
             <span>Save</span>
         </button>
-        <button  type="button"class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="btn_Print">
-            <i class="fa fa-print"></i>Print
-        </button>
     </div>
 </form>
+
+<script>
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2",
+
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
+    
+</script>
 
 <script src="~/js/erpjs/gateentry/transaction/visitorentryjs/visitorapi.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/visitorentryjs/visitor.js"></script>

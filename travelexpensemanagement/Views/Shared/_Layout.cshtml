@@ -169,8 +169,16 @@
 										continue;
 									}
 									bool isActive = IsHere(submenu.WebFORM_NAME);
-									<li class="sub-nav navbar-adjust @(isActive ? "active-submenu" : "")">
+									@* <li class="sub-nav navbar-adjust @(isActive ? "active-submenu" : "")">
 										<a href="/@submenu.WebFORM_NAME/Index">@submenu.DISPLAY_NAME</a>
+									</li> *@
+
+									<li class="sub-nav navbar-adjust @(isActive ? "active-submenu" : "")">
+										<a href="/@submenu.WebFORM_NAME/Index"
+										   class="menu-link"
+										   data-menuid="@submenu.CODE">
+											@submenu.DISPLAY_NAME
+										</a>
 									</li>
 								}
 							</ul>
@@ -503,6 +511,8 @@
 			}
 		});
 	</script>
+
+	
 
 </body>
 

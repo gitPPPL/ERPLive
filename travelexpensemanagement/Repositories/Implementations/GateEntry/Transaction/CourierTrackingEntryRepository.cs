@@ -4,6 +4,8 @@ using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.GateEntry.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using static travelexpensemanagement.Controllers.GateEntry.Transaction.CourierTrackingEntryController;
+using travelexpensemanagement.Models.GateEntry.Transaction;
 
 namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction
 {
@@ -53,8 +55,10 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     cmd.Parameters.AddWithValue("@V_NO", model.DocNo ?? "");
                     cmd.Parameters.AddWithValue("@V_DATE", model.DocDate);
                     cmd.Parameters.AddWithValue("@DOC_ID", docID);
-                    cmd.Parameters.AddWithValue("@PARTY_CODE", model.PartyName ?? "");
-                    cmd.Parameters.AddWithValue("@CITY_CODE", model.City ?? "");
+                    cmd.Parameters.AddWithValue("@PARTY_CODE", model.PartyCode ?? "");
+                    cmd.Parameters.AddWithValue("@PARTY_NAME", model.PartyName ?? "");
+                    cmd.Parameters.AddWithValue("@CITY_CODE", model.CITY_CODE ?? "");
+                    cmd.Parameters.AddWithValue("@CITY_NAME", model.CITY_NAME ?? "");
                     cmd.Parameters.AddWithValue("@COURIER_NAME", model.CourierName ?? "");
                     cmd.Parameters.AddWithValue("@DOCKET_NO", model.DocketNo ?? "");
                     cmd.Parameters.AddWithValue("@RECD_BY", model.ReceivedBy ?? "");
@@ -72,7 +76,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     cmd.ExecuteNonQuery();
                 }
             }
-            return model.ACTION == "INSERT" ? "Record inserted successfully.": "Record updated successfully.";
+            return model.ACTION == "INSERT" ? "Record inserted successfully." : "Record updated successfully.";
         }
 
         public GetCourierTrackingModel GetCourierData(string docType, string docNo)
@@ -100,13 +104,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 VType = rdr["V_TYPE"]?.ToString(),
                                 DocDate = rdr["V_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["V_DATE"]).ToString("dd/MM/yyyy") : null,
                                 DocNo = rdr["DOC_ID"]?.ToString(),
-                                PartyName = rdr["PARTY_CODE"]?.ToString(),
+                                PartyName = rdr["PARTY_NAME"]?.ToString(),
                                 City = rdr["CITY_CODE"]?.ToString(),
                                 CourierName = rdr["COURIER_NAME"]?.ToString(),
                                 DocketNo = rdr["DOCKET_NO"]?.ToString(),
                                 ReceivedBy = rdr["RECD_BY"]?.ToString(),
                                 Purpose = rdr["PURPOSE"]?.ToString(),
-                                //Weight = rdr["WEIGHT"]?.ToString(),
                                 Weight = rdr["WEIGHT"] != DBNull.Value ? Convert.ToDecimal(rdr["WEIGHT"]) : 0,
                                 Remarks = rdr["REMARKS"]?.ToString()
                             };
@@ -126,5 +129,66 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         {
             throw new NotImplementedException();
         }
+        public CourierTrackingReportModel PrintCourierReport(PrintCourierReportModel model)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string selForMul = "";
+
+            selForMul = "{COURIER_TRACKING.COMP_CODE} = " + gv.PubCompCode;
+            selForMul += " and {COURIER_TRACKING.BRANCH_CODE} = " + gv.PubBranchCode;
+            selForMul += " and {COURIER_TRACKING.YEAR_CODE} = " + gv.PubFYearCode;
+            selForMul += " and {COURIER_TRACKING.V_DATE} IN DATE(" +
+                         model.FromDate.Value.ToString("yyyy,MM,dd") +
+                         ") TO DATE(" +
+                         model.ToDate.Value.ToString("yyyy,MM,dd") + ")";
+
+            if (!string.IsNullOrWhiteSpace(model.VType))
+            {
+                selForMul += " and {COURIER_TRACKING.V_TYPE} = '" + model.VType + "'";
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.PartyName))
+            {
+                selForMul += " and {COURIER_TRACKING.party_Name} = '" + model.PartyName + "'";
+            }
+
+            return new CourierTrackingReportModel
+            {
+                Reportname = "rptCourierTracking",
+                Database = "ERPDB",
+                SelectionFormula = selForMul,
+
+                FormulaFields = new List<FormulaFieldModel>
+            {
+            new FormulaFieldModel
+            {
+                FormulaName="comp_name",
+                FormulaValue=gv.CompanyName
+            },
+            new FormulaFieldModel
+            {
+                FormulaName="comp_add1",
+                FormulaValue=gv.Address1
+            },
+            new FormulaFieldModel
+            {
+                FormulaName="comp_add2",
+                FormulaValue=gv.Address2
+            },
+            new FormulaFieldModel
+            {
+                FormulaName="F1",
+                FormulaValue=$"From Date {model.FromDate:dd/MM/yyyy} to {model.ToDate:dd/MM/yyyy}"
+            },
+            new FormulaFieldModel
+            {
+                FormulaName="RPTNAME",
+                FormulaValue=$"COURIER TRACKING LIST ({model.VType})"
+            }
+        }
+            };
+        }
+
     }
 }

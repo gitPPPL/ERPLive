@@ -8,12 +8,13 @@
     color: #fff;
     padding: 6px 8px;
     border-radius: 8px;
-    flex-wrap: wrap; /* important */
+    flex-wrap: wrap;
 }
 /* Right section default behavior */
 .erppagelist-header-right {
     display: flex;
     align-items: center;
+    gap: 10px;
 }
 /* TITLE WITH ICON */
 .erppagelist-title {
@@ -31,17 +32,122 @@
         font-size: 13px;
     }
 
+.erppagesubfieldset {
+    width: 100%;
+    border: 1px solid #66a644;
+    border-left: 3px solid #1c5e31;
+    border-radius: 8px;
+    padding: 6px;
+    background: #fafcff;
+    box-sizing: border-box;
+    margin-top: 10px;
+}
 /* BUTTON */
 .erppagelist-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 12px;
+    padding: 4px 10px;
     border-radius: 6px;
     border: none;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
 }
+/*button More*/
+.erppagebtn_approved {
+    color: #2f7d32;
+    font-weight: bold;
+    background-color: #ffffff;
+    padding: 2px 8px;
+    border: none;
+    font-weight: 600;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.erppagebtn_sendapproval {
+    color: #ffffff;
+    /* font-weight: bold; */
+    background-color: #66a644;
+    padding: 2px 8px;
+    border: none;
+    font-weight: 400;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+/* Dropdown Wrapper */
+.erppage-dropdownaction {
+    position: relative;
+    display: inline-block;
+}
+
+/* Three Dot Button */
+.erppage-dropdownaction-btn {
+    background: #c6d8ff !important;
+    color: #0f0f0f;
+    border-radius: 4px;
+    padding: 3px 7px;
+}
+
+    .erppage-dropdownaction-btn:hover {
+        background: #e9ecef;
+    }
+
+
+/* Dropdown Menu */
+.erppage-dropdownaction-menu {
+    position: absolute;
+    top: 357px !IMPORTANT;
+    left: 1080px !important;
+    right: 45%;
+    margin-right: 5px;
+    width: max-content;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .15);
+    z-index: 999999;
+}
+
+    /* Menu Items */
+    .erppage-dropdownaction-menu a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 8px;
+        color: #0f0f0f;
+        text-decoration: none;
+        font-size: 12px;
+        background-color: #ffffff;
+        border-radius: 4px;
+        border: 1px solid #c1c1c1;
+    }
+
+        .erppage-dropdownaction-menu a:hover {
+            background: #2952cc;
+            color: #ffffff;
+            border: 1px solid #2952cc;
+        }
+
+
+.erppagelisthighlight {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    color: #1b5e20;
+    font-weight: 600;
+    font-size: 13px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid #a5d6a7;
 }
 /* PRIMARY */
 .erppagelist-btn-add {
@@ -57,22 +163,24 @@
     cursor: pointer;
     transition: all 0.25s ease;
 }
+
     .erppagelist-btn-add:hover {
         background-color: rgb(255 255 255 / 84%);
         color: #216826;
     }
-    
-    /* ACTION */
-    .erppagelist-btn-action {
-        background: #007bff;
-        color: #fff;
-        border: 1px solid rgba(255,255,255,0.25);
+
+/* ACTION */
+.erppagelist-btn-action {
+    background: #007bff;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+}
+
+    .erppagelist-btn-action:hover {
+        background: #fff;
+        color: #007bff;
+        border: 1px solid #007bff;
     }
-        .erppagelist-btn-action:hover {
-            background: #fff;
-            color: #007bff;
-            border: 1px solid #007bff;
-        }
 /* TOOLBAR */
 .erppagelist-toolbar {
     margin-top: 10px;
@@ -84,6 +192,7 @@
     background: #fff;
     border-radius: 8px;
 }
+
 .erppagelist-toolbar-end {
     margin-top: 6px;
     display: flex;
@@ -103,7 +212,7 @@
     background: #fff;
     border: 1px solid #cdcdcd;
     padding: 4px 8px;
-    border-radius: 6px;
+    border-radius: 25px;
     width: 350px;
 }
 
@@ -115,7 +224,7 @@
         border: none;
         outline: none;
         width: 100%;
-        font-size: 13px;
+        font-size: 12px;
     }
 
 /* ACTIONS RIGHT */
@@ -139,11 +248,11 @@
     .erppagelist-action.delete {
         color: #dc2626;
     }
+
 .hidden-col {
     display: none;
 }
 /* PAGINATION (PREMIUM UI) */
-/* MAIN LAYOUT */
 .erppagelist-pagination {
     margin-top: 8px;
     display: flex;
@@ -198,7 +307,7 @@
 .page-nav {
     border: none;
     background: #256d29;
-    padding: 6px 10px;
+    padding: 4px 8px;
     border-radius: 6px;
     cursor: pointer;
     color: #fff;
@@ -227,10 +336,12 @@
     transform: translateY(0);
     transition: all 0.2s ease;
 }
+
 .erppagelist-pages {
     font-size: 13px;
     font-weight: 500;
 }
+
 .page-current {
     font-size: 13px;
     font-weight: 500;
@@ -240,71 +351,59 @@
     border-radius: 6px;
 }
 
-
-
 /* TABLE */
 .excel-table {
-    position: relative;
-    background: #fff;
-    border-radius: 8px;
-    /* IMPORTANT FIX */
-    overflow: visible; /* 🔥 change this */
-    width: 100%; /* FIX */
     table-layout: fixed;
+    width: 100%;
+    min-width: 100%;
 }
-/* ACTION BAR */
-.erppage-actions {
+
+.width-table td {
+    padding: 4px 6px;
+}
+
+.excel-table thead th {
     position: sticky;
-    bottom: 0;
-    display: flex; /* 🔥 MISSING */
-    justify-content: flex-end; /* now works */
-    gap: 10px;
-    background: #fff;
-    padding: 6px 12px; /* better spacing */
-    border-top: 1px solid #eee;
-    z-index: 10;
+    top: 0;
+    z-index: 30;
+    background: linear-gradient(135deg,#232323,#0f0f0f);
 }
-    /* HEADER */
-    .excel-table th {
-        position: sticky;
-        top: 0;
-        background: linear-gradient(135deg, #232323, #0f0f0f);
-        padding: 10px;
-        font-size: 13px;
-        text-align: left;
-        user-select: none;
-        color: #ffffff;
-        border-bottom: 2px solid #d1d5db;
-    }
-    
-    /* CELLS */
-    .excel-table td {
-        padding: 5px;
-        font-size: 12px;
-        border-bottom: 1px solid #eee;
-        border-right: 1px solid #eee;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .excel-table th,
-    .excel-table td {
-        background-clip: padding-box; /* prevents overlap glitches */
-    }
-    .excel-table input,
-    .excel-table select {
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
-        box-sizing: border-box;
-    }
+/* HEADER */
+.excel-table th {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(135deg, #232323, #0f0f0f);
+    padding: 10px;
+    font-size: 12px;
+    text-align: left;
+    user-select: none;
+    color: #ffffff;
+    border-bottom: 2px solid #d1d5db;
+}
+/* CELLS */
+.excel-table td {
+    font-size: 12px;
+    border-bottom: 1px solid #eee;
+    border-right: 1px solid #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.excel-table input,
+.excel-table select {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
 
 /* ONLY THIS TABLE */
 .table-row-layout {
     display: flex;
     gap: 16px;
     align-items: flex-start;
-    margin-bottom: 10px; /* vertical gap between rows */
+    margin-bottom: 10px;
 }
 
     /* each table takes equal width */
@@ -312,12 +411,11 @@
         flex: 1;
         min-width: 0;
     }
-.special-6x6-table {
-    height: 175px; /* fixed height */
-    overflow-y: auto; /* vertical scroll */
-   
-}
 
+.special-6x6-table {
+    height: 175px;
+    overflow-y: auto;
+}
     /* Sticky Header ONLY here */
     .special-6x6-table thead th {
         position: sticky;
@@ -325,7 +423,6 @@
         z-index: 20;
         background: linear-gradient(135deg, #232323, #0f0f0f);
     }
-
     /* Optional: fixed equal columns */
     .special-6x6-table td,
     .special-6x6-table th {
@@ -334,68 +431,102 @@
         max-width: none;
     }
 
-
 /* ACTION BUTTONS */
 .act-btn {
     border: none;
     background: none;
     cursor: pointer;
-    margin: 0 3px;
     font-size: 14px;
 }
 
     .act-btn.edit {
-        background: #d4e9ff;
-        color: #007bff;
-        border-radius: 4px;
-        padding: 4px 6px;
+        color: #24A0ED;
     }
 
     .act-btn.document {
-        background: #ffe7c9;
         color: #ff8100;
-        border-radius: 4px;
-        padding: 4px 6px;
     }
 
-        /* Optional: add hover effect consistent with others */
         .act-btn.document:hover {
             opacity: 0.85;
             transform: translateY(-1px);
         }
+
     .act-btn.add {
-        background: #bbedca;
         color: #27723f;
-        border-radius: 4px;
-        padding: 4px 6px;
     }
-    .act-btn.approve {
-        background: #bbedca;
-        color: #27723f;
-        border-radius: 4px;
-        padding: 4px 6px;
-    }
+
     .act-btn.view {
-        background: #d9faff;
-        color: #0492a9;
-        border-radius: 4px;
-        padding: 4px 6px;
+        color: #11912e;
     }
+
     .act-btn.delete {
-        background: #ffdcdc;
         color: #ff4949;
-        border-radius: 4px;
-        padding: 4px 6px;
     }
 
     .act-btn:hover {
         opacity: 0.85;
         transform: translateY(-1px);
     }
-.action-col {
-    text-align: center;
+
+.erp-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    margin: 0 3px;
+    font-size: 13px;
 }
 
+    .erp-btn.view {
+        color: #266e2a;
+        background-color: #d3ffd5;
+        padding: 4px;
+        border-radius: 4px;
+    }
+
+    .erp-btn.delete {
+        color: #fc6180;
+        background-color: #ffd2db;
+        padding: 4px;
+        border-radius: 4px;
+    }
+
+.report-type-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    background: #f4f6f9;
+    border-radius: 10px;
+    border: 1px solid #dce3ea;
+}
+
+    .report-type-switch input[type="radio"] {
+        display: none;
+    }
+
+    .report-type-switch label {
+        min-width: 100px;
+        padding: 6px 18px;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+        color: #555;
+        transition: all 0.25s ease;
+        margin: 0;
+    }
+
+    .report-type-switch input[type="radio"]:checked + label {
+        background: #0d6efd;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.25);
+    }
+
+    .report-type-switch label:hover {
+        background: #e9ecef;
+    }
 /* TOASTER CONTAINER */
 #erp-toast-container {
     position: fixed;
@@ -408,13 +539,10 @@
 }
 /* ================= FIXED GRID TABLE ================= */
 .fixed-grid-table {
-    width: 100%;
-    table-layout: fixed;
     border-collapse: separate;
     border-spacing: 0;
+    position: relative;
 }
-
-
 
     /* Fixed cells */
     .fixed-grid-table th,
@@ -430,25 +558,62 @@
         padding: 6px 8px !important;
     }
 
-    /* Body */
-    .fixed-grid-table td {
-        padding: 6px 6px !important;
-    }
-
     /* Prevent form controls from stretching columns */
     .fixed-grid-table input,
     .fixed-grid-table select,
     .fixed-grid-table textarea {
-        width: 100% !important;
         min-width: 0 !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
+        scroll-margin-right: 120px;
     }
 
 /* Wrapper scroll */
 .fixed-grid-wrapper {
     overflow-x: auto;
     position: relative;
+}
+/*Fixed table Grid Entry*/
+.erppagetable-control {
+    display: block;
+    line-height: 1.25;
+    background-image: none;
+    background-clip: padding-box;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    height: 25px;
+    border-radius: 3px !important;
+    padding: 2px 6px;
+    font-size: 12px;
+    border: none !important;
+}
+
+    .erppagetable-control:focus, .form-select:focus {
+        border: 1px solid #1c5e31 !important;
+        background-color: #fff3e0 !important;
+    }
+
+    .erppagetable-control:focus {
+        color: #495057;
+        background-color: #fff;
+        border-color: #80bdff;
+        outline: 0;
+    }
+/* Single Select */
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--single {
+    border: 1px solid #1c5e31 !important;
+    outline: none !important;
+}
+/* Multiple Select */
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--multiple {
+    border: 1px solid #1c5e31 !important;
+    background-color: #fff3e0 !important;
+    outline: none !important;
+}
+
+button:focus {
+    outline: 1px dotted;
 }
 /* TOASTER ITEM */
 .erp-toast {
@@ -477,6 +642,28 @@
         font-weight: bold;
         font-size: 14px;
     }
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toast-ok-btn {
+    margin-left: 10px;
+    padding: 4px 12px;
+    border: none;
+    border-radius: 4px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+    .toast-ok-btn:hover {
+        background: #f1f1f1;
+    }
 /* RESIZER */
 .resizer {
     width: 5px;
@@ -487,59 +674,76 @@
     cursor: col-resize;
 }
 
-th {
+.fixed-grid-table td.action-col {
+    overflow: visible !important;
+    gap: 6px;
+}
+/*.fixed-grid-wrapper,
+.excel-wrapper,
+.erppagelist-container {
+    overflow-x: auto !important;
+    overflow-y: auto;
+    position: relative;
+}*/
+.excel-wrapper.fixed-grid-wrapper {
+    max-height: 500px; /* or 400px/600px */
+    overflow: auto;
     position: relative;
 }
 
 /* Zebra striping for all excel-table rows with light grey shades */
 .excel-table tbody tr:nth-child(even) td,
 .excel-table tbody tr:nth-child(even) th {
-    background-color: #f9f9f9; /* very light grey */
+    background-color: #f9f9f9;
 }
 
 .excel-table tbody tr:nth-child(odd) td,
 .excel-table tbody tr:nth-child(odd) th {
-    background-color: #f0f0f0; /* white */
+    background-color: #ffffff;
 }
 
 /* Hover effect for full row including action column */
 .excel-table tbody tr:hover td,
 .excel-table tbody tr:hover th {
-    background-color: #e6e6e6; /* slightly darker grey on hover */
+    background-color: #e6e6e6;
 }
 /* ACTION COLUMN FREEZE (FINAL) */
 .fixed-grid-table td.action-col {
     white-space: nowrap;
 }
+
 .fixed-grid-table thead th.action-col {
-    z-index: 999;
-   
+    position: sticky;
+    right: 0;
+    top: 0;
+    z-index: 50;
 }
+
 .fixed-grid-table tbody tr:hover td.action-col {
     background: #f2f2f2;
 }
+
 .fixed-grid-table th.action-col,
 .fixed-grid-table td.action-col {
     position: sticky;
     right: 0;
-   /* width: 140px;*/
-    background: #fff;
-    z-index: 10;
-    padding: 6px 0px !important;
-    /* CENTER EVERYTHING */
+    display: table-cell;
     text-align: center !important;
     vertical-align: middle !important;
+    white-space: nowrap;
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    box-shadow: -4px 0 6px rgba(0,0,0,0.08);
+}
+
+.action-wrap {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 }
 
-/* HEADER ABOVE EVERYTHING */
-.fixed-grid-table th.action-col {
-    z-index: 999;
-    background: linear-gradient(135deg, #232323, #0f0f0f);
-}
 
 .sortable-table th {
     cursor: pointer;
@@ -554,20 +758,218 @@ th {
 /* Prevent layout breaking for unlimited columns */
 .erppagelist-container {
     -webkit-overflow-scrolling: touch;
-   /* margin-top: 10px;*/
-    padding: 8px 6px;
+    padding: 8px;
     background: #fff;
     border-radius: 8px;
 }
-
 /* Excel wrapper safety */
 .excel-wrapper {
-    display:block;
+    display: block;
     width: 100%;
     overflow-x: auto;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 0; /* remove padding inside wrapper */
+}
+
+/* ==========================================
+   ERP ENTERPRISE FILTER DROPDOWN
+========================================== */
+
+.erppage-search-inputdropdown {
+    position: relative;
+    width: 100%;
+    /*min-width: 220px;*/
+}
+
+.erppage-search-inputdropdown-control {
+    min-height: 22px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 2px 6px;
+}
+
+.erppage-search-inputdropdown-selected {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    overflow: hidden;
+    height: 20px !important;
+}
+
+
+
+.erppage-search-inputdropdown-control:focus-within {
+    border-color: #2f7d32;
+    box-shadow: 0 0 0 2px rgba(47,125,50,.15);
+}
+
+.erppage-search-inputdropdown-placeholder {
+    color: #888;
+    font-size: 12px;
+}
+
+.erppage-search-inputdropdown-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    color: #1b5e20;
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+    .erppage-search-inputdropdown-chip i {
+        cursor: pointer;
+    }
+
+
+.erppage-search-inputdropdown-chip-single {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #ffffff;
+    color: #0f0f0f;
+    border-radius: 20px;
+    /*padding: 2px 8px;*/
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+    .erppage-search-inputdropdown-chip-single i {
+        cursor: pointer;
+    }
+
+.erppage-search-inputdropdown-chip-more {
+    background: #f3f4f6;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #666;
+}
+
+.erppage-search-inputdropdown-arrow {
+    margin-left: auto;
+    color: #666;
+}
+
+.erppage-search-inputdropdown-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    z-index: 99999;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+
+    .erppage-search-inputdropdown-panel.show {
+        display: block;
+    }
+
+.erppage-search-inputdropdown-toolbar {
+    display: flex;
+    gap: 6px;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+    .erppage-search-inputdropdown-toolbar button {
+        border: none;
+        background: transparent;
+        color: #2f7d32;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+.erppage-search-inputdropdown-search {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+    .erppage-search-inputdropdown-search input {
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 3px 8px;
+        font-size: 11px;
+    }
+
+.erppage-search-inputdropdown-list {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.erppage-search-inputdropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+    .erppage-search-inputdropdown-item:hover,
+    .erppage-search-inputdropdown-item.active {
+        background: #2952cc;
+        color: white;
+    }
+
+    .erppage-search-inputdropdown-item input[type=checkbox] {
+        width: 14px;
+        height: 14px;
+        accent-color: #2f7d32;
+        cursor: pointer;
+    }
+
+.erppage-search-inputdropdown-count {
+    margin-left: auto;
+    font-size: 10px;
+    background: #eef2ff;
+    color: #3b5bdb;
+    border-radius: 10px;
+    padding: 2px 6px;
+}
+
+.erppage-search-inputdropdown-footer {
+    padding: 8px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.erppage-search-inputdropdown-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.erppage-search-inputdropdown-btn-clear {
+    background: #f3f4f6;
+}
+
+.erppage-search-inputdropdown-btn-apply {
+    background: linear-gradient(135deg,#2f7d32,#1b5e20);
+    color: white;
 }
 /*Tooltip*/
 .tooltip-btn {
@@ -599,9 +1001,8 @@ th {
 /* Improve scroll behavior */
 .erppagelist-container::-webkit-scrollbar,
 .excel-wrapper::-webkit-scrollbar {
-    width: 6px; /* vertical scrollbar width */
-
-    height: 6px;
+    width: 8px;
+    height: 10px;
 }
 
 .erppagelist-container::-webkit-scrollbar-thumb,
@@ -668,32 +1069,18 @@ th {
     }
 
 
-/* Center the Action column header and cell content */
-.fixed-grid-table th.action-col,
-.fixed-grid-table td.action-col {
-    text-align: center !important;
-    vertical-align: middle !important;
+/* Remove default button margins */
+.fixed-grid-table td.action-col .act-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
-
-
-
-    /* Remove default button margins */
-    .fixed-grid-table td.action-col .act-btn {
-        margin: 0 !important;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
 /*Excel table end*/
 
-/* ============================= */
 /* ENTERPRISE HEADER RESPONSIVE  */
-/* ============================= */
-
 @media (max-width: 1024px) {
 
     .erppagelist-header {
-        
         padding: 10px 12px;
     }
 
@@ -724,7 +1111,7 @@ th {
     }
 
     .erppagelist-header {
-        flex-direction: row; /* KEEP SAME ROW */
+        flex-direction: row;
         flex-wrap: wrap;
         align-items: center;
     }
@@ -735,12 +1122,13 @@ th {
     }
 
     .excel-table {
-        min-width: 900px; /* keeps scroll alive */
+        min-width: 900px;
     }
 
     .erppagelist-container {
         overflow-x: auto;
     }
+
     .erppagelist-header-right {
         margin-left: auto;
         justify-content: flex-end;
@@ -750,6 +1138,7 @@ th {
     .erp-card {
         display: block;
     }
+
     .erppagelist-title {
         flex: 1;
         font-size: 14px;
@@ -759,19 +1148,20 @@ th {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
+
     .erppagelist-btn {
         width: auto;
         font-size: 12px;
         padding: 6px 10px;
     }
-    .erppagelist-btn span {
-        display: none;
-    }
+
+        .erppagelist-btn span {
+            display: none;
+        }
 }
 
 /* VERY SMALL DEVICES */
 @media (max-width: 480px) {
-
     .erppagelist-header {
         flex-direction: row;
         flex-wrap: nowrap;
@@ -783,7 +1173,7 @@ th {
     .erppagelist-title {
         font-size: 13px;
         flex: 1;
-        min-width: 0; /* prevents overflow issues */
+        min-width: 0;
     }
 
     .erppagelist-header-right {
@@ -803,4 +1193,80 @@ th {
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+}
+
+
+/*table color*/
+.po-generated-row,
+.po-generated-row td,
+.po-generated-row input,
+.po-generated-row select,
+.po-generated-row textarea {
+    background-color: #ffe5b6 !important;
+}
+
+    .po-generated-row .select2-container--default .select2-selection--single {
+        background: #ffe5b6 !important;
+        border: 1px solid #ffe5b6 !important;
+    }
+
+    .po-generated-row .select2-selection__rendered {
+        background: #ffe5b6 !important;
+        color: #000 !important;
+    }
+
+    .po-generated-row .select2-selection__arrow {
+        background: #ffe5b6 !important;
+    }
+
+/*.order-received-row,
+.order-received-row td,
+.order-received-row input,
+.order-received-row select,
+.order-received-row textarea {
+    background-color: #cdf9da !important;
+}
+
+    .order-received-row .select2-container--default .select2-selection--single {
+        background: #cdf9da !important;
+        border: 1px solid #cdf9da !important;
+    }
+
+    .order-received-row .select2-selection__rendered {
+        background: #cdf9da !important;
+        color: #000 !important;
+    }
+
+    .order-received-row .select2-selection__arrow {
+        background: #cdf9da !important;
+    }
+*/
+
+.order-received-row,
+.order-received-row td,
+.order-received-row input,
+.order-received-row select,
+.order-received-row textarea {
+    background-color: #cdf9da !important;
+}
+
+    .order-received-row td .select2-container .select2-selection--single {
+        background: #cdf9da !important;
+        border: 1px solid #cdf9da !important;
+    }
+
+    .order-received-row td .select2-container .select2-selection__rendered {
+        background: #cdf9da !important;
+        color: #000 !important;
+    }
+
+    .order-received-row td .select2-container .select2-selection__arrow {
+        background: #cdf9da !important;
+    }
+
+.ui-widget.ui-widget-content {
+    top: 158px;
+    left: 690.5px;
+    width: 294px;
+    z-index: 9999999999;
 }

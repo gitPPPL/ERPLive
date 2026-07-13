@@ -16,73 +16,21 @@
 		
 
         <div class="">
-            @foreach (var permission in Model.UserMenuPermissions)
-            {
-                if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
-                {
-                    <div class="">
-                        <div class="col-md-12">
-                            @* Add Button *@
-                            @if (Model.UserLevel == 1 || permission._ADD == 1)
-                            {
-                                <button class="btn btn-primary" onclick="window.location.href='@Url.Action("Index", "AssetsMaster")'">
-                                    <i class="fa fa-plus"></i> Add Assets
-                                </button>
-                            }
-                            @* Edit Button *@
-                            @if (Model.UserLevel == 1 || permission._EDIT == 1)
-                            {
-                                <button class="btn btn-warning">
-                                    <i class="fa fa-edit"></i> Edit
-                                </button>
-                            }
-                            @* Delete Button *@
-                            @if (Model.UserLevel == 1 || permission._DELETE == 1)
-                            {
-                                <button class="btn btn-danger">
-                                    <i class="fa fa-trash"></i> Delete
-                                </button>
-                            }
-                            @* Print Button *@
-                            @if (Model.UserLevel == 1 || permission._PRINT == 1)
-                            {
-                                <button class="btn btn-secondary">
-                                    <i class="fa fa-print"></i> Print
-                                </button>
-                            }
-                            @* Export Button *@
-                            @if (Model.UserLevel == 1 || permission._EXPORT == 1)
-                            {
-                                <button class="btn btn-success">
-                                    <i class="fa fa-file-excel-o"></i> Export
-                                </button>
-                            }
-                            @* Mail Button *@
-                            @if (Model.UserLevel == 1 || permission._MAIL == 1)
-                            {
-                                <button class="btn btn-info">
-                                    <i class="fa fa-envelope"></i> Mail
-                                </button>
-                            }
-                            @* Approval Button *@
-                            @if (Model.UserLevel == 1 || permission._APPROVAL == 1)
-                            {
-                                <button class="btn btn-dark">
-                                    <i class="fa fa-check"></i> Approve
-                                </button>
-                            }
-                            @* Doc Detail Button *@
-                            @if (Model.UserLevel == 1 || permission._DOCDETAIL == 1)
-                            {
-                                <button class="btn btn-primary">
-                                    <i class="fa fa-file-text"></i> Doc Detail
-                                </button>
-                            }
-                        </div>
-                    </div>
-                    break;
-                }
-            }
+            <button id="btnAdd">Add</button>
+
+            <button id="btnEdit">Edit</button>
+
+            <button id="btnDelete">Delete</button>
+
+            <button id="btnPrint">Print</button>
+
+            <button id="btnExport">Export</button>
+
+            <button id="btnMail">Mail</button>
+
+            <button id="btnApproval">Approval</button>
+
+            <button id="btnDocDetail">Doc Detail</button>
 
         </div>
 	</div>
@@ -226,6 +174,7 @@
     const pageSize = 10;
 
     $(document).ready(function () {
+         checkPermission();
         loadAllAsset(currentPage);
 
         // Optional: Search with Enter key or delay

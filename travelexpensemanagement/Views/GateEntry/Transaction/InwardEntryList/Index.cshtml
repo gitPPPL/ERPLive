@@ -74,19 +74,19 @@
 <!-- TABLE -->
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
-        <table id="tblInwardEntryList" class="excel-table fixed-grid-table">
+        <table id="tblInwardEntryList" class="excel-table fixed-grid-table table-width resizable-table">
 
             <colgroup>
-                <col style="display:none;">
-                <col style="width: 90px;">
-                <col style="width: 110px;">
-                <col style="width: 90px;">
-                <col style="width: 100px;">
-                <col style="width: 120px;">
+                <col class="hidden-col">
+                <col style="width: 81px;">
+                <col style="width: 119px;">
+                <col style="width: 82px;">
+                <col style="width: 95px;">
+                <col style="width: 114px;">
                 <col style="width: 85px;">
                 <col style="width: 150px;">
                 <col style="width: 85px;">
-                <col style="width: 100px;">
+                <col style="width: 85px;">
                 <col style="width: 100px;">
                 <col style="width: 100px;">
                 <col style="width: 100px;">
@@ -95,7 +95,7 @@
 
             <thead>
                 <tr>
-                    <th style="display:none;">Code</th>
+                    <th class="hidden-col">Code</th>
                     <th>Doc No</th>
                     <th>Doc Type</th>
                     <th>Doc Date</th>
@@ -229,20 +229,21 @@
                     <td>${item.status || ''}</td>
 
                     <td class="action-col">
-
+                    <div class="action-wrap">
                     @if (canEdit)
                     {
-                         <button class="act-btn edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}' ,'${item.v_DATE}')"><i class="fa fa-edit"></i></button>
+                         <button class="act-btn edit btn-edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}' ,'${item.v_DATE}')"><i class="fa fa-edit"></i></button>
                     }        
                                           
-                  <button class="act-btn view" onclick="viewMenuDetails('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
+                  <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
 
                    @if (canDelete)
                     {
-                        <button class="act-btn delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
+                        <button class="act-btn delete btn-delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
                     }              
                 
-                        <button class="act-btn document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+                        <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+                        </div>
                     </td>
                 </tr>
             `);

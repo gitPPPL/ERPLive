@@ -59,10 +59,10 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
         [HttpGet]
         public JsonResult GetTruckOutRecords(
-      DateTime FromDate, DateTime ToDate,
-      string OutType, string DocType,
-      string VehicleNo, string QrCode,
-      int pageNumber = 1, int pageSize = 10)
+            DateTime FromDate, DateTime ToDate,
+            string OutType, string DocType,
+            string VehicleNo, string QrCode,
+            int pageNumber = 1, int pageSize = 10)
         {
             var globelVar = _globalVariableService.GetGlobalVariables();
             var list = new List<dynamic>();
@@ -78,6 +78,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                     // ✅ Required params
                     cmd.Parameters.AddWithValue("@CompCode", globelVar.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", globelVar.PubFYearCode);
                     cmd.Parameters.AddWithValue("@FromDate", FromDate);
                     cmd.Parameters.AddWithValue("@ToDate", ToDate);
 
@@ -144,31 +145,30 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                     foreach (var record in records)
                     {
-                        string query = @"
-                UPDATE GATE1
-                SET OUT_DATE = @OUT_DATE,
-                    OUT_TIME = @OUT_TIME,
-                    EDATE = GETDATE(),
-                    REMARKS = @REMARKS
-                WHERE V_NO = @V_NO
-                    AND YEAR_CODE = @YEAR_CODE
-                    AND COMP_CODE = @COMP_CODE
-                    AND BRANCH_CODE = @BRANCH_CODE
-                    AND DOC_ID = @DOC_ID";
+                        string query = @" UPDATE GATE1 SET OUT_DATE=@OUT_DATE, OUT_TIME=@OUT_TIME, REMARKS=@REMARKS,
+                          OUT_ALLOWED=@OUT_ALLOWED,INOUT_ACTIVE='No',EDATE=GETDATE() WHERE V_NO=@V_NO AND
+                          DOC_ID=@DOC_ID AND YEAR_CODE=@YEAR_CODE AND COMP_CODE=@COMP_CODE AND BRANCH_CODE=@BRANCH_CODE";
 
                         using (SqlCommand cmd = new SqlCommand(query, conn))
                         {
                             cmd.Parameters.AddWithValue("@V_NO", record.V_NO);
-                            cmd.Parameters.AddWithValue("@OUT_DATE", DateTime.Parse(record.OUT_DATE));
+                            if (!string.IsNullOrWhiteSpace(record.OUT_DATE))
+                            {
+                                cmd.Parameters.AddWithValue("@OUT_DATE", DateTime.Parse(record.OUT_DATE));
+                            }
+                            else
+                            {
+                                cmd.Parameters.AddWithValue("@OUT_DATE", DBNull.Value);
+                            }
                             cmd.Parameters.AddWithValue("@OUT_TIME", record.OUT_TIME);
                             cmd.Parameters.AddWithValue("@DOC_ID", record.DOC_ID);
-                            cmd.Parameters.AddWithValue("@REMARKS", record.remarks); 
-
+                            cmd.Parameters.AddWithValue("@REMARKS", record.remarks);
+                            cmd.Parameters.AddWithValue("@OUT_ALLOWED", record.OUT_ALLOWED);
                             cmd.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
                             cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                            cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                            cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVar.PubBranchCode);
 
-                            int rows = cmd.ExecuteNonQuery(); //get affected rows
+                            int rows = cmd.ExecuteNonQuery(); 
                             totalUpdated += rows;
                         }
                     }
@@ -199,63 +199,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                 });
             }
         }
-
-        //[HttpPost]
-        //public IActionResult SaveOutTimes([FromBody] List<TruckOutRecord> records)
-        //{
-        //    if (records == null || !records.Any())
-        //        return BadRequest("No records received.");
-
-        //    var globalVar = _globalVariableService.GetGlobalVariables();
-
-        //    try
-        //    {
-        //        using (SqlConnection conn = _dbConnection.GetErpConnection())
-        //        {
-        //            conn.Open();
-
-        //            foreach (var record in records)
-        //            {
-        //                string query = @"
-        //            UPDATE GATE1
-        //            SET OUT_DATE = @OUT_DATE,
-        //                OUT_TIME = @OUT_TIME,
-        //                EDATE = GETDATE(),
-        //                REMARKS = @REMARKS
-        //            WHERE V_NO = @V_NO
-        //                AND YEAR_CODE = @YEAR_CODE
-        //                AND COMP_CODE = @COMP_CODE
-        //                AND BRANCH_CODE = @BRANCH_CODE
-        //                AND DOC_ID = @DOC_ID";
-
-        //                using (SqlCommand cmd = new SqlCommand(query, conn))
-        //                {
-        //                    cmd.Parameters.AddWithValue("@V_NO", record.V_NO);
-        //                    cmd.Parameters.AddWithValue("@OUT_DATE", DateTime.Parse(record.OUT_DATE));
-        //                    cmd.Parameters.AddWithValue("@OUT_TIME", record.OUT_TIME);
-        //                    cmd.Parameters.AddWithValue("@DOC_ID", record.DOC_ID);
-        //                    cmd.Parameters.AddWithValue("@REMARKS", record.remarks);
-
-        //                    cmd.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
-        //                    cmd.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-        //                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1); // Update if dynamic
-
-        //                    cmd.ExecuteNonQuery();
-        //                }
-        //            }
-        //        }
-
-        //        return Ok(new { success = true, message = "Records updated successfully." });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new
-        //        {
-        //            success = false,
-        //            message = "Error updating records.",
-        //            details = ex.Message
-        //        });
-        //    }
-        //}
     }
 }
+    

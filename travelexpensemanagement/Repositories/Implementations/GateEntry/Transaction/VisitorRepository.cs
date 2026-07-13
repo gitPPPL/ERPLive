@@ -39,7 +39,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
                 cmd.Parameters.AddWithValue("@V_TYPE", vType);
                 cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
-                cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                cmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
                 cmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
 
                 int nextNo = Convert.ToInt32(cmd.ExecuteScalar());
@@ -129,8 +129,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     cmd.Parameters.AddWithValue("@CARD_NO", model.CARD_NO ?? "");
                     cmd.Parameters.AddWithValue("@CARD_CODE", model.CARD_CODE ?? 0);
 
-                    cmd.Parameters.Add("@IMG_FILE", SqlDbType.VarBinary, -1)
-                        .Value = model.IMG_FILE ?? (object)DBNull.Value;
+                    cmd.Parameters.Add("@IMG_FILE", SqlDbType.VarBinary, -1).Value = model.IMG_FILE ?? (object)DBNull.Value;
 
                     cmd.Parameters.AddWithValue("@FILE_NAME", model.FILE_NAME ?? "");
                     cmd.Parameters.AddWithValue("@REMARKS", model.REMARKS ?? "");

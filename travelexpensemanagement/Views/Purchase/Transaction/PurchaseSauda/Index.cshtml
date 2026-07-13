@@ -1,329 +1,339 @@
-﻿@{
+﻿@using System.Text.Json
+
+@{
     ViewBag.Title = "Purchase Sauda";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
+    var databaseName = ViewBag.DatabaseName as string;
+    var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0; // Ensure proper type conversion
+    var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
+    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+
 }
 
-<fieldset>
-    <legend class="legend-field">Purchase Sauda</legend>
-    <div class="row">
-        <div class="offset-md-10 col-md-2">
-            <div class="btn-right">
-                <button id="btnbacklist"
-                        onclick="window.location.href='@Url.Action("Index", "PurchaseSaudaList")'" type="button" class="btn btn-primary">
-                    <i class="fa fa-list"></i>Back to list
-                </button>
-            </div>
+<script>
+    // Passing only required variables to JS
+    window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
+        CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
+        UserId = globalVariables.PubUserId,
+        UserName = globalVariables.PubUserName,
+        UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
+        FYearCode = globalVariables.PubFYearCode,
+        BranchCode = globalVariables.PubBranchCode,
+        LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
+        CompanyName = globalVariables.CompanyName,
+        Address1 = globalVariables.Address1,
+        Address2 = globalVariables.Address2,
+        GST = globalVariables.gstin,
+        PAN = globalVariables.PAN,
+        Phone = globalVariables.Phone,
+        Email = globalVariables.Email
+    }));
+
+    window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
+</script>
+
+
+
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+           <i class="fa fa-cart-plus"></i>
         </div>
+        <div class="erppage-header-title">Purchase Sauda</div>
     </div>
+    <div class="erppage-header-right">
 
-    <form id="PurchaseSaudaForm">
-        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
 
-        <!-- Row 1 -->
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label>Doc No</label>
-                    <input type="number" class="form-control" id="txtDocNo" placeholder="Enter Doc No" readonly>
+         <button class="erppagelist-btn erppagelist-btn-action" id="btnMail">
+                <i class="fa fa-envelope"></i> Mail
+            </button>
+
+        <button type="button" class="erppage-btn erppage-btn-copy" onclick="TransitReport();" >
+            <i class="fa-solid fa-print"></i> Print
+        </button>
+
+
+        <button type="button"
+                id="btn_Sendapproval"
+                style="display:none;" class="erppagebtn_sendapproval">
+            Send For Approval
+        </button>
+
+        <button type="button"
+                id="btn_Approved"
+                style="display:none;" class="erppagebtn_approved">
+            Approved
+        </button>
+
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PurchaseSaudaList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="PurchaseSaudaForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="txtDocNo" placeholder="Enter Doc No" readonly>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label>Doc Date<span class="required">*</span></label>
-                    <input type="date" class="form-control" id="dtDocDate" placeholder="Select Doc Date">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-redinput" id="dtDocDate">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label>Doc Status</label>
-                    <select class="form-control" id="ddlDocStatus">
-                        <option value="">-- Select Status --</option>
-                        <option value="open" selected>Open</option>
-                        <option value="closed">Closed</option>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Status</label>
+                    <select class="erppage-input" id="ddlDocStatus">
+        
                     </select>
-
                 </div>
-            </div>
-      
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label>Supply From<span class="required">*</span></label>
-                    <select class="form-control" id="ddlSupplyFrom">
-                        <option value="">-- Select Supply From --</option>
-                        <option>LOCAL</option>
-                        <option>IMPORT</option>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Supply From</label>
+                    <select class="erppage-input erppage-required" id="ddlSupplyFrom">
+                        <option value="LOCAL">LOCAL</option>
+                        <option value="IMPORT">IMPORT</option>
                     </select>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <fieldset class="fieldset-sub-divide">
-                    <legend class="sub-legend">Party Details</legend>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Party Name<span class="required">*</span></label>
-                                <select class="form-control" id="ddlPartyName">
-                                    <option value="">-- Select Party Name --</option>
-                                </select>
-                            </div>
-                        </div>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Party Details</legend>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Party Name</label>
+                        <select class="erppage-input erppage-required" id="ddlPartyName">
+                              <option value="">Select Party Name</option>
+                        </select>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Address Line 1</label>
-                                <textarea type="text" class="form-control" id="txtAddress1" placeholder="Enter Address Line 1" readonly></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Address Line 2</label>
-                                <textarea type="text" class="form-control" id="txtAddress2" placeholder="Enter Address Line 2" readonly></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Address Line 3</label>
-                                <textarea type="text" class="form-control" id="txtAddress3" placeholder="Enter Address Line 3" readonly></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Station</label>
-                                <input type="text" class="form-control" id="txtStation" placeholder="Enter Station" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Country</label>
-                                <input type="text" class="form-control" id="txtCountry" placeholder="Enter Country" readonly>
-                            </div>
-                        </div>
-                 
-                    </div>
-                    <div class="row">
-                                             
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>Ship From</label>
-                                <select class="form-control" id="ddlShipFrom">
-                                    <option value="">-- Select Ship From --</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <div class="col-md-8">
-                <fieldset class="fieldset-sub-divide" style="height:338px;">
-                    <legend class="sub-legend">Purchase Details</legend>
-                    <div class="row">
-                       
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Item Name<span class="required">*</span></label>
-                                <select class="form-control" id="ddlItemName">
-                                    <option value="">-- Select Item Name --</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>No. of Trucks</label>
-                                <input type="number" class="form-control" id="numTrucks" placeholder="Enter Truck Count">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Weight (Kgs)<span class="required">*</span></label>
-                                <input type="number" class="form-control" id="numWeight" placeholder="Enter Weight">
-                            </div>
-                        </div>
-                    </div>
-                   
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Rate<span class="required">*</span> </label>
-                                <div class="input-divide">
-                                    <select class="form-control" id="ddlRate">
-                                        <option value="Rs">Rs</option>
-                                        <option value="USD">USD</option>
-                                        <option value="Yen">Yen</option>
-                                        <option value="CNY">CNY</option>
-                                    </select>
-                                    <input type="number" class="form-control" id="numRate" placeholder="Enter Rate" >
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>ExRate</label>
-                                <input type="text" class="form-control" id="txtExRate" placeholder="Enter ExRate">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Discount %</label>
-                                <input type="number" class="form-control" id="numDiscount" placeholder="Enter Discount %">
-                            </div>
-                        </div>
-                    
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Tax Rate<span class="required">*</span></label>
-                                <div class="input-divide">
-                                    <select class="form-control" id="ddlTaxRate" style="width:100px;">
-                                        <option value="">--Select Tax Rate--</option>
-                                    </select>
-                                    <input type="number" class="form-control" id="numTaxRate" placeholder="Enter Tax Rate" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Net Rate</label>
-                                <input type="number" class="form-control" id="numNetRate" placeholder="Enter Net Rate" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Waste %</label>
-                                <input type="number" class="form-control" id="numWaste" placeholder="Enter Waste %">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="btn-mt">
-                                <div class="form-group" style="display: flex;gap: 10px;">
-                                    <input type="checkbox" id="chkNatural">
-                                    <label class="checkbox-label" for="chkNatural">Only Natural Bottle Accepted</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Payment Term<span class="required">*</span></label>
-                                <select class="form-control" id="ddlPaymentTerm">
-                                    <option value="">-- Select Payment Term --</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Purchase Through<span class="required">*</span></label>
-                                <select class="form-control" id="ddlPurchaseThrough">
-                                    <option value="">-- Select Purchase Through --</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Freight Term<span class="required">*</span></label>
-                                <select class="form-control" id="ddlFreightTerm">
-                                    <option value="">-- Select Freight Term --</option>
-                                    <option value="FOR">FOR</option>
-                                    <option value="EX">EX</option>
-                                    <option value="FOB">FOB</option>
-                                    <option value="CIF">CIF</option>
-                                    <option value="CFR">CFR</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Delivery Term</label>
-                                <input type="text" class="form-control" id="txtDeliveryTerm" placeholder="Enter Delivery Term" maxlength="100">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Remarks</label>
-                                <textarea type="text" class="form-control" id="txtRemarks" placeholder="Enter Remarks"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-        </div>
-        <fieldset class="fieldset-sub">
-            <legend class="sub-legend">Import Terms</legend>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>PI No.</label>
-                        <input type="text" class="form-control" id="NumPINO" placeholder="Enter PI No." maxlength="50">
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Add. Line 1</label>
+                        <input type="text" class="erppage-input" id="txtAddress1" placeholder="Enter Address Line 1" readonly>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>PI Dt</label>
-                        <input type="date" class="form-control" id="DtPIDate">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Add. Line 2</label>
+                        <input type="text" class="erppage-input" id="txtAddress2" placeholder="Enter Address Line 2" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Add. Line 3</label>
+                        <input type="text" class="erppage-input" id="txtAddress3" placeholder="Enter Address Line 3" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Station</label>
+                        <select class="erppage-input" id="txtStation" disabled>
+                              <option value="">Select Station</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Contact No</label>
+                        <input type="text" class="erppage-input" id="txtContactNo" placeholder="Enter Contact No" readonly>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>Offer No.</label>
-                        <input type="text" class="form-control" id="NumOfferNo" placeholder="Enter Offer No." maxlength="50">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Country</label>
+                        <input type="text" class="erppage-input" id="txtCountry" placeholder="Enter Country" readonly>
                     </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>Broker Name</label>
-                        <select class="form-control" id="ddlBrokerName">
-                            <option value="">-- Select Broker Name --</option>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Deliv. From</label>
+                        <input type="text" class="erppage-input" id="txtDeliveryFrom" placeholder="Enter Delivery From" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ship From</label>
+                        <select class="erppage-input" id="ddlShipFrom">
+                              <option value="">Select Ship From</option>
                         </select>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>Brokerage/Comm.</label>
-                        <input type="number" class="form-control" id="NumBrokerage" placeholder="Enter Brokerage/Comm"  maxlength="12">
+            </fieldset>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Purchase Details</legend>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Item Name</label>
+                        <select class="erppage-input erppage-required" id="ddlItemName">
+                            <option value="">Select Item Name</option>
+                        </select>
                     </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label>Packing Type</label>
-                        <select class="form-control" id="ddlPackingType">
-                            <option value="">-- Select Packing Type --</option>
-                            <option>Jumbo</option>
-                            <option>Box</option>
-                            <option>Pallet</option>
-                            <option>Bales</option>
-                            <option>Other</option>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">No. of Trucks</label>
+                        <input type="number" class="erppage-input" id="numTrucks" placeholder="Enter Truck Count" oninput="if (this.value.length > 4) this.value = this.value.slice(0, 4)">
+                    </div>
+                   <div class="erppage-divfield">
+                        <label class="erppage-label">Weight (Kgs)</label>
+                        <input type="number" class="erppage-redinput" id="numWeight" placeholder="Enter Weight" oninput="if (this.value.length > 10) this.value = this.value.slice(0, 10)">
+                    </div>
+                     <div class="erppage-divfield">
+                        <label class="erppage-label">Item Type</label>
+                        <select class="erppage-input erppage-required" id="ddlItemType">
+                            <option value="">Select Item Type</option>
+                            <option value="PSF">PSF</option>
+                            <option value="MB">MB</option>
+                            <option value="CHIPS">CHIPS</option>
+                            <option value="FABRIC">FABRIC</option>
+                            <option value="HD">HD</option>
+                            <option value="RAW">RAW</option>       
                         </select>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label>Dispatch From</label>
-                        <select class="form-control" id="ddlDispatchFrom">
-                            <option value="">-- Select Dispatch Location --</option>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Rate</label>
+                        <div class="erppage-inline-group">
+                            <select class="erppage-redinput" id="ddlRate">
+                                <option value="Rs">Rs</option>
+                                <option value="USD">USD</option>
+                                <option value="Yen">Yen</option>
+                                <option value="CNY">CNY</option>
+                            </select>
+                            <input type="number" class="erppage-redinput" id="numRate" placeholder="Enter Rate" oninput="if (this.value.length > 9) this.value = this.value.slice(0, 9)">
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">ExRate</label>
+                        <input type="text"class="erppage-input" id="txtExRate" placeholder="Enter ExRate" oninput="if (this.value.length > 8) this.value = this.value.slice(0, 8)">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Discount %</label>
+                        <input type="number" class="erppage-input" id="numDiscount" placeholder="Enter Discount %" oninput="if (this.value.length > 10) this.value = this.value.slice(0, 12)">
+                    </div>
+                     <div class="erppage-divfield">
+                        <label class="erppage-label">Freight Rate</label>
+                        <div class="erppage-inline-group">
+                            <input type="number" class="erppage-input" id="numFreightRate" placeholder="Enter Freight Rate" oninput="if (this.value.length > 10) this.value = this.value.slice(0, 12)" >
+                            <input type="text" class="erppage-input" id="cmbtaxterm" placeholder="Enter Tax Term" style="display:none;">
+                        </div>
+                    </div>
+                </div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Tax Rate</label>
+                        <div class="erppage-inline-group">
+                            <select class="erppage-redinput" id="ddlTaxRate" style="width:90px;">
+                                <option value="">Select Tax Rate</option>
+                            </select>
+                            <input type="number" class="erppage-redinput" id="numTaxRate" placeholder="Enter Tax Rate"  oninput="if (this.value.length > 15) this.value = this.value.slice(0, 15) " >
+                        </div>
+                    </div>
+                     <div class="erppage-divfield">
+                        <label class="erppage-label">Net Rate</label>
+                        <input type="number" class="erppage-input" id="numNetRate" placeholder="Enter Net Rate" oninput="if (this.value.length > 10) this.value = this.value.slice(0, 12)" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Waste %</label>
+                        <input type="number" class="erppage-input" id="numWaste" placeholder="Enter Waste %" oninput="if (this.value.length > 3) this.value = this.value.slice(0, 7)">
+                    </div>
+                    <div class="erppage-divfield">
+                        <div class="erppage-checkbox-wrap">
+                            <input class="erppage-checkbox-input" type="checkbox" id="chkNatural">
+                            <label for="chkNatural" class="erppage-checkbox-label">Only Natural Bottle Accepted</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Paym. Term</label>
+                        <select class="erppage-input erppage-required" id="ddlPaymentTerm">
+                            <option value="">Select Payment Term</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Purchase Thr.</label>
+                        <select class="erppage-input erppage-required" id="ddlPurchaseThrough">
+                            <option value="">Select Purchase Through</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Freight Term</label>
+                        <select class="erppage-input erppage-required" id="ddlFreightTerm">
+                            <option value="">Select Freight Term</option>
+                            <option value="FOR">FOR</option>
+                            <option value="EX">EX</option>
+                            <option value="FOB">FOB</option>
+                            <option value="CIF">CIF</option>
+                            <option value="CFR">CFR</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Delivery Term</label>
+                        <input type="text" class="erppage-input" id="txtDeliveryTerm" placeholder="Enter Delivery Term" maxlength="100">
+                    </div>
+                </div>
+                <div class="erppage-grid4">
+                     <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Remarks</label>
+                        <textarea class="erppage-input" id="txtRemarks" placeholder="Enter Remarks" rows="2" maxlength="250"></textarea>
+                    </div>
+                 </div>
+            </fieldset>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Import Terms</legend>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">PI No.</label>
+                        <input type="text" class="erppage-input" id="NumPINO" placeholder="Enter PI No." maxlength="50">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">PI Dt</label>
+                        <input type="date" class="erppage-input" id="DtPIDate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Offer No.</label>
+                        <input type="text" class="erppage-input" id="NumOfferNo" placeholder="Enter Offer No." maxlength="50">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" style="display:none">Offer Dt</label>
+                        <input type="date" class="erppage-input" id="DtOfferDate" style="display:none;">
+                    </div>
+                </div>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Broker Name</label>
+                        <select class="erppage-input" id="ddlBrokerName">
+                            <option value="">Select Broker Name</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Brokerage /Comm.</label>
+
+                        <input type="text" class="erppage-input"  id="NumBrokerage"  placeholder="Enter Brokerage/Comm"   maxlength="10"  inputmode="numeric"  pattern="[0-9]*">
+
+                        @* <input type="number" class="erppage-input" id="NumBrokerage" placeholder="Enter Brokerage/Comm"  maxlength="10" > *@
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Offer Rate</label>
+                        <input type="text" class="erppage-input" id="NumOfferRate" placeholder="Enter Offer Rate" maxlength="10"  inputmode="numeric"  pattern="[0-9]*">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Packing Type</label>
+                        <select class="erppage-input" id="ddlPackingType">
+                            <option value="">Select Packing Type</option>
+                            <option value="Jumbo">Jumbo</option>
+                            <option value="Box">Box</option>
+                            <option value="Pallet">Pallet</option>
+                            <option value="Bales">Bales</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label>Payment Type</label>
-                        <select class="form-control" id="ddlPaymentType">
-                            <option value="">-- Select Payment Type --</option>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Dispatch From</label>
+                        <select class="erppage-input" id="ddlDispatchFrom">
+                            <option value="">Select Dispatch Location</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Payment Type</label>
+                        <select class="erppage-input" id="ddlPaymentType">
+                            <option value="">Select Payment Type</option>
                             <option value="Advance">Advance</option>
                             <option value="Due">Due</option>
                             <option value="Paid">Paid</option>
@@ -333,1139 +343,289 @@
                             <option value="LC">LC</option>
                         </select>
                     </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group position-relative">
-                        <label for="DtSBLCDue">SBLC Due Dt</label>
-                        <div class="calender-check">
-                            <input type="date" class="form-control" id="DtSBLCDue" style="padding-left: 30px;">
-                            <input type="checkbox" id="chkSBLCDue" class="checkbox-inside">
+                    <div class="erppage-divfield erppage-datefield">
+                        <label class="erppage-label">SBLC Due Dt</label>
+                        <div class="erppage-datebox">
+                            <input type="date" class="erppage-input erppage-dateinput" id="DtSBLCDue">
+                            <label class="erppage-checkbox-inside">
+                                <input type="checkbox" class="erppage-checkbox-input" id="chkSBLCDue">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="erppage-divfield erppage-datefield">
+                        <label class="erppage-label">LC Due Dt</label>
+                        <div class="erppage-datebox">
+                            <input type="date" class="erppage-input erppage-dateinput" id="DtLCDue">
+                            <label class="erppage-checkbox-inside">
+                                <input type="checkbox" class="erppage-checkbox-input" id="chkDtLCDue">
+                            </label>
                         </div>
                     </div>
                 </div>
-
-               @*  <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="DtSBLCDue">SBLC Due Dt</label>
-                        <div class="d-flex align-items-center">
-                            <input type="checkbox" id="chkSBLCDue" style="margin-right: 10px;">
-                            <input type="date" class="form-control" id="DtSBLCDue">
-                        </div>
-                    </div>
-                </div> *@
-                <div class="col-md-3">
-                    <div class="form-group position-relative">
-                        <label for="DtLCDue">LC Due Dt</label>
-                        <div class="calender-check">
-                            <input type="date" class="form-control" id="DtLCDue" style="padding-left: 30px;">
-                            <input type="checkbox" id="chkDtLCDue" class="checkbox-inside">
-                        </div>
-                    </div>
-                </div>
-                @* <div class="col-md-3">
-                    <div class="form-group">
-                        <label>LC Due Dt</label>
-                        <div class="d-flex align-items-center">
-                            <input type="checkbox" id="chkDtLCDue" style="margin-right: 10px;">
-                        <input type="date" class="form-control" id="DtLCDue" >
-                        </div>
-                    </div>
-                </div> *@
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label id="GradeID">Grade<span class="required">*</span></label>
-                        <select class="form-control" id="ddlGrade">
-                            <option value="">-- Select Grade --</option>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Grade</label>
+                        <select class="erppage-input erppage-required" id="ddlGrade">
+                            <option value="">Select Grade</option>
                             <option value="PE">PE</option>
                             <option value="PP">PP</option>
                         </select>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Item Remarks</label>
-                        <textarea class="form-control" id="TxtItemRemarks" placeholder="Enter remarks" maxlength="300"   ></textarea>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Item Remarks</label>
+                        <textarea class="erppage-input" id="TxtItemRemarks" placeholder="Enter remarks" maxlength="300" rows="1"></textarea>
                     </div>
                 </div>
-            </div>
-            <div class="card">
-                <div class="table-responsive-entry">
-                    <table id="tblAttachmentPS" class="table-entry">
-                        <thead class="table-head">
-                            <tr>
-                                <th style="display:none;">Code</th>
-                                <th>File Name</th>
-                                <th>File Upload</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+            </fieldset>
 
+
+
+
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Attachment</legend>
+                <div class="erppageattachmentsection">
+                    <div class="erppageattachmentsectionrow">
+                        <div class="erppageattachmentsectioncol">
+                            <div class="erppageattachmentsectionuploadcard">
+                                <h2 class="erppageattachmentsectiontitle">UPLOAD MULTIPLE FILES</h2>
+                                <div class="erppageattachmentsectiondropzone" id="dropZone">
+                                    <div class="erppageattachmentsectioncloud">
+                                        ☁
+                                    </div>
+                                    <div class="erppageattachmentsectiondragtext">
+                                        Drag & Drop your files here
+                                    </div>
+                                    <div class="erppageattachmentsectionor">
+                                        OR
+                                    </div>
+
+                                    <button type="button" class="erppageattachmentsectionbrowsebtn" id="browseBtn">
+                                        Browse Files
+                                    </button>                                
+                                    <input type="file" id="fileInput" multiple hidden>
+
+                       
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppageattachmentsectioncol">
+                            <div class="erppageattachmentsectionfilecard">
+                                <div class="erppageattachmentsectionheader">
+                                    Uploaded Files
+                                </div>
+                                <div class="erppageattachmentsectionfilelist"
+                                     id="fileList">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+
+
+
+
+
+            <div class="erppage-internalaction">
+
+                <button type="button" class="erppage-btn erppage-btn-common-disabled"   id="btn_ShowPuchasehistory">
+                    <i class="fa fa-history"></i>
+                    <span>Show Purchase History</span>
+                </button>
+
+                <button type="button" class="erppage-btn erppage-btn-common-disabled" data-bs-toggle="modal" data-bs-target="#deliveryPlanModal">
+                    <i class="fa-solid fa-truck"></i>
+                    <span>Create/View Delivery Plan</span>
+                </button>
+                <button type="button" class="erppage-btn erppage-btn-common-disabled" id="btn_CreatePurchaseOrder">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    <span>Create Purchase Order</span>
+                </button>
+                <button type="button" class="erppage-btn erppage-btn-common" id="btn_ModificationOrder" style="display:none;">
+                   <i class="fa fa-pencil-square-o"></i>
+                    <span id="modification_count" style="display:none;"></span>
+                </button>
             </div>
         </fieldset>
-        <div class="row">
-            <div class="offset-md-6 col-md-6">
-                <div class="button-right">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deliveryPlanModal">
-                        <i class="fa fa-truck"></i> Create/View Delivery Plan
+        <div class="erppage-actions">
+            <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
+    </div>
+</div>
+@* Modal Popup *@
+<div class="modal fade" id="deliveryPlanModal" tabindex="-1" aria-labelledby="deliveryPlanModalLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-truck"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="deliveryPlanModalLabel">Dispatch Delivery Planning</h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="erppagesmodal-body">
+                <div class="erppage-grid3">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc No</label>
+                        <input type="text" class="erppage-input" id="TxtDispatchDocNo" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc Date</label>
+                        <input type="date" class="erppage-input" id="DispatchDocDate" readonly>
+                    </div>
+                </div>
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblPurchaseQuotationList" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:120px;">  
+                            <col style="width:220px;">  
+                            <col style="width:140px;">  
+                            <col style="width:120px;">  
+                            <col style="width:220px;">  
+                            <col style="width:100px;">  
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Del. Date</th>
+                                <th>Quantity</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" class="erppage-input" id="TxtIcode"></td>
+                                <td><input type="text" class="erppage-input" id="TxtItemName"></td>
+                                <td><input type="date" class="erppage-input" id="DtDelDate"></td>
+                                <td><input type="number" class="erppage-input" id="NumQuantity"></td>
+                                <td><input type="text" class="erppage-input" id="TxtRemarks"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="erppagesmodal-action mt-2">
+                    <button id="DispatchSave" type="button" class="erppagesmodal-btn erppagesmodal-btn-success">
+                        <i class="fa fa-save"></i> Save
                     </button>
-
-                    <button type="button" class="btn btn-primary">
-                        <i class="fa fa-file-invoice"></i> Create Purchase Order
-                    </button>
-
                 </div>
             </div>
+
         </div>
-        <div class="row">
-            <div class="offset-md-9 col-md-3">
-                <div class="btn-last">
-                    <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+    </div>
+</div>
+
+<div class="modal fade" id="showpurchasehistoryModal" tabindex="-1" aria-labelledby="showpurchasehistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-truck"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="showpurchasehistoryModalLabel">Dispatch Delivery Planning</h5>
                 </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
             </div>
-        </div>
-        <div class="modal fade" id="deliveryPlanModal" tabindex="-1" aria-labelledby="deliveryPlanModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="deliveryPlanModalLabel">Dispatch Delivery Planning</h5>
-                        <i class="fa fa-close btn-close" data-bs-dismiss="modal"></i>
-                    </div>
-
-                    <div class="modal-body">
-
-                        <!-- Form Row -->
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Doc No</label>
-                                    <input type="text" class="form-control" id="TxtDispatchDocNo" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Doc Date</label>
-                                    <input type="date" class="form-control" id="DispatchDocDate" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Table -->
-                        <div class="card">
-                            <div class="table-responsive">
-                                <table id="tblPurchaseQuotationList" class="table-width">
-                                    <thead class="table-head">
-                                        <tr>
-                                            <th>Icode</th>
-                                            <th>Item Name</th>
-                                            <th>Del. Date</th>
-                                            <th>Quantity</th>
-                                            <th>Remarks</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="no-border-input">
-                                            <td><input type="text" class="form-control" id="TxtIcode" /></td>
-                                            <td><input type="text" class="form-control" id="TxtItemName" /></td>
-                                            <td><input type="date" class="form-control" id="DtDelDate" /></td>
-                                            <td><input type="number" class="form-control" id="NumQuantity" /></td>
-                                            <td><input type="text" class="form-control" id="TxtRemarks" /></td>
-                                        </tr>
-
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div class="modal-footer">
-                        <button id="DispatchSave" type="button" class="btn btn-success">
-                            <i class="fa fa-save"></i> Save
-                        </button>
-
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </form>
-</fieldset>
-
-<script>
-        $(document).ready(async function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const rowId = urlParams.get('id');
-            const mode = urlParams.get('mode');
-            const $attachmentTbody = $('#tblAttachmentPS tbody');
-            const $dispatchtableTbody = $('#tblPurchaseQuotationList tbody');
-            let attachmentIndex = Date.now();
-
-          addAttachmentRow()
-
-           if (!rowId) {
-                await GetVNo();
-                document.getElementById('dtDocDate').valueAsDate = new Date();
-                 document.getElementById('DispatchDocDate').valueAsDate = new Date();
-            }
-
+            <div class="erppagesmodal-body">
                
-
-                    LoadDropDown()
-            .then(() => {
-                if (rowId) {
-                    return LoadFormByID(rowId).then(() => {
-                        const selectedValue = $('#ddlSupplyFrom').val();
-
-                 
-                        if (selectedValue === "IMPORT") {
-                            $('#GradeID').html('Grade <span class="required">*</span>');
-                        } else {
-                            $('#GradeID').html('Grade');
-                        }
-
-                        const DtSBLCDue = $("#DtSBLCDue").val();
-                        if (DtSBLCDue) {
-                        $("#chkSBLCDue").prop("checked", true);
-                        } else {
-                        $("#chkSBLCDue").prop("checked", false);
-                        }
-
-                        const DtLCDue = $("#DtLCDue").val();
-                        if (DtLCDue) {
-                        $("#chkDtLCDue").prop("checked", true);
-                        } else {
-                        $("#chkDtLCDue").prop("checked", false);
-                        }
-                                               
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("An error occurred:", error);
-            });
-
-
-          if (mode === "view") {
-               setFormReadOnly();
-                  $('#PurchaseRequestForm').after(
-                 '<span class="badge bg-secondary ms-2">Read‑Only Mode</span>'
-               );
-             }
-
-          $('#ddlPartyName').on('change', function () {
-                const selectedValue = this.value;
-                if (selectedValue) {
-                fetchDDlParty(selectedValue);
-            }
-            });
-
-          $('#ddlSupplyFrom').on('change', function () {
-                const selectedValue = this.value;
-                if (selectedValue === "IMPORT") {
-                    $('#GradeID').html('Grade <span class="required">*</span>');
-                } else {
-                    $('#GradeID').html('Grade');
-                }
-            });
-
-          $('.btn-add-row-last').on('click', function () {
-            const lastRowFileNameInput = $attachmentTbody.find('tr:last input[type="text"]').val();
-            if (lastRowFileNameInput === '') {
-                toastr.warning('Please Select Prevoius Row Attachment.');
-                return;
-            }
-            addAttachmentRow();
-            });
-
-          $('#numRate, #numDiscount,  #ddlTaxRate').on('change', recalculateNetRate);
-
-          $(document).on('click', '.btn-add-action', function () {
-
-            const lastRowFileNameInput = $attachmentTbody.find('tr:last input[type="text"]').val();
-            if (lastRowFileNameInput === '') {
-                toastr.warning('Please Select Prevoius Row Attachment.');
-                return;
-            }
-
-            addAttachmentRow();
-          });
-
-          $(document).on('click', '.btn-delete-action', function () {
-            if (confirm('Are you sure you want to delete this attachment?')) {
-              $(this).closest('tr').remove();
-            }
-          });
-
-          $(document).on('click', '.btn-edit-action', function () {
-            const $btn = $(this);
-            const $row = $btn.closest('tr');
-            const $input = $row.find('input[type="text"]');
-
-            $btn.toggleClass('editing');
-            const isEditing = $btn.hasClass('editing');
-
-            $input.prop('disabled', !isEditing);
-            $input.focus();
-            $input.css('background-color', isEditing ? '#f0f8ff' : 'white');
-          });
-
-          $(document).on('change', 'input[type="file"]', function () {
-            const fileInput = this;
-            const fileName = fileInput.files.length ? fileInput.files[0].name : '';
-            const $row = $(this).closest('tr');
-            $row.find('input[type="text"]').val(fileName);
-          });
-
-          $("#btn-save").click(function (e) {
-            e.preventDefault();
-                    const DOC_ID = $.trim($('#TxtCode').val()) || null;
-                    const V_NO = $.trim($('#txtDocNo').val()) ? parseFloat($.trim($('#txtDocNo').val())) : null;
-                    const V_DATE = formatDate($("#dtDocDate").val()) || null;
-                    const SHIP_CODE = parseInt($('#ddlShipFrom').val()) || 0;
-                    const SHIP_TYPE = $.trim($('#ddlSupplyFrom option:selected').text()) || "";
-                    const PARTY_CODE = parseInt($('#ddlPartyName').val()) || 0;
-                    const ADD1 = $.trim($('#txtAddress1').val()) || "";
-                    const ADD2 = $.trim($('#txtAddress2').val()) || "";
-                    const ADD3 = $.trim($('#txtAddress3').val()) || "";
-                    const CityName = $('#txtStation').val().trim();
-                    const CITY_CODE = $('#txtStation').data('cityCode') || 0;
-                    const PHONE = $.trim($('#NumContactNo').val()) || "";
-                    const ITEM_CODE = parseInt($('#ddlItemName').val()) || 0;
-                    const TRUCK_NO = parseInt($('#numTrucks').val()) || 0;
-                    const EXRATE = parseFloat($('#txtExRate').val()) || 0;
-                    const DISC_PER = parseFloat($('#numDiscount').val()) || 0;
-                    const REMARK = $.trim($('#txtRemarks').val()) || "";
-                    const PINO = $.trim($('#NumPINO').val()) || "";
-                    const PIDATE = formatDate($("#DtPIDate").val()) || null;
-                    const OFFERNO = $.trim($('#NumOfferNo').val()) || "";
-                    const BROKER_RATE = parseFloat($('#NumBrokerage').val()) || 0;
-                    const BROKER = parseInt($('#ddlBrokerName').val()) || 0;
-                    const PACK_TYPE = $.trim($('#ddlPackingType option:selected').text()) || "";
-                    const DISPATCH_FROM = parseInt($('#ddlDispatchFrom').val()) || 0;
-                    const PAYMENT_STATUS = $.trim($('#ddlPaymentType option:selected').text()) || "";
-                    const CURRENCY = $.trim($('#ddlRate option:selected').text()) || "";
-                 
-                    let SBLC_DUEDATE = null;
-                    if ($("#chkSBLCDue").is(":checked")) {
-                        const dateVal = $("#DtSBLCDue").val();
-                        SBLC_DUEDATE = dateVal ? dateVal : null;
-                    } else {
-                        SBLC_DUEDATE = null;
-                    }
-
-                    const GRADE = $.trim($('#ddlGrade option:selected').text()) || "";
-                    const ITEM_REMARKS = $.trim($('#TxtItemRemarks').val()) || "";
-                    const WASTE_PER = parseInt($('#numWaste').val()) || 0;
-                    const RATE = parseFloat($('#numRate').val()) || 0;
-                    const TAX_CODE = parseFloat($('#ddlTaxRate').val()) || 0;
-                    const TAX_RATE = parseFloat($('#numTaxRate').val()) || 0;
-                    const ONLY_NATURAL = $('#chkNatural').prop('checked') ? 1 : 0;
-                    const ITEM_TYPE = $.trim($('#ddlItemType option:selected').text()) || "";
-                    const QTY = parseInt($('#numWeight').val()) || 0;
-                    const FRT_TERM = $.trim($('#ddlFreightTerm option:selected').text()) || "";
-                    const NET_RATE = parseFloat($('#numNetRate').val()) || 0;
-                    const PAYTERM_CODE = parseInt($('#ddlPaymentTerm').val()) || 0;
-                    const DEL_TERM = $.trim($('#txtDeliveryTerm').val()) || "";
-                    const selectedStatus = $('#ddlDocStatus').val();
-                    const STATUS = selectedStatus === 'open' ? 1 : 0;
-                    let LC_DUEDATE = null;
-                    if ($("#chkDtLCDue").is(":checked")) {
-                    const dateVal = $("#DtLCDue").val();
-                    LC_DUEDATE = dateVal ? dateVal : null;
-                    } else {
-                    LC_DUEDATE = null;
-                    }
-                    const DEAL_THROUGH = parseInt($('#ddlPurchaseThrough').val()) || 0;
-                    const ACTION = !DOC_ID ? 'INSERT' : 'UPDATE';
-                    const TAX_TERM = $.trim($('#ddlPackingType option:selected').text()) || "";
-
-                    if (!V_DATE) {
-                        toastr.warning("Please select a Voucher Date.");
-                            $("#dtDocDate").focus();
-                        return;
-                    }
-                    if (!SHIP_TYPE) {
-                        toastr.warning("Please select a Supply From.");
-                            $("#ddlSupplyFrom").focus();
-                        return;
-                    }
-                    if (!PARTY_CODE) {
-                        toastr.warning("Please select a Party Name.");
-                            $("#ddlPartyName").focus();
-                        return;
-                    }
-                    if (!ITEM_CODE) {
-                                toastr.warning("Please select a Item Name.");
-                                $("#ddlItemName").focus();
-                                return;
-                            }
-                    if (!DEAL_THROUGH) {
-                            toastr.warning("Please select a Purchase Through.");
-                            $("#ddlPurchaseThrough").focus();
-                            return;
-                        }
-                    if (!DEAL_THROUGH) {
-                        toastr.warning("Please select a Purchase Through.");
-                        $("#ddlPurchaseThrough").focus();
-                        return;
-                    }
-        
-                    if (!QTY) {
-                        toastr.warning("Please Fill Weight (Kgs) .");
-                        $("#numWeight").focus();
-                        return;
-                    }
-                    if (!TAX_CODE) {
-                        toastr.warning("Please Select Tax Rate");
-                        $("#ddlTaxRate").focus();
-                        return;
-                    }
-                    if (!PAYTERM_CODE) {
-                        toastr.warning("Please Select Payment Term ");
-                        $("#ddlPaymentTerm").focus();
-                        return;
-                    }
-                    if (FRT_TERM === "-- Select Freight Term --" || !FRT_TERM) {
-                        toastr.warning("Please Select Freight Term ");
-                        $("#ddlFreightTerm").focus();
-                        return;
-                        }
-
-                    if (!RATE) {
-                        toastr.warning("Please Fill Rate");
-                        $("#numRate").focus();
-                        return;
-                    }
-                  
-                    
-           
-
-                       if ($("#chkSBLCDue").is(":checked")) {
-                            if (!SBLC_DUEDATE) {
-                            toastr.warning("Please Select SBLC Due Date");
-                            $("#DtSBLCDue").focus();
-                            return;
-                        }
-
-                       }
-                       if ($("#chkDtLCDue").is(":checked")) {
-                            if (!LC_DUEDATE) {
-                            toastr.warning("Please Select LC Due Dt");
-                            $("#DtLCDue").focus();
-                            return;
-                        }
-
-                       }
-
-
-            const Header = {
-                DOC_ID: DOC_ID,
-                V_NO: V_NO,
-                V_DATE: V_DATE,
-                SHIP_CODE: SHIP_CODE,
-                SHIP_TYPE:SHIP_TYPE,
-                PARTY_CODE: PARTY_CODE,
-                ADD1: ADD1,
-                ADD2: ADD2,
-                ADD3: ADD3,
-                CITY_CODE: CITY_CODE,
-                CityName: CityName,
-                PHONE: PHONE,
-                ITEM_CODE: ITEM_CODE,
-                TRUCK_NO: TRUCK_NO,
-                EXRATE: EXRATE,
-                DISC_PER: DISC_PER,
-                REMARK: REMARK,
-                PINO: PINO,
-                PIDATE: PIDATE,
-                OFFERNO: OFFERNO,
-                BROKER_RATE: BROKER_RATE,
-                BROKER: BROKER,
-                PACK_TYPE: PACK_TYPE,
-                DISPATCH_FROM: DISPATCH_FROM,
-                PAYMENT_STATUS: PAYMENT_STATUS,
-                CURRENCY: CURRENCY,
-                SBLC_DUEDATE: SBLC_DUEDATE,
-                GRADE: GRADE,
-                ITEM_REMARKS: ITEM_REMARKS,
-                WASTE_PER: WASTE_PER,
-                RATE: RATE,
-                TAX_CODE: TAX_CODE,
-                ONLY_NATURAL: ONLY_NATURAL,
-                ITEM_TYPE: ITEM_TYPE,
-                QTY: QTY,
-                FRT_TERM: FRT_TERM,
-                NET_RATE: NET_RATE,
-                PAYTERM_CODE: PAYTERM_CODE,
-                DEL_TERM: DEL_TERM,
-                STATUS: STATUS,
-                LC_DUEDATE: LC_DUEDATE,
-                DEAL_THROUGH: DEAL_THROUGH,
-                ACTION: ACTION,
-                TAX_TERM:TAX_TERM,
-                TAX_RATE:TAX_RATE
-            };
-
-            const documentData = collectPurchaseDocumentsData();
-           
-            if (SHIP_TYPE === "IMPORT") {
-                if (GRADE === "-- Select Grade --" || !GRADE )
-                {
-
-                    toastr.warning("Please Select Grade.");
-                    return;
-                }
-                if (!documentData[0].FileName || documentData[0].FileName.trim() === "") {
-                    toastr.warning("Please Fill Atleast One Row Document Details.");
-                    return;
-                }
-            }
-
-                const payload = {
-                    Header: Header,
-                    Document: documentData
-                };
-
-            $("#btn-save").prop("disabled", true);
-            $.ajax({
-                url: '/PurchaseSauda/SavedData',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(payload),
-                success: function (response) {
-                    if (response.success) {
-                        toastr.success("Saved successfully!");
-                        setTimeout(() => window.location.href = '/PurchaseSaudaList/Index', 1000);
-
-                    } else {
-                        toastr.error(response.message || "Save failed.");
-                    }
-                },
-                error: function (xhr, status, error) {
-                    let errorMessage = "Something went wrong.";
-                    if (xhr.status === 400) {
-                        errorMessage = "Bad Request: " + xhr.responseText;
-                    } else if (xhr.status === 500) {
-                        errorMessage = "Server error: " + xhr.responseText;
-                    } else {
-                        errorMessage = "Unexpected error: " + xhr.statusText;
-                    }
-                    console.error("Error: ", errorMessage);
-                    toastr.error(errorMessage);
-                },
-                complete: function () {
-
-                    $("#btn-save").prop("disabled", false);
-                }
-            });
-        });
-
-          async function LoadDropDown() {
-            try {
-              await Promise.all([
-                        DDLShipFrom(),
-                        DDLPurchaseThrough(),
-                        DDLTaxRate(),
-                        DDLPaymentTerm(),
-                        DDLBrokerName(),
-                        DDLDispatchForm(),
-                        DDLItemGroup(),
-                        DDLPartyMast(),
-                        DDLItemMaster()
-              ]);
-            } catch (error) {
-              console.error("Error loading dropdowns:", error);
-            }
-          }
-
-    
-
-            function formatDate(dateStr) {
-      if (!dateStr) return null;
-
-      const date = new Date(dateStr);
-      if (isNaN(date)) return null;
-
-      // Extract local date parts
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months 0-11
-      const day = String(date.getDate()).padStart(2, '0');
-
-      return `${year}-${month}-${day}`;
-    }
-
-
-
-
-          function collectPurchaseDocumentsData() {
-            const documents = [];
-            let hasError = false;
-            let errorMessages = [];
-            $('#tblAttachmentPS tbody tr').each(function (index) {
-                const $row = $(this);
-                const fileName = $row.find('input[type="text"]').val()?.trim() || "";
-                const fileInput = $row.find('input[type="file"]')[0];
-                const fileSelected = fileInput ? fileInput.files[0] : null;
-                const documentData = {
-                    FileName: fileName,
-                    FilePath: fileSelected ? "/attachments/pan/" + fileSelected.name : null
-                };
-                documents.push(documentData);
-            });
-
-            if (hasError) {
-                toastr.error(errorMessages.join(" "));
-                return [];
-            }
-            return documents;
-        }
-
-         function addAttachmentRow(data = {}) {
-          const index = data.index || attachmentIndex++;
-          const row = `
-        <tr>
-          <td style="display:none;">
-            <input type="hidden" class="attachment-code" value="${index}" />
-          </td>
-          <td>
-            <input type="text" class="form-control mb-1" id="fileName_${index}" value="${data.fileName || ''}" placeholder="Enter file name" disabled />
-          </td>
-          <td>
-            <input type="file" class="form-control file-upload" id="fileInput_${index}" />
-          </td>
-          <td>
-            <i class="fa fa-plus btn-add-action" title="Add Row" style="cursor:pointer; margin-right:8px;"></i>
-            <i class="fa fa-edit btn-edit-action" title="Edit Row" style="cursor:pointer; margin-right:8px;"></i>
-            <i class="fa fa-trash btn-delete-action" title="Delete Row" style="cursor:pointer;"></i>
-          </td>
-        </tr>
-      `;
-      $attachmentTbody.append(row);
-    }
-
-         function recalculateNetRate() {
-                    const baseRate = parseFloat($('#numRate').val()) || 0;
-                    const discountPercent = parseFloat($('#numDiscount').val()) || 0;
-                    let taxRate = 0;
-                    const selectedText = $('#ddlTaxRate').find('option:selected').text();
-                    const taxMatch = selectedText.match(/\d+(\.\d+)?/);
-                    if (taxMatch) {
-                      taxRate = parseFloat(taxMatch[0]);
-                    }
-                    const discountAmount = baseRate * discountPercent / 100;
-                    const rateAfterDiscount = baseRate - discountAmount;
-                    const taxAmount = rateAfterDiscount * taxRate / 100;
-                    const roundedTax = Math.round(taxAmount); 
-                    const finalNetRate = rateAfterDiscount + taxAmount;
-                    $('#numNetRate').val(finalNetRate.toFixed(2));
-                    $('#numTaxRate').val(taxRate.toFixed(2));
-                }
-
-         async function GetVNo() {
-            try {
-              const res = await fetch('/PurchaseSauda/GetVNo');
-              if (!res.ok) throw new Error(`HTTP ${res.status}`);
-              const data = await res.json();
-              if (!data.v_NO) throw new Error('Response missing v_NO');
-              $('#txtDocNo').val(data.v_NO);
-              $('#TxtDispatchDocNo').val(data.v_NO);
-
-            } catch (e) {
-              console.error('GetVNo failed:', e);
-                toastr.error('Error loading Document Number: ' + e.message);
-            }
-          }
-
-         async function LoadFormByID(id) {
-          try {
-            const res = await $.ajax({
-              url: '/PurchaseSaudaList/GetDataByCode',
-              method: 'GET',
-              data: { code: id }
-            });
-
-            if (res.success) {
-
-              const header = res.data.header;
-              const DispatchDetails = res.data.details;
-              const attachments = res.data.attachment || [];
-         
-
-                $('#TxtCode').val(header.doC_ID || '');
-                $('#txtDocNo').val(header.v_NO || '');
-                $('#TxtDispatchDocNo').val(header.v_NO || '');
-                $('#dtDocDate').val(formatDate(header.v_DATE));
-                $('#DispatchDocDate').val(formatDate(header.v_DATE));
-                $('#ddlShipFrom').val(header.shiP_CODE || '');
-                $('#ddlSupplyFrom').val(header.shiP_TYPE || '');
-                $('#ddlPartyName').val(header.partY_CODE || '');
-                $('#txtAddress1').val(header.adD1 || '');
-                $('#txtAddress2').val(header.adD2 || '');
-                $('#txtAddress3').val(header.adD3 || '');
-                $('#txtStation').val(header.cityName || '');
-                $('#txtStation').attr('data-city-code', header.citY_CODE || 0);
-                $('#ddlItemName').val(header.iteM_CODE || '');
-                $('#numTrucks').val(header.trucK_NO || '');
-                $('#txtExRate').val(header.exrate || '');
-                $('#numDiscount').val(header.disC_PER || '');
-                $('#txtRemarks').val(header.remark || '');
-                $('#NumPINO').val(header.pino || '');
-                $('#DtPIDate').val(formatDate(header.pidate));
-                $('#NumOfferNo').val(header.offerno || '');
-                $('#NumBrokerage').val(header.brokeR_RATE || '');
-                $('#ddlBrokerName').val(header.broker || '');
-                $('#ddlPackingType').val(header.pacK_TYPE || '');
-                $('#ddlDispatchFrom').val(header.dispatcH_FROM || '');
-                $('#ddlPaymentType').val(header.paymenT_STATUS || '');
-                $('#ddlRate').val(header.currency || '');
-                $('#DtSBLCDue').val(formatDate(header.sblC_DUEDATE));
-                $('#ddlGrade').val(header.grade || '');
-                $('#TxtItemRemarks').val(header.iteM_REMARKS || '');
-                $('#numWaste').val(header.wastE_PER || 0);
-                $('#numRate').val(header.rate || 0);
-                $('#numTaxRate').val(header.taX_RATE || 0);
-                $('#ddlTaxRate').val(header.taX_CODE || 0);
-                $('#chkNatural').prop('checked', header.onlY_NATURAL == 1);
-                $('#ddlItemType').val(header.iteM_TYPE || '');
-                $('#numWeight').val(header.qty || 0);
-                $('#ddlFreightTerm').val(header.frT_TERM || '');
-                $('#numNetRate').val(header.neT_RATE || 0);
-                $('#ddlPaymentTerm').val(header.payterM_CODE || 0);
-                $('#txtDeliveryTerm').val(header.deL_TERM || '');
-                $('#ddlDocStatus').val(header.status === 1 ? 'open' : 'closed');
-                $('#DtLCDue').val(formatDate(header.lC_DUEDATE));
-                $('#ddlPurchaseThrough').val(header.deaL_THROUGH || 0);
-                $('#txtCountry').val(header.countrY_CODE || 0);
-                $('#txtCountry').val(header.country|| '');
-
-
-              
-
-
-
-
-              $attachmentTbody.empty();
-              if (attachments.length === 0) {
-                addAttachmentRow();
-              } else {
-                for (const attach of attachments) {
-                  addAttachmentRow({
-                    index: attach.index || Date.now(),
-                    fileName: attach.fileName || '',
-                    filePath: attach.filePath || ''
-                  });
-                }
-              }
-
-
-              $dispatchtableTbody.empty();
-              if (DispatchDetails.length === 0) {
-                addPurchaseQuotationRow();
-              } else {
-                for (const Dispatch of DispatchDetails) {
-                  addPurchaseQuotationRow({
-                    icode: Dispatch.itemCode || '',
-                    itemName: Dispatch.itemName || '',
-                    delDate: Dispatch.deliveryDate ? formatDate(Dispatch.deliveryDate) : '',
-                    quantity: Dispatch.qty || '',
-                    remarks: Dispatch.remarks || ''
-                  });
-                }
-              }
-
-            } else {
-              toastr.error(res.message || "Failed to load data.");
-              console.error("Error from server:", res.message);
-            }
-          } catch (err) {
-            console.error("Failed to load data", err);
-            toastr.error("Something went wrong while loading the form.");
-          }
-        }
-
-         async function fetchDDlParty(PartyId) {
-            try {
-              const response = await fetch(`/PurchaseSauda/GetDataByPartyCode?PartyId=${PartyId}`);
-              const data = await response.json();
-                    $('#txtAddress1').val(data[0].address1);
-                    $('#txtAddress2').val(data[0].address2);
-                    $('#txtAddress3').val(data[0].address3);
-                    $('#NumContactNo').val(data[0].mobile);
-                    $('#txtStation').val(data[0].cityName);
-                    $('#txtStation').data('cityCode', data[0].cityCode);
-                    $('#txtCountry').val(data[0].country);
-                    $('#txtDeliveryFrom').val(data[0].name);
-                    $('#ddlShipFrom').val(data[0].code);
-            } catch (error) {
-              console.error('Failed to fetch party data:', error);
-            }
-          }
-
-         async function DDLPartyMast() {
-            try {
-                const res = await fetch('/PurchaseSauda/DDLPartyMast');
-                const data = await res.json();
-                const ddl = $('#ddlPartyName');
-                ddl.empty().append('<option value="">-- Select Party Name --</option>');
-                data.forEach(item => {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                });
-            } catch (error) {
-                console.error("Error loading Party:", error);
-            }
-        }
-
-          async function DDLShipFrom() {
-            try {
-              const res = await fetch('/PurchaseSauda/DDLShipFrom');
-              const data = await res.json();
-              const ddl = $('#ddlShipFrom');
-              ddl.empty().append('<option value="">-- Select Ship From --</option>');
-              data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-              });
-            } catch (error) {
-              console.error("Error loading Ship From:", error);
-            }
-          }
-
-          async function DDLPurchaseThrough() {
-          try {
-            const res = await fetch('/PurchaseSauda/DDLPurchaseThrough');
-            const data = await res.json();
-
-            const ddl = $('#ddlPurchaseThrough');
-            ddl.empty().append('<option value="">-- Select Purchase Through --</option>');
-
-            if (Array.isArray(data)) {
-              data.forEach(item => {
-                       ddl.append(`<option value="${item.value}">${item.value} - ${item.text}</option>`);
-              });
-            } else {
-              console.warn('Unexpected data format:', data);
-            }
-
-          } catch (error) {
-            console.error("Error loading Purchase Through:", error);
-            toastr.error("Failed to load Purchase Through options.");
-          }
-        }
-
-          async function DDLItemMaster() {
-            try {
-         const res = await fetch('/PurchaseSauda/DDLItemMaster');
-
-              const data = await res.json();
-              const ddl = $('#ddlItemName');
-              ddl.empty().append('<option value="">-- Select Item Name --</option>');
-              data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-              });
-            } catch (error) {
-              console.error("Error loading Item Master:", error);
-            }
-          }
-
-          async function DDLTaxRate() {
-            try {
-              const res = await fetch('/PurchaseSauda/DDLTaxRate');
-              const data = await res.json();
-              const ddl = $('#ddlTaxRate');
-              ddl.empty().append('<option value="">-- Select Tax Rate --</option>');
-              data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-              });
-            } catch (error) {
-              console.error("Error loading Tax Rate:", error);
-            }
-          }
-
-          async function DDLPaymentTerm() {
-            try {
-              const res = await fetch('/PurchaseSauda/DDLPaymentTerm');
-              const data = await res.json();
-              const ddl = $('#ddlPaymentTerm');
-              ddl.empty().append('<option value="">-- Select Payment Term --</option>');
-              data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-              });
-            } catch (error) {
-              console.error("Error loading Payment Term:", error);
-            }
-          }
-
-          async function DDLBrokerName() {
-            try {
-              const res = await fetch('/PurchaseSauda/DDLBrokerName');
-              const data = await res.json();
-              const ddl = $('#ddlBrokerName');
-              ddl.empty().append('<option value="">-- Select Broker Name --</option>');
-              data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-              });
-            } catch (error) {
-              console.error("Error loading Broker Name:", error);
-            }
-          }
-
-           async function DDLItemGroup() {
-                try {
-                      const res = await fetch('/PurchaseSauda/DDLItemGroup');
-                  const data = await res.json();
-                      const ddl = $('#ddlItemType');
-                  ddl.empty().append('<option value="">-- Select Item Group --</option>');
-                  data.forEach(item => {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
-                  });
-                } catch (error) {
-                  console.error("Error loading Broker Name:", error);
-                }
-              }
-
-          async function DDLDispatchForm() {
-            try {
-              const res = await fetch('/PurchaseSauda/DDLDispatchForm');
-              const data = await res.json();
-              const ddl = $('#ddlDispatchFrom');
-              ddl.empty().append('<option value="">-- Select Dispatch From --</option>');
-              data.forEach(item => {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-              });
-            } catch (error) {
-              console.error("Error loading Dispatch Form:", error);
-            }
-          }
-
-          function setFormReadOnly() {
-                const form = $('#PurchaseSaudaForm');
-                form.find('input, select, textarea, button').prop('disabled', true);
-                form.find('textarea').css('background-color', '#f0f0f0');
-                form.find('table tbody tr').each(function () {
-                    $(this).find('input, select, textarea').prop('disabled', true);
-                    $(this).css('background-color', '#f9f9f9');
-                });
-                form.find('.btn-save').hide();
-            }
-
-  
-
-           
-
-
-
-                    });
-
-</script>
-
-<script>
-    let $tbody;
-    let rowIndex = 0;
-    let itemMap = {};
-    let reverseItemMap = {};
-
-    function generateSelect(data, selectedValue = '') {
-        let options = `<option value="">-- Select Item --</option>`;
-        for (let code in data) {
-            const name = data[code];
-            const selected = code === selectedValue ? 'selected' : '';
-            options += `<option value="${code}" data-code="${code}">${name}</option>`;
-        }
-        return options;
-    }
-
-    function addPurchaseQuotationRow(data = {}) {
-  
-        data.index = data.index !== undefined ? data.index : rowIndex++;
-        const row = `
-            <tr class="no-border-input" data-row="${data.index}">
-                <td><input type="text" class="form-control icode" id="icode_${data.index}" value="${data.icode || ''}" readonly /></td>
-                <td><select class="form-control itemName">${generateSelect(itemMap, data.itemName)}</select></td>
-                <td><input type="date" class="form-control" id="delDate_${data.index}" value="${data.delDate || ''}" /></td>
-                <td><input type="number" class="form-control" id="quantity_${data.index}" value="${data.quantity || ''}" /></td>
-                <td><input type="text" class="form-control" id="remarks_${data.index}" value="${data.remarks || ''}" /></td>
-                <td>
-                    <i class="fa fa-plus btn-add-actions" title="Add Row" style="cursor:pointer; margin-right: 5px;"></i>
-                    <i class="fa fa-trash btn-delete-actions" title="Delete Row" style="cursor:pointer; color:red;"></i>
-                </td>
-            </tr>
-        `;
-
-        $tbody.append(row);
-    }
-
-    function Getitem() {
-        return $.ajax({
-            url: '/PurchaseSauda/DDLDispatchItemMaster',
-            type: 'GET',
-            success: function (response) {
-                if (response.length > 0) {
-                    itemMap = {};
-                    reverseItemMap = {};
-
-                    response.forEach(item => {
-                        itemMap[item.value] = item.text;
-                        reverseItemMap[item.text] = item.value;
-                    });
-
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblshowpurchasehistoryList" class="excel-table fixed-grid-table resizable-table">
+                        <colgroup>
+                            <col style="width:150px;">  
+                            <col style="width:150px;">  
+                            <col style="width:120px;">  
+                            <col style="width:250px;">  
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Bill No</th>
+                                <th>Bill Date</th>
+                                <th>Quantity</th>
+                                <th>Party Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>   
+
+<div class="modal fade" id="modificationModal" tabindex="-1" aria-labelledby="modificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                       <i class="fa fa-pencil-square-o"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="modificationModalLabel">Modification</h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="erppagesmodal-body">
                
-                    const existingData = [];
-                    $tbody.find('tr').each(function () {
-                        const $tr = $(this);
-                        const data = {
-                            index: $tr.data('row'),
-                            icode: $tr.find('.icode').val(),
-                            itemName: $tr.find('.itemName').val(),
-                            delDate: $tr.find(`#delDate_${$tr.data('row')}`).val(),
-                            quantity: $tr.find(`#quantity_${$tr.data('row')}`).val(),
-                            remarks: $tr.find(`#remarks_${$tr.data('row')}`).val()
-                        };
-                        existingData.push(data);
-                    });
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="modificationList" class="excel-table fixed-grid-table width-table resizable-table">
+                        <colgroup>
+                            <col style="width:120px;">  
+                            <col style="width:200px;">  
+                            <col style="width:200px;">  
+                            <col style="width:120px;">  
+                            <col style="width:120px;">  
+                            <col style="width:250px;">  
+                            <col style="width:150px;">  
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Sauda No</th>
+                                <th>Party Name</th>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                                <th>Rate</th>
+                                <th>Remarks</th>
+                                <th>Modify Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-                    $tbody.empty();
-                    existingData.forEach(rowData => addPurchaseQuotationRow(rowData));
-                } else {
-                    console.warn("⚠️ No Item data returned.");
-                }
-            },
-            error: function (xhr) {
-                console.error("❌ Error fetching item list:", xhr);
-            }
-        });
-    }
-
-    $(document).ready(function () {
-
-        $tbody = $('#tblPurchaseQuotationList tbody');
-        $tbody.empty();
-
-          Getitem().then(() => {
-            addPurchaseQuotationRow();
-        });
-
-          function collectPurchaseQuotationData() {
-        const data = [];
-        $tbody.find('tr').each(function () {
-            const $tr = $(this);
-
-            const itemCode = parseInt($tr.find('.icode').val()?.trim()) || 0;
-            const itemName = $tr.find('.itemName option:selected').text().trim() || '';
-            const delDate = $tr.find('input[type="date"]').val() || '';
-            const formattedDelDate = delDate ? new Date(delDate).toISOString() : null;
-            const quantity = parseFloat($tr.find('input[type="number"]').val()) || null;
-            const remarks = $tr.find('input[type="text"]').last().val()?.trim() || '';
-             const v_no = document.getElementById('TxtDispatchDocNo').value;
-             const V_DATE = document.getElementById('DispatchDocDate').value;
-
-            data.push({
-                ItemCode: itemCode,
-                ItemName: itemName,
-                DeliveryDate: formattedDelDate,
-                Qty: quantity,
-                Remarks: remarks,
-                v_no : v_no,
-                V_DATE:V_DATE
-            });
-        });
-
-        return data;
-    }
-
-         $("#DispatchSave").click(function (e) {
-        e.preventDefault();
-
-        const rowsData = collectPurchaseQuotationData();
-
-       
-        const payload = {
-            DispatchDelivery: rowsData
-
-        };
-
-
-        if (
-        !payload.DispatchDelivery ||
-        (Array.isArray(payload.DispatchDelivery) && payload.DispatchDelivery.length === 0) || 
-        (typeof payload.DispatchDelivery === 'object' && !Array.isArray(payload.DispatchDelivery) && Object.keys(payload.DispatchDelivery).length === 0) 
-        ) {
-        toastr.warning('Please Fill Atleast One Row in Dispatch Delivery Planning.');
-        return ; 
-        } 
+        </div>
+    </div>
+</div>   
 
 
 
 
 
 
-        $("#DispatchSave").prop("disabled", true);
-        $.ajax({
-            url: '/PurchaseSauda/SaveDispatchDetails',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(payload),  
-            success: function (response) {
-                if (response.success) {
-                    toastr.success("Saved successfully!");
-                        var deliveryPlanModal = document.getElementById('deliveryPlanModal');
-                        var modal = bootstrap.Modal.getInstance(deliveryPlanModal); 
-                        modal.hide();
-                } else {
-                    toastr.error(response.message || "Save failed.");
-                }
-            },
-            error: function (xhr, status, error) {
-                let errorMessage = "Something went wrong.";
-                if (xhr.status === 400) {
-                    errorMessage = "Bad Request: " + xhr.responseText;
-                } else if (xhr.status === 500) {
-                    errorMessage = "Server error: " + xhr.responseText;
-                } else {
-                    errorMessage = "Unexpected error: " + xhr.statusText;
-                }
-
-                console.error("Error: ", errorMessage);
-                toastr.error(errorMessage);
-            },
-            complete: function () {
-                $("#DispatchSave").prop("disabled", false);
-            }
-        });
-    });
-
-        $(document).on('click', '.btn-add-actions', function () {
-          const lastRow = $tbody.find('tr').last();
-        if (lastRow.length) {
-            const lastItemName = lastRow.find('select.itemName').val();
-            if (!lastItemName) {
-                  toastr.warning("Please Select Data in  Previous Row .");
-                return;
-            }
-        }
-            addPurchaseQuotationRow();
-        });
-
-        $(document).on('click', '.btn-delete-actions', function () {
-        const $row = $(this).closest('tr');
-     
-        $row.remove();
-  
-    });
-
-        $(document).on('change', '.itemName', function () {
-            const $select = $(this);
-            const selectedCode = $select.val();
-            const $row = $select.closest('tr');
-            $row.find('.icode').val(selectedCode); 
-        });
-    });
-
-</script>
 
 
+
+
+<script src="~/js/erpjs/purchase/transaction/purchasesauda/purchasesaudainit.js"></script>
+<script src="~/js/erpjs/purchase/transaction/purchasesauda/purchasesaudaapi.js"></script>
+<script src="~/js/erpjs/purchase/transaction/purchasesauda/purchasesauda.js"></script>

@@ -323,6 +323,16 @@ namespace travelexpensemanagement.Controllers
             }
             return Json(result);
         }
+        //[HttpPost]
+        //public IActionResult SetMenuSession(string menuId, string moduleId)
+        //{
+        //    HttpContext.Session.SetString("CurrentMenuId", menuId);
+        //    HttpContext.Session.SetString("CurrentModuleId", moduleId);
+        //    return Json(new
+        //    {
+        //        success = true
+        //    });
+        //}
 
 
     }

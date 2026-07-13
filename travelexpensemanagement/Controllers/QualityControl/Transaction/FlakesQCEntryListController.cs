@@ -9,23 +9,28 @@ using System.Globalization;
 using System.Numerics;
 using System.Reflection.Emit;
 using System.Runtime.ConstrainedExecution;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.QualityControl.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.QualityControl;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace travelexpensemanagement.Controllers.QualityControl.Transaction
 {
+    [SessionAuthorize]
     public class FlakesQCEntryListController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
+        private readonly IFlakesQCEntryListRepository _flakesQCEntryListRepository;
         public FlakesQCEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-        ModuleService.ModuleService moduleService)
+        ModuleService.ModuleService moduleService , IFlakesQCEntryListRepository flakesQCEntryListRepository)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
+            _flakesQCEntryListRepository = flakesQCEntryListRepository;
         }
 
         public IActionResult Index()
@@ -54,7 +59,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     cmd.Parameters.AddWithValue("@PageSize", pageSize);
                     cmd.Parameters.AddWithValue("@COMP_CODE", globalVars.PubCompCode ?? (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@YEAR_CODE", globalVars.PubFYearCode ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVars.PubBranchCode);
 
                     conn.Open();
                     using (var reader = cmd.ExecuteReader())
@@ -134,7 +139,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                         cmd.Parameters.AddWithValue("@searchOption", "Header");
                         cmd.Parameters.AddWithValue("@V_NO", code);
                         cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
                         cmd.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
                         cmd.Parameters.AddWithValue("@V_TYPE", "SFQC");
 
@@ -225,147 +230,26 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> CheackConditionCpyFrm(int DeptCode, string Shifttype, DateTime v_date)
+        [HttpDelete]
+        public async Task<JsonResult> Delete(int code)
         {
-            var GetGlobalCode = _globalVariableService.GetGlobalVariables();
-
             try
             {
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                using (SqlCommand cmd = new SqlCommand("sp_FlakesQCEntry", con))
+                bool result = await _flakesQCEntryListRepository.Delete(code);
+
+                if (result == true)
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.AddWithValue("@ACTION", "CheackConditionCpyFrm");
-                    cmd.Parameters.AddWithValue("@DEPT_CODE", DeptCode);
-                    cmd.Parameters.AddWithValue("@SHIFT", Shifttype);
-                    cmd.Parameters.AddWithValue("@v_date", v_date.ToString("yyyy-MM-dd"));
-                    cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
-
-                    // IMPORTANT: handle null properly if needed in SP logic
-                    if (DeptCode == 0)
-                        cmd.Parameters["@DEPT_CODE"].Value = DBNull.Value;
-
-                     DataTable dt = new DataTable();
-
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                    {
-                        da.Fill(dt);
-                    }
-
-                    return Json(new
-                    {
-                        success = dt.Rows.Count > 0,
-                        data = dt
-                    });
+                    return Json(new  { success = true, message = "Flakes QC Entry deleted successfully." });
                 }
+
+                return Json(new  { success = false,  message = "Unable to delete Flakes QC Entry."  });
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
-            }
-        }
-        [HttpGet]
-        public async Task<IActionResult> GetDataCopyForm( int DeptCode, string Shifttype,  DateTime v_date)
-        {
-            var GetGlobalCode = _globalVariableService.GetGlobalVariables();
-
-            try
-            {
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-                    await con.OpenAsync();
-
-                    using (SqlCommand cmd = new SqlCommand("sp_FlakesQCEntry", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@DEPT_CODE", DeptCode);
-                        cmd.Parameters.AddWithValue("@shift", Shifttype);
-                        cmd.Parameters.AddWithValue("@v_date", v_date.Date);
-                        cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
-                        cmd.Parameters.AddWithValue("@Action", "GetDataCopyForm");
-
-                        using (SqlDataReader rdr = await cmd.ExecuteReaderAsync())
-                        {
-                            var results = new List<object>();
-                            while (await rdr.ReadAsync())
-                            {
-                                var result = new
-                                {
-                                    BagNo = rdr["BagNo"]?.ToString(),
-                                    ItemName = rdr["ITEM_NAME"]?.ToString(),
-                                    ProdPlace = rdr["ProdPlace"]?.ToString(),
-                                    LotNo = rdr["LOT_NO"]?.ToString(),
-                                    WBQty = rdr["WB_QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["WB_QTY"]) : 0,
-                                    GrossQty = rdr["GROSS_QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["GROSS_QTY"])  : 0,
-                                    TareQty = rdr["TARE_QTY"] != DBNull.Value  ? Convert.ToDecimal(rdr["TARE_QTY"])  : 0,
-                                    Qty = rdr["QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["QTY"])  : 0,
-                                    VType = rdr["v_type"]?.ToString(),
-                                    VNo = rdr["v_no"] != DBNull.Value   ? Convert.ToInt32(rdr["v_no"])  : 0,
-                                    ItemCode = rdr["item_code"] != DBNull.Value ? Convert.ToInt32(rdr["item_code"]) : 0,
-                                    DeptCode = rdr["deptcode"] != DBNull.Value ? Convert.ToInt32(rdr["deptcode"]) : 0,
-                                    DeptName = rdr["Dept"]?.ToString()
-                                };
-
-                                results.Add(result);
-                            }
-
-                            if (results.Any())
-                            {
-                                return Json(new  {  success = true, message = "Data fetched successfully", data = results  });
-                            }
-                            else
-                            {
-                                return Json(new { success = false, message = "No data found" });
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new  { success = false,  message = "Error fetching data",  error = ex.Message,  stackTrace = ex.StackTrace });
+                return Json(new  {  success = false,  message = "Error deleting Flakes QC Entry.",  error = ex.Message });
             }
         }
 
-        [HttpPost]
-        public JsonResult Delete(int code)
-        {
-            var getGlobalCode = _globalVariableService.GetGlobalVariables();
-            try
-            {
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-                    using (SqlCommand cmd = new SqlCommand("sp_FlakesQCEntry", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@Action", "DELETE");
-                        cmd.Parameters.AddWithValue("@V_NO", code);
-                        cmd.Parameters.AddWithValue("@COMP_CODE", getGlobalCode.PubCompCode);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", getGlobalCode.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-
-                return Json(new { success = true, message = "Flekes Qc Entry deleted successfully." });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Error deleting Flekes Qc Entry.", error = ex.Message });
-            }
-        }
-        
         [HttpPost]
         public JsonResult GetDataTotalppmChangge(float totalPpm, int itemCode, int depotCode , float HDPE , float PVCPPM ,
             float PCLowMelt , float Wrapper , float Metal , float Stone , float Rubber , float Glue , float Yellowp ,
@@ -439,7 +323,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     }
                 }
 
-
                     if (code > 0)
                     {
                         string sql = "SELECT Name FROM ITEM_MAST WHERE code = @Code AND comp_code = @CompCode";
@@ -467,7 +350,136 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetDataCopyForm(int DeptCode, string Shifttype, DateTime v_date)
+        {
+            var GetGlobalCode = _globalVariableService.GetGlobalVariables();
 
+            try
+            {          
+                using (SqlConnection conCheck = _dbConnection.GetErpConnection())
 
+                //using (SqlCommand cmdCheck = new SqlCommand("sp_FlakesQCEntry", conCheck))
+                //{
+                //    cmdCheck.CommandType = CommandType.StoredProcedure;
+                //    cmdCheck.Parameters.AddWithValue("@ACTION", "CheackConditionCpyFrm");
+                //    cmdCheck.Parameters.AddWithValue("@DEPT_CODE", DeptCode);
+                //    cmdCheck.Parameters.AddWithValue("@SHIFT", Shifttype);
+                //    cmdCheck.Parameters.AddWithValue("@v_date", v_date.Date);
+                //    cmdCheck.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                //    cmdCheck.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+                //    if (DeptCode == 0)
+                //        cmdCheck.Parameters["@DEPT_CODE"].Value = DBNull.Value;
+
+                //    DataTable dtCheck = new DataTable();
+
+                //    using (SqlDataAdapter da = new SqlDataAdapter(cmdCheck))
+                //    {
+                //        da.Fill(dtCheck);
+                //    }
+
+                //    if (dtCheck.Rows.Count == 0)
+                //    {
+                //        return Json(new  { success = false, message = "Condition failed or no data found for copy form." });
+                //    }
+                //}
+                // STEP 2: Fetch actual data
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    await con.OpenAsync();
+
+                    using (SqlCommand cmd = new SqlCommand("sp_FlakesQCEntry", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue("@DEPT_CODE", DeptCode);
+                        cmd.Parameters.AddWithValue("@SHIFT", Shifttype);
+                        cmd.Parameters.AddWithValue("@v_date", v_date.Date);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@ACTION", "GetDataCopyForm");
+
+                        using (SqlDataReader rdr = await cmd.ExecuteReaderAsync())
+                        {
+                            var results = new List<object>();
+
+                            while (await rdr.ReadAsync())
+                            {
+                                var result = new
+                                {
+                                    BagNo = rdr["BagNo"]?.ToString(),
+                                    ItemName = rdr["ITEM_NAME"]?.ToString(),
+                                    ProdPlace = rdr["ProdPlace"]?.ToString(),
+                                    LotNo = rdr["LOT_NO"]?.ToString(),
+                                    WBQty = rdr["WB_QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["WB_QTY"]) : 0,
+                                    GrossQty = rdr["GROSS_QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["GROSS_QTY"]) : 0,
+                                    TareQty = rdr["TARE_QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["TARE_QTY"]) : 0,
+                                    Qty = rdr["QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["QTY"]) : 0,
+                                    VType = rdr["v_type"]?.ToString(),
+                                    VNo = rdr["v_no"] != DBNull.Value ? Convert.ToInt32(rdr["v_no"]) : 0,
+                                    ItemCode = rdr["item_code"] != DBNull.Value ? Convert.ToInt32(rdr["item_code"]) : 0,
+                                    DeptCode = rdr["deptcode"] != DBNull.Value ? Convert.ToInt32(rdr["deptcode"]) : 0,
+                                    DeptName = rdr["Dept"]?.ToString()
+                                };
+
+                                results.Add(result);
+                            }
+
+                            if (results.Any())
+                            {
+                                return Json(new { success = true, message = "Data fetched successfully",  data = results  });
+                            }
+                            else
+                            {
+                                return Json(new {  success = false,  message = "No data found" });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error fetching data", error = ex.Message  });
+            }
+        }
+
+        public async Task<IActionResult> DocDetailsCode(string docCode)
+        {
+            try
+            {
+                var result = await _flakesQCEntryListRepository.DocDetailsCode(docCode);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error fetching document details.", error = ex.Message });
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> ExportToExcel(string searchTerm = null)
+        {
+            try
+            {
+                var fileBytes = await _flakesQCEntryListRepository.ExportToExcel(searchTerm);
+                return File( fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "GateOutwardReport.xlsx" );
+            }
+            catch (Exception ex)
+            {
+                return Json(new {  success = false, message = "Error exporting excel.",  error = ex.Message });
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> ExportToPdf(string searchTerm = null)
+        {
+            try
+            {
+                var fileBytes = await _flakesQCEntryListRepository.ExportToPdf(searchTerm);
+                return File( fileBytes, "application/pdf", "GateOutwardReport.pdf" );
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false,  message = "Error exporting pdf.", error = ex.Message });
+            }
+        }
     }
 }

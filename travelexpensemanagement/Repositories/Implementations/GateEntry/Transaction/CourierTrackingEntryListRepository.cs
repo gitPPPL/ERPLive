@@ -6,7 +6,6 @@ using travelexpensemanagement.Models; // adjust namespace
 using travelexpensemanagement.Models.GateEntry.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
-
 namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction
 {
     public class CourierTrackingEntryListRepository : ICourierTrackingEntryListRepository
@@ -56,6 +55,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 {
                                     VNo = reader["V_NO"]?.ToString() ?? "",
                                     DocType = reader["V_TYPE"]?.ToString() ?? "",
+                                    Name = reader["Name"]?.ToString() ?? "",
                                     DocNo = reader["DOC_ID"]?.ToString() ?? "",
                                     DocDate = reader["V_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["V_DATE"]).ToString("yyyy-MM-dd") : "",
                                     PartyName = reader["PARTY_NAME"]?.ToString() ?? "",
@@ -87,7 +87,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             return response;
         }
-
         public async Task<RepositoryResponse> DeleteCourierTrackingEntry(string vNo, string docType)
         {
             var response = new RepositoryResponse
@@ -95,7 +94,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 status = false,
                 message = "Failed to delete courier tracking entry"
             };
-
             try
             {
                 var global = _globalVariableService.GetGlobalVariables();
@@ -195,7 +193,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         cmd.Parameters.AddWithValue("@V_NO", model.V_No);
                         cmd.Parameters.AddWithValue("@V_TYPE", model.DocType);
                         cmd.Parameters.AddWithValue("@PARTY_NAME", model.PartyName);
-                        cmd.Parameters.AddWithValue("@CITY_NAME", model.City);
+                        cmd.Parameters.AddWithValue("@CITY_NAME", model.CITY_NAME);
                         cmd.Parameters.AddWithValue("@COURIER_NAME", model.CourierName);
                         cmd.Parameters.AddWithValue("@DOCKET_NO", model.DocketNo);
                         cmd.Parameters.AddWithValue("@PURPOSE", model.Purpose);

@@ -6,7 +6,9 @@
         public DateTime? DocDate { get; set; }
         public string DocNo { get; set; }
         public string PartyName { get; set; }
-        public string City { get; set; }
+        public string PartyCode { get; set; }
+        public string CITY_CODE { get; set; }
+        public string CITY_NAME { get; set; }
         public string CourierName { get; set; }
         public string DocketNo { get; set; }
         public string ReceivedBy { get; set; }
@@ -21,6 +23,7 @@
         {
             public string VNo { get; set; }
             public string DocType { get; set; }
+            public string Name { get; set; }
             public string? DocDate { get; set; }
             public string? DocNo { get; set; }
             public string? PartyName { get; set; }

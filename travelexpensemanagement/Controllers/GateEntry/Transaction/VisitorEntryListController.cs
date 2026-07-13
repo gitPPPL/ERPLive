@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
@@ -20,8 +21,8 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private int? userLevel;
         private readonly IVisitorListRepository _visitorListRepo;
         public VisitorEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
-    ModuleService.ModuleService moduleService, IVisitorListRepository visitorListRepo)
+        travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
+        ModuleService.ModuleService moduleService, IVisitorListRepository visitorListRepo)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -33,11 +34,16 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
         public IActionResult Index()
         {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            ViewBag.CompCode = globalVar.PubCompCode;
-            ViewBag.BranchCode = 1;
-            ViewBag.YearCode = globalVar.PubFYearCode;
-            return View("~/Views/GateEntry/Transaction/VisitorEntryList/Index.cshtml");
+            ViewBag.CurrentMenu = "Visitor Inward";
+            var permissions = _moduleService.GetUserMenuPermissions();
+            var userLevel = _moduleService.GetUserLevel();
+
+            var model = new UserMenuPermissionsViewModel
+            {
+                UserMenuPermissions = permissions,
+                UserLevel = userLevel
+            };
+            return View("~/Views/GateEntry/Transaction/VisitorEntryList/Index.cshtml", model);
         }
 
         [HttpGet]

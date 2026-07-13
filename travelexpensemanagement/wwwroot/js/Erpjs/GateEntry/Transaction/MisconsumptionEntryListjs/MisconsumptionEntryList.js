@@ -1,12 +1,11 @@
 ﻿let pager = null;
-
+var controllerName = window.location.pathname.split('/')[1];
 $(document).ready(function () {
-
+	checkPermission(controllerName);
 	pager = Pagination.create({
 		pageSize: 10,
 		paginationContainer: '#pageNumbers',
 		infoContainer: '#pageInfoText',
-
 		loader: function ({ pageNumber, pageSize, callback }) {
 
 			const searchTerm = $('#tableSearch').val();
@@ -36,40 +35,62 @@ $(document).ready(function () {
 					callback({ data: [], totalCount: 0 });
 				}
 			});
-		},
-
+		}, 
 		render: function (list) {
 
 			const tbody = $('#tblMiscConsumptionList tbody');
 			tbody.empty();
 
 			if (!Array.isArray(list) || list.length === 0) {
-				tbody.append(`<tr>
-					<td colspan="10" class="text-center text-muted">No records found.</td>
+				tbody.append(`
+				<tr>
+					<td class="text-center text-muted">
+						No records found.
+					</td>
 				</tr>`);
 				return;
 			}
 
 			list.forEach(item => {
-				console.log("ITEM:", item);
 				tbody.append(`
-					<tr>
-						<td>${item.v_NO ?? ''}</td>
-						<td>${item.v_TYPE ?? ''}</td>
-						<td>${formatDate(item.v_DATE)}</td>
-						<td>${item.partY_NAME ?? ''}</td>
-						<td class="action-col">
-							<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-edit"></i></button>
-							<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewMenuDetails('${item.v_NO}', '${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
-							<button class="act-btn delete " title="Delete" style="cursor:pointer;" onclick="deleteTemp('${item.v_NO}', '${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
+				<tr>
+					<td>${item.v_NO ?? ''}</td>
+					<td>${item.v_TYPE ?? ''}</td>
+					<td>${formatDate(item.v_DATE)}</td>
+					<td>${item.partY_NAME ?? ''}</td>
+					<td class="action-col">
+						<div class="action-wrap">
 
-						</td>
-					</tr>
-				`);
+							<button class="act-btn edit permission-edit"
+									title="Edit"
+									style="cursor:pointer;"
+									onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}')">
+								<i class="fa fa-edit"></i>
+							</button>
+
+							<button class="act-btn view btn-view"
+								title="View"
+								style="cursor:pointer;"
+								onclick="viewMenuDetails('${item.v_NO}', '${item.vtypeCode}')">
+							   <i class="fa fa-eye"></i>
+						   </button>
+
+						   <button class="act-btn delete permission-delete"
+									title="Delete"
+									style="cursor:pointer;"
+									onclick="deleteTemp('${item.v_NO}', '${item.vtypeCode}')">
+								<i class="fa fa-trash"></i>
+							</button>
+
+						</div>
+					</td>
+				</tr>
+		`);
 			});
+			applyGridPermission();
+			
 		}
-	});
-
+	}); 
 	pager.load();
 
 });
@@ -105,7 +126,7 @@ function AddOrEditFunction(code, vtype) {
 
 //===View Mode=====
 function viewMenuDetails(code, vtype) {
-	window.location.href = '/MiscConsumptionEntry/Index?id=' + encodeURIComponent(code) + '&vtype=' + encodeURIComponent(vtype) + '&mode=view';
+	window.location.href = '/MiscConsumptionEntry/Index?id=' + encodeURIComponent(code) + '&vtype=' + encodeURIComponent(vtype) + '&readOnly=true';
 }
 
 //===Delete Data====

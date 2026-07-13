@@ -165,13 +165,11 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 using var conn = _dbConnection.GetErpConnection();
                 conn.Open();
                 
-
                 // DELETE OLD DETAILS
                 string deleteSql = @"DELETE FROM GATE2 WHERE COMP_CODE = @CompCode AND V_NO = @VNo AND  V_TYPE = @VType AND BRANCH_CODE = @BranchCode AND YEAR_CODE = @YearCode;";
 
                 using (var deleteCmd = conn.CreateCommand())
                 {
-                    
                     deleteCmd.CommandText = deleteSql;
                     deleteCmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
                     deleteCmd.Parameters.AddWithValue("@VNo", header.V_NO);
@@ -240,7 +238,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                 {
                     if (string.IsNullOrWhiteSpace(item.ITEM_NAME))
                         continue;
-
                     
                     using var cmd = new SqlCommand("sp_MiscConsumptionEntry", conn);
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -283,13 +280,9 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                     cmd.Parameters.AddWithValue("@LIP", g.PubLocalId);
                     cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
 
-                    Console.WriteLine(item.REF_TYPE);
-                    Console.WriteLine(item.REF_NO);
-
                     cmd.ExecuteNonQuery();
                 }
 
-                
                 return "Success";
             }
             catch (Exception ex)

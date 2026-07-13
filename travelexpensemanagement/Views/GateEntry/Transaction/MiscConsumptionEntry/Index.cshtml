@@ -1,6 +1,7 @@
 ﻿@{
     ViewBag.Title = "Misc Consumption Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 
 <div id="erp-toast-container"></div>
@@ -12,6 +13,9 @@
         <div class="erppage-header-title">Misc Consumption Entry</div>
     </div>
     <div class="erppage-header-right">
+        <button type="button" class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print" onclick="PendingQCReport()">
+            <i class="fa fa-print"></i>Print
+        </button>
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "MiscConsumptionEntryList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -43,9 +47,8 @@
                 </div>
             </div>
             <!-- Party Bill -->
-            <fieldset class="erppage-subfieldset">
-                <legend>Party Details</legend>
-                <div class="erppage-subheader">Party Details</div>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Party Details</legend>
                 <div class="erppage-body">
                     <div class="erppage-grid4">
                         <div class="erppage-divfield erppage-col-span-2">
@@ -88,15 +91,15 @@
                 </div>
                 <div class="erppagelist-toolbar-end" style="margin: 0px; padding: 0px 10px;">
                     <div class="erppage-internalaction" style="margin: 0;">
-                        <button id="btn-pending" type="button" class="erppage-btn erppage-btn-danger">
+                        <button id="btn-pending" type="button" class="erppage-btn erppage-btn-common-pending-disabled">
                             <i class="fa fa-clock"></i>
                             <span>Pending Documents</span>
                         </button>
                     </div>
                 </div>
                 <div class="erppagelist-container">
-                    <div class="excel-wrapper fixed-grid-wrapper">
-                        <table id="tblConsumptionEntry" class="excel-table fixed-grid-table">
+                    <div class="excel-wrapper fixed-grid-wrapper" id="tableWrapper">
+                        <table id="tblConsumptionEntry" class="excel-table fixed-grid-table table-width resizable-table">
                             <colgroup>
                                 <col style="width:280px;">     
                                 <col style="width:180px;">     
@@ -111,7 +114,7 @@
                             <thead class="table-head">
                                 <tr>
                                     <th style="display:none;">Code</th>
-                                    <th>Item Name</th>
+                                    <th class="freeze-item">Item Name</th>
                                     <th>Department</th>
                                     <th>Unit</th>
                                     <th>Nos</th>
@@ -131,8 +134,8 @@
 
         <!--Modal Popup-->
         <div class="modal fade" id="pendingModal" tabindex="-1" aria-labelledby="pendingModalLabel">
-            <div class="modal-dialog modal-xl erppagesmodal" style="max-width: 65vw;">
-                <div class="modal-content erppagesmodal-content draggable-modal">
+            <div class="modal-dialog medium-modal erppagesmodal">
+                <div class="modal-content erppagesmodal-content erppage-modal-drag">
                     <!-- HEADER -->
                     <div class="erppagesmodal-header">
                         <div class="erppagesmodal-header-left">
@@ -148,26 +151,27 @@
                         </button>
                     </div>
                     <div class="erppagesmodal-body">
-                        <div class="erppagelist-container" style="margin:0px;">
+                        <div class="erppagelist-container">
                             <div class="excel-wrapper" style="height:65vh;">
-                                <table id="tblPendingDocument" class="excel-table fixed-grid-table table-width">
+                                <table id="tblPendingDocument" class="excel-table fixed-grid-table table-width resizable-table">
                                     <colgroup>
-                                        <col style="width:0px;">
-                                        <col style="width:40px;">
-                                        <col style="width:140px;">
-                                        <col style="width:130px;">
-                                        <col style="width:110px;">
-                                        <col style="width:90px;">
-                                        <col style="width:110px;">
-                                        <col style="width:180px;">
-                                        <col style="width:200px;">
-                                        <col style="width:70px;">
-                                        <col style="width:100px;">
-                                        <col style="width:80px;">
+                                        <col class="hidden-col">      <!-- Code (Hidden) -->
+                                        <col style="width:40px;">     <!-- Checkbox -->
+                                        <col style="width: 100px;">    <!-- Voucher Type -->
+                                        <col style="width: 86px;">    <!-- Voucher No -->
+                                        <col style="width: 83px;">    <!-- Date -->
+                                        <col style="width: 69px;">     <!-- Quantity -->
+                                        <col style="width: 90px;">    <!-- Pending Qty -->
+                                        <col style="width: 154px;">    <!-- Item Name -->
+                                        <col style="width: 182px;">    <!-- Remarks -->
+                                        <col style="width: 52px;">     <!-- Nos -->
+                                        <col style="width: 91px;">    <!-- Unit Name -->
+                                        <col style="width: 89px;">     <!-- Department -->
+                                        <col style="width:80px;">     <!-- SR NO -->
                                     </colgroup>
                                     <thead class="table-head">
                                         <tr>
-                                            <th style="display:none;">Code</th>
+                                            <th class="hidden-col">Code</th>
                                             <th><input type="checkbox" id="chkSelectAll"></th>
                                             <th>Voucher Type</th>
                                             <th>Voucher No</th>
@@ -197,7 +201,6 @@
                                 <div class="pagination-center">
                                     <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
                                     <div id="pageNumbers" class="page-numbers"></div>
-
                                     <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
                                 </div>
                                 <div class="pagination-right" id="pageInfoText">
@@ -210,8 +213,6 @@
                                 <i class="fa fa-check"></i> Add Selected
                             </button>
                         </div>
-                        
-
                     </div>
                 </div>
             </div>
@@ -232,6 +233,23 @@
 <script src="~/js/erpjs/gateentry/transaction/misconsumptionentryjs/misconsumptionapi.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/misconsumptionentryjs/misconsumptionvalidation.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/misconsumptionentryjs/misconsumptionui.js"></script>
+
+<script>
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2",
+
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
+
+</script>
 
 
 

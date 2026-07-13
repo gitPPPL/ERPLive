@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System.Data;
+using System.Data.Common;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
@@ -83,22 +84,17 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { success = false, message = ex.Message });
             }
         }
-        public JsonResult GetddlRefNo(string VNo, string Vtype)
+
+        //-------------------------------Ref No Drop down List Banding data------------------------------------
+        public JsonResult GetddlRefNo(string Vtype)
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
-            string gType = Vtype switch
-            {
-                "RCPT" or "RCPI" => "INRM",
-                "SRPU" => "INST",
-                "SRJW" => "INJB",
-                "BFRC" => "INFU",
-                _ => "INST"
-            };
-            string query = $@" SELECT V_NO, DOC_ID FROM Gate1 G WHERE G.v_type =  '{gType}'  AND G.COMP_CODE = {globalVar.PubCompCode}  AND G.BRANCH_CODE = 1
-            AND G.YEAR_CODE = {globalVar.PubFYearCode} AND (MRN_NO IS NULL OR MRN_NO = 0 OR MRN_NO='{VNo}') ORDER BY G.V_NO";
+            string query = $@" SELECT a.V_NO, DOC_ID  FROM PURCHASE1 a  WHERE a.COMP_CODE = {globalVar.PubCompCode}
+            AND a.BRANCH_CODE = 1  AND a.V_TYPE = '{Vtype}' and a.YEAR_CODE = '{globalVar.PubFYearCode}' ORDER BY a.V_NO";
             var moduleList = _dropdownService.GetDropdownList(query);
             return Json(moduleList);
         }
+        //-------------------------------Ref No Drop down List Banding data------------------------------------
         public JsonResult GetddlDocStatus()
         {
             string query = $@" Select Code,Name from DOCSTATUS_MAST where V_TYPE='Document' Order by CODE";
@@ -116,7 +112,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         public JsonResult GetDepartmentList()
         {
             var CCode = _globalVariableService.GetGlobalVariables().PubCompCode;
-            string query = $@"Select code, name from DEPT_MAST WHERE COMP_CODE = '" + CCode + "'";
+            string query = $@"Select code, name from DEPT_MAST";
             var moduleList = _dropdownService.GetDropdownList(query);
             return Json(moduleList);
         }
@@ -452,7 +448,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         {
                             string V_NO = "";
                             string DOC_ID = "";
-                            
+
                             DOC_ID = headerObj.DocType + headerObj.Vno;
 
                             // Insert Header
@@ -461,7 +457,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 cmdHeader.CommandType = CommandType.StoredProcedure;
 
                                 AddParameterSafe(cmdHeader, "@COMP_CODE", globalVar.PubCompCode);
-                                AddParameterSafe(cmdHeader, "@BRANCH_CODE", 1);
+                                AddParameterSafe(cmdHeader, "@BRANCH_CODE", globalVar.PubBranchCode);
                                 AddParameterSafe(cmdHeader, "@YEAR_CODE", globalVar.PubFYearCode);
                                 // Document Header
                                 AddParameterSafe(cmdHeader, "@V_NO", headerObj.Vno);
@@ -500,7 +496,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 AddParameterSafe(cmdHeader, "@BILL_DATE", string.IsNullOrWhiteSpace(headerObj.BillDate) ? DBNull.Value : DateTime.Parse(headerObj.BillDate));
                                 AddParameterSafe(cmdHeader, "@BL_NO", headerObj.BLNo);
                                 //AddParameterSafe(cmdHeader, "@BL_DATE", DateTime.Parse(headerObj.BLDate));
-                                AddParameterSafe(cmdHeader, "@BL_DATE", string.IsNullOrWhiteSpace(headerObj.BLDate)? DBNull.Value: DateTime.Parse(headerObj.BLDate)
+                                AddParameterSafe(cmdHeader, "@BL_DATE", string.IsNullOrWhiteSpace(headerObj.BLDate) ? DBNull.Value : DateTime.Parse(headerObj.BLDate)
 );
                                 AddParameterSafe(cmdHeader, "@WAYBILL_NO", headerObj.WaybillNo);
                                 AddParameterSafe(cmdHeader, "@INPUT_TYPE", headerObj.InputType);
@@ -565,7 +561,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                     AddParameterSafe(cmdItem, "@V_DATE", DateTime.Parse(headerObj.DocDate));
 
                                     AddParameterSafe(cmdItem, "@COMP_CODE", globalVar.PubCompCode);
-                                    AddParameterSafe(cmdItem, "@BRANCH_CODE", 1);
+                                    AddParameterSafe(cmdItem, "@BRANCH_CODE", globalVar.PubBranchCode);
                                     AddParameterSafe(cmdItem, "@YEAR_CODE", globalVar.PubFYearCode);
                                     AddParameterSafe(cmdItem, "@SNO", serialNo++);
                                     AddParameterSafe(cmdItem, "@ITEM_CODE", item.ItemCode);
@@ -1089,48 +1085,52 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 throw new Exception($"{ex.Message} | Parameter: {paramName}", ex);
             }
         }
-        public async Task<IActionResult> GetGatDetailsList(string StrVNo, string StrV_type)
+        //-------------------------------------GetRefNoList----------------------------------
+        public async Task<IActionResult> GetRefNoList(string StrVNo, string StrV_type)
         {
             var gv = _globalVariableService.GetGlobalVariables();
             var response = new GatePurchaseDetailsResponse();
-
             try
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())
-                using (var command = new SqlCommand("usp_GetGatePurchaseReturnEntryDetails", con))
+                using (SqlCommand command = new SqlCommand("usp_GetRefNoPurchaseReturnEntry", con))
                 {
                     command.CommandType = CommandType.StoredProcedure;
+
                     command.Parameters.AddWithValue("@V_TYPE", StrV_type);
-                    command.Parameters.AddWithValue("@V_NO", StrVNo);
+                    command.Parameters.AddWithValue("@V_NO", Convert.ToInt32(StrVNo));
                     command.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
-                    command.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                    command.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
                     command.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
                     await con.OpenAsync();
-
-                    using (var reader = await command.ExecuteReaderAsync())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
                     {
-                        // ----------- Header List -----------
+                        // Header
                         while (await reader.ReadAsync())
                         {
+                            Console.WriteLine("SHIP_GST = " + reader["SHIP_GST"].ToString());
                             var header = new Dictionary<string, object>();
-                            for (int i = 0; i < reader.FieldCount; i++)
+                            for (int i = 0; i < reader.FieldCount;  i++)
+                            {
                                 header[reader.GetName(i)] = reader.IsDBNull(i) ? null : reader.GetValue(i);
+                            }
                             response.Header.Add(header);
                         }
-
-                        // ----------- Items List -----------
+                        // Items
                         if (await reader.NextResultAsync())
                         {
                             while (await reader.ReadAsync())
                             {
                                 var item = new Dictionary<string, object>();
+
                                 for (int i = 0; i < reader.FieldCount; i++)
+                                {
                                     item[reader.GetName(i)] = reader.IsDBNull(i) ? null : reader.GetValue(i);
+                                }
                                 response.Items.Add(item);
                             }
                         }
-
-                        // ----------- Weight Summary -----------
+                        // Weight Summary
                         if (await reader.NextResultAsync())
                         {
                             while (await reader.ReadAsync())
@@ -1141,9 +1141,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                     var prop = typeof(WeightSummary).GetProperty(reader.GetName(i));
                                     if (prop != null && !reader.IsDBNull(i))
                                     {
-                                        var value = reader.GetValue(i);
-                                        var converted = ChangeType(value, prop.PropertyType);
-                                        prop.SetValue(obj, converted);
+                                        prop.SetValue(obj, ChangeType(reader.GetValue(i), prop.PropertyType));
                                     }
                                 }
                                 response.WeightSummary.Add(obj);
@@ -1151,23 +1149,38 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         }
                     }
                 }
-
-                return Json(response);
+                return Json(new
+                {
+                    success = true,
+                    data = response
+                });
+            }
+            catch (SqlException ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred: {ex.Message}");
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
         }
+        //-------------------------------------GetRefNoList----------------------------------
+
         [HttpPost]
         public IActionResult GetAllDatadetails([FromBody] GetDetailsRequest request)
         {
             if (request == null)
                 return BadRequest("Invalid request");
-
             var gv = _globalVariableService.GetGlobalVariables();
             var response = new PurchaseAllDetailsResponse();
-
             try
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())
@@ -1180,13 +1193,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
                     cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
                     cmd.Parameters.AddWithValue("@V_TYPE", request.vType);
-
-                    //cmd.Parameters.AddWithValue("@VNO", 202100001);
-                    //cmd.Parameters.AddWithValue("@YEAR_CODE", 3);
-                    //cmd.Parameters.AddWithValue("@COMP_CODE", 5);
-                    //cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                    //cmd.Parameters.AddWithValue("@V_TYPE", vType);
-
                     con.Open();
                     using (var reader = cmd.ExecuteReader())
                     {

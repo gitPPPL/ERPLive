@@ -4,35 +4,77 @@ function getSelectedPendingRows() {
 }
 
 function setFormReadOnly() {
-    $('#OutwardEntryForm input:not([type="hidden"])').prop('readonly', true);
-    $('#OutwardEntryForm input[type="checkbox"], input[type="radio"], input[type="file"]').prop('disabled', true);
-    $('#OutwardEntryForm input[type="time"], #OutwardEntryForm input[type="date"]').prop('disabled', true);
-    $('#OutwardEntryForm select').prop('disabled', true);
-    $('#OutwardEntryForm textarea').prop('readonly', true);
-    $('#OutwardEntryForm button').prop('disabled', true);
-    $('#OutwardEntryForm a').css({
-        'pointer-events': 'none',
-        'opacity': '0.5'
-    });
-    $('#tblOutwardEntry tbody').find('input, select, textarea, button').prop('disabled', true);
-    $('#btnpendingorderno, #btn-pending').prop('disabled', true);
-    $('#pendingorders').find('input, select, button').prop('disabled', true);
-    $('.btn-add-action, .btn-delete-action').css({
-        'pointer-events': 'none',
-        'opacity': '0.5'
-    });
+    const form = $('#OutwardEntryForm');
 
-    $('#tablePagination').css({
-        'pointer-events': 'none',
-        'opacity': '0.5'
-    });
-    $('#OutwardEntryForm')
-        .find('input, select, textarea, button, a')
-        .attr('tabindex', '-1');
-    $('#OutwardEntryForm').css({
-        'opacity': '0.95'
-    });
+    // -------------------------
+    // 1. Inputs (text, number, email etc.)
+    // -------------------------
+    form.find('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"])')
+        .prop('readonly', true);
+
+    // -------------------------
+    // 2. Disable checkboxes, radios, file, date, time
+    // -------------------------
+    form.find('input[type="checkbox"], input[type="radio"], input[type="file"], input[type="date"], input[type="time"]')  .prop('disabled', true);
+
+    // -------------------------
+    // 3. Disable selects
+    // -------------------------
+    form.find('select').prop('disabled', true);
+
+    // -------------------------
+    // 4. Textareas
+    // -------------------------
+    form.find('textarea').prop('readonly', true);
+
+    // -------------------------
+    // 5. Buttons
+    // -------------------------
+    form.find('button').prop('disabled', true);
+    $('#btn-save, #btnpendingorderno, #btn-pending').prop('disabled', true);
+
+    // -------------------------
+    // 6. Links
+    // -------------------------
+    form.find('a').css({ 'pointer-events': 'none', 'opacity': '0.5' });
+
+    // -------------------------
+    // 7. TABLE FIX (ALL ROWS AND CELLS)
+    // -------------------------
+    $('#tblOutwardEntry').addClass('table-readonly')
+        .find('input, select, textarea, button')
+        .each(function () {
+            const $el = $(this);
+            if ($el.is('select') || $el.is('button') ||
+                $el.is(':checkbox') || $el.is(':radio') || $el.is('[type=file]') ||
+                $el.is('[type=date]') || $el.is('[type=time]')) {
+                $el.prop('disabled', true);
+            } else {
+                $el.prop('readonly', true); // text, number, textarea
+            }
+        });
+
+    // Optional: disable pointer events on table
+    $('#tblOutwardEntry.table-readonly').css('pointer-events', 'none');
+
+    // -------------------------
+    // 8. Modal Inputs
+    // -------------------------
+    $('#pendingorders').find('input, select, button').prop('disabled', true);
+
+    // -------------------------
+    // 9. Add/Delete buttons
+    // -------------------------
+    $('.btn-add-action, .btn-delete-action').css({ 'pointer-events': 'none', 'opacity': '0.5' });
+
+    // -------------------------
+    // 10. Form opacity and tab navigation
+    // -------------------------
+    form.css({ 'opacity': '0.95' });
+    form.find('input, select, textarea, button, a').attr('tabindex', '-1');
 }
+
+
 
 async function LoadDropDowns() {
     await Promise.all([
@@ -41,7 +83,8 @@ async function LoadDropDowns() {
         loadUnit(),
         DDLVtype(),
         DDLParty(),
-        DDLcity_mast()
+        DDLcity_mast(),
+        DDLstate()
     ]);
 }
 
@@ -98,71 +141,83 @@ function addRow($tbody, data = {}) {
         return !$(this).find("select.itemName").val();
     }).first();
 
-    $tbody.find(".btn-add-action").remove();
+    $tbody.find(".act-btn.edit").hide();
 
     const selectItems = generateSelect(itemMap, data.itemName || "");
     const selectDept = generateSelect(DeptMap, data.department || "");
     const selectunit = generateSelect(UnitMap, data.unit || "");
 
-    const row = `
+
+    console.log("Item", itemMap);
+
+
+     const row = $(`
     <tr class="no-border-input">
       <td style="display:none;">${data.code || ""}</td>
 
       <!-- Disabled Selects -->
       <td>
-        <select class="form-control itemName" disabled>
+        <select class="erppagetable-control itemName" disabled>
           <option value="">-- Select --</option>${selectItems}
         </select>
       </td>
 
       <td>
-        <select class="form-control department" disabled>
+        <select class="erppagetable-control department" >
           <option value="">-- Select --</option>${selectDept}
         </select>
       </td>
 
       <td>
-        <select class="form-control unit" disabled>
+        <select class="erppagetable-control unit" disabled>
           <option value="">-- Select --</option>${selectunit}
         </select>
       </td>
 
-      <!-- Enabled -->
+      <!-- Enabled Inputs -->
       <td>
-        <input type="number" class="form-control no" value="${data.no || ''}"/>
+        <input type="number" class="erppagetable-control no" value="${data.no || ''}" oninput="if(this.value.length > 10) this.value = this.value.slice(0,12)" />
+      </td>
+      <td>
+      <input type="number" class="erppagetable-control quantity" value="${data.quantity || ''}" oninput="if(this.value.length > 14) this.value = this.value.slice(0,14)" />
       </td>
 
       <td>
-        <input type="number" class="form-control quantity" value="${data.quantity || ''}"/>
-      </td>
-
-      <td>
-        <input type="text" class="form-control remarks" value="${data.remarks || ''}"/>
+        <input type="text" class="erppagetable-control remarks" maxlength="225" value="${data.remarks || ''}"/>
       </td>
 
       <!-- Readonly -->
       <td>
-        <input type="text" class="form-control ref-type"
-               value="${data.refType || ''}" readonly/>
+        <input type="text" class="erppagetable-control ref-type" value="${data.refType || ''}" readonly/>
       </td>
 
       <td>
-        <input type="text" class="form-control ref-no"
-               value="${data.refNo || ''}" readonly/>
+        <input type="text" class="erppagetable-control ref-no" value="${data.refNo || ''}" readonly/>
       </td>
 
-      <td>
-        <button class="act-btn edit" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus btn-add-action"></i></button>
-        <button class="act-btn delete" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash btn-delete-action"></i></button> 
+      <td class="action-col">
+        <div class="action-wrap">
+            <button class="act-btn delete" title="Delete Row" style="cursor:pointer;">
+              <i class="fa fa-trash btn-delete-action"></i>
+            </button> 
+        </div>
       </td>
-    </tr>`;
+    </tr>
+    `);
 
+    // Append or insert row
     if ($emptyRow.length) {
         $emptyRow.before(row);
-    }
-    else {
+    } else {
         $tbody.append(row);
     }
+
+    // Enforce max 18 digits on number inputs
+    row.find("input[type=number]").on("input", function () {
+        if (this.value.length > 18) {
+            this.value = this.value.slice(0, 18);
+        }
+    });
 }
 
 function renderPendingTable() {
@@ -179,26 +234,58 @@ function renderPendingTable() {
 }
 
 function PendingaddRow($tbody, data = {}, index) {
+
+    let formattedDate = '';
+
+    if (data.VoucherDate) {
+        // remove time part
+        let datePart = data.VoucherDate.split(' ')[0]; // "21-05-2026"
+
+        let parts = datePart.split('-');
+
+        if (parts.length === 3) {
+            let day = parts[0].padStart(2, '0');
+            let month = parts[1].padStart(2, '0');
+            let year = parts[2];
+
+            formattedDate = `${day}-${month}-${year}`;
+        }
+    }
+
     const row = `
-            <tr>
-              <td>
-                <input type="checkbox" class="row-checkbox"
-                       data-index="${index}"
-                       ${data.selected ? "checked" : ""}/>
-              </td>
-              <td><input type="text" class="form-control Vouchertype" value="${data.Vouchertype || ''}"/></td>
-              <td><input type="text" class="form-control VoucherNo" value="${data.VoucherNo || ''}"/></td>
-              <td><input type="text" class="form-control VoucherDate" value="${data.VoucherDate || ''}"/></td>
-              <td><input type="text" class="form-control ItemCode" value="${data.ItemCode || ''}"/></td>
-              <td><input type="text" class="form-control ItemName" value="${data.ItemName || ''}"/></td>
-              <td><input type="text" class="form-control Qty" value="${data.Qty || ''}"/></td>
-              <td><input type="number" class="form-control PQty" value="${data.PQty || ''}"/></td>
-              <td><input type="text" class="form-control remarks" value="${data.remarks || ''}"/></td>
-              <td><input type="text" class="form-control nos" value="${data.nos || ''}"/></td>
-              <td><input type="text" class="form-control UnitName" value="${data.UnitName || ''}"/></td>
-              <td><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}"/></td>
-              <td><input type="text" class="form-control SRno" value="${data.SRno || ''}"/></td>
-            </tr>`;
+        <tr>
+          <td>
+            <input type="checkbox" class="row-checkbox"
+                   data-index="${index}"
+                   ${data.selected ? "checked" : ""}
+                   />
+          </td>
+
+          <td><input type="text" class="form-control Vouchertype" value="${data.Vouchertype || ''}" readonly/></td>
+
+          <td><input type="text" class="form-control VoucherNo" value="${data.VoucherNo || ''}" readonly/></td>
+
+          <td><input type="text" class="form-control VoucherDate" value="${formattedDate}" readonly/></td>
+
+          <td><input type="text" class="form-control ItemCode" value="${data.ItemCode || ''}" readonly/></td>
+
+          <td><input type="text" class="form-control ItemName" value="${data.ItemName || ''}" readonly/></td>
+
+          <td><input type="text" class="form-control Qty" value="${data.Qty || ''}" readonly/></td>
+
+          <td><input type="number" class="form-control PQty" value="${data.PQty || ''}" readonly/></td>
+
+          <td><input type="text" class="form-control remarks" value="${data.remarks || ''}" readonly/></td>
+
+          <td class="hidden-col"><input type="text" class="form-control nos" value="${data.nos || ''}" readonly/></td>
+
+          <td class="hidden-col"><input type="text" class="form-control UnitName" value="${data.UnitName || ''}" readonly/></td>
+
+          <td class="hidden-col"><input type="text" class="form-control UnitCode" value="${data.UnitCode || ''}" readonly/></td>
+
+          <td class="hidden-col"><input type="text" class="form-control SRno" value="${data.SRno || ''}" readonly/></td>
+        </tr>`;
+
     $tbody.append(row);
 }
 

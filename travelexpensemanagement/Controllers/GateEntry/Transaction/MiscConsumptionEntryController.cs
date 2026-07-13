@@ -38,6 +38,14 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
         public IActionResult Index()
         {
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+            ViewBag.DatabaseName = databaseName;
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+            ViewBag.GlobalVariables = globalVariables;
             return View("~/Views/GateEntry/Transaction/MiscConsumptionEntry/Index.cshtml");
         }
 
@@ -102,21 +110,33 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                 var result = _repository.SaveMiscConsumption( request.Header, request.Deatils, action );
 
-                _logService.InsertLog("GATE1", "MiscConsumptionEntry", "Transaction", action, request.Header.V_TYPE, request.Header.V_NO.ToString(),
-                          request.Header.V_DATE);
+                //if (action == "UPDATE")
+                //{
+                //    _globalValidationdate.LogInsertUpdateDelete(
+                //        "gate1",
+                //        "gate1",
+                //        "Transaction",
+                //        request.Header.V_NO.ToString(),
+                //        request.Header.V_TYPE
+                //    );
 
-                _logService.InsertLog("GATE2", "MiscConsumptionEntry", "Transaction", action, request.Header.V_TYPE, request.Header.V_NO.ToString(),
-                          request.Header.V_DATE);
-
-                if (action == "UPDATE")
-                {
-                    _globalValidationdate.LogInsertUpdateDelete("GATE1", "GATE1", "Transaction", request.Header.V_NO.ToString(), request.Header.V_TYPE);
-
-                    _globalValidationdate.LogInsertUpdateDelete("GATE2", "GATE2", "Transaction", request.Header.V_NO.ToString(), request.Header.V_TYPE);
-                }
+                //    _globalValidationdate.LogInsertUpdateDelete(
+                //        "gate2",
+                //        "gate2",
+                //        "Transaction",
+                //        request.Header.V_NO.ToString(),
+                //        request.Header.V_TYPE
+                //    );
+                //}
 
                 if (result == "Success")
                 {
+                    _logService.InsertLog("gate1", "miscconsumptionentry", "transaction", action, request.Header.V_TYPE, request.Header.V_NO.ToString(),
+                          request.Header.V_DATE);
+
+                    _logService.InsertLog("gate2", "miscconsumptionentry", "transaction", action, request.Header.V_TYPE, request.Header.V_NO.ToString(),
+                              request.Header.V_DATE);
+
                     return Json(new { success = true, message = "Saved successfully" });
                 }
                 else

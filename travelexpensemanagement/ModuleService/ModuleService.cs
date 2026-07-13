@@ -130,6 +130,8 @@ namespace travelexpensemanagement.ModuleService
             var companyName = cmd.ExecuteScalar();
             return companyName != null ? companyName.ToString() : null;
         }
+
+
         // Models
         public class Module
         {

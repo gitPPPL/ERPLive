@@ -1,151 +1,138 @@
 ﻿@{
-	ViewBag.Title = "Transport Inward Entry List";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Transport Inward Entry List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 
-	var currentMenu = ViewBag.CurrentMenu as string;
-	bool canAdd = false;
-	bool canEdit = false;
-	bool canDelete = false;
-	bool canPrint = false;
-	bool canExport = false;
-	bool canMail = false;
-	bool canApproval = false;
-	bool canDocDetail = false;
+    // var currentMenu = ViewBag.CurrentMenu as string;
+    // bool canAdd = false;
+    // bool canEdit = false;
+    // bool canDelete = false;
+    // bool canPrint = false;
+    // bool canExport = false;
+    // bool canMail = false;
+    // bool canApproval = false;
+    // bool canDocDetail = false;
 
-	foreach (var permission in Model.UserMenuPermissions)
-	{
-		if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
-		{
-			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
-			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
-			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
-			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
-			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
-			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
-			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
-			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
-			break;
-		}
-	}
+    // foreach (var permission in Model.UserMenuPermissions)
+    // {
+    // 	if (permission.DISPLAY_NAME == ViewBag.CurrentMenu)
+    // 	{
+    // 		canAdd = Model.UserLevel == 1 || permission._ADD == 1;
+    // 		canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
+    // 		canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
+    // 		canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
+    // 		canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
+    // 		canMail = Model.UserLevel == 1 || permission._MAIL == 1;
+    // 		canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
+    // 		canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
+    // 		break;
+    // 	}
+    // }
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
-
+<div id="erp-toast-container"></div>
 <!-- HEADER -->
 <div class="erppagelist-header">
-	<div class="erppagelist-title">
-		<i class="fa fa-list"></i>
-		<span>Vehicle Inward Entry List</span>
-	</div>
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Vehicle Inward Entry List</span>
+    </div>
 
-	<div class="erppagelist-header-right">
-		@if (canAdd){
-			<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "VehicleInwardEntry")'">
-				<i class="fa fa-plus"></i>Add New
-			</button>
-		}
-	</div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "VehicleInwardEntry")'" id="button_add">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
 </div>
 
 <!-- TOOLBAR -->
 <div class="erppagelist-toolbar">
-	<div class="erppagelist-search-wrapper">
-		<i class="fa fa-search"></i>
-		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
-	</div>
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+    </div>
 
-	<div class="erppagelist-actions">
+    <div class="erppagelist-actions">
 
-		@if (canPrint)
-		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="callGetReportAsPdf()">
-				<i class="fa fa-print"></i> Print
-			</button>
-		}
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="button_export">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail" id="button_mail">
+            <i class="fa fa-envelope"></i> Mail
+        </button>
+        @* <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records" id="button_approval">
+            <i class="fa fa-check-circle"></i> Approved
+        </button> *@
 
-		@if (canExport)
-		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" onclick="exportToExcel()">
-				<i class="fa fa-file-excel"></i> Export
-			</button>
-		}
-
-		@if (canMail)
-		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
-				<i class="fa fa-envelope"></i> Mail
-			</button>
-		}
-
-		@if (canApproval)
-		{
-			<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
-				<i class="fa fa-check-circle"></i> Approved
-			</button>
-		}
-
-	</div>
+    </div>
 </div>
 
 <div class="erppagelist-container">
-	<div class="excel-wrapper fixed-grid-wrapper">
-		<table id="tblPurchaseBillPassEntry" class="excel-table fixed-grid-table">
-			<colgroup>
-				<col style="display:none;" />  <!-- Code (hidden) -->
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblPurchaseBillPassEntry" class="excel-table fixed-grid-table table-width resizable-table">
+            <colgroup>
+                <col style="display:none;" />  <!-- Code (hidden) -->
 
-				<col style="width: 80px;" />   <!-- VNo -->
-				<col style="width: 110px;" />  <!-- VDate -->
-				<col style="width: 90px;" />   <!-- VTime -->
-				<col style="width: 90px;" />   <!-- Do No -->
-				<col style="width: 200px;" />  <!-- Party Name -->
-				<col style="width: 150px;" />  <!-- Truck No -->
-				<col style="width: 120px;" />  <!-- Transport -->
+                <col style="width: 80px;" />   <!-- VNo -->
+                <col style="width: 110px;" />  <!-- VDate -->
+                <col style="width: 90px;" />   <!-- VTime -->
+                <col style="width: 90px;" />   <!-- Do No -->
+                <col style="width: 200px;" />  <!-- Party Name -->
+                <col style="width: 150px;" />  <!-- Truck No -->
+                <col style="width: 120px;" />  <!-- Transport -->
 
-				<col style="width: 120px;" />  <!-- Action -->
-			</colgroup>
-			<thead>
-				<tr>
-					<th style="display:none;">Code</th>
-					<th>Doc No</th>
-					<th>Doc Date</th>
-					<th>Doc Time</th>
-					<th>Do No</th>
-					<th>Party Name</th>
-					<th>Truck No</th>
-					<th>Transport</th>
-					<th class="action-col">Action</th>
-				</tr>
-			</thead>
-			<tbody></tbody>
-		</table>
-	</div>
+                <col style="width: 120px;" />  <!-- Action -->
+            </colgroup>
+            <thead>
+                <tr>
+                    <th style="display:none;">Code</th>
+                    <th>Doc No</th>
+                    <th>Doc Date</th>
+                    <th>Doc Time</th>
+                    <th>Do No</th>
+                    <th>Party Name</th>
+                    <th>Truck No</th>
+                    <th>Transport</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-	<div class="erppagelist-pagination">
-		<div class="pagination-left">
-			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
-				<option value="5">5</option>
-				<option value="10" selected>10</option>
-				<option value="20">20</option>
-				<option value="50">50</option>
-			</select>
-		</div>
-		<div class="pagination-center">
-			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
-			<div id="pageNumbers" class="page-numbers"></div>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
 
-			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
-		</div>
-		<div class="pagination-right" id="pageInfoText">
-			Results: 0 - 0 of 0
-		</div>
-	</div>
+            <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
 </div>
-<script>
-	window.permissions = {
-		canEdit: @canEdit.ToString().ToLower(),
-		canDelete: @canDelete.ToString().ToLower(),
-		canDocDetail: @canDocDetail.ToString().ToLower()
-	};
-</script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="~/common/delete.js"></script>
 <script src="~/common/pagination.js"></script>
 <script src="~/js/erpjs/gateentry/transaction/vehicleinwardentrylist/vehicleinwardentrylist.js"></script>
+<script>
+    window.globalVariables = {
+        compCode: "@globalVariables?.PubCompCode",
+        yearCode: "@globalVariables?.PubFYearCode",
+        branchCode: "@globalVariables?.PubBranchCode",
+        companyName: "@globalVariables?.CompanyName",
+        add1: "@globalVariables?.Address1",
+        add2: "@globalVariables?.Address2",
+    };
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
+</script>

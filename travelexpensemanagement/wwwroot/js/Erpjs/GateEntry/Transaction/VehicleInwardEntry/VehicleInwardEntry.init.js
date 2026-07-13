@@ -1,7 +1,9 @@
 ﻿let docId = "";
 let readOnly; 
-
+let RemoveAttachment = false;
+var controllerName = window.location.pathname.split('/')[1];
 $(async function () {
+    checkPermissionForEntryPage(controllerName);
     try {
         docId = VehicleUI.getQueryParam('id');
         readOnly = VehicleUI.getQueryParam('readOnly');
@@ -108,10 +110,11 @@ function initEventListeners(docId) {
         $('#TxtAttachment').val('');
         $('#imgPreview').attr('src', '');
         $('#previewContainer').fadeOut();
+        RemoveAttachment = true;
+        console.log("RemoveAttachment value:", RemoveAttachment);
     });
     //=========Save Event=========
     $('#btn-save').on('click', async function (e) {
-        console.log("docId", docId);
         e.preventDefault();
         const validate = await VehicleValidation.validateSave();
         if (validate) {

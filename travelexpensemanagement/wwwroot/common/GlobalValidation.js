@@ -1,4 +1,6 @@
-﻿function validateForm(formSelector) {
+﻿let permission = null;
+let Entrypermission = null;
+function validateForm(formSelector) {
     console.log("Validating form...");
     let isValid = true;
     $(formSelector).find('.error-message').remove();
@@ -342,3 +344,152 @@ function getCurrentDateYMD() {
     const yyyy = today.getFullYear();
     return `${yyyy}-${mm}-${dd}`;
 };
+
+function checkPermission(controllerName, callback) {
+
+    $.ajax({
+        url: '/Permission/GetCurrentMenuPermission',
+        type: 'GET',
+        data: {
+            controllerName: controllerName
+        },
+        success: function (res) {
+
+            if (!res.success)
+                return;
+
+            permission = res;
+
+            $("#button_add").toggle(res.add);
+            $("#button_edit").toggle(res.edit);
+            $("#button_delete").toggle(res.delete);
+            $("#button_print").toggle(res.print);
+            $("#button_export").toggle(res.export);
+            $("#button_mail").toggle(res.mail);
+            $("#button_approval").toggle(res.approval);
+            $("#button_document").toggle(res.docdetail);
+
+            applyGridPermission();
+
+            if (callback)
+                callback();
+        }
+    });
+}
+function applyGridPermission() {
+
+    if (!permission)
+        return;
+
+    $(".permission-edit").toggle(permission.edit);
+    $(".permission-delete").toggle(permission.delete);
+}
+
+function checkModificationDays(options) {
+    const {
+        controller,
+        action = 'checkModificationDays',
+        vDate,
+        rowId = null,
+        vType = null,
+        onAllowed = null,
+        url = `/${controller}/${action}`
+    } = options;
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        data: { vDate: vDate },
+
+        success: function (response) {
+
+            if (response.success) {
+
+                if (response.isAllowed === 0) {
+                    showToast(response.message, { type: "warning" });
+                }
+                else {
+
+                    // Dynamic callback
+                    if (typeof onAllowed === "function") {
+                        //onAllowed(rowId);
+                        if (vType !== null) {
+                            onAllowed(rowId, vType);
+                        } else {
+                            onAllowed(rowId);
+                        }
+                    }
+
+                }
+
+            } else {
+                showToast(response.message, { type: "error" });
+            }
+        },
+
+        error: function () {
+            showToast("An error occurred!", { type: "error" });
+        }
+    });
+}
+
+function checkPermissionForEntryPage(controllerName) {
+
+    $.ajax({
+        url: '/Permission/GetCurrentEntryPagePermission',
+        type: 'GET',
+        data: {
+            controllerName: controllerName
+        },
+        success: function (res) {
+            console.log(res);
+            if (!res.success)
+                return;
+            Entrypermission = res;
+
+            $("#button_add").toggle(res.add);
+            $("#button_edit").toggle(res.edit);
+            $("#button_delete").toggle(res.delete);
+            $("#button_print").toggle(res.print);
+            $("#button_export").toggle(res.export);
+            $("#button_mail").toggle(res.mail);
+            $("#button_approval").toggle(res.approval);
+            $("#button_document").toggle(res.docdetail);
+
+            $(".permission-edit").toggle(res.edit);
+            $(".permission-delete").toggle(res.delete);
+
+            applyGridPermissionforEntryPage();
+        }
+    });
+}
+
+function applyGridPermissionforEntryPage() {
+
+    if (!permission)
+        return;
+
+    $(".permission-edit").toggle(permission.edit);
+    $(".permission-delete").toggle(permission.delete);
+}
+
+function SetFYDate(inputId, loginDate) {
+    var $input = $('#' + inputId);
+    var d = new Date(loginDate);
+    var fyStartYear = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+    var minDate = fyStartYear + '-04-01';
+    var maxDate = loginDate;
+    $input.attr('min', minDate).attr('max', maxDate).val(maxDate);
+
+    $input.on('change', function () {
+        var selectedDate = new Date(this.value);
+        var min = new Date(minDate);
+        var max = new Date(maxDate);
+
+        if (selectedDate < min || selectedDate > max) {
+            toastr.info('Please select a date within the Financial Year and not greater than Login Date.');
+            this.value = maxDate;
+        }
+    });
+}

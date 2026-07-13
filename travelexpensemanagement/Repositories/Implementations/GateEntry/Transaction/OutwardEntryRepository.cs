@@ -1,4 +1,7 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DocumentFormat.OpenXml.Office.CustomUI;
+using Microsoft.Data.SqlClient;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
+using StackExchange.Redis;
 using System.Data;
 using System.Reflection.Metadata;
 using travelexpensemanagement.Common.Globalvariable;
@@ -20,53 +23,26 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
-        }
+        }       
 
-        public RepositoryResponse SaveOutwardEntry(
-         OutWordEntry_Header header,
-         List<DetailsOutwardEntry> details,
-         string action)
+        public RepositoryResponse SaveOutwardEntry( OutWordEntry_Header header, List<DetailsOutwardEntry> details, string action)
         {
             try
             {
                 var validation = Validdata(header, details);
 
-                if (!validation.status)
+                if (validation.status == true)
                 {
-                    return new RepositoryResponse
-                    {
-                        status = false,
-                        message = validation.message
-                    };
+                    return new RepositoryResponse  {  status = true,  message = validation.message };
                 }
-
                 var g = _globalVariableService.GetGlobalVariables();
-
                 using var conn = _dbConnection.GetErpConnection();
+
                 conn.Open();
-
                 using var transaction = conn.BeginTransaction();
-
                 try
-                {
-                    // DELETE OLD DATA
-                    string deleteSql = @"DELETE FROM GATE2
-                                 WHERE COMP_CODE = @CompCode
-                                 AND V_NO = @VNo
-                                 AND BRANCH_CODE = @BranchCode
-                                 AND YEAR_CODE = @YearCode";
-
-                    using (var deleteCmd = new SqlCommand(deleteSql, conn, transaction))
-                    {
-                        deleteCmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                        deleteCmd.Parameters.AddWithValue("@VNo", header.V_NO);
-                        deleteCmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-                        deleteCmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
-
-                        deleteCmd.ExecuteNonQuery();
-                    }
-
-                    // HEADER SAVE
+                {               
+            
                     using (var cmd = new SqlCommand("sp_OutwardEntry", conn, transaction))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -115,15 +91,29 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
                         cmd.ExecuteNonQuery();
                     }
+               
+                    string deleteSql = @"DELETE FROM GATE2
+                                 WHERE COMP_CODE = @CompCode
+                                 AND V_NO = @VNo
+                                 AND BRANCH_CODE = @BranchCode
+                                 AND YEAR_CODE = @YearCode";
 
-                    // DETAILS SAVE
+                    using (var deleteCmd = new SqlCommand(deleteSql, conn, transaction))
+                    {
+                        deleteCmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
+                        deleteCmd.Parameters.AddWithValue("@VNo", header.V_NO);
+                        deleteCmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
+                        deleteCmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
+
+                        deleteCmd.ExecuteNonQuery();
+                    }
+
                     foreach (var d in details)
                     {
                         if (string.IsNullOrWhiteSpace(d.ITEM_NAME))
                             continue;
 
                         using var cmd = new SqlCommand("sp_OutwardEntry", conn, transaction);
-
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "INSERT");
                         cmd.Parameters.AddWithValue("@SaveAction", "Details");
@@ -165,20 +155,46 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             }
             catch (Exception ex)
             {
-                return new RepositoryResponse
-                {
-                    status = false,
-                    message = ex.Message
-                };
+                return new RepositoryResponse { status = false, message = ex.Message };
             }
         }
-        public RepositoryResponse Validdata(  OutWordEntry_Header header,  List<DetailsOutwardEntry> details)
+        public RepositoryResponse Validdata(OutWordEntry_Header header,  List<DetailsOutwardEntry> details)
         {
             try
             {
                 var g = _globalVariableService.GetGlobalVariables();
                 using var conn = _dbConnection.GetErpConnection();
                 conn.Open();
+
+                decimal mainQty = 0;
+                decimal gateQty = 0;
+
+                if (header.V_DATE != null)
+                {
+                    string sql = "SELECT START_DATE, END_DATE FROM YEAR_MAST WHERE CODE = " +  g.PubFYearCode + "";
+
+                    using var cmd = new SqlCommand(sql, conn);
+                    using var reader = cmd.ExecuteReader();
+
+                    if (reader.Read()) 
+                    {
+                      
+                        DateTime startDate = reader.GetDateTime(reader.GetOrdinal("START_DATE"));
+                        DateTime endDate = reader.GetDateTime(reader.GetOrdinal("END_DATE"));
+                        DateTime vDate = header.V_DATE.Value;
+
+                        if (vDate < startDate || vDate > endDate)
+                        {
+                            return new RepositoryResponse
+                            {
+                                status = false,
+                                message = "Voucher Date must be within the Financial Year."
+                            };
+                        }
+
+                    }                  
+                }
+
                 foreach (var d in details)
                 {
                     if (string.IsNullOrWhiteSpace(d.ITEM_NAME))
@@ -201,29 +217,17 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 string bill_gst = Convert.ToString(reader["bill_gst"]);
                                 string einvoice_flg = Convert.ToString(reader["einvoice_flg"]);
                                 decimal namount = Convert.ToDecimal(reader["namount"]);
-
                                 decimal billGstValue = 0;
                                 decimal.TryParse(bill_gst, out billGstValue);
 
-                                if (namount >= 100000 &&
-                                    billGstValue > 16 &&
-                                    namount != 0 &&
-                                    einvoice_flg != "Y")
+                                if (namount >= 100000 && billGstValue > 16 && namount != 0 &&  einvoice_flg != "Y")
                                 {
-                                    return new RepositoryResponse
-                                    {
-                                        status = false,
-                                        message = "Please Generate GST E Invoice Before Creating GatePass."
-                                    };
+                                    return new RepositoryResponse { status = true, message = "Please Generate GST E Invoice Before Creating GatePass." };
                                 }
                             }
                         }
-
-                        // =====================================================
-                        // GST TAX VALIDATION
-                        // =====================================================
-
-                        using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))                        {
+                        using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))          
+                        {
                             cmd.CommandType = CommandType.StoredProcedure;
                             cmd.Parameters.AddWithValue("@Action", "Validdata");
                             cmd.Parameters.AddWithValue("@ShowActionOption", "GSTVALID");
@@ -235,13 +239,12 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             using var reader = cmd.ExecuteReader();
                             if (reader.Read())
                             {
-                                return new RepositoryResponse { status = false, message = $"ERROR! Tax not calculated in Invoice No => {d.REF_NO} & {d.REF_TYPE}"  };
+                                return new RepositoryResponse { status = true, message = $"ERROR! Tax not calculated in Invoice No => {d.REF_NO} & {d.REF_TYPE}"  };
                             }
                         }
                     }
 
-                    if (d.REF_TYPE == "DCHL" &&
-                        string.IsNullOrWhiteSpace(header.WAYBILL_NO))
+                    if (d.REF_TYPE == "DCHL" && string.IsNullOrWhiteSpace(header.WAYBILL_NO))
                     {
                         using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
                         {
@@ -255,18 +258,24 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 string state_type =  Convert.ToString(reader["state_type"]);
                                 if (state_type != "Local")
                                 {
-                                    return new RepositoryResponse
-                                    {
-                                        status = false,
-                                        message = "EWayBill is mandatory for Interstate Material Movement."
-                                    };
+                                    return new RepositoryResponse { status = true, message = "EWayBill is mandatory for Interstate Material Movement."  };
                                 }
                             }
                         }
                     }
 
-                    decimal mainQty = 0;
-                    decimal gateQty = 0;
+                    using (SqlCommand cmd = new SqlCommand("sp_OutwardEntry", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "Validdata");
+                        cmd.Parameters.AddWithValue("@ShowActionOption", "PendingQuantitycheack");
+                        cmd.Parameters.AddWithValue("@PARTY_CITY", header.PARTY_CITY);
+                        using var reader = cmd.ExecuteReader();
+                        if (reader.Read())
+                        {
+                            return new RepositoryResponse { status = true, message = "EWayBill is mandatory for Interstate Material Movement." };
+                        }
+                    }
 
                     if (header.ITEM_TYPE != "Others")
                     {
@@ -281,9 +290,11 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             cmd.Parameters.AddWithValue("@ITEM_CODE", d.ITEM_CODE);
                             cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE);
                             cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
+                            cmd.Parameters.AddWithValue("@DOC_ID", header.V_TYPE + header.V_NO);
                             cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
                             cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
                             cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
+                            cmd.Parameters.AddWithValue("@REMARKS", d.REMARKS);
                             using var reader = cmd.ExecuteReader();
                             if (reader.Read())
                             {
@@ -291,39 +302,56 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                 gateQty =  Convert.ToDecimal(reader["GateQty"]);
                             }
                         }
-                        gateQty += (d.QTY ?? 0);
-  
+                        gateQty = gateQty + (d.QTY ?? 0);
+
                         if (gateQty > mainQty)
                         {
-                            decimal pendingQty =
-                                mainQty - (gateQty - (d.QTY ?? 0));
-
+                            decimal pendingQty = (decimal)((mainQty - gateQty) + d.QTY);
                             return new RepositoryResponse
                             {
-                                status = false,
-                                message =
-                                    $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " +
-                                    $"& Your Quantity is = {(d.QTY ?? 0)}, " +
-                                    $"Please Check Item Name {d.ITEM_NAME}"
+                                status = true,
+                                message = $"{header.ITEM_TYPE} Pending Quantity is = {pendingQty} " + $"& Your Quantity is = {(d.QTY ?? 0)}, " + $"Please Check Item Name {d.ITEM_NAME}"
                             };
                         }
+
                     }
+
                 }
-                return new RepositoryResponse
-                {
-                    status = true,
-                    message = "Success"
-                };
+
+                return new RepositoryResponse { status = false, message = "Success" };
             }
             catch (Exception ex)
             {
-                return new RepositoryResponse
-                {
-                    status = false,
-                    message = ex.Message
-                };
+                return new RepositoryResponse  { status = false,  message = ex.Message };
             }
         }
+        
+        public decimal GetDecimal(string query)
+        {
+            try
+            {
+                using var con = _dbConnection.GetErpConnection();
+                con.Open();
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    object result = cmd.ExecuteScalar();
+
+                    if (result != null && result != DBNull.Value)
+                    {
+                        return Convert.ToDecimal(result);
+                    }
+
+                    return 0m;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetDecimal() Error: " + ex.Message);
+                return 0m;
+            }
+        }
+
         public string GetText(string query)
         {
             try
@@ -428,5 +456,6 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
 
             return dataList;
         }
+        
     }
 }

@@ -110,5 +110,16 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var result = await _VehicleInwardRepository.TransportInwardRecordsById(id);
             return Json(new { status = result.status, message = result.message, data = result.data });
         }
+        //===Check Modification Days
+        [HttpGet]
+        public JsonResult checkModificationDays(DateTime? vDate)
+        {
+            if (!vDate.HasValue)
+            {
+                return Json(new { success = false, message = "Doc Date is empty!!" });
+            }
+            var (allowed, message) = _globalValidationdate.CheckModificationDays(vDate.Value);
+            return Json(new { success = true, isAllowed = allowed, message = message });
+        }
     }
 }

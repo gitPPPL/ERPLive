@@ -39,9 +39,104 @@
 </div>
 <div class="erppagelist-container">
 	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblCourierTrackingEntryList" class="excel-table fixed-grid-table resizable-table table-width">
+			<colgroup>
+				<col class="hidden-col">
+				<col style="width: 88px;">
+				<col style="width: 80px;">
+				<col style="width: 83px;">
+				<col style="width: 127px;">
+				<col style="width: 104px;">
+				<col style="width: 116px;">
+				<col style="width: 95px;">
+				<col style="width: 99px;">
+				<col style="width: 64px;">
+				<col style="width: 87px;">
+				<col style="width: 140px;">
+			</colgroup>
+
+			<thead>
+				<tr>
+					<th class="hidden-col">Code</th>
+					<th>Doc Type</th>
+					<th>Doc No</th>
+					<th>Doc Date</th>
+					<th>Party Name</th>
+					<th>City</th>
+					<th>Courier Name</th>
+					<th>Docket No.</th>
+					<th>Purpose</th>
+					<th>Weight (in gm)</th>
+					<th>Remarks</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+
+	</div>
+
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="25">25</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+		<div class="pagination-center">
+			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
+	</div>
+</div>
+
+@* @{
+	ViewBag.Title = "Courier Tracking Entry List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-center-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Courier Tracking Entry List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		<button class="erppage-header-back" onclick="location.href='@Url.Action("Index", "CourierTrackingEntry")'">
+			<i class="fa fa-plus"></i>Add New
+		</button>
+
+	</div>
+</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+	</div>
+	<div class="erppagelist-actions">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="btnExport" data-tooltip="Export to Excel">
+			<i class="fa fa-file-excel"></i>Export
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+			<i class="fa fa-envelope"></i>Mail
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
+			<i class="fa fa-check-circle"></i>Approved
+		</button>
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
 		<table id="tblCourierTrackingEntryList" class="excel-table fixed-grid-table">
 			<colgroup>
-				<col style="display:none;" />
+				<col style="width: 80px;" />
 				<col style="width: 80px;" /> 
 				<col style="width: 110px;" />
 				<col style="width: 150px;" />
@@ -56,7 +151,7 @@
 
 			<thead>
 				<tr>
-					<th style="display:none;">Code</th>
+					<th>V_Type</th>
 					<th>Voucher No</th>
 					<th>Voucher Date</th>
 					<th>Party Name</th>
@@ -93,7 +188,7 @@
 		</div>
 	</div>
 </div>
-
+ *@
 <script src="/common/pagination.js"></script>
 <script src="/common/delete.js"></script>
 
@@ -130,7 +225,7 @@
 				const tbody = $('#tblCourierTrackingEntryList tbody');
 				tbody.empty();
 				if (!docs.length) {
-					tbody.append(`<tr><td colspan="11" class="text-center">No records found</td></tr>`);
+					tbody.append(`<tr><td class="text-center">No records found</td></tr>`);
 					return;
 				}
 
@@ -139,6 +234,7 @@
 			  <tr>
 				<td style="display:none;">${doc.docNo || ''}</td>
 				<td style="display:none;">${doc.docType || ''}</td>
+				<td>${doc.name || ''}</td>
 				<td>${doc.vNo || ''}</td>
 				<td>${doc.docDate || ''}</td>
 				<td>${doc.partyName || ''}</td>
@@ -149,10 +245,11 @@
 				<td>${doc.weight || ''}</td>
 				<td>${doc.remarks || ''}</td>
 				<td class="action-col">
-					<button class="act-btn edit" title="Edit" style="cursor:pointer;" onclick="editDocStage('${doc.vNo || ''}', '${doc.docType || ''}')"><i class="fa fa-edit"></i></button>
-					<button class="act-btn view" title="View" style="cursor:pointer;" onclick="viewDocStage('${doc.docNo || ''}')"><i class="fa fa-eye"></i></button>
-					<button class="act-btn delete" title="View" style="cursor:pointer;" onclick="deleteDocStage('${doc.vNo || ''}', '${doc.docType || ''}')"><i class="fa fa-trash"></i></button>
-				
+				<div class="action-wrap">
+					<button class="act-btn edit btn-edit" title="Edit" style="cursor:pointer;" onclick="editDocStage('${doc.vNo || ''}', '${doc.docType || ''}')"><i class="fa fa-edit"></i></button>
+					<button class="act-btn view btn-view" title="View" style="cursor:pointer;" onclick="viewDocStage('${doc.docNo || ''}')"><i class="fa fa-eye"></i></button>
+					<button class="act-btn delete btn-delete" title="View" style="cursor:pointer;" onclick="deleteDocStage('${doc.vNo || ''}', '${doc.docType || ''}')"><i class="fa fa-trash"></i></button>
+				</div>
 				</td>
 			  </tr>
 			`);

@@ -55,6 +55,15 @@ public class MiscConsumptionListRepository : IMiscConsumptionListRepository
                         VtypeCode = reader["vCode"]?.ToString()
                     });
                 }
+                if (reader.NextResult())
+                {
+                    if (reader.Read())
+                    {
+                        totalCount = reader["TotalCount"] != DBNull.Value
+                            ? Convert.ToInt32(reader["TotalCount"])
+                            : 0;
+                    }
+                }
             }
         }
 

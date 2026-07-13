@@ -67,7 +67,10 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         BILL_DATE = reader["BILL_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["BILL_DATE"]) : DateTime.MinValue,
                         PARTY_NAME = reader["NAME"]?.ToString(),
                         REF_TYPE = reader["Ref_type"]?.ToString(),
-                        V_TYPE = reader["V_TYPE"]?.ToString()
+                        V_TYPE = reader["V_TYPE"]?.ToString(),
+                        PARTY_GST = reader["PARTY_GST"]?.ToString(),
+                        ITEM_TYPE = reader["ITEM_TYPE"]?.ToString(),
+                        WAYBILL_NO = reader["WayBill_No"]?.ToString()
                     });
                 }
 
@@ -126,6 +129,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             Add2 = rdr["ADD2"]?.ToString(),
                             Add3 = rdr["ADD3"]?.ToString(),
                             PARTY_CITY = rdr["PARTY_CITY"] != DBNull.Value ? Convert.ToInt32(rdr["PARTY_CITY"]) : 0,
+                            PARTY_ADDRESSID = rdr["PARTY_ADDRESSID"] != DBNull.Value ? Convert.ToInt32(rdr["PARTY_ADDRESSID"]) : 0,
                             City = rdr["CITY"]?.ToString(),
                             STATE_CODE = rdr["STATE_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["STATE_CODE"]) : 0,
                             state = rdr["state"]?.ToString(),
@@ -161,7 +165,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                             DEPT_CODE = rdr["DEPT_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["DEPT_CODE"]) : 0,
                             UOM_CODE = rdr["UOM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["UOM_CODE"]) : 0,
                             NOS = rdr["NOS"] != DBNull.Value ? Convert.ToInt32(rdr["NOS"]) : 0,
-                            QTY = rdr["QTY"] != DBNull.Value ? Convert.ToInt32(rdr["QTY"]) : 0,
+                            QTY = rdr["QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["QTY"]) : 0,
                             REMARKS = rdr["REMARKS"]?.ToString(),
                             REF_TYPE = rdr["REF_TYPE"]?.ToString(),
                             REF_NO = rdr["REF_NO"] != DBNull.Value ? Convert.ToInt32(rdr["REF_NO"]) : 0
@@ -486,12 +490,11 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
         }
 
         [HttpGet]
-        public async Task<object> GetDataByPendingorder(int PartyCode, string Type, DateTime v_date, int BILL_NO)
+        public async Task<object> GetDataByPendingorder(int PartyCode, string Type, DateTime v_date)
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
             var Datalist = new List<object>();
             DateTime fromDate = v_date.AddDays(-10);
-
             try
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())
@@ -508,8 +511,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                         cmd3.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
                         cmd3.Parameters.AddWithValue("@PARTY_CODE", PartyCode);
                         cmd3.Parameters.Add("@v_date", SqlDbType.SmallDateTime).Value = v_date;
-                        cmd3.Parameters.Add("@FromDate", SqlDbType.SmallDateTime).Value = fromDate;
-                        cmd3.Parameters.AddWithValue("@BILL_NO", BILL_NO);
+                        cmd3.Parameters.Add("@FromDate", SqlDbType.SmallDateTime).Value = fromDate;               
 
                         using (SqlDataReader rdr = cmd3.ExecuteReader())
                         {
@@ -524,8 +526,8 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
                                     var Item_name = rdr["Item_name"]?.ToString();
                                     var UNIT_NAME = rdr["UNIT_NAME"]?.ToString();
                                     var UNIT_CODE = rdr["UNIT_CODE"]?.ToString();
-                                    var NOS = rdr["NOS"]?.ToString();
-                                    var QTY = rdr["QTY"]?.ToString();
+                                    var NOS = rdr["NOS"]?.ToString();                  
+                                    decimal? QTY = rdr["QTY"] != DBNull.Value ? (decimal?)Convert.ToDecimal(rdr["QTY"]) : null;
                                     var P_QTY = rdr["P_QTY"]?.ToString();
                                     var REMARK = rdr["REMARK"]?.ToString();
                                     var SRNO = rdr["SRNO"]?.ToString();

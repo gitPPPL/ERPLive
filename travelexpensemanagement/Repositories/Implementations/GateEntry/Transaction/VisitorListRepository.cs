@@ -158,7 +158,7 @@ namespace travelexpensemanagement.Repositories.Implementations.GateEntry.Transac
             }
 
             return dt;
-        }
+        } 
 
         public async Task<DataTable> ExportVisitorToPdf(string searchTerm)
         {

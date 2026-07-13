@@ -2,7 +2,9 @@
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
 namespace travelexpensemanagement.Controllers.GateEntry.Transaction
@@ -13,6 +15,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly travelexpensemanagement.LogService.LogService _logService;
+        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         public MiscConsumptionEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DropdownService dropdownService, DbHelper dbHelper, IMiscConsumptionListRepository repo,
            ModuleService.ModuleService moduleService ,travelexpensemanagement.LogService.LogService logService)
         {
@@ -20,11 +23,21 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             _globalVariableService = globalVariableService;
             _repo = repo;
             _logService = logService;
+            _moduleService = moduleService;
         }
 
         public IActionResult Index()
         {
-            return View("~/Views/GateEntry/Transaction/MiscConsumptionEntryList/Index.cshtml");
+            ViewBag.CurrentMenu = "Contractor Material Consumption";
+            var permissions = _moduleService.GetUserMenuPermissions();
+            var userLevel = _moduleService.GetUserLevel();
+
+            var model = new UserMenuPermissionsViewModel
+            {
+                UserMenuPermissions = permissions,
+                UserLevel = userLevel
+            };
+            return View("~/Views/GateEntry/Transaction/MiscConsumptionEntryList/Index.cshtml", model);
         }
 
         public IActionResult GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)

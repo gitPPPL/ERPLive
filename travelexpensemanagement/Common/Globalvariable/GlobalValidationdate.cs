@@ -134,6 +134,44 @@ namespace travelexpensemanagement.Common.Globalvariable
                 ExecuteNonQuery(conn, mqry);
             }
         }
+
+        public (int isAllowed, string message) CheckModificationDays(DateTime vDate)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            int allowed = 1;
+            string? message = "";
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_checkModificationDays", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@vdate", vDate);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@userCode", gv.PubUserId);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                allowed = reader["Not_allowed"] != DBNull.Value ? Convert.ToInt32(reader["Not_allowed"]) : 1;
+                                message = reader["Message"]?.ToString();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                allowed = 1;
+                message = ex.Message;
+            }
+            return (allowed, message ?? "");
+        }
+
+
+
         private string ExecuteScalar(SqlConnection conn, string query)
         {
             using (var cmd = new SqlCommand(query, conn))

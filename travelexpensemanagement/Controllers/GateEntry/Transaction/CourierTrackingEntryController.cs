@@ -38,26 +38,15 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var data = type switch
             {
                 "DocType" => _dropdownService.GetDocType(),
-                "City" => _dropdownService.GetCity(gv.PubCompCode),
-                //"Party" => _dropdownService.GetParty(gv.PubCompCode),
-                "Courier" => _dropdownService.GetCourier(),
-                "Purpose" => _dropdownService.GetPurpose(),
+                //"City" => _dropdownService.GetCity(gv.PubCompCode),
+                //"Courier" => _dropdownService.GetCourier(),
+                //"Purpose" => _dropdownService.GetPurpose(),
                 "Employee" => _dropdownService.GetEmployee(gv.PubCompCode),
+                "printDocType" => _dropdownService.GetDocType(),
                 _ => new List<DropdownService.DropdownModel>() 
             };
             return Json(data);
         }
-
-        //[HttpGet]
-        //public JsonResult SearchParty(string term)
-        //{
-        //    var gv = _globalVariableService.GetGlobalVariables();
-
-        //    var data = _dropdownService.SearchParty(gv.PubCompCode, term);
-
-        //    return Json(data);
-        //}
-
         [HttpGet]
         public JsonResult SearchParty(string term = "")
         {
@@ -65,8 +54,27 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             var data = _dropdownService.SearchParty(gv.PubCompCode, term);
             return Json(data);
         }
+        [HttpGet]
+        public JsonResult SearchCity(string term = "")
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            var data = _dropdownService.GetCity(gv.PubCompCode, term);
+            return Json(data);
+        }
 
-
+        [HttpGet]
+        public JsonResult SearchCourier(string term = "")
+        {
+            var data = _dropdownService.GetCourier(term);
+            return Json(data);
+        }
+        [HttpGet]
+        public JsonResult SearchPurpose(string term = "")
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            var data = _dropdownService.GetPurpose(gv.PubCompCode, term);
+            return Json(data);
+        }
 
         public JsonResult GetDocNo(string docType)
         {
@@ -88,7 +96,46 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             return Json(data);
         }
 
+        [HttpPost]
+        public IActionResult PrintCourierReport([FromBody] PrintCourierReportModel model)
+        {
+            if (!model.FromDate.HasValue || !model.ToDate.HasValue)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "From Date and To Date are required."
+                });
+            }
 
+            var report = _repository.PrintCourierReport(model);
+
+            return Json(new
+            {
+                success = true,
+                report = report
+            });
+        }
+        public class CourierTrackingReportModel
+        {
+            public string Reportname { get; set; }
+            public string Database { get; set; }
+            public string SelectionFormula { get; set; }
+            public List<FormulaFieldModel> FormulaFields { get; set; }
+        }
+
+        public class FormulaFieldModel
+        {
+            public string FormulaName { get; set; }
+            public string FormulaValue { get; set; }
+        }
+        public class PrintCourierReportModel
+        {
+            public DateTime? FromDate { get; set; }
+            public DateTime? ToDate { get; set; }
+            public string VType { get; set; }
+            public string PartyName { get; set; }
+        }
         public class CodeRequest
         {
             public string docNo { get; set; }
