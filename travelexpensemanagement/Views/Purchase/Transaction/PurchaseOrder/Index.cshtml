@@ -1642,16 +1642,9 @@
             $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
             $(`#ddlImake${idx}`).val(item.MAKE_CODE || '');
             $(`#ddlUnit${idx}`).val(item.UOM_CODE || '');
-
             $(`#ddlTax${idx}`) .val(item.taxCode || '') .trigger('change');
-
-            // $(`#ddlTax${idx}`).val(item.TAX_CODE || '');
-
-
-
             $(`#ddlDepartment${idx}`).val(item.DEPT_CODE || '');
             $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE || '');
-
             $(`#TxtNos${idx}`).val(item.NOS || '');
             $(`#TxtQty${idx}`).val(item.QTY || '');
             $(`#txtAdjQtySauda${idx}`).val(item.ADJ_QTY_SAUDA || '');
@@ -2161,9 +2154,7 @@
                 unitSelect.val('').trigger('change');
             }
         });
-    }
-
-  
+    }      
 
     function formatDate(dateStr) {
       if (!dateStr) return '';
@@ -2238,8 +2229,7 @@
                    });
                });
      }
-
-        
+             
     async function GetPartyAddress(Partycode) {
     try {
 

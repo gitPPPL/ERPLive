@@ -19,6 +19,13 @@
     font-size: 12px;
     font-weight: 600;
 }
+.erppage-grid-crdr {
+    display: grid;
+    grid-template-columns: 0.8fr 0.5fr 0.5fr 3fr;
+    gap: 16px;
+    padding: 4px;
+    align-items: start;
+}
 /* LEFT */
 .erppage-header-left {
     display: flex;
@@ -104,7 +111,58 @@
             border-color: #2f7d32;
             box-shadow: 0 0 0 2px rgba(47, 125, 50, 0.15);
         }
+/*Single File Upload */
+.erppage-filepicker {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
 
+.erppage-filepicker-name {
+    flex: 1;
+}
+
+.erppage-filepicker-btn,
+.erppage-filepicker-remove {
+    height: 23px;
+    border: none;
+    border-radius: 6px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    color: #fff;
+    margin: 0px;
+}
+
+.erppage-filepicker-btn {
+    background: linear-gradient(135deg, #2d7b46, #1c5e31);
+}
+
+.erppage-filepicker-remove {
+    width: 23px;
+    padding: 0;
+    background: #dc2626;
+}
+.erppage-btn-green {
+    height: 23px;
+    border: none;
+    border-radius: 6px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    color: #fff;
+    margin: 0px;
+    background-color: #1c5e31;
+}
 /* Dropdown List */
 .dropdown-list {
     position: absolute;
@@ -146,7 +204,7 @@
 
     /* Scrollbar */
     .dropdown-list::-webkit-scrollbar {
-        width: 6px;
+        width: 10px;
     }
 
     .dropdown-list::-webkit-scrollbar-thumb {
@@ -218,10 +276,10 @@
     align-items: center;
     gap: 12px;
     padding: 4px 10px;
-    border-radius: 8px;
+    /*border-radius: 8px;*/
     text-decoration: none;
     color: #212529;
-    font-size: 14px;
+    font-size: 12px;
     transition: all .2s ease;
     cursor: pointer;
 }
@@ -336,7 +394,7 @@
 }
 
     .erppageattachmentsectionfilelist::-webkit-scrollbar {
-        width: 8px;
+        width: 10px;
     }
 
     .erppageattachmentsectionfilelist::-webkit-scrollbar-thumb {
@@ -1227,6 +1285,11 @@
     max-width: 100%;
 }
 
+.erppagescol-9 {
+    flex: 0 0 75%;
+    max-width: 75%;
+}
+
 .erppagescol-6 .erppagetabledynamic-wrapper {
     min-height: 130px;
     background-color: #e1e1e1;
@@ -1346,6 +1409,18 @@
 .erppage-subfieldset .erppage-grid4 {
     padding: 4px 0px;
 }
+
+/*field input width fix*/
+.erppage-width-93 {
+    flex: 0 0 93%;
+    max-width: 93%;
+}
+
+.erppage-width-7 {
+    flex: 0 0 7%;
+    max-width: 7%;
+}
+
 /* ===== FIELD ===== */
 .erppage-field {
     display: grid;
@@ -1528,8 +1603,9 @@
     padding: 3px 8px;
     transition: 0.2s;
     box-sizing: border-box;
-    font-size: 12px;
-    color: #181818;
+    font-size: 11px;
+    color: #2c2c2c;
+    height:23px;
 }
     .erppage-input:disabled {
         
@@ -1537,7 +1613,20 @@
         cursor: not-allowed;
         color: #5e5e5e;
     }
-    
+/*input[type="date"].erppage-input, .erppage-redinput {
+    appearance: none;
+    -webkit-appearance: none;
+    min-height: 23px;
+    line-height: 23px;
+}
+input[type="time"].erppage-input, .erppage-redinput {
+    appearance: none;
+    -webkit-appearance: none;
+    height: 23px;
+    min-height: 23px;
+    line-height: 23px;
+    padding: 3px 8px;
+}*/
 /* ===== TEXTAREA ===== */
 .erppage-textarea {
     width: 100%;
@@ -1563,7 +1652,7 @@
         box-shadow: 0 0 0 2px rgba(47,125,50,0.15);
     }
 /* ===== SELECT FIX (ONLY ADDITION) ===== */
-select.erppage-input {
+/*select.erppage-input {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -1576,7 +1665,7 @@ select.erppage-input {
     font-size: 12px;
     color: #2c2c2c;
 }
-
+*/
 /* Focus */
 .erppage-input:focus {
     outline: none;
@@ -1820,7 +1909,7 @@ input[type="number"] {
 
 .erppage-tabs {
     display: flex;
-    gap: 6px;
+    gap: 2px;
     border-bottom: 2px solid #2f7d32;
 }
 
@@ -2126,8 +2215,8 @@ input[type="number"] {
     align-items: center;
     gap: 8px;
     border: none;
-    padding: 3px 8px;
-    border-radius: 6px;
+    padding: 3px 12px;
+    border-radius: 8px;
     font-size: 12px;
     cursor: pointer;
     transition: all 0.25s ease;

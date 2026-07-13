@@ -3,7 +3,7 @@
 }
 <!DOCTYPE html>
 <html lang="en">
-<head>
+@* <head>
 	<title>Trave Expense Index </title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
@@ -28,11 +28,280 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-</head>
+</head> *@
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ERP Login</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="~/css/ERPPageLogin.css" />
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	</head>
 
-<body class="fix-menu">
-	<!-- Pre-loader start -->
-	<div class="theme-loader">
+<body class="erppagelogin-body">
+	<div class="erppagelogin-loader" id="pageLoader">
+		<div class="erppagelogin-loader-box">
+			<div class="erppagelogin-loader-circle"></div>
+			<img src="./Images/auth/pashupati_logo.webp" alt="Loading" class="erppagelogin-loader-logo">
+			<div class="erppagelogin-loader-text">Loading ERP Portal...</div>
+		</div>
+	</div>
+	<div class="erppagelogin-container">
+		@Html.AntiForgeryToken()
+		<div class="erppagelogin-left">
+			<div class="erppagelogin-glass-overlay"></div>
+			<div class="erppagelogin-shape"></div>
+			<div class="erppagelogin-shape2"></div>
+			<div class="erppage-text">
+				<div class="erppagelogin-logo">ERP</div>
+				<div class="erppagelogin-tagline">Innovation Starts Here</div>
+			</div>
+			<div class="erppagelogin-content">
+				@* <div class="erppagelogin-title">Welcome Back</div> *@
+				<div class="erppagelogin-description">
+					Access your ERP dashboard to manage business operations,reports, analytics, and workflows in one place.
+				</div>
+				<div class="erppagelogin-buttons">
+					<button class="erppagelogin-btn erppagelogin-btn-outline">What To Expect</button>
+					<button class="erppagelogin-btn erppagelogin-btn-fill">More Products</button>
+				</div>
+			</div>
+		</div>
+		<div class="erppagelogin-right">
+			<div class="erppagelogin-form">
+				<div class="erppagelogin-form-logo">
+					<img src="./Images/auth/pashupati_logo.webp" alt="Logo">
+				</div>
+				<h2>Login</h2>
+				<div class="erppagelogin-subtitle">Sign in to continue</div>
+				<form method="post" action="@Url.Action("GetAction", "Login")">
+					<div class="erppagelogin-group">
+						<label class="erppagelogin-label">Username</label>
+						<div class="erppagelogin-input-wrapper">
+							<i class="fa fa-user erppagelogin-input-icon"></i>
+							<select class="erppagelogin-input erppagelogin-select" id="ddlUserName" name="UserMasterCode" onchange="GetcompanyID()">
+								<option>Select Username</option>
+							</select>
+							<i class="fa fa-chevron-down erppagelogin-select-arrow"></i>
+						</div>
+					</div>
+					<div class="erppagelogin-group">
+						<label class="erppagelogin-label">Company</label>
+						<div class="erppagelogin-input-wrapper">
+							<i class="fa fa-building erppagelogin-input-icon"></i>
+							<select class="erppagelogin-input erppagelogin-select" id="ddlCompany" name="CompanyCode">
+								<option>Select Company</option>
+							</select>
+							<i class="fa fa-chevron-down erppagelogin-select-arrow"></i>
+						</div>
+					</div>
+					<div class="erppagelogin-group">
+						<label class="erppagelogin-label">Password</label>
+						<div class="erppagelogin-input-wrapper">
+							<i class="fa fa-lock erppagelogin-input-icon"></i>
+							<input type="password" class="erppagelogin-input" id="passwordField" placeholder="Enter password" maxlength="30" name="Password" required>
+							<i class="fa fa-eye erppagelogin-password-toggle" id="togglePassword"></i>
+						</div>
+					</div>
+					<div class="erppagelogin-row">
+						<div class="erppagelogin-group">
+							<label class="erppagelogin-label">Financial Year</label>
+							<div class="erppagelogin-input-wrapper">
+								<i class="fa fa-calendar-days erppagelogin-input-icon"></i>
+								<select class="erppagelogin-input erppagelogin-select" name="FinancialYear" id="ddlFinancialYear">
+									<option>Select Year</option>
+								</select>
+								<i class="fa fa-chevron-down erppagelogin-select-arrow"></i>
+							</div>
+						</div>
+						<div class="erppagelogin-group">
+							<label class="erppagelogin-label">Date</label>
+							<div class="erppagelogin-input-wrapper erppagelogin-date-wrapper">
+								<i class="fa fa-calendar erppagelogin-input-icon"></i>
+								<input type="date" class="erppagelogin-input erppagelogin-date-input" id="LoginDate" name="LoginDate">
+							</div>
+						</div>
+					</div>
+					@* <div class="erppagelogin-options">
+						<label class="erppagelogin-remember">
+							<input type="checkbox"><span>Remember Me</span>
+						</label>
+						<a href="#">Forgot Password?</a>
+					</div> *@
+					<button type="submit" class="erppagelogin-btn-login">Login</button>
+					@if (TempData["ErrorMessage"] != null)
+					{
+						<div class="alert alert-danger">
+							@TempData["ErrorMessage"]
+						</div>
+					}
+				</form>
+				<div class="erppagelogin-footer">
+					<a href="#">Version : PAS.2025.04.001</a>
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+
+	<script>
+
+		const togglePassword = document.getElementById('togglePassword');
+		const passwordField = document.getElementById('passwordField');
+		togglePassword.addEventListener('click', function () {
+		  const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+
+		  passwordField.setAttribute('type', type);
+		  this.classList.toggle('fa-eye');
+		  this.classList.toggle('fa-eye-slash');
+		});
+
+		window.addEventListener('load', function () {
+		  const loader = document.getElementById('pageLoader');
+		  setTimeout(function () {
+			loader.classList.add('erppagelogin-loader-hide'); }, 100);
+		});
+
+	</script>
+
+	<script>
+		$(document).ready(function () {
+			GetUserdll();
+			GetdlFinancialYear();
+		});
+		function GetUserdll() {
+			$.ajax({
+				url: '/Login/GeUserNameddl',
+				type: 'GET',
+				dataType: 'json',
+				success: function (data) {
+					console.log(data)
+					var ddl = $('#ddlUserName');
+					ddl.empty();
+					ddl.append('<option value="">Select Users</option>');
+					$.each(data, function (index, item) {
+						ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+					});
+				},
+				error: function (xhr, status, error) {
+					console.error("Error: ", xhr.responseText);
+					alert('Error loading Users: ' + error);
+				}
+			});
+		}
+		function GetcompanyID() {
+			var selectedUserId = $('#ddlUserName').val();
+			if (selectedUserId) {
+				$.ajax({
+					url: '/Login/GetCompanyIDByUser',
+					type: 'POST',
+					data: { userId: selectedUserId },
+					success: function (response) {
+						var ddl = $('#ddlCompany');
+						ddl.empty();
+						ddl.append('<option value="">Select Company</option>');
+						$.each(response, function (index, item) {
+							ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+						});
+					},
+					error: function (xhr, status, error) {
+						console.error("Error fetching company ID:", xhr.responseText);
+					}
+				});
+			}
+		}
+		function GetdlFinancialYear() {
+			$.ajax({
+			url: '/Login/GeddlFinancialYear',
+			type: 'GET',
+			dataType: 'json',
+			success: function (data) {
+				var ddl = $('#ddlFinancialYear');
+				ddl.empty();
+				ddl.append('<option value="">Financial Year</option>');
+
+				$.each(data.financialYears, function (index, item) {
+					var selected = item.text === data.currentYearText ? ' selected' : '';
+					ddl.append('<option value="' + item.value + '"' + selected + '>' + item.text + '</option>');
+				});
+				 var today = new Date().toISOString().split('T')[0];
+				$('#LoginDate').val(today);
+			},
+			error: function (xhr, status, error) {
+				console.error("Error: ", xhr.responseText);
+				alert('Error loading financial years: ' + error);
+			}
+		});
+		}
+
+		 $('#ddlFinancialYear').on('change', function () {
+			var selectedValue = $(this).val();
+			if (selectedValue) {
+				$.ajax({
+					url: '/Login/GetYearID',
+					type: 'POST',
+					data: { financialYear: selectedValue },
+					success: function (response) {
+						console.log(response);
+
+					if (response.length > 0) {
+					var dateStr = response[0].text;
+					var parts = dateStr.split('/');
+					var formattedDate = parts[2] + '-' + parts[1] + '-' + parts[0];
+
+					$('#LoginDate').val(formattedDate);
+				}
+					},
+					error: function () {
+						alert('Error occurred while calling the server.');
+					}
+				});
+			}
+		});
+
+
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			var today = new Date().toISOString().split('T')[0];
+			var loginDateInput = document.getElementById("LoginDate");
+			loginDateInput.setAttribute("max", today);
+			loginDateInput.addEventListener("change", function () {
+				var selectedDate = this.value;
+
+				if (selectedDate > today) {
+					alert("Future date not allowed.");
+					this.value = "";
+				}
+			});
+		});
+
+		document.querySelector(".erppagelogin-date-wrapper .erppagelogin-input-icon")
+		.addEventListener("click", function () {
+			document.getElementById("LoginDate").showPicker();
+		});
+	</script>
+
+	<script type="text/javascript" src="~/js/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="~/js/jquery-ui/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="~/js/popper.js/popper.min.js"></script>
+	<script type="text/javascript" src="~/js/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="~/js/modernizr/modernizr.js"></script>
+	<script type="text/javascript" src="~/js/modernizr/css-scrollbars.js"></script>
+	<script type="text/javascript" src="~/js/common-pages.js"></script>
+
+</body>
+
+</html>
+
+@* 	<div class="theme-loader">
 		<div class="ball-scale">
 			<div class='contain'>
 				<div class="ring"><div class="frame"></div></div>
@@ -47,14 +316,10 @@
 				<div class="ring"><div class="frame"></div></div>
 			</div>
 		</div>
-	</div>
+	</div> *@
 
-	<!-- Pre-loader end -->
-	<section>
-		<!-- Container-fluid starts -->
+	@* <section>
 		<div class="wrapper__sec">
-			@* <div class="left-container">
-		</div> *@
 			<div class="right-container">
 				<div class="right-container__box">
 					<div class="col-sm-12">
@@ -134,10 +399,10 @@
 				</div>
 			</div>
 		</div>
-	</section>
+	</section> *@
 
 	<!-- Bootstrap Registration Modal -->
-	<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+	@* <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content p-4">
 				<div class="modal-header border-0">
@@ -181,8 +446,8 @@
 				</div>
 			</div>
 		</div>
-	</div>
-	<script>
+	</div> *@
+	@* <script>
 		$(document).ready(function () {
 			GetUserdll();
 			GetdlFinancialYear();
@@ -301,7 +566,5 @@
 	<script type="text/javascript" src="~/js/bootstrap/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="~/js/modernizr/modernizr.js"></script>
 	<script type="text/javascript" src="~/js/modernizr/css-scrollbars.js"></script>
-	<script type="text/javascript" src="~/js/common-pages.js"></script>
-</body>
+	<script type="text/javascript" src="~/js/common-pages.js"></script> *@
 
-</html>

@@ -308,10 +308,8 @@ async function GetDocData(MasterTblId, readOnly) {
         Calculation = false;
         SelectShipParty = false;
 
-        //await Promise.all([
-        //    fillFormFields(response.header),
-        //    fillItemDetailsTable(response.detail)
-        //]);
+            fillFormFields(response.header),
+            fillItemDetailsTable(response.detail)
 
 
         Calculation = true;
@@ -739,7 +737,6 @@ function setEnterKeyFocusOnTable(sequence, rowCount) {
         });
     });
 }
-
 function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
@@ -926,7 +923,6 @@ function SetFYDate(inputId, loginDate) {
         }
     });
 }
-
 function addAttachmentRow(data = {}) {
     const $list = $('#fileList');
 
@@ -1094,21 +1090,16 @@ function Wb_SaudaDdl_Make_enabledisable(VType) {
 
 async function LoadOrdersModal() {
     let V_NO = $('#ddSaudaNo option:selected').text();
-
-
     const response = await $.ajax({
         url: '/PurchaseOrder/GetDataByOrder',
         method: 'GET',
         data: { V_NO: V_NO }
     });
 
-    console.log(response);
-
     const tbody = $("#tblPOMaster tbody");
     tbody.empty();
 
     if (response.success && response.data.length > 0) {
-
         response.data.forEach(item => {
             tbody.append(`
                 <tr>
@@ -1120,10 +1111,8 @@ async function LoadOrdersModal() {
                 </tr>
             `);
         });
-
         const modal = new bootstrap.Modal(document.getElementById("ordersModal"));
         modal.show();
-
     }
     else
     {

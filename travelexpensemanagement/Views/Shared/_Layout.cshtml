@@ -4,10 +4,15 @@
 @{
 	var userName = "Guest";
 	var modules = new List<travelexpensemanagement.ModuleService.ModuleService.Module>();
+	var moduleMenus = ModuleService.BuildModuleMenus();
+	//var moduleMenus = ModuleService.GetModuleMenus();
+	//var moduleMenus = ViewBag.ModuleMenus as List<travelexpensemanagement.ModuleService.ModuleService.ModuleMenuViewModel>;
 	var menumodules = new List<travelexpensemanagement.ModuleService.ModuleService.MenuModule>();
 	var menuPermissions = new List<travelexpensemanagement.ModuleService.ModuleService.UserMenuPermission>();
 	int? userLevel = 1;
 	var Company = string.Empty;
+
+	
 
 	// Current controller and action
 	var currentCtrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
@@ -34,30 +39,7 @@
 	}
 }
 <style>
-	.search-results {
-		position: absolute;
-		background: #fff;
-		width: 305px;
-		max-height: 300px;
-		overflow-y: auto;
-		box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-		z-index: 1000;
-		display: block;
-		margin-top: 332px;
-		margin-left: 25px;
-	}
-	.search-results a
-	{
-		display: block;
-		padding: 8px 12px;
-		text-decoration: none;
-		color: #333;
-		border-bottom: 1px solid #ddd;
-	}
-	 .search-results a:hover {
-	 	background-color: #f0f0f0;
-	 }
-
+	
 	#lottie-overlay {
 		position: fixed;
 		top: 0;
@@ -80,6 +62,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
 	<title>Pashupati ERP</title>
 	<meta charset="utf-8">
@@ -89,6 +72,7 @@
 
 	<link rel="icon" href="~/images/favicon.ico" type="image/x-icon">
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
+    <link href="~/css/loader.css" rel="stylesheet" />
 	<link rel="stylesheet" type="text/css" href="~/css/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="~/icon/themify-icons/themify-icons.css">
 	<link rel="stylesheet" type="text/css" href="~/icon/icofont/css/icofont.css">
@@ -98,135 +82,564 @@
 	<link rel="stylesheet" type="text/css" href="~/css/ERPPagesMasterstyle.css">
 	<link rel="stylesheet" type="text/css" href="~/css/ERPPagesModal.css">
 	<link rel="stylesheet" type="text/css" href="~/css/ERPPagesLayout.css">
-	<link rel="stylesheet" href="~/css/erppagesmasterprint.css" rel="stylesheet" />
-	<link rel="stylesheet" type="text/css" href="~/css/jquery.mCustomScrollbar.css">
+    
+    <link href="~/css/alldashboard/gateentrydashboard.css" rel="stylesheet" />
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
-	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+	<script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
 </head>
-
 <body>
-
-	<div class="container-fluid">
-
-		<!-- Sidebar -->
-
-		<nav class="sidebar">
-			<div class="sidebar-fixed-top">
-			<div class="sidebar-logo">
-				<img src="~/images/logo.webp">
+	<div class="ERPPageLayout-overlay" id="ERPPageLayoutOverlay"></div>
+	<aside class="ERPPageLayout-sidebar" id="ERPPageLayoutSidebar">
+		<div class="ERPPageLayout-logo">
+			<img src="~/images/logo.webp">
+			<div class="ERPPageLayout-logo-text">
+				<h2>ERP Portal</h2>
 			</div>
-			<div class="dropdown-divider"></div>
-			<div class="sidebar-heading"><i class="fa fa-building"></i><span>@Company</span></div>
+		</div>
+		<div class="ERPPageLayout-company-info">
+			<div class="ERPPageLayout-company-icon">
+				<i class="fa fa-building"></i>
 			</div>
-			<ul class="sidebar-nav">
-				@foreach (var module in modules)
+			<div class="ERPPageLayout-company-details">
+				<h3>@Company</h3>
+				<span>Corporate ERP System</span>
+			</div>
+		</div>
+		<div class="ERPPageLayout-search">
+			<i class="fa fa-search"></i>
+			<input type="text" id="ERPPageLayoutMenuSearch" placeholder="Search Menu...">
+			<div id="ERPPageLayoutSearchResults" class="ERPPageLayout-search-results"></div>
+		</div>
+		@functions {
+
+			bool IsMenuActiveRecursive(
+			travelexpensemanagement.ModuleService.ModuleService.MenuModule menu,
+			string currentController)
+			{
+				if (!string.IsNullOrEmpty(menu.WebFORM_NAME) &&
+				string.Equals(menu.WebFORM_NAME,
+				currentController,
+				StringComparison.OrdinalIgnoreCase))
 				{
-					var submenus = menumodules.Where(m => m.MODULE_CODE == module.Code).ToList();
-					bool hasModuleAccess = userLevel == 1 ||
-					menuPermissions.Any(p => p.MODULE_CODE == module.Code && p._ACCESS == 1);
-					if (!hasModuleAccess)
-					{
-						continue;
-					}
-					// Unique submenu ID for toggling
-					@* var submenuId = "submenu-" + module.Code.ToLower(); *@
-					var submenuId = "submenu-" + module.Code;
-					// Determine if any subitem is active
-					bool isParentOpen = submenus.Any(sm => IsHere(sm.WebFORM_NAME));
-					string toggleClass = isParentOpen ? "expanded" : "";
-					string submenuStyle = isParentOpen ? "display:block;" : "display:none;";
-					<li class="nav-item @(isParentOpen ? "active-parent" : "")">
-						<a class="nav-link navbar-adjust toggle @toggleClass"
-						   href="javascript:void(0)"
-						   onclick="toggleSubmenu(event, '@submenuId')">
-							<span><i class="fa fa-home"></i>@module.DisplayName</span>
-							<i class="fa fa-angle-down"></i>
-						</a>
-
-						@if (submenus.Any())
-						{
-							<ul id="@submenuId" class="submenu" style="@submenuStyle">
-								@foreach (var submenu in submenus)
-								{
-									bool hasSubAccess = userLevel == 1 || 
-									@* menuPermissions.Any(p => p.MENU_NAME == submenu.DISPLAY_NAME && p._ACCESS == 1); *@
-									menuPermissions.Any(p => p.MENU_CODE == submenu.CODE && p._ACCESS == 1);
-									@* menuPermissions.Any(p => p._ACCESS == 1); *@
-									if (!hasSubAccess)
-									{
-										continue;
-									}
-									bool isActive = IsHere(submenu.WebFORM_NAME);
-									<li class="sub-nav navbar-adjust @(isActive ? "active-submenu" : "")">
-										<a href="/@submenu.WebFORM_NAME/Index">@submenu.DISPLAY_NAME</a>
-									</li>
-								}
-							</ul>
-						}
-					</li>
+					return true;
 				}
-			</ul>
 
-		</nav>
-		<div class="main-content">
-			<nav class="top-navbar">
-				<button id="hamburger">
-					<span class="hamburger-icon">&#9776;</span> <!-- ☰ hamburger -->
-					<span class="close-icon" style="display:none;">&#10005;</span> <!-- ✕ close -->
+				if (menu.Children != null && menu.Children.Any())
+				{
+					return menu.Children.Any(child =>
+					IsMenuActiveRecursive(child, currentController));
+				}
+
+				return false;
+			}
+
+			bool HasMenuAccess(
+			travelexpensemanagement.ModuleService.ModuleService.MenuModule menu,
+			List<travelexpensemanagement.ModuleService.ModuleService.UserMenuPermission> permissions,
+			int? userLevel)
+			{
+				if (userLevel == 1)
+					return true;
+
+				bool currentAccess = permissions.Any(p =>
+				p.MENU_CODE == menu.CODE &&
+				p._ACCESS == 1);
+
+				if (currentAccess)
+					return true;
+
+				if (menu.Children != null && menu.Children.Any())
+				{
+					return menu.Children.Any(child =>
+					HasMenuAccess(child, permissions, userLevel));
+				}
+
+				return false;
+			}
+
+			void RenderMenu(
+			travelexpensemanagement.ModuleService.ModuleService.MenuModule menu,
+			List<travelexpensemanagement.ModuleService.ModuleService.UserMenuPermission> menuPermissions,
+			int? userLevel,
+			TextWriter writer)
+			{
+				bool hasAccess = userLevel == 1 ||
+				HasMenuAccess(menu, menuPermissions, userLevel);
+
+				if (!hasAccess)
+					return;
+
+				writer.WriteLine("<li class='ERPPageLayout-menu-item'>");
+
+				if (menu.Children != null && menu.Children.Any())
+				{
+					writer.WriteLine($@"
+				<a href='#' class='ERPPageLayout-menu-link ERPPageLayout-has-submenu'>
+				<span>{menu.DISPLAY_NAME}</span>
+				<i class='fa fa-angle-down ERPPageLayout-arrow'></i>
+				</a>
+
+				<ul class='ERPPageLayout-submenu'>
+				");
+
+					foreach (var child in menu.Children)
+					{
+						RenderMenu(
+						child,
+						menuPermissions,
+						userLevel,
+						writer);
+					}
+
+					writer.WriteLine("</ul>");
+				}
+				else
+				{
+					writer.WriteLine($@"
+				<a href='/{menu.WebFORM_NAME}/Index'
+				class='ERPPageLayout-menu-link'>
+				{menu.DISPLAY_NAME}
+				</a>
+				");
+				}
+
+				writer.WriteLine("</li>");
+			}
+		}
+		
+		<ul class="ERPPageLayout-menu">
+
+    @if (moduleMenus != null)
+    {
+        foreach (var module in moduleMenus)
+        {
+            bool moduleOpen = module.Menus.Any(m =>
+                IsMenuActiveRecursive(m, currentCtrl));
+
+            bool hasModuleAccess = userLevel == 1 ||
+                module.Menus.Any(menu =>
+                    HasMenuAccess(menu, menuPermissions, userLevel));
+
+            if (!hasModuleAccess)
+            {
+                continue;
+            }
+
+            <li class="ERPPageLayout-menu-item @(moduleOpen ? "active keep-open" : "")">
+
+                <a href="#" class="ERPPageLayout-menu-link ERPPageLayout-has-submenu">
+
+                    <span>
+                        <i class="fa @(string.IsNullOrEmpty(module.Icon) ? "fa-folder" : module.Icon)"></i>
+                        @module.ModuleName
+                    </span>
+
+                    <i class="fa fa-angle-down ERPPageLayout-arrow"></i>
+
+                </a>
+
+                <ul class="ERPPageLayout-submenu @(moduleOpen ? "open" : "")">
+
+                    @foreach (var menu in module.Menus)
+                    {
+                        bool hasAccess = HasMenuAccess(
+                            (travelexpensemanagement.ModuleService.ModuleService.MenuModule)menu,
+                            menuPermissions,
+                            userLevel);
+
+                        if (!hasAccess)
+                        {
+                            continue;
+                        }
+
+								RenderMenu(
+								(travelexpensemanagement.ModuleService.ModuleService.MenuModule)menu,
+								menuPermissions,
+								userLevel,
+								Output);
+                    }
+
+                </ul>
+
+            </li>
+        }
+    }
+
+</ul>
+			
+	
+	</aside>
+	<!-- MAIN -->
+	<div class="ERPPageLayout-main">
+		<header class="ERPPageLayout-topbar">
+			<div class="ERPPageLayout-topbar-left">
+				<button class="ERPPageLayout-icon-btn" id="ERPPageLayoutToggleSidebar">
+					<i class="fa fa-bars"></i>
 				</button>
-				<div class="search-section">
-					<div class="search-wrapper">
-					<i class="fa fa-search search-icon"></i>
-					@* <input type="text" class="search-input" placeholder="Search..."> *@
-					<input type="text" class="search-input" id="menuSearch" placeholder="Search Menu...">
-					<div id="searchResults" class="search-results"></div>
-				</div>
-				</div>
-
-				<div class="action-section">
-					<a class="fullscreen" href="#!" onclick="javascript:toggleFullScreen()">
-						<i class="ti-fullscreen"></i>
-					</a>
-					<div class="divider mx-2"></div>
-					<!-- Right: Actions -->
-					<div class="user-info dropdown">
-						<a href="#" class="user-image dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-							<img src="~/images/user.png" class="user-avatar" alt="User" width="32" height="32">
-							<span class="user-name ms-2">@userName</span>
-						</a>
-						<ul class="dropdown-menu dropdown-menu-end">
-							<li><a class="user-dropdown" href="#settings"><i class="fa fa-cog me-2"></i>Settings</a></li>
-							<li><a class="user-dropdown" href="#profile"><i class="fa fa-user me-2"></i>Profile</a></li>
-							<li><a class="user-dropdown" href="#messages"><i class="fa fa-envelope me-2"></i>My Messages</a></li>
-							<li><a class="user-dropdown" href="#notifications"><i class="fa fa-bell me-2"></i>Notifications</a></li>
-							<li><hr class="dropdown-divider"></li>
-							<li><a class="user-dropdown text-danger" href="@Url.Action("Logout", "Login")"><i class="fa fa-sign-out me-2"></i>Logout</a></li>
-						</ul>
+			</div>
+			<div class="ERPPageLayout-topbar-right">
+				<button class="ERPPageLayout-icon-btn" id="ERPPageLayoutFullscreenBtn">
+					<i class="fa fa-expand"></i>
+				</button>
+				<div class="ERPPageLayout-user">
+					<button class="ERPPageLayout-user-btn" id="ERPPageLayoutUserBtn">
+						<img src="~/images/user.png" class="user-avatar" alt="User" width="32" height="32">
+						<span>@userName</span>
+						<i class="fa fa-angle-down"></i>
+					</button>
+					<div class="ERPPageLayout-user-menu" id="ERPPageLayoutUserMenu">
+						<a href="#"><i class="fa fa-user"></i>Profile</a>
+						<a href="#"><i class="fa fa-gear"></i>Settings</a>
+						<a href="#"><i class="fa fa-lock"></i>Change Password</a>
+						<a href="@Url.Action("Logout", "Login")"><i class="fa fa-right-from-bracket"></i>Logout</a>
 					</div>
 				</div>
-			</nav>
-			
-			<div class="content-body">
-				<div id="lottie-overlay">
-					<div id="lottie-animation"></div>
-				</div>
-				@RenderBody()
 			</div>
-
+		</header>
+		<div class="ERPPageLayout-content">
+			<div id="lottie-overlay">
+				<div id="lottie-animation"></div>
+			</div>
+			@RenderBody()
 		</div>
 	</div>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.10/lottie.min.js"></script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+
+			/* =========================================
+			   MENU TOGGLE
+			========================================= */
+
+			document.addEventListener('click', function (e) {
+
+			const link = e.target.closest('.ERPPageLayout-has-submenu');
+
+			if (!link) return;
+
+			e.preventDefault();
+			e.stopPropagation();
+
+			const parentLi = link.closest('li');
+
+			const submenu = Array.from(parentLi.children).find(el => el.classList.contains('ERPPageLayout-submenu'));
+
+			console.log("Clicked:", link.textContent.trim());
+			console.log("Parent LI:", parentLi);
+			console.log("Submenu:", submenu);
+
+			if (!submenu) return;
+
+			const isOpen = submenu.classList.contains('open');
+
+			if (isOpen) {
+
+				submenu.classList.remove('open');
+				parentLi.classList.remove('active');
+				link.classList.remove('open');
+
+			} else {
+
+				submenu.classList.add('open');
+				parentLi.classList.add('active');
+				link.classList.add('open');
+			}
+		});
+
+			/* =========================================
+			   AUTO OPEN ACTIVE PAGE MENU
+			========================================= */
+
+			const currentPath = window.location.pathname.toLowerCase();
+
+			const activeLink = document.querySelector(`.ERPPageLayout-menu a[href="${window.location.pathname}"]`);
+
+		if (activeLink) {
+
+			activeLink.classList.add('active-page');
+
+			let currentLi = activeLink.closest('li');
+
+			while (currentLi) {
+
+				currentLi.classList.add('active');
+				currentLi.classList.add('keep-open');
+
+				const submenu = Array.from(currentLi.children)
+					.find(el => el.classList.contains('ERPPageLayout-submenu'));
+
+				if (submenu) {
+					submenu.classList.add('open');
+				}
+
+				const parentLink = currentLi.querySelector(
+					':scope > .ERPPageLayout-menu-link'
+				);
+
+				if (parentLink) {
+					parentLink.classList.add('open');
+				}
+
+				currentLi = currentLi.parentElement.closest('li');
+			}
+		}
+
+			
+
+			/* =========================================
+			   SIDEBAR TOGGLE
+			========================================= */
+
+			// const sidebarBtn = document.getElementById('ERPPageLayoutToggleSidebar');
+			// const sidebar = document.getElementById('ERPPageLayoutSidebar');
+			// const overlay = document.getElementById('ERPPageLayoutOverlay');
+
+			// if (sidebarBtn && sidebar && overlay) {
+
+			// 	sidebarBtn.addEventListener('click', function () {
+			// 		sidebar.classList.toggle('active');
+			// 		overlay.classList.toggle('active');
+			// 	});
+
+			// 	overlay.addEventListener('click', function () {
+			// 		sidebar.classList.remove('active');
+			// 		overlay.classList.remove('active');
+			// 	});
+			// }
+
+			/* =========================================
+			   USER DROPDOWN
+			========================================= */
+
+			const userBtn = document.getElementById('ERPPageLayoutUserBtn');
+			const userMenu = document.getElementById('ERPPageLayoutUserMenu');
+
+			if (userBtn && userMenu) {
+
+				userBtn.addEventListener('click', function (e) {
+					e.stopPropagation();
+					userMenu.classList.toggle('show');
+				});
+
+				document.addEventListener('click', function (e) {
+					if (!e.target.closest('.ERPPageLayout-user')) {
+						userMenu.classList.remove('show');
+					}
+				});
+			}
+
+			/* =========================================
+			   FULLSCREEN
+			========================================= */
+
+			const fullscreenBtn = document.getElementById('ERPPageLayoutFullscreenBtn');
+
+			if (fullscreenBtn) {
+
+				fullscreenBtn.addEventListener('click', function () {
+
+					if (!document.fullscreenElement) {
+						document.documentElement.requestFullscreen();
+					} else {
+						document.exitFullscreen();
+					}
+				});
+			}
+
+		/* =========================================
+		   SIDEBAR TOGGLE
+		========================================= */
+
+		const sidebarBtn = document.getElementById('ERPPageLayoutToggleSidebar');
+		const sidebar = document.getElementById('ERPPageLayoutSidebar');
+		const overlay = document.getElementById('ERPPageLayoutOverlay');
+		const main = document.querySelector('.ERPPageLayout-main');
+
+		if (sidebarBtn && sidebar) {
+
+			sidebarBtn.addEventListener('click', function () {
+
+				sidebar.classList.toggle('collapsed');
+
+				if (main) {
+					main.classList.toggle('expanded');
+				}
+
+			});
+
+			if (overlay) {
+				overlay.addEventListener('click', function () {
+					sidebar.classList.remove('collapsed');
+
+					if (main) {
+						main.classList.remove('expanded');
+					}
+				});
+			}
+		}
+
+			/* =========================================
+			   LOTTIE
+			========================================= */
+
+			const lottieContainer = document.getElementById('lottie-animation');
+
+			if (lottieContainer && typeof lottie !== "undefined") {
+
+				lottie.loadAnimation({
+					container: lottieContainer,
+					renderer: 'svg',
+					loop: true,
+					autoplay: true,
+					path: 'https://lottie.host/30e1c7d5-22ca-41c7-b0a2-f2b0a7ce94e2/ysJGEsOTl6.json'
+				});
+			}
+
+			/* =========================================
+			   MENU SEARCH
+			========================================= */
+
+			const searchInput = document.getElementById("ERPPageLayoutMenuSearch");
+
+			if (searchInput) {
+
+				searchInput.addEventListener("input", function () {
+
+					const keyword = this.value.trim().toLowerCase();
+
+					const resetUI = () => {
+
+						document.querySelectorAll('.ERPPageLayout-menu-link')
+							.forEach(link => link.classList.remove('active-page'));
+
+						document.querySelectorAll('.ERPPageLayout-menu li')
+							.forEach(li => li.classList.remove('active'));
+
+						document.querySelectorAll(".ERPPageLayout-menu li")
+							.forEach(li => {
+								li.style.display = "";
+								li.classList.remove("search-match");
+							});
+
+						document.querySelectorAll(".ERPPageLayout-submenu")
+							.forEach(sub => {
+								if (!sub.closest(".keep-open")) {
+									sub.classList.remove("open");
+								}
+							});
+					};
+
+					resetUI();
+
+					if (keyword === "") return;
+
+					const rootMenus = document.querySelectorAll(".ERPPageLayout-menu > li");
+
+					rootMenus.forEach(root => {
+						const matched = processMenu(root, keyword);
+						root.style.display = matched ? "" : "none";
+					});
+				});
+			}
+
+			function processMenu(li, keyword) {
+
+				let selfMatch = false;
+				let childMatch = false;
+
+				const link = li.querySelector(":scope > a");
+
+				if (link) {
+
+					const text = link.textContent.trim().toLowerCase();
+					selfMatch = text.includes(keyword);
+
+					link.classList.remove("active-page");
+
+					if (selfMatch) {
+
+						const hasChildren = li.querySelector(":scope > .ERPPageLayout-submenu");
+
+						if (hasChildren) {
+							link.classList.add("active-page");
+						} else {
+							link.classList.remove("active-page");
+						}
+
+						let level = 0;
+						let parentLi = li.parentElement.closest("li");
+
+						while (parentLi) {
+
+							level++;
+
+							const parentLink =
+								parentLi.querySelector(':scope > .ERPPageLayout-menu-link');
+
+							if (level <= 2) {
+
+								parentLi.classList.add("active");
+
+								if (parentLink) {
+									parentLink.classList.add("active-page");
+								}
+							}
+
+							parentLi = parentLi.parentElement.closest("li");
+						}
+					}
+				}
+
+				const children = li.querySelectorAll(":scope > .ERPPageLayout-submenu > li");
+
+				children.forEach(child => {
+					if (processMenu(child, keyword)) {
+						childMatch = true;
+					}
+				});
+
+				const finalMatch = selfMatch || childMatch;
+
+				li.style.display = finalMatch ? "" : "none";
+
+				const submenu = li.querySelector(":scope > .ERPPageLayout-submenu");
+				const parentLink = li.querySelector(":scope > .ERPPageLayout-menu-link");
+
+				if (submenu) {
+
+					if (childMatch || selfMatch) {
+						submenu.classList.add("open");
+						if (parentLink) parentLink.classList.add("open");
+					} else {
+						submenu.classList.remove("open");
+						if (parentLink) parentLink.classList.remove("open");
+					}
+				}
+
+				return finalMatch;
+			}
+
+		});
+	</script>
+	<script>
+		$(document).ajaxComplete(function (event, xhr) {
+			if (xhr.status === 401 && xhr.responseText === "SessionExpired") {
+				window.location.href = "/AccessedError/Index";
+			}
+		});
+	</script>
+
+	
 	<script>
 		$(document).ajaxStart(function () {
 			showLoader();
@@ -272,106 +685,7 @@
 		};
 
 	</script>
-	<script>
-		// Initialize Lottie animation
-					document.addEventListener("DOMContentLoaded", function () {
-
-			var animation = lottie.loadAnimation({
-				container: document.getElementById('lottie-animation'),
-				renderer: 'svg',
-				loop: true,
-				autoplay: true,
-				path: 'https://lottie.host/30e1c7d5-22ca-41c7-b0a2-f2b0a7ce94e2/ysJGEsOTl6.json'
-			});
-
-		});
-	</script>
-	<script>
-		    document.addEventListener('DOMContentLoaded', () => {
-			const sidebar = document.querySelector('.sidebar');
-			const mainContent = document.querySelector('.main-content');
-			const topNavbar = document.querySelector('.top-navbar');
-			const hamburger = document.getElementById('hamburger');
-			const hamburgerIcon = hamburger.querySelector('.hamburger-icon');
-			const closeIcon = hamburger.querySelector('.close-icon');
-
-			hamburger.addEventListener('click', () => {
-				const isSmallScreen = window.innerWidth <= 992;
-
-				if (isSmallScreen) {
-					// Toggle sidebar for small screens
-					sidebar.classList.toggle('open');
-					mainContent.classList.toggle('shifted'); // <-- Move main content & top-navbar
-
-					if (sidebar.classList.contains('open')) {
-						hamburgerIcon.style.display = 'none';
-						closeIcon.style.display = 'inline-block';
-					} else {
-						hamburgerIcon.style.display = 'inline-block';
-						closeIcon.style.display = 'none';
-					}
-				} else {
-					// Toggle sidebar for large screens
-					sidebar.classList.toggle('closed');
-					mainContent.classList.toggle('full-width');
-					topNavbar.classList.toggle('full-width');
-
-					if (sidebar.classList.contains('closed')) {
-						hamburgerIcon.style.display = 'inline-block';
-						closeIcon.style.display = 'none';
-					} else {
-						hamburgerIcon.style.display = 'none';
-						closeIcon.style.display = 'inline-block';
-					}
-				}
-			});
-
-			// Reset sidebar when resizing window
-			window.addEventListener('resize', () => {
-				if (window.innerWidth > 992) {
-					sidebar.classList.remove('open');
-					sidebar.classList.remove('closed');
-					mainContent.classList.remove('shifted');
-					mainContent.classList.remove('full-width');
-					topNavbar.classList.remove('full-width');
-					hamburgerIcon.style.display = 'inline-block';
-					closeIcon.style.display = 'none';
-				} else {
-					sidebar.classList.remove('closed');
-				}
-			});
-		});
-		</script>
-	<!-- Your existing local scripts, no duplicate jQuery here -->
-    <script src="~/common/GlobalFunction.js"></script>
-    <script src="~/common/GlobalValidation.js"></script>
-	<script src="~/common/GlobalToaster.js"></script>
-    <script src="~/common/delete.js"></script>
-
-
-	<script type="text/javascript" src="~/js/jquery-ui/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="~/js/popper.js/popper.min.js"></script>
-	<script type="text/javascript" src="~/js/bootstrap/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="~/js/jquery-slimscroll/jquery.slimscroll.js"></script>
-	<script type="text/javascript" src="~/js/modernizr/modernizr.js"></script>
-	<script src="~/pages/widget/amchart/amcharts.min.js"></script>
-	<script src="~/pages/widget/amchart/serial.min.js"></script>
-	<script type="text/javascript" src="pages/todo/todo.js"></script>
-	<script type="text/javascript" src="~/pages/dashboard/custom-dashboard.js"></script>
-	<script type="text/javascript" src="~/js/script.js"></script>
-	<script type="text/javascript" src="~/js/SmoothScroll.js"></script>
-	<script src="~/js/pcoded.min.js"></script>
-	<script src="~/js/demo-12.js"></script>
-	<script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script>
-
-	<script src="~/js/erpjs/approvalservice/approvalservice.js"></script>
-
-
-
-	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
-	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-
-
+	
 
 
 	<script>
@@ -380,152 +694,21 @@
 			$window.scroll(function(){
 				if ($window.scrollTop() >= 200) {
 				 nav.addClass('active');
-			 }
+			}
 			 else {
 				 nav.removeClass('active');
 			 }
 		 });
 	</script>
-	<script>
-		function toggleSubmenu(event, id) {
-			event.preventDefault();
-			const link = event.currentTarget;
-			const submenu = document.getElementById(id);
-			const isCollapsed = submenu.style.display === 'block';
-			submenu.style.display = isCollapsed ? 'none' : 'block';
-			link.classList.toggle('collapsed', isCollapsed);
-		}
-	</script>
-	<script>
-		function toggleSubmenu(event, submenuId) {
-			event.preventDefault();
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.10/lottie.min.js"></script>
+	<script src="~/common/globalfunction.js"></script>
+	<script src="~/common/dropdown.js"></script>
+	<script src="~/common/globalvalidation.js"></script>
+	<script src="~/common/GlobalToaster.js"></script>
+	<script type="text/javascript" src="~/js/popper.js/popper.min.js"></script>
+	<script type="text/javascript" src="~/js/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="~/js/script.js"></script>
 
-			// Remove 'active' class from all main links
-			const allToggles = document.querySelectorAll('.navbar-adjust');
-			allToggles.forEach(function (toggle) {
-				toggle.classList.remove('active');
-			});
-
-			// Toggle submenu visibility
-			const submenu = document.getElementById(submenuId);
-			const allSubmenus = document.querySelectorAll('.submenu');
-			allSubmenus.forEach(function (menu) {
-				if (menu !== submenu) {
-					menu.style.display = 'none';
-				}
-			});
-
-			// Toggle current submenu and activate current link
-			if (submenu.style.display === 'block') {
-				submenu.style.display = 'none';
-			} else {
-				submenu.style.display = 'block';
-				event.currentTarget.classList.add('active');
-			}
-		}
-	</script>
-	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			const searchInput = document.getElementById('menuSearch');
-			const searchResults = document.getElementById('searchResults');
-
-			searchInput.addEventListener('keyup', function () {
-				const query = searchInput.value.toLowerCase().trim();
-				searchResults.innerHTML = '';
-				searchResults.style.display = 'none';
-
-				if (query === '') return;
-
-				// Get all submenu items
-				const allSubmenuLinks = document.querySelectorAll('.submenu li');
-				allSubmenuLinks.forEach(function (li) {
-					const link = li.querySelector('a');
-					const text = link.textContent.toLowerCase();
-
-					if (text.includes(query)) {
-						const clonedLink = link.cloneNode(true);
-						searchResults.appendChild(clonedLink);
-					}
-				});
-
-				if (searchResults.children.length > 0) {
-					searchResults.style.display = 'block';
-				}
-			});
-
-			// Hide results if clicked outside
-			document.addEventListener('click', function (e) {
-				if (!searchResults.contains(e.target) && e.target !== searchInput) {
-					searchResults.style.display = 'none';
-				}
-			});
-		});
-	</script>
-	<script>
-
-		document.addEventListener('DOMContentLoaded', function () {
-			const searchInput = document.getElementById('menuSearch');
-			searchInput.addEventListener('keyup', function () {
-				const query = searchInput.value.toLowerCase().trim();
-				// Loop through all submenu <li> items
-				const allSubmenuLinks = document.querySelectorAll('.submenu li');
-				allSubmenuLinks.forEach(function (li) {
-					const linkText = li.textContent.toLowerCase();
-					const matches = linkText.includes(query);
-					li.style.display = matches ? 'block' : 'none';
-				});
-				// Show/hide parent modules based on visible children
-				const allModules = document.querySelectorAll('.nav-item');
-				allModules.forEach(function (module) {
-					const visibleSubmenus = module.querySelectorAll('.submenu li:not([style*="display: none"])');
-					const submenu = module.querySelector('.submenu');
-					if (visibleSubmenus.length > 0) {
-						module.style.display = 'block';
-						if (submenu) submenu.style.display = 'block';
-					} else {
-						module.style.display = 'none';
-					}
-				});
-				// Reset all if input is empty
-				if (query === '') {
-					document.querySelectorAll('.nav-item').forEach(function (module) {
-						module.style.display = 'block';
-						const submenu = module.querySelector('.submenu');
-						if (submenu) submenu.style.display = 'none'; // or 'block' if you want all open
-					});
-					document.querySelectorAll('.submenu li').forEach(function (li) {
-						li.style.display = 'block';
-					});
-				}
-			});
-		});
-
-	</script>
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			// Restore sidebar scroll position
-			const savedScroll = sessionStorage.getItem("sidebar-scroll");
-			const sidebar = document.querySelector(".sidebar");
-			if (sidebar && savedScroll) {
-				sidebar.scrollTop = parseInt(savedScroll);
-			}
-
-			// Save scroll position before page unload
-			window.addEventListener("beforeunload", function () {
-				if (sidebar) {
-					sessionStorage.setItem("sidebar-scroll", sidebar.scrollTop);
-				}
-			});
-		});
-	</script>
-
-	<script>
-		$(document).ajaxComplete(function (event, xhr) {
-			if (xhr.status === 401 && xhr.responseText === "SessionExpired") {
-				window.location.href = "/AccessedError/Index";
-			}
-		});
-	</script>
 
 </body>
 

@@ -1,11 +1,7 @@
 ﻿@{
 	ViewBag.Title = "Purchase Order List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
-
-
 	var userlevel = ViewBag.userLevel;
-
-
 	var currentMenu = ViewBag.CurrentMenu as string;
 	bool canAdd = false;
 	bool canEdit = false;
@@ -139,9 +135,7 @@
 		<div class="pagination-right" id="pageInfoText">
 			Results: 0 - 0 of 0
 		</div>
-
 	</div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -467,7 +461,7 @@
 			});
 		}
 
-	 function showEmployeePopup(docid) {
+   function showEmployeePopup(docid) {
 
 		 $.ajax({
 			   url: '/PurchaseOrderList/GetPurchaseOrderEntryDetails',
