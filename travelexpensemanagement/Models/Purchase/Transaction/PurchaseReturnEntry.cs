@@ -145,18 +145,18 @@
         public class ItemDetailModel
         {
             public int? Code { get; set; }
-            public string ItemCode { get; set; }
-            public string ItemName { get; set; }
-            public string HSNCode { get; set; }
-            public string Unit { get; set; }
+            public string? ItemCode { get; set; }
+            public string? ItemName { get; set; }
+            public string? HSNCode { get; set; }
+            public string? Unit { get; set; }
             public int? Nos { get; set; }
             public decimal? ReturnQty { get; set; }
             public decimal? BillQty { get; set; }
             public decimal? Rate { get; set; }
             public decimal? Amount { get; set; }
-            public string RCMYN { get; set; }
-            public string InputYN { get; set; }
-            public string TaxType { get; set; }
+            public string? RCMYN { get; set; }
+            public string? InputYN { get; set; }
+            public string? TaxType { get; set; }
             public decimal? PackPer { get; set; }
             public decimal? PackAmt { get; set; }
             public decimal? DiscPer { get; set; }
@@ -173,15 +173,15 @@
 
             public decimal? OthAmt { get; set; }
             public decimal? NetAmt { get; set; }
-            public string Make { get; set; }
-            public string Department { get; set; }
-            public string Remarks { get; set; }
+            public string? Make { get; set; }
+            public string? Department { get; set; }
+            public string? Remarks { get; set; }
             public decimal? LDRate { get; set; }
             public decimal? LDAmt { get; set; }
             public string WBType { get; set; }
-            public string WBNo { get; set; }
+            public int? WBNo { get; set; }
             public string RefType { get; set; }
-            public string RefNo { get; set; }
+            public int? RefNo { get; set; }
         }
 
         public class PurchaseReturnHeaderModel
@@ -279,6 +279,7 @@
             public int V_NO { get; set; }
             public string V_TYPE { get; set; }
             public string REF_TYPE { get; set; }
+            public string REF_NO { get; set; }
             public DateTime? V_DATE { get; set; }
             public int COMP_CODE { get; set; }
             public int BRANCH_CODE { get; set; }
@@ -309,6 +310,7 @@
             public string TRANSIT_NO { get; set; }
             public string WAYBILL_NO { get; set; }
             public string TRANSPORT_CODE { get; set; }
+            public string TRANSPORT_AC { get; set; }
             public string TRANSPORT_NAME { get; set; }
             public string GR_NO { get; set; }
             public DateTime? GR_DATE { get; set; }

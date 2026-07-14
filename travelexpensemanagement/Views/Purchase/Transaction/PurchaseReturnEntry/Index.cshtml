@@ -336,8 +336,8 @@
                         </div>
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
-                        <label class="erppage-label">Remarks</label>
-                        <textarea class="erppage-input" id="txtremarks" rows="3" placeholder="Enter Remarks"></textarea>
+                      @*   <label class="erppage-label">Remarks</label>
+                        <textarea class="erppage-input" id="txtremarks" rows="3" placeholder="Enter Remarks"></textarea> *@
                     </div>
                 </div>
             </fieldset>
@@ -906,6 +906,7 @@
     let makeList = [];
     let deptList = [];
     let readOnly= false;
+    let isEditMode = false;
     $(document).ready(function () {
         ddlDocType();
         ddlRefType();
@@ -933,23 +934,22 @@
         const vType = getQueryParam('vType');
         const mode = getQueryParam("mode");
         readOnly = (mode === 'view');
-
         if (code) {
-        $.ajax({
-            url: '/PurchaseReturnEntry/GetAllDatadetails',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ VNO: code, vType: vType }),
-            success: function (response) {
-                console.log(response);
-                const $attachmentTbody = $('#tblAttachmentPRE tbody');
-                GetallDatapurchase1purchase2purchase3(response);
-            },
-            error: function (xhr) {
-                toastr.error('Error: ' + xhr.responseText);
-            }
-        });
-    }
+            $.ajax({
+                url: '/PurchaseReturnEntry/GetAllDatadetails',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ VNO: code, vType: vType }),
+                success: function (response) {
+                    const $attachmentTbody = $('#tblAttachmentPRE tbody');
+                    isEditMode = true;
+                    GetallDatapurchase1purchase2purchase3(response);
+                },
+                error: function (xhr) {
+                    toastr.error('Error: ' + xhr.responseText);
+                }
+            });
+        }
     // When document type changes
     $('#ddlDocType').on('change', function () {
         const selectedValue = $(this).val();
@@ -968,10 +968,8 @@
     // Ref Type dropdown list banding End
     // How to get data on change start Block
     $('#ddlRefNo').on('change', function () {
-
         var selectedNo = $(this).val();
         var selectedText = $(this).find("option:selected").text();
-
         if (selectedNo == "0" || selectedNo == "")
             return;
 
@@ -983,21 +981,14 @@
                 StrV_type: selectedText.substring(0, 4)
             },
             success: function (res) {
-
                 if (!res.success) {
-
                     alert(res.message);
-                    // or toastr.error(res.message);
-
                     return;
                 }
-
                 GetalldatafetchGatonchange(res.data);
             },
             error: function (xhr) {
-
                 alert("Server Error");
-                console.log(xhr);
             }
         });
 
@@ -1009,7 +1000,7 @@
             getBillFrom(selectedBillFrom);
         }
     });
-        // Add new row
+    // Add new row
     $('#tblItemRecordPO tbody tr').each(function () {
         loadItemDropdown($(this).find('.item-name-dropdown'));
         loadTaxTypeDropdown($(this).find('.TaxType-dropdown'));
@@ -1043,14 +1034,13 @@
         const amount = billQty * rate;
         row.find('input[name="Amount"]').val(amount.toFixed(2));
     });
-        // allData calculation this method onanimation start block
+    // allData calculation this method onanimation start block
     $(document).on('change', '.TaxType-dropdown', function () {
         const selectedCode = $(this).val();
         const row = $(this).closest('tr');
-        console.log("Selected Code:", selectedCode);
         getTaxType(selectedCode, row);
     })
-         // checked last time when page is complate
+    // checked last time when page is complate
     $(document).on('input', '#tblItemRecordPO tbody input', function () {
         const row = $(this).closest('tr');
         calculateTotalRecQty();
@@ -1084,11 +1074,55 @@
             addAttachmentRow();
         });
 
+    $(document).on('click', '.btn-add-row', function () {
+
+        const currentRow = $(this).closest('tr');
+        const newRow = currentRow.clone();
+
+        // Clear values
+        newRow.find('input').val('');
+        newRow.find('select').prop('selectedIndex', 0);
+
+        // New row editable
+        newRow.find('input').prop('readonly', false);
+        newRow.find('select').prop('disabled', false);
+
+        // Reload dropdowns
+        loadItemDropdown(newRow.find('.item-name-dropdown'));
+        loadTaxTypeDropdown(newRow.find('.TaxType-dropdown'));
+        loadMakeList(newRow.find('.make-dropdown'));
+        loadDeptList(newRow.find('select[name="Department"]'));
+
+        currentRow.after(newRow);
+    });
+    
+    // $(document).on('click', '.btn-add-row', function () {
+
+    //     const row = $(this).closest('tr');
+    //     const newRow = row.clone();
+
+    //     newRow.find('input').val('');
+    //     newRow.find('select').prop('selectedIndex', 0);
+
+    //     loadItemDropdown(newRow.find('.item-name-dropdown'));
+    //     loadTaxTypeDropdown(newRow.find('.TaxType-dropdown'));
+    //     loadMakeList(newRow.find('.make-dropdown'));
+    //     loadDeptList(newRow.find('select[name="Department"]'));
+
+    //     row.after(newRow);
+
+    // });
+
+     $(document).on('click', '.btn-delete', function () {
+        $(this).closest('tr').remove();
+    });
+    $(document).on('click', '.btn-edit', function () {
+        const row = $(this).closest('tr');
+        row.find('input').prop('readonly', false);
+        row.find('select').prop('disabled', false);
+    });
     // Delete row on trash icon click
-    $(document).on('click', '.btn-delete-action', function () {
-            $(this).closest('tr').remove();
-        });
-         //Attachment End Block
+    //Attachment End Block
     $('#selectAllIOSM').on('change', function () {
          let checked = $(this).is(':checked');
          $('#tblindendorderstore tbody input[type="checkbox"]').prop('checked', checked).trigger('change');
@@ -1103,8 +1137,6 @@
         let reqNo = $row.find('td:eq(25)').text().trim();
         let vtype = $row.find('td:eq(2)').text().trim();
         let poNo = $row.find('td:eq(1)').text().trim();
-
-
         let uniqueKey = `${itemCode}_${reqNo}_${vtype}_${poNo}`;
 
         if (this.checked) {
@@ -1217,7 +1249,7 @@
     });
      // checked box checked multiple row insert onanimationstart Block
     $('#btn-save').on('click', function (e) {
-        e.preventDefault(); // Prevent default form submit
+        e.preventDefault(); 
 
         if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
         if (!validateRequiredField('#DtDocDate', 'Doc Date')) return;
@@ -1241,8 +1273,6 @@
         DocDate: $('#DtDocDate').val() || null,
         WbNo: $('#WBNo').val() || null,
         RefType: $('#ddlRefType').val() || null,
-        // RefNo: $('#ddlRefNo').val() || null,
-        // RefNo: $('#ddlRefNo option:selected').text() || null,
         RefNo: (function() {
         const val = $('#ddlRefNo option:selected').text();
         const match = val.match(/\d+$/);
@@ -1388,7 +1418,7 @@
     };
         allData.push(rowData);
     });
-        console.log("All data collected:", allData);
+        console.log("Item data", allData);
         // 3. FormData
         const formData = new FormData();
         formData.append("Header", JSON.stringify(header));
@@ -1438,7 +1468,305 @@
                 }
             });
         });
-    });
+
+     function GetallDatapurchase1purchase2purchase3(data) {
+        const purchase1 = data.purchase1;
+        const purchase2 = data.purchase2;
+        const purchase3 = data.purchase3;
+
+        console.log("purchase1", purchase1);
+        console.log("purchase2", purchase2);
+        console.log("purchase3", purchase3);
+        // ====== Purchase1 Header Bind ======
+        if (purchase1 && purchase1.length > 0) {
+            const p1 = purchase1[0];
+
+            ddlDocType(() => {
+                $('#ddlDocType').val(p1.v_TYPE);
+            });
+
+            $('#NumDocNo').val(p1.v_NO);
+            $('#DtDocDate').val(formatDateForInput(p1.v_DATE));
+
+            $('#ddlRefNo').val(p1.reF_NO);
+            if (p1.reF_TYPE && p1.reF_NO) {
+               ddlRefNo(p1.reF_NO, p1.reF_TYPE, p1.reF_NO);
+            } else
+            {
+               ddlRefNo('', p1.reF_TYPE);
+            }
+            ddlGateNo = p1.gatE_NO;
+            ddlRefType(() => {
+                $('#ddlRefType').val(p1.reF_TYPE);
+            });
+            ddlReturnTo(function () {
+                $('#ddlReturnTo').val(String(p1.partY_CODE)).trigger('change.select2');
+            });
+            ddlShipDetails(function () {
+                $('#ddlShipFrom').val(String(p1.shiP_CODE)).trigger('change.select2');
+            });
+
+
+            $('#txtAddLine1').val(p1.bilL_ADD1);
+            $('#txtAddLine2').val(p1.bilL_ADD2);
+            $('#txtAddLine3').val(p1.bilL_ADD3);
+
+            $('#txtShipAddLine1').val(p1.shiP_ADD1);
+            $('#txtShipAddLine2').val(p1.shiP_ADD2);
+            $('#txtShipAddLine3').val(p1.shiP_ADD3);
+
+            GetddlCityBillDetails(() => {
+                $('#ddlCity').val(p1.bilL_CITY);
+                $('#ddlShipCity').val(p1.shiP_CITY);
+            });
+
+
+            $('#txtPincode').val(p1.bilL_PINCODE);
+            $('#NumShipPincode').val(p1.shiP_PINCODE);
+
+            $('#txtGST').val(p1.bilL_GST);
+            $('#txtShipGST').val(p1.shiP_GST);
+
+            $('#txtBillNo').val(p1.bilL_NO);
+            $('#DtBillDate').val(formatDateForInput(p1.bilL_DATE));
+            $('#NumChallanNo').val(p1.chalL_NO);
+            $('#DtChallanDate').val(formatDateForInput(p1.chalL_DATE));
+            $('#TxtWaybillNo').val(p1.waybilL_NO);
+
+            $('#txtExchangeRate').val(p1.excH_RATE);
+            $('#txtNetAmount').val(p1.namount);
+            //Item Total
+            $('#NumReceivedQty').val(p1.recD_QTY);
+            $('#NumBillQty').val(p1.bilL_QTY);
+            $('#NumAmount').val(p1.amount);
+            $('#NumPacking').val(p1.pacK_AMT);
+            $('#NumDiscount').val(p1.disC_AMT);
+            $('#NumCGST').val(p1.cgsT_AMT);
+            $('#NumSGST').val(p1.sgsT_AMT);
+            $('#NumIGST').val(p1.igsT_AMT);
+            $('#NumCESS').val(p1.cesS_AMT);
+            $('#NumVAT').val(p1.vaT_AMT);
+            $('#NumOtherAmt').val(p1.otH_AMT);
+            $('#NumSubTotal').val(p1.amount);
+            $('#NumRoundOff').val(p1.rounD_OFF);
+            $('#NumFinalNetAmt').val(p1.namount);
+
+            $('#txtVehicleNo').val(p1.trucK_NO);
+            $('#txtContainerNo').val(p1.containeR_NO);;
+            $('#NumFreightPay').val(p1.frtpaY_AMT);
+            $('#NumFrtTax1').val(p1.frtpaY_TAXPER);
+            $('#NumFrtTax2').val(p1.frtpaY_TAX);
+            $('#TxtFreightPayNarration').val(p1.frtpaY_NAR);
+            $('#NumTDSFreight1').val(p1.frtpaY_TAXPER);
+            $('#txtGRNo').val(p1.gR_NO);
+            // $('#DtGRDate').val(p1.gR_DATE);
+             if (p1.gR_DATE) {
+                const grDate = new Date(p1.gR_DATE).toISOString().split('T')[0];
+                $('#DtGRDate').val(grDate);
+             }
+
+            $('#NumGRNo').val(p1.gR_NO);
+
+            $('#txtremarks').val(p1.remarks);
+
+            $('#DtGRDate').val(formatDateForInput(p1.gR_DATE));
+            $('#DtBLDate').val(formatDateForInput(p1.bilL_DATE));
+
+             ddlTransportName(() => {
+                $('#ddlTransportName').val(p1.transporT_CODE);
+            });
+
+             ddlTransportAC(() => {
+                $('#ddlTransportAC').val(p1.transporT_AC);
+            });
+             ddlDocStatus(() => {
+                $('#ddlDocStatus').val(p1.status);
+            });
+
+            ddlCreditAC(() => {
+               $('#ddlcreditAC').val(p1.crediT_AC);
+            });
+             ddlDebitAC(() => {
+                $('#ddldebitAC').val(p1.debiT_AC);
+            });
+             $('#TxtWaybillNo').val(p1.waybilL_NO);
+             $('#TxtBLNo').val(p1.bL_NO);
+
+             if (p1.inpuT_TYPE) {
+              $('#ddlInputType').val(p1.inpuT_TYPE);
+              console.log('inpuT_TYPE:', p1.inpuT_TYPE);
+             }
+
+            if (p1.inpuT_TYPE) {
+             $('#ddlExpensesType').val(p1.expS_TYPE);
+              console.log('ddlExpensesType:', p1.expS_TYPE);
+             }
+            // khushahal
+
+        }
+        // ====== Purchase2 Item Rows Bind ======
+        bindItemsdata(purchase2);
+        // getdataImage(purchase3)
+    }
+    // LOAD BY V_NO ==========================
+    function bindItemsdata(items) {
+        const $tbody = $('#tblItemRecordPO tbody').empty();
+
+        items.forEach(i => {
+            const qty = i.recD_QTY ?? 0;
+            const rate = i.rate ?? 0;
+            const amount = qty * rate;
+            const inputYN = (i.inpuT_YN || '').trim().toUpperCase();
+            const rcmYN = (i.rcM_YN || '').trim().toUpperCase();
+                debugger;
+            const $tr = $(`
+                <tr>
+                    <td>
+                        <select class="form-control item-name-dropdown" name="ItemName" style="width:200px;"></select>
+                    </td>
+                    <td><input class="form-control" style="width: 100PX;" name="HSNCode" value="${i.hsN_CODE ?? 0}"  /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="Unit" value="${i.uoM_NAME || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="Nos" value="${i.nos ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="RecQty" value="${i.recD_QTY ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="BillQty" value="${i.bilL_QTY ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="Rate" value="${i.rate ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="Amount" value="${i.amount}" /></td>
+                    <td>
+                        <select class="form-control" name="RCMYN">
+                              <option value="">--Select--</option>
+                              <option value="Yes" ${(rcmYN === 'Y' || rcmYN === 'YES') ? 'selected' : ''}>Yes</option>
+                              <option value="No" ${(rcmYN === 'N' || rcmYN === 'NO') ? 'selected' : ''}>No</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control" name="InputYN">
+                             <option value="">--Select--</option>
+                             <option value="Yes" ${(inputYN === 'Y' || inputYN === 'YES') ? 'selected' : ''}>Yes</option>
+                             <option value="No" ${(inputYN === 'N' || inputYN === 'NO') ? 'selected' : ''}>No</option>
+                        </select>
+                    </td>
+                    <td><select class="form-control TaxType-dropdown" name="TaxType"></select></td>
+                    <td><input class="form-control" style="width: 100PX;" name="PackPer" value="${i.pacK_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="PackAmt" value="${i.pacK_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="DiscPer" value="${i.disC_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="DiscAmt" value="${i.disC_AMT ?? 0}" /></td>
+                    <td><input name="WBQty" class="form-control" style="width: 100PX;" value="${i.wB_QTY ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="CGSTPer" value="${i.cgsT_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="CGSTAmt" value="${i.cgsT_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="SGSTPer" value="${i.sgsT_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="SGSTAmt" value="${i.sgsT_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="IGSTPer" value="${i.igsT_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="IGSTAmt" value="${i.igsT_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="CESSPer" value="${i.cesS_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="CESSAmt" value="${i.cesS_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="OthAmt" value="${i.otH_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="NetAmt" value="${i.neT_AMT ?? amount}" /></td>
+                     <td>
+                        <select class="form-control make-dropdown" style="width: 100PX;" name="Make"}"></select>
+                    </td>
+                    <td>
+                        <select class="form-control" style="width: 100PX;" name="Department"}"></select>
+                    </td>
+                    <td><input class="form-control" style="width: 100PX;" name="Remarks" value="${i.remarks || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="LDRate" value="${i.lanD_RATE ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="LDAmt" value="${i.lanD_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="WBType" value="${i.kantA_TYPE || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="WBNo" value="${i.kantA_NO || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="RefType" value="${i.reF_TYPE || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="RefNo" value="${i.reF_NO || ''}" /></td>
+                    <td class="action-col">
+                    <div class="action-wrap">
+                        <button type="button" class="act-btn add btn-add-row"  title="Add" style="cursor:pointer;"><i class="fa fa-plus-circle"></i></button>
+                        <button type="button" class="act-btn edit btn-edit"  title="edit" style="cursor:pointer;"><i class="fa fa-edit"></i></button>
+                        <button type="button" class="act-btn delete btn-delete"  title="delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
+                     </div>
+                    </td>
+                </tr>
+            `);
+
+            $tbody.append($tr);
+            const $lastRow = $tbody.find('tr').last();
+            const $itemDropdown = $lastRow.find('select[name="ItemName"]');
+            const $taxDropdown = $lastRow.find('select[name="TaxType"]');
+            const $makeDropdown = $lastRow.find('select[name="Make"]');
+            const $deptDropdown = $lastRow.find('select[name="Department"]');
+            // Load dropdowns
+            loadItemDropdowngat($itemDropdown, i.iteM_CODE);
+            loadTaxTypeDropdowngatCode($taxDropdown, i.taX_CODE);
+            loadMakeList($makeDropdown, i.makE_CODE);
+            loadDeptList($deptDropdown, i.depT_CODE);
+            // Default ReadOnly
+            $lastRow.find('input').prop('readonly', true);
+            $lastRow.find('select').prop('disabled', true);
+            // Action buttons enabled rahenge
+            $lastRow.find('.btn-add-row, .btn-edit, .btn-delete').prop('disabled', false);
+        });
+
+        // delete row event
+        $tbody.off('click', '.btn-delete').on('click', '.btn-delete', function () {
+            $(this).closest('tr').remove();
+        });
+    }
+    function loadTaxTypeDropdowngatCode($dropdown, selectedType = "") {
+        $.ajax({
+            url: '/PurchaseReturnEntry/GetTaxTypeList',
+            method: 'GET',
+            success: function (data) {
+                $dropdown.empty();
+                $dropdown.append('<option value="">--Select Tax Type--</option>');
+                $.each(data, function (index, tax) {
+                    // ✅ use selectedType instead of selectedCode
+                    let selected = String(tax.code) === String(selectedType) ? 'selected' : '';
+                    $dropdown.append(`<option value="${tax.code}" ${selected}>${tax.name}</option>`);
+                });
+            },
+            error: function () {
+                toastr.error('Failed to load tax types.');
+            }
+        });
+    }
+    function getdataImage(Imagedata) {
+        const $attachmentTbody = $('#tblAttachmentPRE tbody');
+        $attachmentTbody.empty();
+
+        if (!Array.isArray(Imagedata) || Imagedata.length === 0) {
+            console.warn("⚠️ No attachment data to display");
+            return;
+        }
+
+        Imagedata.forEach(item => {
+            const fullPath = item.attachment; // "/attachments/Purchase/sdfsf.PNG"
+            if (!fullPath) return;
+
+            const fileName = fullPath.split('/').pop();
+
+            // Check if it's an image
+            let previewHtml = '';
+            if (/\.(jpg|jpeg|png|gif|bmp)$/i.test(fileName)) {
+                previewHtml = `
+                    <img src="${fullPath}" alt="${fileName}"
+                         style="max-width:80px; max-height:80px; border:1px solid #ccc; border-radius:4px;" />`;
+            } else {
+                previewHtml = `<a href="${fullPath}" target="_blank" class="text-info">View File</a>`;
+            }
+
+            const row = `
+                <tr>
+                    <td >${item.doC_ID || ''}</td>
+                    <td style="display:none;"><label>${fileName}</label></td>
+                    <td><input type="file" class="form-control file-upload" /></td>
+                    <td>${previewHtml}</td>
+                    <td>
+                        <i class="fa fa-plus btn-add-action text-success me-2" title="Add Row" style="cursor:pointer;"></i>
+                        <i class="fa fa-edit btn-edit-action text-primary me-2" title="Edit Row" style="cursor:pointer;"></i>
+                        <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                    </td>
+                </tr>
+            `;
+            $attachmentTbody.append(row);
+        });
+    }
+     
     function ddlDocType(callback) {
         $.ajax({
             url: '/PurchaseReturnEntry/GetddlDocType',
@@ -1512,50 +1840,45 @@
             }
         });
     }
-    function ddlRefNo() {
-        const ddl = $('#ddlRefNo');
-        const vType1 = $('#ddlRefType').val();
-        const vNo = $('#NumDocNo').val();
+    function ddlRefNo(selectedValue = '', vType = '', vNo = '') {
 
-        // Optional: guard clause if values are missing
-        if (!vType1 || !vNo) {
-            console.warn("Missing vType or vNo");
+        const ddl = $('#ddlRefNo');
+
+        // If parameters are not passed, use current control values
+        vType = vType || $('#ddlRefType').val();
+        vNo = vNo || $('#NumDocNo').val();
+
+        if (!vType) {
             return;
         }
+
         $.ajax({
             url: '/PurchaseReturnEntry/GetddlRefNo',
             type: 'GET',
             dataType: 'json',
-            data: { VNo: vNo, Vtype: vType1 },
+            data: { VNo: vNo, Vtype: vType },
             success: function (data) {
-                // Reset Select2 if already applied
+
                 if (ddl.hasClass("select2-hidden-accessible")) {
                     ddl.select2('destroy');
                 }
 
-                ddl.empty().append('<option value="" disabled selected hidden>-- Select Reference No --</option>');
+                ddl.empty().append('<option value="">-- Select Reference No --</option>');
 
-                data.forEach(item => {
-                    const displayText = `${item.text}`; // Already formatted in C#
-                    ddl.append(new Option(displayText, item.value));
+                $.each(data, function (i, item) {
+                    ddl.append(new Option(item.text, item.value));
                 });
 
                 ddl.select2({
                     placeholder: "-- Select Reference No --",
                     allowClear: true,
-                    width: '100%',
-                    minimumResultsForSearch: data.length >= 5 ? 0 : Infinity,
-                    language: {
-                        inputTooShort: () => 'Type to search...',
-                        searchInputPlaceholder: "Search Reference No..."
-                    }
+                    width: '100%'
                 });
 
-                $('.select2-selection').addClass('form-control');
-            },
-            error: function (xhr, status, error) {
-                console.error("Error loading reference list:", xhr.responseText);
-                toastr.error('Error loading reference list: ' + error);
+                if (selectedValue) {
+                    // ddl.val(selectedValue).trigger('change');
+                    ddl.val(selectedValue).trigger('change.select2');
+                }
             }
         });
     }
@@ -1934,7 +2257,6 @@
         let totalVAT = 0;
         let totalOtherAmt = 0;
         let SubTotal = 0;
-        // alert("Total Amount")
         $('#tblItemRecordPO tbody tr').each(function () {
             const row = $(this);
             const recQty = parseFloat(row.find('input[name="RecQty"]').val()) || 0;
@@ -1977,7 +2299,7 @@
         $('#NumVAT').val(totalVAT.toFixed(2));
         $('#NumOtherAmt').val(totalOtherAmt.toFixed(2));
         $('#NumSubTotal').val(SubTotal.toFixed(2));
-        
+
 
         // Optional: Calculate Round Off
         let rounded = Math.round(SubTotal);
@@ -2025,18 +2347,17 @@
 
         if (!response || !response.header || response.header.length === 0)
             return;
-
         const header = response.header[0];
-
-        console.log(header);
-
+        console.log('Ref No', header);
         // Party
         $('#TxtWaybillNo').val(header.WAYBILL_NO || '');
-        ddlReturnTo(function () {
-            $('#ddlReturnTo').val(header.PARTY_CODE);
-            $('#ddlShipFrom').val(header.SHIP_CODE);
-        });
 
+        ddlReturnTo(function () {
+            $('#ddlReturnTo').val(String(header.PARTY_CODE)).trigger('change.select2');
+        });
+        ddlShipDetails(function () {
+            $('#ddlShipFrom').val(String(header.SHIP_CODE)).trigger('change.select2');
+        });
         // Address
         $('#txtAddLine1').val(header.ADD1 || '');
         $('#txtAddLine2').val(header.ADD2 || '');
@@ -2084,20 +2405,9 @@
         $('#ddlTransport').val(header.TRANSPORT_CODE || '');
         $('#txtVehicleNo').val(header.TRUCK_NO || '');
         $('#txtContainerNo').val(header.CONTAINER_NO || '');
-
-
         // GR Details
-            const today = new Date().toISOString().split('T')[0];
-
-    $('#DtGRDate').val(
-        header.GR_DATE
-            ? header.GR_DATE.split('T')[0]
-            : ($('#DtDocDate').val() || today)
-    );
-
-
-
-
+        const today = new Date().toISOString().split('T')[0];
+        $('#DtGRDate').val(header.GR_DATE ? header.GR_DATE.split('T')[0] : ($('#DtDocDate').val() || today));
         // Freight
         $('#txtFreightAmount').val(header.FRTPAY_AMT || 0);
         $('#txtFreightTaxPer').val(header.FRTPAY_TAXPER || 0);
@@ -2113,17 +2423,23 @@
         }
     }
     function bindItems(items) {
+
         console.log("Items:", items);
+
         const $tbody = $("#tblItemRecordPO tbody");
         $tbody.empty();
+
         $.each(items, function (index, i) {
-            let qty = i.RECD_QTY || 0;
-            let rate = i.RATE || 0;
+
+            let qty = parseFloat(i.RECD_QTY || 0);
+            let rate = parseFloat(i.RATE || 0);
             let amount = qty * rate;
+
             let row = `
             <tr>
-                <td style="display:none;">
-                    <input type="text" class="form-control" name="Code" value="${i.ITEM_CODE || ''}">
+
+                <td style="display:none">
+                    <input type="hidden" name="Code" value="${i.ITEM_CODE || ''}">
                 </td>
 
                 <td>
@@ -2131,47 +2447,54 @@
                 </td>
 
                 <td>
-                    <input type="text" class="form-control" style="width:100px;" name="HSNCode" value="${i.HSN_CODE || ''}">
+                    <input type="text" class="form-control" name="HSNCode"
+                           value="${i.HSN_CODE || ''}">
                 </td>
 
                 <td>
-                    <input type="text" class="form-control" style="width:100px;" name="Unit" value="${i.Unit || ''}">
+                    <input type="text" class="form-control" name="Unit"
+                           value="${i.Unit || ''}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="Nos" value="${i.NOS || 0}">
+                    <input type="number" class="form-control" name="Nos"
+                           value="${i.NOS || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="ReturnQty" value="0">
+                    <input type="number" class="form-control" name="ReturnQty"
+                           value="${i.RECD_QTY || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="BillQty" value="${qty}">
+                    <input type="number" class="form-control" name="BillQty"
+                           value="${i.BILL_QTY || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="Rate" value="${rate}">
+                    <input type="number" class="form-control" name="Rate"
+                           value="${i.RATE || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="Amount" value="${amount}">
+                    <input type="number" class="form-control" name="Amount"
+                           value="${amount.toFixed(2)}">
                 </td>
 
                 <td>
-                    <select class="form-control" name="RCMYN">
+                     <select class="form-control" name="RCMYN">
                         <option value="">--Select--</option>
-                        <option value="Y" ${i.RCM_YN == "Y" ? "selected" : ""}>Yes</option>
-                        <option value="N" ${i.RCM_YN == "N" ? "selected" : ""}>No</option>
+                        <option value="Y" ${i.rcM_YN === 'Y' ? 'selected' : ''}>Yes</option>
+                        <option value="N" ${i.rcM_YN === 'N' ? 'selected' : ''}>No</option>
                     </select>
                 </td>
 
                 <td>
-                    <select class="form-control" name="InputYN">
-                        <option value="">--Select--</option>
-                        <option value="Y" ${i.INPUT_YN == "Y" ? "selected" : ""}>Yes</option>
-                        <option value="N" ${i.INPUT_YN == "N" ? "selected" : ""}>No</option>
-                    </select>
+                  <select class="form-control" name="InputYN">
+                    <option value="">--Select--</option>
+                    <option value="Y" ${i.inpuT_YN === 'Y' ? 'selected' : ''}>Yes</option>
+                    <option value="N" ${i.inpuT_YN === 'N' ? 'selected' : ''}>No</option>
+                </select>
                 </td>
 
                 <td>
@@ -2179,63 +2502,78 @@
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="PackPer" value="${i.PACK_PER || 0}">
+                    <input type="number" class="form-control" name="PackPer"
+                           value="${i.PACK_PER || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="PackAmt" value="0">
+                    <input type="number" class="form-control" name="PackAmt"
+                           value="${i.PACK_AMT || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="DiscPer" value="${i.DISC_PER || 0}">
+                    <input type="number" class="form-control" name="DiscPer"
+                           value="${i.DISC_PER || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="DiscAmt" value="0">
+                    <input type="number" class="form-control" name="DiscAmt"
+                           value="${i.DISC_AMT || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="WBQty" value="0">
+                    <input type="number" class="form-control" name="WBQty"
+                           value="${i.WB_QTY || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="CGSTPer" value="${i.CGST_PER || 0}">
+                    <input type="number" class="form-control" name="CGSTPer"
+                           value="${i.CGST_PER || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="CGSTAmt" value="0">
+                    <input type="number" class="form-control" name="CGSTAmt"
+                           value="${i.CGST_AMT || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="SGSTPer" value="${i.SGST_PER || 0}">
+                    <input type="number" class="form-control" name="SGSTPer"
+                           value="${i.SGST_PER || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="SGSTAmt" value="0">
+                    <input type="number" class="form-control" name="SGSTAmt"
+                           value="${i.SGST_AMT || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="IGSTPer" value="${i.IGST_PER || 0}">
+                    <input type="number" class="form-control" name="IGSTPer"
+                           value="${i.IGST_PER || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="IGSTAmt" value="0">
+                    <input type="number" class="form-control" name="IGSTAmt"
+                           value="${i.IGST_AMT || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="CessPer" value="0">
+                    <input type="number" class="form-control" name="CessPer"
+                           value="${i.CESS_PER || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="CessAmt" value="0">
+                    <input type="number" class="form-control" name="CessAmt"
+                           value="${i.CESS_AMT || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="OthAmt" value="${i.OTH_AMT || 0}">
+                    <input type="number" class="form-control" name="OthAmt"
+                           value="${i.OTH_AMT || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="NetAmt" value="0">
+                    <input type="number" class="form-control" name="NetAmt"
+                           value="${i.NET_AMT || amount}">
                 </td>
 
                 <td>
@@ -2247,57 +2585,68 @@
                 </td>
 
                 <td>
-                    <input type="text" class="form-control" style="width:100px;" name="Remarks">
+                    <input type="text" class="form-control" name="Remarks"
+                           value="${i.REMARKS || ''}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="LDRate" value="0">
+                    <input type="number" class="form-control" name="LDRate"
+                           value="${i.POLAND_RATE || 0}">
                 </td>
 
                 <td>
-                    <input type="number" class="form-control" style="width:100px;" name="LDAmt" value="0">
+                    <input type="number" class="form-control" name="LDAmt"
+                           value="${i.LAND_AMT || 0}">
                 </td>
 
                 <td>
-                    <input type="text" class="form-control" style="width:100px;" name="WBType" value="${i.KANTA_TYPE || ''}">
+                    <input type="text" class="form-control" name="WBType"
+                           value="${i.KANTA_TYPE || ''}">
                 </td>
 
                 <td>
-                    <input type="text" class="form-control" style="width:100px;" name="WBNo" value="${i.KANTA_NO || ''}">
+                    <input type="text" class="form-control" name="WBNo"
+                           value="${i.KANTA_NO || ''}">
                 </td>
 
                 <td>
-                    <input type="text" class="form-control" style="width:100px;" name="RefType" value="${i.V_TYPE || ''}">
+                    <input type="text" class="form-control" name="RefType"
+                           value="${i.PO_TYPE || ''}">
                 </td>
 
                 <td>
-                    <input type="text" class="form-control" style="width:100px;" name="RefNo" value="${i.V_NO || ''}">
+                    <input type="text" class="form-control" name="RefNo"
+                           value="${i.PO_NO || ''}">
                 </td>
 
-                <td>
-                    <i class="fa fa-edit btn-edit"></i>
-                    <i class="fas fa-trash btn-delete btn-delete-row"></i>
-                </td>
+                 <td class="action-col">
+                    <div class="action-wrap">
+                        <button type="button" class="act-btn add btn-add-row"  title="Add" style="cursor:pointer;"><i class="fa fa-plus-circle"></i></button>
+                        <button type="button" class="act-btn edit btn-edit"  title="edit" style="cursor:pointer;"><i class="fa fa-edit"></i></button>
+                        <button type="button" class="act-btn delete btn-delete"  title="delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
+                     </div>
+                 </td>
 
             </tr>`;
 
             $tbody.append(row);
             let $lastRow = $tbody.find("tr:last");
+            $lastRow.find('[name="RCMYN"]').val(i.rcM_YN);
+            $lastRow.find('[name="InputYN"]').val(i.inpuT_YN);
             loadItemDropdowngat($lastRow.find(".item-name-dropdown"), i.ITEM_CODE);
             loadTaxTypeDropdowngat($lastRow.find(".TaxType-dropdown"), i.TAX_CODE);
             loadMakeList($lastRow.find(".make-dropdown"), i.MAKE_CODE);
-            loadDeptList($lastRow.find(".Department-dropdown"), i.DEPT_CODE
-            );
+            loadDeptList($lastRow.find(".department-dropdown"), i.DEPT_CODE);
+
         });
 
-            $("#tblItemRecordPO tbody tr").each(function () {
-                recalculateRow($(this));
-            });
-
-             calculateTotalRecQty();
-
+        $("#tblItemRecordPO tbody tr").each(function () {
+            recalculateRow($(this));
+        });
+        calculateTotalRecQty();
         $tbody.off("click", ".btn-delete").on("click", ".btn-delete", function () {
             $(this).closest("tr").remove();
+            calculateTotalRecQty();
         });
     }
     function loadTaxTypeDropdowngat($dropdown, selectedCode) {
@@ -2379,142 +2728,7 @@
         });
     }
     //-------------------------------------GetRefNoList----------------------------------
-    function GetallDatapurchase1purchase2purchase3(data) {
-        const purchase1 = data.purchase1;
-        const purchase2 = data.purchase2;
-        const purchase3 = data.purchase3;
 
-        console.log("purchase1", purchase1);
-        console.log("purchase2", purchase2);
-        console.log("purchase3", purchase3);
-        // ====== Purchase1 Header Bind ======
-        if (purchase1 && purchase1.length > 0) {
-            const p1 = purchase1[0];
-
-            ddlDocType(() => {
-                $('#ddlDocType').val(p1.v_TYPE);
-            });
-
-            $('#NumDocNo').val(p1.doC_ID);
-            $('#DtDocDate').val(formatDateForInput(p1.v_DATE));
-
-            ddlGateNo = p1.gatE_NO;
-
-             ddlRefType(() => {
-                $('#ddlRefType').val(p1.reF_TYPE);
-
-            });
-
-            ddlReturnTo(() => {
-                $('#ddlReturnTo').val(p1.partY_CODE);
-
-            });
-
-             ddlShipDetails(() => {
-                 $('#ddlShipFrom').val(p1.shiP_CODE);
-            });
-
-            $('#txtAddLine1').val(p1.bilL_ADD1);
-            $('#txtAddLine2').val(p1.bilL_ADD2);
-            $('#txtAddLine3').val(p1.bilL_ADD3);
-
-            $('#txtShipAddLine1').val(p1.shiP_ADD1);
-            $('#txtShipAddLine2').val(p1.shiP_ADD2);
-            $('#txtShipAddLine3').val(p1.shiP_ADD3);
-
-            GetddlCityBillDetails(() => {
-                $('#ddlCity').val(p1.bilL_CITY);
-                $('#ddlShipCity').val(p1.shiP_CITY);
-            });
-
-
-            $('#txtPincode').val(p1.bilL_PINCODE);
-            $('#NumShipPincode').val(p1.shiP_PINCODE);
-
-            $('#txtGST').val(p1.bilL_GST);
-            $('#txtShipGST').val(p1.shiP_GST);
-
-            $('#txtBillNo').val(p1.bilL_NO);
-            $('#DtBillDate').val(formatDateForInput(p1.bilL_DATE));
-            $('#NumChallanNo').val(p1.chalL_NO);
-            $('#DtChallanDate').val(formatDateForInput(p1.chalL_DATE));
-            $('#TxtWaybillNo').val(p1.waybilL_NO);
-
-            $('#txtExchangeRate').val(p1.excH_RATE);
-            $('#txtNetAmount').val(p1.namount);
-            //Item Total
-            $('#NumReceivedQty').val(p1.recD_QTY);
-            $('#NumBillQty').val(p1.bilL_QTY);
-            $('#NumAmount').val(p1.amount);
-            $('#NumPacking').val(p1.pacK_AMT);
-            $('#NumDiscount').val(p1.disC_AMT);
-            $('#NumCGST').val(p1.cgsT_AMT);
-            $('#NumSGST').val(p1.sgsT_AMT);
-            $('#NumIGST').val(p1.igsT_AMT);
-            $('#NumCESS').val(p1.cesS_AMT);
-            $('#NumVAT').val(p1.vaT_AMT);
-            $('#NumOtherAmt').val(p1.otH_AMT);
-            $('#NumSubTotal').val(p1.amount);
-            $('#NumRoundOff').val(p1.rounD_OFF);
-            $('#NumFinalNetAmt').val(p1.namount);
-
-            $('#txtVehicleNo').val(p1.trucK_NO);
-            $('#txtContainerNo').val(p1.containeR_NO);;
-            $('#NumFreightPay').val(p1.frtpaY_AMT);
-            $('#NumFrtTax1').val(p1.frtpaY_TAXPER);
-            $('#NumFrtTax2').val(p1.frtpaY_TAX);
-            $('#TxtFreightPayNarration').val(p1.frtpaY_NAR);
-            $('#NumTDSFreight1').val(p1.frtpaY_TAXPER);
-            $('#txtGRNo').val(p1.gR_NO);
-            // $('#DtGRDate').val(p1.gR_DATE);
-             if (p1.gR_DATE) {
-                const grDate = new Date(p1.gR_DATE).toISOString().split('T')[0];
-                $('#DtGRDate').val(grDate);
-             }
-
-            $('#NumGRNo').val(p1.gR_NO);
-
-            $('#txtremarks').val(p1.remarks);
-
-            $('#DtGRDate').val(formatDateForInput(p1.gR_DATE));
-
-             ddlTransportName(() => {
-                $('#ddlTransportName').val(p1.transporT_NAME);
-            });
-
-             ddlTransportName(() => {
-                $('#ddlTransportName').val(p1.transporT_NAME);
-            });
-             ddlDocStatus(() => {
-                $('#ddlDocStatus').val(p1.status);
-            });
-
-            ddlCreditAC(() => {
-               $('#ddlcreditAC').val(p1.crediT_AC);
-            });
-             ddlDebitAC(() => {
-                $('#ddldebitAC').val(p1.debiT_AC);
-            });
-             $('#TxtWaybillNo').val(p1.waybilL_NO);
-             $('#TxtBLNo').val(p1.bL_NO);
-
-             if (p1.inpuT_TYPE) {
-              $('#ddlInputType').val(p1.inpuT_TYPE);
-              console.log('inpuT_TYPE:', p1.inpuT_TYPE);
-             }
-
-            if (p1.inpuT_TYPE) {
-             $('#ddlExpensesType').val(p1.expS_TYPE);
-              console.log('ddlExpensesType:', p1.expS_TYPE);
-             }
-            // khushahal
-
-        }
-        // ====== Purchase2 Item Rows Bind ======
-        bindItemsdata(purchase2);
-        getdataImage(purchase3)
-    }
-    // Helper function for date
     function formatDateForInput(dateString) {
         if (!dateString) return "";
         const dateObj = new Date(dateString);
@@ -2524,158 +2738,11 @@
         const day = String(dateObj.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
-    // LOAD BY V_NO ==========================
-    function bindItemsdata(items) {
-        const $tbody = $('#tblItemRecordPO tbody').empty();
 
-        items.forEach(i => {
-            const qty = i.recD_QTY ?? 0;
-            const rate = i.rate ?? 0;
-            const amount = qty * rate;
-                debugger;
-            const $tr = $(`
-                <tr>
-                    <td>
-                        <select class="form-control item-name-dropdown" name="ItemName" style="width:200px;"></select>
-                    </td>
-                    <td><input class="form-control" style="width: 100PX;" name="HSNCode" value="2638" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="Unit" value="${i.uoM_NAME || ''}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="Nos" value="${i.nos ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="RecQty" value="${i.recD_QTY ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="BillQty" value="${i.bilL_QTY ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="Rate" value="${i.rate ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="Amount" value="${i.amount}" /></td>
-
-                      <td>
-                        <select class="form-control" name="RCMYN">
-                            <option value="">--Select--</option>
-                            <option value="Yes" ${i.rcM_YN === 'Yes' ? 'selected' : ''}>Yes</option>
-                            <option value="No" ${i.rcM_YN === 'No' ? 'selected' : ''}>No</option>
-                        </select>
-                    </td>
-                    <td>
-                        <select class="form-control" name="InputYN">
-                            <option value="">--Select--</option>
-                            <option value="Yes" ${i.inpuT_YN === 'Yes' ? 'selected' : ''}>Yes</option>
-                            <option value="No" ${i.inpuT_YN === 'No' ? 'selected' : ''}>No</option>
-                        </select>
-                    </td>
-                    <td><select class="form-control TaxType-dropdown" name="TaxType"></select></td>
-                    <td><input class="form-control" style="width: 100PX;" name="PackPer" value="${i.pacK_PER ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="PackAmt" value="${i.pacK_AMT ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="DiscPer" value="${i.disC_PER ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="DiscAmt" value="${i.disC_AMT ?? 0}" /></td>
-                    <td><input name="WBQty" class="form-control" style="width: 100PX;" value="${i.wB_QTY ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="CGSTPer" value="${i.cgsT_PER ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="CGSTAmt" value="${i.cgsT_AMT ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="SGSTPer" value="${i.sgsT_PER ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="SGSTAmt" value="${i.sgsT_AMT ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="IGSTPer" value="${i.igsT_PER ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="IGSTAmt" value="${i.igsT_AMT ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="CESSPer" value="${i.cesS_PER ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="CESSAmt" value="${i.cesS_AMT ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="OthAmt" value="${i.otH_AMT ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="NetAmt" value="${i.neT_AMT ?? amount}" /></td>
-                     <td>
-                        <select class="form-control make-dropdown" style="width: 100PX;" name="Make"}"></select>
-                    </td>
-                    <td>
-                        <select class="form-control" style="width: 100PX;" name="Department"}"></select>
-                    </td>
-                    <td><input class="form-control" style="width: 100PX;" name="Remarks" value="${i.remarks || ''}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="LDRate" value="${i.lanD_RATE ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="LDAmt" value="${i.lanD_AMT ?? 0}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="KantaType" value="${i.kantA_TYPE || ''}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="KantaNo" value="${i.kantA_NO || ''}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="ReqType" value="${i.reQ_TYPE || ''}" /></td>
-                    <td><input class="form-control" style="width: 100PX;" name="ReqNo" value="${i.reQ_NO || ''}" /></td>
-                    <td>
-                        <i class="fa fa-edit btn-edit"></i>
-                        <i class="fas fa-trash btn-delete btn-delete-row"></i>
-                    </td>
-                </tr>
-            `);
-
-            $tbody.append($tr);
-
-            const $lastRow = $tbody.find('tr').last();
-            const $itemDropdown = $lastRow.find('select[name="ItemName"]');
-            const $taxDropdown = $lastRow.find('select[name="TaxType"]');
-            const $makeDropdown = $lastRow.find('select[name="Make"]');
-            const $deptDropdown = $lastRow.find('select[name="Department"]');
-
-            // Load dropdowns
-            loadItemDropdowngat($itemDropdown, i.iteM_CODE);
-            loadTaxTypeDropdowngatCode($taxDropdown, i.taX_CODE);
-            loadMakeList($makeDropdown, i.makE_CODE);
-            loadDeptList($deptDropdown, i.depT_CODE);
-
-        });
-
-        // delete row event
-        $tbody.off('click', '.btn-delete').on('click', '.btn-delete', function () {
-            $(this).closest('tr').remove();
-        });
-    }
-    function loadTaxTypeDropdowngatCode($dropdown, selectedType = "") {
-        $.ajax({
-            url: '/PurchaseReturnEntry/GetTaxTypeList',
-            method: 'GET',
-            success: function (data) {
-                $dropdown.empty();
-                $dropdown.append('<option value="">--Select Tax Type--</option>');
-                $.each(data, function (index, tax) {
-                    // ✅ use selectedType instead of selectedCode
-                    let selected = String(tax.code) === String(selectedType) ? 'selected' : '';
-                    $dropdown.append(`<option value="${tax.code}" ${selected}>${tax.name}</option>`);
-                });
-            },
-            error: function () {
-                toastr.error('Failed to load tax types.');
-            }
-        });
-    }
-    function getdataImage(Imagedata) {
-        const $attachmentTbody = $('#tblAttachmentPRE tbody');
-        $attachmentTbody.empty();
-
-        if (!Array.isArray(Imagedata) || Imagedata.length === 0) {
-            console.warn("⚠️ No attachment data to display");
-            return;
-        }
-
-        Imagedata.forEach(item => {
-            const fullPath = item.attachment; // "/attachments/Purchase/sdfsf.PNG"
-            if (!fullPath) return;
-
-            const fileName = fullPath.split('/').pop();
-
-            // Check if it's an image
-            let previewHtml = '';
-            if (/\.(jpg|jpeg|png|gif|bmp)$/i.test(fileName)) {
-                previewHtml = `
-                    <img src="${fullPath}" alt="${fileName}"
-                         style="max-width:80px; max-height:80px; border:1px solid #ccc; border-radius:4px;" />`;
-            } else {
-                previewHtml = `<a href="${fullPath}" target="_blank" class="text-info">View File</a>`;
-            }
-
-            const row = `
-                <tr>
-                    <td >${item.doC_ID || ''}</td>
-                    <td style="display:none;"><label>${fileName}</label></td>
-                    <td><input type="file" class="form-control file-upload" /></td>
-                    <td>${previewHtml}</td>
-                    <td>
-                        <i class="fa fa-plus btn-add-action text-success me-2" title="Add Row" style="cursor:pointer;"></i>
-                        <i class="fa fa-edit btn-edit-action text-primary me-2" title="Edit Row" style="cursor:pointer;"></i>
-                        <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
-                    </td>
-                </tr>
-            `;
-            $attachmentTbody.append(row);
-        });
-    }
+    });
+    
+    
+    
 </script>
 
 

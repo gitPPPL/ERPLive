@@ -334,47 +334,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
             return Json(list);
         }
-        //[HttpGet]
-        //public JsonResult GetTaxTypeDetails(int code)
-        //{
-        //    string sql = @" SELECT CODE, CGST_PER, SGST_PER, IGST_PER, TDS_PER, TCS_PER, VAT_PER, OTH_PER, OTH_PER2 FROM TAX_MAST WHERE CODE = @Code";
-        //    var result = new object(); // or create a specific class if preferred
-
-        //    using (SqlConnection con = _dbConnection.GetErpConnection())
-        //    using (SqlCommand cmd = new SqlCommand(sql, con))
-        //    {
-        //        cmd.Parameters.AddWithValue("@Code", code);
-        //        con.Open();
-
-        //        using (var rdr = cmd.ExecuteReader())
-        //        {
-        //            if (rdr.Read())
-        //            {
-        //                result = new
-        //                {
-        //                    Code = rdr["CODE"],
-        //                    CGST_PER = rdr["CGST_PER"],
-        //                    SGST_PER = rdr["SGST_PER"],
-        //                    IGST_PER = rdr["IGST_PER"],
-        //                    TDS_PER = rdr["TDS_PER"],
-        //                    TCS_PER = rdr["TCS_PER"],
-        //                    VAT_PER = rdr["VAT_PER"],
-        //                    OTH_PER = rdr["OTH_PER"],
-        //                    OTH_PER2 = rdr["OTH_PER2"]
-        //                };
-        //            }
-        //            else
-        //            {
-        //                return Json(new { success = false, message = "No record found" });
-        //            }
-        //        }
-        //    }
-
-        //    return Json(result);
-        //}
-
-
-        [HttpGet]
+           [HttpGet]
         public JsonResult GetTaxTypeDetails(string code)
         {
             bool isNumeric = int.TryParse(code, out int codeValue);
@@ -436,6 +396,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         {
             var headerObj = JsonConvert.DeserializeObject<PurchaseReturnHeaderModel>(Header);
             var globalVar = _globalVariableService.GetGlobalVariables();
+            string V_NO = "";
+            string DOC_ID = "";
+            DOC_ID = headerObj.DocType + headerObj.Vno;
             if (headerObj.ACTION == "INSERT")
             {
                 using (SqlConnection con = _dbConnection.GetErpConnection())
@@ -446,10 +409,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     {
                         try
                         {
-                            string V_NO = "";
-                            string DOC_ID = "";
-
-                            DOC_ID = headerObj.DocType + headerObj.Vno;
 
                             // Insert Header
                             using (var cmdHeader = new SqlCommand("InsertPurchaseReturnEntryHeader", con, transaction))
@@ -492,12 +451,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                                 // Document Details 
                                 AddParameterSafe(cmdHeader, "@BILL_NO", headerObj.BillNo);
-                                //AddParameterSafe(cmdHeader, "@BILL_DATE", DateTime.Parse(headerObj.BillDate));
                                 AddParameterSafe(cmdHeader, "@BILL_DATE", string.IsNullOrWhiteSpace(headerObj.BillDate) ? DBNull.Value : DateTime.Parse(headerObj.BillDate));
                                 AddParameterSafe(cmdHeader, "@BL_NO", headerObj.BLNo);
-                                //AddParameterSafe(cmdHeader, "@BL_DATE", DateTime.Parse(headerObj.BLDate));
-                                AddParameterSafe(cmdHeader, "@BL_DATE", string.IsNullOrWhiteSpace(headerObj.BLDate) ? DBNull.Value : DateTime.Parse(headerObj.BLDate)
-);
+                                AddParameterSafe(cmdHeader, "@BL_DATE", string.IsNullOrWhiteSpace(headerObj.BLDate) ? DBNull.Value : DateTime.Parse(headerObj.BLDate));
                                 AddParameterSafe(cmdHeader, "@WAYBILL_NO", headerObj.WaybillNo);
                                 AddParameterSafe(cmdHeader, "@INPUT_TYPE", headerObj.InputType);
                                 AddParameterSafe(cmdHeader, "@EXPS_TYPE", headerObj.ExpensesType);
@@ -505,7 +461,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 AddParameterSafe(cmdHeader, "@STATUS", 1);
 
                                 // Transport
-                                AddParameterSafe(cmdHeader, "@TRANSPORT_NAME", headerObj.TransportName);
+                                AddParameterSafe(cmdHeader, "@TRANSPORT_CODE", headerObj.TransportName);
                                 AddParameterSafe(cmdHeader, "@TRUCK_NO", headerObj.VehicleNo);
                                 AddParameterSafe(cmdHeader, "@CONTAINER_NO", headerObj.ContainerNo);
                                 AddParameterSafe(cmdHeader, "@FRTPAY_AMT", headerObj.FreightPay);
@@ -613,6 +569,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                     AddParameterSafe(cmdItem, "@LAND_RATE", item.LDRate ?? (object)DBNull.Value);
                                     AddParameterSafe(cmdItem, "@LAND_AMT", item.LDAmt ?? (object)DBNull.Value);
                                     // WBType/WBNo are not being sent, so omitted
+                                    
+
+                                    AddParameterSafe(cmdItem, "@KANTA_TYPE", item.WBType ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@KANTA_NO", item.WBNo ?? (object)DBNull.Value);
+
                                     AddParameterSafe(cmdItem, "@REF_TYPE", item.RefType ?? (object)DBNull.Value);
                                     AddParameterSafe(cmdItem, "@REF_NO", item.RefNo);
 
@@ -629,112 +590,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                     await cmdItem.ExecuteNonQueryAsync();
                                 }
                             }
-
-
-                            //foreach (var item in ItemDetails)
-                            //{
-                            //    using (var cmdItem = new SqlCommand("InsertPurchaseReturnEntryItemDetail", con, transaction))
-                            //    {
-                            //        cmdItem.CommandType = CommandType.StoredProcedure;
-
-                            //        AddParameterSafe(cmdItem, "@V_NO", V_NO);
-                            //        AddParameterSafe(cmdItem, "@DOC_ID", DOC_ID);
-                            //        AddParameterSafe(cmdItem, "@V_TYPE", headerObj.DocType);
-                            //        AddParameterSafe(cmdItem, "@V_DATE", DateTime.Parse(headerObj.DocDate));
-                            //        AddParameterSafe(cmdItem, "@COMP_CODE", globalVar.PubCompCode);
-                            //        AddParameterSafe(cmdItem, "@BRANCH_CODE", 1);
-                            //        AddParameterSafe(cmdItem, "@YEAR_CODE", globalVar.PubFYearCode);
-                            //        AddParameterSafe(cmdItem, "@SNO", serialNo++);
-                            //        AddParameterSafe(cmdItem, "@ITEM_CODE", item.ItemCode);
-                            //        AddParameterSafe(cmdItem, "@ITEM_NAME", item.ItemName);
-                            //        AddParameterSafe(cmdItem, "@HSN_CODE", item.HSNCode);
-                            //        AddParameterSafe(cmdItem, "@UOM_NAME", item.Unit);
-                            //        AddParameterSafe(cmdItem, "@NOS", item.Nos);
-                            //        AddParameterSafe(cmdItem, "@RECD_QTY", item.ReturnQty);
-                            //        AddParameterSafe(cmdItem, "@BILL_QTY", item.BillQty);
-                            //        AddParameterSafe(cmdItem, "@RATE", item.Rate);
-                            //        AddParameterSafe(cmdItem, "@AMOUNT", item.Amount);
-                            //        AddParameterSafe(cmdItem, "@RCM_YN", item.RCMYN);
-                            //        AddParameterSafe(cmdItem, "@INPUT_YN", item.InputYN);
-                            //        AddParameterSafe(cmdItem, "@TAX_CODE", item.TaxType);
-                            //        AddParameterSafe(cmdItem, "@PACK_PER", item.PackPer);
-                            //        AddParameterSafe(cmdItem, "@PACK_AMT", item.PackAmt);
-                            //        AddParameterSafe(cmdItem, "@DISC_PER", item.DiscPer);
-                            //        AddParameterSafe(cmdItem, "@DISC_AMT", item.DiscAmt);
-                            //        AddParameterSafe(cmdItem, "@CGST_PER", item.CGSTPer);
-                            //        AddParameterSafe(cmdItem, "@CGST_AMT", item.CGSTAmt);
-                            //        AddParameterSafe(cmdItem, "@SGST_PER", item.SGSTPer);
-                            //        AddParameterSafe(cmdItem, "@SGST_AMT", item.SGSTAmt);
-                            //        AddParameterSafe(cmdItem, "@IGST_PER", item.IGSTPer);
-                            //        AddParameterSafe(cmdItem, "@IGST_AMT", item.IGSTAmt);
-                            //        AddParameterSafe(cmdItem, "@CESS_PER", item.CESSPer);
-                            //        AddParameterSafe(cmdItem, "@CESS_AMT", item.CESSAmt);
-                            //        AddParameterSafe(cmdItem, "@OTH_AMT", item.OthAmt);
-                            //        AddParameterSafe(cmdItem, "@NET_AMT", item.NetAmt);
-                            //        AddParameterSafe(cmdItem, "@MAKE_CODE", item.Make);
-                            //        AddParameterSafe(cmdItem, "@DEPT_CODE", item.Department);
-                            //        AddParameterSafe(cmdItem, "@REMARKS", item.Remarks);
-                            //        AddParameterSafe(cmdItem, "@LAND_RATE", item.LDRate);
-                            //        AddParameterSafe(cmdItem, "@LAND_AMT", item.LDAmt);
-                            //        //AddParameterSafe(cmdItem, "@X", item.WBType);
-                            //        //AddParameterSafe(cmdItem, "@X", item.WBNo);
-                            //        AddParameterSafe(cmdItem, "@REF_TYPE", item.RefType);
-                            //        AddParameterSafe(cmdItem, "@REF_NO", item.RefNo);
-                            //        AddParameterSafe(cmdItem, "@UUSER", globalVar.PubUserId);
-                            //        AddParameterSafe(cmdItem, "@UDATE", DateTime.Now);
-                            //        AddParameterSafe(cmdItem, "@EUSER", "");
-                            //        AddParameterSafe(cmdItem, "@EDATE", "");
-                            //        AddParameterSafe(cmdItem, "@AED", "A");
-                            //        AddParameterSafe(cmdItem, "@WSID", globalVar.PubWorkStationID);
-                            //        AddParameterSafe(cmdItem, "@LIP", globalVar.PubLocalId);
-                            //        AddParameterSafe(cmdItem, "@LID", Environment.MachineName);
-                            //        AddParameterSafe(cmdItem, "@Action", "Insert");
-
-                            //        await cmdItem.ExecuteNonQueryAsync();
-                            //    }
-                            //}
-                            //// Insert Image
-                            //foreach (var file in Attachments)
-                            //{
-                            //    if (file.File != null && file.File.Length > 0)
-                            //    {
-                            //        // Save file to disk
-                            //        var fileName = Path.GetFileName(file.File.FileName);
-                            //        var saveFolder = Path.Combine("wwwroot", "attachments", "Purchase");
-                            //        var filePath = Path.Combine(saveFolder, fileName);
-
-                            //        if (!Directory.Exists(saveFolder))
-                            //        {
-                            //            Directory.CreateDirectory(saveFolder);
-                            //        }
-                            //        using (var stream = new FileStream(filePath, FileMode.Create))
-                            //        {
-                            //            await file.File.CopyToAsync(stream);
-                            //        }
-                            //        // Save record to database
-                            //        using (var cmdAttach = new SqlCommand("InsertPURCHASEReturnEntryAttachment", con, transaction))
-                            //        {
-                            //            cmdAttach.CommandType = CommandType.StoredProcedure;
-
-                            //            AddParameterSafe(cmdAttach, "@COMP_CODE", globalVar.PubCompCode);
-                            //            AddParameterSafe(cmdAttach, "@BRANCH_CODE", 1);
-                            //            AddParameterSafe(cmdAttach, "@YEAR_CODE", globalVar.PubFYearCode);
-                            //            AddParameterSafe(cmdAttach, "@DOC_ID", DOC_ID);
-                            //            AddParameterSafe(cmdAttach, "@V_NO", V_NO);
-                            //            AddParameterSafe(cmdAttach, "@V_TYPE", headerObj.DocType);
-                            //            AddParameterSafe(cmdAttach, "@V_DATE", DateTime.Parse(headerObj.DocDate));
-                            //            AddParameterSafe(cmdAttach, "@UUSER", globalVar.PubUserId);
-                            //            AddParameterSafe(cmdAttach, "@UDATE", DateTime.Now);
-                            //            AddParameterSafe(cmdAttach, "@AED", "A");
-                            //            AddParameterSafe(cmdAttach, "@WSID", globalVar.PubWorkStationID);
-                            //            AddParameterSafe(cmdAttach, "@LIP", globalVar.PubLocalId);
-                            //            AddParameterSafe(cmdAttach, "@LID", Environment.MachineName);
-                            //            AddParameterSafe(cmdAttach, "@ATTACHMENT", "/attachments/Purchase/" + fileName);
-                            //            AddParameterSafe(cmdAttach, "@Action", "Insert");
-                            //            await cmdAttach.ExecuteNonQueryAsync();
-                            //        }
-                            //    }
-                            //}
                             transaction.Commit();
                             return Ok(new { status = "success", message = "Saved successfully" });
                         }
@@ -761,70 +616,80 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 cmdHeader.CommandType = CommandType.StoredProcedure;
 
                                 AddParameterSafe(cmdHeader, "@COMP_CODE", globalVar.PubCompCode);
-                                AddParameterSafe(cmdHeader, "@BRANCH_CODE", 1);
+                                AddParameterSafe(cmdHeader, "@BRANCH_CODE", globalVar.PubBranchCode);
                                 AddParameterSafe(cmdHeader, "@YEAR_CODE", globalVar.PubFYearCode);
-                                AddParameterSafe(cmdHeader, "@DOC_ID", headerObj.DocNo);
-                                //AddParameterSafe(cmdHeader, "@V_NO", headerObj.code);
-                                //AddParameterSafe(cmdHeader, "@V_TYPE", headerObj.DocType);
-                                //AddParameterSafe(cmdHeader, "@V_DATE", DateTime.Parse(headerObj.DocDate));
-                                //AddParameterSafe(cmdHeader, "@EXCH_RATE", headerObj.ExchangeRate);
-                                //// add new Line
-                                //AddParameterSafe(cmdHeader, "@BILL_ADD1", headerObj.AddLine1);
-                                //AddParameterSafe(cmdHeader, "@BILL_ADD2", headerObj.AddLine2);
-                                //AddParameterSafe(cmdHeader, "@BILL_ADD3", headerObj.AddLine3);
-                                //AddParameterSafe(cmdHeader, "@BILL_CITY", headerObj.City);
-                                //AddParameterSafe(cmdHeader, "@BILL_PINCODE", headerObj.Pincode);
-                                //AddParameterSafe(cmdHeader, "@BILL_ADDRESSID", headerObj.State);
-                                //AddParameterSafe(cmdHeader, "@BILL_GST", headerObj.GST);
-                                //AddParameterSafe(cmdHeader, "@SHIP_GST", headerObj.ShipGST);
+                                // Document Header
+                                AddParameterSafe(cmdHeader, "@V_NO", headerObj.Vno);
+                                AddParameterSafe(cmdHeader, "@V_TYPE", headerObj.DocType);
+                                AddParameterSafe(cmdHeader, "@DOC_ID", DOC_ID);
+                                AddParameterSafe(cmdHeader, "@V_DATE", DateTime.Parse(headerObj.DocDate));
+                                //AddParameterSafe(cmdHeader, "@WAYBILL_NO", headerObj.WbNo);
+                                AddParameterSafe(cmdHeader, "@REF_TYPE", headerObj.RefType);
+                                AddParameterSafe(cmdHeader, "@REF_NO", headerObj.RefNo);
 
-                                //AddParameterSafe(cmdHeader, "@SHIP_CODE", headerObj.ShipFrom);
-                                //AddParameterSafe(cmdHeader, "@SHIP_ADD1", headerObj.ShipAddLine1);
-                                //AddParameterSafe(cmdHeader, "@SHIP_ADD2", headerObj.ShipAddLine2);
-                                //AddParameterSafe(cmdHeader, "@SHIP_ADD3", headerObj.ShipAddLine3);
-                                //AddParameterSafe(cmdHeader, "@SHIP_CITY", headerObj.ShipCity);
-                                //AddParameterSafe(cmdHeader, "@SHIP_PINCODE", headerObj.ShipPincode);
-                                //AddParameterSafe(cmdHeader, "@SHIP_ADDRESSID", headerObj.ShipState);
+                                // Return To Details
+                                AddParameterSafe(cmdHeader, "@PARTY_CODE", headerObj.ReturnTo);
+                                AddParameterSafe(cmdHeader, "@BILL_ADD1", headerObj.ReturnAddLine1);
+                                AddParameterSafe(cmdHeader, "@BILL_ADD2", headerObj.ReturnAddLine2);
+                                AddParameterSafe(cmdHeader, "@BILL_ADD3", headerObj.ReturnAddLine3);
+                                AddParameterSafe(cmdHeader, "@BILL_CITY", headerObj.ReturnCity);
+                                AddParameterSafe(cmdHeader, "@BILL_ADDRESSID", headerObj.ReturnCity);
+                                AddParameterSafe(cmdHeader, "@BILL_GST", headerObj.ReturnGST);
 
-                                // add new Line
+                                // Ship To Details
+                                AddParameterSafe(cmdHeader, "@SHIP_CODE", headerObj.ShipTo);
+                                AddParameterSafe(cmdHeader, "@SHIP_ADD1", headerObj.ShipAddLine1);
+                                AddParameterSafe(cmdHeader, "@SHIP_ADD2", headerObj.ShipAddLine2);
+                                AddParameterSafe(cmdHeader, "@SHIP_ADD3", headerObj.ShipAddLine3);
+                                AddParameterSafe(cmdHeader, "@SHIP_CITY", headerObj.ShipCity);
+                                AddParameterSafe(cmdHeader, "@SHIP_GST", headerObj.ShipGST);
+                                AddParameterSafe(cmdHeader, "@SHIP_ADDRESSID", headerObj.ShipCity);
 
+                                // Accounting
+                                AddParameterSafe(cmdHeader, "@CREDIT_AC", headerObj.CreditAC);
+                                AddParameterSafe(cmdHeader, "@DEBIT_AC", headerObj.DebitAC);
+
+                                // Document Details 
                                 AddParameterSafe(cmdHeader, "@BILL_NO", headerObj.BillNo);
-                                AddParameterSafe(cmdHeader, "@BILL_DATE", DateTime.Parse(headerObj.BillDate));
-                                //AddParameterSafe(cmdHeader, "@CHALL_NO", headerObj.ChallanNo);
-                                //AddParameterSafe(cmdHeader, "@CHALL_DATE", DateTime.Parse(headerObj.ChallanDate));
-                                //AddParameterSafe(cmdHeader, "@GATE_NO", headerObj.GateNo);
-
+                                AddParameterSafe(cmdHeader, "@BILL_DATE", string.IsNullOrWhiteSpace(headerObj.BillDate) ? DBNull.Value : DateTime.Parse(headerObj.BillDate));
+                                AddParameterSafe(cmdHeader, "@BL_NO", headerObj.BLNo);
+                                AddParameterSafe(cmdHeader, "@BL_DATE", string.IsNullOrWhiteSpace(headerObj.BLDate) ? DBNull.Value : DateTime.Parse(headerObj.BLDate));
                                 AddParameterSafe(cmdHeader, "@WAYBILL_NO", headerObj.WaybillNo);
+                                AddParameterSafe(cmdHeader, "@INPUT_TYPE", headerObj.InputType);
+                                AddParameterSafe(cmdHeader, "@EXPS_TYPE", headerObj.ExpensesType);
+                                AddParameterSafe(cmdHeader, "@NAMOUNT", headerObj.NumFinalNetAmt);
+                                AddParameterSafe(cmdHeader, "@STATUS", 1);
 
-                                AddParameterSafe(cmdHeader, "@TRANSPORT_NAME", headerObj.TransportName);
-                                AddParameterSafe(cmdHeader, "@GR_NO", headerObj.GRNo);
-                                AddParameterSafe(cmdHeader, "@GR_DATE", DateTime.Parse(headerObj.GRDate));
-
+                                // Transport
+                                AddParameterSafe(cmdHeader, "@TRANSPORT_CODE", headerObj.TransportName);
                                 AddParameterSafe(cmdHeader, "@TRUCK_NO", headerObj.VehicleNo);
                                 AddParameterSafe(cmdHeader, "@CONTAINER_NO", headerObj.ContainerNo);
                                 AddParameterSafe(cmdHeader, "@FRTPAY_AMT", headerObj.FreightPay);
                                 AddParameterSafe(cmdHeader, "@FRTPAY_TAXPER", headerObj.FrtTax1);
                                 AddParameterSafe(cmdHeader, "@FRTPAY_TAX", headerObj.FrtTax2);
                                 AddParameterSafe(cmdHeader, "@FRTPAY_NAR", headerObj.FrtPayNarr);
+                                AddParameterSafe(cmdHeader, "@GR_NO", headerObj.GRNo ?? "");
+                                AddParameterSafe(cmdHeader, "@GR_DATE", string.IsNullOrWhiteSpace(headerObj.GRDate) ? DBNull.Value : DateTime.Parse(headerObj.GRDate));
+                                AddParameterSafe(cmdHeader, "@TRANSPORT_AC", headerObj.TransportAC);
+                                //AddParameterSafe(cmdHeader, "@DEBIT_AC", headerObj.FreightDebit);
+                                //AddParameterSafe(cmdHeader, "@CREDIT_AC", headerObj.FreightCredit);
                                 AddParameterSafe(cmdHeader, "@REMARKS", headerObj.Remarks);
-                                AddParameterSafe(cmdHeader, "@NAMOUNT", headerObj.NumFinalNetAmt);
 
-                                // Default values
-                                AddParameterSafe(cmdHeader, "@STATUS", 0);
-                                AddParameterSafe(cmdHeader, "@RECD_QTY", headerObj.NumReceivedQty);
-                                AddParameterSafe(cmdHeader, "@BILL_QTY", headerObj.NumBillQty);
-                                AddParameterSafe(cmdHeader, "@AMOUNT", headerObj.NumAmount);
-                                AddParameterSafe(cmdHeader, "@DISC_AMT", headerObj.NumDiscount);
-                                AddParameterSafe(cmdHeader, "@PACK_AMT", headerObj.NumPacking);
-                                AddParameterSafe(cmdHeader, "@CGST_AMT", headerObj.NumCGST);
-                                AddParameterSafe(cmdHeader, "@SGST_AMT", headerObj.NumSGST);
-                                AddParameterSafe(cmdHeader, "@IGST_AMT", headerObj.NumIGST);
-                                AddParameterSafe(cmdHeader, "@CESS_AMT", headerObj.NumCESS);
-                                AddParameterSafe(cmdHeader, "@VAT_AMT", headerObj.NumVAT);
-                                AddParameterSafe(cmdHeader, "@OTH_AMT", headerObj.NumOtherAmt);
-                                AddParameterSafe(cmdHeader, "@TCS_PER", headerObj.NumTCSPer1);
-                                AddParameterSafe(cmdHeader, "@TCS_AMT", headerObj.NumTCSPer2);
-                                AddParameterSafe(cmdHeader, "@ROUND_OFF", headerObj.NumRoundOff);
+                                // Amount Breakdown
+                                AddParameterSafe(cmdHeader, "@RECD_QTY", headerObj.NumReceivedQty ?? 0);
+                                AddParameterSafe(cmdHeader, "@BILL_QTY", headerObj.NumBillQty ?? 0);
+                                AddParameterSafe(cmdHeader, "@AMOUNT", headerObj.NumAmount ?? 0);
+                                AddParameterSafe(cmdHeader, "@DISC_AMT", headerObj.NumDiscount ?? 0);
+                                AddParameterSafe(cmdHeader, "@PACK_AMT", headerObj.NumPacking ?? (object)DBNull.Value);
+                                AddParameterSafe(cmdHeader, "@CGST_AMT", headerObj.NumCGST ?? 0);
+                                AddParameterSafe(cmdHeader, "@SGST_AMT", headerObj.NumSGST ?? 0);
+                                AddParameterSafe(cmdHeader, "@IGST_AMT", headerObj.NumIGST ?? 0);
+                                AddParameterSafe(cmdHeader, "@CESS_AMT", headerObj.NumCESS ?? 0);
+                                AddParameterSafe(cmdHeader, "@VAT_AMT", headerObj.NumVAT ?? 0);
+                                AddParameterSafe(cmdHeader, "@OTH_AMT", headerObj.NumOtherAmt ?? 0);
+                                AddParameterSafe(cmdHeader, "@TCS_PER", headerObj.NumTCSPer1 ?? 0);
+                                AddParameterSafe(cmdHeader, "@TCS_AMT", headerObj.NumTCSPer2 ?? 0);
+                                AddParameterSafe(cmdHeader, "@ROUND_OFF", headerObj.NumRoundOff ?? 0);
 
                                 AddParameterSafe(cmdHeader, "@UUSER", globalVar.PubUserId);
                                 AddParameterSafe(cmdHeader, "@UDATE", DateTime.Now);
@@ -834,107 +699,115 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 AddParameterSafe(cmdHeader, "@WSID", globalVar.PubWorkStationID);
                                 AddParameterSafe(cmdHeader, "@LIP", globalVar.PubLocalId);
                                 AddParameterSafe(cmdHeader, "@LID", Environment.MachineName);
-
                                 AddParameterSafe(cmdHeader, "@Action", "Update");
-
                                 await cmdHeader.ExecuteNonQueryAsync();
                             }
                             // Insert Items
 
-                            using (SqlCommand ItemDetailDelete = new SqlCommand("DELETE FROM PURCHASE2 WHERE COMP_CODE = @COMP_CODE AND V_NO = @V_NO and DOC_ID= @DOC_ID and YEAR_CODE= @YEAR_CODE ", con, transaction))
+                            using (SqlCommand ItemDetailDelete = new SqlCommand("DELETE FROM PURCHASE2 WHERE COMP_CODE = @COMP_CODE AND V_NO = @V_NO and V_TYPE= @V_TYPE and YEAR_CODE= @YEAR_CODE ", con, transaction))
                             {
                                 ItemDetailDelete.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                                //ItemDetailDelete.Parameters.AddWithValue("@V_NO", headerObj.code);
-                                ItemDetailDelete.Parameters.AddWithValue("@DOC_ID", headerObj.DocNo);
+                                ItemDetailDelete.Parameters.AddWithValue("@V_NO", headerObj.Vno);
+                                ItemDetailDelete.Parameters.AddWithValue("@V_TYPE", headerObj.DocType);
                                 ItemDetailDelete.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
                                 ItemDetailDelete.ExecuteNonQuery();
                             }
 
                             int serialNo = 1;
+
                             foreach (var item in ItemDetails)
                             {
                                 using (var cmdItem = new SqlCommand("InsertPurchaseReturnEntryItemDetail", con, transaction))
                                 {
                                     cmdItem.CommandType = CommandType.StoredProcedure;
 
-                                    //AddParameterSafe(cmdItem, "@V_NO", headerObj.code);
-                                    AddParameterSafe(cmdItem, "@DOC_ID", headerObj.DocNo);
-                                    AddParameterSafe(cmdItem, "@V_TYPE", headerObj.DocType);
+                                    AddParameterSafe(cmdItem, "@V_NO", headerObj.Vno);
+                                    AddParameterSafe(cmdItem, "@DOC_ID", headerObj.DocType + headerObj.Vno ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@V_TYPE", headerObj.DocType ?? (object)DBNull.Value);
                                     AddParameterSafe(cmdItem, "@V_DATE", DateTime.Parse(headerObj.DocDate));
+
                                     AddParameterSafe(cmdItem, "@COMP_CODE", globalVar.PubCompCode);
-                                    AddParameterSafe(cmdItem, "@BRANCH_CODE", 1);
+                                    AddParameterSafe(cmdItem, "@BRANCH_CODE", globalVar.PubBranchCode);
                                     AddParameterSafe(cmdItem, "@YEAR_CODE", globalVar.PubFYearCode);
                                     AddParameterSafe(cmdItem, "@SNO", serialNo++);
+                                    AddParameterSafe(cmdItem, "@ITEM_CODE", item.ItemCode);
+                                    AddParameterSafe(cmdItem, "@ITEM_NAME", item.ItemName ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@HSN_CODE", item.HSNCode ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@UOM_NAME", item.Unit ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@NOS", item.Nos ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@RECD_QTY", item.ReturnQty ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@BILL_QTY", item.BillQty ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@RATE", item.Rate ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@AMOUNT", item.Amount ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@RCM_YN", item.RCMYN ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@INPUT_YN", item.InputYN ?? (object)DBNull.Value);
 
-                                    AddParameterSafe(cmdItem, "@ITEM_CODE", item.ItemName);
-                                    AddParameterSafe(cmdItem, "@ITEM_NAME", item.ItemName);
-                                    AddParameterSafe(cmdItem, "@HSN_CODE", item.HSNCode);
-                                    //AddParameterSafe(cmdItem, "@UOM_NAME", item.UOMName);
-                                    //AddParameterSafe(cmdItem, "@NOS", item.Nos);
-                                    //AddParameterSafe(cmdItem, "@PLUS_MINUSQTY", item.PlusMinusQty);
-                                    //AddParameterSafe(cmdItem, "@RECD_QTY", item.RecQty);
-                                    //AddParameterSafe(cmdItem, "@BILL_QTY", item.BillQty);
-                                    //AddParameterSafe(cmdItem, "@USD_RATE", item.USDRate);
-                                    //AddParameterSafe(cmdItem, "@EXCH_RATE", item.ExRate);
-                                    //AddParameterSafe(cmdItem, "@RATE", item.Rate);
-                                    //AddParameterSafe(cmdItem, "@AMOUNT", item.Amount);
-                                    //AddParameterSafe(cmdItem, "@EMPTY_YN", item.EmptyYN);
-                                    //AddParameterSafe(cmdItem, "@WB_QTY", item.WBQty);
-                                    //AddParameterSafe(cmdItem, "@PACK_PER", item.PackPer);
-                                    //AddParameterSafe(cmdItem, "@PACK_AMT", item.PackAmt);
-                                    //AddParameterSafe(cmdItem, "@DISC_PER", item.DiscPer);
-                                    //AddParameterSafe(cmdItem, "@DISC_AMT", item.DiscAmt);
-                                    //AddParameterSafe(cmdItem, "@CGST_PER", item.CGSTPer);
-                                    //AddParameterSafe(cmdItem, "@CGST_AMT", item.CGSTAmt);
-                                    //AddParameterSafe(cmdItem, "@SGST_PER", item.SGSTPer);
-                                    //AddParameterSafe(cmdItem, "@SGST_AMT", item.SGSTAmt);
-                                    //AddParameterSafe(cmdItem, "@IGST_PER", item.IGSTPer);
-                                    //AddParameterSafe(cmdItem, "@IGST_AMT", item.IGSTAmt);
-                                    //AddParameterSafe(cmdItem, "@CESS_PER", item.CESSPer);
-                                    //AddParameterSafe(cmdItem, "@CESS_AMT", item.CESSAmt);
-                                    //AddParameterSafe(cmdItem, "@VAT_PER", item.VATPer);
-                                    //AddParameterSafe(cmdItem, "@VAT_AMT", item.VATAmt);
-                                    //AddParameterSafe(cmdItem, "@OTH_AMT", item.OthAmt);
-                                    //AddParameterSafe(cmdItem, "@NET_AMT", item.NetAmt);
-                                    //AddParameterSafe(cmdItem, "@LAND_RATE", item.LDRate);
-                                    //AddParameterSafe(cmdItem, "@LAND_AMT", item.LDAmt);
-                                    //AddParameterSafe(cmdItem, "@BIN_LOCATION", item.BinLocation);
-                                    //AddParameterSafe(cmdItem, "@PO_TYPE", item.POType);
-                                    //AddParameterSafe(cmdItem, "@PO_NO", item.PONo);
-                                    //AddParameterSafe(cmdItem, "@KANTA_TYPE", item.KantaType);
-                                    //AddParameterSafe(cmdItem, "@KANTA_NO", item.KantaNo);
-                                    //AddParameterSafe(cmdItem, "@REQ_TYPE", item.ReqType);
-                                    //AddParameterSafe(cmdItem, "@REQ_NO", item.ReqNo);
-                                    //AddParameterSafe(cmdItem, "@GATE_TYPE", item.GateType);
-                                    //AddParameterSafe(cmdItem, "@GATE_NO", item.GateNo);
-                                    //AddParameterSafe(cmdItem, "@BIN_CODE", item.BinCode);
-                                    //AddParameterSafe(cmdItem, "@MAKE_CODE", item.MakeCode);
-                                    //AddParameterSafe(cmdItem, "@TAX_CODE", item.TaxCode);
-                                    //AddParameterSafe(cmdItem, "@UOM_CODE", item.UOMCode);
-                                    //AddParameterSafe(cmdItem, "@DEPT_CODE", item.DeptCode);
-                                    AddParameterSafe(cmdItem, "@REMARKS", item.Remarks);
+                                    // Parse string to int or pass DBNull
+                                    if (int.TryParse(item.TaxType, out int taxCode))
+                                        AddParameterSafe(cmdItem, "@TAX_CODE", taxCode);
+                                    else
+                                        AddParameterSafe(cmdItem, "@TAX_CODE", DBNull.Value);
+
+                                    AddParameterSafe(cmdItem, "@PACK_PER", item.PackPer ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@PACK_AMT", item.PackAmt ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@DISC_PER", item.DiscPer ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@DISC_AMT", item.DiscAmt ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@CGST_PER", item.CGSTPer ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@CGST_AMT", item.CGSTAmt ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@SGST_PER", item.SGSTPer ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@SGST_AMT", item.SGSTAmt ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@IGST_PER", item.IGSTPer ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@IGST_AMT", item.IGSTAmt ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@CESS_PER", item.CESSPer ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@CESS_AMT", item.CESSAmt ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@OTH_AMT", item.OthAmt ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@NET_AMT", item.NetAmt ?? (object)DBNull.Value);
+
+                                    // Handle MAKE_CODE (string to int or DBNull)
+                                    if (int.TryParse(item.Make, out int makeCode))
+                                        AddParameterSafe(cmdItem, "@MAKE_CODE", makeCode);
+                                    else
+                                        AddParameterSafe(cmdItem, "@MAKE_CODE", DBNull.Value);
+
+                                    // Handle DEPT_CODE (string to int or DBNull)
+                                    if (int.TryParse(item.Department, out int deptCode))
+                                        AddParameterSafe(cmdItem, "@DEPT_CODE", deptCode);
+                                    else
+                                        AddParameterSafe(cmdItem, "@DEPT_CODE", DBNull.Value);
+
+                                    AddParameterSafe(cmdItem, "@REMARKS", item.Remarks ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@LAND_RATE", item.LDRate ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@LAND_AMT", item.LDAmt ?? (object)DBNull.Value);
+                                    // WBType/WBNo are not being sent, so omitted
+
+
+                                    AddParameterSafe(cmdItem, "@KANTA_TYPE", item.WBType ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@KANTA_NO", item.WBNo ?? (object)DBNull.Value);
+
+                                    AddParameterSafe(cmdItem, "@REF_TYPE", item.RefType ?? (object)DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@REF_NO", item.RefNo);
 
                                     AddParameterSafe(cmdItem, "@UUSER", globalVar.PubUserId);
                                     AddParameterSafe(cmdItem, "@UDATE", DateTime.Now);
-                                    AddParameterSafe(cmdItem, "@EUSER", "");
-                                    AddParameterSafe(cmdItem, "@EDATE", "");
+                                    AddParameterSafe(cmdItem, "@EUSER", DBNull.Value);
+                                    AddParameterSafe(cmdItem, "@EDATE", DBNull.Value);
                                     AddParameterSafe(cmdItem, "@AED", "A");
                                     AddParameterSafe(cmdItem, "@WSID", globalVar.PubWorkStationID);
                                     AddParameterSafe(cmdItem, "@LIP", globalVar.PubLocalId);
                                     AddParameterSafe(cmdItem, "@LID", Environment.MachineName);
                                     AddParameterSafe(cmdItem, "@Action", "Insert");
+
                                     await cmdItem.ExecuteNonQueryAsync();
                                 }
                             }
                             // Insert Image
-
-                            using (SqlCommand deleteAttachments = new SqlCommand("DELETE FROM PURCHASE3 WHERE COMP_CODE = @COMP_CODE AND V_NO = @V_NO and DOC_ID= @DOC_ID and YEAR_CODE= @YEAR_CODE ", con, transaction))
+                            using (SqlCommand ItemDetailDelete = new SqlCommand("DELETE FROM PURCHASE3 WHERE COMP_CODE = @COMP_CODE AND V_NO = @V_NO and V_TYPE= @V_TYPE and YEAR_CODE= @YEAR_CODE ", con, transaction))
                             {
-                                deleteAttachments.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                                //deleteAttachments.Parameters.AddWithValue("@V_NO", headerObj.code);
-                                deleteAttachments.Parameters.AddWithValue("@DOC_ID", headerObj.DocNo);
-                                deleteAttachments.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
-                                deleteAttachments.ExecuteNonQuery();
+                                ItemDetailDelete.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
+                                ItemDetailDelete.Parameters.AddWithValue("@V_NO", headerObj.Vno);
+                                ItemDetailDelete.Parameters.AddWithValue("@V_TYPE", headerObj.DocType);
+                                ItemDetailDelete.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
+                                ItemDetailDelete.ExecuteNonQuery();
                             }
 
                             foreach (var file in Attachments)
@@ -963,7 +836,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                         AddParameterSafe(cmdAttach, "@BRANCH_CODE", 1);
                                         AddParameterSafe(cmdAttach, "@YEAR_CODE", globalVar.PubFYearCode);
                                         AddParameterSafe(cmdAttach, "@DOC_ID", headerObj.DocNo);
-                                        //AddParameterSafe(cmdAttach, "@V_NO", headerObj.code);
+                                        AddParameterSafe(cmdAttach, "@V_NO", headerObj.Vno);
                                         AddParameterSafe(cmdAttach, "@V_TYPE", headerObj.DocType);
                                         AddParameterSafe(cmdAttach, "@V_DATE", DateTime.Parse(headerObj.DocDate));
                                         AddParameterSafe(cmdAttach, "@UUSER", globalVar.PubUserId);
@@ -995,84 +868,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetOrderDetailsList(string StrID)
-        //{
-        //    var gv = _globalVariableService.GetGlobalVariables();
-        //    var results = new List<Dictionary<string, object>>();
-        //    try
-        //    {
-        //        using (SqlConnection con = _dbConnection.GetErpConnection())
-        //        {
-        //            using (var command = new SqlCommand("usp_GetGatePurchaseEntryDetailsCopyFrom", con))
-        //            {
-        //                command.CommandType = CommandType.StoredProcedure;
-        //                command.Parameters.AddWithValue("@V_TYPE", "INFU");
-        //                command.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
-        //                command.Parameters.AddWithValue("@BRANCH_CODE", 1);
-        //                command.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
-
-        //                await con.OpenAsync();
-        //                using (var reader = await command.ExecuteReaderAsync())
-        //                {
-        //                    while (await reader.ReadAsync())
-        //                    {
-        //                        var row = new Dictionary<string, object>();
-        //                        for (int i = 0; i < reader.FieldCount; i++)
-        //                        {
-        //                            row[reader.GetName(i)] = reader.IsDBNull(i) ? null : reader.GetValue(i);
-        //                        }
-        //                        results.Add(row);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        return Json(results);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // You can log the error here if needed
-        //        return StatusCode(500, new { message = "An error occurred while fetching order details.", error = ex.Message });
-        //    }
-        //}
-
-        //[HttpGet]
-        //public IActionResult GetAddressListByPartyCode(int partyCode)
-        //{
-        //    var compCode = _globalVariableService.GetGlobalVariables().PubCompCode;
-        //    var addressList = new List<object>();
-
-        //    try
-        //    {
-        //        using (SqlConnection con = _dbConnection.GetErpConnection())
-        //        {
-        //            using (SqlCommand cmd = new SqlCommand("Select ADDRESS_ID, ADD1 from SUBGROUP_ADDRESS where COMP_CODE = @COMP_CODE AND CODE = @pCode", con))
-        //            {
-        //                cmd.Parameters.AddWithValue("@COMP_CODE", compCode);
-        //                cmd.Parameters.AddWithValue("@pCode", partyCode);
-
-        //                con.Open();
-        //                using (var reader = cmd.ExecuteReader())
-        //                {
-        //                    while (reader.Read())
-        //                    {
-        //                        addressList.Add(new
-        //                        {
-        //                            AddressId = reader["ADDRESS_ID"],
-        //                            Address1 = reader["ADD1"].ToString()
-        //                        });
-        //                    }
-        //                }
-        //            }
-        //        }
-
-        //        return Json(new { success = true, addresses = addressList });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { success = false, message = "Error retrieving address list", error = ex.Message });
-        //    }
-        //}
 
         public static void AddParameterSafe(SqlCommand cmd, string paramName, object value)
         {
