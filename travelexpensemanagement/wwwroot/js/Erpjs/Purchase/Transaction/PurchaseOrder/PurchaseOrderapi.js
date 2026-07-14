@@ -278,7 +278,6 @@ async function collectFormData() {
     };
 }
 
-
 async function GetDocData(MasterTblId, readOnly) {
     try {
         const response = await $.ajax({
@@ -307,10 +306,11 @@ async function GetDocData(MasterTblId, readOnly) {
         Calculation = false;
         SelectShipParty = false;
 
-        fillFormFields(response.header),
+   
+         fillFormFields(response.header);
 
-            fillItemDetailsTable(response.detail)
-
+         fillItemDetailsTable(response.detail);
+       
 
         Calculation = true;
         SelectShipParty = true;
@@ -395,14 +395,13 @@ async function GetDocData(MasterTblId, readOnly) {
 }
 
 async function fillFormFields(data) {
-
-    console.log("header data", data);
-
     if (!Array.isArray(data) || data.length === 0) {
         toastr.error("Invalid or empty data array");
         return;
     }
+
     const d = data[0];
+
     $('#txtDocNo').val(d.V_NO || '');
     $('#TxtDocId').val(d.DOC_ID || '');
     $('#dtDocDate').val((d.V_DATE || '').substring(0, 10));
@@ -431,7 +430,6 @@ async function fillFormFields(data) {
     $('#NumPincodeSD').val(d.SHIP_PINCODE || '');
 
     // Financials
-
     $('#NumTotalNosIt').val(d.NOS || '');
     $('#NumQtyIt').val(d.QTY || '');
     $('#NumAmountIt').val(d.AMOUNT || '');
@@ -446,12 +444,10 @@ async function fillFormFields(data) {
     $('#TxtOtherAmtSod').val(d.OTH_AMT || '');
     $('#NumNetAmtIt').val(d.NET_AMT || '');
 
-
     $('#ddlPriceType').val(d.PRICE_TYPE || '');
     $('#txtPartyRef').val(d.PARTY_REF || '');
     $('#ddlCurrency').val(d.IMPORT_CURRENCY || '');
     $('#NumExRate').val(d.EXRATE || '');
-
 
     // Terms
     $('#txtDeliveryTerm').val(d.DELIVERY_TERM || '');
@@ -461,7 +457,6 @@ async function fillFormFields(data) {
     $('#txtPriceTerm').val(d.PRICE_TERM || '');
     $('#txtRemarksTC').val(d.REMARKS || '');
     $('#txtPartySauda').val(d.PARTY_NAME || '');
-
 
 }
 
@@ -490,7 +485,6 @@ async function fillItemDetailsTable(data) {
         $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE).trigger('change');
         $(`#ddlDepartment${idx}`).val(item.DEPT_CODE).trigger('change');
         $(`#ddlTax${idx}`).val(item.TAX_CODE).trigger('change');
-
         // Inputs
         $(`#TxtCode${idx}`).val(item.ITEM_CODE);
         $(`#TxtNos${idx}`).val(item.NOS);
@@ -499,45 +493,31 @@ async function fillItemDetailsTable(data) {
         $(`#TxtExrate${idx}`).val(item.IMPORT_RATE);
         $(`#TxtCalcRate${idx}`).val(item.CALC_RATE);
         $(`#TxtAmount${idx}`).val(item.AMOUNT);
-
         $(`#TxtPackPercent${idx}`).val(item.PACK_PER);
         $(`#TxtPack${idx}`).val(item.PACK_AMT);
-
         $(`#TxtDiscPercent${idx}`).val(item.DISC_PER);
         $(`#TxtDisc${idx}`).val(item.DISC_AMT);
-
         $(`#TxtCgstPercent${idx}`).val(item.CGST_PER);
         $(`#TxtCgst${idx}`).val(item.CGST_AMT);
-
         $(`#TxtSgstPercent${idx}`).val(item.SGST_PER);
         $(`#TxtSgst${idx}`).val(item.SGST_AMT);
-
         $(`#TxtIgstPercent${idx}`).val(item.IGST_PER);
         $(`#TxtIgst${idx}`).val(item.IGST_AMT);
-
         $(`#TxtVatPercent${idx}`).val(item.VAT_PER);
         $(`#TxtVat${idx}`).val(item.VAT_AMT);
-
         $(`#TxtCessPercent${idx}`).val(item.CESS_PER);
         $(`#TxtCess${idx}`).val(item.CESS_AMT);
-
         $(`#TxtTcsPer${idx}`).val(item.TCS_PER);
         $(`#TxtTcsAmt${idx}`).val(item.TCS_AMT);
-
         $(`#TxtOthPer${idx}`).val(item.OTH_PER);
         $(`#TxtOthAmt${idx}`).val(item.OTH_AMT);
-
         $(`#TxtOthPer2${idx}`).val(item.TOTAL_PER2);
         $(`#TxtOthAmt2${idx}`).val(item.TOTAL_AMT2);
-
         $(`#TxtNetAmt${idx}`).val(item.NET_AMT);
         $(`#TxtLdRate${idx}`).val(item.LAND_RATE);
-
         $(`#TxtRemarks${idx}`).val(item.REMARKS);
-
         $(`#TxtAppLevel${idx}`).val(item.PREORITY_LEVEL);
         $(`#TxtAppRemarks${idx}`).val(item.PREORITY_REMARKS);
-
         $(`#TxtMthRate${idx}`).val(item.RATE_MONTHLY);
         $(`#TxtQtrRate${idx}`).val(item.RATE_QUARTERLY);
         $(`#TxtAnlRate${idx}`).val(item.RATE_ANNUALY);
@@ -640,7 +620,6 @@ function addItemRecordRow() {
 
     setEnterKeyFocusOnTable(itemRecords, rowCount);
 }
-
 function setEnterKeyFocusOnTable(sequence, rowCount) {
     sequence.forEach((id, index) => {
         let elementId = `#${id}${rowCount}`;
@@ -970,8 +949,7 @@ async function GetDatabbyPartycode() {
         $('#TxtCity1PD').val(data.partydetails.citY_CODE);
         $('#TxtGSTPD').val(data.partydetails.gstin);
              
-        if (!docId) {
-            
+        if (!docId) {           
 
             $('#ddlShipFrom').val(data.partydetails.code).trigger('change');
             $('#TxtAdd1SD').val(data.partydetails.adD1);
@@ -1049,7 +1027,6 @@ async function LoadOrdersModal() {
 
 async function LoadDatabyShipCode(PartyCode) {
     try {
-
         const data = await $.ajax({
             url: '/PurchaseOrder/GetDataByShipPartyCode',
             method: 'GET',
@@ -1081,8 +1058,6 @@ async function GetPartyAddressDetails(PartyCode, AddressCode) {
             }
         });
 
-        console.log("PartyAddress", data);
-
         $('#TxtAdd1PD').val(data.partyAddress.add1);
         $('#TxtAdd2PD').val(data.partyAddress.add2);
         $('#TxtAdd3PD').val(data.partyAddress.add3);
@@ -1099,10 +1074,6 @@ async function GetPartyAddressDetails(PartyCode, AddressCode) {
 
 async function GetShipPartyAddressDetails(PartyCode, AddressCode) {
     try {
-
-
-
-
         const data = await $.ajax({
             url: '/PurchaseOrder/GetDataByPartyAddressID',
             method: 'GET',
@@ -1111,8 +1082,6 @@ async function GetShipPartyAddressDetails(PartyCode, AddressCode) {
                 AddressCode: AddressCode
             }
         });
-
-
 
         $('#TxtAdd1SD').val(data.partyAddress.add1);
         $('#TxtAdd2SD').val(data.partyAddress.add2);
@@ -1191,7 +1160,6 @@ function renderPurchaseHistory(data) {
     myModal.show();
 }
 
-
 async function fillItemDetailsTableBySaudaNo(data) {
     const $tbody = $('#tblItemRecordPO tbody');
     $tbody.empty();
@@ -1254,3 +1222,18 @@ async function fillItemDetailsTableBySaudaNo(data) {
     }
 }
 
+async function fetchDatabyTaxType(TaxCode) {
+    try {
+        const res = await $.ajax({
+            url: '/PurchaseOrder/GetDataByTaxType',
+            method: 'GET',
+            data: { TaxCode: TaxCode }
+        });
+        console.log("fetchDatabyTaxType res:", res);
+        return res;
+    }
+    catch (error) {
+        console.error("AJAX Error:", error);
+        return null;
+    }
+}

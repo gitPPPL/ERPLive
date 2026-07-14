@@ -105,8 +105,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = "data load failed" });
             }
 
-        }          
-             
+        }                       
 
         public JsonResult DDLGridItem()
         {
@@ -122,11 +121,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
 
         }
-
-
-
-
-
 
         public JsonResult DDLGridMake(int ItemCode = 0)
         {
@@ -510,14 +504,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     {
                         foreach (var a in POmodel.Attachments)
                         {
-                            purchaseOrderAttachmentTable.Rows.Add(
-                                "/attachments/Purchase/" + (a.FileName ?? ""),
-                                a.FileName,
-                                srno++
-                            );
+                            purchaseOrderAttachmentTable.Rows.Add( "/attachments/Purchase/" + (a.FileName ?? ""), a.FileName, srno++);
                         }
                     }
-
                     using (var transaction = con.BeginTransaction())
                     {
                         bool success = true;
@@ -1564,8 +1553,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
             using (SqlConnection con = _dbcontext.GetErpConnection())
             {
-                con.Open();
-                
+                con.Open();               
 
         
                 // -------------------- 1st QUERY (Supplier Master) --------------------
@@ -1717,18 +1705,49 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
 
 
+        public JsonResult GetDataByTaxType(int TaxCode)
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                con.Open();
 
 
+                // -------------------- 1st QUERY (Supplier Master) --------------------
+                string query1 = @" select top 1 CGST_PER, SGST_PER,IGST_PER,isnull(VAT_PER,0) as VAT_PER,TDS_PER,TCS_PER,OTH_PER,
+                isnull(OTH_PER2,0) as OTH_PER2 from TAX_MAST  where ACTIVE = 1 and CODE =@TaxCode  ";
 
+                object Partydetails = null;
 
+                using (SqlCommand cmd = new SqlCommand(query1, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@TaxCode", TaxCode);
 
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            Partydetails = new
+                            {
 
-
-
-
-
-
-
+                                CGST_PER = reader["CGST_PER"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["CGST_PER"]),
+                                SGST_PER = reader["SGST_PER"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["SGST_PER"]),
+                                IGST_PER = reader["IGST_PER"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["IGST_PER"]),
+                                VAT_PER = reader["VAT_PER"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["VAT_PER"]),
+                                TDS_PER = reader["TDS_PER"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["TDS_PER"]),
+                                TCS_PER = reader["TCS_PER"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["TCS_PER"]),
+                                OTH_PER = reader["OTH_PER"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["OTH_PER"]),
+                                OTH_PER2 = reader["OTH_PER2"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["OTH_PER2"])
+                            };
+                        }
+                    }
+                }
+     
+                return Json(new { Partydetails = Partydetails });
+            }
+        }
 
     }
 }

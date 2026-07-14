@@ -662,11 +662,8 @@
                             </div>
                         </div>
                     </div>
-
-
-
-                    
- <div class="modal fade" id="modificationModal" tabindex="-1" aria-labelledby="modificationModalLabel" aria-hidden="true">
+                                        
+            <div class="modal fade" id="modificationModal" tabindex="-1" aria-labelledby="modificationModalLabel" aria-hidden="true">
     <div class="modal-dialog erppagesmodal medium-modal">
         <div class="modal-content erppagesmodal-content">
             <div class="erppagesmodal-header">
@@ -741,16 +738,14 @@
     </div>
 </div>   
 
-
-
         </fieldset>
-        <div class="erppage-actions">
-            <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
-                <i class="fa-solid fa-floppy-disk"></i>
-                <span>Save</span>
-            </button>
+            <div class="erppage-actions">
+                <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save</span>
+                </button>
+            </div>
         </div>
-    </div>
 
     <!--Purchase Request Modal Popup-->
     <div class="modal fade" id="purchaseRequestModal" tabindex="-1" aria-labelledby="purchaseRequestLabel" aria-hidden="true">
@@ -1163,10 +1158,6 @@
     </div>
 </div>   
 
-
-
-
-
     <ul id="customContextMenu" class="custom-context-menu" style="display:none;">
         <li data-action="exporttoexcel" data-bs-toggle="modal" data-bs-target="#ExportToExcel">Export To Excel</li>
         <li data-action="purchasereceipthistory" data-bs-toggle="modal" data-bs-target="#purchasereceipthistory">Show/Set QC Parameter</li>
@@ -1202,7 +1193,6 @@
 <script src="~/js/erpjs/purchase/transaction/purchaseorder/purchaseorderinit.js"></script>
 <script src="~/js/erpjs/purchase/transaction/purchaseorder/purchaseorder.js"></script>
 
-
 <script>
 
     const AllFieldsId = [
@@ -1212,7 +1202,6 @@
       "NumPincodePD", "TxtCity1PD", "TxtGSTPD", "ddlShipFrom", "ddlAddressbypartySD", "TxtAdd1SD", "TxtAdd2SD",
       "TxtAdd3SD", "NumPincodeSD", "TxtCity1SD", "TxtGSTSD"
     ];
-
     let itemRecords = [
       "TxtCode", "ddlItemname", "ddlImake", "ddlUnit", "ddlIplaceofUse", "ddlDepartment",
       "TxtNos", "TxtQty", "TxtRate", "TxtExrate", "TxtAmount", "TxtPackPercent", "TxtPack",
@@ -1252,26 +1241,7 @@
             }
         });
 
-        setEnterKeyFocus(AllFieldsId);
-
-        $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function () {
-            var tbody = $(this).closest('tbody');
-            var rowCount = tbody.find('tr').length;
-
-            if (rowCount > 1) {
-                $(this).closest('tr').remove();
-            } else {
-                alert('Cannot delete the first row.');
-            }
-        });
-
-        $(document).on('click', '#tab4 .btn-add-action', function () {
-         addAttachmentRow();
-        });
-
-        $(document).on('click', '#tab1 .btn-add-row, #tab1 .btn-Itemadd-action', function () {
-            addItemRecordRow();
-        });
+        setEnterKeyFocus(AllFieldsId);         
 
         $('#ddlDocType').on('change', function () {
             const VType = $(this).val();
@@ -1280,10 +1250,6 @@
         });
 
         $('#chkDeliveryDate').on('change', function () {
-        $(this).val(this.checked ? '1' : '0');
-        });
-
-        $('#chkValidateDate').on('change', function () {
         $(this).val(this.checked ? '1' : '0');
         });
 
@@ -1301,8 +1267,7 @@
            console.log(quotationrateList);
            await fillItemDetailsTable(quotationrateList)
         });
-
-  
+          
         $(document).on('click', '.btn-purchaseCopy',async function(){
         const selectedItems = getPurchaseData();
         console.log('a');
@@ -1359,76 +1324,34 @@
                 console.error('Error during calculation:', err);
             }
         });
-   
-        //Attachment
+                
+        $(document).on('change', '#ddWBNo', async function () {
+            var docid = $('#ddWBNo').find('option:selected').val();
+            var partyCode = $('#ddlPartyName').val();
+            let data = await GetWeighBridgeDetail(docid, partyCode);
 
-        browseBtn.addEventListener("click", function () {
-        fileInput.click();
-    });
+            const $tbody = $('#tblItemRecordPO tbody');
+            $tbody.empty();
+            console.log(data);
 
-        fileInput.addEventListener("change", function () {
+            for (let index = 0; index < data.length; index++) {
+                const item = data[index];
+                const idx = index + 1;
 
-        Array.from(this.files).forEach(file => {
+                addItemRecordRow();
 
-            if (!isDuplicateFile(file)) {
-                selectedFiles.push(file);
+                $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
+                $(`#ddlImake${idx}`).val(item.MakeCode).trigger('change');
+                $(`#TxtQty${idx}`).val(item.Qty);
+                $(`#ddlUnit${idx}`).val(item.UNIT_CODE).trigger('change');
             }
         });
-
-        renderFileList();
-        this.value = "";
-    });
-
-        $(document).on("click", ".erp-delete-file-btn", function () {
-
-        const index = $(this).data("index");
-
-        selectedFiles.splice(index, 1);
-
-        renderFileList();
-    });
-
-        $(document).on("click", ".erp-delete-db-btn", function () {
-
-        const index = $(this).data("index");
-
-        globalAttachments.splice(index, 1);
-
-        renderFileList();
-    });
-
-        dropZone.addEventListener("dragover", function (e) {
-        e.preventDefault();
-        dropZone.classList.add("dragover");
-    });
-
-        dropZone.addEventListener("dragleave", function () {
-        dropZone.classList.remove("dragover");
-    });
-
-        dropZone.addEventListener("drop", function (e) {
-        e.preventDefault();
-        dropZone.classList.remove("dragover");
-
-        const files = e.dataTransfer.files;
-
-        Array.from(files).forEach(file => {
-
-            if (!isDuplicateFile(file)) {
-                selectedFiles.push(file);
-            }
-        });
-
-        renderFileList();
-    });
 
     });
 
 </script>
 
 <script>
-
-
 
     async function collectGridDetail() {
          const items = [];
@@ -1751,28 +1674,6 @@
             $(`#TxtSpclRate${idx}`).val('');
         }
     }
-
-    $(document).on('change', '#ddWBNo', async function () {
-        var docid = $('#ddWBNo').find('option:selected').val();
-        var partyCode = $('#ddlPartyName').val();
-        let data = await GetWeighBridgeDetail(docid, partyCode);
-
-        const $tbody = $('#tblItemRecordPO tbody');
-        $tbody.empty();
-        console.log(data);
-
-        for (let index = 0; index < data.length; index++) {
-            const item = data[index];
-            const idx = index + 1;
-
-            addItemRecordRow();
-
-            $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
-            $(`#ddlImake${idx}`).val(item.MakeCode).trigger('change');
-            $(`#TxtQty${idx}`).val(item.Qty);
-            $(`#ddlUnit${idx}`).val(item.UNIT_CODE).trigger('change');
-        }
-    });
 
     function enableAllFields() {
       AllFieldsId.forEach(id => {

@@ -459,9 +459,8 @@ function calculateTaxAmounts(rowId) {
     $(`#TxtOthAmt2${rowId}`).val(othAmt2.toFixed(2));
     $(`#TxtNetAmt${rowId}`).val(netAmt.toFixed(2));
 
-    calculateAllTotals(); // Recalculate footer totals
+    calculateAllTotals(); 
 }
-
 function loadItemNameDropdown() {
     $.ajax({
         url: '/PurchaseOrder/DDLGridItem',
@@ -471,15 +470,23 @@ function loadItemNameDropdown() {
         }
     });
 }
-function loadMakeDropdown(ItemCode = 0) {
+function loadMakeDropdown(rowId, itemCode) {
+
     $.ajax({
         url: '/PurchaseOrder/DDLGridMake',
         method: 'GET',
         data: {
-            ItemCode: ItemCode
+            ItemCode: itemCode
         },
         success: function (data) {
-            MakeNameOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+
+            let options = '<option value="">-Select Make-</option>';
+
+            $.each(data, function (i, item) {
+                options += `<option value="${item.value}">${item.text}</option>`;
+            });
+
+            $('#ddlImake' + rowId).html(options);
         }
     });
 
@@ -524,5 +531,3 @@ function loadTaxTypeDropdown() {
     });
 
 }
-
-
