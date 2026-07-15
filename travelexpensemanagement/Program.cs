@@ -68,6 +68,9 @@ builder.Services.AddScoped<IPurchaseQuotationRepository, PurchaseQuotationReposi
 builder.Services.AddScoped<IPurchaseQuotationListRepository, PurchaseQuotationListRepository>();
 builder.Services.AddScoped<IQuotationRateApprovalRepository, QuotationRateApprovalRepository>();
 builder.Services.AddScoped<IQuotationRateApprovalListRepository, QuotationRateApprovalListRepository>();
+builder.Services.AddScoped<IPurchaseReceiptEntryRepository, PurchaseReceiptEntryRepository>();
+builder.Services.AddScoped<IPurchaseReceiptEntryListRepository, PurchaseReceiptEntryListRepository>();
+builder.Services.AddScoped<IIndentStatusUpdateRepository, IndentStatusUpdateRepository>();
 
 
 // Gete Entry Transaction repositories

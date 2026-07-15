@@ -2,82 +2,117 @@
 	ViewBag.Title = "Purchase Receipt Entry List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<div id="erp-center-toast-container"></div>
+<!-- HEADER -->
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Purchase Receipt Entry List</span>
+	</div>
+	<div class="erppagelist-header-right">
 
-<fieldset>
-	<legend class="legend-field">Purchase Receipt Entry List</legend>
+		<button type="button" class="erppage-header-back" id="button_add" onclick="location.href='@Url.Action("Index", "PurchaseReceiptEntry")'">
+			<i class="fa fa-plus"></i>Add New
+		</button>
 
-	<div class="row">
-		<div class="col-lg-3">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
-		</div>
+	</div>
+</div>
 
-		<div class="col-lg-9">
-			<div class="btn-rightalign">
-				<button onclick="window.location.href='@Url.Action("Index", "PurchaseReceiptEntry")'" type="button" class="btn btn-add">
-					<i class="fa fa-plus"></i>Add
-				</button>
-				<button class="btn btn-print" onclick="printCityMasterReport()">
-					<i class="fa fa-print"></i> Print
-				</button>
-				<button class="btn btn-export">
-					<i class="fas fa-file-export"></i> Export
-				</button>
-				<button class="btn btn-mail">
-					<i class="fa fa-envelope"></i> Mail
-				</button>
-				<button class="btn btn-send">
-					<i class="fa fa-paper-plane"></i> Approval Send
-				</button>
-				<button class="btn btn-approved">
-					<i class="fa fa-check"></i> Approved
-				</button>
-			</div>
-		</div>
+<!-- TOOLBAR -->
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search by All Columns Name...." />
+	</div>
+	<div class="erppagelist-actions">
+
+		@* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print" onclick="PendingQCReport()">
+				<i class="fa fa-print"></i>Print
+		</button> *@
+
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="button_export" data-tooltip="Export to Excel">
+			<i class="fa fa-file-excel"></i>Export
+		</button>
+
+	</div>
+</div>
+
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblPurchaseReceiptEntryList" class="excel-table fixed-grid-table table-width resizable-table">
+			<colgroup>
+				<col class="hidden-col">
+				<col style="width: 73px;">
+				<col style="width: 82px;">
+				<col style="width: 80px;">
+				<col style="width: 220px;">
+				<col style="width: 130px;">
+				<col style="width: 79px;">
+				<col style="width: 198px;">
+				<col style="width: 205px;">
+				<col style="width: 85px;">
+				<col style="width: 131px;">
+				<col style="width: 220px;">
+				<col style="width: 67px;">
+				<col style="width: 66px;">
+				<col style="width: 76px;">
+				<col style="width: 114px;">
+				<col style="width: 113px;">
+				<col style="width: 67px;">
+				<col style="width: 120px;">
+			</colgroup>
+			<thead>
+				<tr>
+					<th class="hidden-col">Code</th>
+					<th>Doc Type</th>
+					<th>Doc No</th>
+					<th>Doc Date</th>
+					<th>Party Name</th>
+					<th>Bill Number</th>
+					<th>Bill Date</th>
+					<th>Bill Address 1</th>
+					<th>Bill Address 2</th>
+					<th>Bill City</th>
+					<th>Bill Gst</th>
+					<th>Ship To</th>
+					<th>Quantity</th>
+					<th>Amount</th>
+					<th>Remarks</th>
+					<th>Transport Name</th>
+					<th>Gate Number</th>
+					<th>Status</th>
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
 	</div>
 
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblPurchaseReceiptEntryList" class="table-width">
-				<thead class="table-head">
-					<tr>
-						<th style="display:none;">Code</th>
-						<th>Voucher No</th>
-						<th>Voucher Type</th>
-						<th>Voucher Date</th>
-						<th>Party Name</th>
-						<th>Bill Number</th>
-						<th>Bill Date</th>
-						<th>Bill Address 1</th>
-						<th>Bill Address 2</th>
-						<th>Bill City</th>
-						<th>Bill Gst</th>
-						<th>Ship To</th>
-						<th>Quantity</th>
-						<th>Amount</th>
-						<th>Remarks</th>
-						<th>Transport Name</th>
-						<th>Gate Number</th>
-						<th>Status</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
 		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
+		<div class="pagination-center">
+			<button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+
+			<button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
 		</div>
 	</div>
-</fieldset>
+</div>
 
-<script>
+<script src="~/common/pagination.js"></script>
+<script src="~/js/erpjs/purchase/transaction/purchasereceiptmrnlistjs/purchasereceiptmrnlist.js"></script>
+
+@* <script>
     let currentPage = 1;
 	const pageSize = 10;
 	$(document).ready(function () {
@@ -113,8 +148,8 @@
 				docs.forEach(doc => {
 					tbody.append(`
 						<tr>
-							<td>${doc.vNo || ''}</td>
 							<td>${doc.vType || ''}</td>
+							<td>${doc.vNo || ''}</td>
 							<td>${doc.vDate || ''}</td>
 							<td>${doc.partyName || ''}</td>
 							<td>${doc.billNo || ''}</td>
@@ -130,15 +165,22 @@
 							<td>${typeof doc.transportName === 'object' ? (doc.transportName.Name || '') : (doc.transportName || '')}</td>
 							<td>${doc.gateNo || ''}</td>
 							<td>${doc.status || ''}</td>
-							<td>
-								<div class="action-icons">
-									<i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.vType}', '${doc.vNo}')"></i>
-							        <i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.vType}', '${doc.vNo}')"></i>
-							        <i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.vType}', '${doc.vNo}')"></i>
-
-									<i class="fa fa-file btn-document" data-bs-toggle="tooltip" title="Document Details" onclick="showDocumentPopup('${doc.vNo}')"></i>
+							<td class="action-col">
+								<div class="action-wrap">
+									<button class="act-btn edit btn-edit" title="Edit" style="cursor:pointer;" onclick="editDocStage('${doc.vType}', '${doc.vNo}')">
+									   <i class="fa fa-edit"></i>
+								    </button>
+									<button class="act-btn view btn-view" title="View" style="cursor:pointer;"onclick="viewDocStage('${doc.vType}', '${doc.vNo}')">
+									  <i class="fa fa-eye"></i>
+								    </button>
+									<button class="act-btn delete btn-delete" title="Delete" style="cursor:pointer;" onclick="deleteDocStage('${doc.vType}', '${doc.vNo}')">
+									   <i class="fa fa-trash"></i>
+								    </button>
+									<button class="act-btn document btn-document" title="Document Details" style="cursor:pointer;" onclick="showDocumentPopup('${doc.vNo}')">
+										  <i class="fa fa-file"></i>
+									</button>
 								</div>
-					</td>
+							</td>
 						</tr>
 					`);
 				});
@@ -150,6 +192,7 @@
 			}
 		});
 	}
+
 	function renderPagination(total, pageSize, currentPage) {
 		const totalPages = Math.ceil(total / pageSize);
 		const pagination = $('#tablePagination');
@@ -172,17 +215,16 @@
 		}
 		pagination.html(html);
 	}
+
 	function goToPage(page) {
 		currentPage = page;
 		loadPurchaseReceiptEntryList();
 	}
-		function editDocStage(vType, vNo) {
+
+    function editDocStage(vType, vNo) {
 		// Build the docCode (if you want to combine) or pass separately
 		window.location.href = `/PurchaseReceiptEntry/Index?vType=${encodeURIComponent(vType)}&vNo=${encodeURIComponent(vNo)}`;
 	}
- //    function viewDocStage(docCode) {
-	// 	window.location.href = `/PurchaseReceiptEntry/Index?docCode=${encodeURIComponent(docCode)}&mode=view`;
-	// }
 
 	function viewDocStage(vType, vNo) {
 		   window.location.href = `/PurchaseReceiptEntry/Index?vType=${encodeURIComponent(vType)}&vNo=${encodeURIComponent(vNo)}&readOnly=true`;
@@ -223,4 +265,4 @@
 	}
 
 
-</script>
+</script> *@

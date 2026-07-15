@@ -19,6 +19,13 @@
     font-size: 12px;
     font-weight: 600;
 }
+.erppage-grid-crdr {
+    display: grid;
+    grid-template-columns: 0.8fr 0.5fr 0.5fr 3fr;
+    gap: 16px;
+    padding: 4px;
+    align-items: start;
+}
 /* LEFT */
 .erppage-header-left {
     display: flex;
@@ -104,7 +111,58 @@
             border-color: #2f7d32;
             box-shadow: 0 0 0 2px rgba(47, 125, 50, 0.15);
         }
+/*Single File Upload */
+.erppage-filepicker {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
 
+.erppage-filepicker-name {
+    flex: 1;
+}
+
+.erppage-filepicker-btn,
+.erppage-filepicker-remove {
+    height: 23px;
+    border: none;
+    border-radius: 6px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    color: #fff;
+    margin: 0px;
+}
+
+.erppage-filepicker-btn {
+    background: linear-gradient(135deg, #2d7b46, #1c5e31);
+}
+
+.erppage-filepicker-remove {
+    width: 23px;
+    padding: 0;
+    background: #dc2626;
+}
+.erppage-btn-green {
+    height: 23px;
+    border: none;
+    border-radius: 6px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    color: #fff;
+    margin: 0px;
+    background-color: #1c5e31;
+}
 /* Dropdown List */
 .dropdown-list {
     position: absolute;
@@ -146,7 +204,7 @@
 
     /* Scrollbar */
     .dropdown-list::-webkit-scrollbar {
-        width: 6px;
+        width: 10px;
     }
 
     .dropdown-list::-webkit-scrollbar-thumb {
@@ -218,10 +276,9 @@
     align-items: center;
     gap: 12px;
     padding: 4px 10px;
-    border-radius: 8px;
     text-decoration: none;
     color: #212529;
-    font-size: 14px;
+    font-size: 12px;
     transition: all .2s ease;
     cursor: pointer;
 }
@@ -230,13 +287,6 @@
         background: #f5f8ff;
         color: #0d6efd;
     }
-
-   /* .erppagedropdown-item i {
-        width: 18px;
-        text-align: center;
-        color: #0d6efd;
-        font-size: 15px;
-    }*/
 
     .erppagedropdown-item span {
         font-weight: 500;
@@ -336,7 +386,7 @@
 }
 
     .erppageattachmentsectionfilelist::-webkit-scrollbar {
-        width: 8px;
+        width: 10px;
     }
 
     .erppageattachmentsectionfilelist::-webkit-scrollbar-thumb {
@@ -592,7 +642,8 @@
     display: block;
     box-shadow: 4px 3px;
     border: 1px solid #2952cc7d;
-    margin:0px;
+    margin: 0px;
+    background-color: #fff;
 }
 /* Responsive */
 @media (max-width: 768px) {
@@ -854,8 +905,8 @@
     .erppage-input-with-icon .erppageinputicon {
         position: static;
         transform: none;
-        width: 32px;
-        height: 32px;
+        width: 25px;
+        height: 25px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -966,7 +1017,6 @@
     text-overflow: ellipsis;
 }
 
-
 /*table First columns fixed and position sticky End*/
 .erppage-toggle input:checked + .erppage-toggle-slider {
     background: linear-gradient(135deg,#2f7d32,#1b5e20);
@@ -1073,7 +1123,7 @@
     column-gap: 16px;
     row-gap: 10px;
     padding: 4px;
-    align-items: start;
+    align-items: baseline;
 }
 .erppage-grid1 {
     display: grid;
@@ -1081,7 +1131,7 @@
     column-gap: 16px;
     row-gap: 10px;
     padding: 4px;
-    align-items: start;
+    align-items: baseline;
 }
 .erppage-grid2 {
     display: grid;
@@ -1089,7 +1139,7 @@
     column-gap: 16px;
     row-gap: 10px;
     padding: 4px;
-    align-items: start;
+    align-items: baseline;
 }
 .erppage-grid3 {
     display: grid;
@@ -1097,7 +1147,7 @@
     column-gap: 16px;
     row-gap: 10px;
     padding: 4px;
-    align-items: start;
+    align-items: baseline;
 }
 .erppage-grid4 {
     display: grid;
@@ -1105,7 +1155,7 @@
     column-gap: 16px;
     row-gap: 10px;
     padding: 4px;
-    align-items: start;
+    align-items: baseline;
 }
 .erppage-grid5 {
     display: grid;
@@ -1113,7 +1163,15 @@
     column-gap: 16px;
     row-gap: 10px;
     padding: 4px;
-    align-items: start;
+    align-items: baseline;
+}
+.erppage-grid6 {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    column-gap: 16px;
+    row-gap: 10px;
+    padding: 4px;
+    align-items: baseline;
 }
 /* Tablet */
 @media (max-width: 1024px) {
@@ -1225,6 +1283,11 @@
 .erppagescol-12 {
     flex: 0 0 100%;
     max-width: 100%;
+}
+
+.erppagescol-9 {
+    flex: 0 0 75%;
+    max-width: 75%;
 }
 
 .erppagescol-6 .erppagetabledynamic-wrapper {
@@ -1346,6 +1409,54 @@
 .erppage-subfieldset .erppage-grid4 {
     padding: 4px 0px;
 }
+
+/*field input width fix*/
+.erppage-width-93 {
+    flex: 0 0 93%;
+    max-width: 93%;
+}
+
+.erppage-width-7 {
+    flex: 0 0 7%;
+    max-width: 7%;
+}
+
+.erppage-width-30 {
+    flex: 0 0 30%;
+    max-width: 30%;
+}
+
+.erppage-width-70 {
+    flex: 0 0 70%;
+    max-width: 70%;
+}
+
+/*fieldset Divide*/
+/* Split Input Group */
+.erppage-inputgroup-split {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+/* Each field occupies equal width */
+.erppage-inputgroup-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+    /* Input takes full width */
+    .erppage-inputgroup-item .erppage-input {
+        width: 100%;
+        height: 24px;
+    }
+
+    /* Optional */
+    .erppage-inputgroup-item .erppage-label {
+        margin-bottom: 4px;
+    }
 /* ===== FIELD ===== */
 .erppage-field {
     display: grid;
@@ -1358,13 +1469,13 @@
 /* ===== FIELD ===== */
 
 .erppage-divfield {
-    display: flex;
+    display: block;
     align-items: center;
     gap: 6px;
 }
-    
+
 .erppage-label {
-    width: 80px;
+    width: 100%;
     flex-shrink: 0;
 }
 
@@ -1496,7 +1607,7 @@
     transition: 0.2s;
     box-sizing: border-box;
     font-size: 11px;
-    color: #2c2c2c;
+    color: #121212;
     border-left: 3px solid #ff2626;
 }
 
@@ -1513,11 +1624,12 @@
 }
 /* ===== LABEL ===== */
 .erppage-label {
-    font-size: 12px;
-    color: #2c2c2c;
+    font-size: 11px;
+    color: #121212;
     display: inline-block;
     margin: 0;
     font-weight: 600;
+    /*display: contents;*/
 }
 
 /* ===== INPUT ===== */
@@ -1528,8 +1640,9 @@
     padding: 3px 8px;
     transition: 0.2s;
     box-sizing: border-box;
-    font-size: 12px;
-    color: #181818;
+    font-size: 11px;
+    color: #121212;
+    height: 23px;
 }
     .erppage-input:disabled {
         
@@ -1537,7 +1650,7 @@
         cursor: not-allowed;
         color: #5e5e5e;
     }
-    
+
 /* ===== TEXTAREA ===== */
 .erppage-textarea {
     width: 100%;
@@ -1563,19 +1676,6 @@
         box-shadow: 0 0 0 2px rgba(47,125,50,0.15);
     }
 /* ===== SELECT FIX (ONLY ADDITION) ===== */
-select.erppage-input {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-color: #fff;
-    background-image: url("data:image/svg+xml;utf8,<svg fill='%236b7280' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7l4.5 5 4.5-5z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 0px center;
-    background-size: 16px;
-    padding-right: 16px;
-    font-size: 12px;
-    color: #2c2c2c;
-}
 
 /* Focus */
 .erppage-input:focus {
@@ -1589,7 +1689,7 @@ select.erppage-input {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 30px;
+    min-height: 22px;
 }
 
 .erppage-checkbox-input {
@@ -1777,8 +1877,8 @@ input[type="number"] {
     right: 0px;
     top: 50%;
     transform: translateY(-50%);
-    width: 28px;
-    height: 28px;
+    width: 25px;
+    height: 25px;
     border: none;
     border-radius: 5px;
     background: linear-gradient(135deg,#2f7d32,#1b5e20);
@@ -1820,7 +1920,7 @@ input[type="number"] {
 
 .erppage-tabs {
     display: flex;
-    gap: 6px;
+    gap: 2px;
     border-bottom: 2px solid #2f7d32;
 }
 
@@ -1845,6 +1945,9 @@ input[type="number"] {
 
     .erppage-tab-content.active {
         display: block;
+        background-color: #e9e9e9;
+        padding: 8px;
+        border-radius: 0px 0px 8px 8px;
     }
 .erppage-accordion-header {
     display: none;
@@ -2042,7 +2145,7 @@ input[type="number"] {
     }
 
 .erppage-btn-common-active {
-    background: linear-gradient(135deg, #1c5e31, #66a644);
+    background: linear-gradient(135deg, #1c5e31, #2f7d32);
     color: #fff;
 }
 
@@ -2060,7 +2163,6 @@ input[type="number"] {
 
     /* Hover effect for disabled-style button */
     .erppage-btn-common-active-disabled:hover {
-        /*background: linear-gradient(135deg, #1c5e31, #66a644);*/
         background-color: #1c5e31;
         color: #fff !important;
     }
@@ -2109,7 +2211,7 @@ input[type="number"] {
 .erppage-actions {
     position: fixed;
     bottom: 0;
-    left: 0;
+    left: 280px;
     right: 0;
     display: flex;
     justify-content: flex-end;
@@ -2126,8 +2228,8 @@ input[type="number"] {
     align-items: center;
     gap: 8px;
     border: none;
-    padding: 3px 8px;
-    border-radius: 6px;
+    padding: 3px 12px;
+    border-radius: 8px;
     font-size: 12px;
     cursor: pointer;
     transition: all 0.25s ease;
@@ -2181,7 +2283,7 @@ input[type="number"] {
 
 /* ICON */
 .erppage-btn i {
-    font-size: 14px;
+    font-size: 13px;
 }
 .erppagescol-25 {
     flex: 0 0 calc(25% - 9px);

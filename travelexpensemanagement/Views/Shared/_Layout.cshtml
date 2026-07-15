@@ -95,7 +95,8 @@
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 </head>
 <body>
 	<div class="ERPPageLayout-overlay" id="ERPPageLayoutOverlay"></div>
@@ -608,13 +609,13 @@
 
 	
 	<script>
-		$(document).ajaxStart(function () {
-			showLoader();
-		});
+		// $(document).ajaxStart(function () {
+		// 	showLoader();
+		// });
 
-		$(document).ajaxStop(function () {
-			hideLoader();
-		});
+		// $(document).ajaxStop(function () {
+		// 	hideLoader();
+		// });
 
 		let loaderTimeout;
 		let loaderStartTime;

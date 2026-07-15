@@ -32,21 +32,21 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         {
             return View("~/Views/GateEntry/Transaction/CourierTrackingEntry/Index.cshtml");
         }
-        public JsonResult GetDropdown(string type)
-        {
-            var gv = _globalVariableService.GetGlobalVariables();
-            var data = type switch
-            {
-                "DocType" => _dropdownService.GetDocType(),
-                "City" => _dropdownService.GetCity(gv.PubCompCode),
-                "Party" => _dropdownService.GetParty(gv.PubCompCode),
-                "Courier" => _dropdownService.GetCourier(),
-                "Purpose" => _dropdownService.GetPurpose(),
-                "Employee" => _dropdownService.GetEmployee(gv.PubCompCode),
-                _ => new List<DropdownService.DropdownModel>() 
-            };
-            return Json(data);
-        }
+        //public JsonResult GetDropdown(string type)
+        //{
+        //    var gv = _globalVariableService.GetGlobalVariables();
+        //    var data = type switch
+        //    {
+        //        "DocType" => _dropdownService.GetDocType(),
+        //        "City" => _dropdownService.GetCity(gv.PubCompCode),
+        //        "Party" => _dropdownService.GetParty(gv.PubCompCode),
+        //        "Courier" => _dropdownService.GetCourier(),
+        //        "Purpose" => _dropdownService.GetPurpose(),
+        //        "Employee" => _dropdownService.GetEmployee(gv.PubCompCode),
+        //        _ => new List<DropdownService.DropdownModel>() 
+        //    };
+        //    return Json(data);
+        //}
         public JsonResult GetDocNo(string docType)
         {
             int nextVNo = _repository.GetNextDocNo(docType);

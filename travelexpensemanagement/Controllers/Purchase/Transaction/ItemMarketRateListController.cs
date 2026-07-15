@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
@@ -18,7 +19,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private int? userLevel;
         private readonly IItemMarketRateListRepository _itemMarketRateListRepository;
         private readonly GlobalValidationdate _globalValidationdate;
-        public ItemMarketRateListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DropdownService dropdownService, DbHelper dbHelper,ModuleService.ModuleService moduleService, IItemMarketRateListRepository itemMarketRateList, GlobalValidationdate globalValidationdate)
+        private readonly GlobalExcelExport _globalExcelExport;
+        public ItemMarketRateListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DropdownService dropdownService, DbHelper dbHelper,ModuleService.ModuleService moduleService, IItemMarketRateListRepository itemMarketRateList, GlobalValidationdate globalValidationdate, GlobalExcelExport globalExcelExport)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -27,7 +29,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             _moduleService = moduleService;
             _itemMarketRateListRepository = itemMarketRateList;
             _globalValidationdate = globalValidationdate;
+            _globalExcelExport = globalExcelExport;
         }
+
         public IActionResult Index()
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
@@ -118,7 +122,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     { "@Action", "Excel" }
                 };
 
-                var fileBytes = _globalValidationdate.ExportToExcel("sp_MARKET_RATE", "Item Market Rate", parameters);
+                var fileBytes = _globalExcelExport.ExportToExcel("sp_MARKET_RATE", "Item Market Rate", parameters);
 
                 return File(
                     fileBytes,

@@ -1,0 +1,90 @@
+﻿@{
+    ViewBag.Title = "Store Purchase Order Status";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-clipboard-check"></i>
+        <span>Store Purchase Order Status</span>
+    </div>
+</div>
+<div class="erppage-fieldset">
+    <div class="erppage-container">
+        <div class="erppage-grid5">
+            <div class="erppage-divfield">
+                <label class="erppage-label">From Date</label>
+                <input type="date" class="erppage-input" id="Dtfromdate" />
+            </div>
+            <div class="erppage-divfield">
+                <label class="erppage-label">To Date</label>
+                <input type="date" class="erppage-input" id="Dttodate" />
+            </div>
+            <div class="erppage-divfield erppage-col-span-2">
+                <label class="erppage-label">Supplier Name</label>
+                @* <select class="erppage-input erppage-select" id="ddlsuppliername">
+                    <option value="">Select Supplier Name</option>
+                </select> *@
+                <input type="text" id="txtSupplierName" class="form-control" placeholder="Search Supplier" />
+                <input type="hidden" id="hdnSupplierCode">
+            </div>
+        </div>
+        <div class="erppage-internalaction mt-2">
+            <button type="button" id="btnLoaddata" class="erppage-btn erppage-btn-common-active-disabled">
+                <i class="fa fa-download"></i>
+                <span>Load Data</span>
+            </button>
+            <button type="submit" id="btnSave" class="erppage-btn erppage-btn-save">
+                <i class="fa fa-save"></i>
+                <span>Save</span>
+            </button>
+        </div>
+        <div class="erppagelist-container">
+            <div class="excel-wrapper fixed-grid-wrapper">
+                <table id="tblStorePurchaseOrderStatus" class="excel-table fixed-grid-table table-width resizable-table">
+                    <colgroup>
+                        <col class="hidden-col">
+                        <col style="width: 61px;">
+                        <col style="width: 104px;">
+                        <col style="width:110px;">
+                        <col style="width: 147px;">
+                        <col style="width: 76px;">
+                        <col class="hidden-col">
+                        <col style="width:220px;">
+                        <col style="width: 78px;">
+                        <col style="width: 78px;">
+                        <col style="width: 69px;">
+                        <col style="width:140px;">
+                        <col style="width:140px;">
+                        <col style="width: 196px;">
+                        <col style="width:90px;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th class="hidden-col">Code</th>
+                            <th>Type</th>
+                            <th>Srno</th>
+                            <th>Date</th>
+                            <th>Party Name</th>
+                            <th>Item Id</th>
+                            <th class="hidden-col">SNo</th>
+                            <th>Item Name</th>
+                            <th>Order Qty</th>
+                            <th>Recd Qty</th>
+                            <th>Bal Qty</th>
+                            <th>Disp Through</th>
+                            <th>Dispatch Ref</th>
+                            <th>Dispatch Remarks</th>
+                            <th class="action-col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/common/dropdown.js"></script>
+<script src="~/js/erpjs/purchase/transaction/indentstatusupdatejs/indentstatusupdate.js"></script>

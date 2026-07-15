@@ -2,7 +2,6 @@
 const urlParams = new URLSearchParams(location.search);
 const rowId = (urlParams.get('docId'));
 const isReadOnly = urlParams.get('readOnly') === 'true';
-
 let isMobileDataLoaded = false;
 let isMobileLoading = false;
 let mobileRequest = null;
@@ -14,18 +13,16 @@ let formState = {
 
 // ============ INIT ============
 function VisitorInit() {
-
     setCurrentDate();
     setCurrentTime();
     $("#NumDocNo").focus();
-    $("#btn_Print").hide();
+    $("#button_print").hide();
     if (rowId) {
-
         loadEmpList().then(() => {
             initSelect2();  
             loadVisitorEntry(rowId);
             if (isReadOnly) {
-                $("#btn_Print").show();
+                $("#button_print").show();
                 setVisitorEntryFormReadOnly();
             }
         });
@@ -139,6 +136,9 @@ function initSelect2() {
         placeholder: "Search Employee..",
         allowClear: true,
         width: '100%'
+    });
+    $('#ddlMeetEmployee').on('select2:open', function () {
+        document.querySelector('.select2-container--open .select2-search__field').focus();
     });
 }
 
@@ -324,7 +324,7 @@ async function onFormSubmit(e) {
             formState.isReadOnlyFromUrl = true;
 
             if (response.message.includes("Saved")) {
-                $("#btn_Print").show();
+                $("#button_print").show();
                 if (response.docId) {
                     $('#DOCID').val(response.docId);
                 }
@@ -332,7 +332,7 @@ async function onFormSubmit(e) {
                 showToast("Data Saved Successfully", { type: "success" });
 
             } else {
-                $("#btn_Print").show();
+                $("#button_print").show();
                 showToast("Data Updated Successfully", { type: "success" });
             }
 
@@ -451,7 +451,7 @@ function setVisitorEntryFormReadOnly() {
 
     // disable inputs
     form.find('input, select, textarea, button[type="submit"]').prop('disabled', true);
-    form.find('button').not('#btnbacklist , #btn_Print').prop('disabled', true);
+    form.find('button').not('#btnbacklist , #button_print').prop('disabled', true);
 
     // add readonly class
     form.addClass('erppage-readonly');
@@ -716,6 +716,7 @@ function PendingQCReport() {
             RPTNAME: "VISITOR SLIP"
         }
     };
+
     var now = new Date();
     var day = String(now.getDate()).padStart(2, '0');
     var month = String(now.getMonth() + 1).padStart(2, '0');
@@ -751,66 +752,6 @@ function PendingQCReport() {
     });
 }
 
-
-// ===== PRINT BUTTON(logic) =====
-//function PendingQCReport() {
-//    var reportName = "VISITOR_SLIP";
-//    var now = new Date();
-//    var day = String(now.getDate()).padStart(2, '0');
-//    var month = String(now.getMonth() + 1).padStart(2, '0');
-//    var year = String(now.getFullYear()).slice(-2);
-//    var hours = String(now.getHours()).padStart(2, '0');
-//    var minutes = String(now.getMinutes()).padStart(2, '0');
-//    var seconds = String(now.getSeconds()).padStart(2, '0');
-//    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
-//    $.ajax({
-//        url: 'http://localhost:34089/Report/PendingQCReport',
-//        type: 'GET',
-//        data: {
-//            Reportname: reportName,
-//            tableName: "VISITOR",
-//            vNo: $('#NumDocNo').val(),
-//            compCode: window.globalCompCode,
-//            branchCode: window.globalBranchCode,
-//            yearCode: window.globalYearCode,
-//            vType: 'VISI',
-//        },
-
-//        xhrFields: {
-//            responseType: 'blob'
-//        },
-
-//        success: function (response) {
-
-//            var file = new Blob(
-//                [response],
-//                { type: 'application/pdf' });
-
-//            var fileName =
-//                `${reportName}_${timestamp}.pdf`;
-
-//            var link = document.createElement('a');
-
-//            link.href = URL.createObjectURL(file);
-
-//            link.download = fileName;
-
-//            document.body.appendChild(link);
-
-//            link.click();
-
-//            document.body.removeChild(link);
-//        },
-
-//        error: function (xhr, status, error) {
-
-//            console.error(
-//                'Error generating report:',
-//                error
-//            );
-//        }
-//    });
-//}
 
 
 

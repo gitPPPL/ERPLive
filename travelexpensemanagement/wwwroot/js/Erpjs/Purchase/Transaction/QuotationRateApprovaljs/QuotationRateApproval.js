@@ -978,7 +978,7 @@ function getItemDetailsFromTable() {
             BULKDISC_UR: getStringOrNull(getText('BULKDISC_UR')),
             DOC_ID: getText('DOC_ID')
         };
-
+        
         details.push(detail);
     });
     return details;

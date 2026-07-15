@@ -396,7 +396,7 @@ function InitializeERPFilterDropdown(config) {
         RenderItems();
         RenderSelected();
 
-        TriggerChange();
+        TriggerChange(); 
     }
 
     function TriggerChange() {

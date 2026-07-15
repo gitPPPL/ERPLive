@@ -9,8 +9,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const rowId = urlParams.get('id');
 const vtype = urlParams.get('vtype');
 const $tbody = $("#tblConsumptionEntry tbody");
-const mode = urlParams.get('mode');
-const isReadOnly = (mode === 'view');
+let isReadOnly = urlParams.get('readOnly') === 'true';
 
 async function Misconsumptioninit() {
     try {
@@ -270,19 +269,15 @@ async function saveConsumptionEntry() {
 
         if (response && response.success) {
 
-            const msg = header.action === 'UPDATE'
-                ? "Data Updated Successfully"
-                : "Data Saved Successfully";
+            const msg = header.action === 'UPDATE' ? "Data Updated Successfully" : "Data Saved Successfully";
 
             showToast(msg, { type: "success" });
 
-            setTimeout(() => {
-                window.location.href = '/MiscConsumptionEntryList/Index';
-            }, 1000);
+            isReadOnly = true;
+            setFormReadOnly();
 
         } else {
             showToast(response.message, { type: "error" });
-           // showToast("Error while saving", { type: "error" });
         }
 
     } catch (err) {
@@ -305,7 +300,6 @@ async function LoadFormByID(rowId, vtype) {
 
         const header = result.data.header;
         const details = result.data.details;
-        console.log("Details Data", details);
         // ========= HEADER FILL =========
         $('#TxtCode').val(header.doC_ID || '');
         $('#ddlDocType').val(header.v_TYPE || '');
@@ -399,34 +393,34 @@ function addRow($tbody, data = {}) {
             </td>
             <td style="display:none;">${data.code || ""}</td>
 
-            <td>
-                <select class="form-control itemName" disabled>
-                    <option value="">-- Select --</option>
+            <td class="freeze-item">
+                <select class="erppagetable-control itemName" disabled>
+                    <option value="">Select item name</option>
                 </select>
             </td>
 
             <td>
-                <select class="form-control department" disabled>
-                    <option value="">-- Select --</option>
+                <select class="erppagetable-control department" disabled>
+                    <option value="">Select Department</option>
                 </select>
             </td>
 
             <td>
-                <select class="form-control unit" disabled>
-                    <option value="">-- Select --</option>
+                <select class="erppagetable-control unit" disabled>
+                    <option value="">Select Unit</option>
                 </select>
             </td>
 
             <td>
-                <input type="number" class="form-control no" value="${data.no || ''}"/>
+                <input type="number" class="erppagetable-control no" value="${data.no || ''}"/>
             </td>
 
             <td>
-                <input type="number" class="form-control quantity" value="${data.quantity || ''}"/>
+                <input type="number" class="erppagetable-control quantity" value="${data.quantity || ''}"/>
             </td>
 
             <td>
-                <input type="text" class="form-control remarks" value="${data.remarks || ''}"readonly />
+                <input type="text" class="erppagetable-control remarks" value="${data.remarks || ''}"readonly />
             </td>
 
             <td> 
@@ -438,9 +432,10 @@ function addRow($tbody, data = {}) {
             </td>
 
             <td class="action-col">
-                  	<button class="act-btn add btn-add-action" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus"></i></button>
+                <div class="action-wrap">
+                  	<button class="act-btn add btn-add-action" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus-circle"></i></button>
 					<button class="act-btn delete btn-delete-action" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash"></i></button>  
-               
+               </div>
             </td>
 
         </tr>
@@ -698,7 +693,6 @@ async function loadPendingDocuments(partyId) {
     try {
 
         const data = await MisConsumptionApi.getPendingDocuments(partyId);
-        console.log("pending Document Data", data);
         const tbody = $('#tblPendingDocument tbody');
         tbody.empty();
         if (!data || data.length === 0) {
@@ -846,7 +840,7 @@ function setFormReadOnly() {
     $(`${formSelector} button`).prop('disabled', true);
     $(formSelector).addClass('erppage-readonly');
     $('#btn-save').hide();
-
+    
     // ===== TABLE FIELDS FIX =====
     $('#tblConsumptionEntry tbody tr').each(function () {
 
@@ -888,8 +882,65 @@ function setFormReadOnly() {
         'pointer-events': 'none',
     });
 
-    $(`${formSelector} input, ${formSelector} select, ${formSelector} textarea`)
-        .attr('tabindex', '-1');
+    $(`${formSelector} input, ${formSelector} select, ${formSelector} textarea`).attr('tabindex', '-1');
+    $("#btn_Print").prop("disabled", false)
 }
+
+//==========Report==============
+function PendingQCReport() {
+    var reportName = "Rpt_gate_MiscConsumption";
+    // Crystal Report Formula
+    var SelForMul =
+        "{GATEPASS1.COMP_CODE}=" + window.globalVariables.compCode +
+        " AND {GATEPASS1.YEAR_CODE}=" + window.globalVariables.yearCode +
+        " AND {GATEPASS1.BRANCH_CODE}=" + window.globalVariables.branchCode +
+        " AND {GATEPASS1.V_NO}=" + $("#NumDocNo").val() +
+        " AND {GATEPASS1.V_TYPE}='" + $("#ddlDocType").val() + "'";
+   
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: SelForMul,
+        Database: window.database.db,
+        Parameters: {
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.add1,
+            comp_add2: window.globalVariables.add2,
+            RPTNAME: $("#ddlDocType option:selected").text()
+        }
+    };
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+    $.ajax({
+        url: 'http://localhost:34089/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (response) {
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+        }
+    });
+}
+
 
 

@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Spire.Doc.Documents;
 using System;
@@ -13,9 +14,11 @@ namespace travelexpensemanagement.Common.DropdownService
     public class DropdownService
     {
         private readonly DataBaseConnection _dbConnection;
-        public DropdownService(DataBaseConnection dbConnection)
+        private readonly IMemoryCache _memoryCache;
+        public DropdownService(DataBaseConnection dbConnection, IMemoryCache memoryCache)
         {
             _dbConnection = dbConnection;
+            _memoryCache = memoryCache;
         }
         public List<object> GetDropdownList(string query)
         {
@@ -31,12 +34,12 @@ namespace travelexpensemanagement.Common.DropdownService
                 {
                     dropdownItems.Add(new
                     {
-                        Value = reader[0].ToString(), 
-                        Text = reader[1].ToString()   
+                        Value = reader[0].ToString(),
+                        Text = reader[1].ToString()
                     });
                 }
             }
-            return dropdownItems;   
+            return dropdownItems;
         }
         public List<object> GetDropdownListcon(string query)
         {
@@ -59,7 +62,6 @@ namespace travelexpensemanagement.Common.DropdownService
             }
             return dropdownItems;
         }
-
         public List<object> GetDropdownListERP(string query)
         {
             List<object> dropdownItems = new List<object>();
@@ -81,7 +83,6 @@ namespace travelexpensemanagement.Common.DropdownService
             }
             return dropdownItems;
         }
-
         public List<object> GetEmpdataList(string query)
         {
             List<object> dropdownItems = new List<object>();
@@ -106,7 +107,6 @@ namespace travelexpensemanagement.Common.DropdownService
             return dropdownItems;
 
         }
-
         public List<object> GetEmpReasonList(string query)
         {
             List<object> dropdownItems = new List<object>();
@@ -129,7 +129,6 @@ namespace travelexpensemanagement.Common.DropdownService
             return dropdownItems;
 
         }
-
         public List<DropdownModel> GetMultipleDropdownList(string commandText, CommandType commandType, Dictionary<string, object> parameters = null)
         {
             List<DropdownModel> dropdownItems = new List<DropdownModel>();
@@ -170,7 +169,6 @@ namespace travelexpensemanagement.Common.DropdownService
             public string Value { get; set; }
             public string Text { get; set; }
         }
-
         private List<DropdownModel> ExecuteDropdown(string query, SqlParameter[] parameters = null)
         {
             var list = new List<DropdownModel>();
@@ -204,70 +202,197 @@ namespace travelexpensemanagement.Common.DropdownService
             return ExecuteDropdown(query);
         }
         // City
-        public List<DropdownModel> GetCity(string compCode)
+        //    public List<DropdownModel> GetCity(string compCode, string term)
+        //    {
+        //        string query = @"
+        //    SELECT TOP (50)
+        //           Code AS Value,
+        //           Name AS Text
+        //    FROM City_MAST
+        //    WHERE (@Term = '' OR Name LIKE '%' + @Term + '%')
+        //    ORDER BY Name";
+
+        //        return ExecuteDropdown(query, new[]
+        //        {
+        //    new SqlParameter("@Term", term ?? "")
+        //});
+        //    }
+
+        public List<DropdownModel> GetCity(string compCode, string term)
         {
-            string query = @"SELECT DISTINCT Code AS Value, Name AS Text FROM (SELECT Code, Name FROM City_MAST
-                        UNION ALL
-                        SELECT City_Code, City_Name FROM COURIER_TRACKING WHERE Comp_code = @CompCode 
-                        AND City_Name <> ''  AND City_Code <> '0' ) x ORDER BY Name";
+            string query = @" SELECT TOP (50) Value, Text  FROM ( SELECT Code AS Value, Name AS Text
+            FROM City_MAST
+            UNION
+            SELECT City_Code AS Value,  City_Name AS Text FROM COURIER_TRACKING WHERE Comp_code = @CompCode
+        ) X WHERE (@Term = '' OR Text LIKE '%' + @Term + '%')  ORDER BY Text";
+
             return ExecuteDropdown(query, new[]
             {
-                new SqlParameter("@CompCode", compCode)
+                new SqlParameter("@CompCode", compCode),
+                new SqlParameter("@Term", term ?? "")
             });
         }
+
+
         // Party
-        public List<DropdownModel> GetParty(string compCode)
+
+
+        public List<DropdownModel> SearchParty(string compCode, string term)
         {
-            string query = @"SELECT DISTINCT Code AS Value, Name AS Text 
-                 FROM (
-                    SELECT Code, Name FROM SUBGROUP_MAST WHERE Comp_code = @CompCode
-                    AND Nature NOT IN ('CASH','BANK','OTHERS')
-                    AND Name IS NOT NULL AND Name <> '' AND Code IS NOT NULL AND Code <> '0'
+            string query = @"
+SELECT TOP (50)
+       Value,
+       Text
+FROM
+(
+    SELECT Code AS Value,
+           Name AS Text
+    FROM SUBGROUP_MAST
+    WHERE Comp_code=@CompCode
+      AND Nature NOT IN ('CASH','BANK','OTHERS')
 
-                    UNION ALL
+    UNION
 
-                    SELECT Party_Code, Party_Name FROM COURIER_TRACKING  WHERE Comp_code = @CompCode
-                    AND Party_Name IS NOT NULL AND Party_Name <> ''
-                    AND Party_Code IS NOT NULL AND Party_Code <> '0'
-                 ) x
-                 ORDER BY Name";
+    SELECT Party_Code,
+           Party_Name
+    FROM COURIER_TRACKING
+    WHERE Comp_code=@CompCode
+) X
+WHERE (@Term='' OR Text LIKE @Term + '%')
+ORDER BY Text";
 
             return ExecuteDropdown(query, new[]
             {
-                new SqlParameter("@CompCode", compCode)
+        new SqlParameter("@CompCode", compCode),
+        new SqlParameter("@Term", term ?? "")
+    });
+        }
+
+        //public List<DropdownModel> GetCourier(string term)
+        //{
+        //    string query = @"SELECT DISTINCT COURIER_NAME AS Value, COURIER_NAME AS Text 
+        //                     FROM COURIER_TRACKING 
+        //                     WHERE COURIER_NAME IS NOT NULL AND COURIER_NAME <> '' 
+        //                     ORDER BY COURIER_NAME";
+
+        //    return ExecuteDropdown(query);
+        //}
+
+        public List<DropdownModel> GetCourier(string term)
+        {
+            string query = @"
+        SELECT DISTINCT
+               COURIER_NAME AS Value,
+               COURIER_NAME AS Text
+        FROM COURIER_TRACKING
+        WHERE COURIER_NAME IS NOT NULL
+          AND COURIER_NAME <> ''
+          AND (@Term = '' OR COURIER_NAME LIKE '%' + @Term + '%')
+        ORDER BY COURIER_NAME";
+
+            return ExecuteDropdown(query, new[]
+            {
+        new SqlParameter("@Term", term ?? "")
+    });
+        }
+
+
+        public List<DropdownModel> GetTransportName(string compCode, string term)
+        {
+            string query = @"SELECT TOP (50) Code AS Value,  Name AS Text FROM TRANSPORT_MAST
+            WHERE COMP_CODE = @CompCode  AND (@Term = '' OR Name LIKE @Term + '%') ORDER BY Name ASC";
+
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode),
+                new SqlParameter("@Term", term ?? "")
             });
         }
-        // Courier
-        public List<DropdownModel> GetCourier()
-        {
-            string query = @"SELECT DISTINCT COURIER_NAME AS Value, COURIER_NAME AS Text 
-                             FROM COURIER_TRACKING 
-                             WHERE COURIER_NAME IS NOT NULL AND COURIER_NAME <> '' 
-                             ORDER BY COURIER_NAME";
 
-            return ExecuteDropdown(query);
+        //==================My Code Start===============================
+        public List<DropdownModel> GetSupplierName(string compCode, string term)
+        {
+            string query = @"
+            SELECT TOP (50)
+                CODE AS Value,
+                NAME AS Text
+            FROM SUBGROUP_MAST
+            WHERE COMP_CODE = @CompCode
+              AND NATURE = 'Supplier'
+              AND ACTIVE = 1
+              AND (@Term = '' OR NAME LIKE @Term + '%')
+            ORDER BY NAME ASC";
+
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode),
+                new SqlParameter("@Term", term ?? "")
+            });
         }
+
+
+        //================Code End====================================
 
         // Purpose
-        public List<DropdownModel> GetPurpose()
-        {
-            string query = @"SELECT DISTINCT Purpose AS Value, Purpose AS Text 
-                             FROM COURIER_TRACKING WHERE Purpose <> '' ORDER BY Purpose";
+        //public List<DropdownModel> GetPurpose(string compCode, string term)
+        //{
+        //    string query = @"SELECT DISTINCT Purpose AS Value, Purpose AS Text 
+        //                     FROM COURIER_TRACKING WHERE Purpose <> '' ORDER BY Purpose";
 
-            return ExecuteDropdown(query);
+        //    return ExecuteDropdown(query);
+        //}
+
+        public List<DropdownModel> GetPurpose(string compCode, string term)
+        {
+            string query = @"
+            SELECT DISTINCT
+                   Purpose AS Value,
+                   Purpose AS Text
+            FROM COURIER_TRACKING
+            WHERE Purpose <> ''
+              AND (@Term = '' OR Purpose LIKE '%' + @Term + '%')
+            ORDER BY Purpose";
+
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@Term", term ?? "")
+            });
         }
 
         // Employee
+        //public List<DropdownModel> GetEmployee(string compCode)
+        //{
+        //    string query = @"SELECT Code AS Value, CAST(Code AS VARCHAR(20)) + ' | ' + Name AS Text FROM EMP_MAST WHERE RESIGN_DATE IS NULL 
+        //                     AND Comp_code = @CompCode ORDER BY Name";
+
+        //    return ExecuteDropdown(query, new[]
+        //    {
+        //        new SqlParameter("@CompCode", compCode)
+        //    });
+        //}
+
         public List<DropdownModel> GetEmployee(string compCode)
         {
-            string query = @"SELECT Code AS Value, Name AS Text FROM EMP_MAST WHERE RESIGN_DATE IS NULL 
-                             AND Comp_code = @CompCode ORDER BY Name";
+            string query = @"
+                SELECT
+                    Code AS Value,
+                    LTRIM(RTRIM(Code))
+                    + SPACE(10 - LEN(LTRIM(RTRIM(Code))))
+                    + '|'
+                    + SPACE(5)
+                    + CAST(Name AS VARCHAR(200)) AS Text
+                FROM EMP_MAST
+                WHERE RESIGN_DATE IS NULL
+                  AND Comp_code = @CompCode
+                ORDER BY Name";
 
             return ExecuteDropdown(query, new[]
             {
                 new SqlParameter("@CompCode", compCode)
             });
         }
+
+
         // DocType
         public List<DropdownModel> GetDocTypeWithParam(List<string> codes)
         {
@@ -328,7 +453,85 @@ namespace travelexpensemanagement.Common.DropdownService
                 new SqlParameter("@CompCode", compCode)
             });
         }
-        
+
+        public List<DropdownModel> GetQCIncharg(string compCode)
+        {
+            string query = @"
+                SELECT 
+                    code AS Value,
+                    CONCAT(Name,'(',code,')') AS Text
+                FROM EMP_MAST
+                WHERE Comp_code = @CompCode
+                AND Resign_date IS NULL
+                AND Type IN ('Staff')
+                ORDER BY Name
+            ";
+
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+
+        public List<DropdownModel> GetChem(string compCode)
+        {
+            string query = @"
+                SELECT 
+                    code AS Value,
+                    CONCAT(Name,'(',code,')') AS Text
+                FROM EMP_MAST
+                WHERE Comp_code = @CompCode
+                AND Resign_date IS NULL
+                AND Type IN ('Staff','Semi Staff')
+                ORDER BY Name
+            ";
+
+                    return ExecuteDropdown(query, new[]
+                    {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+        public List<DropdownModel> GetPartyName(string compCode)
+        {
+            string query = @" SELECT CODE AS Value, NAME AS Text FROM SUBGROUP_MAST  WHERE COMP_CODE = @CompCode ORDER BY NAME  ";
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+        public List<DropdownModel> GetItemName(string compCode)
+        {
+            string query = @" SELECT a.CODE AS Value,a.NAME AS Text FROM ITEM_MAST a LEFT JOIN ITEM_MGROUP b ON a.MGROUP_CODE = b.CODE
+                AND a.COMP_CODE = b.COMP_CODE WHERE a.COMP_CODE = @CompCode AND b.MGROUP_TYPE = 'Raw' AND a.ACTIVE = 1 ORDER BY a.NAME";
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+        public List<DropdownModel> GetItemMaster(string compCode)
+        {
+            string query = @"
+            SELECT Code AS Value, NAME AS Text FROM ITEM_MAST WHERE COMP_CODE = @CompCode AND ACTIVE = 1 AND NAME <> '' ORDER BY NAME ";
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+        public List<DropdownModel> GetParticulars(string compCode)
+        {
+            string query = @"
+                SELECT Code AS Value, NAME AS Text FROM QCP_MAST WHERE COMP_CODE = @CompCode AND ACTIVE = 1 AND NAME <> '' ORDER BY NAME ";
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode)
+            });
+        }
+        public List<DropdownModel> GetUnits()
+        {
+            string query = @"
+                SELECT Code AS Value, NAME AS Text FROM QCPUNIT_MAST WHERE ACTIVE = 1 AND NAME <> '' ORDER BY NAME ";
+            return ExecuteDropdown(query);
+        }
+
     }
 }
-

@@ -208,7 +208,7 @@
     background: #fff;
     border: 1px solid #cdcdcd;
     padding: 4px 8px;
-    border-radius: 6px;
+    border-radius: 25px;
     width: 350px;
 }
 
@@ -220,7 +220,7 @@
         border: none;
         outline: none;
         width: 100%;
-        font-size: 12px;
+        font-size: 11px;
     }
 
 /* ACTIONS RIGHT */

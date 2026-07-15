@@ -38,6 +38,14 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
         public IActionResult Index()
         {
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+            ViewBag.DatabaseName = databaseName;
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+            ViewBag.GlobalVariables = globalVariables;
             return View("~/Views/GateEntry/Transaction/MiscConsumptionEntry/Index.cshtml");
         }
 

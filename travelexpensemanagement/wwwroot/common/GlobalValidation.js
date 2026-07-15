@@ -393,6 +393,91 @@ function checkModificationDays(options) {
     });
 }
 
+//======Check Permission==========
+let permission = null;
+function checkPermission(controllerName) {
+
+    $.ajax({
+        url: '/Permission/GetCurrentMenuPermission',
+        type: 'GET',
+        data: {
+            controllerName: controllerName
+        },
+        success: function (res) {
+            console.log(res);
+            if (!res.success)
+                return;
+            permission = res;
+            
+            $("#button_add").toggle(res.add);
+            $("#button_edit").toggle(res.edit);
+            $("#button_delete").toggle(res.delete);
+            $("#button_print").toggle(res.print);
+            $("#button_export").toggle(res.export);
+            $("#button_mail").toggle(res.mail);
+            $("#button_approval").toggle(res.approval);
+            $("#button_document").toggle(res.docdetail);
+
+            $(".permission-edit").toggle(res.edit);
+            $(".permission-delete").toggle(res.delete);
+
+            applyGridPermission();
+        }
+    });
+}
+
+function applyGridPermission() {
+
+    if (!permission)
+        return;
+
+    $(".permission-edit").toggle(permission.edit);
+    $(".permission-delete").toggle(permission.delete);
+}
+
+//==========Entry Page Permission========
+let Entrypermission = null;
+
+function checkPermissionForEntryPage(controllerName) {
+
+    $.ajax({
+        url: '/Permission/GetCurrentEntryPagePermission',
+        type: 'GET',
+        data: {
+            controllerName: controllerName
+        },
+        success: function (res) {
+            console.log(res);
+            if (!res.success)
+                return;
+            Entrypermission = res;
+
+            $("#button_add").toggle(res.add);
+            $("#button_edit").toggle(res.edit);
+            $("#button_delete").toggle(res.delete);
+            $("#button_print").toggle(res.print);
+            $("#button_export").toggle(res.export);
+            $("#button_mail").toggle(res.mail);
+            $("#button_approval").toggle(res.approval);
+            $("#button_document").toggle(res.docdetail);
+
+            $(".permission-edit").toggle(res.edit);
+            $(".permission-delete").toggle(res.delete);
+
+            applyGridPermissionforEntryPage();
+        }
+    });
+}
+
+function applyGridPermissionforEntryPage() {
+
+    if (!permission)
+        return;
+
+    $(".permission-edit").toggle(permission.edit);
+    $(".permission-delete").toggle(permission.delete);
+}
+
 //How to call
 
 //====Use checkModificationAllowed on click of edit button

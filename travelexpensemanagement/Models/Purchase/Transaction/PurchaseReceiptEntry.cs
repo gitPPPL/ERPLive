@@ -1,4 +1,6 @@
-﻿namespace travelexpensemanagement.Models.Purchase.Transaction
+﻿using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseReceiptEntry;
+
+namespace travelexpensemanagement.Models.Purchase.Transaction
 {
     public class PurchaseReceiptEntry
     {
@@ -141,7 +143,6 @@
             public string? FinalLock { get; set; }     
            
         }
-
         public class PurchaseReceiptHeaderModel
         {
             public string? DocType { get; set; }
@@ -176,6 +177,8 @@
             public string? ShipAddLine3 { get; set; }
             public string? ShipCity { get; set; }
             public string? ShipPincode { get; set; }
+            public string? BILL_ADDRESSID { get; set; }
+            public string? SHIP_ADDRESSID { get; set; }
             public string? ShipState { get; set; }
             public string? ShipGST { get; set; }
             public string? TransportName { get; set; }
@@ -202,12 +205,25 @@
             public decimal? NumTCSPer2 { get; set; }
             public decimal? NumRoundOff { get; set; }
             public decimal? NumFinalNetAmt { get; set; }
+            public DateTime? EWB_DATE { get; set; }     
+            public DateTime? EWB_EXPDATE { get; set; }
+            public string? EWB_INVNO { get; set; }
+            public string? GATE_TYPE { get; set; }
+            public string? TRANSIT_NO { get; set; }
+            public string? TRANSPORT_CODE { get; set; }
+            public string? HOLD_PAY { get; set; }
+            public string? HOLD_REASON { get; set; }
+            public string? HOLD_DATE { get; set; }
             public string? ACTION { get; set; }
         }
+
         public class AttachmentModel
         {
             public string FileName { get; set; }
             public IFormFile File { get; set; }
+            public string IMG_FILE { get; set; }
+            public string FILE_NAME { get; set; }
+            public string FILE_TYPE { get; set; }
         }
 
         public class Purchase1List
@@ -355,14 +371,18 @@
             public decimal? RATE_SPECIAL { get; set; }
             public string FINAL_LOCK { get; set; }
         }
+
         public class Purchase3List
         {
             public string DOC_ID { get; set; }
             public int V_NO { get; set; }
             public string V_TYPE { get; set; }
             public DateTime V_DATE { get; set; }
-            public string ATTACHMENT { get; set; }
+            public byte[] IMG_FILE { get; set; }
+            public string FILE_NAME { get; set; }
+            public string FILE_TYPE { get; set; }
         }
+
         public class WeightSummary
         {
             public string KantaType { get; set; }
@@ -371,6 +391,7 @@
             public string ITEM_NAME { get; set; }
             public decimal NetWt { get; set; }
         }
+
         public class PurchaseAllDetailsResponse
         {
             public List<Purchase1List> Purchase1 { get; set; } = new List<Purchase1List>();
@@ -378,6 +399,7 @@
             public List<Purchase3List> Purchase3 { get; set; } = new List<Purchase3List>();
             //public List<WeightSummary> WeightSummary { get; set; } = new();
         }
+
         public class GetDetailsRequest
         {
             public string VNO { get; set; }
@@ -392,8 +414,54 @@
         }
 
 
+        //=============Production Batch=============
+        public class ProductionBatchSaveModel
+        {
+            public int VNo { get; set; }
 
+            public string VType { get; set; }
 
+            public DateTime VDate { get; set; }
+
+            public int ItemCode { get; set; }
+
+            public int FromDeptCode { get; set; }
+
+            public int ToDeptCode { get; set; }
+
+            public List<ProductionBatchRow> Rows { get; set; }
+        }
+        public class ProductionBatchRow
+        {
+            public string RefType { get; set; }
+
+            public int RefNo { get; set; }
+
+            public int ItemCode { get; set; }
+
+            public string BarcodeNo { get; set; }
+
+            public string BatchNo { get; set; }
+
+            public decimal ApproxWeight { get; set; }
+            
+            public decimal ActualWeight { get; set; }
+
+            public int Sno { get; set; }
+        }
+        public class ProductionBatchRequest
+        {
+            public int? Vno { get; set; }
+            public string Vtype { get; set; }
+        }
+
+        public class CreateIntimationModel
+        {
+            public PurchaseReceiptHeaderModel Header { get; set; }
+            public List<ItemDetailModel> ItemDetails { get; set; }
+        }
 
     }
+
 }
+

@@ -2,6 +2,7 @@
 using System.Data;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.QualityMaster;
@@ -18,6 +19,7 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl.Ma
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private int? userLevel;
         private readonly GlobalValidationdate _globalValidationdate;
+       
         public TemperatureMasterListRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
         DropdownService dropdownService, DbHelper dbHelper, ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
         {
@@ -26,6 +28,8 @@ namespace travelexpensemanagement.Repositories.Implementations.QualityControl.Ma
             _globalVariableService = globalVariableService;
             _dropdownService = dropdownService;
             _globalValidationdate = globalValidationdate;
+          
+
         }
 
         public (List<TempratureMasterModel> Data, int TotalCount)GetTemperatureList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
