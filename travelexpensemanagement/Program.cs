@@ -57,11 +57,12 @@
     builder.Services.AddScoped<IBigWeighbridgeRepository, BigWeighbridgeRepository>();
     builder.Services.AddScoped<IStoreWeighbridgeEntryRepository, StoreWeighbridgeEntryRepository>();
     builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridgeEntryListRepository>();
-    //Weighbridge Transaction repositories
+    builder.Services.AddScoped<IApprovalService, ApprovalService>();
+//Weighbridge Transaction repositories
 
 
 
-    builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
+builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
     builder.Services.AddScoped<EncryptionHelper>();
 
     builder.Services.AddDistributedMemoryCache();

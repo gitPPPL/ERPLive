@@ -100,5 +100,105 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
             return Json(new { items = results, totalCount });
         }
+        [HttpPost]
+        public async Task<IActionResult> Delete(string vNo, string docType)
+        {
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    await con.OpenAsync();
+
+                    using (SqlTransaction transaction = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            // PURCHASE3
+                            var cmd3 = new SqlCommand(@"
+                        DELETE FROM PURCHASE3
+                        WHERE V_TYPE=@VType
+                        AND V_NO=@VNo
+                        AND YEAR_CODE=@YearCode
+                        AND COMP_CODE=@CompCode
+                        AND BRANCH_CODE=@BranchCode", con, transaction);
+
+                            cmd3.Parameters.AddWithValue("@VType", docType);
+                            cmd3.Parameters.AddWithValue("@VNo", vNo);
+                            cmd3.Parameters.AddWithValue("@YearCode", gv.PubFYearCode);
+                            cmd3.Parameters.AddWithValue("@CompCode", gv.PubCompCode);
+                            cmd3.Parameters.AddWithValue("@BranchCode", 1);
+
+                            await cmd3.ExecuteNonQueryAsync();
+
+                            // PURCHASE2
+                            var cmd2 = new SqlCommand(@"
+                        DELETE FROM PURCHASE2
+                        WHERE V_TYPE=@VType
+                        AND V_NO=@VNo
+                        AND YEAR_CODE=@YearCode
+                        AND COMP_CODE=@CompCode
+                        AND BRANCH_CODE=@BranchCode", con, transaction);
+
+                            cmd2.Parameters.AddWithValue("@VType", docType);
+                            cmd2.Parameters.AddWithValue("@VNo", vNo);
+                            cmd2.Parameters.AddWithValue("@YearCode", gv.PubFYearCode);
+                            cmd2.Parameters.AddWithValue("@CompCode", gv.PubCompCode);
+                            cmd2.Parameters.AddWithValue("@BranchCode", 1);
+
+                            await cmd2.ExecuteNonQueryAsync();
+
+                            // PURCHASE1
+                            var cmd1 = new SqlCommand(@"
+                        DELETE FROM PURCHASE1
+                        WHERE V_TYPE=@VType
+                        AND V_NO=@VNo
+                        AND YEAR_CODE=@YearCode
+                        AND COMP_CODE=@CompCode
+                        AND BRANCH_CODE=@BranchCode", con, transaction);
+
+                            cmd1.Parameters.AddWithValue("@VType", docType);
+                            cmd1.Parameters.AddWithValue("@VNo", vNo);
+                            cmd1.Parameters.AddWithValue("@YearCode", gv.PubFYearCode);
+                            cmd1.Parameters.AddWithValue("@CompCode", gv.PubCompCode);
+                            cmd1.Parameters.AddWithValue("@BranchCode", 1);
+
+                            int rows = await cmd1.ExecuteNonQueryAsync();
+
+                            transaction.Commit();
+
+                            if (rows > 0)
+                            {
+                                return Json(new
+                                {
+                                    success = true,
+                                    message = "Record deleted successfully."
+                                });
+                            }
+
+                            return Json(new
+                            {
+                                success = false,
+                                message = "Record not found."
+                            });
+                        }
+                        catch
+                        {
+                            transaction.Rollback();
+                            throw;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

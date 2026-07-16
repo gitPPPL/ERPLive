@@ -7,6 +7,7 @@ using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using static travelexpensemanagement.Controllers.QualityControl.Transaction.IncommingQCRMController;
 using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseReturnEntry;
 
 
@@ -591,7 +592,13 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 }
                             }
                             transaction.Commit();
-                            return Ok(new { status = "success", message = "Saved successfully" });
+                            //return Ok(new { status = "success", message = "Saved successfully" });
+                            return Ok(new
+                            {
+                                success = true,
+                                action = "INSERT",
+                                message = "Data saved successfully."
+                            });
                         }
                         catch (Exception ex)
                         {
@@ -801,58 +808,64 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 }
                             }
                             // Insert Image
-                            using (SqlCommand ItemDetailDelete = new SqlCommand("DELETE FROM PURCHASE3 WHERE COMP_CODE = @COMP_CODE AND V_NO = @V_NO and V_TYPE= @V_TYPE and YEAR_CODE= @YEAR_CODE ", con, transaction))
-                            {
-                                ItemDetailDelete.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
-                                ItemDetailDelete.Parameters.AddWithValue("@V_NO", headerObj.Vno);
-                                ItemDetailDelete.Parameters.AddWithValue("@V_TYPE", headerObj.DocType);
-                                ItemDetailDelete.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
-                                ItemDetailDelete.ExecuteNonQuery();
-                            }
+                            //using (SqlCommand ItemDetailDelete = new SqlCommand("DELETE FROM PURCHASE3 WHERE COMP_CODE = @COMP_CODE AND V_NO = @V_NO and V_TYPE= @V_TYPE and YEAR_CODE= @YEAR_CODE ", con, transaction))
+                            //{
+                            //    ItemDetailDelete.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
+                            //    ItemDetailDelete.Parameters.AddWithValue("@V_NO", headerObj.Vno);
+                            //    ItemDetailDelete.Parameters.AddWithValue("@V_TYPE", headerObj.DocType);
+                            //    ItemDetailDelete.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
+                            //    ItemDetailDelete.ExecuteNonQuery();
+                            //}
 
-                            foreach (var file in Attachments)
-                            {
-                                if (file.File != null && file.File.Length > 0)
-                                {
-                                    // Save file to disk
-                                    var fileName = Path.GetFileName(file.File.FileName);
-                                    var saveFolder = Path.Combine("wwwroot", "attachments", "Purchase");
-                                    var filePath = Path.Combine(saveFolder, fileName);
+                            //foreach (var file in Attachments)
+                            //{
+                            //    if (file.File != null && file.File.Length > 0)
+                            //    {
+                            //        // Save file to disk
+                            //        var fileName = Path.GetFileName(file.File.FileName);
+                            //        var saveFolder = Path.Combine("wwwroot", "attachments", "Purchase");
+                            //        var filePath = Path.Combine(saveFolder, fileName);
 
-                                    if (!Directory.Exists(saveFolder))
-                                    {
-                                        Directory.CreateDirectory(saveFolder);
-                                    }
-                                    using (var stream = new FileStream(filePath, FileMode.Create))
-                                    {
-                                        await file.File.CopyToAsync(stream);
-                                    }
-                                    // Save record to database
-                                    using (var cmdAttach = new SqlCommand("InsertPURCHASEReturnEntryAttachment", con, transaction))
-                                    {
-                                        cmdAttach.CommandType = CommandType.StoredProcedure;
+                            //        if (!Directory.Exists(saveFolder))
+                            //        {
+                            //            Directory.CreateDirectory(saveFolder);
+                            //        }
+                            //        using (var stream = new FileStream(filePath, FileMode.Create))
+                            //        {
+                            //            await file.File.CopyToAsync(stream);
+                            //        }
+                            //        // Save record to database
+                            //        using (var cmdAttach = new SqlCommand("InsertPURCHASEReturnEntryAttachment", con, transaction))
+                            //        {
+                            //            cmdAttach.CommandType = CommandType.StoredProcedure;
 
-                                        AddParameterSafe(cmdAttach, "@COMP_CODE", globalVar.PubCompCode);
-                                        AddParameterSafe(cmdAttach, "@BRANCH_CODE", 1);
-                                        AddParameterSafe(cmdAttach, "@YEAR_CODE", globalVar.PubFYearCode);
-                                        AddParameterSafe(cmdAttach, "@DOC_ID", headerObj.DocNo);
-                                        AddParameterSafe(cmdAttach, "@V_NO", headerObj.Vno);
-                                        AddParameterSafe(cmdAttach, "@V_TYPE", headerObj.DocType);
-                                        AddParameterSafe(cmdAttach, "@V_DATE", DateTime.Parse(headerObj.DocDate));
-                                        AddParameterSafe(cmdAttach, "@UUSER", globalVar.PubUserId);
-                                        AddParameterSafe(cmdAttach, "@UDATE", DateTime.Now);
-                                        AddParameterSafe(cmdAttach, "@AED", "A");
-                                        AddParameterSafe(cmdAttach, "@WSID", globalVar.PubWorkStationID);
-                                        AddParameterSafe(cmdAttach, "@LIP", globalVar.PubLocalId);
-                                        AddParameterSafe(cmdAttach, "@LID", Environment.MachineName);
-                                        AddParameterSafe(cmdAttach, "@ATTACHMENT", "/attachments/Purchase/" + fileName);
-                                        //AddParameterSafe(cmdAttach, "@Action", "Insert");
-                                        await cmdAttach.ExecuteNonQueryAsync();
-                                    }
-                                }
-                            }
+                            //            AddParameterSafe(cmdAttach, "@COMP_CODE", globalVar.PubCompCode);
+                            //            AddParameterSafe(cmdAttach, "@BRANCH_CODE", 1);
+                            //            AddParameterSafe(cmdAttach, "@YEAR_CODE", globalVar.PubFYearCode);
+                            //            AddParameterSafe(cmdAttach, "@DOC_ID", headerObj.DocNo);
+                            //            AddParameterSafe(cmdAttach, "@V_NO", headerObj.Vno);
+                            //            AddParameterSafe(cmdAttach, "@V_TYPE", headerObj.DocType);
+                            //            AddParameterSafe(cmdAttach, "@V_DATE", DateTime.Parse(headerObj.DocDate));
+                            //            AddParameterSafe(cmdAttach, "@UUSER", globalVar.PubUserId);
+                            //            AddParameterSafe(cmdAttach, "@UDATE", DateTime.Now);
+                            //            AddParameterSafe(cmdAttach, "@AED", "A");
+                            //            AddParameterSafe(cmdAttach, "@WSID", globalVar.PubWorkStationID);
+                            //            AddParameterSafe(cmdAttach, "@LIP", globalVar.PubLocalId);
+                            //            AddParameterSafe(cmdAttach, "@LID", Environment.MachineName);
+                            //            AddParameterSafe(cmdAttach, "@ATTACHMENT", "/attachments/Purchase/" + fileName);
+                            //            //AddParameterSafe(cmdAttach, "@Action", "Insert");
+                            //            await cmdAttach.ExecuteNonQueryAsync();
+                            //        }
+                            //    }
+                            //}
                             transaction.Commit();
-                            return Ok(new { status = "success", message = "Update successfully" });
+                            //return Ok(new { status = "success", message = "Update successfully" });
+                            return Ok(new
+                            {
+                                success = true,
+                                action = "UPDATE",
+                                message = "Data updated successfully."
+                            });
                         }
                         catch (Exception ex)
                         {
@@ -1060,6 +1073,104 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return StatusCode(500, "An unexpected error occurred: " + ex.Message);
             }
         }
+
+        //------------------------------------Report-------------------------------------------
+
+        [HttpPost]
+        public IActionResult PrintPurchaseReturnEntryReport([FromBody] PrintReportModel model)
+        {
+            if (model == null)
+                return BadRequest();
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+                    string sql = @"SELECT 1
+                           FROM Ledger2
+                           WHERE V_TYPE=@VTYPE
+                           AND V_NO=@VNO
+                           AND COMP_CODE=@COMP
+                           AND BRANCH_CODE=@BRANCH
+                           AND YEAR_CODE=@YEAR";
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@VTYPE", model.VType);
+                        cmd.Parameters.AddWithValue("@VNO", model.VNo);
+                        cmd.Parameters.AddWithValue("@COMP", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH", gv.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YEAR", gv.PubFYearCode);
+
+                        var exist = cmd.ExecuteScalar();
+
+                        if (exist == null)
+                        {
+                            return Json(new
+                            {
+                                success = false,
+                                message = $"Voucher not posted of VType:{model.VType} and VNo:{model.VNo}"
+                            });
+                        }
+                    }
+
+                    string reportName = gv.PubCompCode == "7"
+                        ? "INVOICE_PRETK"
+                        : "INVOICE_PRET";
+
+                    var requestData = new
+                    {
+                        Reportname = reportName,
+                        Database = "ERPDB",
+
+                        selectionFormula =
+                            "{PURCHASE1.V_TYPE} = '" + model.VType + "'" +
+                            " AND {PURCHASE1.V_NO} = " + model.VNo +
+                            " AND {PURCHASE1.COMP_CODE} = " + gv.PubCompCode +
+                            " AND {PURCHASE1.YEAR_CODE} = " + gv.PubFYearCode +
+                            " AND {PURCHASE1.BRANCH_CODE} = " + gv.PubBranchCode,
+
+                        Parameters = new
+                        {
+                            RPTNAME = model.VType + "/Debit Note",
+                            comp_name = gv.CompanyName,
+                            comp_name1 = gv.PubCompCode == "3" ? "" : gv.CompanyName,
+                            comp_add1 = gv.Address1,
+                            comp_add2 = gv.Address2,
+                            comp_phone = "Mobile :" + gv.Phone,
+                            GST = "GSTIN :" + gv.gstin,
+                            TIN = "TIN NO. :" + gv.PAN,
+                            Website = "Web :" + gv.Website,
+                            EMAIL = "Email :" + gv.Email,
+                            INWORD = model.Amount
+                        }
+                    };
+
+                    return Json(new
+                    {
+                        success = true,
+                        report = requestData
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        public class PrintReportModel
+        {
+            public string? VType { get; set; }
+            public string? Amount { get; set; }
+            public int? VNo { get; set; }
+        }
+        //------------------------------------Report-------------------------------------------
+
         private object ChangeType(object value, Type targetType)
         {
             if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Nullable<>))

@@ -66,48 +66,92 @@
 		<!-- Pagination container -->
 		<div class="row">
 			<div class="col-md-12">
-				<div class="pagination-end">
+				@* <div class="pagination-end">
 					<div class="custom-pagination" id="tablePagination"></div>
+				</div> *@
+
+				<div class="erppagelist-pagination">
+					<div class="pagination-left">
+						<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+							<option value="5">5</option>
+							<option value="10" selected>10</option>
+							<option value="25">25</option>
+							<option value="50">50</option>
+						</select>
+					</div>
+					<div class="pagination-center">
+						<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+						<div id="pageNumbers" class="page-numbers"></div>
+						<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+					</div>
+					<div class="pagination-right" id="pageInfoText">
+						Results: 0 - 0 of 0
+					</div>
 				</div>
+
 			</div>
 		</div>
 	</div>
 </fieldset>
 
+
+<script src="/common/pagination.js"></script>
+<script src="/common/delete.js"></script>
+
 <script>
-	let currentPage = 1;
-	const pageSize = 10;
+	let purchasePagination;
+
 	$(document).ready(function () {
-		loadPurchaseReceiptEntryList();
-		$('#searchBox').on('keyup', function () {
-			currentPage = 1;
-			loadPurchaseReceiptEntryList();
-		});
-	});
-	function loadPurchaseReceiptEntryList() {
-		const searchTerm = $('#searchBox').val();
-		$.ajax({
-			url: '/PurchaseReturnEntryList/GetPurchaseReceiptEntryList',
-			type: 'GET',
-			dataType: 'json',
-			data: {
-				searchTerm,
-				pageNumber: currentPage,
-				pageSize: pageSize
+
+		purchasePagination = Pagination.create({
+			pageSize: 10,
+			paginationContainer: '#pageNumbers',
+			infoContainer: '#pageInfoText',
+
+			loader: function (params) {
+
+				$.ajax({
+					url: '/PurchaseReturnEntryList/GetPurchaseReceiptEntryList',
+					type: 'GET',
+					dataType: 'json',
+					data: {
+						searchTerm: $('#searchBox').val(),
+						pageNumber: params.pageNumber,
+						pageSize: params.pageSize
+					},
+					success: function (res) {
+
+						params.callback({
+							data: res.items || [],
+							totalCount: res.totalCount || 0
+						});
+
+					},
+					error: function () {
+						toastr.error("Error fetching data.");
+					}
+				});
+
 			},
-			success: function (res) {
-				console.log('res',res)
-				const docs = res.items || [];
-				const totalCount = res.totalCount || 0;
+
+			render: function (docs) {
+
 				const tbody = $('#tblPurchaseReturnEntryList tbody');
 				tbody.empty();
 
-				if (docs.length === 0) {
-					tbody.append(`<tr><td colspan="18" class="text-center text-muted">No records found.</td></tr>`);
-					renderPagination(0, pageSize, currentPage);
+				if (!docs.length) {
+					tbody.append(`
+						<tr>
+							<td colspan="18" class="text-center text-muted">
+								No records found.
+							</td>
+						</tr>
+					`);
 					return;
 				}
+
 				docs.forEach(doc => {
+
 					tbody.append(`
 						<tr>
 							<td>${doc.vNo || ''}</td>
@@ -120,66 +164,72 @@
 							<td>${doc.billAdd2 || ''}</td>
 							<td>${doc.billCity || ''}</td>
 							<td>${doc.billGST || ''}</td>
-							<td>${doc.shipTo && typeof doc.shipTo === 'object' ? (doc.shipTo.Name || '') : (doc.shipTo || '')}</td>
+							<td>${doc.shipTo && typeof doc.shipTo === 'object'
+								? (doc.shipTo.Name || '')
+								: (doc.shipTo || '')}</td>
 							<td>${doc.qty || ''}</td>
-							<td>${doc.amount}</td>
-							<td>${doc.remarks && typeof doc.remarks === 'object' ? (doc.remarks.Text || '') : (doc.remarks || '')}</td>
-							<td>${typeof doc.transportName === 'object' ? (doc.transportName.Name || '') : (doc.transportName || '')}</td>
+							<td>${doc.amount || ''}</td>
+							<td>${doc.remarks && typeof doc.remarks === 'object'
+								? (doc.remarks.Text || '')
+								: (doc.remarks || '')}</td>
+							<td>${typeof doc.transportName === 'object'
+								? (doc.transportName.Name || '')
+								: (doc.transportName || '')}</td>
 							<td>${doc.gateNo || ''}</td>
 							<td>${doc.status || ''}</td>
 							<td>
 								<div class="action-icons">
-									<i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.vType}', '${doc.vNo}')"></i>
-									<i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.vNo}')"></i>
-									<i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.vNo}')"></i>
-									<i class="fa fa-file btn-document" data-bs-toggle="tooltip" title="Document Details" onclick="showDocumentPopup('${doc.vNo}')"></i>
+									<i class="fas fa-edit btn-edit"
+									   title="Edit"
+									   onclick="editDocStage('${doc.vType}','${doc.vNo}')"></i>
+
+									   <i class="fas fa-eye btn-view"
+									   title="View"
+									   onclick="viewDocStage('${doc.vType}','${doc.vNo}')"></i>
+
+									   <i class="fas fa-trash btn-delete"
+									   title="Delete"
+									   onclick="deleteDocStage('${doc.vType}','${doc.vNo}')"></i>
+
+									<i class="fa fa-file btn-document"
+									   title="Document"
+									   onclick="showDocumentPopup('${doc.vNo}')"></i>
 								</div>
-					</td>
+							</td>
 						</tr>
 					`);
+
 				});
 
-				renderPagination(totalCount, pageSize, currentPage);
-			},
-			error: function () {
-				alert('Error fetching data');
 			}
+
 		});
+
+		// First Load
+		purchasePagination.load();
+
+		// Search
+		$('#searchBox').keyup(function () {
+			purchasePagination.load();
+		});
+
+	});
+
+	function changeRowsPerPage() {
+		purchasePagination.setPageSize(parseInt($('#pageSizeSelect').val()));
+		purchasePagination.load();
 	}
-	function renderPagination(total, pageSize, currentPage) {
-		const totalPages = Math.ceil(total / pageSize);
-		const pagination = $('#tablePagination');
-		pagination.empty();
-		if (totalPages <= 1) return;
-		let html = '';
-		if (currentPage > 1) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-		}
-		const startPage = Math.max(1, currentPage - 2);
-		const endPage = Math.min(totalPages, currentPage + 2);
-		for (let i = startPage; i <= endPage; i++) {
-			html += `
-				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-		}
-		if (currentPage < totalPages) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-		}
-		pagination.html(html);
-	}
-	function goToPage(page) {
-		currentPage = page;
-		loadPurchaseReceiptEntryList();
-	}
-		function editDocStage(vType, vNo) {
-		// Build the docCode (if you want to combine) or pass separately
+
+	function editDocStage(vType, vNo) {
 		window.location.href = `/PurchaseReturnEntry/Index?vType=${encodeURIComponent(vType)}&vNo=${encodeURIComponent(vNo)}`;
 	}
-	function viewDocStage(docCode) {
-		window.location.href = `/PurchaseReturnEntry/Index?docCode=${encodeURIComponent(docCode)}&mode=view`;
+
+	function viewDocStage(vType, vNo) {
+		window.location.href = `/PurchaseReturnEntry/Index?vType=${encodeURIComponent(vType)}&vNo=${encodeURIComponent(vNo)}&mode=view`;
 	}
-	function deleteDocStage(docCode) {
+
+	function deleteDocStage(vType, vNo) {
+
 		Swal.fire({
 			title: 'Are you sure?',
 			text: "You won't be able to revert this deletion!",
@@ -188,30 +238,48 @@
 			confirmButtonColor: '#d33',
 			cancelButtonColor: '#3085d6',
 			confirmButtonText: 'Yes, delete it!'
-		}).then((result) => {	
+		}).then((result) => {
+
 			if (result.isConfirmed) {
+
 				$.ajax({
-					url: '/PurchaseReturnEntry/DeleteDocByCode',
+					url: '/PurchaseReturnEntryList/Delete',   
 					type: 'POST',
-					data: { docCode: docCode },
-					success: function (response) {
-						if (response.success) {
-							toastr.success(response.message || "Record deleted successfully.");
-							loadPurchaseReceiptEntryList();
-						} else {
-							toastr.warning("Delete failed.");
-						}
+					data: {
+						vNo: vNo,
+						docType: vType
 					},
-					error: function () {
-						toastr.error("An error occurred while deleting.");
+					success: function (response) {
+
+						if (response.success) {
+
+							toastr.success(response.message);
+
+							purchasePagination.load();
+
+						} else {
+
+							toastr.error(response.message);
+
+						}
+
+					},
+					error: function (xhr) {
+
+						toastr.error(xhr.responseText);
+
 					}
+
 				});
+
 			}
+
 		});
+
 	}
-	function showDocumentPopup(docCode)
-	{
-		alert(docCode)
+
+	function showDocumentPopup(docCode) {
+		alert(docCode);
 	}
 
 </script>

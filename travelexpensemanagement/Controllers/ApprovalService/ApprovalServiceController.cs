@@ -27,15 +27,27 @@ namespace travelexpensemanagement.Controllers
             return View();
         }
         [HttpGet]
-        public async Task<IActionResult> CheckApprovalStatus(string v_type,int v_no, string tableName)
+        public async Task<IActionResult> CheckApprovalStatus(string v_type, int v_no, string tableName)
         {
-            string status = await _approvalService.GetApprovalStatus(v_type, v_no, tableName);
-
-            return Json(new
+            try
             {
-                success = true,
-                message = status
-            });
+                string status = await _approvalService.GetApprovalStatus(v_type, v_no, tableName);
+
+                return Json(new
+                {
+                    success = true,
+                    message = status
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = ex.Message,
+                    stackTrace = ex.StackTrace
+                });
+            }
         }
         public JsonResult DDlSendTo(string v_type)
         {
@@ -51,7 +63,6 @@ namespace travelexpensemanagement.Controllers
                 return Json(DDlSendTo);
             }
         }
-
         public JsonResult DDlApprovalRemark()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
