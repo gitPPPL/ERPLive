@@ -807,6 +807,65 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                     await cmdItem.ExecuteNonQueryAsync();
                                 }
                             }
+
+
+                            using (SqlCommand ImageDetailDelete = new SqlCommand("DELETE FROM IMG_TABLE WHERE COMP_CODE = @COMP_CODE AND V_NO = @V_NO and V_TYPE= @V_TYPE and YEAR_CODE= @YEAR_CODE ", con, transaction))
+                            {
+                                ImageDetailDelete.Parameters.AddWithValue("@COMP_CODE", globalVar.PubCompCode);
+                                ImageDetailDelete.Parameters.AddWithValue("@V_NO", headerObj.Vno);
+                                ImageDetailDelete.Parameters.AddWithValue("@V_TYPE", headerObj.DocType);
+                                ImageDetailDelete.Parameters.AddWithValue("@YEAR_CODE", globalVar.PubFYearCode);
+                                ImageDetailDelete.ExecuteNonQuery();
+                            }
+
+                            int rowId = 1;
+
+                            if (Attachments != null && Attachments.Any())
+                            {
+                                foreach (var attachment in Attachments)
+                                {
+                                    if (attachment?.File == null || attachment.File.Length == 0)
+                                        continue;
+
+                                    byte[] fileBytes;
+
+                                    using (var ms = new MemoryStream())
+                                    {
+                                        await attachment.File.CopyToAsync(ms);
+                                        fileBytes = ms.ToArray();
+                                    }
+
+                                    using (var cmdImage = new SqlCommand("InsertPURCHASEReturnEntryAttachment", con, transaction))
+                                    {
+                                        cmdImage.CommandType = CommandType.StoredProcedure;
+
+                                        AddParameterSafe(cmdImage, "@COMP_CODE", globalVar.PubCompCode);
+                                        AddParameterSafe(cmdImage, "@BRANCH_CODE", globalVar.PubBranchCode);
+                                        AddParameterSafe(cmdImage, "@YEAR_CODE", globalVar.PubFYearCode);
+
+                                        AddParameterSafe(cmdImage, "@DOC_ID", DOC_ID);
+                                        AddParameterSafe(cmdImage, "@V_NO", headerObj.Vno);
+                                        AddParameterSafe(cmdImage, "@V_TYPE", headerObj.DocType);
+                                        AddParameterSafe(cmdImage, "@V_DATE", DateTime.Parse(headerObj.DocDate));
+
+                                        AddParameterSafe(cmdImage, "@ROWID", rowId++);
+                                        AddParameterSafe(cmdImage, "@IMG_FILE", fileBytes);
+                                        AddParameterSafe(cmdImage, "@FILE_NAME", attachment.File.FileName);
+                                        AddParameterSafe(cmdImage, "@FILE_TYPE", Path.GetExtension(attachment.File.FileName));
+
+                                        AddParameterSafe(cmdImage, "@UUSER", globalVar.PubUserId);
+                                        AddParameterSafe(cmdImage, "@WSID", globalVar.PubWorkStationID);
+                                        AddParameterSafe(cmdImage, "@LIP", globalVar.PubLocalId);
+                                        AddParameterSafe(cmdImage, "@LID", Environment.MachineName);
+
+                                        AddParameterSafe(cmdImage, "@Action", "ImageInsert");
+
+                                        await cmdImage.ExecuteNonQueryAsync();
+                                    }
+                                }
+                            }
+
+
                             // Insert Image
                             //using (SqlCommand ItemDetailDelete = new SqlCommand("DELETE FROM PURCHASE3 WHERE COMP_CODE = @COMP_CODE AND V_NO = @V_NO and V_TYPE= @V_TYPE and YEAR_CODE= @YEAR_CODE ", con, transaction))
                             //{
@@ -1042,21 +1101,34 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         }
 
                         // ----------- PURCHASE3 -----------
+                        // -----------Image -----------
                         if (reader.NextResult())
                         {
                             while (reader.Read())
                             {
                                 var obj = new Purchase3List();
+
                                 for (int i = 0; i < reader.FieldCount; i++)
                                 {
-                                    var prop = typeof(Purchase3List).GetProperty(reader.GetName(i));
-                                    if (prop != null && !reader.IsDBNull(i))
+                                    string columnName = reader.GetName(i);
+                                    var prop = typeof(Purchase3List).GetProperty(columnName);
+
+                                    if (prop == null || reader.IsDBNull(i))
+                                        continue;
+
+                                    // Special handling for byte[]
+                                    if (columnName == "IMG_FILE")
+                                    {
+                                        prop.SetValue(obj, (byte[])reader["IMG_FILE"]);
+                                    }
+                                    else
                                     {
                                         var value = reader.GetValue(i);
                                         var converted = ChangeType(value, prop.PropertyType);
                                         prop.SetValue(obj, converted);
                                     }
                                 }
+
                                 response.Purchase3.Add(obj);
                             }
                         }

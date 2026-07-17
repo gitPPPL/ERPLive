@@ -269,8 +269,16 @@
 
         public class AttachmentModel
         {
-            public string FileName { get; set; }
+            //public string FileName { get; set; }
             public IFormFile File { get; set; }
+            public string? DOC_ID { get; set; }
+            public int V_NO { get; set; }
+            public string V_TYPE { get; set; }
+            public DateTime V_DATE { get; set; }
+
+            public byte[] IMG_FILE { get; set; }
+            public string FILE_NAME { get; set; }
+            public string FILE_TYPE { get; set; }
         }
 
         public class Purchase1List
@@ -426,14 +434,23 @@
             public decimal? RATE_SPECIAL { get; set; }
             public string FINAL_LOCK { get; set; }
         }
+
         public class Purchase3List
         {
+            //public string DOC_ID { get; set; }
+            //public int V_NO { get; set; }
+            //public string V_TYPE { get; set; }
+            //public DateTime V_DATE { get; set; }
+            //public string ATTACHMENT { get; set; }
             public string DOC_ID { get; set; }
             public int V_NO { get; set; }
             public string V_TYPE { get; set; }
             public DateTime V_DATE { get; set; }
-            public string ATTACHMENT { get; set; }
+            public byte[] IMG_FILE { get; set; }
+            public string FILE_NAME { get; set; }
+            public string FILE_TYPE { get; set; }
         }
+
         public class WeightSummary
         {
             public string KantaType { get; set; }

@@ -5,6 +5,7 @@ let makeList = [];
 let deptList = [];
 let readOnly = false;
 let isEditMode = false;
+let rowsAttachment = [];
 function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
@@ -29,6 +30,7 @@ $(document).ready(function () {
     ddlDocStatus(() => {
         $('#ddlDocStatus').val(1).prop('disabled', true);
     });
+
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('DtDocDate').value = today;
     checkApprovalStatus(vType, code, 'PURCHASE1');
@@ -40,7 +42,6 @@ $(document).ready(function () {
             contentType: 'application/json',
             data: JSON.stringify({ VNO: code, vType: vType }),
             success: function (response) {
-                const $attachmentTbody = $('#tblAttachmentPRE tbody');
                 isEditMode = true;
                 GetallDatapurchase1purchase2purchase3(response);
                 if (readOnly) {
@@ -506,28 +507,36 @@ $(document).ready(function () {
         });
 
         // 4. Attachments
-        $('#tblAttachmentPRE tbody tr').each(function (index) {
-            const fileName = $(this).find('input[type="text"]').val();
-            const fileInput = $(this).find('input[type="file"]')[0];
+        //$('#tblAttachmentPRE tbody tr').each(function (index) {
+        //    const fileName = $(this).find('input[type="text"]').val();
+        //    const fileInput = $(this).find('input[type="file"]')[0];
 
-            formData.append(`Attachments[${index}].FileName`, fileName || '');
+        //    formData.append(`Attachments[${index}].FileName`, fileName || '');
 
-            if (fileInput && fileInput.files.length > 0) {
-                formData.append(`Attachments[${index}].File`, fileInput.files[0]);
-            }
-        });
+        //    if (fileInput && fileInput.files.length > 0) {
+        //        formData.append(`Attachments[${index}].File`, fileInput.files[0]);
+        //    }
+        //});
+
+        rowsAttachment.forEach((attachment, index) => {
+
+            formData.append(`Attachments[${index}].FileName`, attachment.FileName);
+            formData.append(`Attachments[${index}].File`, attachment.File);
+
+        });  
+
 
         // 5. Add Attachments
-        $('#tblAttachmentPRE tbody tr').each(function (index) {
-            const fileName = $(this).find('input[type="text"]').val();
-            const fileInput = $(this).find('input[type="file"]')[0];
+        //$('#tblAttachmentPRE tbody tr').each(function (index) {
+        //    const fileName = $(this).find('input[type="text"]').val();
+        //    const fileInput = $(this).find('input[type="file"]')[0];
 
-            formData.append(`Attachments[${index}].FileName`, fileName || '');
+        //    formData.append(`Attachments[${index}].FileName`, fileName || '');
 
-            if (fileInput && fileInput.files.length > 0) {
-                formData.append(`Attachments[${index}].File`, fileInput.files[0]);
-            }
-        });
+        //    if (fileInput && fileInput.files.length > 0) {
+        //        formData.append(`Attachments[${index}].File`, fileInput.files[0]);
+        //    }
+        //});
         // 5. Submit to server
         $.ajax({
             url: '/PurchaseReturnEntry/SaveAllData',
@@ -569,6 +578,109 @@ $(document).ready(function () {
             }
         });
     });
+    $("#browseBtn").on("click", function () {
+        $("#fileInput").click();
+    });
+    //----------------------------------------------Image----------------------------------------
+    $('#fileInput').on('change', function (e) {
+
+        const files = e.target.files;
+
+        Array.from(files).forEach(file => {
+
+            const reader = new FileReader();
+
+            reader.onload = function (ev) {
+
+                const mime = file.type || 'application/octet-stream';
+
+                // Store selected file
+                rowsAttachment.push({
+                    FileName: file.name,
+                    File: file
+                });
+
+                // UI
+                const card = `
+            <div class="erp-file-row" data-filename="${file.name}">
+
+                <div class="erp-file-preview">
+                    ${mime.startsWith('image/')
+                        ? `<img src="${ev.target.result}" class="erp-file-thumbnail">`
+                        : mime === 'application/pdf'
+                            ? `<i class="fa fa-file-pdf-o" style="font-size:40px;color:red;"></i>`
+                            : `<i class="fa fa-file" style="font-size:40px;"></i>`
+                    }
+                </div>
+
+                <div class="erp-file-info">
+                    <div class="erp-file-name">${file.name}</div>
+                    <div class="erp-file-type">${mime}</div>
+                </div>
+
+                <div class="erp-file-actions">
+
+                    <button type="button"
+                            class="erp-btn view btn-view-attachment"
+                            data-src="${ev.target.result}"
+                            data-type="${mime}">
+                        <i class="fa fa-eye"></i>
+                    </button>
+
+                    <button type="button"
+                            class="erp-btn delete btn-delete-attachment"
+                            data-filename="${file.name}">
+                        <i class="fa fa-trash"></i>
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+                $('#fileList').append(card);
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+        $(this).val('');
+    });
+
+    $(document).on("click", ".btn-view-attachment", function () {
+
+        const src = $(this).data("src");
+        const type = $(this).data("type");
+
+        $("#previewImage").hide();
+        $("#previewPdf").hide();
+
+        if (type.startsWith("image/")) {
+
+            $("#previewImage").attr("src", src).show();
+        }
+        else if (type === "application/pdf") {
+
+            $("#previewPdf").attr("src", src).show();
+        }
+        else {
+
+            alert("Preview not available for this file type.");
+            return;
+
+        }
+
+        $("#imagePreviewModal").modal("show");
+    });
+
+    //=======For Image Delete========
+    $(document).on("click", ".btn-delete-attachment", function () {
+
+        const fileName = $(this).data("filename");
+        rowsAttachment = rowsAttachment.filter(x => x.FileName !== fileName);
+        $(this).closest(".erp-file-row").remove();
+
+    });
+    //----------------------------------------------Image----------------------------------------
     function GetallDatapurchase1purchase2purchase3(data) {
         const purchase1 = data.purchase1;
         const purchase2 = data.purchase2;
@@ -692,7 +804,7 @@ $(document).ready(function () {
         }
         // ====== Purchase2 Item Rows Bind ======
         bindItemsdata(purchase2);
-        // getdataImage(purchase3)
+        getdataImage(purchase3);
     }
     // LOAD BY V_NO ==========================
     function bindItemsdata(items) {
@@ -811,47 +923,47 @@ $(document).ready(function () {
             }
         });
     }
-    function getdataImage(Imagedata) {
-        const $attachmentTbody = $('#tblAttachmentPRE tbody');
-        $attachmentTbody.empty();
+    //function getdataImage(Imagedata) {
+    //    const $attachmentTbody = $('#tblAttachmentPRE tbody');
+    //    $attachmentTbody.empty();
 
-        if (!Array.isArray(Imagedata) || Imagedata.length === 0) {
-            console.warn("⚠️ No attachment data to display");
-            return;
-        }
+    //    if (!Array.isArray(Imagedata) || Imagedata.length === 0) {
+    //        console.warn("⚠️ No attachment data to display");
+    //        return;
+    //    }
 
-        Imagedata.forEach(item => {
-            const fullPath = item.attachment; // "/attachments/Purchase/sdfsf.PNG"
-            if (!fullPath) return;
+    //    Imagedata.forEach(item => {
+    //        const fullPath = item.attachment; // "/attachments/Purchase/sdfsf.PNG"
+    //        if (!fullPath) return;
 
-            const fileName = fullPath.split('/').pop();
+    //        const fileName = fullPath.split('/').pop();
 
-            // Check if it's an image
-            let previewHtml = '';
-            if (/\.(jpg|jpeg|png|gif|bmp)$/i.test(fileName)) {
-                previewHtml = `
-                    <img src="${fullPath}" alt="${fileName}"
-                         style="max-width:80px; max-height:80px; border:1px solid #ccc; border-radius:4px;" />`;
-            } else {
-                previewHtml = `<a href="${fullPath}" target="_blank" class="text-info">View File</a>`;
-            }
+    //        // Check if it's an image
+    //        let previewHtml = '';
+    //        if (/\.(jpg|jpeg|png|gif|bmp)$/i.test(fileName)) {
+    //            previewHtml = `
+    //                <img src="${fullPath}" alt="${fileName}"
+    //                     style="max-width:80px; max-height:80px; border:1px solid #ccc; border-radius:4px;" />`;
+    //        } else {
+    //            previewHtml = `<a href="${fullPath}" target="_blank" class="text-info">View File</a>`;
+    //        }
 
-            const row = `
-                <tr>
-                    <td >${item.doC_ID || ''}</td>
-                    <td style="display:none;"><label>${fileName}</label></td>
-                    <td><input type="file" class="form-control file-upload" /></td>
-                    <td>${previewHtml}</td>
-                    <td>
-                        <i class="fa fa-plus btn-add-action text-success me-2" title="Add Row" style="cursor:pointer;"></i>
-                        <i class="fa fa-edit btn-edit-action text-primary me-2" title="Edit Row" style="cursor:pointer;"></i>
-                        <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
-                    </td>
-                </tr>
-            `;
-            $attachmentTbody.append(row);
-        });
-    }
+    //        const row = `
+    //            <tr>
+    //                <td >${item.doC_ID || ''}</td>
+    //                <td style="display:none;"><label>${fileName}</label></td>
+    //                <td><input type="file" class="form-control file-upload" /></td>
+    //                <td>${previewHtml}</td>
+    //                <td>
+    //                    <i class="fa fa-plus btn-add-action text-success me-2" title="Add Row" style="cursor:pointer;"></i>
+    //                    <i class="fa fa-edit btn-edit-action text-primary me-2" title="Edit Row" style="cursor:pointer;"></i>
+    //                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+    //                </td>
+    //            </tr>
+    //        `;
+    //        $attachmentTbody.append(row);
+    //    });
+    //}
     function ddlDocType(callback) {
         $.ajax({
             url: '/PurchaseReturnEntry/GetddlDocType',
@@ -1966,3 +2078,105 @@ function makePageReadOnly() {
     $("#tblItemRecordPO .btn-add").removeAttr("onclick");
 
 }
+
+//------------------------------------------------Images Start Block-----------------------------------
+function getdataImage(Imagedata) {
+
+    const $list = $('#fileList');
+    $list.empty();
+
+    rowsAttachment = [];
+
+    if (!Array.isArray(Imagedata) || Imagedata.length === 0)
+        return;
+
+    Imagedata.forEach(item => {
+
+        const fileName = item.filE_NAME || "File";
+        const base64 = item.imG_FILE;
+        const mimeType = getMimeType(fileName);
+
+        if (!base64) return;
+
+        // Save for Update
+        rowsAttachment.push({
+            FileName: fileName,
+            FileContentBase64: base64,
+            FileType: mimeType
+        });
+
+        const dataUrl = `data:${mimeType};base64,${base64}`;
+
+        const html = `
+            <div class="erp-file-row" data-filename="${fileName}">
+
+                <div class="erp-file-preview">
+                    ${mimeType.startsWith("image/")
+                ? `<img src="${dataUrl}" class="erp-file-thumbnail">`
+                : mimeType === "application/pdf"
+                    ? `<i class="fa fa-file-pdf-o" style="font-size:40px;color:red;"></i>`
+                    : `<i class="fa fa-file"></i>`
+            }
+                </div>
+
+                <div class="erp-file-info">
+                    <div class="erp-file-name">${fileName}</div>
+                    <div class="erp-file-type">${mimeType}</div>
+                </div>
+
+                <div class="erp-file-actions">
+
+                    <button type="button"
+                            class="erp-btn view btn-view-attachment"
+                            data-src="${dataUrl}"
+                            data-type="${mimeType}">
+                        <i class="fa fa-eye"></i>
+                    </button>
+
+                    <button type="button"
+                            class="erp-btn delete btn-delete-attachment"
+                            data-filename="${fileName}">
+                        <i class="fa fa-trash"></i>
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+        $list.append(html);
+
+    });
+}
+
+function getMimeType(fileName) {
+
+    const ext = fileName?.split('.').pop()?.toLowerCase();
+
+    switch (ext) {
+
+        case 'jpg':
+        case 'jpeg':
+            return 'image/jpeg';
+
+        case 'png':
+            return 'image/png';
+
+        case 'gif':
+            return 'image/gif';
+
+        case 'bmp':
+            return 'image/bmp';
+
+        case 'webp':
+            return 'image/webp';
+
+        case 'pdf':
+            return 'application/pdf';
+
+        default:
+            return 'application/octet-stream';
+    }
+}
+
+//------------------------------------------------Images End Block-----------------------------------
