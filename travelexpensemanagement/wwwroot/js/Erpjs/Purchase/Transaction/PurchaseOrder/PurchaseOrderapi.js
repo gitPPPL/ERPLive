@@ -32,19 +32,16 @@ async function handleDocLoad() {
 }
 function TransitReport() {
 
-    if (!rowId) {
+    if (!docId) {
         showToast(`Please save the data before printing the report.`, { type: "info" });
         return;
     }
 
     var reportName = "";
 
-    if (globalVars.CompCode == "7") {
-        reportName = "pr_porderK_gst";
-    }
-    else {
+ 
         reportName = "pr_porder_gst";
-    }
+
 
     var v_no = $('#TxtCode').val();
     var v_type = "PAUD";
@@ -146,136 +143,241 @@ async function checkValidDate() {
     }
 }
 
-async function SaveData(saveDt) {
-
+async function SaveData(model) {
     try {
 
-        console.log("Request Payload:", saveDt);
+        console.log("Request:", model);
+        console.log(JSON.stringify(model));
 
         const response = await $.ajax({
             url: '/PurchaseOrder/SaveOrUpdatePurchaseOrder',
             type: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify(saveDt),
+            data: JSON.stringify(model),
             dataType: 'json'
         });
 
-        const v = response;
+        if (response.status) {
 
-        if (v?.status == true) {
+            toastr.success(response.message || "Data saved successfully.");
 
-            toastr.success("Data Insert Successfully");
+            let rowId = model.VType + model.VNo;
 
-            setTimeout(() => {
-                window.location.href = '/PurchaseOrderList/Index';
-            }, 500);
+            setTimeout(function () {
+                window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+            }, 3000);
 
+
+        } else {
+            toastr.warning(response.message || "Unable to save data.");
         }
 
-        else if (v?.status == false)
-        {
-            toastr.warning(v.message);
-        }
-        else {
-            toastr.error(v?.message || "Save failed");
-        }
+        return response;
 
-    } catch (error) {
-        toastr.error( error?.responseText || "Error occurred while saving. Please contact admin." );
+    } catch (err) {
+
+        toastr.error(err.responseJSON?.message || err.responseText || "Error while saving.");
+
+        throw err;
     }
 }
+function getPurchaseOrderModel() {
 
-async function collectFormData() {
-    const id = toNullableString(docId);
-    const itemRecords = await collectOrder2Items();
-    const attachment = await getAttachmentDetails();
+    const model = {
+        //================ HEADER ==================
+        VNo: parseIntSafe($('#txtDocNo').val()),
+        VType: $('#ddlDocType').val(),
+        VDate: toNullableDate($('#dtDocDate').val()),
+        DocId: $('#TxtDocId').val(),
 
-    console.log("id", docId);
+        PlaceCode: parseIntSafe($('#ddlPlace').val()),
+        WbNo: parseIntSafe($('#ddWBNo').val()),
+        PartyCode: parseIntSafe($('#ddlPartyName').val()),
+        ShipCode: parseIntSafe($('#ddlShipFrom').val()),
+        ShipFrom: parseIntSafe($('#ddlPartyName').val()),
 
+        BillAdd1: $('#TxtAdd1PD').val(),
+        BillAdd2: $('#TxtAdd2PD').val(),
+        BillAdd3: $('#TxtAdd3PD').val(),
+        BillCity: parseIntSafe($('#TxtCity1PD').val()),
+        BillPincode: $('#NumPincodePD').val(),
+        BillGst: $('#TxtGSTPD').val(),
 
-    const docid = toNullableString(document.getElementById("TxtDocId")?.value);
+        ShipAdd1: $('#TxtAdd1SD').val(),
+        ShipAdd2: $('#TxtAdd2SD').val(),
+        ShipAdd3: $('#TxtAdd3SD').val(),
+        ShipCity: parseIntSafe($('#TxtCity1SD').val()),
+        ShipPincode: $('#NumPincodeSD').val(),
 
-    console.log("docid", docid);
+        PriceType: $('#ddlPriceType').val(),
+        PartyRef: $('#txtPartyRef').val(),
+        ImportCurrency: $('#ddlCurrency').val(),
+        ExRate: parseFloatSafe($('#NumExRate').val()),
 
-    return {
-        VNo: parseIntSafe(document.getElementById("txtDocNo")?.value),
-        VType: toNullableString(document.getElementById("ddlDocType")?.value),
-        VDate: toNullableDate(document.getElementById("dtDocDate")?.value),
-        DeliveryDate: toNullableDate(document.getElementById("DtDeliveryDate")?.value),
-        ValidityDate: toNullableDate(document.getElementById("DtValidateDate")?.value),
-        DocId: toNullableString(document.getElementById("TxtDocId")?.value),
-        PlaceCode: parseIntSafe(document.getElementById("ddlPlace")?.value),
-        WbType: null,
-        WbNo: parseIntSafe(document.getElementById("ddWBNo")?.value),
-        PartyCode: parseIntSafe(document.getElementById("ddlPartyName")?.value),
-        ShipCode: parseIntSafe(document.getElementById("ddlShipFrom")?.value),
-        ShipFrom: parseIntSafe(document.getElementById("ddlPartyName")?.value),
-        BillAdd1: toNullableString(document.getElementById("TxtAdd1PD")?.value),
-        BillAdd2: toNullableString(document.getElementById("TxtAdd2PD")?.value),
-        BillAdd3: toNullableString(document.getElementById("TxtAdd3PD")?.value),
-        BillCity: parseIntSafe(document.getElementById("TxtCity1PD")?.value),
-        BillPincode: toNullableString(document.getElementById("NumPincodePD")?.value),
-        BillGst: toNullableString(document.getElementById("TxtGSTPD")?.value),
-        ShipAdd1: toNullableString(document.getElementById("TxtAdd1SD")?.value),
-        ShipAdd2: toNullableString(document.getElementById("TxtAdd2SD")?.value),
-        ShipAdd3: toNullableString(document.getElementById("TxtAdd3SD")?.value),
-        ShipCity: parseIntSafe(document.getElementById("TxtCity1SD")?.value),
-        ShipPincode: toNullableString(document.getElementById("NumPincodeSD")?.value),
-        ShipGst: null,
-        PriceType: toNullableString(document.getElementById("ddlPriceType")?.value),
-        PartyRef: toNullableString(document.getElementById("txtPartyRef")?.value),
-        ImportCurrency: toNullableString(document.getElementById("ddlCurrency")?.value),
-        ExRate: parseFloatSafe(document.getElementById("NumExRate")?.value),
-        Nos: parseFloatSafe(document.getElementById("NumTotalNosIt")?.value),
-        Qty: parseFloatSafe(document.getElementById("NumQtyIt")?.value),
-        Amount: parseFloatSafe(document.getElementById("NumAmountIt")?.value),
-        PackAmt: parseFloatSafe(document.getElementById("NumPackingAmtIt")?.value),
-        DiscAmt: parseFloatSafe(document.getElementById("NumDiscAmtIt")?.value),
-        CgstAmt: parseFloatSafe(document.getElementById("NumCgstAmtIt")?.value),
-        SgstAmt: parseFloatSafe(document.getElementById("NumSgstAmtIt")?.value),
-        IgstAmt: parseFloatSafe(document.getElementById("NumIgstAmtIt")?.value),
-        OthAmt: parseFloatSafe(document.getElementById("TxtOtherAmtSod")?.value),
-        VatAmt: parseFloatSafe(document.getElementById("NumVatAmtIt")?.value),
-        CessPer: null,
-        CessAmt: parseFloatSafe(document.getElementById("NumCessAmtIt")?.value),
-        TcsPer: null,
-        TcsAmt: parseFloatSafe(document.getElementById("NumTCSIt")?.value),
-        NetAmt: parseFloatSafe(document.getElementById("NumNetAmtIt")?.value),
-        DeliveryTerm: toNullableString(document.getElementById("txtDeliveryTerm")?.value),
-        TransportTerm: toNullableString(document.getElementById("txtTransportTerm")?.value),
-        PaytermCode: parseIntSafe(document.getElementById("ddlPaymentTerm")?.value),
-        PaymentTerm: toNullableString(document.getElementById("txtPaymentTerm")?.value),
-        PriceTerm: toNullableString(document.getElementById("txtPriceTerm")?.value),
-        SaudaType: null,
-        SaudaNo: null,
-        DeliveryPeriod: null,
-        DeliveryTo: null,
-        Remarks: toNullableString(document.getElementById("txtRemarksTC")?.value),
-        PoType: null,
-        FAProvStatus: null,
-        FAProvRemarks: null,
-        MailSend: null,
-        CDiscAmt: null,
-        AutoGenPo: null,
-        PoAcceptFlg: null,
-        PoAttachPath: null,
-        PoAttachDate: null,
-        TaxCode: null,
-        ItemType: null,
-        SupplyType: null,
-        TranType: null,
-        FormCode: null,
-        VehicleNo: null,
-        InvType: null,
-        InvNo: null,
-        PartyName: toNullableString(document.getElementById("txtPartySauda")?.value),
-        ShipName: null,
-        Status: null,
+        Nos: parseFloatSafe($('#NumTotalNosIt').val()),
+        Qty: parseFloatSafe($('#NumQtyIt').val()),
+        Amount: parseFloatSafe($('#NumAmountIt').val()),
+        PackAmt: parseFloatSafe($('#NumPackingAmtIt').val()),
+        DiscAmt: parseFloatSafe($('#NumDiscAmtIt').val()),
+        CgstAmt: parseFloatSafe($('#NumCgstAmtIt').val()),
+        SgstAmt: parseFloatSafe($('#NumSgstAmtIt').val()),
+        IgstAmt: parseFloatSafe($('#NumIgstAmtIt').val()),
+        OthAmt: parseFloatSafe($('#TxtOtherAmtSod').val()),
+        VatAmt: parseFloatSafe($('#NumVatAmtIt').val()),
+        CessAmt: parseFloatSafe($('#NumCessAmtIt').val()),
+        TcsAmt: parseFloatSafe($('#NumTCSIt').val()),
+        NetAmt: parseFloatSafe($('#NumNetAmtIt').val()),
 
-        SaveOrUpdate: (!docid || docid === "") ? 'Save' : 'Update',
-        ItemRecords: itemRecords,
-        Attachments: attachment
+        DeliveryTerm: $('#txtDeliveryTerm').val(),
+        DeliveryDate: toNullableDate($('#DtDeliveryDate').val()),
+        ValidityDate: toNullableDate($('#DtValidateDate').val()),
+        TransportTerm: $('#txtTransportTerm').val(),
+
+        PaytermCode: parseIntSafe($('#ddlPaymentTerm').val()),
+        PaymentTerm: $('#txtPaymentTerm').val(),
+        PriceTerm: $('#txtPriceTerm').val(),
+
+        SaudaType: $('#ddSaudaNo').val(),
+        SaudaNo: parseIntSafe($('#ddSaudaNo option:selected').text()),
+
+        Remarks: $('#txtRemarksTC').val(),
+        PartyName: $('#txtPartySauda').val(),
+
+        SaveOrUpdate: $('#TxtDocId').val() ? "Update" : "Save",
+
+        //================ DETAIL ==================
+        ItemRecords: [],
+
+        //================ ATTACHMENT ==============
+        Attachments: getAttachmentDetails()
     };
+
+    //========== Collect Table Data ==========
+    $('#tblItemRecordPO tbody tr').each(function () {
+
+        const idx = this.id.replace('row', '');
+
+        model.ItemRecords.push({
+
+            SNO: parseIntSafe(idx),
+            PlaceCode: parseIntSafe($(`#ddlIplaceofUse${idx}`).val()),
+            ItemCode: parseIntSafe($(`#ddlItemname${idx}`).val()),
+            ItemName: $(`#ddlItemname${idx} option:selected`).text(),
+            MakeCode: parseIntSafe($(`#ddlImake${idx}`).val()),
+            NOS: parseIntSafe($(`#TxtNos${idx}`).val()),
+            Qty: parseFloatSafe($(`#TxtQty${idx}`).val()),
+            AdjQty: parseFloatSafe($(`#txtAdjQtySauda${idx}`).val()),
+            UomCode: parseIntSafe($(`#ddlUnit${idx}`).val()),
+            UomName: $(`#ddlUnit${idx} option:selected`).text(),
+            Rate: parseFloatSafe($(`#TxtRate${idx}`).val()),
+            ImportRate: parseFloatSafe($(`#TxtExrate${idx}`).val()),
+            CalcRate: parseFloatSafe($(`#TxtCalcRate${idx}`).val()),
+            Amount: parseFloatSafe($(`#TxtAmount${idx}`).val()),
+            PackPer: parseFloatSafe($(`#TxtPackPercent${idx}`).val()),
+            PackAmt: parseFloatSafe($(`#TxtPack${idx}`).val()),
+            DiscPer: parseFloatSafe($(`#TxtDiscPercent${idx}`).val()),
+            DiscAmt: parseFloatSafe($(`#TxtDisc${idx}`).val()),
+            TaxCode: parseIntSafe($(`#ddlTax${idx}`).val()),
+            CgstPer: parseFloatSafe($(`#TxtCgstPercent${idx}`).val()),
+            CgstAmt: parseFloatSafe($(`#TxtCgst${idx}`).val()),
+            SgstPer: parseFloatSafe($(`#TxtSgstPercent${idx}`).val()),
+            SgstAmt: parseFloatSafe($(`#TxtSgst${idx}`).val()),
+            IgstPer: parseFloatSafe($(`#TxtIgstPercent${idx}`).val()),
+            IgstAmt: parseFloatSafe($(`#TxtIgst${idx}`).val()),
+            VatPer: parseFloatSafe($(`#TxtVatPercent${idx}`).val()),
+            VatAmt: parseFloatSafe($(`#TxtVat${idx}`).val()),
+            CessPer: parseFloatSafe($(`#TxtCessPercent${idx}`).val()),
+            CessAmt: parseFloatSafe($(`#TxtCess${idx}`).val()),
+
+            OthAmt: parseFloatSafe($(`#TxtOthAmt${idx}`).val()),
+            NetAmt: parseFloatSafe($(`#TxtNetAmt${idx}`).val()),
+            LandRate: parseFloatSafe($(`#TxtLdRate${idx}`).val()),
+            PlaceUse: $(`#ddlIplaceofUse${idx} option:selected`).text(),
+            DeptCode: parseIntSafe($(`#ddlDepartment${idx}`).val()),
+            DeptName: $(`#ddlDepartment${idx} option:selected`).text(),
+            Remarks: $(`#TxtRemarks${idx}`).val(),
+            PreorityLevel: parseIntSafe($(`#TxtAppLevel${idx}`).val()),
+            PreorityRemarks: $(`#TxtAppRemarks${idx}`).val(),
+            RateMonthly: parseFloatSafe($(`#TxtMthRate${idx}`).val()),
+            RateQuarterly: parseFloatSafe($(`#TxtQtrRate${idx}`).val()),
+            RateAnnualy: parseFloatSafe($(`#TxtAnlRate${idx}`).val()),
+            RateSpecial: parseFloatSafe($(`#TxtSpclRate${idx}`).val()),
+            RequestType: $(`#TxtReqtype${idx}`).val(),
+            RequestNo: parseIntSafe($(`#TxtReqno${idx}`).val()),
+            ApprovalType: $(`#TxtApptype${idx}`).val(),
+            ApprovalNo: parseIntSafe($(`#TxtAppno${idx}`).val()),
+            Status: $(`#TxtStatus${idx}`).val(),
+            SaudaType: $('#ddSaudaNo').val(),
+            SaudaNo: parseIntSafe($('#ddSaudaNo option:selected').text())
+
+
+
+
+        });
+    });
+
+    return model;
+}
+
+
+
+
+
+
+
+
+
+
+
+function getAttachmentDetails() {
+
+    const attachments = [];
+
+    selectedFiles.forEach(file => {
+
+        attachments.push({
+            FileName: file.name,
+            FilePath: `/uploads/${file.name}`,
+            FileSize: file.size,
+            FileType: file.type,
+            FileContentBase64: null
+        });
+
+    });
+
+    globalAttachments.forEach(file => {
+
+        attachments.push({
+            FileName: file.fileName,
+            FilePath: file.filePath,
+            FileSize: file.fileSize,
+            FileType: file.fileType,
+            FileContentBase64: null
+        });
+
+    });
+
+    return attachments;
+}
+
+async function collectGridDetail() {
+    const items = [];
+    $('#tblItemRecordPO tbody tr').each(function () {
+        const idx = this.id.replace('row', '');
+        const $r = $(this);
+
+        items.push({
+            SNO: parseIntSafe(idx),
+            ItemName: $r.find(`#ddlItemname${idx} option:selected`).text(),
+            ItemCode: parseIntSafe($r.find(`#ddlItemname${idx}`).val()),
+            MakeCode: parseIntSafe($r.find(`#ddlImake${idx}`).val()),
+            Qty: parseFloatSafe($r.find(`#TxtQty${idx}`).val()),
+            UomName: $r.find(`#ddlUnit${idx} option:selected`).text(),
+            UomCode: parseIntSafe($r.find(`#ddlUnit${idx}`).val())
+        });
+    });
+
+    return items;
 }
 
 async function GetDocData(MasterTblId, readOnly) {
@@ -305,15 +407,15 @@ async function GetDocData(MasterTblId, readOnly) {
 
         Calculation = false;
         SelectShipParty = false;
+        SelectParty = false;
+        selectItemOption = false
 
-   
-         fillFormFields(response.header);
-
-         fillItemDetailsTable(response.detail);
-       
+        await fillPurchaseOrderData(response.header, response.detail);       
 
         Calculation = true;
         SelectShipParty = true;
+        SelectParty = true;
+        selectItemOption = true;
 
         $('#fileList').empty();
 
@@ -394,97 +496,98 @@ async function GetDocData(MasterTblId, readOnly) {
     }
 }
 
-async function fillFormFields(data) {
-    if (!Array.isArray(data) || data.length === 0) {
-        toastr.error("Invalid or empty data array");
-        return;
+async function fillPurchaseOrderData(headerData, detailData) {
+
+    // ================= HEADER =================
+    if (Array.isArray(headerData) && headerData.length > 0) {
+
+        const d = headerData[0];
+
+        $('#txtDocNo').val(d.V_NO || '');
+        $('#TxtDocId').val(d.DOC_ID || '');
+        $('#dtDocDate').val((d.V_DATE || '').substring(0, 10));
+        $('#DtDeliveryDate').val((d.DELIVERY_DATE || '').substring(0, 10));
+        $('#DtValidateDate').val((d.VALIDITY_DATE || '').substring(0, 10));
+        $('#ddlDocType').val(d.V_TYPE || '');
+        $('#ddlPlace').val(d.PLACE_CODE || '');
+        $('#ddWBNo').val(d.WB_NO || '');
+
+        $('#ddlPartyName').val(d.PARTY_CODE || '').trigger('change');
+        $('#ddlShipFrom').val(d.SHIP_CODE || '').trigger('change');
+
+        // Billing Address
+        $('#TxtAdd1PD').val(d.BILL_ADD1 || '');
+        $('#TxtAdd2PD').val(d.BILL_ADD2 || '');
+        $('#TxtAdd3PD').val(d.BILL_ADD3 || '');
+        $('#TxtCity1PD').val(d.BILL_CITY || '');
+        $('#NumPincodePD').val(d.BILL_PINCODE || '');
+        $('#TxtGSTPD').val(d.BILL_GST || '');
+
+        // Shipping Address
+        $('#TxtAdd1SD').val(d.SHIP_ADD1 || '');
+        $('#TxtAdd2SD').val(d.SHIP_ADD2 || '');
+        $('#TxtAdd3SD').val(d.SHIP_ADD3 || '');
+        $('#TxtCity1SD').val(d.SHIP_CITY || '');
+        $('#NumPincodeSD').val(d.SHIP_PINCODE || '');
+
+        // Financials
+        $('#NumTotalNosIt').val(d.NOS || '');
+        $('#NumQtyIt').val(d.QTY || '');
+        $('#NumAmountIt').val(d.AMOUNT || '');
+        $('#NumPackingAmtIt').val(d.PACK_AMT || '');
+        $('#NumDiscAmtIt').val(d.DISC_AMT || '');
+        $('#NumCgstAmtIt').val(d.CGST_AMT || '');
+        $('#NumSgstAmtIt').val(d.SGST_AMT || '');
+        $('#NumIgstAmtIt').val(d.IGST_AMT || '');
+        $('#NumVatAmtIt').val(d.VAT_AMT || '');
+        $('#NumCessAmtIt').val(d.CESS_AMT || '');
+        $('#NumTCSIt').val(d.TCS_AMT || '');
+        $('#TxtOtherAmtSod').val(d.OTH_AMT || '');
+        $('#NumNetAmtIt').val(d.NET_AMT || '');
+
+        $('#ddlPriceType').val(d.PRICE_TYPE || '');
+        $('#txtPartyRef').val(d.PARTY_REF || '');
+        $('#ddlCurrency').val(d.IMPORT_CURRENCY || '');
+        $('#NumExRate').val(d.EXRATE || '');
+
+        // Terms
+        $('#txtDeliveryTerm').val(d.DELIVERY_TERM || '');
+        $('#txtTransportTerm').val(d.TRANSPORT_TERM || '');
+        $('#ddlPaymentTerm').val(d.PAYTERM_CODE || '');
+        $('#txtPaymentTerm').val(d.PAYMENT_TERM || '');
+        $('#txtPriceTerm').val(d.PRICE_TERM || '');
+        $('#txtRemarksTC').val(d.REMARKS || '');
+        $('#txtPartySauda').val(d.PARTY_NAME || '');
+    } else {
+        toastr.error("Invalid or empty header data.");
     }
 
-    const d = data[0];
-
-    $('#txtDocNo').val(d.V_NO || '');
-    $('#TxtDocId').val(d.DOC_ID || '');
-    $('#dtDocDate').val((d.V_DATE || '').substring(0, 10));
-    $('#DtDeliveryDate').val((d.DELIVERY_DATE || '').substring(0, 10));
-    $('#DtValidateDate').val((d.VALIDITY_DATE || '').substring(0, 10));
-    $('#ddlDocType').val(d.V_TYPE || '');
-    $('#ddlPlace').val(d.PLACE_CODE || '');
-    $('#ddWBNo').val(d.WB_NO || '');
-
-    $('#ddlPartyName').val(d.PARTY_CODE || '').trigger('change');
-    $('#ddlShipFrom').val(d.SHIP_CODE || '').trigger('change');
-
-    // Billing Address
-    $('#TxtAdd1PD').val(d.BILL_ADD1 || '');
-    $('#TxtAdd2PD').val(d.BILL_ADD2 || '');
-    $('#TxtAdd3PD').val(d.BILL_ADD3 || '');
-    $('#TxtCity1PD').val(d.BILL_CITY || '');
-    $('#NumPincodePD').val(d.BILL_PINCODE || '');
-    $('#TxtGSTPD').val(d.BILL_GST || '');
-
-    // Shipping Address
-    $('#TxtAdd1SD').val(d.SHIP_ADD1 || '');
-    $('#TxtAdd2SD').val(d.SHIP_ADD2 || '');
-    $('#TxtAdd3SD').val(d.SHIP_ADD3 || '');
-    $('#TxtCity1SD').val(d.SHIP_CITY || '');
-    $('#NumPincodeSD').val(d.SHIP_PINCODE || '');
-
-    // Financials
-    $('#NumTotalNosIt').val(d.NOS || '');
-    $('#NumQtyIt').val(d.QTY || '');
-    $('#NumAmountIt').val(d.AMOUNT || '');
-    $('#NumPackingAmtIt').val(d.PACK_AMT || '');
-    $('#NumDiscAmtIt').val(d.DISC_AMT || '');
-    $('#NumCgstAmtIt').val(d.CGST_AMT || '');
-    $('#NumSgstAmtIt').val(d.SGST_AMT || '');
-    $('#NumIgstAmtIt').val(d.IGST_AMT || '');
-    $('#NumVatAmtIt').val(d.VAT_AMT || '');
-    $('#NumCessAmtIt').val(d.CESS_AMT || '');
-    $('#NumTCSIt').val(d.TCS_AMT || '');
-    $('#TxtOtherAmtSod').val(d.OTH_AMT || '');
-    $('#NumNetAmtIt').val(d.NET_AMT || '');
-
-    $('#ddlPriceType').val(d.PRICE_TYPE || '');
-    $('#txtPartyRef').val(d.PARTY_REF || '');
-    $('#ddlCurrency').val(d.IMPORT_CURRENCY || '');
-    $('#NumExRate').val(d.EXRATE || '');
-
-    // Terms
-    $('#txtDeliveryTerm').val(d.DELIVERY_TERM || '');
-    $('#txtTransportTerm').val(d.TRANSPORT_TERM || '');
-    $('#ddlPaymentTerm').val(d.PAYTERM_CODE || '');
-    $('#txtPaymentTerm').val(d.PAYMENT_TERM || '');
-    $('#txtPriceTerm').val(d.PRICE_TERM || '');
-    $('#txtRemarksTC').val(d.REMARKS || '');
-    $('#txtPartySauda').val(d.PARTY_NAME || '');
-
-}
-
-async function fillItemDetailsTable(data) {
-
-    console.log("Table Data", data);
+    // ================= DETAIL =================
+    console.log("Table Data:", detailData);
 
     const $tbody = $('#tblItemRecordPO tbody');
     $tbody.empty();
 
-    if (!Array.isArray(data) || data.length === 0)
+    if (!Array.isArray(detailData) || detailData.length === 0)
         return;
 
-    for (let index = 0; index < data.length; index++) {
-
-        // Create Row
+    for (let index = 0; index < detailData.length; index++) {
         addItemRecordRow();
-
-        const item = data[index];
+        const item = detailData[index];
         const idx = index + 1;
 
+        await loadItemNameDropdown();
+        await loadMakeDropdown(idx, item.ITEM_CODE);
+
         // Dropdowns
-        $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
+        $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change'); 
         $(`#ddlImake${idx}`).val(item.MAKE_CODE).trigger('change');
         $(`#ddlUnit${idx}`).val(item.UOM_CODE).trigger('change');
         $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE).trigger('change');
         $(`#ddlDepartment${idx}`).val(item.DEPT_CODE).trigger('change');
         $(`#ddlTax${idx}`).val(item.TAX_CODE).trigger('change');
+        $(`#TxtStatus${idx}`).val(item.STATUS).trigger('change');
+
         // Inputs
         $(`#TxtCode${idx}`).val(item.ITEM_CODE);
         $(`#TxtNos${idx}`).val(item.NOS);
@@ -522,6 +625,12 @@ async function fillItemDetailsTable(data) {
         $(`#TxtQtrRate${idx}`).val(item.RATE_QUARTERLY);
         $(`#TxtAnlRate${idx}`).val(item.RATE_ANNUALY);
         $(`#TxtSpclRate${idx}`).val(item.RATE_SPECIAL);
+        $(`#TxtSaudatype${idx}`).val(item.SAUDA_TYPE ?? '');
+        $(`#TxtSaudano${idx}`).val(item.SAUDA_NO ?? '');
+        $(`#TxtReqtype${idx}`).val(item.REQUEST_TYPE ?? '');
+        $(`#TxtReqno${idx}`).val(item.REQUEST_NO ?? '');
+        $(`#TxtApptype${idx}`).val(item.APPROVAL_TYPE ?? '');
+        $(`#TxtAppno${idx}`).val(item.APPROVAL_NO ?? '');
     }
 }
 function addItemRecordRow() {
@@ -530,7 +639,7 @@ function addItemRecordRow() {
 
     let newRow = `
         <tr class="no-border-input" id="row${rowCount}"> <td class="d-None"><input class="form-control" id="TxtCode${rowCount}" /></td>         
-        <td>
+        <td class="freeze-item">
 
         <select style="min-width:500px;" class="form-control" id="ddlItemname${rowCount}">
          <option value="">-Select Item Name-</option> ${itemNameOptions}
@@ -591,23 +700,30 @@ function addItemRecordRow() {
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthAmt${rowCount}" readonly/></td>
             <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer2${rowCount}" readonly/></td>
             <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthAmt2${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  id="TxtNetAmt${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  id="TxtNetAmt${rowCount}" readonly /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtLdRate${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtRemarks${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtAppLevel${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAppRemarks${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtStatus${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqtype${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqno${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtApptype${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAppno${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSaudatype${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSaudano${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtMthRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtQtrRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAnlRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSpclRate${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtCalcRate${rowCount}" readonly /></td>
+
+            <td>
+                <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtStatus${rowCount}">
+                 <option value="">-select Staus-</option>${statuslist}
+                </select>
+            </td>
+
+         
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqtype${rowCount}" readonly  /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqno${rowCount}" readonly  /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtApptype${rowCount}"  /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAppno${rowCount}"  /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSaudatype${rowCount}"  readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSaudano${rowCount}"  readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtMthRate${rowCount}"  /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtQtrRate${rowCount}"  /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAnlRate${rowCount}"  /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSpclRate${rowCount}"  /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtCalcRate${rowCount}"  /></td>
             <td class="action-col">
                 <div class="action-wrap">
                     <button class="act-btn add btn-add-action btn-Itemadd-action" title="Add Row" style="cursor:pointer;"><i class="fa fa-plus-circle"></i></button>
@@ -1237,3 +1353,6 @@ async function fetchDatabyTaxType(TaxCode) {
         return null;
     }
 }
+
+
+

@@ -1,30 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.Data.SqlClient;
-using Newtonsoft.Json;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Asn1.X509.Qualified;
-using Org.BouncyCastle.Bcpg;
-using Org.BouncyCastle.Utilities;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.Common;
-using System.Linq.Expressions;
-using System.Net.Mail;
-using System.Reflection.Emit;
 using System.Text.Json;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
-using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.Models;
-using travelexpensemanagement.Models.Inventory.Master;
 using travelexpensemanagement.Models.Purchase.Transaction;
-using UglyToad.PdfPig.Content;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using static travelexpensemanagement.Controllers.Master.StateMasterController;
+
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
     public class PurchaseOrderController : Controller
@@ -107,13 +94,45 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
         }                       
 
-        public JsonResult DDLGridItem()
+        public JsonResult DDLGridItem(string v_type)
         {
             var getdata = _globalValue.GetGlobalVariables();
             using (SqlConnection con = _dbcontext.GetErpConnection())
             {
-                string query = "Select a.Code,a.name from item_mast a left join ITEM_GROUP b on a.GROUP_CODE=b.CODE and b.COMP_CODE= " + getdata.PubCompCode + "     where  " +
-                    " a.comp_code=" + getdata.PubCompCode + " and a.name <> ''  group by a.name,a.CODE order by a.name";
+                string query = "";
+                if (v_type == "JORD")
+                {
+                    query = @"SELECT  a.CODE, a.NAME  FROM ITEM_MAST a
+                    LEFT JOIN ITEMUNIT_MAST b ON a.UNIT_CODE = b.CODE AND b.COMP_CODE = a.COMP_CODE
+                    LEFT JOIN ITEM_GROUP c ON a.GROUP_CODE = c.CODE  AND c.COMP_CODE = a.COMP_CODE
+                    LEFT JOIN ITEM_MGROUP d ON c.MGROUP_CODE = d.CODE AND d.COMP_CODE = a.COMP_CODE
+                    WHERE a.COMP_CODE = " + getdata.PubCompCode + @"  AND d.MGROUP_TYPE = 'Service' AND a.ACTIVE = 1
+                    GROUP BY a.NAME, a.CODE, b.NAME,  b.CODE, a.HSN_CODE,  a.CATLOG
+                    ORDER BY a.NAME;";
+                }
+
+                else if(v_type == "RORD")
+                {
+                        query = @"	SELECT  a.CODE, a.NAME 
+                        FROM ITEM_MAST a
+                        LEFT JOIN ITEMUNIT_MAST b ON a.UNIT_CODE = b.CODE AND b.COMP_CODE = a.COMP_CODE
+                        LEFT JOIN ITEM_GROUP c ON a.GROUP_CODE = c.CODE AND c.COMP_CODE = a.COMP_CODE
+                        LEFT JOIN ITEM_MGROUP d ON c.MGROUP_CODE = d.CODE AND d.COMP_CODE = a.COMP_CODE
+                        WHERE a.COMP_CODE =  " + getdata.PubCompCode + @"  AND d.MGROUP_TYPE = 'Raw' AND a.ACTIVE = 1
+                        GROUP BY a.NAME, a.CODE, b.NAME, b.CODE, a.HSN_CODE, a.CATLOG
+                        ORDER BY a.NAME;";
+                }
+                else
+                {
+                        query = @"SELECT   a.CODE, a.NAME  FROM ITEM_MAST a
+                        LEFT JOIN ITEM_MAKE b ON a.CODE = b.ITEM_CODE  AND b.COMP_CODE = a.COMP_CODE
+                        LEFT JOIN ITEMUNIT_MAST c ON a.UNIT_CODE = c.CODE  AND c.COMP_CODE = a.COMP_CODE
+                        LEFT JOIN ITEM_GROUP d ON a.GROUP_CODE = d.CODE  AND d.COMP_CODE = a.COMP_CODE
+                        LEFT JOIN ITEM_MGROUP e  ON d.MGROUP_CODE = e.CODE AND e.COMP_CODE = a.COMP_CODE
+                        WHERE a.COMP_CODE = " + getdata.PubCompCode + @" AND a.ACTIVE = 1
+                        GROUP BY a.NAME, a.CODE, c.NAME, c.CODE, a.HSN_CODE, a.CATLOG
+                        ORDER BY a.NAME;";
+                }                                 
 
                 var DDLGridItemList = _dropdownService.GetDropdownList(query);
 
@@ -121,7 +140,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
 
         }
-
         public JsonResult DDLGridMake(int ItemCode = 0)
         {
             var getdata = _globalValue.GetGlobalVariables();
@@ -195,6 +213,17 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
+        public JsonResult DllStatus()
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                string query = @"Select Code,Name from DOCSTATUS_MAST Order by CODE ";
+                var DllStatus = _dropdownService.GetDropdownList(query);
+                return Json(DllStatus);
+            }
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetDepartmentList()
         {
@@ -208,7 +237,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = "data load failed" });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> GetTaxList()
         {
@@ -222,7 +250,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = "data load failed" });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> GetPayTermList()
         {
@@ -236,7 +263,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = "data load failed" });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> GetMachineMastList()
         {
@@ -251,21 +277,28 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetWeighBridge(int partyCd)
+        public JsonResult GetWeighBridge(int partyCd)
         {
-            try
+
+            if (partyCd != null && partyCd <= 0)
             {
-                if (partyCd != null && partyCd <= 0)
-                {
-                    return Json(new { status = true, data = "" });
-                }
-                var wbList = await _dbHelper.GetJsonDataAsync($@"SELECT distinct DOC_ID, V_NO FROM wb1 WHERE PARTY_CODE={partyCd} AND V_TYPE='KANT' and COMP_CODE={_globalValue.GetGlobalVariables().PubCompCode} and BRANCH_CODE=1 order by V_NO ");
-                return Json(new { status = true, data = wbList });
+                return Json(new { status = true, data = "" });
             }
-            catch (Exception ex)
+
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
             {
-                return Json(new { status = false, message = "data load failed" });
+                string sql = @" ;WITH tmpwb AS ( SELECT  V_TYPE , V_NO   FROM WB1 WHERE V_TYPE = 'KANT' AND WB_TYPE = 'Raw Material'
+                                AND PARTY_CODE = " + partyCd + @" AND COMP_CODE = " + getdata.PubCompCode + @" AND BRANCH_CODE = " + getdata.PubBranchCode + @"
+                              
+                                 UNION ALL
+
+                                SELECT V_TYPE , V_NO  FROM WB1 WHERE V_TYPE = 'KSIN' AND PARTY_CODE = " + partyCd + @"  AND COMP_CODE = " + getdata.PubCompCode + @"
+                                AND BRANCH_CODE = " + getdata.PubBranchCode + @"  )
+                                SELECT V_TYPE, V_NO FROM tmpwb WHERE V_NO IS NOT NULL  ORDER BY V_NO;";
+
+                var GetWeighBridge = _dropdownService.GetDropdownList(sql);
+                return Json(GetWeighBridge);
             }
         }
 
@@ -275,12 +308,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             try
             {
                 var userSession = _globalValue.GetGlobalVariables();
-                //string strqry = $@" SELECT distinct wb1.DOC_ID, wb1.V_NO,wb2.ITEM_CODE,im.UNIT_CODE,wb2.NET_WGT
-                //FROM wb1 left join wb2 on wb1.DOC_ID=WB2.DOC_ID and wb1.COMP_CODE=wb2.COMP_CODE
-                //left join ITEM_MAST im on wb2.ITEM_CODE=im.CODE and WB2.COMP_CODE=im.COMP_CODE
-                //WHERE wb2.DOC_ID='{docid}' and isnull(wb2.ITEM_CODE, 0)<>0
-                //and WB1.COMP_CODE={userSession.PubCompCode} and wb1.BRANCH_CODE=1  ";
-
 
                 string strqry = $@" select a.ITEM_CODE,e.Name ITEM_NAME, d.NAME 'Make',d.CODE 'MakeCode',e.UNIT_CODE,e.UNIT_NAME,sum(a.NET_WGT)Qty
                    from WB2 a inner join wb1 b on a.V_TYPE = b.V_TYPE and a.v_no = b.v_no and a.COMP_CODE = b.COMP_CODE
@@ -289,7 +316,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                    left join ITEMMAKE_MAST d on c.MAKE_CODE = d.CODE and a.COMP_CODE = d.COMP_CODE
                    left join ITEM_MAST e on a.Item_CODE = e.CODE and a.COMP_CODE = e.COMP_CODE
                    where a.item_name<>'' and a.DOC_ID = '{docid}'
-                   and a.COMP_CODE = {userSession.PubCompCode}   and e.active = 1 and a.BRANCH_CODE = 1
+                   and a.COMP_CODE = {userSession.PubCompCode}   and e.active = 1 and a.BRANCH_CODE = {userSession.PubBranchCode}  
                    and b.PARTY_CODE = {partyCd}
                    group by a.ITEM_CODE,e.Name,d.NAME,d.CODE,e.UNIT_CODE,e.UNIT_NAME ";
                 var wbDetail = await _dbHelper.GetJsonDataAsync(strqry);
@@ -300,7 +327,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = "data load failed" });
             }
         }
-
         [HttpPost]
         public JsonResult CalculationBySaudaNo([FromBody] SaudaCalculationRequest model)
         {
@@ -314,7 +340,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 DateTime effectiveDate = model.EffectiveDate ?? DateTime.Now;
 
                 List<Order2> itemList = model.Orders ?? new List<Order2>();                 
-                CalculateSaudaRate(btn, saudaType, saudaNo, stateCode, cityCode, effectiveDate, itemList);
+                CalculateSaudaRate(btn, saudaType, saudaNo,  cityCode, effectiveDate, itemList);
 
                 return Json(new { status = true, data = itemList });
             }
@@ -322,8 +348,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             {
                 return Json(new { status = false, message = ex.Message });
             }
-        }
-         
+        }        
 
         [HttpGet]
         public async Task<IActionResult> GetSaudaDetail(string docid)
@@ -344,66 +369,55 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         {
             try
             {
-
                 if (string.IsNullOrEmpty(id))
                 {
                     return Json(new { status = false, message = "Invalid ID" });
                 }
+
                 var userSession = _globalValue.GetGlobalVariables();
                 string VType = id.Substring(0, 4);
                 string VNo = id.Substring(4);
                 var parametersHeader = new Dictionary<string, object>
                 {
-                { "@COMP_CODE", int.Parse(userSession.PubCompCode) },
-                { "@YEAR_CODE", int.Parse(userSession.PubFYearCode) },
-                { "@BRANCH_CODE", 1 },
-                { "@V_TYPE", VType},
-                { "@V_NO", int.Parse(VNo) },
-                { "@Action", "PurchaseOrderHeader" }
+                    { "@COMP_CODE", int.Parse(userSession.PubCompCode) },
+                    { "@YEAR_CODE", int.Parse(userSession.PubFYearCode) },
+                    { "@BRANCH_CODE", userSession.PubBranchCode },
+                    { "@V_TYPE", VType},
+                    { "@V_NO", int.Parse(VNo) },
+                    { "@Action", "PurchaseOrderHeader" }
                 };
 
                 var parametersDetail = new Dictionary<string, object>
                 {
-                { "@COMP_CODE", int.Parse(userSession.PubCompCode) },
-                { "@YEAR_CODE", int.Parse(userSession.PubFYearCode) },
-                { "@BRANCH_CODE", 1 },
-                { "@V_TYPE", VType},
-                { "@V_NO", int.Parse(VNo) },
-                { "@Action", "PurchaseOrderDetail" }
+                    { "@COMP_CODE", int.Parse(userSession.PubCompCode) },
+                    { "@YEAR_CODE", int.Parse(userSession.PubFYearCode) },
+                    { "@BRANCH_CODE", userSession.PubBranchCode },
+                    { "@V_TYPE", VType},
+                    { "@V_NO", int.Parse(VNo) },
+                    { "@Action", "PurchaseOrderDetail" }
                 };
 
                 var parametersAttachment = new Dictionary<string, object>
                 {
-                { "@COMP_CODE", int.Parse(userSession.PubCompCode) },
-                { "@YEAR_CODE", int.Parse(userSession.PubFYearCode) },
-                { "@BRANCH_CODE", 1 },
-                { "@V_TYPE", VType},
-                { "@V_NO", int.Parse(VNo) },
-                { "@Action", "PurchaseOrderAttachment" }
+                    { "@COMP_CODE", int.Parse(userSession.PubCompCode) },
+                    { "@YEAR_CODE", int.Parse(userSession.PubFYearCode) },
+                    { "@BRANCH_CODE", userSession.PubBranchCode },
+                    { "@V_TYPE", VType},
+                    { "@V_NO", int.Parse(VNo) },
+                    { "@Action", "PurchaseOrderAttachment" }
                 };
 
                 var header = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_PurchaseOrder]", parametersHeader);
                 var detail = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_PurchaseOrder]", parametersDetail);
                 var attachment = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_PurchaseOrder]", parametersAttachment);
 
-                return Json(new
-                {
-                    status = true,
-                    header = header,
-                    detail = detail,
-                    attachment = attachment
-                });
+                return Json(new { status = true,  header = header, detail = detail, attachment = attachment });
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    status = false,
-                    message = ex.Message
-                });
+                return Json(new { status = false, message = ex.Message });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> GetPurchaseRtApprovalList()
         {
@@ -428,7 +442,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = "data load failed" });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> GetQuotationRtAprvlLiast(int partyCode)
         {
@@ -462,12 +475,53 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = "data load failed" });
             }
         }
+        public string GetText(string query)
+        {
+            try
+            {
+                using var con = _dbcontext.GetErpConnection();
+                {
+                    con.Open();
 
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return reader[0].ToString();
+                            }
+                            else
+                            {
+                                return string.Empty;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetText() Error: " + ex.Message);
+                return string.Empty;
+            }
+        }
+  
         [HttpPost]
         public async Task<IActionResult> SaveOrUpdatePurchaseOrder([FromBody] PurchaseOrder POmodel)
         {
             try
             {
+
+                var usersessionDt = _globalValue.GetGlobalVariables();
+                System.Boolean isApprovalBody = false;
+                System.Boolean isFinalApprovalBody = false;
+                string DOC_APPROSTAGE = "";
+                string APPROV_USER = "";
+                string fappstatus = "";
+                string fappRemark = "";
+                string gstExmptflg = "0";
+                string orders = "";
+         
 
                 if (POmodel == null)
                 return Json(new { status = false, message = " data save failed." });
@@ -484,162 +538,240 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 //        return Json(new { status = false, message = data.message });
                 //    }
                 //}
+           
+                //if (POmodel.SaudaNo > 0 && POmodel.ItemRecords != null && POmodel.ItemRecords.Any())
+                //{
+                //  CalculateSaudaRate(  "SAV",  POmodel.SaudaType ?? "", POmodel.SaudaNo ?? 0, POmodel.BillCity ?? 0,  POmodel.VDate ?? DateTime.Now,  POmodel.ItemRecords);
+                //}
 
+                DOC_APPROSTAGE = GetText("select 1 from DOC_APPROSTAGE where USER_CODE= " + usersessionDt.PubUserId + " and DOC_CODE= '" + POmodel.VType + "' and comp_code= " + usersessionDt.PubCompCode + " ");
 
-                using (var con = _dbcontext.GetErpConnection())
+                if (DOC_APPROSTAGE == "1")
                 {
-                    await con.OpenAsync();
-                    var usersessionDt = _globalValue.GetGlobalVariables();
-                    DataTable purchaseOrderTable = FillDataTable(POmodel.ItemRecords, "[dbo].[Type_Order2]");
+                    isApprovalBody = true;
+                }
 
-                    DataTable purchaseOrderAttachmentTable = new DataTable();
+                APPROV_USER = GetText("select APPROV_USER from DOC_APPROSTAGE where USER_CODE = " + usersessionDt.PubUserId + " and DOC_CODE = '" + POmodel.VType + "' and comp_code = " + usersessionDt.PubCompCode + "");
 
-                    purchaseOrderAttachmentTable.Columns.Add("FILE_Path", typeof(string));
-                    purchaseOrderAttachmentTable.Columns.Add("FILE_NAME", typeof(string));
-                    purchaseOrderAttachmentTable.Columns.Add("SRNO", typeof(int));
+                if(APPROV_USER == "FINAL")
+                {
+                    isFinalApprovalBody = true;
+                }
 
-                    int srno = 1;
+                if(isFinalApprovalBody == true)
+                {
+                    fappstatus = "Approved";
+                    fappRemark = "Document Approved.";
+                }
+                else
+                {
 
-                    if (POmodel.Attachments != null)
+                    int ffg = 0;
+
+                    if (POmodel.VType == "RORD")
                     {
-                        foreach (var a in POmodel.Attachments)
+                        foreach (var item in POmodel.ItemRecords)
                         {
-                            purchaseOrderAttachmentTable.Rows.Add( "/attachments/Purchase/" + (a.FileName ?? ""), a.FileName, srno++);
+                            if(item.SaudaType == "" && item.Rate != item.CalcRate)
+                            {
+                                ffg = 1;
+                            }
+                        }
+
+                        if(ffg == 0)
+                        {
+                            fappstatus = "Approved";
+                            fappRemark = "Document Approved.";
                         }
                     }
-                    using (var transaction = con.BeginTransaction())
+                }       
+
+                if (POmodel.SaudaNo > 0)
+                {
+                    string sql = @" SELECT V_NO, SUM(QTY) AS TotalQty FROM ORDER2 WHERE SAUDA_TYPE = @SaudaType  AND SAUDA_NO = @SaudaNo
+                                    AND COMP_CODE = @CompCode  AND BRANCH_CODE = @BranchCode AND YEAR_CODE = @YearCode
+                                    AND V_TYPE = @VType AND V_NO <> @CurrentVNo GROUP BY V_NO ORDER BY V_NO";
+
+                    using (var con = _dbcontext.GetErpConnection())
                     {
-                        bool success = true;
+                        await con.OpenAsync();
 
-                        try
+                        using (var cmd = con.CreateCommand())
                         {
-                            using (SqlCommand cmd = new SqlCommand("[dbo].[sp_PurchaseOrder_AE]", con, transaction))
+                            cmd.CommandText = sql;
+
+                            cmd.Parameters.AddWithValue("@SaudaType", "PAUD");
+                            cmd.Parameters.AddWithValue("@SaudaNo", POmodel.SaudaNo);
+                            cmd.Parameters.AddWithValue("@CompCode", usersessionDt.PubCompCode);
+                            cmd.Parameters.AddWithValue("@BranchCode", usersessionDt.PubBranchCode);
+                            cmd.Parameters.AddWithValue("@YearCode", usersessionDt.PubFYearCode);
+                            cmd.Parameters.AddWithValue("@VType", "RORD");
+                            cmd.Parameters.AddWithValue("@CurrentVNo", POmodel.VNo);
+
+                            using (var reader = await cmd.ExecuteReaderAsync())
                             {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Transaction = transaction;
-                                cmd.CommandType = CommandType.StoredProcedure;
-
-                                if (POmodel.SaveOrUpdate == "Save")
-                                    cmd.Parameters.AddWithValue("@Action", "Add");
-                                else
-                                    cmd.Parameters.AddWithValue("@Action", "Edit");
-
-                                cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode ?? (object)DBNull.Value);
-                                cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode ?? (object)DBNull.Value);
-                                cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
-                                cmd.Parameters.AddWithValue("@V_NO", _dbHelper.Xnull(POmodel.VNo));
-                                cmd.Parameters.AddWithValue("@V_TYPE", _dbHelper.Xnull(POmodel.VType));
-                                cmd.Parameters.AddWithValue("@V_DATE", _dbHelper.Xnull(POmodel.VDate));
-                                cmd.Parameters.AddWithValue("@DOC_ID", _dbHelper.Xnull(POmodel.DocId));
-                                cmd.Parameters.AddWithValue("@PLACE_CODE", _dbHelper.Xnull(POmodel.PlaceCode));
-                                cmd.Parameters.AddWithValue("@WB_TYPE", _dbHelper.Xnull(POmodel.WbType));
-                                cmd.Parameters.AddWithValue("@WB_NO", _dbHelper.Xnull(POmodel.WbNo));
-                                cmd.Parameters.AddWithValue("@PARTY_CODE", _dbHelper.Xnull(POmodel.PartyCode));
-                                cmd.Parameters.AddWithValue("@SHIP_CODE", _dbHelper.Xnull(POmodel.ShipCode));
-                                cmd.Parameters.AddWithValue("@SHIP_FROM", _dbHelper.Xnull(POmodel.ShipFrom));
-                                cmd.Parameters.AddWithValue("@PRICE_TYPE", _dbHelper.Xnull(POmodel.PriceType));
-                                cmd.Parameters.AddWithValue("@PARTY_REF", _dbHelper.Xnull(POmodel.PartyRef));
-                                cmd.Parameters.AddWithValue("@IMPORT_CURRENCY", _dbHelper.Xnull(POmodel.ImportCurrency));
-                                cmd.Parameters.AddWithValue("@EXRATE", _dbHelper.Xnull(POmodel.ExRate));
-                                cmd.Parameters.AddWithValue("@NOS", _dbHelper.Xnull(POmodel.Nos));
-                                cmd.Parameters.AddWithValue("@QTY", _dbHelper.Xnull(POmodel.Qty));
-                                cmd.Parameters.AddWithValue("@AMOUNT", _dbHelper.Xnull(POmodel.Amount));
-                                cmd.Parameters.AddWithValue("@PACK_AMT", _dbHelper.Xnull(POmodel.PackAmt));
-                                cmd.Parameters.AddWithValue("@DISC_AMT", _dbHelper.Xnull(POmodel.DiscAmt));
-                                cmd.Parameters.AddWithValue("@CGST_AMT", _dbHelper.Xnull(POmodel.CgstAmt));
-                                cmd.Parameters.AddWithValue("@SGST_AMT", _dbHelper.Xnull(POmodel.SgstAmt));
-                                cmd.Parameters.AddWithValue("@IGST_AMT", _dbHelper.Xnull(POmodel.IgstAmt));
-                                cmd.Parameters.AddWithValue("@OTH_AMT", _dbHelper.Xnull(POmodel.OthAmt));
-                                cmd.Parameters.AddWithValue("@VAT_AMT", _dbHelper.Xnull(POmodel.VatAmt));
-                                cmd.Parameters.AddWithValue("@CESS_PER", _dbHelper.Xnull(POmodel.CessPer));
-                                cmd.Parameters.AddWithValue("@CESS_AMT", _dbHelper.Xnull(POmodel.CessAmt));
-                                cmd.Parameters.AddWithValue("@TCS_PER", _dbHelper.Xnull(POmodel.TcsPer));
-                                cmd.Parameters.AddWithValue("@TCS_AMT", _dbHelper.Xnull(POmodel.TcsAmt));
-                                cmd.Parameters.AddWithValue("@NET_AMT", _dbHelper.Xnull(POmodel.NetAmt));
-                                cmd.Parameters.AddWithValue("@DELIVERY_TERM", _dbHelper.Xnull(POmodel.DeliveryTerm));
-                                cmd.Parameters.AddWithValue("@DELIVERY_DATE", _dbHelper.Xnull(POmodel.DeliveryDate));
-                                cmd.Parameters.AddWithValue("@VALIDITY_DATE", _dbHelper.Xnull(POmodel.ValidityDate));
-                                cmd.Parameters.AddWithValue("@TRANSPORT_TERM", _dbHelper.Xnull(POmodel.TransportTerm));
-                                cmd.Parameters.AddWithValue("@PAYTERM_CODE", _dbHelper.Xnull(POmodel.PaytermCode));
-                                cmd.Parameters.AddWithValue("@PAYMENT_TERM", _dbHelper.Xnull(POmodel.PaymentTerm));
-                                cmd.Parameters.AddWithValue("@PRICE_TERM", _dbHelper.Xnull(POmodel.PriceTerm));
-                                cmd.Parameters.AddWithValue("@SAUDA_TYPE", _dbHelper.Xnull(POmodel.SaudaType));
-                                cmd.Parameters.AddWithValue("@SAUDA_NO", _dbHelper.Xnull(POmodel.SaudaNo));
-                                cmd.Parameters.AddWithValue("@DELIVERY_PERIOD", _dbHelper.Xnull(POmodel.DeliveryPeriod));
-                                cmd.Parameters.AddWithValue("@DELIVERY_TO", _dbHelper.Xnull(POmodel.DeliveryTo));
-                                cmd.Parameters.AddWithValue("@REMARKS", _dbHelper.Xnull(POmodel.Remarks));
-                                cmd.Parameters.AddWithValue("@POTYPE", _dbHelper.Xnull(POmodel.PoType));
-                                cmd.Parameters.AddWithValue("@FAPROV_STATUS", _dbHelper.Xnull(POmodel.FAProvStatus));
-                                cmd.Parameters.AddWithValue("@FAPROV_REMARKS", _dbHelper.Xnull(POmodel.FAProvRemarks));
-                                cmd.Parameters.AddWithValue("@MAILSEND", _dbHelper.Xnull(POmodel.MailSend));
-                                cmd.Parameters.AddWithValue("@CDISC_AMT", _dbHelper.Xnull(POmodel.CDiscAmt));
-                                cmd.Parameters.AddWithValue("@AUTOGEN_PO", _dbHelper.Xnull(POmodel.AutoGenPo));
-                                cmd.Parameters.AddWithValue("@POACCEPT_FLG", _dbHelper.Xnull(POmodel.PoAcceptFlg));
-                                cmd.Parameters.AddWithValue("@POATTACH_PATH", _dbHelper.Xnull(POmodel.PoAttachPath));
-                                cmd.Parameters.AddWithValue("@POATTCH_DATE", _dbHelper.Xnull(POmodel.PoAttachDate));
-                                cmd.Parameters.AddWithValue("@BILL_ADD1", _dbHelper.Xnull(POmodel.BillAdd1));
-                                cmd.Parameters.AddWithValue("@BILL_ADD2", _dbHelper.Xnull(POmodel.BillAdd2));
-                                cmd.Parameters.AddWithValue("@BILL_ADD3", _dbHelper.Xnull(POmodel.BillAdd3));
-                                cmd.Parameters.AddWithValue("@BILL_CITY", _dbHelper.Xnull(POmodel.BillCity));
-                                cmd.Parameters.AddWithValue("@BILL_PINCODE", _dbHelper.Xnull(POmodel.BillPincode));
-                                cmd.Parameters.AddWithValue("@BILL_GST", _dbHelper.Xnull(POmodel.BillGst));
-                                cmd.Parameters.AddWithValue("@SHIP_ADD1", _dbHelper.Xnull(POmodel.ShipAdd1));
-                                cmd.Parameters.AddWithValue("@SHIP_ADD2", _dbHelper.Xnull(POmodel.ShipAdd2));
-                                cmd.Parameters.AddWithValue("@SHIP_ADD3", _dbHelper.Xnull(POmodel.ShipAdd3));
-                                cmd.Parameters.AddWithValue("@SHIP_CITY", _dbHelper.Xnull(POmodel.ShipCity));
-                                cmd.Parameters.AddWithValue("@SHIP_PINCODE", _dbHelper.Xnull(POmodel.ShipPincode));
-                                cmd.Parameters.AddWithValue("@SHIP_GST", _dbHelper.Xnull(POmodel.ShipGst));
-                                cmd.Parameters.AddWithValue("@TAX_CODE", _dbHelper.Xnull(POmodel.TaxCode));
-                                cmd.Parameters.AddWithValue("@ITEM_TYPE", _dbHelper.Xnull(POmodel.ItemType));
-                                cmd.Parameters.AddWithValue("@SUPPLY_TYPE", _dbHelper.Xnull(POmodel.SupplyType));
-                                cmd.Parameters.AddWithValue("@TRAN_TYPE", _dbHelper.Xnull(POmodel.TranType));
-                                cmd.Parameters.AddWithValue("@FORM_CODE", _dbHelper.Xnull(POmodel.FormCode));
-                                cmd.Parameters.AddWithValue("@VEHICLE_NO", _dbHelper.Xnull(POmodel.VehicleNo));
-                                cmd.Parameters.AddWithValue("@INV_TYPE", _dbHelper.Xnull(POmodel.InvType));
-                                cmd.Parameters.AddWithValue("@INV_NO", _dbHelper.Xnull(POmodel.InvNo));
-                                cmd.Parameters.AddWithValue("@PARTY_NAME", _dbHelper.Xnull(POmodel.PartyName));
-                                cmd.Parameters.AddWithValue("@SHIP_NAME", _dbHelper.Xnull(POmodel.ShipName));
-                                cmd.Parameters.AddWithValue("@status", 1);
-                                cmd.Parameters.AddWithValue("@User", usersessionDt.PubUserId ?? (object)DBNull.Value);
-                                cmd.Parameters.AddWithValue("@Lip", usersessionDt.PubLocalId ?? (object)DBNull.Value);
-
-
-                                var tvp = cmd.Parameters.AddWithValue("@ItemRecord", purchaseOrderTable);
-                                tvp.SqlDbType = SqlDbType.Structured;
-                                tvp.TypeName = "[dbo].[Type_Order2]";
-
-                                var tvp2 = cmd.Parameters.AddWithValue("@attachment", purchaseOrderAttachmentTable);
-                                tvp2.SqlDbType = SqlDbType.Structured;
-                                tvp2.TypeName = "[dbo].[Type_order3]";
-
-                                 var returnParam = new SqlParameter("@ReturnVal", SqlDbType.Int) { Direction = ParameterDirection.ReturnValue };
-                                cmd.Parameters.Add(returnParam);
-                                var errorParam = new SqlParameter("@ErrorMessage", SqlDbType.NVarChar, 4000)
+                                while (await reader.ReadAsync())
                                 {
-                                    Direction = ParameterDirection.Output
-                                };
-                                cmd.Parameters.Add(errorParam);
-                                await cmd.ExecuteNonQueryAsync();
-                                string errorMessage = errorParam.Value?.ToString();
-
-                                if ((int)returnParam.Value <= 0)
-                                    success = false;
+                                    string vNo = reader["V_NO"].ToString();
+                                    decimal totalQty = Convert.ToDecimal(reader["TotalQty"]);                           
+                                }
                             }
-
-                            if (success)
-                                transaction.Commit();
-                            else
-                                transaction.Rollback();
-
-                            return Json(new  {   status = success, message = success ? "Data save/update successfully." : "Failed to save or update some employee details." });
-                        }
-                        catch (Exception ex)
-                        {
-                            transaction?.Rollback();
-                            return Json(new { status = false, message = "Transaction failed: " + ex.Message });
                         }
                     }
                 }
+
+                using (var con = _dbcontext.GetErpConnection())
+                {
+                        await con.OpenAsync();
+
+                        DataTable purchaseOrderTable = FillDataTable(POmodel.ItemRecords, "[dbo].[Type_Order2]");
+
+                        DataTable purchaseOrderAttachmentTable = new DataTable();
+
+                        purchaseOrderAttachmentTable.Columns.Add("FILE_Path", typeof(string));
+                        purchaseOrderAttachmentTable.Columns.Add("FILE_NAME", typeof(string));
+                        purchaseOrderAttachmentTable.Columns.Add("SRNO", typeof(int));
+
+                        int srno = 1;
+
+                        if (POmodel.Attachments != null)
+                        {
+                            foreach (var a in POmodel.Attachments)
+                            {
+                                purchaseOrderAttachmentTable.Rows.Add("/attachments/Purchase/" + (a.FileName ?? ""), a.FileName, srno++);
+                            }
+                        }
+                        using (var transaction = con.BeginTransaction())
+                        {
+                            bool success = true;
+                            try
+                            {
+                                using (SqlCommand cmd = new SqlCommand("[dbo].[sp_PurchaseOrder_AE]", con, transaction))
+                                {
+                                    cmd.CommandType = CommandType.StoredProcedure;
+                                    cmd.Transaction = transaction;
+                                    cmd.CommandType = CommandType.StoredProcedure;
+
+                                    if (POmodel.SaveOrUpdate == "Save")
+                                        cmd.Parameters.AddWithValue("@Action", "Add");
+                                    else
+                                        cmd.Parameters.AddWithValue("@Action", "Edit");
+
+                                    cmd.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
+                                    cmd.Parameters.AddWithValue("@V_NO", _dbHelper.Xnull(POmodel.VNo));
+                                    cmd.Parameters.AddWithValue("@V_TYPE", _dbHelper.Xnull(POmodel.VType));
+                                    cmd.Parameters.AddWithValue("@V_DATE", _dbHelper.Xnull(POmodel.VDate));
+                                    cmd.Parameters.AddWithValue("@DOC_ID", _dbHelper.Xnull(POmodel.DocId));
+                                    cmd.Parameters.AddWithValue("@PLACE_CODE", _dbHelper.Xnull(POmodel.PlaceCode));
+                                    cmd.Parameters.AddWithValue("@WB_TYPE", _dbHelper.Xnull(POmodel.WbType));
+                                    cmd.Parameters.AddWithValue("@WB_NO", _dbHelper.Xnull(POmodel.WbNo));
+                                    cmd.Parameters.AddWithValue("@PARTY_CODE", _dbHelper.Xnull(POmodel.PartyCode));
+                                    cmd.Parameters.AddWithValue("@SHIP_CODE", _dbHelper.Xnull(POmodel.ShipCode));
+                                    cmd.Parameters.AddWithValue("@SHIP_FROM", _dbHelper.Xnull(POmodel.ShipFrom));
+                                    cmd.Parameters.AddWithValue("@PRICE_TYPE", _dbHelper.Xnull(POmodel.PriceType));
+                                    cmd.Parameters.AddWithValue("@PARTY_REF", _dbHelper.Xnull(POmodel.PartyRef));
+                                    cmd.Parameters.AddWithValue("@IMPORT_CURRENCY", _dbHelper.Xnull(POmodel.ImportCurrency));
+                                    cmd.Parameters.AddWithValue("@EXRATE", _dbHelper.Xnull(POmodel.ExRate));
+                                    cmd.Parameters.AddWithValue("@NOS", _dbHelper.Xnull(POmodel.Nos));
+                                    cmd.Parameters.AddWithValue("@QTY", _dbHelper.Xnull(POmodel.Qty));
+                                    cmd.Parameters.AddWithValue("@AMOUNT", _dbHelper.Xnull(POmodel.Amount));
+                                    cmd.Parameters.AddWithValue("@PACK_AMT", _dbHelper.Xnull(POmodel.PackAmt));
+                                    cmd.Parameters.AddWithValue("@DISC_AMT", _dbHelper.Xnull(POmodel.DiscAmt));
+                                    cmd.Parameters.AddWithValue("@CGST_AMT", _dbHelper.Xnull(POmodel.CgstAmt));
+                                    cmd.Parameters.AddWithValue("@SGST_AMT", _dbHelper.Xnull(POmodel.SgstAmt));
+                                    cmd.Parameters.AddWithValue("@IGST_AMT", _dbHelper.Xnull(POmodel.IgstAmt));
+                                    cmd.Parameters.AddWithValue("@OTH_AMT", _dbHelper.Xnull(POmodel.OthAmt));
+                                    cmd.Parameters.AddWithValue("@VAT_AMT", _dbHelper.Xnull(POmodel.VatAmt));
+                                    cmd.Parameters.AddWithValue("@CESS_PER", _dbHelper.Xnull(POmodel.CessPer));
+                                    cmd.Parameters.AddWithValue("@CESS_AMT", _dbHelper.Xnull(POmodel.CessAmt));
+                                    cmd.Parameters.AddWithValue("@TCS_PER", _dbHelper.Xnull(POmodel.TcsPer));
+                                    cmd.Parameters.AddWithValue("@TCS_AMT", _dbHelper.Xnull(POmodel.TcsAmt));
+                                    cmd.Parameters.AddWithValue("@NET_AMT", _dbHelper.Xnull(POmodel.NetAmt));
+                                    cmd.Parameters.AddWithValue("@DELIVERY_TERM", _dbHelper.Xnull(POmodel.DeliveryTerm));
+                                    cmd.Parameters.AddWithValue("@DELIVERY_DATE", _dbHelper.Xnull(POmodel.DeliveryDate));
+                                    cmd.Parameters.AddWithValue("@VALIDITY_DATE", _dbHelper.Xnull(POmodel.ValidityDate));
+                                    cmd.Parameters.AddWithValue("@TRANSPORT_TERM", _dbHelper.Xnull(POmodel.TransportTerm));
+                                    cmd.Parameters.AddWithValue("@PAYTERM_CODE", _dbHelper.Xnull(POmodel.PaytermCode));
+                                    cmd.Parameters.AddWithValue("@PAYMENT_TERM", _dbHelper.Xnull(POmodel.PaymentTerm));
+                                    cmd.Parameters.AddWithValue("@PRICE_TERM", _dbHelper.Xnull(POmodel.PriceTerm));
+                                    cmd.Parameters.AddWithValue("@SAUDA_TYPE", _dbHelper.Xnull(POmodel.SaudaType));
+                                    cmd.Parameters.AddWithValue("@SAUDA_NO", _dbHelper.Xnull(POmodel.SaudaNo));
+                                    cmd.Parameters.AddWithValue("@DELIVERY_PERIOD", _dbHelper.Xnull(POmodel.DeliveryPeriod));
+                                    cmd.Parameters.AddWithValue("@DELIVERY_TO", _dbHelper.Xnull(POmodel.DeliveryTo));
+                                    cmd.Parameters.AddWithValue("@REMARKS", _dbHelper.Xnull(POmodel.Remarks));
+                                    cmd.Parameters.AddWithValue("@POTYPE", _dbHelper.Xnull(POmodel.PoType));
+                                    cmd.Parameters.AddWithValue("@FAPROV_STATUS", _dbHelper.Xnull(POmodel.FAProvStatus));
+                                    cmd.Parameters.AddWithValue("@FAPROV_REMARKS", _dbHelper.Xnull(POmodel.FAProvRemarks));
+                                    cmd.Parameters.AddWithValue("@MAILSEND", _dbHelper.Xnull(POmodel.MailSend));
+                                    cmd.Parameters.AddWithValue("@CDISC_AMT", _dbHelper.Xnull(POmodel.CDiscAmt));
+                                    cmd.Parameters.AddWithValue("@AUTOGEN_PO", _dbHelper.Xnull(POmodel.AutoGenPo));
+                                    cmd.Parameters.AddWithValue("@POACCEPT_FLG", _dbHelper.Xnull(POmodel.PoAcceptFlg));
+                                    cmd.Parameters.AddWithValue("@POATTACH_PATH", _dbHelper.Xnull(POmodel.PoAttachPath));
+                                    cmd.Parameters.AddWithValue("@POATTCH_DATE", _dbHelper.Xnull(POmodel.PoAttachDate));
+                                    cmd.Parameters.AddWithValue("@BILL_ADD1", _dbHelper.Xnull(POmodel.BillAdd1));
+                                    cmd.Parameters.AddWithValue("@BILL_ADD2", _dbHelper.Xnull(POmodel.BillAdd2));
+                                    cmd.Parameters.AddWithValue("@BILL_ADD3", _dbHelper.Xnull(POmodel.BillAdd3));
+                                    cmd.Parameters.AddWithValue("@BILL_CITY", _dbHelper.Xnull(POmodel.BillCity));
+                                    cmd.Parameters.AddWithValue("@BILL_PINCODE", _dbHelper.Xnull(POmodel.BillPincode));
+                                    cmd.Parameters.AddWithValue("@BILL_GST", _dbHelper.Xnull(POmodel.BillGst));
+                                    cmd.Parameters.AddWithValue("@SHIP_ADD1", _dbHelper.Xnull(POmodel.ShipAdd1));
+                                    cmd.Parameters.AddWithValue("@SHIP_ADD2", _dbHelper.Xnull(POmodel.ShipAdd2));
+                                    cmd.Parameters.AddWithValue("@SHIP_ADD3", _dbHelper.Xnull(POmodel.ShipAdd3));
+                                    cmd.Parameters.AddWithValue("@SHIP_CITY", _dbHelper.Xnull(POmodel.ShipCity));
+                                    cmd.Parameters.AddWithValue("@SHIP_PINCODE", _dbHelper.Xnull(POmodel.ShipPincode));
+                                    cmd.Parameters.AddWithValue("@SHIP_GST", _dbHelper.Xnull(POmodel.ShipGst));
+                                    cmd.Parameters.AddWithValue("@TAX_CODE", _dbHelper.Xnull(POmodel.TaxCode));
+                                    cmd.Parameters.AddWithValue("@ITEM_TYPE", _dbHelper.Xnull(POmodel.ItemType));
+                                    cmd.Parameters.AddWithValue("@SUPPLY_TYPE", _dbHelper.Xnull(POmodel.SupplyType));
+                                    cmd.Parameters.AddWithValue("@TRAN_TYPE", _dbHelper.Xnull(POmodel.TranType));
+                                    cmd.Parameters.AddWithValue("@FORM_CODE", _dbHelper.Xnull(POmodel.FormCode));
+                                    cmd.Parameters.AddWithValue("@VEHICLE_NO", _dbHelper.Xnull(POmodel.VehicleNo));
+                                    cmd.Parameters.AddWithValue("@INV_TYPE", _dbHelper.Xnull(POmodel.InvType));
+                                    cmd.Parameters.AddWithValue("@INV_NO", _dbHelper.Xnull(POmodel.InvNo));
+                                    cmd.Parameters.AddWithValue("@PARTY_NAME", _dbHelper.Xnull(POmodel.PartyName));
+                                    cmd.Parameters.AddWithValue("@SHIP_NAME", _dbHelper.Xnull(POmodel.ShipName));
+                                    cmd.Parameters.AddWithValue("@status", 1);
+                                    cmd.Parameters.AddWithValue("@User", usersessionDt.PubUserId ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@Lip", usersessionDt.PubLocalId ?? (object)DBNull.Value);
+
+                                    var tvp = cmd.Parameters.AddWithValue("@ItemRecord", purchaseOrderTable);
+                                    tvp.SqlDbType = SqlDbType.Structured;
+                                    tvp.TypeName = "[dbo].[Type_Order2]";
+
+                                    var tvp2 = cmd.Parameters.AddWithValue("@attachment", purchaseOrderAttachmentTable);
+                                    tvp2.SqlDbType = SqlDbType.Structured;
+                                    tvp2.TypeName = "[dbo].[Type_order3]";
+
+                                    var returnParam = new SqlParameter("@ReturnVal", SqlDbType.Int) { Direction = ParameterDirection.ReturnValue };
+                                    cmd.Parameters.Add(returnParam);
+                                    var errorParam = new SqlParameter("@ErrorMessage", SqlDbType.NVarChar, 4000)
+                                    {
+                                        Direction = ParameterDirection.Output
+                                    };
+                                    cmd.Parameters.Add(errorParam);
+                                    await cmd.ExecuteNonQueryAsync();
+                                    string errorMessage = errorParam.Value?.ToString();
+
+                                    if ((int)returnParam.Value <= 0)
+                                        success = false;
+                                }
+
+                                if (success)
+                                    transaction.Commit();
+                                else
+                                    transaction.Rollback();
+
+                                return Json(new { status = success, message = success ? "Data save/update successfully." : "Failed to save or update some employee details." });
+                            }
+                            catch (Exception ex)
+                            {
+                                transaction?.Rollback();
+                                return Json(new { status = false, message = "Transaction failed: " + ex.Message });
+                            }
+                        }
+                    }
             }
             catch (Exception ex)
             {
@@ -647,6 +779,121 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
+        private void CalculateSaudaRate(string btn, string SaudaType, int saudaNo, int CityCode, DateTime effectiveDate, List<Order2> itemList)
+        {
+            double saudaRate = 0.0;
+            int saudaICode = 0;
+            string sdate = "";
+
+            var userdata = _globalValue.GetGlobalVariables();
+            string effDate = effectiveDate.ToString("yyyyMMdd");
+            // Step 1: Fetch Sauda Rate
+            if (saudaNo > 0)
+            {
+                string query = $@" SELECT TOP 1 ITEM_CODE, RATE, V_DATE FROM SAUDA WHERE V_TYPE = '{SaudaType}'  AND V_NO = {saudaNo} AND COMP_CODE = {userdata.PubCompCode} AND BRANCH_CODE = 1";
+
+                var dt = LoadDataInDataTable(query);
+                if (dt.Rows.Count > 0)
+                {
+                    saudaICode = Convert.ToInt32(dt.Rows[0]["ITEM_CODE"]);
+                    saudaRate = Convert.ToDouble(dt.Rows[0]["RATE"]);
+                    sdate = Convert.ToDateTime(dt.Rows[0]["V_DATE"]).ToString("yyyy-MM-dd");
+                }
+            }
+
+            if (saudaRate == 0)
+            {
+                throw new Exception("Sauda Rate is blank.");
+            }
+
+            // Step 2: Loop through items
+            foreach (var item in itemList)
+            {
+                if (item.ItemCode == null || item.ItemCode <= 0)
+                    continue;
+
+                double rate = 0.0;
+
+                // Step 3: Check discount master
+                if (isExist($"SELECT 1 FROM RMDISC_MAST WHERE SAUDA_ITEM = {saudaICode} AND COMP_CODE = {userdata.PubCompCode}"))
+                {
+                    string discountQuery = $@"
+                        SELECT TOP 1 ISNULL(RATE, 0) AS Rate  FROM RMDISC_MAST WHERE ITEM_CODE = {item.ItemCode}
+                        AND COMP_CODE = {userdata.PubCompCode} AND SAUDA_ITEM = {saudaICode} AND EFF_DATE <= '{effDate}'
+                        ORDER BY EFF_DATE DESC";
+
+                    var RMDiscRate = LoadDataInDataTable(discountQuery);
+                    if (RMDiscRate.Rows.Count == 0)
+                    {
+                        throw new Exception($"Item ({item.ItemName}) not found in discount master.");
+                    }
+
+                    rate = Convert.ToDouble(RMDiscRate.Rows[0]["Rate"]);
+
+                    // Special condition
+                    if (rate != 0 && string.Compare(sdate, "20250503") <= 0 && item.ItemCode == 30003)
+                    {
+                        rate += 7;
+                    }
+
+                    // Assign calculated rate
+                    if (btn == "BTN")
+                    {
+                        item.CalcRate = (decimal)formatVal(saudaRate + rate, "AMT");
+                    }
+                    else if (btn == "SAV" && item.CalcRate > (decimal)(saudaRate + rate))
+                    {
+                        item.CalcRate = (decimal)formatVal(saudaRate + rate, "AMT");
+                    }
+                }
+                else
+                {
+                    item.CalcRate = (decimal)formatVal(saudaRate + rate, "AMT");
+                }
+
+                // Final values
+                item.Rate = item.CalcRate;
+                item.SaudaNo = saudaNo;
+
+                // Step 4: Tax Calculation
+                if (btn == "BTN")
+                {
+                    var stateCode = getText($"SELECT STATE_CODE FROM CITY_MAST WHERE CODE = {Convert.ToInt32(CityCode)}");
+                    double igstPer = Convert.ToDouble(getText($@"
+                        SELECT ISNULL(IGST_PER, 0) 
+                        FROM ITEM_MAST 
+                        WHERE CODE = {item.ItemCode} AND COMP_CODE = {userdata.PubCompCode}"));
+
+                    double cgstPer = Convert.ToDouble(getText($@"
+                        SELECT ISNULL(CGST_PER, 0) 
+                        FROM ITEM_MAST 
+                        WHERE CODE = {item.ItemCode} AND COMP_CODE = {userdata.PubCompCode}"));
+
+                    if (userdata.STATE_CODE == stateCode)
+                    {
+                        // Intra-state: CGST + SGST
+                        if (cgstPer > 0)
+                        {
+                            item.TaxCode = Convert.ToInt32(getText($"SELECT CODE FROM TAX_MAST WHERE CGST_PER = {cgstPer}"));
+                            item.CgstPer = (decimal)cgstPer;
+                            item.SgstPer = (decimal)cgstPer;
+                            item.IgstPer = 0;
+                        }
+                    }
+                    else
+                    {
+                        // Inter-state: IGST
+                        if (igstPer > 0)
+                        {
+                            item.TaxCode = Convert.ToInt32(getText($"SELECT CODE FROM TAX_MAST WHERE IGST_PER = {igstPer}"));
+                            item.CgstPer = 0;
+                            item.SgstPer = 0;
+                            item.IgstPer = (decimal)igstPer;
+                        }
+                    }
+                }
+            }
+        }
         private DataTable FillDataTable<T>(List<T> data, string typeName)
         {
             int x = 1;
@@ -770,7 +1017,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return PurchaseOrderTbl;
 
         }
-
         private DataTable ToEmptyDataTable(string typeName)
         {
             var dt = new DataTable();
@@ -852,139 +1098,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     throw new ArgumentException("Unknown table type: " + typeName);
             }
             return dt;
-        }
-         
-        private void CalculateSaudaRate(string btn,string SaudaType, int saudaNo,int StateCode,int CityCode,DateTime effectiveDate, List<Order2> itemList)
-        {
-            double saudaRate = 0.0;
-            int saudaICode = 0;
-            string sdate = "";
-
-            var userdata = _globalValue.GetGlobalVariables();
-
-            // Step 1: Fetch Sauda Rate
-            if (saudaNo > 0)
-            {
-                string query = $@"
-            SELECT TOP 1 ITEM_CODE, RATE, V_DATE FROM SAUDA
-            WHERE V_TYPE = '{SaudaType}' 
-              AND V_NO = {saudaNo}
-              AND COMP_CODE = {userdata.PubCompCode}
-              AND BRANCH_CODE = 1";
-
-                var dt = LoadDataInDataTable(query);
-                if (dt.Rows.Count > 0)
-                {
-                    saudaICode = Convert.ToInt32(dt.Rows[0]["ITEM_CODE"]);
-                    saudaRate = Convert.ToDouble(dt.Rows[0]["RATE"]);
-                    sdate = Convert.ToDateTime(dt.Rows[0]["V_DATE"]).ToString("yyyy-MM-dd");
-                }
-            }
-
-            if (saudaRate == 0)
-            {
-                throw new Exception("Sauda Rate is blank.");
-            }
-
-            // Step 2: Loop through items
-            foreach (var item in itemList)
-            {
-                if (item.ItemCode == null || item.ItemCode <= 0)
-                    continue;
-
-                double rate = 0.0;
-
-                // Step 3: Check discount master
-                if (isExist($"SELECT 1 FROM RMDISC_MAST WHERE SAUDA_ITEM = {saudaICode} AND COMP_CODE = {userdata.PubCompCode}"))
-                {
-                    string discountQuery = $@"
-                SELECT TOP 1 ISNULL(RATE, 0) AS Rate 
-                FROM RMDISC_MAST
-                WHERE ITEM_CODE = {item.ItemCode}
-                  AND COMP_CODE = {userdata.PubCompCode}
-                  AND SAUDA_ITEM = {saudaICode}
-                  AND EFF_DATE <= '{effectiveDate}'
-                ORDER BY EFF_DATE DESC";
-
-                    var RMDiscRate = LoadDataInDataTable(discountQuery);
-                    if (RMDiscRate.Rows.Count == 0)
-                    {
-                        throw new Exception($"Item ({item.ItemName}) not found in discount master.");
-                    }
-
-                    rate = Convert.ToDouble(RMDiscRate.Rows[0]["Rate"]);
-
-                    // Special condition
-                    if (rate != 0 && string.Compare(sdate, "20250503") <= 0 && item.ItemCode == 30003)
-                    {
-                        rate += 7;
-                    }
-
-                    // Assign calculated rate
-                    if (btn == "BTN")
-                    {
-                        item.CalcRate = (decimal)formatVal(saudaRate + rate, "AMT");
-                    }
-                    else if (btn == "SAV" && item.CalcRate > (decimal)(saudaRate + rate))
-                    {
-                        item.CalcRate = (decimal)formatVal(saudaRate + rate, "AMT");
-                    }
-                }
-                else
-                {
-                    item.CalcRate = (decimal)formatVal(saudaRate + rate, "AMT");
-                }
-
-                // Final values
-                item.Rate = item.CalcRate;
-                item.SaudaNo = saudaNo;
-
-                // Optional: Store metadata if needed
-                // item.SomeTag = txtSaudaNo.Tag?.ToString();
-
-                // Step 4: Tax Calculation
-                if (btn == "BTN")
-                {
-                    var stateCode = getText($"SELECT STATE_CODE FROM CITY_MAST WHERE CODE = {Convert.ToInt32(CityCode)}");
-                    int stateCodeInt = string.IsNullOrWhiteSpace(stateCode) ? 0 : Convert.ToInt32(stateCode);
-                    double igstPer = Convert.ToDouble(getText($@"
-                SELECT ISNULL(IGST_PER, 0) 
-                FROM ITEM_MAST 
-                WHERE CODE = {item.ItemCode} AND COMP_CODE = {userdata.PubCompCode}"));
-
-                    double cgstPer = Convert.ToDouble(getText($@"
-                SELECT ISNULL(CGST_PER, 0) 
-                FROM ITEM_MAST 
-                WHERE CODE = {item.ItemCode} AND COMP_CODE = {userdata.PubCompCode}"));
-
-                    if (Convert.ToInt32(StateCode) == (stateCodeInt))
-                    {
-                        // Intra-state: CGST + SGST
-                        if (cgstPer > 0)
-                        {
-                            item.TaxCode = Convert.ToInt32(getText($"SELECT CODE FROM TAX_MAST WHERE CGST_PER = {cgstPer}"));
-                            item.CgstPer = (decimal)cgstPer;
-                            item.SgstPer = (decimal)cgstPer;
-                            item.IgstPer = 0;
-                        }
-                    }
-                    else
-                    {
-                        // Inter-state: IGST
-                        if (igstPer > 0)
-                        {
-                            item.TaxCode = Convert.ToInt32(getText($"SELECT CODE FROM TAX_MAST WHERE IGST_PER = {igstPer}"));
-                            item.CgstPer = 0;
-                            item.SgstPer = 0;
-                            item.IgstPer = (decimal)igstPer;
-                        }
-                    }
-                }
-
-                 
-            }
-        }
-
+        }               
         private double formatVal(double value, string formatType)
         {
             switch (formatType.ToUpper())
@@ -997,7 +1111,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     return value;
             }
         }
-
         private DataTable LoadDataInDataTable(string query)
         {
             DataTable dt = new DataTable();
@@ -1010,7 +1123,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
             return dt;
         }
-
         private string getText(string query)
         {
             using (var con = _dbcontext.GetErpConnection())
@@ -1023,7 +1135,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 }
             }
         }
-
         private bool isExist(string query)
         {
             using (var con = _dbcontext.GetErpConnection())
@@ -1036,7 +1147,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 }
             }
         }
-
         private List<ValidationResult> ValidateQuotationItems(DataTable dt)
         {
             var results = new List<ValidationResult>();
@@ -1180,7 +1290,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             var result = await _globalValidationdate.CheckValidDate("ORDER1", vdate, vtype, vno);
             return Ok(result);
         }
-
         public async Task<IActionResult> saveValidateData([FromBody] PurchaseOrder POmodel)
         {
             if (POmodel == null)
@@ -1328,7 +1437,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { status = false, message = "Error: " + ex.Message });
             }
         }
-
         public JsonResult DDLCityMast()
         {
             var getdata = _globalValue.GetGlobalVariables();
@@ -1339,7 +1447,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(DDLCityMast);
             }
         }
-
         public JsonResult DDlPartyList()
         {
             var getdata = _globalValue.GetGlobalVariables();
@@ -1479,7 +1586,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { Partydetails = Partydetails , SaudaDetails  = SaudaDetails , PartyCountry  = PartyCountry });
             }
         }
-
+        
         public JsonResult GetSaudaList(int partyCd)
         {
             var getdata = _globalValue.GetGlobalVariables();
@@ -1703,7 +1810,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 };
             }
         }
-
 
         public JsonResult GetDataByTaxType(int TaxCode)
         {

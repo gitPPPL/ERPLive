@@ -9,12 +9,12 @@ async function LoadDropdown() {
             DDLCityMast(),
             GetPlaceList(),
             DDLTxtCity1SDt(),
-            loadItemNameDropdown(),
-            loadMakeDropdown(),
+            loadItemNameDropdown(),   
             loadUnitDropdown(),
             loadPlaceDropdown(),
             loadDepartmentDropdown(),
-            loadTaxTypeDropdown()
+            loadTaxTypeDropdown(),
+            loadStatusDropdown()
         ]);
 
     } catch (error) {
@@ -139,16 +139,10 @@ async function DDlShipPartyList() {
     try {
         const res = await fetch('/PurchaseOrder/DDlPartyList');
         const data = await res.json();
-
         const ddl = $('#ddlShipFrom');
-
-        // clear old options
         ddl.empty();
-
-        // default option
         ddl.append('<option value=""></option>');
 
-        // add new options
         data.forEach(item => {
             ddl.append(new Option(item.text, item.value));
         });
@@ -224,6 +218,26 @@ async function GetSaudanoList(partyCd) {
 
         data.forEach(item => {
             ddl.append(`<option value="${item.text}">${item.value}</option>`);
+        });
+
+    } catch (error) {
+        console.error("Error loading Sauda No:", error);
+    }
+}
+
+async function GetWeighBridge(partyCd) {
+    try {
+        const data = await $.ajax({
+            url: '/PurchaseOrder/GetWeighBridge',
+            method: 'GET',
+            data: { partyCd: partyCd }
+        });
+
+        const ddl = $('#ddWBNo');
+        ddl.empty().append('');
+        
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
         });
 
     } catch (error) {
@@ -461,35 +475,51 @@ function calculateTaxAmounts(rowId) {
 
     calculateAllTotals(); 
 }
-function loadItemNameDropdown() {
-    $.ajax({
-        url: '/PurchaseOrder/DDLGridItem',
-        method: 'GET',
-        success: function (data) {
-            itemNameOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
-        }
-    });
+
+async function loadItemNameDropdown() {
+    try {
+        let v_type = $('#ddlDocType').val();
+        const data = await $.ajax({
+            url: '/PurchaseOrder/DDLGridItem',
+            type: 'GET',
+            data: { v_type: v_type }
+        });
+
+        itemNameOptions = data .map(x => `<option value="${x.value}">${x.text}</option>`) .join('');
+
+        return itemNameOptions;
+
+    } catch (error) {
+        console.error("Error loading Item Name dropdown:", error);
+        itemNameOptions = "";
+        return "";
+    }
 }
-function loadMakeDropdown(rowId, itemCode) {
 
-    $.ajax({
-        url: '/PurchaseOrder/DDLGridMake',
-        method: 'GET',
-        data: {
-            ItemCode: itemCode
-        },
-        success: function (data) {
+async function loadMakeDropdown(rowId, itemCode) {
+    try {
+        const data = await $.ajax({
+            url: '/PurchaseOrder/DDLGridMake',
+            type: 'GET',
+            data: {
+                ItemCode: itemCode
+            }
+        });
 
-            let options = '<option value="">-Select Make-</option>';
+        let options = '<option value="">-Select Make-</option>';
 
-            $.each(data, function (i, item) {
-                options += `<option value="${item.value}">${item.text}</option>`;
-            });
+        $.each(data, function (i, item) {
+            options += `<option value="${item.value}">${item.text}</option>`;
+        });
 
-            $('#ddlImake' + rowId).html(options);
-        }
-    });
+        $('#ddlImake' + rowId).html(options);
 
+        return true;
+
+    } catch (error) {
+        console.error("Error loading Make dropdown:", error);
+        return false;
+    }
 }
 function loadUnitDropdown() {
     $.ajax({
@@ -511,15 +541,26 @@ function loadPlaceDropdown() {
     });
 
 }
-function loadDepartmentDropdown() {
-    $.ajax({
-        url: '/PurchaseOrder/DDLDepartmentList',
-        method: 'GET',
-        success: function (data) {
-            DepartmentOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
-        }
-    });
 
+async function loadDepartmentDropdown() {
+    try {
+
+        const data = await $.ajax({
+            url: '/PurchaseOrder/DDLDepartmentList',
+            type: 'GET'
+        });
+
+        DepartmentOptions = data
+            .map(x => `<option value="${x.value}">${x.text}</option>`)
+            .join('');
+
+        return DepartmentOptions;
+
+    } catch (error) {
+        console.error("Error loading Department Name dropdown:", error);
+        DepartmentOptions = "";
+        return "";
+    }
 }
 function loadTaxTypeDropdown() {
     $.ajax({
@@ -530,4 +571,40 @@ function loadTaxTypeDropdown() {
         }
     });
 
+}
+
+async function loadStatusDropdown() {
+    try {
+
+        const data = await $.ajax({
+            url: '/PurchaseOrder/DllStatus',
+            type: 'GET'
+        });
+
+        statuslist = data
+            .map(x => `<option value="${x.value}">${x.text}</option>`)
+            .join('');
+
+        return statuslist;
+
+    } catch (error) {
+        console.error("Error loading Item Name dropdown:", error);
+        statuslist = "";
+        return "";
+    }
+}
+
+
+async function DDLCityMast() {
+    try {
+        const res = await fetch('/PurchaseOrder/DDLCityMast');
+        const data = await res.json();
+        const ddl = $('#TxtCity1PD');
+        ddl.empty().append('<option value="">-- Select City Name --</option>');
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading City:", error);
+    }
 }

@@ -34,65 +34,53 @@ $('#btn-save').on('click', async function (e) {
     e.preventDefault();
 
     try {
+
+        // Header Validation
         if (!validateRequiredField('#ddlPriceType', 'Price Type')) return;
         if (!validateRequiredField('#ddlPlace', 'Place')) return;
         if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
         if (!validateRequiredField('#ddlShipFrom', 'Ship From')) return;
 
-        var v_type = $('#ddlDocType').val();
-        var PartyRef = $('#txtPartyRef').val().trim();
-        var totalAmount = parseFloat($('#NumAmountIt').val()) || 0;
+        const vType = $('#ddlDocType').val();
+        const partyRef = $('#txtPartyRef').val().trim();
+        const totalAmount = parseFloat($('#NumAmountIt').val()) || 0;
 
-        if (v_type === 'PORD') {
-            if (PartyRef === '' && totalAmount >= 50000) {
-                toastr.warning("Party Reference is required if total PO Amount is greater than or equal to 50,000.");
-                return;
-            }
-        }
-
-        const checkdate = await checkValidDate();
-        if (!checkdate) {
+        if (vType === 'PORD' && partyRef === '' && totalAmount >= 50000) {
+            toastr.warning("Party Reference is required if total PO Amount is greater than or equal to 50,000.");
             return;
         }
 
-        const tableData = await collectFormData();
+        if (!(await checkValidDate())) {
+            return;
+        }
 
-        console.log("tableData", tableData);
+        // Collect Complete Model
+        const model = getPurchaseOrderModel();
 
-        const rows = tableData.ItemRecords || [];
+        console.log(model);
 
-        console.log("Rows:", rows);
-        console.log("Row Count:", rows.length);
-
-        if (rows.length === 0) {
+        // Detail Validation
+        if (!model.ItemRecords || model.ItemRecords.length === 0) {
             toastr.warning("Please enter at least one item.");
             return;
         }
 
         let hasItem = false;
 
-        for (let i = 0; i < rows.length; i++) {
-            const row = rows[i];
+        for (let i = 0; i < model.ItemRecords.length; i++) {
 
-            console.log("row", row);
+            const row = model.ItemRecords[i];
 
-            const itemCode = (row.ItemCode || "").toString().trim();
-            const amount = (row.Amount || "").toString().trim();
-            const landRate = (row.LandRate || "").toString().trim(); // ✅ FIXED
-
-            // Skip completely blank rows
-            if (itemCode === "") {
-                continue;
-            }
+            if (!row.ItemCode) continue;
 
             hasItem = true;
 
-            if (amount === "") {
+            if (!row.Amount || row.Amount <= 0) {
                 toastr.warning(`Amount is required in row ${i + 1}.`);
                 return;
             }
 
-            if (landRate === "") {
+            if (!row.LandRate || row.LandRate <= 0) {
                 toastr.warning(`Loaded Rate is required in row ${i + 1}.`);
                 return;
             }
@@ -103,25 +91,27 @@ $('#btn-save').on('click', async function (e) {
             return;
         }
 
-        SaveData(tableData);          
-    
-    } catch (error) {
-        toastr.error('An error occurred while saving the data.');
+        // Save
+        await SaveData(model);
+
+    }
+    catch (error) {
+        console.error(error);
+        toastr.error(error.responseText || "An error occurred while saving the data.");
     }
 });
 
 $('#ddlPartyName').on('change', async function () {
     let PartyCode = $('#ddlPartyName').val();
-    if (!PartyCode) {
+    await GetPartyAddress(PartyCode);
+    await GetSaudanoList(PartyCode);
+    await GetWeighBridge(PartyCode);
+    if (SelectParty == false) return;
+    if (!PartyCode)
+    {
         return;
     }
-    await GetSaudanoList(PartyCode)
-    await Promise.allSettled([
-        GetPartyAddress(PartyCode),     
-        GetDatabbyPartycode(),     
- 
-    ]);
-
+    await GetDatabbyPartycode();
 });
 
 $('#ddlShipFrom').on('change', async function () { 
@@ -177,15 +167,64 @@ $(document).on('click', '.btn-delete-action, .btn-Itemdelete-action', function (
 });
 
 $(document).on('change', '[id^=ddlItemname]', function () {
-
     const rowId = this.id.replace('ddlItemname', '');
     const itemCode = $(this).val();
-
-    console.log("Row:", rowId);
-    console.log("Item Code:", itemCode);
-
+    if (selectItemOption == false) return;
     loadMakeDropdown(rowId, itemCode);
+});
 
+$(document).on("click", ".btn-Itemadd-action", function (e) {
+    e.preventDefault();
+    addItemRecordRow();
+});
+
+$(document).on('click', '#BtnCalculation', async function (event) {
+    event.preventDefault();
+
+    try {
+
+        const itemRecords = await collectGridDetail();
+
+        const payload = {
+            Btn: "BTN",
+            SaudaNo: parseInt($('#ddSaudaNo').val()) || 0,
+            SaudaType: $('#ddSaudaNo option:selected').text().trim(),
+            StateCode: parseInt($('#TxtGSTPD').val()) || 0,
+            CityCode: parseInt($('#TxtCity1PD').val()) || 0,
+            EffectiveDate: $('#dtDocDate').val(), // yyyy-MM-dd
+            Orders: itemRecords
+        };
+
+        console.log("Request Payload:", payload);
+
+        const response = await $.ajax({
+            url: '/PurchaseOrder/CalculationBySaudaNo',
+            type: 'POST',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(payload)
+        });
+
+        console.log("Calculation Response:", response);
+
+        if (response.status) {
+
+            await fillItemDetailsTableBySaudaNo(response.data);
+
+            calculateAllRows();
+            calculateAllTotals();
+
+        } else {
+            console.warn(response.message);
+        }
+
+    } catch (err) {
+        console.error("Calculation Error:", err);
+
+        if (err.responseJSON) {
+            console.log(err.responseJSON);
+        }
+    }
 });
 
 //Attachment

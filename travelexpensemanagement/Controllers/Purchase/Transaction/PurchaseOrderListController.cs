@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Data.Common;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
@@ -29,16 +30,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         public IActionResult Index()
         {
             ViewBag.CurrentMenu = "Purchase Order";
-            var permissions = _moduleService.GetUserMenuPermissions();
-            var userLevel = _moduleService.GetUserLevel();
-            var userlevel = ViewBag.UserLevel;
-            var model = new UserMenuPermissionsViewModel
-            {
-                UserMenuPermissions = permissions,
-                UserLevel = userLevel
-            };
 
-            return View("~/Views/Purchase/Transaction/PurchaseOrderList/Index.cshtml", model);
+            ViewBag.UserLevel = _globalValue.GetGlobalVariables().PubUserLevel;
+
+
+
+            return View("~/Views/Purchase/Transaction/PurchaseOrderList/Index.cshtml");
         }
          
         [HttpGet]
@@ -491,6 +488,195 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return string.Empty;
             }
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> ExportToExcel(string searchTerm = null)
+        {
+
+            var global = _globalValue.GetGlobalVariables();
+
+            using (var conn = _dbcontext.GetErpConnection())
+            {
+                await conn.OpenAsync();
+
+                using (SqlCommand cmd = new SqlCommand("sp_PurchaseOrder", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Action", "Excel");
+
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    using (var workbook = new ClosedXML.Excel.XLWorkbook())
+                    {
+                        var ws = workbook.Worksheets.Add("GateInward");
+
+                        // Header
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            var cell = ws.Cell(1, i + 1);
+                            cell.Value = reader.GetName(i);
+                            cell.Style.Font.Bold = true;
+                            cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                        }
+
+                        int row = 2;
+                        while (await reader.ReadAsync())
+                        {
+                            for (int col = 0; col < reader.FieldCount; col++)
+                            {
+                                var cell = ws.Cell(row, col + 1);
+
+                                if (reader[col] == DBNull.Value)
+                                {
+                                    cell.Value = "";
+                                }
+                                else if (reader.GetFieldType(col) == typeof(DateTime))
+                                {
+                                    cell.Value = Convert.ToDateTime(reader[col]);
+                                    cell.Style.DateFormat.Format = "dd-MM-yyyy";
+                                }
+                                else
+                                {
+                                    cell.Value = reader[col].ToString();
+                                }
+                            }
+                            row++;
+                        }
+
+                        ws.Columns().AdjustToContents();
+
+                        foreach (var col in ws.Columns())
+                        {
+                            if (col.Width > 40) col.Width = 40;
+                            if (col.Width < 10) col.Width = 10;
+                        }
+
+                        ws.Style.Alignment.WrapText = true;
+                        ws.SheetView.FreezeRows(1);
+
+                        var range = ws.RangeUsed();
+                        if (range != null)
+                        {
+                            range.CreateTable();
+                        }
+
+                        using (var stream = new MemoryStream())
+                        {
+                            workbook.SaveAs(stream);
+                            stream.Position = 0;
+
+                            return File(
+                                stream.ToArray(),
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                "GateInward.xlsx"
+                            );
+                        }
+                    }
+                }
+
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> ExportToPdf(string searchTerm = null)
+        {
+            var global = _globalValue.GetGlobalVariables();
+
+            using (var conn = _dbcontext.GetErpConnection())
+            {
+                await conn.OpenAsync();
+
+                using (SqlCommand cmd = new SqlCommand("sp_PurchaseOrder", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Action", "Excel");
+
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    using (var stream = new MemoryStream())
+                    {
+                        // ✅ PDF Setup (Landscape A4)
+                        var document = new iTextSharp.text.Document(
+                            iTextSharp.text.PageSize.A4.Rotate(), 10, 10, 10, 10);
+
+                        iTextSharp.text.pdf.PdfWriter.GetInstance(document, stream);
+                        document.Open();
+
+                        // ✅ Fonts (FIXED - no ambiguity)
+                        var titleFont = iTextSharp.text.FontFactory.GetFont(
+                            iTextSharp.text.FontFactory.HELVETICA_BOLD, 14);
+
+                        var headerFont = iTextSharp.text.FontFactory.GetFont( iTextSharp.text.FontFactory.HELVETICA_BOLD, 9);
+
+                        var dataFont = iTextSharp.text.FontFactory.GetFont(
+                            iTextSharp.text.FontFactory.HELVETICA, 8);
+
+                        // ✅ Title
+                        var title = new iTextSharp.text.Paragraph("Gate Inward Report", titleFont);
+                        title.Alignment = iTextSharp.text.Element.ALIGN_CENTER;
+                        document.Add(title);
+
+                        document.Add(new iTextSharp.text.Paragraph(" ")); // spacing
+
+                        // ✅ Table
+                        int columnCount = reader.FieldCount;
+                        var table = new iTextSharp.text.pdf.PdfPTable(columnCount);
+                        table.WidthPercentage = 100;
+
+                        // Header
+                        for (int i = 0; i < columnCount; i++)
+                        {
+                            var cell = new iTextSharp.text.pdf.PdfPCell(
+                                new iTextSharp.text.Phrase(reader.GetName(i), headerFont));
+
+                            cell.HorizontalAlignment = iTextSharp.text.Element.ALIGN_CENTER;
+                            cell.BackgroundColor = iTextSharp.text.BaseColor.LIGHT_GRAY;
+
+                            table.AddCell(cell);
+                        }
+
+                        // Data
+                        while (await reader.ReadAsync())
+                        {
+                            for (int col = 0; col < columnCount; col++)
+                            {
+                                string value = "";
+
+                                if (reader[col] != DBNull.Value)
+                                {
+                                    if (reader.GetFieldType(col) == typeof(DateTime))
+                                    {
+                                        value = Convert.ToDateTime(reader[col])
+                                                        .ToString("dd-MM-yyyy");
+                                    }
+                                    else
+                                    {
+                                        value = reader[col].ToString();
+                                    }
+                                }
+
+                                var cell = new iTextSharp.text.pdf.PdfPCell(
+                                    new iTextSharp.text.Phrase(value, dataFont));
+
+                                table.AddCell(cell);
+                            }
+                        }
+
+                        document.Add(table);
+                        document.Close();
+
+                        return File(stream.ToArray(), "application/pdf", "GateInward.pdf");
+                    }
+                }
+            }
+        }
+
 
     }
 }

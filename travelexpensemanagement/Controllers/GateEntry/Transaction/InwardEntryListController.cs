@@ -491,7 +491,6 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
             }
         }
 
-
         [HttpPost]
         public IActionResult GetDataByCode([FromForm] int code, [FromForm] string vtype)
 

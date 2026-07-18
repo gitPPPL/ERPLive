@@ -88,6 +88,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                             RegAdd1 = CompanyData.RegAdd1,
                             RegAdd2 = CompanyData.RegAdd2,
                             CINNO = CompanyData.CINNO,
+                            STATE_CODE = CompanyData.STATE_CODE,
                             // API
                             ip_address = "103.74.69.13",
                             client_id = "8a2017bb-6f67-4bf9-bc62-46bd802ed390",

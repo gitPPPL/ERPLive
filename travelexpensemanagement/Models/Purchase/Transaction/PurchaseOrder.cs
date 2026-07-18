@@ -64,7 +64,6 @@
         public int? ShipCity { get; set; }
         public string? ShipPincode { get; set; }
         public string? ShipGst { get; set; }
-
         public int? TaxCode { get; set; }
         public string? ItemType { get; set; }
         public string? SupplyType { get; set; }
@@ -156,6 +155,7 @@
         public string? FileType { get; set; }     
         public string? FilePath { get; set; }    
         public string? FileContentBase64 { get; set; }
+        public string? IMG_FILE { get; set; }
     }
 
     public class SaudaCalculationRequest

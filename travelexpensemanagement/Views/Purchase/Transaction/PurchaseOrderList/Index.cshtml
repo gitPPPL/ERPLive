@@ -1,33 +1,10 @@
 ﻿@{
 	ViewBag.Title = "Purchase Order List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
-	var userlevel = ViewBag.userLevel;
-	var currentMenu = ViewBag.CurrentMenu as string;
-	bool canAdd = false;
-	bool canEdit = false;
-	bool canDelete = false;
-	bool canPrint = false;
-	bool canExport = false;
-	bool canMail = false;
-	bool canApproval = false;
-	bool canDocDetail = false;
 
-	foreach (var permission in Model.UserMenuPermissions)
-	{
-		if (permission.MENU_NAME == ViewBag.CurrentMenu)
-		{
-			canAdd = Model.UserLevel == 1 || permission._ADD == 1;
-			canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
-			canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
-			canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
-			canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
-			canMail = Model.UserLevel == 1 || permission._MAIL == 1;
-			canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
-			canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
-			break;
-		}
-	} 
+	var PubUserLevel = Convert.ToInt32(ViewBag.UserLevel ?? 0);
 
+	Console.WriteLine("PubUserLevel: " + PubUserLevel);
 }
 
 <div id="erp-toast-container"></div>
@@ -37,13 +14,9 @@
 		<span>Purchase Order List</span>
 	</div>
 	<div class="erppagelist-header-right">
-		@if (canAdd)
-		{
-			<button class="erppage-header-back"
-					onclick="window.location.href='@Url.Action("Index", "PurchaseOrder")'">
-				<i class="fa fa-plus"></i> Add New
-			</button>
-		}
+
+		<button class="erppage-header-back" id="button_add" onclick="window.location.href='@Url.Action("Index", "PurchaseOrder")'"> <i class="fa fa-plus"></i> Add New </button>
+		
 	</div>
 </div>
 <div class="erppagelist-toolbar">
@@ -52,33 +25,20 @@
 		<input type="text" id="searchBox" placeholder="Search Purchase Order..." />
 	</div>
 	<div class="erppagelist-actions">
-		@if (canPrint)
-		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="printCityMasterReport()">
+
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print" >
 				<i class="fa fa-print"></i> Print
 			</button>
-		}
 
-		@if (canExport)
-		{
-			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" onclick="exportToExcel()">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="button_export" data-tooltip="Export to Excel" >
 				<i class="fa fa-file-excel"></i> Export
 			</button>
-		}
-
-		@if (canMail)
-		{
+			
 			<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
 				<i class="fa fa-envelope"></i> Mail
 			</button>
-		}
-
-		@if (canApproval)
-		{
-			<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records">
-				<i class="fa fa-check-circle"></i> Approved
-			</button>
-		}
+		
+			
 
 	</div>
 </div>
@@ -140,23 +100,116 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-<script>
-	var permissions = {
-		canEdit: @canEdit.ToString().ToLower(),
-		canDelete: @canDelete.ToString().ToLower(),
-		canDocDetail: @canDocDetail.ToString().ToLower()
-	};
+<script>  	
+		let currentPage = 1;
+		let pageSize = 10;
+		var controllerName = window.location.pathname.split('/')[1];
+		let pubUserLevel = @PubUserLevel;
 
-	const userlevel = @Model.UserLevel;	   	
-	let currentPage = 1;
-	let pageSize = 10;
 
 	$(document).ready(function () {
-		GetMasterDataList();
+
+		checkPermission(controllerName, function () {
+		  GetMasterDataList();
+		});
+
 		$('#searchBox').on('keyup', function () {
 			currentPage = 1;
 			GetMasterDataList();
 		});
+
+
+		$('#button_export').on('click', function () {
+			var text = $('#searchBox').val();
+			window.location.href = '/InwardEntryList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+		});
+
+		$('#button_print').on('click', function () {
+			var text = $('#searchBox').val();
+			window.open('/InwardEntryList/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
+		});
+
+
+
+
+
+
+	    $(document).on('click', '.permission-delete', async function () {
+         
+		 const $row = $(this).closest('tr');
+		 const CodeforDel = $row.find('.code').text().trim();
+		 const v_no = $row.find('#v_no').text().trim();
+		 const v_type = $row.find('#v_type').text().trim();
+
+		 try {
+			 const res = await $.ajax({
+				 url: '/PurchaseOrderList/DeleteValidation',
+				 method: 'GET',
+				 dataType: 'json',   // ✅ IMPORTANT FIX
+				 data: { v_no: v_no, v_type : v_type }
+			 });
+
+			 console.log("res", res);
+
+				 if (res?.validation4?.approval === "Approved") {
+					 toastr.warning("This document approval is in process, deletion not allowed.");
+					 return;
+				 }
+
+				 if (res?.validation1?.success === true) {
+					toastr.info(res.validation1.message);
+
+
+					  console.log("Delete pubUserLevel",pubUserLevel);
+
+					  if(pubUserLevel != "1")
+					{
+						return ;
+					}
+
+
+				 }
+
+				 if (res?.validation2?.success === true) {
+					 toastr.info(res.validation2.message);
+
+				 }
+
+				 if (res?.validation3?.success === true) {
+					 toastr.info(res.validation3.message);
+
+				 }
+
+
+			 const confirmed = await confirmAction();
+			 if (!confirmed) return;
+
+			 $.ajax({
+				 url: '/PurchaseOrderList/DeletePurchaseOrderEntry',
+				 type: 'DELETE',
+				 dataType: 'json',   // ✅ important
+				 data: { docid: CodeforDel },
+				 success: function (res) {
+					 if (res.status) {
+						 showFlashMessageByKey('delete', 'success');
+						 $row.remove();
+						 GetMasterDataList();
+					 } else {
+						 Swal.fire('Error!', res.message || 'Delete failed', 'error');
+					 }
+				 },
+				 error: function (xhr) {
+					 Swal.fire('Error!', xhr.responseText || 'Server error', 'error');
+				 }
+			 });
+
+		 } catch (err) {
+			 console.error("Validation error:", err);
+			 Swal.fire('Error!', 'Validation failed. Please try again.', 'error');
+		 }
+	 });
+
+
 	});
  
 	function GetMasterDataList() {
@@ -182,17 +235,16 @@
 				}
 				$.each(mastListData, function (index, item) {
 					let actions = '';
-					if (permissions.canEdit) {
-						actions += `<button class="act-btn edit btn-edit" title="Edit Row" style="cursor:pointer;" onclick="AddOrEditFunction('${item.DOC_ID}','${item.V_NO}','${item.V_TYPE}')"><i class="fa fa-edit"></i></button>`;
-					}
+
+					 actions += `<button class="act-btn edit permission-edit" title="Edit Row" style="cursor:pointer;" onclick="AddOrEditFunction('${item.DOC_ID}','${item.V_NO}','${item.V_TYPE}')"><i class="fa fa-edit"></i></button>`;
+					
 					actions += `<button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewMenuDetails('${item.DOC_ID}')"><i class="fa fa-eye"></i></button>`;
 
-					if (permissions.canDelete) {
-						actions += `<button class="act-btn delete btn-delete" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash"></i></button>`;
-					}
-					if (permissions.canDocDetail) {
-						actions += `<button class="act-btn document btn-document btn-details" title="Document Row" style="cursor:pointer;" onclick="showEmployeePopup('${item.DOC_ID}')"><i class="fa fa-file"></i></button>`;
-					}
+					 actions += `<button class="act-btn delete permission-delete" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash"></i></button>`;
+					
+				
+					actions += `<button class="act-btn document btn-document btn-details" title="Document Row" style="cursor:pointer;" onclick="showEmployeePopup('${item.DOC_ID}')"><i class="fa fa-file"></i></button>`;
+					
 					tbody.append(`
 						<tr>
 							<td class="d-none code">${item.DOC_ID}</td>
@@ -293,173 +345,11 @@
 
 		}
 
-   async function viewMenuDetails(rowId) {
-	    	window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
-		}
+   async function viewMenuDetails(rowId)
+	{
+		window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+	}	
 
-   $(document).on('click', '.btn-delete', async function () {
-
-		const $row = $(this).closest('tr');
-		const CodeforDel = $row.find('.code').text().trim();
-		const v_no = $row.find('#v_no').text().trim();
-		const v_type = $row.find('#v_type').text().trim();
-
-		try {
-			const res = await $.ajax({
-				url: '/PurchaseOrderList/DeleteValidation',
-				method: 'GET',
-				dataType: 'json',   // ✅ IMPORTANT FIX
-				data: { v_no: v_no, v_type : v_type }
-			});
-
-			console.log("res", res);
-
-				if (res?.validation4?.approval === "Approved") {
-					toastr.warning("This document approval is in process, deletion not allowed.");
-					return;
-				}
-
-				if (res?.validation1?.success === true) {
-					toastr.info(res.validation1.message);
-				   console.log("User_level" ,userlevel);
-
-				   if(userlevel != "1")
-				   {
-					   return ;
-				   }
-
-
-				}
-
-				if (res?.validation2?.success === true) {
-					toastr.info(res.validation2.message);
-
-				}
-
-				if (res?.validation3?.success === true) {
-					toastr.info(res.validation3.message);
-
-				}
-
-
-			const confirmed = await confirmAction();
-			if (!confirmed) return;
-
-			$.ajax({
-				url: '/PurchaseOrderList/DeletePurchaseOrderEntry',
-				type: 'DELETE',
-				dataType: 'json',   // ✅ important
-				data: { docid: CodeforDel },
-				success: function (res) {
-					if (res.status) {
-						showFlashMessageByKey('delete', 'success');
-						$row.remove();
-						GetMasterDataList();
-					} else {
-						Swal.fire('Error!', res.message || 'Delete failed', 'error');
-					}
-				},
-				error: function (xhr) {
-					Swal.fire('Error!', xhr.responseText || 'Server error', 'error');
-				}
-			});
-
-		} catch (err) {
-			console.error("Validation error:", err);
-			Swal.fire('Error!', 'Validation failed. Please try again.', 'error');
-		}
-	});
-			 
-   function exportToExcel() {
-		  fetch('/PurchaseOrderList/ExportAllDocs')
-			.then(response => {
-			  if (!response.ok) throw new Error("Network response was not ok");
-			  return response.json();
-			})
-			.then(responseData => {
-			  if (!responseData.status) {
-				toastr.error("Failed to fetch data.");
-				return;
-			  }
-			  const dataArray = responseData.data;
-			  if (!Array.isArray(dataArray) || dataArray.length === 0) {
-				toastr.warning("No data available to export.");
-				return;
-			  }
-
-			  const worksheet = XLSX.utils.json_to_sheet(dataArray, { header: Object.keys(dataArray[0]) });
-			  const colWidths = Object.keys(dataArray[0]).map(key => {
-				const maxLen = Math.max(
-				  key.length,
-				  ...dataArray.map(row => (row[key] ? row[key].toString().length : 0))
-				);
-				return { wch: maxLen + 2 };
-			  });
-			  worksheet['!cols'] = colWidths;
-
-
-			  const headerRowNumber = 1;
-			  Object.keys(dataArray[0]).forEach((_, idx) => {
-				const cellAddress = XLSX.utils.encode_cell({ c: idx, r: headerRowNumber - 1 });
-				if (!worksheet[cellAddress]) return;
-				worksheet[cellAddress].s = {
-				  font: { bold: true },
-				  fill: { fgColor: { rgb: "FFFF00" } }
-				};
-			  });
-
-			  const workbook = XLSX.utils.book_new();
-			  XLSX.utils.book_append_sheet(workbook, worksheet, "AllDocs");
-
-			  const pageName = "PurchaseOrder_List";
-			  const now = new Date();
-			  const pad = n => String(n).padStart(2, '0');
-			  const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-			  const fileName = `${pageName}_${timestamp}.xlsx`;
-
-			  XLSX.writeFile(workbook, fileName);
-			})
-			.catch(error => {
-			  console.error("Export failed:", error);
-			  toastr.error("Failed to export data.");
-			});
-		}
-
-   function callGetReportAsPdf() {
-		    var reportName = "rpt_emp_mast";
-			var now = new Date();
-			var day = String(now.getDate()).padStart(2, '0');
-			var month = String(now.getMonth() + 1).padStart(2, '0');
-			var year = String(now.getFullYear()).slice(-2);
-			var hours = String(now.getHours()).padStart(2, '0');
-			var minutes = String(now.getMinutes()).padStart(2, '0');
-			var seconds = String(now.getSeconds()).padStart(2, '0');
-			var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
-
-			$.ajax({
-				url: 'http://192.168.20.51:8082/Report/GetReportAsPdf',
-				type: 'GET',
-				data: { Reportname: reportName },
-				xhrFields: {
-					responseType: 'blob'
-				},
-				success: function (response) {
-					console.log('PDF response:', response);
-					var file = new Blob([response], { type: 'application/pdf' });
-					var fileName = `${reportName}_${timestamp}.pdf`;
-
-					var link = document.createElement('a');
-					link.href = URL.createObjectURL(file);
-					link.download = fileName;
-					document.body.appendChild(link);
-					link.click();
-					document.body.removeChild(link);
-				},
-				error: function (xhr, status, error) {
-					console.error('Error generating report:', error);
-				}
-			});
-		}
 
    function showEmployeePopup(docid) {
 
