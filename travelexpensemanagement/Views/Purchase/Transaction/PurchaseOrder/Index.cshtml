@@ -23,10 +23,6 @@
         <div class="erppage-header-title">Purchase Order</div>
     </div>
 
-
-
-
-
     <div class="erppage-header-right">
     
         <button class="erppagelist-btn erppagelist-btn-action" id="btnMail"> <i class="fa fa-envelope"></i> Mail </button>
@@ -840,7 +836,7 @@
                         </table>
                     </div>
                     <div class="erppagesmodal-action mt-2">
-                        <button type="button" class="erppagesmodal-btn" data-bs-dismiss="modal">
+                        <button type="button" class="erppagesmodal-btn"  id="btnPurchaseRequestCopy"  data-bs-dismiss="modal">
                             <i class="fa fa-copy"></i>Copy
                         </button>
                     </div>
@@ -966,6 +962,8 @@
         </div>
 
     </div>
+
+
     <!--Pending Request Modal Popup-->
     <div class="modal fade" id="PendingRequestModal" tabindex="-1" aria-labelledby="PendingRequestModalLabel" aria-hidden="true">
         <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
@@ -1034,8 +1032,7 @@
                     </div>
                 </div>
                 <div class="erppagesmodal-action">
-                    <button type="button" class="erppagesmodal-btn erppagesmodal-btn-secondary"
-                            data-bs-dismiss="modal">
+                    <button type="button" class="erppagesmodal-btn erppagesmodal-btn-secondary" data-bs-dismiss="modal">
                         <i class="fa fa-times"></i>
                         Close
                     </button>
@@ -1204,25 +1201,24 @@
 <script>
 
     const AllFieldsId = [
-      "ddlDocType", "txtDocNo", "dtDocDate", "ddlPOType1", "ddlPOType2", "txtnetamount1", "txtnetamount2",
-      "txtPartyRef", "DtDeliveryDate", "DtValidateDate", "ddlPriceType", "ddWBNo", "ddlPlace", "ddlCurrency",
-      "NumExRate", "ddSaudaNo", "ddlPartyName", "ddlAddressbyparty", "TxtAdd1PD", "TxtAdd2PD", "TxtAdd3PD",
-      "NumPincodePD", "TxtCity1PD", "TxtGSTPD", "ddlShipFrom", "ddlAddressbypartySD", "TxtAdd1SD", "TxtAdd2SD",
-      "TxtAdd3SD", "NumPincodeSD", "TxtCity1SD", "TxtGSTSD"
+        "ddlDocType", "txtDocNo", "dtDocDate", "ddlPOType1", "ddlPOType2", "txtnetamount1", "txtnetamount2",
+        "txtPartyRef", "DtDeliveryDate", "DtValidateDate", "ddlPriceType", "ddWBNo", "ddlPlace", "ddlCurrency",
+        "NumExRate", "ddSaudaNo", "ddlPartyName", "ddlAddressbyparty", "TxtAdd1PD", "TxtAdd2PD", "TxtAdd3PD",
+        "NumPincodePD", "TxtCity1PD", "TxtGSTPD", "ddlShipFrom", "ddlAddressbypartySD", "TxtAdd1SD", "TxtAdd2SD",
+        "TxtAdd3SD", "NumPincodeSD", "TxtCity1SD", "TxtGSTSD"
     ];
     let itemRecords = [
-      "TxtCode", "ddlItemname", "ddlImake", "ddlUnit", "ddlIplaceofUse", "ddlDepartment",
-      "TxtNos", "TxtQty", "TxtRate", "TxtExrate", "TxtAmount", "TxtPackPercent", "TxtPack",
-      "TxtDiscPercent", "TxtDisc", "ddlTax", "TxtCgstPercent", "TxtCgst", "TxtSgstPercent",
-      "TxtSgst", "TxtIgstPercent", "TxtIgst", "TxtVatPercent", "TxtVat", "TxtCessPercent",
-      "TxtCess", "TxtOthAmt", "TxtNetAmt", "TxtLdRate", "TxtRemarks", "TxtAppLevel",
-      "TxtAppRemarks", "TxtStatus", "TxtReqtype", "TxtReqno", "TxtApptype", "TxtAppno",
-      "TxtSaudatype", "TxtSaudano", "TxtMthRate", "TxtQtrRate", "TxtAnlRate", "TxtSpclRate",
-      "TxtCalcRate"
+        "TxtCode", "ddlItemname", "ddlImake", "ddlUnit", "ddlIplaceofUse", "ddlDepartment",
+        "TxtNos", "TxtQty", "TxtRate", "TxtExrate", "TxtAmount", "TxtPackPercent", "TxtPack",
+        "TxtDiscPercent", "TxtDisc", "ddlTax", "TxtCgstPercent", "TxtCgst", "TxtSgstPercent",
+        "TxtSgst", "TxtIgstPercent", "TxtIgst", "TxtVatPercent", "TxtVat", "TxtCessPercent",
+        "TxtCess", "TxtOthAmt", "TxtNetAmt", "TxtLdRate", "TxtRemarks", "TxtAppLevel",
+        "TxtAppRemarks", "TxtStatus", "TxtReqtype", "TxtReqno", "TxtApptype", "TxtAppno",
+        "TxtSaudatype", "TxtSaudano", "TxtMthRate", "TxtQtrRate", "TxtAnlRate", "TxtSpclRate",
+        "TxtCalcRate"
     ];
 
-    let docId = "";
-    let readOnly;
+
     let selectedFiles = [];
     let globalAttachments = [];
     var globalVars = window.globalVariables || {};
@@ -1239,10 +1235,15 @@
     let TaxTypeOptions = '';
     let selectItemOption = true;
     let statuslist = [];
+    let docId = getQueryParam('id');
+    let readOnly = getQueryParam('readOnly');
+
+
     $(document).ready(function () {
         LoadDropdown()
 
-        $(async function () {
+        $(async function () 
+        {
             try {
                 await GetDocTypeAsync();
                 handleDocLoad();
@@ -1253,45 +1254,45 @@
 
         setEnterKeyFocus(AllFieldsId);         
 
-        $('#ddlDocType').on('change', function () {
+        $('#ddlDocType').on('change', function () 
+        {
             const VType = $(this).val();
             Wb_SaudaDdl_Make_enabledisable(VType);
             GetDocid(VType);
         });
 
-        $('#chkDeliveryDate').on('change', function () {
-        $(this).val(this.checked ? '1' : '0');
+        $('#chkDeliveryDate').on('change', function () 
+        {
+          $(this).val(this.checked ? '1' : '0');
         });
 
-        $(document).on('click', '#BtnPurchaseReq', function(){
+        $(document).on('click', '#BtnPurchaseReq', function()
+        {
             PurchaseRateApproval();
-
         });
+
+
 
         $(document).on('click', '#BtnQuotationRtAprvl', function(){
             quotationRtApproval();
         });
 
-        $(document).on('click', '.btn-quoteCopy', async function(){
+        $(document).on('click', '.btn-quoteCopy', async function()
+        {
            var quotationrateList = getquoteTabledata();
            console.log(quotationrateList);
            await fillItemDetailsTable(quotationrateList)
         });
-          
-        $(document).on('click', '.btn-purchaseCopy',async function(){
-        const selectedItems = getPurchaseData();
-        console.log('a');
-        console.log(selectedItems);
-        fillItemDetailsTable(selectedItems);
-        });
+            
 
-        $('#selectAllQM').on('change', function () {
+        $('#selectAllQM').on('change', function () 
+        {
             const isChecked = $(this).is(':checked');
             $('#tblQuotationModal tbody .chkQuot').prop('checked', isChecked);
-        });
-         
+        });         
                 
-        $(document).on('change', '#ddWBNo', async function () {
+        $(document).on('change', '#ddWBNo', async function () 
+        {
             var docid = $('#ddWBNo').find('option:selected').val();
             var partyCode = $('#ddlPartyName').val();
             let data = await GetWeighBridgeDetail(docid, partyCode);
@@ -1536,36 +1537,7 @@
         });
     }
 
-    function getPurchaseData() {
-        let poData = [];
 
-        $('#tblPurchaseRequest tbody tr').each(function () {
-            const $checkbox = $(this).find('input[type="checkbox"]');
-
-            if ($checkbox.is(':checked')) {
-                const row = $(this).find('td');
-
-                const item = {
-                    ITEM_CODE:    $(row[4]).text().trim(),
-                    ItemName:     $(row[5]).text().trim(),
-                    Unit:         $(row[6]).text().trim(),
-                    makename:     $(row[7]).text().trim(),
-                    TECH_DESC:    $(row[8]).text().trim(),
-                    QTY:          $(row[9]).text().trim(),
-                    UOM_CODE:     $(row[18]).text().trim(),
-                    MAKE_CODE:    $(row[15]).text().trim(),
-                    APROV_REMARKS:$(row[11]).text().trim(),
-                    STATUS:       $(row[12]).text().trim(),
-                    Department:   $(row[13]).text().trim()
-                    // Add other fields if needed
-                };
-
-                poData.push(item);
-            }
-        });
-
-        return poData;
-    }
 
     async function fillItemDetailsTableByQuoteBtn(data) {
         const $tbody = $('#tblItemRecordPO tbody');
@@ -1680,25 +1652,6 @@
           });
     }
 
-    function GetDocid(VType) {
-        $.ajax({
-            url: '@Url.Action("GetMaxVNo", "PurchaseOrder")',
-            type: 'GET',
-            data:{V_type:VType},
-            success: function (response) {
-                if (response.status === true && response.data) {
-                    $('#txtDocNo').val(response.data.vNo || '');
-                    $('#TxtDocId').val(response.data.docId || '');
-                } else {
-                    $('#txtDocNo').val('');
-                    $('#TxtDocId').val('');
-                }
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error fetching Doc ID:', error);
-            }
-        });
-    }
 
     function GetSaudaDetail(docid)
     {
@@ -1947,5 +1900,34 @@
         console.error("Error loading Place:", error);
     }
 }
+
+
+
+
+function GetDocid(VType) {
+    $.ajax({
+        url: '@Url.Action("GetMaxVNo", "PurchaseOrder")',
+        type: 'GET',
+        data: { V_type: VType },
+        success: function (response) {
+            if (response.status === true && response.data) {
+                $('#txtDocNo').val(response.data.vNo || '');
+                $('#TxtDocId').val(response.data.docId || '');
+            } else {
+                $('#txtDocNo').val('');
+                $('#TxtDocId').val('');
+            }
+        },
+        error: function (xhr, status, error) {
+            toastr.error('Error fetching Doc ID:', error);
+        }
+    });
+}
+
+
+
+
+
+
 
 </script>

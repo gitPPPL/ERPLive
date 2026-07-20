@@ -1,7 +1,6 @@
 ﻿
 async function handleDocLoad() {
-    const docId = getQueryParam('id');
-    const readOnly = getQueryParam('readOnly');
+
 
     SetFYDate('dtDocDate', LoginDate);
 
@@ -13,7 +12,6 @@ async function handleDocLoad() {
         var VTpeU = docId.substring(0, 4);
         var VNoU = docId.substring(4);
         $('#txtDocNo').val(VNoU);
-        console.log(VTpeU, VNoU);
         Wb_SaudaDdl_Make_enabledisable(VTpeU);
 
     } else {
@@ -146,30 +144,25 @@ async function checkValidDate() {
 async function SaveData(model) {
     try {
 
-        console.log("Request:", model);
-        console.log(JSON.stringify(model));
-
         const response = await $.ajax({
-            url: '/PurchaseOrder/SaveOrUpdatePurchaseOrder',
+            url: '/PurchaseOrder/SavedData',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(model),
             dataType: 'json'
         });
 
-        if (response.status) {
-
-            toastr.success(response.message || "Data saved successfully.");
-
+        if (response.success) {
+            toastr.success( "Data saved successfully.");
             let rowId = model.VType + model.VNo;
-
             setTimeout(function () {
                 window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
             }, 3000);
+        }
 
-
-        } else {
-            toastr.warning(response.message || "Unable to save data.");
+        else
+        {
+           toastr.warning("Unable to save data.");
         }
 
         return response;
@@ -180,8 +173,11 @@ async function SaveData(model) {
 
         throw err;
     }
-}
-function getPurchaseOrderModel() {
+} 
+
+async function getPurchaseOrderModel() {
+
+    const attachments = await getAttachmentDetails();
 
     const model = {
         //================ HEADER ==================
@@ -189,31 +185,26 @@ function getPurchaseOrderModel() {
         VType: $('#ddlDocType').val(),
         VDate: toNullableDate($('#dtDocDate').val()),
         DocId: $('#TxtDocId').val(),
-
         PlaceCode: parseIntSafe($('#ddlPlace').val()),
         WbNo: parseIntSafe($('#ddWBNo').val()),
         PartyCode: parseIntSafe($('#ddlPartyName').val()),
         ShipCode: parseIntSafe($('#ddlShipFrom').val()),
         ShipFrom: parseIntSafe($('#ddlPartyName').val()),
-
         BillAdd1: $('#TxtAdd1PD').val(),
         BillAdd2: $('#TxtAdd2PD').val(),
         BillAdd3: $('#TxtAdd3PD').val(),
         BillCity: parseIntSafe($('#TxtCity1PD').val()),
         BillPincode: $('#NumPincodePD').val(),
         BillGst: $('#TxtGSTPD').val(),
-
         ShipAdd1: $('#TxtAdd1SD').val(),
         ShipAdd2: $('#TxtAdd2SD').val(),
         ShipAdd3: $('#TxtAdd3SD').val(),
         ShipCity: parseIntSafe($('#TxtCity1SD').val()),
         ShipPincode: $('#NumPincodeSD').val(),
-
         PriceType: $('#ddlPriceType').val(),
         PartyRef: $('#txtPartyRef').val(),
         ImportCurrency: $('#ddlCurrency').val(),
         ExRate: parseFloatSafe($('#NumExRate').val()),
-
         Nos: parseFloatSafe($('#NumTotalNosIt').val()),
         Qty: parseFloatSafe($('#NumQtyIt').val()),
         Amount: parseFloatSafe($('#NumAmountIt').val()),
@@ -227,29 +218,23 @@ function getPurchaseOrderModel() {
         CessAmt: parseFloatSafe($('#NumCessAmtIt').val()),
         TcsAmt: parseFloatSafe($('#NumTCSIt').val()),
         NetAmt: parseFloatSafe($('#NumNetAmtIt').val()),
-
         DeliveryTerm: $('#txtDeliveryTerm').val(),
         DeliveryDate: toNullableDate($('#DtDeliveryDate').val()),
         ValidityDate: toNullableDate($('#DtValidateDate').val()),
         TransportTerm: $('#txtTransportTerm').val(),
-
         PaytermCode: parseIntSafe($('#ddlPaymentTerm').val()),
         PaymentTerm: $('#txtPaymentTerm').val(),
         PriceTerm: $('#txtPriceTerm').val(),
-
         SaudaType: $('#ddSaudaNo').val(),
         SaudaNo: parseIntSafe($('#ddSaudaNo option:selected').text()),
-
         Remarks: $('#txtRemarksTC').val(),
         PartyName: $('#txtPartySauda').val(),
-
-        SaveOrUpdate: $('#TxtDocId').val() ? "Update" : "Save",
+        SaveOrUpdate: docId ? "Update" : "Save",
 
         //================ DETAIL ==================
         ItemRecords: [],
 
-        //================ ATTACHMENT ==============
-        Attachments: getAttachmentDetails()
+        Attachments: attachments
     };
 
     //========== Collect Table Data ==========
@@ -306,7 +291,7 @@ function getPurchaseOrderModel() {
             RequestNo: parseIntSafe($(`#TxtReqno${idx}`).val()),
             ApprovalType: $(`#TxtApptype${idx}`).val(),
             ApprovalNo: parseIntSafe($(`#TxtAppno${idx}`).val()),
-            Status: $(`#TxtStatus${idx}`).val(),
+            Status: parseIntSafe($(`#TxtStatus${idx}`).val()),
             SaudaType: $('#ddSaudaNo').val(),
             SaudaNo: parseIntSafe($('#ddSaudaNo option:selected').text())
 
@@ -314,37 +299,44 @@ function getPurchaseOrderModel() {
 
 
         });
+
+        //================ ATTACHMENT ==============
+        Attachments: attachments
+
+
     });
 
     return model;
 }
 
-
-
-
-
-
-
-
-
-
-
-function getAttachmentDetails() {
+async function getAttachmentDetails() {
 
     const attachments = [];
 
-    selectedFiles.forEach(file => {
+    // Read selected files and convert to Base64
+    for (const file of selectedFiles) {
+
+        const base64 = await new Promise((resolve, reject) => {
+
+            const reader = new FileReader();
+
+            reader.onload = () => resolve(reader.result.split(',')[1]); // only Base64 part
+            reader.onerror = reject;
+
+            reader.readAsDataURL(file);
+
+        });
 
         attachments.push({
             FileName: file.name,
             FilePath: `/uploads/${file.name}`,
             FileSize: file.size,
             FileType: file.type,
-            FileContentBase64: null
+            FileContentBase64: base64
         });
+    }
 
-    });
-
+    // Existing files
     globalAttachments.forEach(file => {
 
         attachments.push({
@@ -352,12 +344,27 @@ function getAttachmentDetails() {
             FilePath: file.filePath,
             FileSize: file.fileSize,
             FileType: file.fileType,
-            FileContentBase64: null
+            FileContentBase64: file.fileContentBase64 || null
         });
 
     });
 
     return attachments;
+}
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            // Remove "data:image/png;base64," prefix
+            const base64String = reader.result.split(',')[1];
+            resolve(base64String);
+        };
+
+        reader.onerror = reject;
+
+        reader.readAsDataURL(file);
+    });
 }
 
 async function collectGridDetail() {
@@ -923,28 +930,6 @@ function renderFileList() {
             `);
     }
 }
-function SetFYDate(inputId, loginDate) {
-    var $input = $('#' + inputId);
-    var d = new Date(loginDate);
-
-    var fyStartYear = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
-
-    var minDate = fyStartYear + '-04-01';
-    var maxDate = loginDate;
-
-    $input.attr('min', minDate).attr('max', maxDate).val(maxDate);
-
-    $input.on('change', function () {
-        var selectedDate = new Date(this.value);
-        var min = new Date(minDate);
-        var max = new Date(maxDate);
-
-        if (selectedDate < min || selectedDate > max) {
-            toastr.info('Please select a date within the Financial Year and not greater than Login Date.');
-            this.value = maxDate;
-        }
-    });
-}
 function addAttachmentRow(data = {}) {
     const $list = $('#fileList');
 
@@ -1353,6 +1338,60 @@ async function fetchDatabyTaxType(TaxCode) {
         return null;
     }
 }
+
+
+function getPurchaseData() {
+    let poData = [];
+
+    $('#tblPurchaseRequest tbody tr').each(function () {
+        const $checkbox = $(this).find('input[type="checkbox"]');
+
+        if ($checkbox.is(':checked')) {
+            const row = $(this).find('td');
+
+            const item = {
+                ITEM_CODE: $(row[4]).text().trim(),
+                ItemName: $(row[5]).text().trim(),
+                Unit: $(row[6]).text().trim(),
+                makename: $(row[7]).text().trim(),
+                TECH_DESC: $(row[8]).text().trim(),
+                QTY: $(row[9]).text().trim(),
+                UOM_CODE: $(row[18]).text().trim(),
+                MAKE_CODE: $(row[15]).text().trim(),
+                APROV_REMARKS: $(row[11]).text().trim(),
+                STATUS: $(row[12]).text().trim(),
+                Department: $(row[13]).text().trim()
+                // Add other fields if needed
+            };
+
+            poData.push(item);
+        }
+    });
+
+    return poData;
+}
+
+
+function SetFYDate(inputId, loginDate) {
+    var $input = $('#' + inputId);
+    var d = new Date(loginDate);
+    var fyStartYear = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+    var minDate = fyStartYear + '-04-01';
+    var maxDate = loginDate;
+    $input.attr('min', minDate).attr('max', maxDate).val(maxDate);
+
+    $input.on('change', function () {
+        var selectedDate = new Date(this.value);
+        var min = new Date(minDate);
+        var max = new Date(maxDate);
+
+        if (selectedDate < min || selectedDate > max) {
+            toastr.info('Please select a date within the Financial Year and not greater than Login Date.');
+            this.value = maxDate;
+        }
+    });
+}
+
 
 
 

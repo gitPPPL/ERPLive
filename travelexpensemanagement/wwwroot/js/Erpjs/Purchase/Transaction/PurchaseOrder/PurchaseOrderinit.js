@@ -36,11 +36,11 @@ $('#btn-save').on('click', async function (e) {
     try {
 
         // Header Validation
-        if (!validateRequiredField('#ddlPriceType', 'Price Type')) return;
         if (!validateRequiredField('#ddlPlace', 'Place')) return;
         if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
         if (!validateRequiredField('#ddlShipFrom', 'Ship From')) return;
-
+        if (!validateRequiredField('#ddlPriceType', 'Price Type')) return;
+   
         const vType = $('#ddlDocType').val();
         const partyRef = $('#txtPartyRef').val().trim();
         const totalAmount = parseFloat($('#NumAmountIt').val()) || 0;
@@ -55,7 +55,7 @@ $('#btn-save').on('click', async function (e) {
         }
 
         // Collect Complete Model
-        const model = getPurchaseOrderModel();
+        const model = await getPurchaseOrderModel();
 
         console.log(model);
 
@@ -226,6 +226,14 @@ $(document).on('click', '#BtnCalculation', async function (event) {
         }
     }
 });
+
+
+$(document).on('click', '#btnPurchaseRequestCopy', async function () {
+    const selectedItems = getPurchaseData();
+    fillItemDetailsTable(selectedItems);
+});
+
+
 
 //Attachment
 

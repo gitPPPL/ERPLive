@@ -361,24 +361,6 @@ function collectPurchaseQuotationData() {
 
     return data;
 }
-function SetFYDate(inputId, loginDate) {
-    var $input = $('#' + inputId);
-    var d = new Date(loginDate);
-    var fyStartYear = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
-    var minDate = fyStartYear + '-04-01';  
-    var maxDate = loginDate;               
-    $input.attr('min', minDate).attr('max', maxDate).val(maxDate);
-    $input.on('change', function () {
-        var selectedDate = new Date(this.value);
-        var min = new Date(minDate);
-        var max = new Date(maxDate);
-
-        if (selectedDate < min || selectedDate > max) {
-            toastr.info('Please select a date within the Financial Year and not greater than Login Date.');
-            this.value = maxDate;
-        }
-    });
-}
 
 async function CheckOutherrised(partycode) {
     try {

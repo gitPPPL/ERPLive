@@ -1,5 +1,4 @@
-﻿/// <reference path="delete.js" />
-function validateForm(formSelector) {
+﻿function validateForm(formSelector) {
     console.log("Validating form...");
     let isValid = true;
     $(formSelector).find('.error-message').remove();
@@ -78,6 +77,8 @@ function showFlashMessageByKey(key, type = 'success') {
         localStorage.setItem('flashMessage', JSON.stringify({ message, type }));
     }
 }
+
+
 $(document).ready(function () {
     const stored = localStorage.getItem('flashMessage');
     if (stored) {
@@ -90,6 +91,9 @@ $(document).ready(function () {
         localStorage.removeItem('flashMessage');
     }
 });
+
+
+
 function confirmAction(message = "Are you sure you want to delete this item group?", yesText = "Yes", noText = "No") {
     return Swal.fire({
         title: '<strong>Confirm Delete</strong>',

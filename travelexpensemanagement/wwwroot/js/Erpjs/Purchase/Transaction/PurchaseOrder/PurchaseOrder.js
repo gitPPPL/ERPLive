@@ -594,7 +594,6 @@ async function loadStatusDropdown() {
     }
 }
 
-
 async function DDLCityMast() {
     try {
         const res = await fetch('/PurchaseOrder/DDLCityMast');

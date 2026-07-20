@@ -118,7 +118,6 @@
 			GetMasterDataList();
 		});
 
-
 		$('#button_export').on('click', function () {
 			var text = $('#searchBox').val();
 			window.location.href = '/InwardEntryList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
@@ -128,11 +127,6 @@
 			var text = $('#searchBox').val();
 			window.open('/InwardEntryList/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
 		});
-
-
-
-
-
 
 	    $(document).on('click', '.permission-delete', async function () {
          
@@ -236,7 +230,7 @@
 				$.each(mastListData, function (index, item) {
 					let actions = '';
 
-					 actions += `<button class="act-btn edit permission-edit" title="Edit Row" style="cursor:pointer;" onclick="AddOrEditFunction('${item.DOC_ID}','${item.V_NO}','${item.V_TYPE}')"><i class="fa fa-edit"></i></button>`;
+					  actions += `<button class="act-btn edit permission-edit" title="Edit Row" style="cursor:pointer;" onclick="AddOrEditFunction('${item.DOC_ID}','${item.V_NO}','${item.V_TYPE}')"><i class="fa fa-edit"></i></button>`;
 					
 					actions += `<button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewMenuDetails('${item.DOC_ID}')"><i class="fa fa-eye"></i></button>`;
 
@@ -317,22 +311,33 @@
 					data: { v_no: v_no, v_type: v_type }
 				});
 
-				if (res?.validation1?.success === true) {
+
+
+				   console.log("rowId1",rowId);
+
+
+
+				if (res?.validation1?.success === true)
+				{
 					toastr.warning(res?.validation1?.message );
 					return;
 				}
 
-				if (res?.validation2?.success === true) {
+				if (res?.validation2?.success === true)
+				{
 					toastr.info(res.validation2.message);
 				}
 
-				if (res?.validation2?.success === true) {
+				if (res?.validation2?.success === true)
+				{
 					toastr.info(res.validation2.message);
 				}
 
-				if (res?.validation3?.success === true) {
+				if (res?.validation3?.success === true)
+				{
 					toastr.info(res.validation3.message);
 				}
+					
 
 			      window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId);
 			
@@ -349,7 +354,6 @@
 	{
 		window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
 	}	
-
 
    function showEmployeePopup(docid) {
 
