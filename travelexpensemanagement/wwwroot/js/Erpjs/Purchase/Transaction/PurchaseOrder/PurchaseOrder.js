@@ -15,6 +15,7 @@ async function LoadDropdown() {
             loadDepartmentDropdown(),
             loadTaxTypeDropdown(),
             loadStatusDropdown()
+      
         ]);
 
     } catch (error) {

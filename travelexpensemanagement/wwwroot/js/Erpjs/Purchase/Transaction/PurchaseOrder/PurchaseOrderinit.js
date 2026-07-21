@@ -264,12 +264,10 @@ $(document).on("click", ".erp-delete-file-btn", function () {
 });
 
 $(document).on("click", ".erp-delete-db-btn", function () {
-
-    const index = $(this).data("index");
-
+    let index = $(this).data("index");
     globalAttachments.splice(index, 1);
-
     renderFileList();
+
 });
 
 dropZone.addEventListener("dragover", function (e) {

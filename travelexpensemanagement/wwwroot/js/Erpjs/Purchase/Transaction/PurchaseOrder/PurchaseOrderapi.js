@@ -1,9 +1,7 @@
 ﻿
-async function handleDocLoad() {
-
-
+async function handleDocLoad()
+{
     SetFYDate('dtDocDate', LoginDate);
-
     if (docId) {
         await GetDocData(docId, readOnly);
         $('#SaudaDetail').show();
@@ -13,8 +11,8 @@ async function handleDocLoad() {
         var VNoU = docId.substring(4);
         $('#txtDocNo').val(VNoU);
         Wb_SaudaDdl_Make_enabledisable(VTpeU);
-
-    } else {
+    } else
+    {
         $('#SaudaDetail').hide();
         $('#ddlStatus').prop('disabled', true);
         const Vtype = $('#ddlDocType').val();
@@ -35,8 +33,7 @@ function TransitReport() {
         return;
     }
 
-    var reportName = "";
-
+        var reportName = "";
  
         reportName = "pr_porder_gst";
 
@@ -155,9 +152,9 @@ async function SaveData(model) {
         if (response.success) {
             toastr.success( "Data saved successfully.");
             let rowId = model.VType + model.VNo;
-            setTimeout(function () {
-                window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
-            }, 3000);
+            //setTimeout(function () {
+            //    window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+            //}, 3000);
         }
 
         else
@@ -310,21 +307,17 @@ async function getPurchaseOrderModel() {
 }
 
 async function getAttachmentDetails() {
-
     const attachments = [];
 
-    // Read selected files and convert to Base64
+    console.log("Global Attachment", globalAttachments);
+    console.log("selected File", selectedFiles);
+
     for (const file of selectedFiles) {
-
         const base64 = await new Promise((resolve, reject) => {
-
             const reader = new FileReader();
-
-            reader.onload = () => resolve(reader.result.split(',')[1]); // only Base64 part
+            reader.onload = () => resolve(reader.result.split(',')[1]); 
             reader.onerror = reject;
-
             reader.readAsDataURL(file);
-
         });
 
         attachments.push({
@@ -338,7 +331,6 @@ async function getAttachmentDetails() {
 
     // Existing files
     globalAttachments.forEach(file => {
-
         attachments.push({
             FileName: file.fileName,
             FilePath: file.filePath,
@@ -367,6 +359,35 @@ function fileToBase64(file) {
     });
 }
 
+function isDuplicateFile(file) {
+
+    const fileName = file.name;
+
+    // Check newly selected files
+    const inNew = selectedFiles.some(f =>
+        f.name === file.name &&
+        f.size === file.size &&
+        f.lastModified === file.lastModified
+    );
+
+    // Check existing DB attachments
+    const inExisting = globalAttachments.some(att => {
+        const name = att.FileName || att.fileName || att.FILE_NAME;
+
+        if (!name) return false;
+
+        return name.toLowerCase() === file.name.toLowerCase();
+    });
+
+    if (inNew || inExisting) {
+        toastr.warning(`File "${fileName}" already exists in attachment list.`);
+        return true;
+    }
+
+    return false;
+}
+
+
 async function collectGridDetail() {
     const items = [];
     $('#tblItemRecordPO tbody tr').each(function () {
@@ -389,24 +410,26 @@ async function collectGridDetail() {
 
 async function GetDocData(MasterTblId, readOnly) {
     try {
+
         const response = await $.ajax({
             url: '/PurchaseOrder/GetPurchaseOrderRecordsById',
             type: 'GET',
             data: { id: MasterTblId }
         });
 
-        console.log("response", response);
-
-        if (!response || !response.status) {
+        if (!response || !response.status)
+        {
             toastr.error('No data returned.');
             return;
         }
-
-        if (readOnly === 'true') {
+        if (readOnly === 'true')
+        {
             disableAllFields();
             $('.btn-add-row-last').hide();
             $('#btn-save, #cancelBtn').hide();
-        } else {
+        }
+        else
+        {
             enableAllFields();
             $('#btn-save, #cancelBtn').show();
             $('.btn-add-row-last').show();
@@ -415,89 +438,136 @@ async function GetDocData(MasterTblId, readOnly) {
         Calculation = false;
         SelectShipParty = false;
         SelectParty = false;
-        selectItemOption = false
+        selectItemOption = false;
 
-        await fillPurchaseOrderData(response.header, response.detail);       
+        await fillPurchaseOrderData(response.header, response.detail);
 
         Calculation = true;
         SelectShipParty = true;
         SelectParty = true;
         selectItemOption = true;
 
-        $('#fileList').empty();
 
+
+        globalAttachments = response.attachment;
+
+
+        $('#fileList').empty();
         const attachments = Array.isArray(response.attachment) ? response.attachment : [];
 
         if (attachments.length === 0) {
-            $('#fileList').html(`
-                <div class="text-muted text-center">
-                    No attachments found.
-                </div>
-            `);
-        } else {
-
-            attachments.forEach((att, idx) => {
-
-                const fileName =
-                    att.FILE_NAME ||
-                    att.FileName ||
-                    att.fileName ||
-                    `File_${idx + 1}`;
-
-                let filePath =
-                    att.FILE_Path ||
-                    att.FilePath ||
-                    att.filePath ||
-                    '';
-
-                // safe URL
-                if (filePath && !filePath.startsWith('http') && !filePath.startsWith('/')) {
-                    filePath = '/' + filePath;
-                }
-
-                const ext = (fileName.split('.').pop() || '').toLowerCase();
-
-                let icon = '📄';
-
-                if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) icon = '🖼️';
-                else if (ext === 'pdf') icon = '📕';
-
-                $('#fileList').append(`
-                    <div class="file-item erp-file-row"
-                         data-id="${att.ID || idx}">
-
-                        <div class="file-icon">
-                            ${icon}
-                        </div>
-
-                        <div class="file-info">
-                            <div class="file-name-text">${fileName}</div>
-                        </div>
-
-                        <div class="file-actions">
-
-                            ${filePath ? `
-                                <button type="button"
-                                        class="view-file"
-                                        onclick="window.open('${filePath}', '_blank')">
-                                    View
-                                </button>
-                            ` : ''}
-
-                            <button type="button"
-                                    class="delete-file"
-                                    data-id="${att.ID || idx}">
-                                Delete
-                            </button>
-
-                        </div>
-
-                    </div>
-                `);
-            });
+            $('#fileList').html(`  <div class="text-muted text-center"> No attachments found.  </div> `);
+            return;
         }
 
-    } catch (error) {
+        attachments.forEach((att, idx) => {
+            const fileName = att.FILE_NAME || att.FileName || `File_${idx + 1}`;
+
+            let fileUrl = "";
+            let blobUrl = "";
+
+            if (att.IMG_FILE) {
+                let base64 = att.IMG_FILE.replace(/\s/g, "");
+
+                let ext = fileName.split('.').pop().toLowerCase();
+
+                let mimeType = "application/octet-stream";
+
+                if (["jpg", "jpeg"].includes(ext))
+                {
+                    mimeType = "image/jpeg";
+                }
+                else if (ext === "png")
+                {
+                    mimeType = "image/png";
+                }
+                else if (ext === "gif")
+                {
+                    mimeType = "image/gif";
+                }
+                else if (ext === "webp")
+                {
+                    mimeType = "image/webp";
+                }
+                else if (ext === "pdf")
+                {
+                    mimeType = "application/pdf";
+                }
+
+                fileUrl = `data:${mimeType};base64,${base64}`;
+
+                // Convert Base64 to Blob URL for View
+                const byteCharacters = atob(base64);
+                const byteNumbers = new Array(byteCharacters.length);
+
+                for (let i = 0; i < byteCharacters.length; i++)
+                {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+
+                const byteArray = new Uint8Array(byteNumbers);
+
+                const blob = new Blob(
+                    [byteArray],
+                    { type: mimeType }
+                );
+
+                blobUrl = URL.createObjectURL(blob);
+            }
+
+            let previewHtml = "";
+
+            if (fileName.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/i))
+            {
+                previewHtml = `<img src="${fileUrl}"
+                style="
+                width:60px;
+                height:60px;
+                object-fit:cover;
+                border:1px solid #ccc;"> `;
+
+            }
+            else if (fileName.match(/\.pdf$/i))
+            {
+              previewHtml = `<span style="font-size:30px;color:red;"> 📕 </span> `;
+            }
+            else
+            {
+              previewHtml = `<span style="font-size:30px;"> 📄 </span> `;
+            }
+
+            $("#fileList").append(`<div class="file-item erp-file-row"
+             data-index="${idx}"
+             style="
+             display:flex;
+             align-items:center;
+             gap:15px;
+             border:1px solid #ddd;
+             padding:10px;
+             margin-bottom:5px;">
+
+
+            <!-- Preview -->
+            <div class="file-preview"> ${previewHtml}  </div>
+
+            <!-- File Name -->
+            <div class="file-info" style="flex:1">  ${fileName} </div>
+            <!-- Buttons -->
+            <div class="file-actions">
+            <!-- View -->
+            <a href="${blobUrl}" target="_blank" class="btn btn-sm btn-primary">  View </a>
+
+            <!-- Delete -->
+            <button type="button" class="btn btn-sm btn-danger erp-delete-db-btn" data-index="${idx}"> Delete </button>
+            </div>
+
+         </div>
+
+    `);
+
+        });
+    }
+    catch (error) {
         console.error(error);
         toastr.error('Failed to load data.');
     }
@@ -792,143 +862,196 @@ function handleBack(redirectUrl, isReadOnly = false) {
         }
     });
 }
-function isDuplicateFile(file) {
 
-    const fileName = file.name;
-
-    // 1. check in newly selected files
-    const inNew = selectedFiles.some(f =>
-        f.name === file.name &&
-        f.size === file.size &&
-        f.lastModified === file.lastModified
-    );
-
-    // 2. check in existing DB attachments
-    const inExisting = globalAttachments.some(att => {
-        const name = att.FileName ?? att.fileName;
-        return name.toLowerCase() === file.name.toLowerCase();
-    });
-
-    if (inNew || inExisting) {
-        toastr.warning(`File "${fileName}" already exists in attachment list.`);
-        return true;
-    }
-
-    return false;
-}
 function renderFileList() {
 
     const attachBody = $("#fileList");
-    attachBody.empty();
+/*    attachBody.empty();*/
 
-    // ===== EXISTING ATTACHMENTS =====
-    if (globalAttachments && globalAttachments.length > 0) {
 
-        globalAttachments.forEach((att, index) => {
+    // ===== EXISTING DATABASE ATTACHMENTS =====
+    //if (globalAttachments && globalAttachments.length > 0) {
 
-            const fileName = att.FileName ?? att.fileName;
-            const filePath = att.FilePath ?? att.filePath;
+    //    globalAttachments.forEach((att, index) => {
 
-            const extension = fileName.split('.').pop().toLowerCase();
+    //        const fileName =  att.FILE_NAME ?? att.FileName ?? att.fileName ??  "File";
 
-            let previewHtml = "";
+    //        let fileUrl = "";
 
-            if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension)) {
-                previewHtml = `<img src="${filePath}" class="erp-file-thumb">`;
-            }
-            else if (extension === "pdf") {
-                previewHtml = `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
-            }
-            else {
-                previewHtml = `<i class="fa fa-file-o erp-file-icon"></i>`;
-            }
+    //        if (att.IMG_FILE) {
 
-            attachBody.append(`
-                    <div class="file-item erp-file-row">
+    //            const extension = fileName.split('.').pop().toLowerCase();
 
-                        <!-- LEFT: ICON / IMAGE -->
-                        <div class="erp-file-preview">
-                            ${previewHtml}
-                        </div>
+    //            let mimeType = "application/octet-stream";
 
-                        <!-- MIDDLE: NAME -->
-                        <div class="erp-file-info">
-                            <div class="erp-file-name">${fileName}</div>
-                        </div>
+    //            if (["jpg", "jpeg"].includes(extension))
+    //                mimeType = "image/jpeg";
 
-                        <!-- RIGHT: ACTIONS -->
-                        <div class="erp-file-actions">
-                            <a href="${filePath}" target="_blank" class="erp-view-btn">
-                                View
-                            </a>
+    //            else if (extension === "png")
+    //                mimeType = "image/png";
 
-                            <button type="button"
-                                    class="erp-delete-db-btn"
-                                    data-index="${index}">
-                                Delete
-                            </button>
-                        </div>
+    //            else if (extension === "gif")
+    //                mimeType = "image/gif";
 
-                    </div>
-                `);
-        });
-    }
+    //            else if (extension === "webp")
+    //                mimeType = "image/webp";
 
-    // ===== NEWLY SELECTED FILES =====
+    //            else if (extension === "pdf")
+    //                mimeType = "application/pdf";
+
+
+    //            fileUrl = `data:${mimeType};base64,${att.IMG_FILE}`;
+    //        }
+
+
+    //        const extension = fileName.split('.').pop().toLowerCase();
+
+    //        let previewHtml = "";
+
+
+    //        if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension)) {
+
+    //            previewHtml =
+    //                `<img src="${fileUrl}" class="erp-file-thumb">`;
+
+    //        }
+    //        else if (extension === "pdf") {
+
+    //            previewHtml =
+    //                `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
+
+    //        }
+    //        else {
+
+    //            previewHtml =
+    //                `<i class="fa fa-file-o erp-file-icon"></i>`;
+    //        }
+
+    //        attachBody.append(`
+
+    //            <div class="file-item erp-file-row">
+
+    //                <div class="erp-file-preview">
+    //                    ${previewHtml}
+    //                </div>
+
+
+    //                <div class="erp-file-info">
+    //                    <div class="erp-file-name">
+    //                        ${fileName}
+    //                    </div>
+    //                </div>
+
+
+    //                <div class="erp-file-actions">
+
+    //                    <a href="${fileUrl}"
+    //                       target="_blank"
+    //                       class="erp-view-btn">
+    //                        View
+    //                    </a>
+
+
+    //                    <button type="button"
+    //                            class="erp-delete-db-btn"
+    //                            data-index="${index}">
+    //                        Delete
+    //                    </button>
+
+    //                </div>
+
+    //            </div>
+
+    //        `);
+
+    //    });
+    //}
+
+
+
+    // ===== NEW SELECTED FILES =====
+
     selectedFiles.forEach((file, index) => {
 
         const extension = file.name.split('.').pop().toLowerCase();
+
         const fileUrl = URL.createObjectURL(file);
+
 
         let previewHtml = "";
 
+
         if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension)) {
-            previewHtml = `<img src="${fileUrl}" class="erp-file-thumb">`;
+
+            previewHtml =
+                `<img src="${fileUrl}" class="erp-file-thumb">`;
+
         }
         else if (extension === "pdf") {
-            previewHtml = `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
+
+            previewHtml =
+                `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
+
         }
         else {
-            previewHtml = `<i class="fa fa-file-o erp-file-icon"></i>`;
+
+            previewHtml =
+                `<i class="fa fa-file-o erp-file-icon"></i>`;
         }
 
+
+
         attachBody.append(`
-                <div class="file-item erp-file-row">
 
-                    <!-- LEFT: ICON / IMAGE -->
-                    <div class="erp-file-preview">
-                        ${previewHtml}
+            <div class="file-item erp-file-row">
+
+                <div class="erp-file-preview">
+                    ${previewHtml}
+                </div>
+
+
+                <div class="erp-file-info">
+                    <div class="erp-file-name">
+                        ${file.name}
                     </div>
+                </div>
 
-                    <!-- MIDDLE: NAME -->
-                    <div class="erp-file-info">
-                        <div class="erp-file-name">${file.name}</div>
-                    </div>
 
-                    <!-- RIGHT: ACTIONS -->
-                    <div class="erp-file-actions">
-                        <a href="${fileUrl}" target="_blank" class="erp-view-btn">
-                            View
-                        </a>
+                <div class="erp-file-actions">
 
-                        <button type="button"
-                                class="erp-delete-file-btn"
-                                data-index="${index}">
-                            Delete
-                        </button>
-                    </div>
+                    <a href="${fileUrl}"
+                       target="_blank"
+                       class="erp-view-btn">
+                        View
+                    </a>
+
+
+                    <button type="button"
+                            class="erp-delete-file-btn"
+                            data-index="${index}">
+                        Delete
+                    </button>
 
                 </div>
-            `);
+
+            </div>
+
+        `);
+
     });
 
+
+
     if (globalAttachments.length === 0 && selectedFiles.length === 0) {
+
         attachBody.html(`
-                <div class="erp-empty-state text-center text-muted">
-                    No attachments found.
-                </div>
-            `);
+            <div class="erp-empty-state text-center text-muted">
+                No attachments found.
+            </div>
+        `);
+
     }
+
 }
 function addAttachmentRow(data = {}) {
     const $list = $('#fileList');
@@ -1338,8 +1461,6 @@ async function fetchDatabyTaxType(TaxCode) {
         return null;
     }
 }
-
-
 function getPurchaseData() {
     let poData = [];
 
@@ -1370,8 +1491,6 @@ function getPurchaseData() {
 
     return poData;
 }
-
-
 function SetFYDate(inputId, loginDate) {
     var $input = $('#' + inputId);
     var d = new Date(loginDate);
@@ -1391,7 +1510,3 @@ function SetFYDate(inputId, loginDate) {
         }
     });
 }
-
-
-
-

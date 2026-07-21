@@ -731,8 +731,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd3.ExecuteNonQuery();
                 }
 
-
-
                 foreach (var Attachment in POmodel.Attachments)
                 {
                     if (string.IsNullOrWhiteSpace(Attachment.FileName))
@@ -760,7 +758,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd3.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value = POmodel.VDate ?? (object)DBNull.Value;
                     cmd3.Parameters.AddWithValue("@FILE_NAME", Attachment.FileName);
 
-
                     byte[]? imageBytes = null;
 
                     if (!string.IsNullOrWhiteSpace(Attachment.FileContentBase64))
@@ -782,7 +779,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd3.Parameters.AddWithValue("@LID", Environment.MachineName);
                     cmd3.ExecuteNonQuery();
                 }
-
 
                 return "Success";
             }
