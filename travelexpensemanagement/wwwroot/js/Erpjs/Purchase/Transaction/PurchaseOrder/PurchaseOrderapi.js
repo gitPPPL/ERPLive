@@ -26,34 +26,66 @@ async function handleDocLoad()
         $('#DtValidateDate').val(todayDate);
     }
 }
-function TransitReport() {
+
+
+
+
+
+
+async function TransitReport() {
 
     if (!docId) {
         showToast(`Please save the data before printing the report.`, { type: "info" });
         return;
     }
 
-        var reportName = "";
- 
+    let reportName = "";
+    let RPTNAME = "";
+
+    if (globalVars.CompCode == 7) {
+        reportName = "pr_porderK_gst";
+    }
+    else {
         reportName = "pr_porder_gst";
+    }
+
+    var v_no = $('#txtDocNo').val();
+    var v_type = $('#ddlDocType').val();
+
+    const response = await $.ajax({
+        url: '/PurchaseOrder/PrintValidation',
+        type: 'GET',
+        data: { V_TYPE: v_type, V_NO: v_no }
+    });     
 
 
-    var v_no = $('#TxtCode').val();
-    var v_type = "PAUD";
+    if (!response.faproV_STATUS)
+    {
+        toastr.info("PO Not Approved, PO Report can not generate.");
+        return;
+    }
+
+
+    if (response.reportname)
+    {
+        RPTNAME = response.reportname;
+    }
 
     var formula =
-        "{ORDER1.COMP_CODE} = " + globalVars.CompCode +
+        " {ORDER1.V_TYPE} = '" + v_type + "' " +
+        " and {ORDER1.V_NO} = " + v_no + 
+        " and {ORDER1.COMP_CODE} = " + globalVars.CompCode +
         " and {ORDER1.YEAR_CODE} = " + globalVars.FYearCode +
-        " and {ORDER1.BRANCH_CODE} = " + globalVars.BranchCode +
-        " and {ORDER1.V_NO} = " + v_no +
-        " and {ORDER1.V_TYPE} = '" + v_type + "'";
+        " and {ORDER1.BRANCH_CODE} = " + globalVars.BranchCode + "";
 
     // Prepare the payload for the API
     var payload = {
         Reportname: reportName,
         selectionFormula: formula,
         Database: database,
+
         Parameters: {
+            approvedBy: globalVars.CompanyName || "",
             comp_name: globalVars.CompanyName || "",
             comp_add1: globalVars.Address1 || "",
             comp_add2: globalVars.Address2 || "",
@@ -62,7 +94,7 @@ function TransitReport() {
             COMP_CIN: globalVars.COMP_CIN || "",
             COMP_EMAIL: globalVars.Email || "",
             comp_phone: globalVars.Phone || "",
-            RPTNAME: "PURCHASE CONTRACT/ORDER"
+            RPTNAME: RPTNAME
         }
     };
 
@@ -332,11 +364,11 @@ async function getAttachmentDetails() {
     // Existing files
     globalAttachments.forEach(file => {
         attachments.push({
-            FileName: file.fileName,
-            FilePath: file.filePath,
+            FileName: file.FILE_NAME,
+            FilePath: file.FILE_Path,
             FileSize: file.fileSize,
             FileType: file.fileType,
-            FileContentBase64: file.fileContentBase64 || null
+            FileContentBase64: file.IMG_FILE || null
         });
 
     });
@@ -358,7 +390,6 @@ function fileToBase64(file) {
         reader.readAsDataURL(file);
     });
 }
-
 function isDuplicateFile(file) {
 
     const fileName = file.name;
@@ -387,7 +418,6 @@ function isDuplicateFile(file) {
     return false;
 }
 
-
 async function collectGridDetail() {
     const items = [];
     $('#tblItemRecordPO tbody tr').each(function () {
@@ -406,171 +436,6 @@ async function collectGridDetail() {
     });
 
     return items;
-}
-
-async function GetDocData(MasterTblId, readOnly) {
-    try {
-
-        const response = await $.ajax({
-            url: '/PurchaseOrder/GetPurchaseOrderRecordsById',
-            type: 'GET',
-            data: { id: MasterTblId }
-        });
-
-        if (!response || !response.status)
-        {
-            toastr.error('No data returned.');
-            return;
-        }
-        if (readOnly === 'true')
-        {
-            disableAllFields();
-            $('.btn-add-row-last').hide();
-            $('#btn-save, #cancelBtn').hide();
-        }
-        else
-        {
-            enableAllFields();
-            $('#btn-save, #cancelBtn').show();
-            $('.btn-add-row-last').show();
-        }
-
-        Calculation = false;
-        SelectShipParty = false;
-        SelectParty = false;
-        selectItemOption = false;
-
-        await fillPurchaseOrderData(response.header, response.detail);
-
-        Calculation = true;
-        SelectShipParty = true;
-        SelectParty = true;
-        selectItemOption = true;
-
-
-
-        globalAttachments = response.attachment;
-
-
-        $('#fileList').empty();
-        const attachments = Array.isArray(response.attachment) ? response.attachment : [];
-
-        if (attachments.length === 0) {
-            $('#fileList').html(`  <div class="text-muted text-center"> No attachments found.  </div> `);
-            return;
-        }
-
-        attachments.forEach((att, idx) => {
-            const fileName = att.FILE_NAME || att.FileName || `File_${idx + 1}`;
-
-            let fileUrl = "";
-            let blobUrl = "";
-
-            if (att.IMG_FILE) {
-                let base64 = att.IMG_FILE.replace(/\s/g, "");
-
-                let ext = fileName.split('.').pop().toLowerCase();
-
-                let mimeType = "application/octet-stream";
-
-                if (["jpg", "jpeg"].includes(ext))
-                {
-                    mimeType = "image/jpeg";
-                }
-                else if (ext === "png")
-                {
-                    mimeType = "image/png";
-                }
-                else if (ext === "gif")
-                {
-                    mimeType = "image/gif";
-                }
-                else if (ext === "webp")
-                {
-                    mimeType = "image/webp";
-                }
-                else if (ext === "pdf")
-                {
-                    mimeType = "application/pdf";
-                }
-
-                fileUrl = `data:${mimeType};base64,${base64}`;
-
-                // Convert Base64 to Blob URL for View
-                const byteCharacters = atob(base64);
-                const byteNumbers = new Array(byteCharacters.length);
-
-                for (let i = 0; i < byteCharacters.length; i++)
-                {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-
-                const byteArray = new Uint8Array(byteNumbers);
-
-                const blob = new Blob(
-                    [byteArray],
-                    { type: mimeType }
-                );
-
-                blobUrl = URL.createObjectURL(blob);
-            }
-
-            let previewHtml = "";
-
-            if (fileName.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/i))
-            {
-                previewHtml = `<img src="${fileUrl}"
-                style="
-                width:60px;
-                height:60px;
-                object-fit:cover;
-                border:1px solid #ccc;"> `;
-
-            }
-            else if (fileName.match(/\.pdf$/i))
-            {
-              previewHtml = `<span style="font-size:30px;color:red;"> 📕 </span> `;
-            }
-            else
-            {
-              previewHtml = `<span style="font-size:30px;"> 📄 </span> `;
-            }
-
-            $("#fileList").append(`<div class="file-item erp-file-row"
-             data-index="${idx}"
-             style="
-             display:flex;
-             align-items:center;
-             gap:15px;
-             border:1px solid #ddd;
-             padding:10px;
-             margin-bottom:5px;">
-
-
-            <!-- Preview -->
-            <div class="file-preview"> ${previewHtml}  </div>
-
-            <!-- File Name -->
-            <div class="file-info" style="flex:1">  ${fileName} </div>
-            <!-- Buttons -->
-            <div class="file-actions">
-            <!-- View -->
-            <a href="${blobUrl}" target="_blank" class="btn btn-sm btn-primary">  View </a>
-
-            <!-- Delete -->
-            <button type="button" class="btn btn-sm btn-danger erp-delete-db-btn" data-index="${idx}"> Delete </button>
-            </div>
-
-         </div>
-
-    `);
-
-        });
-    }
-    catch (error) {
-        console.error(error);
-        toastr.error('Failed to load data.');
-    }
 }
 
 async function fillPurchaseOrderData(headerData, detailData) {
@@ -710,56 +575,60 @@ async function fillPurchaseOrderData(headerData, detailData) {
         $(`#TxtAppno${idx}`).val(item.APPROVAL_NO ?? '');
     }
 }
-function addItemRecordRow() {
+function addItemRecordRow()
+{
     let tbody = $('#tblItemRecordPO tbody');
     let rowCount = tbody.find('tr').length + 1;
 
     let newRow = `
-        <tr class="no-border-input" id="row${rowCount}"> <td class="d-None"><input class="form-control" id="TxtCode${rowCount}" /></td>         
+        <tr class="no-border-input" id="row${rowCount}"> <td class="d-None"><input class="form-control" id="TxtCode${rowCount}" /></td>   
+        
         <td class="freeze-item">
-
-        <select style="min-width:500px;" class="form-control" id="ddlItemname${rowCount}">
-         <option value="">-Select Item Name-</option> ${itemNameOptions}
-        </select>
-
+            <select style="min-width:500px;" class="form-control" id="ddlItemname${rowCount}">
+                 <option value="">-Select Item Name-</option> ${itemNameOptions}
+            </select>
         </td>
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlImake${rowCount}">
-                    <option value="">-select Make-</option> ${MakeNameOptions}
-                </select>
-            </td>
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlUnit${rowCount}" >
-                    <option value="">-select Unit-</option> ${UnitOptions}
-                </select>
-            </td>
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlIplaceofUse${rowCount}">
-                    <option value="">-select Place of Use-</option>${PlaceOptions}
-                </select>
-            </td>
 
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="ddlDepartment${rowCount}">
-                    <option value="">-select department-</option>${DepartmentOptions}
-                </select>
-            </td>
+
+        <td>
+            <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlImake${rowCount}">
+                <option value="">-select Make-</option> ${MakeNameOptions}
+            </select>
+        </td>
+
+        <td>
+            <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlUnit${rowCount}" >
+                <option value="">-select Unit-</option> ${UnitOptions}
+            </select>
+        </td>
+
+        <td>
+            <select style="min-width: 100px; max-width: 200px;" class="form-control" id="ddlIplaceofUse${rowCount}">
+                <option value="">-select Place of Use-</option>${PlaceOptions}
+            </select>
+        </td>
+
+        <td>
+            <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="ddlDepartment${rowCount}">
+                <option value="">-select department-</option>${DepartmentOptions}
+            </select>
+        </td>
 
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtNos${rowCount}"     maxlength="15"  /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtQty${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtRate${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtExrate${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" readonly id="TxtAmount${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" readonly id="TxtAmount${rowCount}" readonly /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtPackPercent${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtPack${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtPack${rowCount}" readonly /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtDiscPercent${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtDisc${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtDisc${rowCount}"  readonly/></td>
 
-            <td>
-                <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="ddlTax${rowCount}">
-                    <option value="">-select Tax Type-</option>${TaxTypeOptions}
-                </select>
-            </td>
+        <td>
+            <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="ddlTax${rowCount}">
+                <option value="">-select Tax Type-</option>${TaxTypeOptions}
+            </select>
+        </td>
 
              <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtCgstPercent${rowCount}" readonly/></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtCgst${rowCount}" readonly /></td>
@@ -767,17 +636,17 @@ function addItemRecordRow() {
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtSgst${rowCount}" readonly /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtIgstPercent${rowCount}" readonly/></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtIgst${rowCount}" readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  id="TxtVatPercent${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  id="TxtVatPercent${rowCount}"  /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtVat${rowCount}" readonly /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  oninput="allowOnlyNumbers(this)" id="TxtCessPercent${rowCount}" /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtCess${rowCount}"  /></td>
-            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsPer${rowCount}" readonly/></td>
-            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsAmt${rowCount}" readonly/></td>
-            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer${rowCount}" readonly/></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtCess${rowCount}" readonly /></td>
+            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsPer${rowCount}" /></td>
+            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtTcsAmt${rowCount}" /></td>
+            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthAmt${rowCount}" readonly/></td>
-            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer2${rowCount}" readonly/></td>
-            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthAmt2${rowCount}" readonly/></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  id="TxtNetAmt${rowCount}" readonly /></td>
+            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthPer2${rowCount}" /></td>
+            <td class="d-none"><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtOthAmt2${rowCount}" /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"  id="TxtNetAmt${rowCount}"  /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control"   id="TxtLdRate${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtRemarks${rowCount}" /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" oninput="allowOnlyNumbers(this)" id="TxtAppLevel${rowCount}" /></td>
@@ -785,17 +654,17 @@ function addItemRecordRow() {
 
             <td>
                 <select style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtStatus${rowCount}">
-                 <option value="">-select Staus-</option>${statuslist}
+                  <option value="">-select Staus-</option>${statuslist}
                 </select>
             </td>
 
          
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqtype${rowCount}" readonly  /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqno${rowCount}" readonly  /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtApptype${rowCount}"  /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAppno${rowCount}"  /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqtype${rowCount}"  readonly  /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtReqno${rowCount}"  readonly  /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtApptype${rowCount}" readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAppno${rowCount}" readonly  /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSaudatype${rowCount}"  readonly /></td>
-            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSaudano${rowCount}"  readonly /></td>
+            <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtSaudano${rowCount}"  readonly  /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtMthRate${rowCount}"  /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtQtrRate${rowCount}"  /></td>
             <td><input style="min-width: 100px; max-width: 200px;" class="erppagetable-control" id="TxtAnlRate${rowCount}"  /></td>
@@ -862,194 +731,44 @@ function handleBack(redirectUrl, isReadOnly = false) {
         }
     });
 }
-
 function renderFileList() {
-
     const attachBody = $("#fileList");
-/*    attachBody.empty();*/
-
-
-    // ===== EXISTING DATABASE ATTACHMENTS =====
-    //if (globalAttachments && globalAttachments.length > 0) {
-
-    //    globalAttachments.forEach((att, index) => {
-
-    //        const fileName =  att.FILE_NAME ?? att.FileName ?? att.fileName ??  "File";
-
-    //        let fileUrl = "";
-
-    //        if (att.IMG_FILE) {
-
-    //            const extension = fileName.split('.').pop().toLowerCase();
-
-    //            let mimeType = "application/octet-stream";
-
-    //            if (["jpg", "jpeg"].includes(extension))
-    //                mimeType = "image/jpeg";
-
-    //            else if (extension === "png")
-    //                mimeType = "image/png";
-
-    //            else if (extension === "gif")
-    //                mimeType = "image/gif";
-
-    //            else if (extension === "webp")
-    //                mimeType = "image/webp";
-
-    //            else if (extension === "pdf")
-    //                mimeType = "application/pdf";
-
-
-    //            fileUrl = `data:${mimeType};base64,${att.IMG_FILE}`;
-    //        }
-
-
-    //        const extension = fileName.split('.').pop().toLowerCase();
-
-    //        let previewHtml = "";
-
-
-    //        if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension)) {
-
-    //            previewHtml =
-    //                `<img src="${fileUrl}" class="erp-file-thumb">`;
-
-    //        }
-    //        else if (extension === "pdf") {
-
-    //            previewHtml =
-    //                `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
-
-    //        }
-    //        else {
-
-    //            previewHtml =
-    //                `<i class="fa fa-file-o erp-file-icon"></i>`;
-    //        }
-
-    //        attachBody.append(`
-
-    //            <div class="file-item erp-file-row">
-
-    //                <div class="erp-file-preview">
-    //                    ${previewHtml}
-    //                </div>
-
-
-    //                <div class="erp-file-info">
-    //                    <div class="erp-file-name">
-    //                        ${fileName}
-    //                    </div>
-    //                </div>
-
-
-    //                <div class="erp-file-actions">
-
-    //                    <a href="${fileUrl}"
-    //                       target="_blank"
-    //                       class="erp-view-btn">
-    //                        View
-    //                    </a>
-
-
-    //                    <button type="button"
-    //                            class="erp-delete-db-btn"
-    //                            data-index="${index}">
-    //                        Delete
-    //                    </button>
-
-    //                </div>
-
-    //            </div>
-
-    //        `);
-
-    //    });
-    //}
-
-
-
-    // ===== NEW SELECTED FILES =====
-
     selectedFiles.forEach((file, index) => {
-
         const extension = file.name.split('.').pop().toLowerCase();
-
         const fileUrl = URL.createObjectURL(file);
-
-
         let previewHtml = "";
 
-
-        if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension)) {
-
-            previewHtml =
-                `<img src="${fileUrl}" class="erp-file-thumb">`;
-
+        if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(extension))
+        {
+         previewHtml = `<img src="${fileUrl}" class="erp-file-thumb">`;
         }
-        else if (extension === "pdf") {
-
-            previewHtml =
-                `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
-
+        else if (extension === "pdf")
+        {
+         previewHtml = `<i class="fa fa-file-pdf-o erp-file-icon text-danger"></i>`;
         }
-        else {
-
-            previewHtml =
-                `<i class="fa fa-file-o erp-file-icon"></i>`;
+        else
+        {
+         previewHtml = `<i class="fa fa-file-o erp-file-icon"></i>`;
         }
-
-
 
         attachBody.append(`
 
             <div class="file-item erp-file-row">
-
-                <div class="erp-file-preview">
-                    ${previewHtml}
-                </div>
-
-
-                <div class="erp-file-info">
-                    <div class="erp-file-name">
-                        ${file.name}
-                    </div>
-                </div>
-
-
+                <div class="erp-file-preview">  ${previewHtml} </div>
+                <div class="erp-file-info"> <div class="erp-file-name"> ${file.name} </div> </div>
                 <div class="erp-file-actions">
-
-                    <a href="${fileUrl}"
-                       target="_blank"
-                       class="erp-view-btn">
-                        View
-                    </a>
-
-
-                    <button type="button"
-                            class="erp-delete-file-btn"
-                            data-index="${index}">
-                        Delete
-                    </button>
-
+                    <a href="${fileUrl}" target="_blank"  class="erp-view-btn">  View  </a>
+                    <button type="button" class="erp-delete-file-btn" data-index="${index}"> Delete </button>
                 </div>
-
             </div>
 
         `);
 
     });
 
-
-
-    if (globalAttachments.length === 0 && selectedFiles.length === 0) {
-
-        attachBody.html(`
-            <div class="erp-empty-state text-center text-muted">
-                No attachments found.
-            </div>
-        `);
-
+    if (selectedFiles.length === 0)
+    {
+        attachBody.html(`  <div class="erp-empty-state text-center text-muted"> No attachments found.  </div> `);
     }
 
 }

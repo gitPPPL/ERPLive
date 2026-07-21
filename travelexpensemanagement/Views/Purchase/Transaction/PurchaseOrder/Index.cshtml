@@ -10,11 +10,10 @@
     var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0; 
     var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
     var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
-
 }
 
-
 <div id="erp-toast-container"></div>
+
 <div class="erppage-header">
     <div class="erppage-header-left">
         <div class="erppage-header-icon">
@@ -25,10 +24,12 @@
 
     <div class="erppage-header-right">
     
-        <button class="erppagelist-btn erppagelist-btn-action" id="btnMail"> <i class="fa fa-envelope"></i> Mail </button>
-        <button type="button" class="erppage-btn erppage-btn-copy" onclick="TransitReport();" >  <i class="fa-solid fa-print"></i> Print </button>
-        <button type="button" id="btn_Sendapproval" style="display:none;" class="erppagebtn_sendapproval"> Send For Approval </button>
-        <button type="button"  id="btn_Approved" style="display:none;" class="erppagebtn_approved"> Approved </button>
+        <button class="erppagelist-btn erppagelist-btn-action" id="button_mail"> <i class="fa fa-envelope"></i> Mail </button>
+        <button type="button" class="erppage-btn erppage-btn-copy" onclick="TransitReport();" id="button_print" >  <i class="fa-solid fa-print"></i> Print </button>
+            <button type="button" id="btn_Sendapproval" style="display:none;" class="erppagebtn_sendapproval"> Send For Approval </button>
+            <button type="button"  id="btn_Approved" style="display:none;" class="erppagebtn_approved">  Approved </button>
+
+
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PurchaseOrderList")', readOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -1207,6 +1208,8 @@
         "NumPincodePD", "TxtCity1PD", "TxtGSTPD", "ddlShipFrom", "ddlAddressbypartySD", "TxtAdd1SD", "TxtAdd2SD",
         "TxtAdd3SD", "NumPincodeSD", "TxtCity1SD", "TxtGSTSD"
     ];
+
+
     let itemRecords = [
         "TxtCode", "ddlItemname", "ddlImake", "ddlUnit", "ddlIplaceofUse", "ddlDepartment",
         "TxtNos", "TxtQty", "TxtRate", "TxtExrate", "TxtAmount", "TxtPackPercent", "TxtPack",
@@ -1221,7 +1224,7 @@
 
     let selectedFiles = [];
     let globalAttachments = [];
-    var globalVars = window.globalVariables || {};
+    let globalVars = window.globalVariables || {};
     let LoginDate = globalVars.LoginDate;
     let isLoading = false;
     let SelectParty = true;
@@ -1237,9 +1240,10 @@
     let statuslist = [];
     let docId = getQueryParam('id');
     let readOnly = getQueryParam('readOnly');
-
+    let controllerName = window.location.pathname.split('/')[1];
 
     $(document).ready(function () {
+       // checkPermissionForEntryPage(controllerName);
         LoadDropdown()
 
         $(async function () 
@@ -1254,12 +1258,7 @@
 
         setEnterKeyFocus(AllFieldsId);         
 
-        $('#ddlDocType').on('change', function () 
-        {
-            const VType = $(this).val();
-            Wb_SaudaDdl_Make_enabledisable(VType);
-            GetDocid(VType);
-        });
+ 
 
         $('#chkDeliveryDate').on('change', function () 
         {
@@ -1285,34 +1284,9 @@
         });
             
 
-        $('#selectAllQM').on('change', function () 
-        {
-            const isChecked = $(this).is(':checked');
-            $('#tblQuotationModal tbody .chkQuot').prop('checked', isChecked);
-        });         
+
                 
-        $(document).on('change', '#ddWBNo', async function () 
-        {
-            var docid = $('#ddWBNo').find('option:selected').val();
-            var partyCode = $('#ddlPartyName').val();
-            let data = await GetWeighBridgeDetail(docid, partyCode);
-
-            const $tbody = $('#tblItemRecordPO tbody');
-            $tbody.empty();
-            console.log(data);
-
-            for (let index = 0; index < data.length; index++) {
-                const item = data[index];
-                const idx = index + 1;
-
-                addItemRecordRow();
-
-                $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
-                $(`#ddlImake${idx}`).val(item.MakeCode).trigger('change');
-                $(`#TxtQty${idx}`).val(item.Qty);
-                $(`#ddlUnit${idx}`).val(item.UNIT_CODE).trigger('change');
-            }
-        });
+    
 
     });
 

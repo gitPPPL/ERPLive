@@ -608,3 +608,156 @@ async function DDLCityMast() {
         console.error("Error loading City:", error);
     }
 }
+
+async function GetDocData(MasterTblId, readOnly) {
+    try {
+
+        const response = await $.ajax({
+            url: '/PurchaseOrder/GetPurchaseOrderRecordsById',
+            type: 'GET',
+            data: { id: MasterTblId }
+        });
+
+        if (!response || !response.status) {
+            toastr.error('No data returned.');
+            return;
+        }
+        if (readOnly === 'true') {
+            disableAllFields();
+            $('.btn-add-row-last').hide();
+            $('#btn-save, #cancelBtn').hide();
+        }
+
+        else {
+            enableAllFields();
+            $('#btn-save, #cancelBtn').show();
+            $('.btn-add-row-last').show();
+        }
+
+        Calculation = false;
+        SelectShipParty = false;
+        SelectParty = false;
+        selectItemOption = false;
+
+        await fillPurchaseOrderData(response.header, response.detail);
+
+        Calculation = true;
+        SelectShipParty = true;
+        SelectParty = true;
+        selectItemOption = true;
+
+        globalAttachments = response.attachment;
+
+
+        $('#fileList').empty();
+        const attachments = Array.isArray(response.attachment) ? response.attachment : [];
+
+        if (attachments.length === 0) {
+            $('#fileList').html(`  <div class="text-muted text-center"> No attachments found.  </div> `);
+            return;
+        }
+
+        attachments.forEach((att, idx) => {
+            const fileName = att.FILE_NAME || att.FileName || `File_${idx + 1}`;
+
+            let fileUrl = "";
+            let blobUrl = "";
+
+            if (att.IMG_FILE) {
+                let base64 = att.IMG_FILE.replace(/\s/g, "");
+
+                let ext = fileName.split('.').pop().toLowerCase();
+
+                let mimeType = "application/octet-stream";
+
+                if (["jpg", "jpeg"].includes(ext)) {
+                    mimeType = "image/jpeg";
+                }
+                else if (ext === "png") {
+                    mimeType = "image/png";
+                }
+                else if (ext === "gif") {
+                    mimeType = "image/gif";
+                }
+                else if (ext === "webp") {
+                    mimeType = "image/webp";
+                }
+                else if (ext === "pdf") {
+                    mimeType = "application/pdf";
+                }
+
+                fileUrl = `data:${mimeType};base64,${base64}`;
+
+                // Convert Base64 to Blob URL for View
+                const byteCharacters = atob(base64);
+                const byteNumbers = new Array(byteCharacters.length);
+
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+
+                const byteArray = new Uint8Array(byteNumbers);
+
+                const blob = new Blob(
+                    [byteArray],
+                    { type: mimeType }
+                );
+
+                blobUrl = URL.createObjectURL(blob);
+            }
+
+            let previewHtml = "";
+
+            if (fileName.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/i)) {
+                previewHtml = `<img src="${fileUrl}"
+                style="
+                width:60px;
+                height:60px;
+                object-fit:cover;
+                border:1px solid #ccc;"> `;
+
+            }
+            else if (fileName.match(/\.pdf$/i)) {
+                previewHtml = `<span style="font-size:30px;color:red;"> ?? </span> `;
+            }
+
+            else {
+                previewHtml = `<span style="font-size:30px;"> ?? </span> `;
+            }
+
+            $("#fileList").append(`<div class="file-item erp-file-row"
+             data-index="${idx}"
+             style="
+             display:flex;
+             align-items:center;
+             gap:15px;
+             border:1px solid #ddd;
+             padding:10px;
+             margin-bottom:5px;">
+
+
+            <!-- Preview -->
+            <div class="file-preview"> ${previewHtml}  </div>
+
+            <!-- File Name -->
+            <div class="file-info" style="flex:1">  ${fileName} </div>
+            <!-- Buttons -->
+            <div class="file-actions">
+            <!-- View -->
+            <a href="${blobUrl}" target="_blank" class="btn btn-sm btn-primary">  View </a>
+
+            <!-- Delete -->
+            <button type="button" class="btn btn-sm btn-danger erp-delete-db-btn" data-index="${idx}"> Delete </button>
+            </div>
+
+         </div>
+
+    `);
+
+        });
+    }
+    catch (error) {
+        console.error(error);
+        toastr.error('Failed to load data.');
+    }
+}

@@ -574,11 +574,15 @@ $(document).ready(async function () {
 
     $(document).on('click', '#btn_Sendapproval', function () {
         var FromName = window.location.pathname.split('/')[1];
+        let vNo = $('#TxtDocNo').val();
+        let vtype = $('#ddlDocType').val();
+
+
         $.ajax({
             url: '/Approval/CheckPendingUser',
             type: 'POST',
             data: {
-                vNo: rowId,
+                vNo: vNo,
                 vType: vtype
             },
             success: function (response) {
@@ -593,21 +597,16 @@ $(document).ready(async function () {
                 if (response.approvalCode8 === true) {
                     OpenApprovalModal({
                         DocType: vtype,
-                        DocNo: rowId,
-                        TableName: 'GATE1'
+                        DocNo: vNo,
+                        TableName: 'ORDER1'
                     });
                     return;
                 }
                 // Approval_Code != 8
-                OpenSendForApprovalModal({
-                    DocType: vtype,
-                    DocNo: rowId,
-                    UserCode: null,
-                    UserName: null,
-                    DocDate: null,
-                    TableName: 'GATE1', 
-                    FromName, FromName
-                });
+                    OpenSendForApprovalModal({
+                        DocType: vtype, DocNo: vNo, UserCode: null, UserName: null,
+                        DocDate: null, TableName: 'ORDER1', FromName, FromName
+                    });
                
             },
             error: function (xhr, status, error) {
@@ -621,8 +620,8 @@ $(document).ready(async function () {
     $(document).on('click', '#btn_Approved', function () {
         OpenApprovalModal({
             DocType: vtype,
-            DocNo: rowId,
-            TableName: 'GATE1'
+            DocNo: vNo,
+            TableName: 'ORDER1'
         });
     });
 

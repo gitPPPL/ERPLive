@@ -32,15 +32,12 @@ $(document).on('click', '[id^=TxtRate], [id^=TxtQty]', function () {
 
 $('#btn-save').on('click', async function (e) {
     e.preventDefault();
-
     try {
-
-        // Header Validation
         if (!validateRequiredField('#ddlPlace', 'Place')) return;
         if (!validateRequiredField('#ddlPartyName', 'Party Name')) return;
         if (!validateRequiredField('#ddlShipFrom', 'Ship From')) return;
         if (!validateRequiredField('#ddlPriceType', 'Price Type')) return;
-   
+        
         const vType = $('#ddlDocType').val();
         const partyRef = $('#txtPartyRef').val().trim();
         const totalAmount = parseFloat($('#NumAmountIt').val()) || 0;
@@ -54,12 +51,8 @@ $('#btn-save').on('click', async function (e) {
             return;
         }
 
-        // Collect Complete Model
         const model = await getPurchaseOrderModel();
 
-        console.log(model);
-
-        // Detail Validation
         if (!model.ItemRecords || model.ItemRecords.length === 0) {
             toastr.warning("Please enter at least one item.");
             return;
@@ -227,13 +220,10 @@ $(document).on('click', '#BtnCalculation', async function (event) {
     }
 });
 
-
 $(document).on('click', '#btnPurchaseRequestCopy', async function () {
     const selectedItems = getPurchaseData();
     fillItemDetailsTable(selectedItems);
 });
-
-
 
 //Attachment
 
@@ -294,3 +284,94 @@ dropZone.addEventListener("drop", function (e) {
 
     renderFileList();
 });
+
+// approval Code
+
+$(document).on('click', '#btn_Sendapproval', function () {
+    var FromName = window.location.pathname.split('/')[1];
+    $.ajax({
+        url: '/Approval/CheckPendingUser',
+        type: 'POST',
+        data: {
+            vNo: rowId,
+            vType: vtype
+        },
+        success: function (response) {
+            console.log('Response:', response);
+            // Pending with another user
+            if (response.success === false) {
+                showToast(`Pending With Another User (${response.userCode})`,
+                    { type: "warning" });
+                return;
+            }
+            // Approval_Code = 5
+            if (response.approvalCode8 === true) {
+                OpenApprovalModal({
+                    DocType: vtype,
+                    DocNo: rowId,
+                    TableName: 'GATE1'
+                });
+                return;
+            }
+            // Approval_Code != 8
+            OpenSendForApprovalModal({
+                DocType: vtype,
+                DocNo: rowId,
+                UserCode: null,
+                UserName: null,
+                DocDate: null,
+                TableName: 'GATE1',
+                FromName, FromName
+            });
+
+        },
+        error: function (xhr, status, error) {
+            console.log(error);
+            alert('Error while checking approval status.');
+        }
+    });
+
+});
+
+$(document).on('click', '#btn_Approved', function () {
+    OpenApprovalModal({
+        DocType: vtype,
+        DocNo: rowId,
+        TableName: 'GATE1'
+    });
+});
+
+
+
+$(document).on('change', '#ddWBNo', async function () {
+    var docid = $('#ddWBNo').find('option:selected').val();
+    var partyCode = $('#ddlPartyName').val();
+    let data = await GetWeighBridgeDetail(docid, partyCode);
+
+    const $tbody = $('#tblItemRecordPO tbody');
+    $tbody.empty();
+    console.log(data);
+
+    for (let index = 0; index < data.length; index++) {
+        const item = data[index];
+        const idx = index + 1;
+
+        addItemRecordRow();
+
+        $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
+        $(`#ddlImake${idx}`).val(item.MakeCode).trigger('change');
+        $(`#TxtQty${idx}`).val(item.Qty);
+        $(`#ddlUnit${idx}`).val(item.UNIT_CODE).trigger('change');
+    }
+});
+
+$('#ddlDocType').on('change', function () {
+    const VType = $(this).val();
+    Wb_SaudaDdl_Make_enabledisable(VType);
+    GetDocid(VType);
+});
+
+$('#selectAllQM').on('change', function () {
+    const isChecked = $(this).is(':checked');
+    $('#tblQuotationModal tbody .chkQuot').prop('checked', isChecked);
+});         

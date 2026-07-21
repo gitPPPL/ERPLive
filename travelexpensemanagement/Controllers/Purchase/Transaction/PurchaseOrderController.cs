@@ -291,11 +291,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             using (SqlConnection con = _dbcontext.GetErpConnection())
             {
                 string sql = @" ;WITH tmpwb AS ( SELECT  V_TYPE , V_NO   FROM WB1 WHERE V_TYPE = 'KANT' AND WB_TYPE = 'Raw Material'
-                                AND PARTY_CODE = " + partyCd + @" AND COMP_CODE = " + getdata.PubCompCode + @" AND BRANCH_CODE = " + getdata.PubBranchCode + @"
+                                AND PARTY_CODE = 21497 AND COMP_CODE = " + getdata.PubCompCode + @" AND BRANCH_CODE = " + getdata.PubBranchCode + @"
                               
                                  UNION ALL
 
-                                SELECT V_TYPE , V_NO  FROM WB1 WHERE V_TYPE = 'KSIN' AND PARTY_CODE = " + partyCd + @"  AND COMP_CODE = " + getdata.PubCompCode + @"
+                                SELECT V_TYPE , V_NO  FROM WB1 WHERE V_TYPE = 'KSIN' AND PARTY_CODE = 21497  AND COMP_CODE = " + getdata.PubCompCode + @"
                                 AND BRANCH_CODE = " + getdata.PubBranchCode + @"  )
                                 SELECT V_TYPE, V_NO FROM tmpwb WHERE V_NO IS NOT NULL  ORDER BY V_NO;";
 
@@ -646,7 +646,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     {
                         cmd3.Parameters.AddWithValue("@Action", "Add");
                     }
-
                     else
                     {
                         cmd3.Parameters.AddWithValue("@Action", "Edit");
@@ -660,11 +659,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd3.Parameters.AddWithValue("@V_NO", POmodel.VNo);
                     cmd3.Parameters.AddWithValue("@DOC_ID", (POmodel.VType) + POmodel.VNo);
                     cmd3.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value = POmodel.VDate == null ? DBNull.Value : Convert.ToDateTime(POmodel.VDate);        
-                    cmd3.Parameters.AddWithValue("@TPLACE_CODE", POmodel.PlaceCode);
+                    cmd3.Parameters.AddWithValue("@TPLACE_CODE", Details.PlaceCode);
                     cmd3.Parameters.AddWithValue("@ITEM_NAME", Details.ItemName);
                     cmd3.Parameters.AddWithValue("@ITEM_CODE", Details.ItemCode);
                     cmd3.Parameters.AddWithValue("@MAKE_CODE", Details.MakeCode);
-                    cmd3.Parameters.AddWithValue("@NOS", Details.NOS);
+                    cmd3.Parameters.AddWithValue("@TNOS", Details.NOS);
                     cmd3.Parameters.AddWithValue("@TQTY", Details.Qty);
                     cmd3.Parameters.AddWithValue("@ADJ_QTY", Details.AdjQty);
                     cmd3.Parameters.AddWithValue("@GATE_QTY", Details.GateQty);
@@ -720,6 +719,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     cmd3.Parameters.AddWithValue("@TFAPROV_REMARKS", Details.FAProvRemarks);
                     cmd3.Parameters.AddWithValue("@COLOR_CODE", Details.ColorCode);
                     cmd3.Parameters.AddWithValue("@GRAM_CODE", Details.GramCode);
+                    cmd3.Parameters.AddWithValue("@RATE_MONTHLY", Details.RateMonthly);
                     cmd3.Parameters.AddWithValue("@UUSER", usersessionDt.PubUserId);
                     cmd3.Parameters.AddWithValue("@UDATE", DateTime.Now);
                     cmd3.Parameters.AddWithValue("@EUSER", usersessionDt.PubUserId);
@@ -747,8 +747,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     {
                         cmd3.Parameters.AddWithValue("@Action", "Edit");
                     }
-                    cmd3.Parameters.AddWithValue("@subAction", "Attachment");
 
+                    cmd3.Parameters.AddWithValue("@subAction", "Attachment");
                     cmd3.Parameters.AddWithValue("@YEAR_CODE", usersessionDt.PubFYearCode ?? (object)DBNull.Value);
                     cmd3.Parameters.AddWithValue("@COMP_CODE", usersessionDt.PubCompCode ?? (object)DBNull.Value);
                     cmd3.Parameters.AddWithValue("@BRANCH_CODE", usersessionDt.PubBranchCode);
@@ -783,7 +783,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return "Success";
             }
 
-
             catch (Exception ex)
             {
                 return $"Error: {ex.Message}";
@@ -801,7 +800,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             if (saudaNo > 0)
             {
                 string query = $@" SELECT TOP 1 ITEM_CODE, RATE, V_DATE FROM SAUDA WHERE V_TYPE = '{SaudaType}'  AND V_NO = {saudaNo} AND COMP_CODE = {userdata.PubCompCode} AND BRANCH_CODE = 1";
-
                 var dt = LoadDataInDataTable(query);
                 if (dt.Rows.Count > 0)
                 {
@@ -1862,6 +1860,79 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 }
      
                 return Json(new { Partydetails = Partydetails });
+            }
+        }
+
+
+
+
+
+
+        public JsonResult PrintValidation(string V_TYPE, int V_NO)
+        {
+            var getdata = _globalValue.GetGlobalVariables();
+
+            using (SqlConnection con = _dbcontext.GetErpConnection())
+            {
+                con.Open();
+
+                string query = @"  SELECT FAPROV_STATUS FROM ORDER1 WHERE V_TYPE = @V_TYPE AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @Branch_Code
+                AND YEAR_CODE = @Year_Code";
+
+                string faProvStatus = string.Empty;
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@V_TYPE", V_TYPE);
+                    cmd.Parameters.AddWithValue("@V_NO", V_NO);
+                    cmd.Parameters.AddWithValue("@Branch_Code", getdata.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@Year_Code", getdata.PubFYearCode);
+
+                    object result = cmd.ExecuteScalar();
+
+                    if (result != null && result != DBNull.Value)
+                    {
+                        faProvStatus = result.ToString();   
+                    }
+                }
+
+                string query2 = @"  Select PRINTNAME from DOCTYPE_MAST where CODE=@V_TYPE ";
+
+                string Reportname = string.Empty;
+
+                using (SqlCommand cmd1 = new SqlCommand(query2, con))
+                {
+                    cmd1.Parameters.AddWithValue("@V_TYPE", V_TYPE);      
+                    object result = cmd1.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        Reportname = result.ToString();
+                    }
+                }
+
+
+                string signatoryList = string.Empty;
+
+                using (SqlCommand cmd = new SqlCommand("sp_PurchaseOrder", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.Add("@Action", SqlDbType.VarChar, 50).Value = "GetApprovalName";
+                    cmd.Parameters.Add("@DOC_ID", SqlDbType.VarChar, 50).Value = V_TYPE + V_NO;
+                    cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = getdata.PubCompCode;
+                    cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = getdata.PubBranchCode;
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            signatoryList = dr["SignatoryList"].ToString();
+                        }
+                    }
+                }
+
+                return Json(new { status = true,  FAPROV_STATUS = faProvStatus, Reportname = Reportname , signatoryList = signatoryList , message = "Print validation successful." });
             }
         }
 
