@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using System.Data;
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Mail;
 using System.Text.Json;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models;
@@ -1182,6 +1184,98 @@ namespace travelexpensemanagement.Common.Globalvariable
 
             return stream.ToArray();
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> GlobalSendMail(string vtype, int vno, string toEmail, string body, IFormFile file, string ccEmail = "")
+        {
+            try
+            {
+                string host = "";
+                string user = "";
+                string pass = "";
+                int port = 0;
+                bool ssl = true;
+
+                var globalVaraible = _globalVariableService.GetGlobalVariables();
+
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    await con.OpenAsync();
+
+                    string query = @"SELECT smtp_server, user_id, password, smtp_port, smtp_ussl  FROM email_setting1
+                        WHERE comp_code = @comp AND V_TYPE = @vtype";
+
+                    using SqlCommand cmd = new SqlCommand(query, con);
+                    cmd.Parameters.AddWithValue("@comp", globalVaraible.PubCompCode);
+                    cmd.Parameters.AddWithValue("@vtype", vtype);
+
+                    using SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                    if (!reader.Read())
+                        return new JsonResult(new { success = false, message = "Email settings not found" });
+
+                    host = reader["smtp_server"].ToString();
+                    user = reader["user_id"].ToString();
+                    pass = "Apple@213";
+                    port = Convert.ToInt32(reader["smtp_port"]);
+                    ssl = Convert.ToBoolean(reader["smtp_ussl"]);
+                }
+
+                using SmtpClient smtp = new SmtpClient(host)
+                {
+                    Port = port,
+                    Credentials = new NetworkCredential(user, pass),
+                    EnableSsl = ssl
+                };
+
+                using MailMessage mail = new MailMessage
+                {
+                    From = new MailAddress(user),
+                    Subject = vtype switch
+                    {
+                        "PAUD" => "Purchase Contract/Order",
+                        "PORD" => $"Purchase Order No : {vno}",
+                        "SAGT" or "SASI" => $"Invoice No : {vno}",
+                        "BPMS" => "Confirmation of Balance",
+                        "TASK" => "New Task Received",
+                        "CLMT" => "Credit Limit Updation",
+                        _ => $"Document No : {vno}"
+                    },
+                    Body = body,
+                    IsBodyHtml = true
+                };
+
+                mail.To.Add(toEmail);
+
+                if (!string.IsNullOrWhiteSpace(ccEmail))
+                    mail.CC.Add(ccEmail);
+
+                // 🔥 STEP 1: ADD ATTACHMENT (IMPORTANT PART)
+                if (file != null && file.Length > 0)
+                {
+                    using var ms = new MemoryStream();
+                    await file.CopyToAsync(ms);
+                    var fileBytes = ms.ToArray();
+                    mail.Attachments.Add(new Attachment(new MemoryStream(fileBytes), file.FileName, "application/pdf")
+                    );
+                }
+
+                await smtp.SendMailAsync(mail);
+
+                return new JsonResult(new { success = true, message = "Mail sent successfully" });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, message = ex.Message });
+            }
+        }
+
+
+
+
+
+
     }
 }
 

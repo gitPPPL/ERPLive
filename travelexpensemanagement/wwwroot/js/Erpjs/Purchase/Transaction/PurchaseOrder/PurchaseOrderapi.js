@@ -9,6 +9,11 @@ async function handleDocLoad()
         $('#ddlStatus').prop('disabled', false);
         var VTpeU = docId.substring(0, 4);
         var VNoU = docId.substring(4);
+
+
+        checkApprovalStatus(VTpeU, VNoU, 'ORDER1');
+
+
         $('#txtDocNo').val(VNoU);
         Wb_SaudaDdl_Make_enabledisable(VTpeU);
     } else
@@ -27,11 +32,6 @@ async function handleDocLoad()
     }
 }
 
-
-
-
-
-
 async function TransitReport() {
 
     if (!docId) {
@@ -41,7 +41,7 @@ async function TransitReport() {
 
     let reportName = "";
     let RPTNAME = "";
-
+    let pubFinalApprovedBy = "";
     if (globalVars.CompCode == 7) {
         reportName = "pr_porderK_gst";
     }
@@ -58,17 +58,19 @@ async function TransitReport() {
         data: { V_TYPE: v_type, V_NO: v_no }
     });     
 
-
     if (!response.faproV_STATUS)
     {
         toastr.info("PO Not Approved, PO Report can not generate.");
         return;
     }
 
-
     if (response.reportname)
     {
         RPTNAME = response.reportname;
+    }
+
+    if (response.signatoryList) {
+        pubFinalApprovedBy = response.signatoryList;
     }
 
     var formula =
@@ -82,18 +84,18 @@ async function TransitReport() {
     var payload = {
         Reportname: reportName,
         selectionFormula: formula,
-        Database: database,
+        Database: database,          
 
         Parameters: {
-            approvedBy: globalVars.CompanyName || "",
+            approvedBy: pubFinalApprovedBy || "",
             comp_name: globalVars.CompanyName || "",
             comp_add1: globalVars.Address1 || "",
             comp_add2: globalVars.Address2 || "",
-            COMP_GST: globalVars.GST || "",
-            COMP_PAN: globalVars.PAN || "",
-            COMP_CIN: globalVars.COMP_CIN || "",
-            COMP_EMAIL: globalVars.Email || "",
-            comp_phone: globalVars.Phone || "",
+            comp_phone: "Phone :" + (globalVars.Phone || ""),
+            GST: "GSTIN :" + (globalVars.GST || ""),
+            Website: "Website :" + (globalVars.pubCompWebsite || ""),
+            PAN: "PAN :" + (globalVars.PAN || ""),
+            EMAIL: "Email :" + (globalVars.Email || ""),
             RPTNAME: RPTNAME
         }
     };
@@ -518,7 +520,7 @@ async function fillPurchaseOrderData(headerData, detailData) {
         const item = detailData[index];
         const idx = index + 1;
 
-        await loadItemNameDropdown();
+       // await loadItemNameDropdown();
         await loadMakeDropdown(idx, item.ITEM_CODE);
 
         // Dropdowns
@@ -1180,6 +1182,64 @@ async function fetchDatabyTaxType(TaxCode) {
         return null;
     }
 }
+
+
+async function fillItemDetailsTable(data) {
+    const $tbody = $('#tblItemRecordPO tbody');
+    $tbody.empty();
+    console.log("Load data", data);
+    for (let index = 0; index < data.length; index++) {
+        const item = data[index];
+        const idx = index + 1;
+        addItemRecordRow();
+
+        isLoading = true;
+
+        $(`#ddlItemname${idx}`).val(item.ITEM_CODE).trigger('change');
+        $(`#ddlImake${idx}`).val(item.MAKE_CODE || '');
+        $(`#ddlUnit${idx}`).val(item.UOM_CODE || '');
+        $(`#ddlTax${idx}`).val(item.taxCode || '').trigger('change');
+        $(`#ddlDepartment${idx}`).val(item.DEPT_CODE || '');
+        $(`#ddlIplaceofUse${idx}`).val(item.PLACE_CODE || '');
+        $(`#TxtNos${idx}`).val(item.NOS || '');
+        $(`#TxtQty${idx}`).val(item.QTY || '');
+        $(`#txtAdjQtySauda${idx}`).val(item.ADJ_QTY_SAUDA || '');
+        $(`#TxtRate${idx}`).val(item.RATE || '');
+        $(`#TxtExrate${idx}`).val(item.EXRATE || '');
+        $(`#TxtCalcRate${idx}`).val(item.CALC_RATE || '');
+        $(`#TxtAmount${idx}`).val(item.AMOUNT || '');
+        $(`#TxtPackPercent${idx}`).val(item.PACK_PER || '');
+        $(`#TxtPack${idx}`).val(item.PACK_AMT || '');
+        $(`#TxtDiscPercent${idx}`).val(item.DISC_PER || '');
+        $(`#TxtDisc${idx}`).val(item.DISC_AMT || '');
+        $(`#TxtCgstPercent${idx}`).val(item.CGST_PER || '');
+        $(`#TxtCgst${idx}`).val(item.CGST_AMT || '');
+        $(`#TxtSgstPercent${idx}`).val(item.SGST_PER || '');
+        $(`#TxtSgst${idx}`).val(item.SGST_AMT || '');
+        $(`#TxtIgstPercent${idx}`).val(item.IGST_PER || '');
+        $(`#TxtIgst${idx}`).val(item.IGST_AMT || '');
+        $(`#TxtVatPercent${idx}`).val(item.VAT_PER || '');
+        $(`#TxtVat${idx}`).val(item.VAT_AMT || '');
+        $(`#TxtCessPercent${idx}`).val(item.CESS_PER || '');
+        $(`#TxtCess${idx}`).val(item.CESS_AMT || '');
+        $(`#TxtTcsPer${idx}`).val(item.TCS_PER || '');
+        $(`#TxtTcsAmt${idx}`).val(item.TCS_AMT || '');
+        $(`#TxtOthPer${idx}`).val(item.OTH_PER || '');
+        $(`#TxtOthAmt${idx}`).val(item.OTH_AMT || '');
+        $(`#TxtOthPer2${idx}`).val(item.OTH_PER2 || '');
+        $(`#TxtOthAmt2${idx}`).val(item.OTH_AMT2 || '');
+        $(`#TxtNetAmt${idx}`).val(item.NET_AMT || '');
+        $(`#TxtLdRate${idx}`).val(item.LD_RATE || '');
+        $(`#TxtRemarks${idx}`).val(item.REMARKS || '');
+        $(`#TxtAppLevel${idx}`).val(item.APP_LEVEL || '');
+        $(`#TxtAppRemarks${idx}`).val(item.APP_REMARKS || '');
+        $(`#TxtMthRate${idx}`).val(item.MTH_RATE || '');
+        $(`#TxtQtrRate${idx}`).val(item.QTR_RATE || '');
+        $(`#TxtAnlRate${idx}`).val(item.ANL_RATE || '');
+        $(`#TxtSpclRate${idx}`).val(item.SPCL_RATE || '');
+    }
+}
+
 function getPurchaseData() {
     let poData = [];
 
@@ -1200,7 +1260,7 @@ function getPurchaseData() {
                 MAKE_CODE: $(row[15]).text().trim(),
                 APROV_REMARKS: $(row[11]).text().trim(),
                 STATUS: $(row[12]).text().trim(),
-                Department: $(row[13]).text().trim()
+                DEPT_CODE: $(row[15]).text().trim()
                 // Add other fields if needed
             };
 

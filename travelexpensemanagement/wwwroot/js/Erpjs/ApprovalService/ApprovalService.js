@@ -196,29 +196,68 @@ function BindSendToDropdown(docType, docNo) {
     });
 }
 
-function BindApprovalRemarks() {
+//function BindApprovalRemarks() {
 
+//    $.ajax({
+//        url: '/Approval/DDlApprovalRemark',
+//        type: 'GET',
+//        success: function (response) {
+//            var remarks = [];
+//            $.each(response, function (i, item) {
+//                remarks.push(item.text);
+//            });
+//            if ($("#ddlsendRemarks").data("ui-autocomplete")) {
+//                $("#ddlsendRemarks").autocomplete("destroy");
+//            }
+//            $("#ddlsendRemarks").autocomplete({
+//                source: remarks,
+//                minLength: 0
+//            });
+//            $("#ddlsendRemarks").off("focus").on("focus", function () {
+//                $(this).autocomplete("search", "");
+//            });
+//        }
+//    });
+//}
+
+
+function BindApprovalRemarks() {
     $.ajax({
         url: '/Approval/DDlApprovalRemark',
         type: 'GET',
         success: function (response) {
             var remarks = [];
+
             $.each(response, function (i, item) {
                 remarks.push(item.text);
             });
+
+            // Destroy existing autocomplete before recreating
             if ($("#ddlsendRemarks").data("ui-autocomplete")) {
                 $("#ddlsendRemarks").autocomplete("destroy");
             }
-            $("#ddlsendRemarks").autocomplete({
-                source: remarks,
-                minLength: 0
-            });
-            $("#ddlsendRemarks").off("focus").on("focus", function () {
-                $(this).autocomplete("search", "");
-            });
+
+            $("#ddlsendRemarks").autocomplete({ source: remarks, minLength: 0 });
+
+            // Show all remarks when textbox gets focus
+            $("#ddlsendRemarks") .off("focus") .on("focus", function () {
+                    $(this).autocomplete("search", "");
+                });
+        },
+        error: function (xhr, status, error) {
+            console.error("Failed to load approval remarks:", error);
         }
     });
 }
+
+
+
+
+
+
+
+
+
 
 $(document).on('click', '#btn_Sendapp', function () {
     var sendTo = $('#ddlsendto').val();

@@ -5,6 +5,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.Common;
+using System.Net;
 using System.Net.Mail;
 using System.Text.Json;
 using travelexpensemanagement.Common.DbHelper;
@@ -47,20 +48,20 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return View("~/Views/Purchase/Transaction/PurchaseOrder/Index.cshtml");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetDocType()
+        public JsonResult GetDocType()
         {
-            try
+            var getdata = _globalValue.GetGlobalVariables();
+            using (SqlConnection con = _dbcontext.GetErpConnection())
             {
-                var Doctype = await _dbHelper.GetJsonDataAsync("select CODE, NAME from DOCTYPE_MAST where isnull(DOCTYPE, '')='PurchaseOrder' ");
-                return Json(new { status = true, data = Doctype });
+                string query = @"select CODE, NAME from DOCTYPE_MAST where isnull(DOCTYPE, '')='PurchaseOrder'  ";
 
+                var GetDocType = _dropdownService.GetDropdownList(query);
+
+                return Json(GetDocType);
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = "data load failed" });
-            }
+
         }
+
         public async Task<IActionResult> GetMaxVNo(string V_type)
         {
             try
@@ -1501,7 +1502,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(GetPartyAddress);
             }
         }
-
         public JsonResult GetDataByPartyCode(int PartyCode, string v_type , int v_no)
          {
             var getdata = _globalValue.GetGlobalVariables();
@@ -1862,13 +1862,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { Partydetails = Partydetails });
             }
         }
-
-
-
-
-
-
-        public JsonResult PrintValidation(string V_TYPE, int V_NO)
+        public  JsonResult PrintValidation(string V_TYPE, int V_NO)
         {
             var getdata = _globalValue.GetGlobalVariables();
 
@@ -1876,8 +1870,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             {
                 con.Open();
 
-                string query = @"  SELECT FAPROV_STATUS FROM ORDER1 WHERE V_TYPE = @V_TYPE AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @Branch_Code
-                AND YEAR_CODE = @Year_Code";
+                string query = @"SELECT FAPROV_STATUS FROM ORDER1 WHERE V_TYPE = @V_TYPE AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE 
+                AND BRANCH_CODE = @Branch_Code AND YEAR_CODE = @Year_Code";
 
                 string faProvStatus = string.Empty;
 
@@ -1933,6 +1927,62 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 }
 
                 return Json(new { status = true,  FAPROV_STATUS = faProvStatus, Reportname = Reportname , signatoryList = signatoryList , message = "Print validation successful." });
+            }
+        }
+        public JsonResult CheackMail(int v_no, string v_type)
+        {
+            var globalVaraible = _globalValue.GetGlobalVariables();
+
+            string FAPROV_STATUS = GetText("select FAPROV_STATUS from SAUDA where FAPROV_STATUS='Approved' and V_TYPE='PAUD' and V_NO=" + v_no + " and " +
+            "COMP_CODE=" + globalVaraible.PubCompCode + " and BRANCH_CODE=" + globalVaraible.PubBranchCode + " and YEAR_CODE=" + globalVaraible.PubFYearCode + " ");
+
+
+            if (FAPROV_STATUS != "Approved")
+            {
+                return Json(new { status = false, message = "Document not approved, Mail not sent." });
+            }
+            else
+            {
+                return Json(new { status = true });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendMail(int PartyCode, int vno,string v_type, IFormFile file)
+        {
+            try
+            {
+                var globalVaraible = _globalValue.GetGlobalVariables();
+
+                if (file == null)
+                    return Json(new { success = false, message = "Report file missing" });
+
+                using var ms = new MemoryStream();
+                file.CopyTo(ms);
+
+                byte[] pdfBytes = ms.ToArray();
+
+                //string Mail = GetText("Select EMAIL from SUBGROUP_MAST WHERE CODE= " + PartyCode +
+                //                      " AND COMP_CODE= " + globalVaraible.PubCompCode);
+
+                string Mail = "sg256001@gmail.com";
+
+                if (Mail == "")
+                {
+                    return Json(new { success = false, message = "Email address is blank for the selected party." });
+                }
+
+                string compname = GetText("Select COMP_NAME from COMP_MAST WHERE CODE= " + globalVaraible.PubCompCode);
+
+                string mailBody = "Please find attached Purchase Order.<br><br><br>";
+                mailBody += "Kindly send us acceptance mail of Purchase Order within 3 days, otherwise it will deemed to be accepted.";
+                mailBody += "<br><br>Regards,<br>" + compname + "<br>" + globalVaraible.Address1 + "<br>" + globalVaraible.Address2;
+
+                return await _globalValidationdate.GlobalSendMail(v_type, vno, Mail, mailBody, file, "");
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
