@@ -36,8 +36,7 @@
                     .prop('disabled', false);
                 break;
 
-            case "NullData":
-                $('#btn_Sendapproval')
+            case "NullData":  $('#btn_Sendapproval')
                     .show()
                     .prop('disabled', false);
                 break;

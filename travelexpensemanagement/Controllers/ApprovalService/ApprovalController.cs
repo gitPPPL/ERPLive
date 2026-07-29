@@ -48,7 +48,6 @@ namespace travelexpensemanagement.Controllers
                 return Json(DDlSendTo);
             }
         }
-
         public JsonResult DDlApprovalRemark()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -159,11 +158,7 @@ namespace travelexpensemanagement.Controllers
 
                         if (pendingUser != null)
                         {
-                            return Json(new
-                            {
-                                success = false,
-                                userCode = pendingUser.ToString()
-                            });
+                            return Json(new { success = false, userCode = pendingUser.ToString() });
                         }
                     }
                     // 2. Approval_Code = 8 Check
@@ -184,11 +179,7 @@ namespace travelexpensemanagement.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
+                return Json(new {  success = false,  message = ex.Message });
             }
         }
 

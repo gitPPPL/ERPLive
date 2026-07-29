@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Office.Word;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
@@ -1005,11 +1006,11 @@ namespace travelexpensemanagement.Common.Globalvariable
 
                 // ? INSERT QUERY
                 string sql = @"INSERT INTO GATE_FASTAG
-                (YEAR_CODE,COMP_CODE,BRANCH_CODE,V_TYPE,V_NO,ClientId,RcNumber,BankName,TagId,Status,FastagId,
-                LaneDirection,TransactionDateTime,SeqNo,TollPlazaGeoCode,TollPlazaName,VehicleType,UUSER,UDATE,AED,WSID,LIP,LID,TransactionId)
-                VALUES
-                (@YEAR_CODE,@COMP_CODE,@BRANCH_CODE,@V_TYPE,@V_NO,@ClientId,@RcNumber,@BankName,@TagId,@Status,@FastagId,
-                @LaneDirection,@TransactionDateTime,@SeqNo,@TollPlazaGeoCode,@TollPlazaName,@VehicleType,@UUSER,GETDATE(),@AED,@WSID,@LIP,@LID,@TRANSACTIONID)";
+                    (YEAR_CODE,COMP_CODE,BRANCH_CODE,V_TYPE,V_NO,ClientId,RcNumber,BankName,TagId,Status,FastagId,
+                    LaneDirection,TransactionDateTime,SeqNo,TollPlazaGeoCode,TollPlazaName,VehicleType,UUSER,UDATE,AED,WSID,LIP,LID,TransactionId)
+                    VALUES
+                    (@YEAR_CODE,@COMP_CODE,@BRANCH_CODE,@V_TYPE,@V_NO,@ClientId,@RcNumber,@BankName,@TagId,@Status,@FastagId,
+                    @LaneDirection,@TransactionDateTime,@SeqNo,@TollPlazaGeoCode,@TollPlazaName,@VehicleType,@UUSER,GETDATE(),@AED,@WSID,@LIP,@LID,@TRANSACTIONID)";
 
                 // ? PARSE JSON
                 var json = JObject.Parse(responseData);
@@ -1187,7 +1188,7 @@ namespace travelexpensemanagement.Common.Globalvariable
 
 
         [HttpPost]
-        public async Task<IActionResult> GlobalSendMail(string vtype, int vno, string toEmail, string body, IFormFile file, string ccEmail = "")
+        public async Task<IActionResult> GlobalSendMail(string vtype, int vno, string toEmail, string body, IFormFile file,string Tablename = "" , string ccEmail = "")
         {
             try
             {
@@ -1263,6 +1264,24 @@ namespace travelexpensemanagement.Common.Globalvariable
 
                 await smtp.SendMailAsync(mail);
 
+                using (SqlConnection con1 = _dbConnection.GetErpConnection())
+                {
+                    string updateQuery = @" UPDATE " + Tablename + @"  SET MAILSEND = ISNULL(MAILSEND, 0) + 1
+                    WHERE V_TYPE = @vtype AND V_NO = @vno AND COMP_CODE = @comp AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+
+                    using (SqlCommand cmd1 = new SqlCommand(updateQuery, con1))
+                    {
+                        cmd1.Parameters.AddWithValue("@comp", globalVaraible.PubCompCode);
+                        cmd1.Parameters.AddWithValue("@BRANCH_CODE", globalVaraible.PubBranchCode);
+                        cmd1.Parameters.AddWithValue("@YEAR_CODE", globalVaraible.PubFYearCode);
+                        cmd1.Parameters.AddWithValue("@vtype", vtype);
+                        cmd1.Parameters.AddWithValue("@vno", vno);
+           
+                        con1.Open();
+                        int rowsAffected = cmd1.ExecuteNonQuery();                        
+                    }
+                }
+
                 return new JsonResult(new { success = true, message = "Mail sent successfully" });
             }
             catch (Exception ex)
@@ -1270,11 +1289,6 @@ namespace travelexpensemanagement.Common.Globalvariable
                 return new JsonResult(new { success = false, message = ex.Message });
             }
         }
-
-
-
-
-
 
     }
 }

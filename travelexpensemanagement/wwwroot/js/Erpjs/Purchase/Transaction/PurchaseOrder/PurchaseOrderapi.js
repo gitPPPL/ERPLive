@@ -1,4 +1,5 @@
 ﻿
+
 async function handleDocLoad()
 {
     SetFYDate('dtDocDate', LoginDate);
@@ -10,20 +11,19 @@ async function handleDocLoad()
         var VTpeU = docId.substring(0, 4);
         var VNoU = docId.substring(4);
 
-
         checkApprovalStatus(VTpeU, VNoU, 'ORDER1');
-
-
         $('#txtDocNo').val(VNoU);
         Wb_SaudaDdl_Make_enabledisable(VTpeU);
-    } else
+    }
+    else
     {
         $('#SaudaDetail').hide();
         $('#ddlStatus').prop('disabled', true);
         const Vtype = $('#ddlDocType').val();
+
         Wb_SaudaDdl_Make_enabledisable(Vtype);
         GetDocid(Vtype);
-
+        addItemRecordRow();
         const today = new Date();
         const todayDate = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0');
 
@@ -31,6 +31,7 @@ async function handleDocLoad()
         $('#DtValidateDate').val(todayDate);
     }
 }
+
 
 async function TransitReport() {
 
@@ -183,21 +184,44 @@ async function SaveData(model) {
             dataType: 'json'
         });
 
-        if (response.success) {
-            toastr.success( "Data saved successfully.");
+
+        console.log("response", response);
+
+        if (response.status == true) {
+            toastr.success(response.message);
             let rowId = model.VType + model.VNo;
-            //setTimeout(function () {
-            //    window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
-            //}, 3000);
+            setTimeout(function () {
+                window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+            }, 3000);
         }
 
         else
         {
-           toastr.warning("Unable to save data.");
+            toastr.warning(response.message);
         }
 
         return response;
 
+    } catch (err) {
+
+        toastr.error(err.responseJSON?.message || err.responseText || "Error while saving.");
+
+        throw err;
+    }
+} 
+
+async function SaveValidation(model) {
+    try {
+
+        const response = await $.ajax({
+            url: '/PurchaseOrder/SaveValidation',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(model),
+            dataType: 'json'
+        });    
+
+        return response;
     } catch (err) {
 
         toastr.error(err.responseJSON?.message || err.responseText || "Error while saving.");
@@ -1183,7 +1207,6 @@ async function fetchDatabyTaxType(TaxCode) {
     }
 }
 
-
 async function fillItemDetailsTable(data) {
     const $tbody = $('#tblItemRecordPO tbody');
     $tbody.empty();
@@ -1239,7 +1262,6 @@ async function fillItemDetailsTable(data) {
         $(`#TxtSpclRate${idx}`).val(item.SPCL_RATE || '');
     }
 }
-
 function getPurchaseData() {
     let poData = [];
 
@@ -1289,3 +1311,67 @@ function SetFYDate(inputId, loginDate) {
         }
     });
 }
+
+async function GetDatabyItemcode(Itemcode) {
+    try {
+
+        let partycode = $('#ddlPartyName').val();
+        let PartyName = $('#ddlPartyName option:selected').text();
+        let v_type = $('#ddlDocType').val();
+
+        const res = await $.ajax({
+            url: '/PurchaseOrder/GetDataByItemCode',
+            type: 'GET',
+            dataType: 'json',
+            data: { Itemcode: Itemcode, v_type: v_type, partycode: partycode, partyname: PartyName }
+        });
+
+        console.log("selected data by itemcode", res);
+
+        if (res.status == false)
+        {
+           toastr.info(res.message);
+            return null;
+        }
+
+        return res.data;
+    }
+    catch (xhr) {
+        console.error(xhr);
+        toastr.error("Failed to load item data.");
+        return null;
+    }
+}
+
+function FillItemData(rowId, data) {
+
+    // Dropdowns
+    $("#ddlImake" + rowId).val(data.makeCode).trigger("change");
+    $("#ddlUnit" + rowId).val(data.unitCode).trigger("change");
+    $("#ddlTax" + rowId).val(data.taxCode).trigger("change");
+
+    // Textboxes
+    $("#TxtQty" + rowId).val(data.qty);
+    $("#TxtRate" + rowId).val(data.rate);
+    $("#TxtPackPercent" + rowId).val(data.packPer);
+    $("#TxtDiscPercent" + rowId).val(data.discPer);
+
+    $("#TxtCgstPercent" + rowId).val(data.cgstPer);
+    $("#TxtSgstPercent" + rowId).val(data.sgstPer);
+    $("#TxtIgstPercent" + rowId).val(data.igstPer);
+    $("#TxtVatPercent" + rowId).val(data.vatPer);
+    $("#TxtCessPercent" + rowId).val(data.cessPer);
+
+    $("#TxtAppLevel" + rowId).val(data.priorityLevel);
+
+    $("#TxtOthAmt" + rowId).val(data.othExps);
+
+    $("#TxtRemarks" + rowId).val(data.techDesc);
+
+    $("#TxtReqtype" + rowId).val(data.reqType);
+    $("#TxtReqno" + rowId).val(data.reqNo);
+
+    $("#TxtApptype" + rowId).val(data.appType);
+    $("#TxtAppno" + rowId).val(data.appNo);
+}
+

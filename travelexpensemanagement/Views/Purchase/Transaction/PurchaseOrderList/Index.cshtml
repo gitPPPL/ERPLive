@@ -151,16 +151,12 @@
 				 }
 
 				 if (res?.validation1?.success === true) {
-					toastr.info(res.validation1.message);
-
-
-					  console.log("Delete pubUserLevel",pubUserLevel);
+					toastr.info(res.validation1.message);		
 
 					  if(pubUserLevel != "1")
 					{
 						return ;
 					}
-
 
 				 }
 
@@ -230,7 +226,7 @@
 				$.each(mastListData, function (index, item) {
 					let actions = '';
 
-					  actions += `<button class="act-btn edit permission-edit" title="Edit Row" style="cursor:pointer;" onclick="AddOrEditFunction('${item.DOC_ID}','${item.V_NO}','${item.V_TYPE}')"><i class="fa fa-edit"></i></button>`;
+						actions += `<button class="act-btn edit permission-edit" title="Edit Row" style="cursor:pointer;" onclick="AddOrEditFunction('${item.DOC_ID}','${item.V_NO}','${item.V_TYPE}','${item.V_DATE}')"><i class="fa fa-edit"></i></button>`;
 					
 					actions += `<button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewMenuDetails('${item.DOC_ID}')"><i class="fa fa-eye"></i></button>`;
 
@@ -302,44 +298,26 @@
 			GetMasterDataList();
 		}
 
-	async function AddOrEditFunction(rowId , v_no ,v_type ) {
+	async function AddOrEditFunction(rowId , v_no ,v_type,V_DATE ) {
 	        try {
+
 				const res = await $.ajax({
 					url: '/PurchaseOrderList/EditValidation',
 					method: 'GET',
 					dataType: 'json',
-					data: { v_no: v_no, v_type: v_type }
+					  data: { v_no: v_no, v_type: v_type , V_DATE : V_DATE }
 				});
 
-
-
-				   console.log("rowId1",rowId);
-
+				   console.log("res",res);
 
 
 				if (res?.validation1?.success === true)
 				{
 					toastr.warning(res?.validation1?.message );
 					return;
-				}
+				}					
 
-				if (res?.validation2?.success === true)
-				{
-					toastr.info(res.validation2.message);
-				}
-
-				if (res?.validation2?.success === true)
-				{
-					toastr.info(res.validation2.message);
-				}
-
-				if (res?.validation3?.success === true)
-				{
-					toastr.info(res.validation3.message);
-				}
-					
-
-			      window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId);
+			   window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId);
 			
 
 			} catch (error) {
@@ -350,15 +328,10 @@
 
 		}
 
-
-
 	async function viewMenuDetails(rowId)
 	{
 		window.location.href = '/PurchaseOrder/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
 	}
-
-
-
 
    function showEmployeePopup(docid) {
 

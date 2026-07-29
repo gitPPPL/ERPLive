@@ -20,19 +20,21 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public PurchaseOrderListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        private readonly GlobalValidationdate _globalValidationdate;
+  
+        public PurchaseOrderListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
         }
         public IActionResult Index()
         {
             ViewBag.CurrentMenu = "Purchase Order";
 
             ViewBag.UserLevel = _globalValue.GetGlobalVariables().PubUserLevel;
-
 
 
             return View("~/Views/Purchase/Transaction/PurchaseOrderList/Index.cshtml");
@@ -230,12 +232,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             // ===================== QUERY 1 =====================
             string query1 = @"
             SELECT   v_no, v_date  
-            FROM GATE2  ";
-            //WHERE REF_TYPE = @v_type  
-            //AND REF_NO = @v_no 
-            //AND COMP_CODE = @COMP_CODE 
-            //AND BRANCH_CODE = @BRANCH_CODE 
-            //AND YEAR_CODE = @YEAR_CODE";
+            FROM GATE2  
+            WHERE REF_TYPE = @v_type
+            AND REF_NO = @v_no
+            AND COMP_CODE = @COMP_CODE
+            AND BRANCH_CODE = @BRANCH_CODE
+            AND YEAR_CODE = @YEAR_CODE";
 
             using (var cmd1 = new SqlCommand(query1, con))
             {
@@ -354,9 +356,10 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
 
             return Json(new  { validation1, validation2, validation3,  validation4 });
+
         }
 
-        public JsonResult EditValidation(int v_no, string v_type)
+        public JsonResult EditValidation(int v_no, string v_type, DateTime V_DATE)
         {
             var globalVaraible = _globalValue.GetGlobalVariables();
 
@@ -364,94 +367,39 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             con.Open();
 
             object validation1 = null;
-            object validation2 = null;
-            object validation3 = null;
 
-            string sql = "select  top 1  status from APPROVAL_STATUS " +
-            " where v_type=@v_type  and v_NO=@v_no and comp_code=@COMP_CODE   " +
-            "  and branch_code=@BRANCH_CODE  and year_code=@YEAR_CODE  and status='OPEN' and USER_CODE<> @USER_CODE";
+            var result = _globalValidationdate.CheckModificationDays(V_DATE);
 
-            using (var cmd1 = new SqlCommand(sql, con))
+            if (result.isAllowed != 1)
             {
-                cmd1.Parameters.AddWithValue("@COMP_CODE", globalVaraible.PubCompCode);
-                cmd1.Parameters.AddWithValue("@BRANCH_CODE", globalVaraible.PubBranchCode);
-                cmd1.Parameters.AddWithValue("@YEAR_CODE", globalVaraible.PubFYearCode);
-                cmd1.Parameters.AddWithValue("@USER_CODE", globalVaraible.PubUserId);
-                cmd1.Parameters.AddWithValue("@v_no", v_no);
-                cmd1.Parameters.AddWithValue("@v_type", v_type);
+            
+                validation1 = new { success = true, Message = $"Modification not allowed. Doc Date exceed allowed limit. Please Check Doc date." };
 
-                using var reader1 = cmd1.ExecuteReader();
-                if (reader1.Read())
-                {
+                return Json(new { validation1 });
 
-                    string lastuser = GetText("select top 1 user_name from APPROVAL_STATUS " +
-                    "where v_type=@v_type and v_NO= @v_no and comp_code= @COMP_CODE   " +
-                    "  and branch_code= @BRANCH_CODE and year_code= @YEAR_CODE and status='OPEN' and user_code<> @USER_CODE  order by srno desc");
-
-                    validation1 = new
-                    {
-                        success = true,
-                        Message = $"This Document Approval is in process at User:{lastuser} "
-                    };
-                }
             }
 
+            string sql = @"select FAPROV_STATUS from Order1 where v_type='"+  v_type +"' and v_NO= "+  v_no +" and comp_code= "+ globalVaraible.PubCompCode + " and branch_code="+ globalVaraible.PubBranchCode + "  and year_code="+ globalVaraible.PubFYearCode + " ";
 
-            // ===================== QUERY 1 =====================
-            string query1 = @"select v_no,v_date from GATE2
-            where REF_TYPE = @v_type and REF_NO = @v_no
-            and COMP_CODE = @COMP_CODE and BRANCH_CODE = @BRANCH_CODE and YEAR_CODE = @YEAR_CODE";
+            string FAPROV_STATUS = GetText(sql);
 
-            using (var cmd1 = new SqlCommand(query1, con))
+            if(FAPROV_STATUS == "Approved")
             {
-                cmd1.Parameters.AddWithValue("@COMP_CODE", globalVaraible.PubCompCode);
-                cmd1.Parameters.AddWithValue("@BRANCH_CODE", globalVaraible.PubBranchCode);
-                cmd1.Parameters.AddWithValue("@YEAR_CODE", globalVaraible.PubFYearCode);
-                cmd1.Parameters.AddWithValue("@v_no", v_no);
-                cmd1.Parameters.AddWithValue("@v_type", v_type);
+                string status = GetText("select status from APPROVAL_STATUS where v_type='" + v_type + "' and v_NO=" + v_no + " and comp_code= " + globalVaraible.PubCompCode + "  and branch_code= " + globalVaraible.PubBranchCode + " and year_code= " + globalVaraible.PubFYearCode + " and status='OPEN' and USER_CODE<>" + globalVaraible.PubUserId + "");
 
-                using var reader1 = cmd1.ExecuteReader();
-                if (reader1.Read())
+
+                if(status != "")
                 {
-                    int gateNo = Convert.ToInt32(reader1["v_no"]);
-                    string gateDate = Convert.ToDateTime(reader1["v_date"]).ToString("dd/MM/yyyy");
+                    string lastuser = GetText("select top 1 user_name from APPROVAL_STATUS where v_type='" + v_type + "' and v_NO= " + v_no + " and comp_code= " + globalVaraible.PubCompCode + " and branch_code= " + globalVaraible.PubBranchCode + " and year_code= " + globalVaraible.PubFYearCode + " and status='OPEN' and user_code<> " + globalVaraible.PubUserId + " order by srno desc");
+                    validation1 = new { success = true, Message = $"This Document Approval is in process at User:" + lastuser + ", Edit not allowed. " };
 
-                    validation2 = new
-                    {
-                        success = true,
-                        Message = $"This document exists in Gate Serial No: {gateNo} dated: {gateDate}"
-                    };
+                    return Json(new { validation1 });
                 }
-            }
 
-            // ===================== QUERY 2 =====================
-            string query2 = @" select top 1 v_no,v_date from ORDER2
-                where SAUDA_TYPE = @SAUDA_TYPE and sauda_NO = @sauda_NO and COMP_CODE = @COMP_CODE and 
-                BRANCH_CODE = @BRANCH_CODE and YEAR_CODE = @YEAR_CODE";
+            }                  
+      
 
-            using (var cmd2 = new SqlCommand(query2, con))
-            {
-                cmd2.Parameters.AddWithValue("@COMP_CODE", globalVaraible.PubCompCode);
-                cmd2.Parameters.AddWithValue("@BRANCH_CODE", globalVaraible.PubBranchCode);
-                cmd2.Parameters.AddWithValue("@YEAR_CODE", globalVaraible.PubFYearCode);
-                cmd2.Parameters.AddWithValue("@sauda_NO", v_no);
-                cmd2.Parameters.AddWithValue("@SAUDA_TYPE", v_type);
-
-                using var reader2 = cmd2.ExecuteReader();
-                if (reader2.Read())
-                {
-                    int gateNo = Convert.ToInt32(reader2["v_no"]);
-                    string gateDate = Convert.ToDateTime(reader2["v_date"]).ToString("dd/MM/yyyy");
-
-                    validation3 = new
-                    {
-                        success = true,
-                        Message = $"This document exists in ORDER Serial No : {gateNo} dated: {gateDate}"
-                    };
-                }
-            }          
-
-            return Json(new { validation1, validation2, validation3 });
+            return Json(new { validation1});
         }
 
         public string GetText(string query)

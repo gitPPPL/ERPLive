@@ -54,7 +54,6 @@ $(document).ready(async function () {
         
     setEnterKeyFocus(AllFieldsId);
 
-
     $(document).on('input', '[id^=TxtRate], [id^=TxtQty], [id^=TxtCess], [id^=TxtPack], [id^=TxtDisc]', function () {
         const $input = $(this);
         const rowId = $input.closest('tr').attr('id').replace('row', '');
@@ -108,6 +107,18 @@ $(document).ready(async function () {
             }
 
             const model = await getPurchaseOrderModel();
+
+
+            const Validation = await SaveValidation(model);
+
+            console.log("Validation", Validation);
+
+            if (Validation.success == false) {
+                toastr.info(Validation.message);
+                return;
+            }
+
+
 
             if (!model.ItemRecords || model.ItemRecords.length === 0) {
                 toastr.warning("Please enter at least one item.");
@@ -214,11 +225,22 @@ $(document).ready(async function () {
         }
     });
 
-    $(document).on('change', '[id^=ddlItemname]', function () {
+    $(document).on('change', '[id^=ddlItemname]', async function () {
         const rowId = this.id.replace('ddlItemname', '');
         const itemCode = $(this).val();
+        let v_type = $('#ddlDocType').val();
         if (selectItemOption == false) return;
+
+        if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
+        if (!validateRequiredField('#ddlPartyName', 'Party')) return;
         loadMakeDropdown(rowId, itemCode);
+        if (v_type != "RORD" && v_type != "DORD") {
+            const itemData = await GetDatabyItemcode(itemCode);
+            if (itemData) {
+                FillItemData(rowId, itemData);
+            }
+        }  
+
     });
 
     $(document).on("click", ".btn-Itemadd-action", function (e) {
@@ -345,8 +367,8 @@ $(document).ready(async function () {
     $(document).on('click', '#btn_Sendapproval', function () {
         var FromName = window.location.pathname.split('/')[1];
 
-        var vtype = docId.substring(0, 4);
-        var rowId = docId.substring(4);
+        const vtype = $('#ddlDocType').val()?.toString().trim() ?? "";
+        const rowId = $('#txtDocNo').val()?.toString().trim() ?? "";
 
         $.ajax({
             url: '/Approval/CheckPendingUser',
@@ -359,8 +381,7 @@ $(document).ready(async function () {
                 console.log('Response:', response);
                 // Pending with another user
                 if (response.success === false) {
-                    showToast(`Pending With Another User (${response.userCode})`,
-                        { type: "warning" });
+                    showToast(`Pending With Another User (${response.userCode})`,  { type: "warning" });
                     return;
                 }
                 // Approval_Code = 5
@@ -369,15 +390,7 @@ $(document).ready(async function () {
                     return;
                 }
                 // Approval_Code != 8
-                OpenSendForApprovalModal({
-                    DocType: vtype,
-                    DocNo: rowId,
-                    UserCode: null,
-                    UserName: null,
-                    DocDate: null,
-                    TableName: 'ORDER1',
-                    FromName, FromName
-                });
+                OpenSendForApprovalModal({ DocType: vtype, DocNo: rowId,  UserCode: null, UserName: null,  DocDate: null, TableName: 'ORDER1', FromName, FromName });
 
             },
             error: function (xhr, status, error) {
@@ -389,9 +402,9 @@ $(document).ready(async function () {
     });
 
     $(document).on('click', '#btn_Approved', function () {
-        var vtype = docId.substring(0, 4);
-        var rowId = docId.substring(4);
 
+        const vtype = $('#ddlDocType').val()?.toString().trim() ?? "";
+        const rowId = $('#txtDocNo').val()?.toString().trim() ?? "";
 
         OpenApprovalModal({  DocType: vtype, DocNo: rowId, TableName: 'ORDER1' });
     });
@@ -450,7 +463,7 @@ $(document).ready(async function () {
 
 
     $('#button_mail').on('click', function () {
-        CheackSendMail();
+        SendMail();
     });
 
 

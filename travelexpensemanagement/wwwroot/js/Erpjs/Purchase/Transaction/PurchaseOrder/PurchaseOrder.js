@@ -216,7 +216,7 @@ async function GetSaudanoList(partyCd) {
         });
 
         const ddl = $('#ddSaudaNo');
-        ddl.empty().append('');
+        ddl.empty().append('<option value="">-- Select Sauda No --</option>');
 
         data.forEach(item => {
             ddl.append(`<option value="${item.text}">${item.value}</option>`);
@@ -236,7 +236,7 @@ async function GetWeighBridge(partyCd) {
         });
 
         const ddl = $('#ddWBNo');
-        ddl.empty().append('');
+        ddl.empty().append('<option value="">-- Select WB No --</option>');
         
         data.forEach(item => {
             ddl.append(`<option value="${item.value}">${item.text}</option>`);
@@ -1008,7 +1008,6 @@ async function GetDocTypeAsync() {
         console.error("Error loading Doc Type:", error);
     }
 }
-
 function GetSaudaDetail(docid) {
     return new Promise((resolve, reject) => {
         $.ajax({
@@ -1027,7 +1026,6 @@ function GetSaudaDetail(docid) {
         })
     });
 }
-
 function GetPartyAddress(partyCd, selectedId, selectedValue = null)
 {
     $.ajax({
@@ -1071,7 +1069,6 @@ function GetPartyAddress(partyCd, selectedId, selectedValue = null)
         }
     });
 }
-
 function GetWeighBridgeNo(partyCd, selectedValue = null) {
     $.ajax({
         url: '/PurchaseOrder/GetWeighBridge',
@@ -1104,7 +1101,6 @@ function GetWeighBridgeNo(partyCd, selectedValue = null) {
         }
     });
 }
-
 function GetWeighBridgeDetail(docid, partyCode) {
     return new Promise((resolve, reject) => {
         $.ajax({
@@ -1123,7 +1119,6 @@ function GetWeighBridgeDetail(docid, partyCode) {
         });
     });
 }
-
 function bindUnitOnItemSelect(itemSelect, unitSelect) {
     itemSelect.on('change', function () {
         const selectedOption = $(this).find('option:selected');
@@ -1140,23 +1135,19 @@ function bindUnitOnItemSelect(itemSelect, unitSelect) {
         }
     });
 }
-
 function formatDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     return d.toISOString().split('T')[0];
 }
-
 function parseIntSafe(value) {
     const parsed = parseInt(value, 10);
     return isNaN(parsed) ? null : parsed;
 }
-
 function parseFloatSafe(value) {
     const parsed = parseFloat(value);
     return isNaN(parsed) ? null : parsed;
 }
-
 function parseDate(dateStr) {
     if (!dateStr) return null;
     const parts = dateStr.split(/[-\/]/);
@@ -1167,32 +1158,26 @@ function parseDate(dateStr) {
     }
     return null;
 }
-
 function toNullableInt(val) {
     const parsed = parseInt(val);
     return isNaN(parsed) ? null : parsed;
 }
-
 function toNullableDate(val) {
     const date = new Date(val);
     return isNaN(date.getTime()) ? null : val;
 }
-
 function toNullableString(val) {
     return val?.trim() || null;
 }
-
 function toNullableDate(val) {
     const date = new Date(val);
     return isNaN(date.getTime()) ? null : date.toISOString(); // if server expects ISO string
 }
-
 function allowOnlyNumbers(input) {
     input.value = input.value
         .replace(/[^0-9.]/g, '')
         .replace(/(\..*)\./g, '$1');
 }
-
 function setFieldsEnabled(enabled) {
     AllFieldsId.forEach(id => {
         const el = document.getElementById(id);
@@ -1201,7 +1186,6 @@ function setFieldsEnabled(enabled) {
         }
     });
 }
-
 function setEnterKeyFocus(sequence) {
     sequence.forEach((id, index) => {
         $(`#${id}`).on('keypress', function (e) {
@@ -1256,7 +1240,6 @@ async function GetShipPartyAddress(Partycode) {
         console.error("Error loading Place:", error);
     }
 }
-
 function GetDocid(VType) {
     $.ajax({
         url: '/PurchaseOrder/GetMaxVNo',
@@ -1277,58 +1260,63 @@ function GetDocid(VType) {
     });
 }
 
-
-async function CheackSendMail() {
-
-    if (!docId) {
-        showToast(`Please save the data before Send Mail.`, { type: "info" });
-        return;
-    }
-    const v_no = parseInt($('#txtDocNo').val()) || 0;
-    const v_type = $('#ddlDocType').val() || '';
-    const res = await $.ajax({
-        url: '/PurchaseOrder/CheackMail',
-        type: 'GET',
-        data: { v_no: v_no, v_type: v_type },
-        dataType: 'json'
-    });
-
-    if (res.status == false) {
-        toastr.warning(res.message);
-        return;
-    }
-
-    Swal.fire({
-        title: "Do you want to send mail?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        cancelButtonText: "No"
-    }).then((result) => {
-
-        if (result.isConfirmed) {
-           SendMail();
-        }
-    });
-}
-
 async function SendMail() {
     try {
+
+        if (!docId) {
+            showToast("Please save the data before Send Mail.", { type: "info" });
+            return;
+        }
 
         let PartyCode = $('#ddlPartyName').val();
         const vno = parseInt($('#txtDocNo').val()) || 0;
         const v_type = $('#ddlDocType').val() || '';
-        // 🔥 STEP 1: GET REPORT FILE
+
+        // Check mail validation
+        const checkRes = await $.ajax({
+            url: '/PurchaseOrder/CheackMail',
+            type: 'GET',
+            data: { v_no: vno, v_type: v_type },
+            dataType: 'json'
+        });
+
+        if (checkRes.status == false) {
+            toastr.warning(checkRes.message);
+            return;
+        }
+
+        // Confirmation
+        const result = await Swal.fire({
+            title: "Do you want to send mail?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            cancelButtonText: "No"
+        });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        // Step 1: Generate report
         const report = await GetTransitReportFile();
 
-        // STEP 2: SEND TO CONTROLLER
+        if (!report || !report.file) {
+            toastr.error("Report generation failed.");
+            return;
+        }
+
+        // Step 2: Prepare FormData
         let formData = new FormData();
         formData.append("PartyCode", PartyCode);
         formData.append("vno", vno);
         formData.append("v_type", v_type);
         formData.append("file", report.file, report.fileName);
 
-        const res = await $.ajax({
+
+
+        // Step 3: Send mail
+        const mailRes = await $.ajax({
             url: '/PurchaseOrder/SendMail',
             type: 'POST',
             data: formData,
@@ -1336,18 +1324,25 @@ async function SendMail() {
             contentType: false
         });
 
-        console.log("Mail response:", res);
-        return res;
+
+        if (mailRes.success == true)
+        {
+            toastr.success(mailRes.message || "Mail sent successfully.");
+        }
+        else
+        {
+            toastr.error(mailRes.message || "Failed to send mail.");
+        }
+        return mailRes;
 
     } catch (error) {
         console.error("Error:", error);
+        toastr.error("An error occurred while sending the mail.");
     }
 }
 
-
 async function GetTransitReportFile()
 {
-
     if (!docId) {
         showToast("Please save the data before printing the report.", { type: "info" });
         throw new Error("No docId");

@@ -28,9 +28,7 @@ namespace travelexpensemanagement.Repositories.Implementations
 
             await conn.OpenAsync();
 
-            using SqlCommand cmd = new SqlCommand(
-                "sp_CheckApprovalStatus",
-                conn);
+            using SqlCommand cmd = new SqlCommand("sp_CheckApprovalStatus", conn);
 
             cmd.CommandType = CommandType.StoredProcedure;
 
