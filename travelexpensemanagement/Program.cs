@@ -9,13 +9,15 @@
     using travelexpensemanagement.ModuleService;
     using travelexpensemanagement.Repositories.Implementations;
     using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+    using travelexpensemanagement.Repositories.Implementations.Purchase.Transaction;
     using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
 
 
     // ADD THESE (Repository)
     using travelexpensemanagement.Repositories.Interfaces;
     using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
-    using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
     using travelexpensemanagement.Services;
     
 
@@ -58,11 +60,12 @@
     builder.Services.AddScoped<IStoreWeighbridgeEntryRepository, StoreWeighbridgeEntryRepository>();
     builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridgeEntryListRepository>();
     builder.Services.AddScoped<IApprovalService, ApprovalService>();
-//Weighbridge Transaction repositories
+    //Weighbridge Transaction repositories
+    //Purchase
+    builder.Services.AddScoped<IPurchaseReturnEntryRepository, PurchaseReturnEntryRepository>();
+    //Purchase
 
-
-
-builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
+    builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
     builder.Services.AddScoped<EncryptionHelper>();
 
     builder.Services.AddDistributedMemoryCache();

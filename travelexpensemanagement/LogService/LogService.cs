@@ -25,7 +25,7 @@ namespace travelexpensemanagement.LogService
             }
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                SqlCommand cmd = new SqlCommand(@" INSERT INTO LOGTABLE
+                SqlCommand cmd = new SqlCommand(@" INSERT INTO LOG_TABLE
                     (COMP_CODE, V_TYPE, V_NO, V_DATE, TABLE_NAME, FORM_NAME, TABLE_TYPE, MODE, USERID, LOG_DATE, WSID, LIP, LID) VALUES
                     (@COMP_CODE, @V_TYPE, @V_NO, @V_DATE, @TABLE_NAME, @FORM_NAME, @TABLE_TYPE, @MODE, @USERID, @LOG_DATE, @WSID, @LIP, @LID)", con);
 

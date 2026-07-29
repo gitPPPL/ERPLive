@@ -295,6 +295,23 @@ ORDER BY Text";
     });
         }
 
+
+        public List<DropdownModel> GetTransportName(string compCode, string term)
+        {
+            string query = @"SELECT TOP (50) Code AS Value,  Name AS Text FROM TRANSPORT_MAST
+            WHERE COMP_CODE = @CompCode  AND (@Term = '' OR Name LIKE @Term + '%') ORDER BY Name ASC";
+
+            return ExecuteDropdown(query, new[]
+            {
+                new SqlParameter("@CompCode", compCode),
+                new SqlParameter("@Term", term ?? "")
+            });
+        }
+
+
+
+
+
         // Purpose
         //public List<DropdownModel> GetPurpose(string compCode, string term)
         //{

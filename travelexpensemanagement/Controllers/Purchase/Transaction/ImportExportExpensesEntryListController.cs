@@ -1,10 +1,9 @@
-﻿using Dapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
 
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
@@ -12,192 +11,320 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
     public class ImportExportExpensesEntryListController : Controller
     {
 
+        private readonly DataBaseConnection _dbConnection;
+        private readonly GlobalVariableService _globalVariableService;
+        private readonly DropdownService _dropdownService;
         private readonly DbHelper _dbHelper;
-        private readonly DataBaseConnection _dbcontext;
-        private readonly GlobalVariableService _globalValue;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public ImportExportExpensesEntryListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        private int? userLevel;
+        public ImportExportExpensesEntryListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
+    DropdownService dropdownService, DbHelper dbHelper,
+    ModuleService.ModuleService moduleService)
         {
+            _dbConnection = dbConnection;
+            _globalVariableService = globalVariableService;
+            _dropdownService = dropdownService;
             _dbHelper = dbHelper;
-            _dbcontext = dbcontext;
-            _globalValue = globalValue;
             _moduleService = moduleService;
-
         }
-
         public IActionResult Index()
         {
-            ViewBag.CurrentMenu = "Import Expense Expenses Entry";
-            var permissions = _moduleService.GetUserMenuPermissions();
-            var userLevel = _moduleService.GetUserLevel();
-
-            var model = new UserMenuPermissionsViewModel
-            {
-                UserMenuPermissions = permissions,
-                UserLevel = userLevel
-            };
-            return View("~/Views/Purchase/Transaction/ImportExportExpensesEntryList/Index.cshtml", model);
+            return View("~/Views/Purchase/Transaction/ImportExportExpensesEntryList/Index.cshtml");
         }
- 
+
         [HttpGet]
-        public async Task<IActionResult> GetImportExportExpenseList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
+        public JsonResult GetPurchaseReceiptEntryList(string searchTerm, int pageNumber = 1, int pageSize = 10)
         {
-            try
+            var results = new List<object>();
+            int totalCount = 0;
+            var gv = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                var UsersessionDt = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
+                using (var cmd = new SqlCommand("InsertPurchaseReceiptHeader", con))
                 {
-                    {"@COMP_CODE", UsersessionDt.PubCompCode },
-                    {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@Action", "ImpExpExpenseEntryList" }
-                };
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-                var fullList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetImportExportExpenseEntry]", parameter);
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    searchTerm = searchTerm.ToLower();
-                    fullList = fullList
-                        .Where(x =>
+                    // Set stored procedure parameters:
+                    cmd.Parameters.AddWithValue("@Action", "SELECT");
+                    cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                    cmd.Parameters.AddWithValue("@SearchTerm", string.IsNullOrEmpty(searchTerm) ? (object)DBNull.Value : searchTerm);
+                    cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
+                    cmd.Parameters.AddWithValue("@PageSize", pageSize);
+
+                    con.Open();
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        // Read paginated data
+                        while (reader.Read())
                         {
-                            var dict = (IDictionary<string, object>)x;
-                            string[] searchableKeys = { "DOC_ID" };
-                            return searchableKeys.Any(key =>
-                                dict.ContainsKey(key) &&
-                                dict[key]?.ToString().ToLower().Contains(searchTerm) == true
-                            );
-                        })
-                        .ToList();
+                            results.Add(new
+                            {
+                                SearchCode = reader["SearchCode"] ?? "",
+                                VNo = reader["VNo"] ?? "",
+                                VType = reader["VType"] ?? "",
+                                VDate = reader["VDate"] ?? "",
+                                PartyName = reader["PartyName"] ?? "",
+                                BillNo = reader["bill_no"] ?? "",
+                                BillDate = reader["BILL_DATE"] ?? "",
+                                BillAdd1 = reader["BILL_ADD1"] ?? "",
+                                BillAdd2 = reader["BILL_ADD2"] ?? "",
+                                BillCity = reader["BILL_CITY"] ?? "",
+                                BillGST = reader["BILL_GST"] ?? "",
+                                ShipTo = reader["ShipTo"] ?? "",
+                                Qty = reader["Qty"] != DBNull.Value ? Convert.ToDecimal(reader["Qty"]) : 0,
+                                Amount = reader["Amount"] != DBNull.Value ? Convert.ToDecimal(reader["Amount"]) : 0,
+                                Remarks = reader["Remarks"] ?? "",
+                                TransportName = reader["Transport_Name"] ?? "",
+                                GateNo = reader["GateNo"] ?? "",
+                                Status = reader["Status"] ?? ""
+                            });
+                        }
+
+                        // Move to second result set for total count
+                        if (reader.NextResult())
+                        {
+                            if (reader.Read())
+                            {
+                                totalCount = reader.GetInt32(0);
+                            }
+                        }
+                    }
                 }
-
-                var totalCount = fullList.Count;
-                var pagedList = fullList
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                return Json(new { status = true, data = pagedList, totalCount });
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
+            return Json(new { items = results, totalCount });
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DeleteImpExpExpenseEntry(string docid)
+        [HttpPost]
+        public JsonResult DeleteDocByCode(string vType, string vNo)
         {
             try
             {
-                if (string.IsNullOrEmpty(docid))
-                {
-                    return Json(new { status = false, message = "Invalid ID" });
-                }
+                var globalVar = _globalVariableService.GetGlobalVariables();
 
-                var userSession = _globalValue.GetGlobalVariables();
-                string VType = docid.Substring(0, 4);
-                string VNo = docid.Substring(4);
-
-                using (var con = _dbcontext.GetErpConnection())
+                using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
-                    await con.OpenAsync();
-                    using (var transaction = con.BeginTransaction())
+                    con.Open();
+
+                    //==========================
+                    // Validation 1 : Purchase Invoice Exists
+                    //==========================
+                    string purchaseCheck = @"
+                    SELECT TOP 1 V_NO, V_DATE
+                    FROM PURCHASE1
+                    WHERE REF_TYPE=@VType
+                      AND REF_NO=@VNo
+                      AND COMP_CODE=@CompCode
+                      AND BRANCH_CODE=@BranchCode
+                      AND YEAR_CODE=@YearCode";
+
+                    using (SqlCommand cmd = new SqlCommand(purchaseCheck, con))
+                    {
+                        cmd.Parameters.AddWithValue("@VType", vType);
+                        cmd.Parameters.AddWithValue("@VNo", vNo);
+                        cmd.Parameters.AddWithValue("@CompCode", globalVar.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BranchCode", globalVar.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YearCode", globalVar.PubFYearCode);
+
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            if (dr.Read())
+                            {
+                                return Json(new
+                                {
+                                    success = false,
+                                    message = $"This document exists in Purchase Invoice Serial No : {dr["V_NO"]} dated : {Convert.ToDateTime(dr["V_DATE"]):dd/MM/yyyy}"
+                                });
+                            }
+                        }
+                    }
+
+                    //==========================
+                    // Validation 2 : QC Exists
+                    //==========================
+                    string qcCheck = @"
+                    SELECT TOP 1 V_NO, V_DATE
+                    FROM QC1
+                    WHERE MRN_TYPE=@VType
+                      AND MRN_NO=@VNo
+                      AND COMP_CODE=@CompCode
+                      AND BRANCH_CODE=@BranchCode";
+
+                    using (SqlCommand cmd = new SqlCommand(qcCheck, con))
+                    {
+                        cmd.Parameters.AddWithValue("@VType", vType);
+                        cmd.Parameters.AddWithValue("@VNo", vNo);
+                        cmd.Parameters.AddWithValue("@CompCode", globalVar.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BranchCode", globalVar.PubBranchCode);
+
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            if (dr.Read())
+                            {
+                                return Json(new
+                                {
+                                    success = false,
+                                    message = $"This document exists in QC Serial No : {dr["V_NO"]} dated : {Convert.ToDateTime(dr["V_DATE"]):dd/MM/yyyy}"
+                                });
+                            }
+                        }
+                    }
+
+                    //==========================
+                    // Validation 3 : Approval
+                    //==========================
+                    string approvalCheck = @"
+                    SELECT 1
+                    FROM APPROVAL_STATUS
+                    WHERE V_TYPE=@VType
+                      AND V_NO=@VNo
+                      AND COMP_CODE=@CompCode
+                      AND BRANCH_CODE=@BranchCode
+                      AND YEAR_CODE=@YearCode
+                      AND STATUS='OPEN'";
+
+                    using (SqlCommand cmd = new SqlCommand(approvalCheck, con))
+                    {
+                        cmd.Parameters.AddWithValue("@VType", vType);
+                        cmd.Parameters.AddWithValue("@VNo", vNo);
+                        cmd.Parameters.AddWithValue("@CompCode", globalVar.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BranchCode", globalVar.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YearCode", globalVar.PubFYearCode);
+
+                        if (cmd.ExecuteScalar() != null)
+                        {
+                            return Json(new
+                            {
+                                success = false,
+                                message = "This Document Approval is in process, Deletion not allowed."
+                            });
+                        }
+                    }
+
+                    using (SqlTransaction tran = con.BeginTransaction())
                     {
                         try
                         {
+                            //==========================
+                            // Get Gate Details
+                            //==========================
+                            string gateType = "";
+                            string gateNo = "";
 
-                            string[] deleteQueries = {
-                        "DELETE FROM PURCHASE1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM PURCHASE2 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM PURCHASE3 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
-                        };
+                            string gateQuery = @"
+                            SELECT TOP 1 GATE_TYPE,GATE_NO
+                            FROM PURCHASE1
+                            WHERE V_TYPE=@VType
+                              AND V_NO=@VNo
+                              AND COMP_CODE=@CompCode
+                              AND BRANCH_CODE=@BranchCode
+                              AND YEAR_CODE=@YearCode";
 
-                            foreach (var query in deleteQueries)
+                            using (SqlCommand cmd = new SqlCommand(gateQuery, con, tran))
                             {
-                                using (var cmd = new SqlCommand(query, con, transaction))
-                                {
-                                    cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                                    cmd.Parameters.AddWithValue("@V_TYPE", VType);
-                                    cmd.Parameters.AddWithValue("@V_NO", VNo);
+                                cmd.Parameters.AddWithValue("@VType", vType);
+                                cmd.Parameters.AddWithValue("@VNo", vNo);
+                                cmd.Parameters.AddWithValue("@CompCode", globalVar.PubCompCode);
+                                cmd.Parameters.AddWithValue("@BranchCode", globalVar.PubBranchCode);
+                                cmd.Parameters.AddWithValue("@YearCode", globalVar.PubFYearCode);
 
-                                    await cmd.ExecuteNonQueryAsync();
+                                using (SqlDataReader dr = cmd.ExecuteReader())
+                                {
+                                    if (dr.Read())
+                                    {
+                                        gateType = dr["GATE_TYPE"]?.ToString();
+                                        gateNo = dr["GATE_NO"]?.ToString();
+                                    }
                                 }
                             }
 
-                            transaction.Commit();
-                            return Json(new { status = true, data = "Data deleted successfully" });
+                            //==========================
+                            // Delete Purchase Tables
+                            //==========================
+                            string deleteSql = @"
+                            DELETE FROM IMG_TABLE
+                            WHERE V_TYPE=@VType AND V_NO=@VNo
+                              AND COMP_CODE=@CompCode
+                              AND BRANCH_CODE=@BranchCode
+                              AND YEAR_CODE=@YearCode;
+
+                            DELETE FROM PURCHASE2
+                            WHERE V_TYPE=@VType AND V_NO=@VNo
+                              AND COMP_CODE=@CompCode
+                              AND BRANCH_CODE=@BranchCode
+                              AND YEAR_CODE=@YearCode;
+
+                            DELETE FROM PURCHASE1
+                            WHERE V_TYPE=@VType AND V_NO=@VNo
+                              AND COMP_CODE=@CompCode
+                              AND BRANCH_CODE=@BranchCode
+                              AND YEAR_CODE=@YearCode";
+
+                            using (SqlCommand cmd = new SqlCommand(deleteSql, con, tran))
+                            {
+                                cmd.Parameters.AddWithValue("@VType", vType);
+                                cmd.Parameters.AddWithValue("@VNo", vNo);
+                                cmd.Parameters.AddWithValue("@CompCode", globalVar.PubCompCode);
+                                cmd.Parameters.AddWithValue("@BranchCode", globalVar.PubBranchCode);
+                                cmd.Parameters.AddWithValue("@YearCode", globalVar.PubFYearCode);
+
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            //==========================
+                            // Update Gate1
+                            //==========================
+                            if (!string.IsNullOrEmpty(gateType) && !string.IsNullOrEmpty(gateNo))
+                            {
+                                string gateUpdate = @"
+                                UPDATE GATE1
+                                SET MRN_NO=NULL
+                                WHERE V_TYPE=@GateType
+                                  AND V_NO=@GateNo
+                                  AND COMP_CODE=@CompCode
+                                  AND BRANCH_CODE=@BranchCode
+                                  AND YEAR_CODE=@YearCode";
+
+                                using (SqlCommand cmd = new SqlCommand(gateUpdate, con, tran))
+                                {
+                                    cmd.Parameters.AddWithValue("@GateType", gateType);
+                                    cmd.Parameters.AddWithValue("@GateNo", gateNo);
+                                    cmd.Parameters.AddWithValue("@CompCode", globalVar.PubCompCode);
+                                    cmd.Parameters.AddWithValue("@BranchCode", globalVar.PubBranchCode);
+                                    cmd.Parameters.AddWithValue("@YearCode", globalVar.PubFYearCode);
+
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+
+                            tran.Commit();
+
+                            return Json(new
+                            {
+                                success = true,
+                                message = "Document deleted successfully."
+                            });
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            transaction.Rollback();
-                            return Json(new { status = false, message = $"Delete failed: {ex.Message}" });
+                            tran.Rollback();
+                            throw;
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, message = ex.Message });
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
         }
-
-        [HttpGet]
-        public async Task<IActionResult> GetImportExportExpenseEntryDetails(string docid)
-        {
-            try
-            {
-                var usersession = _globalValue.GetGlobalVariables();
-                if (string.IsNullOrEmpty(docid))
-                {
-                    return Json(new { status = false, message = "Invalid ID" });
-                }
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@V_TYPE", docid.Substring(0, 4) },
-                    {"@V_NO", docid.Substring(4) },
-                    {"@Action", "EntryDetail" }
-                };
-                var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetImportExportExpenseEntry]", parameter);
-                return Json(new { status = true, data = entryDetailList });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ExportAllDocs()
-        {           
-
-            try
-            {
-                var usersession = _globalValue.GetGlobalVariables();                
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},                   
-                    {"@Action", "Excel" }
-                };
-                var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetImportExportExpenseEntry]", parameter);
-                
-                return Json(new { status = true, data = dataList });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
-        }
-
 
 
     }
 }
-
-

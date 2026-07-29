@@ -189,7 +189,7 @@
 
 									   <i class="fas fa-trash btn-delete"
 									   title="Delete"
-									   onclick="deleteDocStage('${doc.vType}','${doc.vNo}')"></i>
+									   onclick="deleteDocStage('${doc.vType}','${doc.vNo}', '${doc.vDate}')"></i>
 
 									<i class="fa fa-file btn-document"
 									   title="Document"
@@ -228,7 +228,7 @@
 		window.location.href = `/PurchaseReturnEntry/Index?vType=${encodeURIComponent(vType)}&vNo=${encodeURIComponent(vNo)}&mode=view`;
 	}
 
-	function deleteDocStage(vType, vNo) {
+		function deleteDocStage(vType, vNo, vDate) {
 
 		Swal.fire({
 			title: 'Are you sure?',
@@ -243,18 +243,18 @@
 			if (result.isConfirmed) {
 
 				$.ajax({
-					url: '/PurchaseReturnEntryList/Delete',   
+					url: '/PurchaseReturnEntryList/Delete',
 					type: 'POST',
 					data: {
 						vNo: vNo,
-						docType: vType
+						docType: vType,
+						vDate: vDate
 					},
 					success: function (response) {
 
 						if (response.success) {
 
 							toastr.success(response.message);
-
 							purchasePagination.load();
 
 						} else {
@@ -262,14 +262,12 @@
 							toastr.error(response.message);
 
 						}
-
 					},
 					error: function (xhr) {
 
 						toastr.error(xhr.responseText);
 
 					}
-
 				});
 
 			}
@@ -277,6 +275,54 @@
 		});
 
 	}
+
+	// function deleteDocStage(vType, vNo) {
+
+	// 	Swal.fire({
+	// 		title: 'Are you sure?',
+	// 		text: "You won't be able to revert this deletion!",
+	// 		icon: 'warning',
+	// 		showCancelButton: true,
+	// 		confirmButtonColor: '#d33',
+	// 		cancelButtonColor: '#3085d6',
+	// 		confirmButtonText: 'Yes, delete it!'
+	// 	}).then((result) => {
+
+	// 		if (result.isConfirmed) {
+
+	// 			$.ajax({
+	// 				url: '/PurchaseReturnEntryList/Delete',   
+	// 				type: 'POST',
+	// 				data: {
+	// 					vNo: vNo,
+	// 					docType: vType
+	// 				},
+	// 				success: function (response) {
+
+	// 					if (response.success) {
+
+	// 						toastr.success(response.message);
+
+	// 						purchasePagination.load();
+
+	// 					} else {
+
+	// 						toastr.error(response.message);
+
+	// 					}
+
+	// 				},
+	// 				error: function (xhr) {
+
+	// 					toastr.error(xhr.responseText);
+
+	// 				}
+
+	// 			});
+
+	// 		}
+	// 	});
+	// }
 
 	function showDocumentPopup(docCode) {
 		alert(docCode);

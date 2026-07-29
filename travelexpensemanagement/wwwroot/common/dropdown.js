@@ -139,6 +139,10 @@ function bindDropdownNew(controller, type, controlId, placeholder,
                             case "printParty":
                                 $("#hdnprintPartyCode").val(ui.item.code);
                                 break;
+
+                            case "TransportName":
+                                $("#hdnTransport").val(ui.item.code);
+                                break;
                         }
 
                         return false;

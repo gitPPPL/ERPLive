@@ -1,6 +1,8 @@
-﻿namespace travelexpensemanagement.Models.Purchase.Transaction
+﻿using static travelexpensemanagement.Models.Purchase.Transaction.ImportExportExpensesEntry;
+
+namespace travelexpensemanagement.Models.Purchase.Transaction
 {
-    public class PurchaseReturnEntry
+    public class ImportExportExpensesEntry
     {
         public class ItemDetailModel1
         {
@@ -64,114 +66,130 @@
             public int? DeptCode { get; set; }
         }
 
-        public class ItemDetailModel
+        public class ItemDetailImportExportExpensesEntryModel
         {
-            public int? Code { get; set; }
-            public string? ItemCode { get; set; }
-            public string? ItemName { get; set; }
-            public string? HSNCode { get; set; }
-            public string? Unit { get; set; }
-            public int? Nos { get; set; }
-            public decimal? ReturnQty { get; set; }
-            public decimal? BillQty { get; set; }
-            public decimal? Rate { get; set; }
-            public decimal? Amount { get; set; }
-            public string? RCMYN { get; set; }
-            public string? InputYN { get; set; }
-            public string? TaxType { get; set; }
-            public decimal? PackPer { get; set; }
-            public decimal? PackAmt { get; set; }
-            public decimal? DiscPer { get; set; }
-            public decimal? DiscAmt { get; set; }
-            public decimal? WBQty { get; set; }
-            public decimal? CGSTPer { get; set; }
-            public decimal? CGSTAmt { get; set; }
-            public decimal? SGSTPer { get; set; }
-            public decimal? SGSTAmt { get; set; }
-            public decimal? IGSTPer { get; set; }
-            public decimal? IGSTAmt { get; set; }
-            public decimal? CESSPer { get; set; }
-            public decimal? CESSAmt { get; set; }
-
-            public decimal? OthAmt { get; set; }
-            public decimal? NetAmt { get; set; }
-            public string? Make { get; set; }
-            public string? Department { get; set; }
-            public string? Remarks { get; set; }
-            public decimal? LDRate { get; set; }
-            public decimal? LDAmt { get; set; }
-            public string WBType { get; set; }
-            public int? WBNo { get; set; }
-            public string RefType { get; set; }
-            public int? RefNo { get; set; }
-            public string RefBatchNo { get; set; }
-            public string RefBagNo { get; set; }
+            public int VNo { get; set; }                           
+            public string DocId { get; set; }                      
+            public string VType { get; set; }                       
+            public DateTime? VDate { get; set; }                   
+            public int? CompCode { get; set; }                    
+            public int? BranchCode { get; set; }                 
+            public int? YearCode { get; set; }                     
+            public int Sno { get; set; }                         
+            public int? ItemCode { get; set; }                  
+            public string? ItemName { get; set; }                    
+            public int? MakeCode { get; set; }                     
+            public string HSNCode { get; set; }                    
+            public string ? RCMYN { get; set; }                       
+            public string? InputYN { get; set; }                    
+            public int? UOMCode { get; set; }                        
+            public string? UOMName { get; set; }                      
+            public int? DeptCode { get; set; }                       
+            public int? Nos { get; set; }                           
+            public decimal? PlusMinusQty { get; set; }              
+            public decimal? WBQty { get; set; }                     
+            public decimal? RecQty { get; set; }                    
+            public decimal? BillQty { get; set; }                    
+            public decimal? USDRate { get; set; }                    
+            public decimal? ExRate { get; set; }                     
+            public decimal? Rate { get; set; }                       
+            public decimal? Amount { get; set; }                    
+            public decimal? DiscPer { get; set; }                   
+            public decimal? DiscAmt { get; set; }                 
+            public decimal? PackPer { get; set; }                    
+            public decimal? PackAmt { get; set; }                    
+            public int? TaxCode { get; set; }                       
+            public decimal? CGSTPer { get; set; }                    
+            public decimal? CGSTAmt { get; set; }                    
+            public decimal? SGSTPer { get; set; }                   
+            public decimal? SGSTAmt { get; set; }                    
+            public decimal? IGSTPer { get; set; }                   
+            public decimal? IGSTAmt { get; set; }                   
+            public decimal? CESSPer { get; set; }                   
+            public decimal? CESSAmt { get; set; }                   
+            public decimal? VATPer { get; set; }                     
+            public decimal? VATAmt { get; set; }                    
+            public decimal? OthAmt { get; set; }                     
+            public decimal? NetAmt { get; set; }                     
+            public decimal? LDRate { get; set; }                     
+            public decimal? LDAmt { get; set; }                      
+            public decimal? PolandRate { get; set; }               
+            public decimal? PORate { get; set; }                     
+            public string BinLocation { get; set; }                 
+            public int? BinCode { get; set; }                        
+            public string? POType { get; set; }                      
+            public int? PONo { get; set; }                           
+            public string SaudaType { get; set; }                    
+            public int? SaudaNo { get; set; }                        
+            public string? KantaType { get; set; }                   
+            public int? KantaNo { get; set; }                        
+            public string ReqType { get; set; }                    
+            public int? ReqNo { get; set; }                         
+            public string GateType { get; set; }                     
+            public int? GateNo { get; set; }                        
+            public string RefType { get; set; }                     
+            public int? RefNo { get; set; }                          
+            public string QCType { get; set; }                       
+            public int? QCNo { get; set; }                           
+            public string? PassType { get; set; }                    
+            public int? PassNo { get; set; }                        
+            public string? EmptyYN { get; set; }                     
+            public int? MachCode { get; set; }                       
+            public string? Remarks { get; set; }                      
+            public decimal? RateMonthly { get; set; }               
+            public decimal? RateQuarterly { get; set; }              
+            public decimal? RateAnnualy { get; set; }                
+            public decimal? RateSpecial { get; set; }                
+            public string? FinalLock { get; set; }     
+           
         }
-
-        public class PurchaseReturnHeaderModel
+        public class ImportExportExpensesEntryHeaderModel
         {
-            // Document Header
-            public string DocType { get; set; }
-            public string Vno { get; set; }
-            public string DocNo { get; set; }
-            public string DocDate { get; set; }
-            public string WbNo { get; set; }
-            public string RefType { get; set; }
-            public string RefNo { get; set; }
-
-            // Return To Details
-            public string ReturnTo { get; set; }
-            public string ReturnAddLine1 { get; set; }
-            public string ReturnAddLine2 { get; set; }
-            public string ReturnAddLine3 { get; set; }
-            public string ReturnCity { get; set; }
-            public string ReturnGST { get; set; }
-
-            // Ship To Details
-            public string ShipTo { get; set; }
-            public string ShipAddLine1 { get; set; }
-            public string ShipAddLine2 { get; set; }
-            public string ShipAddLine3 { get; set; }
-            public string ShipCity { get; set; }
-            public string ShipGST { get; set; }
-
-            // Document Details
-            public string BillNo { get; set; }
-            public string BillDate { get; set; }
-            public string BLNo { get; set; }
-            public string BLDate { get; set; }
-            public string WaybillNo { get; set; }
-            public string TransitNo { get; set; }
-            public string InputType { get; set; }
-            public string ExpensesType { get; set; }
-            public string NetAmount { get; set; }
-            public string Status { get; set; }
-
-            // Accounting
-            public string CreditAC { get; set; }
-            public string DebitAC { get; set; }
-
-            // Transport
-            public string TransportName { get; set; }
-            public string TransportCode { get; set; }
-            public string VehicleNo { get; set; }
-            public string ContainerNo { get; set; }
-            public string FreightPay { get; set; }
-            public string FrtTax1 { get; set; }
-            public string FrtTax2 { get; set; }
-            public string FrtPayNarr { get; set; }
-            public string GRNo { get; set; }
-            public string GRDate { get; set; }
-            public string TransportAC { get; set; }
-            public string FreightDebit { get; set; }
-            public string FreightCredit { get; set; }
-            public string Remarks { get; set; }
-
-            // Missing TDS fields (now added)
-            public decimal? TDSonFreight1 { get; set; }
-            public decimal? TDSonFreight2 { get; set; }
-
-            // Amount Breakdown
+            public string? DocType { get; set; }
+            public string? DocNo { get; set; }
+            public string? code { get; set; }
+            public string? BillNo { get; set; }
+            public string? ChallanNo { get; set; }
+            public string? WaybillNo { get; set; }
+            public string? WaybillInvNo { get; set; }
+            public string? ReturnType { get; set; }
+            public string DocStatus { get; set; }
+            public string? DocDate { get; set; }
+            public string? GateNo { get; set; }
+            public string? BillDate { get; set; }
+            public string? ChallanDate { get; set; }
+            public string? WaybillDate { get; set; }
+            public string? WaybillExpiry { get; set; }
+            public string? ExchangeRate { get; set; }
+            public string? NetAmount { get; set; }
+            public string? BillFrom { get; set; }
+            public string? AddLine1 { get; set; }
+            public string? AddLine2 { get; set; }
+            public string? AddLine3 { get; set; }
+            public string? City { get; set; }
+            public string? Pincode { get; set; }
+            public string? State { get; set; }
+            public string? GST { get; set; }
+            public string? Remarks { get; set; }
+            public string? ShipFrom { get; set; }
+            public string? ShipAddLine1 { get; set; }
+            public string? ShipAddLine2 { get; set; }
+            public string? ShipAddLine3 { get; set; }
+            public string? ShipCity { get; set; }
+            public string? ShipPincode { get; set; }
+            public string? BILL_ADDRESSID { get; set; }
+            public string? SHIP_ADDRESSID { get; set; }
+            public string? ShipState { get; set; }
+            public string? ShipGST { get; set; }
+            public string? TransportName { get; set; }
+            public string? VehicleNo { get; set; }
+            public string? ContainerNo { get; set; }
+            public string? FreightPay { get; set; }
+            public string? FrtTax1 { get; set; }
+            public string? FrtTax2 { get; set; }
+            public string? FrtPayNarr { get; set; }
+            public string? GRNo { get; set; }
+            public string? GRDate { get; set; }
             public decimal? NumReceivedQty { get; set; }
             public decimal? NumBillQty { get; set; }
             public decimal? NumAmount { get; set; }
@@ -187,32 +205,32 @@
             public decimal? NumTCSPer2 { get; set; }
             public decimal? NumRoundOff { get; set; }
             public decimal? NumFinalNetAmt { get; set; }
-
-            // Action (Save/Update)
+            public DateTime? EWB_DATE { get; set; }     
+            public DateTime? EWB_EXPDATE { get; set; }
+            public string? EWB_INVNO { get; set; }
+            public string? GATE_TYPE { get; set; }
+            public string? TRANSIT_NO { get; set; }
+            public string? TRANSPORT_CODE { get; set; }
+            public string? HOLD_PAY { get; set; }
+            public string? HOLD_REASON { get; set; }
+            public string? HOLD_DATE { get; set; }
             public string? ACTION { get; set; }
         }
 
-        public class AttachmentModel
+        public class ImportExportExpensesEntryAttachmentModel
         {
-            //public string FileName { get; set; }
+            public string FileName { get; set; }
             public IFormFile File { get; set; }
-            public string? DOC_ID { get; set; }
-            public int V_NO { get; set; }
-            public string V_TYPE { get; set; }
-            public DateTime V_DATE { get; set; }
-
-            public byte[] IMG_FILE { get; set; }
+            public string IMG_FILE { get; set; }
             public string FILE_NAME { get; set; }
             public string FILE_TYPE { get; set; }
         }
 
-        public class Purchase1List
+        public class ImportExportExpensesEntry1
         {
             public string DOC_ID { get; set; }
             public int V_NO { get; set; }
             public string V_TYPE { get; set; }
-            public string REF_TYPE { get; set; }
-            public string REF_NO { get; set; }
             public DateTime? V_DATE { get; set; }
             public int COMP_CODE { get; set; }
             public int BRANCH_CODE { get; set; }
@@ -243,7 +261,6 @@
             public string TRANSIT_NO { get; set; }
             public string WAYBILL_NO { get; set; }
             public string TRANSPORT_CODE { get; set; }
-            public string TRANSPORT_AC { get; set; }
             public string TRANSPORT_NAME { get; set; }
             public string GR_NO { get; set; }
             public DateTime? GR_DATE { get; set; }
@@ -253,8 +270,6 @@
             public decimal? FRTPAY_TAXPER { get; set; }
             public decimal? FRTPAY_TAX { get; set; }
             public string FRTPAY_NAR { get; set; }
-            public string FRTPAY_DRAC { get; set; }
-            public string FRTPAY_CRAC { get; set; }
             public string REMARKS { get; set; }
             public string STATUS { get; set; }
             public decimal? RECD_QTY { get; set; }
@@ -278,14 +293,9 @@
             public string RET_TYPE { get; set; }
             public string FAPROV_STATUS { get; set; }
             public string FAPROV_REMARKS { get; set; }
-            public string BL_NO { get; set; }
-            public string INPUT_TYPE { get; set; }
-            public string EXPS_TYPE { get; set; }
-            public string CREDIT_AC { get; set; }
-            public string DEBIT_AC { get; set; }
         }
 
-        public class Purchase2List
+        public class ImportExportExpensesEntry2
         {
             public int V_NO { get; set; }
             public string DOC_ID { get; set; }
@@ -348,8 +358,6 @@
             public string GATE_NO { get; set; }
             public string REF_TYPE { get; set; }
             public string REF_NO { get; set; }
-            public string BATCH_NO { get; set; }
-            public string BAG_NO { get; set; }
             public string QC_TYPE { get; set; }
             public string QC_NO { get; set; }
             public string PASS_TYPE { get; set; }
@@ -364,7 +372,7 @@
             public string FINAL_LOCK { get; set; }
         }
 
-        public class Purchase3List
+        public class ImportExportExpensesEntry3
         {
             public string DOC_ID { get; set; }
             public int V_NO { get; set; }
@@ -383,14 +391,16 @@
             public string ITEM_NAME { get; set; }
             public decimal NetWt { get; set; }
         }
-        public class PurchaseAllDetailsResponse
+
+        public class ImportExportExpensesAllDetailsResponse
         {
-            public List<Purchase1List> Purchase1 { get; set; } = new List<Purchase1List>();
-            public List<Purchase2List> Purchase2 { get; set; } = new List<Purchase2List>();
-            public List<Purchase3List> Purchase3 { get; set; } = new List<Purchase3List>();
+            public List<ImportExportExpensesEntry1> Purchase1 { get; set; } = new List<ImportExportExpensesEntry1>();
+            public List<ImportExportExpensesEntry2> Purchase2 { get; set; } = new List<ImportExportExpensesEntry2>();
+            public List<ImportExportExpensesEntry3> Purchase3 { get; set; } = new List<ImportExportExpensesEntry3>();
             //public List<WeightSummary> WeightSummary { get; set; } = new();
         }
-        public class GetDetailsRequest
+
+        public class GetImportExportExpensesAllDetailsResponseDetailsRequest
         {
             public string VNO { get; set; }
             public string vType { get; set; }
@@ -403,16 +413,55 @@
             public List<WeightSummary> WeightSummary { get; set; } = new();
         }
 
-        public class PrintReportModelPurchaseReturnEntry
+
+        //=============Production Batch=============
+        public class ProductionBatchSaveModel
         {
-            public string VType { get; set; }
             public int VNo { get; set; }
-            public string Amount { get; set; }
+
+            public string VType { get; set; }
+
+            public DateTime VDate { get; set; }
+
+            public int ItemCode { get; set; }
+
+            public int FromDeptCode { get; set; }
+
+            public int ToDeptCode { get; set; }
+
+            public List<ProductionBatchRow> Rows { get; set; }
+        }
+        public class ProductionBatchRow
+        {
+            public string RefType { get; set; }
+
+            public int RefNo { get; set; }
+
+            public int ItemCode { get; set; }
+
+            public string BarcodeNo { get; set; }
+
+            public string BatchNo { get; set; }
+
+            public decimal ApproxWeight { get; set; }
+            
+            public decimal ActualWeight { get; set; }
+
+            public int Sno { get; set; }
+        }
+        public class ProductionBatchRequest
+        {
+            public int? Vno { get; set; }
+            public string Vtype { get; set; }
         }
 
-
-
-
+        public class CreateIntimationModel
+        {
+            public ImportExportExpensesEntryHeaderModel Header { get; set; }
+            public List<ItemDetailImportExportExpensesEntryModel> ItemDetails { get; set; }
+        }
 
     }
+
 }
+

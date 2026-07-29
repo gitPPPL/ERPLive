@@ -23,10 +23,13 @@ $(document).ready(function () {
     GetddlCityShipDetails();
     GetddlstateShipDetails();
     ddlShipDetails();
-    ddlTransportName();
+    //ddlTransportName();
+    bindDropdownNew('PurchaseReturnEntry', 'TransportName', '#ddlTransportName', '-- Select Tran --');
     ddlTransportAC()
     ddlCreditAC();
     ddlDebitAC();
+    ddlFreightCreditAC()
+    ddlFreightDebitAC()
     ddlDocStatus(() => {
         $('#ddlDocStatus').val(1).prop('disabled', true);
     });
@@ -330,17 +333,8 @@ $(document).ready(function () {
     // checked box checked multiple row insert onanimationstart Block
     $('#btn-save').on('click', function (e) {
         e.preventDefault();
-        if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
-        if (!validateRequiredField('#DtDocDate', 'Doc Date')) return;
-        if (!validateRequiredField('#ddlRefType', 'Ref Type')) return;
-
-        if (!validateRequiredField('#ddlReturnTo', 'Return To')) return;
-        if (!validateRequiredField('#ddlShipFrom', 'Ship To')) return;
-        if (!validateRequiredField('#txtBillNo', 'Bill No')) return;
-        if (!validateRequiredField('#DtBillDate', 'Bill Date')) return;
-
-        if (!validateRequiredField('#ddlInputType', 'Input Type')) return;
-        if (!validateRequiredField('#ddlExpensesType', 'Expenses Type')) return;
+        if (!validateSave())
+            return;
         // 1. Header data
 
         var header = {
@@ -403,6 +397,7 @@ $(document).ready(function () {
 
             // Transport
             TransportName: $('#ddlTransportName').val() || null,
+            TransportCode: $('#hdnTransport').val() || null,
             VehicleNo: $('#txtVehicleNo').val() || null,
             ContainerNo: $('#txtContainerNo').val() || null,
             GRNo: $('#txtGRNo').val() || null,
@@ -492,7 +487,9 @@ $(document).ready(function () {
                 WBType: row.find('input[name="WBType"]').val() || null,
                 WBNo: row.find('input[name="WBNo"]').val() || null,
                 RefType: row.find('input[name="RefType"]').val() || null,
-                RefNo: row.find('input[name="RefNo"]').val() || null
+                RefNo: row.find('input[name="RefNo"]').val() || null,
+                RefBatchNo: row.find('input[name="RefBatchNo"]').val() || null,
+                RefBagNo: row.find('input[name="RefBagNo"]').val() || null
             };
             allData.push(rowData);
         });
@@ -507,37 +504,14 @@ $(document).ready(function () {
         });
 
         // 4. Attachments
-        //$('#tblAttachmentPRE tbody tr').each(function (index) {
-        //    const fileName = $(this).find('input[type="text"]').val();
-        //    const fileInput = $(this).find('input[type="file"]')[0];
-
-        //    formData.append(`Attachments[${index}].FileName`, fileName || '');
-
-        //    if (fileInput && fileInput.files.length > 0) {
-        //        formData.append(`Attachments[${index}].File`, fileInput.files[0]);
-        //    }
-        //});
-
         rowsAttachment.forEach((attachment, index) => {
-
             formData.append(`Attachments[${index}].FileName`, attachment.FileName);
             formData.append(`Attachments[${index}].File`, attachment.File);
 
-        });  
-
+        });
+        console.log('kks')
 
         // 5. Add Attachments
-        //$('#tblAttachmentPRE tbody tr').each(function (index) {
-        //    const fileName = $(this).find('input[type="text"]').val();
-        //    const fileInput = $(this).find('input[type="file"]')[0];
-
-        //    formData.append(`Attachments[${index}].FileName`, fileName || '');
-
-        //    if (fileInput && fileInput.files.length > 0) {
-        //        formData.append(`Attachments[${index}].File`, fileInput.files[0]);
-        //    }
-        //});
-        // 5. Submit to server
         $.ajax({
             url: '/PurchaseReturnEntry/SaveAllData',
             type: 'POST',
@@ -558,7 +532,7 @@ $(document).ready(function () {
                     }
 
                     setTimeout(function () {
-                        window.location.href = "/PurchaseReceiptEntryList/Index";
+                        window.location.href = "/PurchaseReturnEntryList/Index";
                     }, 500);
                 }
                 else {
@@ -572,12 +546,168 @@ $(document).ready(function () {
                 console.log("Error:", error);
                 console.log("Response:", xhr.responseText);
 
-                alert("Ajax Error");
-
                 toastr.error(xhr.responseText);
             }
         });
     });
+
+    function validateSave() {
+
+        // Header Validation
+        if (!validateRequiredField('#ddlDocType', 'Voucher Type'))
+            return false;
+
+        if ($('#NumDocNo').val() == "" || parseInt($('#NumDocNo').val()) == 0) {
+            toastr.error("Invalid Voucher No.");
+            $('#NumDocNo').focus();
+            return false;
+        }
+
+        if (!validateRequiredField('#DtDocDate', 'Document Date'))
+            return false;
+
+        if (!validateRequiredField('#ddlRefType', 'Reference Type'))
+            return false;
+
+        if (!validateRequiredField('#ddlInputType', 'Input Type'))
+            return false;
+
+        if (!validateRequiredField('#ddlRefNo', 'Reference No'))
+            return false;
+
+        //if ($('#txtRemarks').val().trim().length <= 5) {
+        //    toastr.error("Reason for Return must be mentioned in Remarks.");
+        //    $('#txtRemarks').focus();
+        //    return false;
+        //}
+
+        if (!validateRequiredField('#ddlReturnTo', 'Party'))
+            return false;
+
+        if (!validateRequiredField('#ddlShipFrom', 'Ship To'))
+            return false;
+
+        if (!validateRequiredField('#ddlcreditAC', 'Debit Account'))
+            return false;
+
+        if (!validateRequiredField('#ddldebitAC', 'Credit Account'))
+            return false;
+
+        // Freight Validation
+
+        let freight = parseFloat($('#NumFreightPay').val()) || 0;
+
+        if (freight > 0 && !$('#ddlFreightDebitAC').val()) {
+            toastr.error("Freight Debit A/C not selected.");
+            $('#ddlFreightDebitAC').focus();
+            return false;
+        }
+
+        if (freight > 0 && !$('#ddlFreightCreditAC').val()) {
+            toastr.error("Freight Credit A/C not selected.");
+            $('#ddlFreightCreditAC').focus();
+            return false;
+        }
+
+        if (freight > 0 &&
+            $('#ddlFreightDebitAC').val() == $('#ddlFreightCreditAC').val()) {
+
+            toastr.error("Freight Debit A/C and Credit A/C must be different.");
+            $('#ddlFreightCreditAC').focus();
+            return false;
+        }
+
+        let freightTax =
+            (parseFloat($('#NumFrtTax1').val()) || 0) +
+            (parseFloat($('#NumFrtTax2').val()) || 0);
+
+        if (freight == 0 && freightTax > 0) {
+            toastr.error("Freight Tax not applicable when Freight Amount is 0.");
+            return false;
+        }
+
+        let tds =
+            (parseFloat($('#NumTDSFreight1').val()) || 0) +
+            (parseFloat($('#NumTDSFreight2').val()) || 0);
+
+        if (tds > 0 && freight == 0) {
+            toastr.error("Freight TDS not applicable when Freight Amount is 0.");
+            return false;
+        }
+
+        if (freight > 0 && !$('#ddlTransportName').val()) {
+            toastr.error("Transport Name is required.");
+            $('#ddlTransportName').focus();
+            return false;
+        }
+        // Item Grid Validation
+        let itemCount = 0;
+        let isValid = true;
+
+        $('#tblItemRecordPO tbody tr').each(function () {
+
+            let row = $(this);
+            let item = row.find('select[name="ItemName"]').val();
+
+            if (!item) {
+                toastr.error("Item not selected.");
+                row.find('select[name="ItemName"]').focus();
+                isValid = false;
+                return false;
+            }
+            itemCount++;
+            let returnQty = row.find('input[name="ReturnQty"]');
+
+            if (returnQty == 0) {
+                toastr.error("Received Qty is 0.");
+                row.find('input[name="ReturnQty"]').focus();
+                isValid = false;
+                return false;
+            }
+            let amount = parseFloat(row.find('input[name="Amount"]').val()) || 0;
+            if (amount == 0) {
+                toastr.error("Amount must not be 0.");
+                row.find('input[name="Amount"]').focus();
+                isValid = false;
+                return false;
+            }
+            let taxType = row.find('select[name="TaxType"]').val();
+            if (!taxType) {
+                toastr.error("Tax Type not selected.");
+                row.find('select[name="TaxType"]').focus();
+                isValid = false;
+                return false;
+            }
+            let make = row.find('select[name="Make"]').val();
+            if (!make) {
+                toastr.error("Make is required.");
+                row.find('select[name="Make"]').focus();
+                isValid = false;
+                return false;
+            }
+            let refType = row.find('input[name="RefType"]').val();
+            let refNo = row.find('input[name="RefNo"]').val();
+            if ((!refType || refType == "") &&
+                (!refNo || refNo == "")) {
+
+                toastr.error("Reference Type and Reference No required.");
+                isValid = false;
+                return false;
+            }
+
+        });
+
+        if (!isValid)
+            return false;
+
+        if (itemCount == 0) {
+            toastr.error("No Record in grid to save.");
+            return false;
+        }
+
+        return true;
+    }
+
     $("#browseBtn").on("click", function () {
         $("#fileInput").click();
     });
@@ -688,6 +818,7 @@ $(document).ready(function () {
         // ====== Purchase1 Header Bind ======
         if (purchase1 && purchase1.length > 0) {
             const p1 = purchase1[0];
+            console.log('Header List', p1)
 
             ddlDocType(() => {
                 $('#ddlDocType').val(p1.v_TYPE);
@@ -719,10 +850,14 @@ $(document).ready(function () {
             $('#txtShipAddLine1').val(p1.shiP_ADD1);
             $('#txtShipAddLine2').val(p1.shiP_ADD2);
             $('#txtShipAddLine3').val(p1.shiP_ADD3);
-            GetddlCityBillDetails(() => {
-                $('#ddlCity').val(p1.bilL_CITY);
-                $('#ddlShipCity').val(p1.shiP_CITY);
-            });
+
+            $('#ddlCity').val(p1.bilL_CITY).trigger('change');
+            $('#ddlShipCity').val(p1.shiP_CITY).trigger('change');
+
+            $('#ddlReturnTo').val(p1.partY_CODE).trigger('change');
+            $('#ddlShipFrom').val(p1.shiP_CODE).trigger('change');
+
+
             $('#txtPincode').val(p1.bilL_PINCODE);
             $('#NumShipPincode').val(p1.shiP_PINCODE);
 
@@ -737,6 +872,13 @@ $(document).ready(function () {
 
             $('#txtExchangeRate').val(p1.excH_RATE);
             $('#txtNetAmount').val(p1.namount);
+            ddlDebitAC(() => {
+                $('#ddldebitAC').val(p1.frtpaY_DRAC);
+            });
+            ddlCreditAC(() => {
+                $('#ddlcreditAC').val(p1.frtpaY_CRAC);
+            });          
+
             //Item Total
             $('#NumReceivedQty').val(p1.recD_QTY);
             $('#NumBillQty').val(p1.bilL_QTY);
@@ -773,11 +915,7 @@ $(document).ready(function () {
 
             $('#DtGRDate').val(formatDateForInput(p1.gR_DATE));
             $('#DtBLDate').val(formatDateForInput(p1.bilL_DATE));
-
-            ddlTransportName(() => {
-                $('#ddlTransportName').val(p1.transporT_CODE);
-            });
-
+            bindDropdownNew('PurchaseReturnEntry', 'TransportName', '#ddlTransportName', '-- Select Transport --', p1.transporT_NAME);
             ddlTransportAC(() => {
                 $('#ddlTransportAC').val(p1.transporT_AC);
             });
@@ -785,11 +923,11 @@ $(document).ready(function () {
                 $('#ddlDocStatus').val(p1.status);
             });
 
-            ddlCreditAC(() => {
-                $('#ddlcreditAC').val(p1.crediT_AC);
+            ddlFreightCreditAC(() => {
+                $('#ddlFreightCreditAC').val(p1.crediT_AC);
             });
-            ddlDebitAC(() => {
-                $('#ddldebitAC').val(p1.debiT_AC);
+            ddlFreightDebitAC(() => {
+                $('#ddlFreightDebitAC').val(p1.debiT_AC);
             });
             $('#TxtWaybillNo').val(p1.waybilL_NO);
             $('#TxtBLNo').val(p1.bL_NO);
@@ -808,6 +946,7 @@ $(document).ready(function () {
     }
     // LOAD BY V_NO ==========================
     function bindItemsdata(items) {
+        console.log('khushahal', items)
         const $tbody = $('#tblItemRecordPO tbody').empty();
 
         items.forEach(i => {
@@ -872,6 +1011,10 @@ $(document).ready(function () {
                     <td><input class="form-control" style="width: 100PX;" name="WBNo" value="${i.kantA_NO || ''}" /></td>
                     <td><input class="form-control" style="width: 100PX;" name="RefType" value="${i.reF_TYPE || ''}" /></td>
                     <td><input class="form-control" style="width: 100PX;" name="RefNo" value="${i.reF_NO || ''}" /></td>
+
+                    <td><input class="form-control" style="width: 100PX;" name="RefBatchNo" value="${i.batcH_NO || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="RefBagNo" value="${i.baG_NO || ''}" /></td>
+
                     <td class="action-col">
                     <div class="action-wrap">
                         <button type="button" class="act-btn add btn-add-row"  title="Add" style="cursor:pointer;"><i class="fa fa-plus-circle"></i></button>
@@ -1238,14 +1381,10 @@ $(document).ready(function () {
             type: 'GET',
             dataType: 'json',
             success: function (data) {
-                const ddlFreight = $('#ddlFreightCreditAC');
                 const ddlCredit = $('#ddlcreditAC');
-
-                ddlFreight.empty().append('<option value="">-- Select Bill --</option>');
                 ddlCredit.empty().append('<option value="">-- Select Bill --</option>');
 
                 $.each(data, function (index, item) {
-                    ddlFreight.append(`<option value="${item.value}">${item.text}</option>`);
                     ddlCredit.append(`<option value="${item.value}">${item.text}</option>`);
                 });
 
@@ -1262,14 +1401,10 @@ $(document).ready(function () {
             type: 'GET',
             dataType: 'json',
             success: function (data) {
-                const ddlFreight = $('#ddlFreightDebitAC');
                 const ddlDebit = $('#ddldebitAC');
-
-                ddlFreight.empty().append('<option value="">-- Select Bill --</option>');
                 ddlDebit.empty().append('<option value="">-- Select Bill --</option>');
 
                 $.each(data, function (index, item) {
-                    ddlFreight.append(`<option value="${item.value}">${item.text}</option>`);
                     ddlDebit.append(`<option value="${item.value}">${item.text}</option>`);
                 });
 
@@ -1280,22 +1415,40 @@ $(document).ready(function () {
             }
         });
     }
-    //Transport Name start ddl banding
-    function ddlTransportName(callback) {
+
+    function ddlFreightCreditAC(callback) {
         $.ajax({
-            url: '/PurchaseReturnEntry/GetddlTransportName',
+            url: '/PurchaseReturnEntry/GetddlFreightCreditAC',
             type: 'GET',
             dataType: 'json',
             success: function (data) {
-                const ddl = $('#ddlTransportName');
-                ddl.empty().append('<option value="">-- Transport Name --</option>');
+                const ddlFreight = $('#ddlFreightCreditAC');
+                ddlFreight.empty().append('<option value="">-- Select Bill --</option>');
                 $.each(data, function (index, item) {
-                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                    ddlFreight.append(`<option value="${item.value}">${item.text}</option>`);
                 });
                 if (typeof callback === "function") callback();
             },
             error: function (xhr) {
-                console.error("Error loading ddlTransportName:", xhr.responseText);
+                console.error("Error loading ddlCreditAC:", xhr.responseText);
+            }
+        });
+    }
+    function ddlFreightDebitAC(callback) {
+        $.ajax({
+            url: '/PurchaseReturnEntry/GetddlFreightDebitAC',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddlFreight = $('#ddlFreightDebitAC');
+                ddlFreight.empty().append('<option value="">-- Select Bill --</option>');
+                $.each(data, function (index, item) {
+                    ddlFreight.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlDebitAC:", xhr.responseText);
             }
         });
     }
@@ -1564,9 +1717,12 @@ $(document).ready(function () {
         // City
         GetddlCityBillDetails(function () {
             $('#ddlCity').val(header.CITY_CODE);
-            $('#ddlShipCity').val(header.SHIP_CITY);
+            
         });
 
+        GetddlCityShipDetails(function () {
+            $('#ddlShipCity').val(header.SHIP_CITY);
+        })
         // State (Only if available in API)
         GetddlstateBillDetails(function () {
             if (header.StateCode)
@@ -1617,9 +1773,10 @@ $(document).ready(function () {
         }
     }
     function bindItems(items) {
+       
         const $tbody = $("#tblItemRecordPO tbody");
         $tbody.empty();
-
+        console.log("kks", items);
         $.each(items, function (index, i) {
 
             let qty = parseFloat(i.RECD_QTY || 0);
@@ -1809,6 +1966,10 @@ $(document).ready(function () {
                            value="${i.PO_NO || ''}">
                 </td>
 
+                <td><input class="form-control" style="width: 100PX;" name="RefBatchNo" value="${i.BATCH_NO || ''}" /></td>
+                <td><input class="form-control" style="width: 100PX;" name="RefBagNo" value="${i.BAG_NO || ''}" /></td>
+
+
                  <td class="action-col">
                     <div class="action-wrap">
                         <button type="button" class="act-btn add btn-add-row"  title="Add" style="cursor:pointer;"><i class="fa fa-plus-circle"></i></button>
@@ -1977,6 +2138,141 @@ $(document).ready(function () {
             TableName: 'PURCHASE1'
         });
     });
+
+    //------------------------------------------ProductionBatch---------------------------------
+
+    $("#btnShowProductionBatch").click(function () {
+
+        $("#hdnItemCode").val($("#txtItemCode").val());
+        $("#hdnFromDept").val($("#ddlFromDept").val());
+        $("#hdnToDept").val($("#ddlToDept").val());
+        var model = {
+            Vno: parseInt($("#NumDocNo").val()) || 0,
+            Vtype: $("#ddlDocType").val()
+        };
+
+        console.log(model);
+
+        $.ajax({
+
+            url: "/PurchaseReturnEntry/GetProductionBatch",
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(model),
+
+            success: function (data) {
+
+                var tbody = $("#tblshowproductionbatchModal tbody");
+                tbody.empty();
+
+                var totalApproxWeight = 0;
+                var totalActualWeight = 0;
+
+                $.each(data, function (i, row) {
+
+                    totalApproxWeight += parseFloat(row.approxWeight || 0);
+                    totalActualWeight += parseFloat(row.actualWeight || 0);
+
+                    tbody.append(`
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>${row.refType}</td>
+                <td>${row.refNo}</td>
+                <td>${row.itemCode}</td>
+                <td>${row.itemName}</td>
+                <td>${row.barcodeNo}</td>
+                <td>${row.batchNo}</td>
+                <td>${row.approxWeight}</td>
+                <td>${row.actualWeight}</td>
+            </tr>
+        `);
+                });
+
+                // Show totals
+                var modal = new bootstrap.Modal(document.getElementById("showproductionbatchmodal"));
+                modal.show();
+            },
+
+            error: function (xhr) {
+
+                console.log(xhr.responseText);
+
+                alert("Something went wrong.");
+
+            }
+
+        });
+
+    });
+    $(document).on("change", "#tblshowproductionbatchModal tbody input[type='checkbox']", function () {
+
+        var totalApprox = 0;
+        var totalActual = 0;
+
+        $("#tblshowproductionbatchModal tbody tr").each(function () {
+
+            var chk = $(this).find("input[type='checkbox']");
+
+            if (chk.is(":checked")) {
+
+                totalApprox += parseFloat($(this).find("td:eq(7)").text()) || 0;
+                totalActual += parseFloat($(this).find("td:eq(8)").text()) || 0;
+
+            }
+
+        });
+
+        $("#NumApproxWeight").val(totalApprox.toFixed(2));
+        $("#NumActualWeight").val(totalActual.toFixed(2));
+
+    });
+    $("#btn_modalsubmit").click(function () {
+
+        var rows = [];
+
+        $("#tblshowproductionbatchModal tbody tr").each(function (index) {
+
+            if ($(this).find("input[type='checkbox']").is(":checked")) {
+
+                rows.push({
+                    RefType: $(this).find("td:eq(1)").text(),
+                    RefNo: parseInt($(this).find("td:eq(2)").text()),
+                    ItemCode: parseInt($(this).find("td:eq(3)").text()),
+                    BarcodeNo: $(this).find("td:eq(5)").text(),
+                    BatchNo: $(this).find("td:eq(6)").text(),
+                    ApproxWeight: parseFloat($(this).find("td:eq(7)").text()),
+                    ActualWeight: parseFloat($(this).find("td:eq(8)").text()),
+                    Sno: index + 1
+                });
+            }
+
+        });
+
+        var model = {
+            VNo: $("#NumDocNo").val(),
+            VType: $("#ddlDocType").val(),
+            VDate: $("#DtDocDate").val(),
+            ItemCode: $("#hdnItemCode").val(),
+            FromDeptCode: $("#hdnFromDept").val(),
+            ToDeptCode: $("#hdnToDept").val(),
+            Rows: rows
+        };
+        console.log('Production Batch data', model)
+
+        $.ajax({
+            url: "/PurchaseReturnEntry/SaveProductionBatch",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(model),
+            success: function (res) {
+                alert(res.message);
+            }
+        });
+
+    });
+
+    //------------------------------------------ProductionBatch---------------------------------
 });
 function PrintPurchaseReturnEntryReport() {
     var model = {
@@ -2148,7 +2444,6 @@ function getdataImage(Imagedata) {
 
     });
 }
-
 function getMimeType(fileName) {
 
     const ext = fileName?.split('.').pop()?.toLowerCase();

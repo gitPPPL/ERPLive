@@ -360,13 +360,8 @@
             </fieldset>
 
             <div class="erppage-internalaction mt-2">
-                <button type="button" class="erppage-btn erppage-btn-common-disabled" data-bs-target="#showproductionbatchmodal" data-bs-toggle="modal">
-                    <i class="fa fa-search"></i>
-                    <span>Show Production Batch</span>
-                </button>
-                <button type="button" class="erppage-btn erppage-btn-common">
-                    <i class="fa fa-refresh"></i>
-                    <span>Refresh Batch From MRN</span>
+                <button type="button" id="btnShowProductionBatch" class="erppage-btn erppage-btn-common-disabled">
+                    <i class="fa fa-search"></i> <span>Show Production Batch</span>
                 </button>
             </div>
 
@@ -421,6 +416,8 @@
                                         <col style="width:120px;">
                                         <col style="width:120px;">
                                         <col style="width:120px;">
+                                        <col style="width:120px;">
+                                        <col style="width:120px;">
                                         <col style="width:90px;">
                                     </colgroup>
 
@@ -462,6 +459,8 @@
                                             <th>WB No</th>
                                             <th>Ref Type</th>
                                             <th>Ref No</th>
+                                            <th>Ref BatchNo</th>
+                                            <th>Ref BagNo</th>
                                             <th class="action-col">Action</th>
                                         </tr>
                                     </thead>
@@ -559,9 +558,11 @@
                                     <div class="erppage-grid2">
                                         <div class="erppage-divfield">
                                             <label class="erppage-label">Transport Name</label>
-                                            <select class="erppage-input erppage-select" id="ddlTransportName">
+                                            @* <select class="erppage-input erppage-select" id="ddlTransportName">
                                                 <option value="">Select Transport Name</option>
-                                            </select>
+                                            </select> *@
+                                            <input type="text" id="ddlTransportName" class="form-control" placeholder="Search Courier" />
+                                            <input type="hidden" id="hdnTransport" />
                                         </div>
                                         <div class="erppage-divfield">
                                             <label class="erppage-label">Vehicle No</label>
@@ -917,17 +918,14 @@
                                         <i class="fa fa-times"></i>
                                     </button>
                                 </div>
-
                                 <div class="erppagesmodal-body text-center">
                                     <img id="previewImage" src="" style="width:100%;height:75vh; object-fit:contain; display:none;" />
                                     <iframe id="previewPdf" style="width:100%; height:75vh; border:none; display:none;">
                                     </iframe>
-
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
 
                 <div class="erppage-actions">
@@ -937,7 +935,6 @@
                     </button>
                 </div>
             </div>
-
             <!--Modal popup-->
             <!--ShowProductionbatch-->
             <div class="modal fade" id="showproductionbatchmodal" tabindex="-1" aria-labelledby="showproductionbatchLabel" aria-hidden="true">
@@ -997,6 +994,9 @@
                                 <div class="erppage-internalaction">
                                     <button type="submit" class="erppage-btn erppage-btn-common-active-disabled" id="btn_modalsubmit"><i class="fa fa-save"></i> Save</button>
                                 </div>
+                                @* <input type="hidden" id="hdnItemCode" value="" />
+                                <input type="hidden" id="hdnFromDept" value="" />
+                                <input type="hidden" id="hdnToDept" value="" /> *@
                             </div>
                         </div>
                     </div>
@@ -1014,5 +1014,5 @@
         });
     });
 </script>
-
+<script src="~/common/dropdown.js"></script>
 <script src="~/js/erpjs/purchase/transaction/purchasereturnentry/purchasereturnentry.js"></script>
