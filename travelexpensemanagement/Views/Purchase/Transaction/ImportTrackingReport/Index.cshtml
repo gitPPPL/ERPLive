@@ -1,0 +1,851 @@
+﻿@using System.Text.Json
+
+@{
+    ViewBag.Title = "Import Tracking Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
+    var databaseName = ViewBag.DatabaseName as string;
+    var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0;
+    var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
+    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+}
+
+<div id="erp-toast-container"></div>
+
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-ship"></i>
+        <span>Import Tracking Report</span>
+    </div>
+</div>
+
+<div class="erppage-fieldset">
+    <div class="erppage-container">
+        <fieldset class="erppagefieldset">
+            <div class="erppage-grid5">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Date From</label>
+                    <input type="date" class="erppage-input" id="DtDatefrom" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">To</label>
+                    <input type="date" class="erppage-input" id="Dtto" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Ship Type</label>
+                    <select class="erppage-input erppage-select" id="ddlshiptype">
+                       <option value="IMPORT">IMPORT</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-select" id="ddlstatus">
+                        <option value="OPEN">OPEN</option>
+                        <option value="CLOSE">CLOSE</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppagelist-search-wrapper mt-2">
+                <i class="fa fa-search"></i>
+                <input type="text" id="searchBox" placeholder="Search By" />
+            </div>
+
+            <div class="erppage-internalaction mt-2">
+                <button type="button" id="btnviewdata" class="erppage-btn erppage-btn-common">
+                    <i class="fa fa-table"></i>
+                    <span>View Data</span>
+                </button>
+                <button type="button" class="erppage-btn erppage-btn-common-active-disabled" id="btn_listofdoc" data-bs-toggle="modal" data-bs-target="#listdocumentsendModal">
+                    <i class="fa fa-paper-plane"></i>
+                    <span>List of Documents to be Send</span>
+                </button>
+            </div>
+        </fieldset>
+
+        <div class="erppagelist-container">
+            <div class="excel-wrapper fixed-grid-wrapper">
+                <table id="tblImportTrackingReport" class="excel-table fixed-grid-table table-width  sortable-table resizable-table">                
+                    <colgroup>
+                        <col class="hidden-col">
+                        <col class="freeze-item freeze1" style="width:100px;">
+                        <col class="freeze-item freeze2" style="width:100px;">
+                        <col class="freeze-item freeze3" style="width:180px;">
+                        <col class="freeze-item freeze4" style="width:180px;">
+                        <col class="freeze-item freeze5" style="width:220px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:220px;">
+                        <col style="width:120px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:80px;">
+                        <col style="width:100px;">
+                        <col style="width:180px;">
+                        <col style="width:180px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:180px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:130px;">
+                        <col style="width:180px;">
+                        <col style="width:130px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:140px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:140px;">
+                        <col style="width:130px;">
+                        <col style="width:120px;">
+                        <col style="width:180px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:140px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:140px;">
+                        <col style="width:120px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:180px;">
+                        <col style="width:180px;">
+                        <col style="width:180px;">
+                        <col style="width:180px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:180px;">
+                        <col style="width:140px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:180px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:120px;">
+                        <col style="width:140px;">
+               
+
+                    </colgroup>
+
+                    <thead>
+                        <tr>
+                            <th class="hidden-col" data-column="0">Code <span class="sort-icon"></span></th>
+                            <th class="freeze-item freeze1" data-column="1">Sauda No <span class="sort-icon"></span></th>
+                            <th class="freeze-item freeze2" data-column="2">Sauda Date <span class="sort-icon"></span></th>
+                            <th class="freeze-item freeze3" data-column="3">Supplier Name <span class="sort-icon"></span></th>
+                            <th class="freeze-item freeze4" data-column="4">Item Name <span class="sort-icon"></span></th>
+                            <th class="freeze-item freeze5" data-column="5">Delivery Location <span class="sort-icon"></span></th>
+                            <th data-column="6">Country <span class="sort-icon"></span></th>
+                            <th data-column="7">Expected Loading <span class="sort-icon"></span></th>
+                            <th data-column="8">Payment Term <span class="sort-icon"></span></th>
+                            <th data-column="9">Frt Term <span class="sort-icon"></span></th>
+                            <th data-column="10">Del. Term <span class="sort-icon"></span></th>
+                            <th data-column="11">Remark <span class="sort-icon"></span></th>
+                            <th data-column="12">No of Container <span class="sort-icon"></span></th>
+                            <th data-column="13">Sauda Qty <span class="sort-icon"></span></th>
+                            <th data-column="14">Tracking Qty <span class="sort-icon"></span></th>
+                            <th data-column="15">MRN Qty <span class="sort-icon"></span></th>
+                            <th data-column="16">MRN No <span class="sort-icon"></span></th>
+                            <th data-column="17">MRN Date <span class="sort-icon"></span></th>
+                            <th data-column="18">Container No <span class="sort-icon"></span></th>
+                            <th data-column="19">Container Size <span class="sort-icon"></span></th>
+                            <th data-column="20">Inv No <span class="sort-icon"></span></th>
+                            <th data-column="21">Inv Date <span class="sort-icon"></span></th>
+                            <th data-column="22">Inv Amt <span class="sort-icon"></span></th>
+                            <th data-column="23">POD <span class="sort-icon"></span></th>
+                            <th data-column="24">POL <span class="sort-icon"></span></th>
+                            <th data-column="25">VSI Name <span class="sort-icon"></span></th>
+                            <th data-column="26">ICD Name <span class="sort-icon"></span></th>
+                            <th data-column="27">Free Days <span class="sort-icon"></span></th>
+                            <th data-column="28">ETD <span class="sort-icon"></span></th>
+                            <th data-column="29">ETA Port Date <span class="sort-icon"></span></th>
+                            <th data-column="30">Rail Date <span class="sort-icon"></span></th>
+                            <th data-column="31">ICD Reach Date <span class="sort-icon"></span></th>
+                            <th data-column="32">PI No. <span class="sort-icon"></span></th>
+                            <th data-column="33">Offer No. <span class="sort-icon"></span></th>
+                            <th data-column="34">CHA Name <span class="sort-icon"></span></th>
+                            <th data-column="35">Scan Doc. Verify Date <span class="sort-icon"></span></th>
+                            <th data-column="36">ETA Place <span class="sort-icon"></span></th>
+                            <th data-column="37">Doc. CHA Handover Date <span class="sort-icon"></span></th>
+                            <th data-column="38">BI No. <span class="sort-icon"></span></th>
+                            <th data-column="39">BI Date <span class="sort-icon"></span></th>
+                            <th data-column="40">BL Recd. Date <span class="sort-icon"></span></th>
+                            <th data-column="41">BL Handover Date to CHA <span class="sort-icon"></span></th>
+                            <th data-column="42">CHA Charge Detail <span class="sort-icon"></span></th>
+                            <th data-column="43">CheckList Approval Date <span class="sort-icon"></span></th>
+                            <th data-column="44">BOE No. <span class="sort-icon"></span></th>
+                            <th data-column="45">BOE Date <span class="sort-icon"></span></th>
+                            <th data-column="46">ETA BE Date <span class="sort-icon"></span></th>
+                            <th data-column="47">IGM Date <span class="sort-icon"></span></th>
+                            <th data-column="48">Sample Collected <span class="sort-icon"></span></th>
+                            <th data-column="49">Sample Collection Date <span class="sort-icon"></span></th>
+                            <th data-column="50">Test Report Date <span class="sort-icon"></span></th>
+                            <th data-column="51">Assessment Type <span class="sort-icon"></span></th>
+                            <th data-column="52">Assessment Date <span class="sort-icon"></span></th>
+                            <th data-column="53">Duty Amount <span class="sort-icon"></span></th>
+                            <th data-column="54">Duty Pay Date <span class="sort-icon"></span></th>
+                            <th data-column="55">Duty Pay Mode <span class="sort-icon"></span></th>
+                            <th data-column="56">Advance Licence No. <span class="sort-icon"></span></th>
+                            <th data-column="57">Doc. Handover Date to Bank <span class="sort-icon"></span></th>
+                            <th data-column="58">Shipping Line Pay Date <span class="sort-icon"></span></th>
+                            <th data-column="59">Shipping Line <span class="sort-icon"></span></th>
+                            <th data-column="60">Hollage Charge <span class="sort-icon"></span></th>
+                            <th data-column="61">DO Date <span class="sort-icon"></span></th>
+                            <th data-column="62">Security Amt <span class="sort-icon"></span></th>
+                            <th data-column="63">Refund Amt <span class="sort-icon"></span></th>
+                            <th data-column="64">Receipt Date <span class="sort-icon"></span></th>
+                            <th data-column="65">Tentative HO Date <span class="sort-icon"></span></th>
+                            <th data-column="66">Container HO Date <span class="sort-icon"></span></th>
+                            <th data-column="67">Adv. Payment Amount <span class="sort-icon"></span></th>
+                            <th data-column="68">Adv. Payment Reference <span class="sort-icon"></span></th>
+                            <th data-column="69">Adv. Payment Date <span class="sort-icon"></span></th>
+                            <th data-column="70">Bal. Payment Amount <span class="sort-icon"></span></th>
+                            <th data-column="71">Bal. Payment Reference <span class="sort-icon"></span></th>
+                            <th data-column="72">Bal. Payment Date <span class="sort-icon"></span></th>
+                            <th data-column="73">Diff. Days <span class="sort-icon"></span></th>
+                            <th data-column="74">Int. Rate <span class="sort-icon"></span></th>
+                            <th data-column="75">Other Charges <span class="sort-icon"></span></th>
+                            <th data-column="76">SBLC Avl. Amt. <span class="sort-icon"></span></th>
+                            <th data-column="77">Supplier <span class="sort-icon"></span></th>
+                            <th data-column="78">Agent <span class="sort-icon"></span></th>
+                            <th data-column="79">Bank <span class="sort-icon"></span></th>
+                            <th data-column="80">Shipping Line <span class="sort-icon"></span></th>
+                            <th data-column="81">SBLC No <span class="sort-icon"></span></th>
+                            <th data-column="82">SBLC ApplDate <span class="sort-icon"></span></th>
+                            <th data-column="83">SBLC PayDate <span class="sort-icon"></span></th>
+                            <th data-column="84">SBLC DueDate <span class="sort-icon"></span></th>
+                            <th data-column="85">SBLC DisbAmt <span class="sort-icon"></span></th>
+                            <th data-column="86">SBLC DisbDate <span class="sort-icon"></span></th>
+                            <th data-column="87">SBLC IntSOFR <span class="sort-icon"></span></th>
+                            <th data-column="88">DO ValidDate <span class="sort-icon"></span></th>
+                            <th data-column="89">Sec. Date <span class="sort-icon"></span></th>
+                            <th data-column="90">Refund RecdDate <span class="sort-icon"></span></th>
+                            <th data-column="91">Detention Amount <span class="sort-icon"></span></th>
+                            <th data-column="92">Detention Date <span class="sort-icon"></span></th>
+                            <th data-column="93">Detention Reason <span class="sort-icon"></span></th>
+                            <th data-column="94">Det. Reason App.By <span class="sort-icon"></span></th>
+                            <th data-column="95">Custom OOC Date <span class="sort-icon"></span></th>
+                            <th data-column="96">Factory Date <span class="sort-icon"></span></th>
+                            <th data-column="97">LC No <span class="sort-icon"></span></th>
+                            <th data-column="98">LC Date <span class="sort-icon"></span></th>
+                            <th data-column="99">LC Benef. <span class="sort-icon"></span></th>
+                            <th data-column="100">LC IssueBank <span class="sort-icon"></span></th>
+                            <th data-column="101">LC Expiry Date <span class="sort-icon"></span></th>
+                            <th data-column="102">LC Amt <span class="sort-icon"></span></th>
+                            <th data-column="103">Tent. HO Ret Date <span class="sort-icon"></span></th>
+                            <th data-column="104">Date of Movement <span class="sort-icon"></span></th>
+                            <th data-column="105">Tent. ContHO RetDate <span class="sort-icon"></span></th>
+                            <th data-column="106">Latest Shipment Date <span class="sort-icon"></span></th>
+                            <th data-column="107">Quality Claim Amt <span class="sort-icon"></span></th>
+                            <th data-column="108">BOE Submit Date <span class="sort-icon"></span></th>
+                            <th data-column="109">QCAmt <span class="sort-icon"></span></th>
+                            <th data-column="110">Enhance. Rate <span class="sort-icon"></span></th>
+                            <th data-column="111">Pass. Rate <span class="sort-icon"></span></th>
+                            <th data-column="112">Under Protest <span class="sort-icon"></span></th>
+                            <th data-column="113">CHA ChangeType <span class="sort-icon"></span></th>
+                            <th data-column="114">Concor Exps <span class="sort-icon"></span></th>
+                            <th data-column="115">CHA Amt <span class="sort-icon"></span></th>
+                            <th data-column="116">CFS Charges <span class="sort-icon"></span></th>
+                            <th data-column="117">CFS D-Stuffing Date <span class="sort-icon"></span></th>
+                            <th data-column="118">CFS Amt <span class="sort-icon"></span></th>
+                            <th data-column="119">CFS Payment Date <span class="sort-icon"></span></th>
+                            <th data-column="120">QC Amount Recd. <span class="sort-icon"></span></th>
+                            <th data-column="121">Actual Container HO Date <span class="sort-icon"></span></th>
+
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!--List Document Send-->
+        <div class="modal fade" id="listdocumentsendModal" tabindex="-1" aria-labelledby="listdocumentsendLabel" aria-hidden="true">
+            <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+                <div class="modal-content erppagesmodal-content">
+                    <div class="erppagesmodal-header">
+                        <div class="erppagesmodal-header-left">
+                            <div class="erppagesmodal-header-icon">
+                                <i class="fa fa-copy"></i>
+                            </div>
+                            <h5 class="erppagesmodal-title" id="listdocumentsendLabel">
+                                Document Send List
+                            </h5>
+                        </div>
+                        <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="erppagesmodal-body">
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Doc Type</label>
+                                <select class="erppage-input erppage-select" id="ddldoctype">
+                                    <option value="">Select Doc Type</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">V Type</label>
+                                <select class="erppage-input erppage-select" id="ddlvtype">
+                                    <option value="">Select V Type</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Search By</label>
+                                <div class="erppage-inputgroup">
+                                    <select class="erppage-input erppage-select erppage-width-30" id="ddlsearchby">
+                                        <option value="">Select Search By</option>
+                                        <option value="Party Name">Party Name</option>
+                                        <option value="City">City</option>
+                                        <option value="Bill No">Bill No</option>
+                                        <option value="Sauda No">Sauda No</option>
+                                        <option value="Exim No">Exim No</option>
+                                        <option value="Truck No">Truck No</option>                         
+
+                                    </select>
+                                    <input type="text" class="erppage-input erppage-width-70" id="txtsearchby" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">From Date</label>
+                                <input type="date" class="erppage-input" id="Dtfromdate" />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">To Date</label>
+                                <input type="date" class="erppage-input" id="Dttodate" />
+                            </div>
+                        </div>
+                        <div class="erppages-row mt-2">
+                            <div class="erppage-radio-group">
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdonlypending" name="PrintType" value="OnlyPending">
+                                    <span>Only Pending</span>
+                                </label>
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdonlysend" name="PrintType" value="OnlySend">
+                                    <span>Only Send</span>
+                                </label>
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdonlyreceived" name="PrintType" value="OnlyReceived">
+                                    <span>Only Received</span>
+                                </label>
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdsendnotreceived" name="PrintType" value="SendNotReceived">
+                                    <span>Send but not Received</span>
+                                </label>
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdunprinted" name="PrintType" value="UnPrinted">
+                                    <span>Send and Received</span>
+                                </label>
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdAll" name="PrintType" value="All">
+                                    <span>All</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="ChkSelectAll" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Select All</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Send To</label>
+                                <select class="erppage-input erppage-select" id="ddlsendto">
+                                    <option value="">Select Send To</option>
+                                </select>
+                            </div>
+                            <div class="erppages-internalaction">
+                                <button type="button" class="erppage-btn erppage-btn-common-disabled" id="btn_search"><i class="fa fa-search"></i> Search</button>
+                                <button type="button" class="erppage-btn erppage-btn-common-active-disabled" id="btn_send"><i class="fa fa-paper-plane"></i> Send</button>
+                            </div>
+                        </div>
+
+                        <div class="excel-wrapper fixed-grid-wrapper">
+                            <table id="tbldocumentsendlist" class="excel-table width-table fixed-grid-table resizable-table">
+                                <colgroup>
+                                    <col style="width:90px;">   
+                                    <col style="width:110px;">  
+                                    <col style="width:180px;">  
+                                    <col style="width:220px;">  
+                                    <col style="width:120px;">  
+                                    <col style="width:110px;">  
+                                    <col style="width:120px;">  
+                                    <col style="width:180px;">  
+                                    <col style="width:180px;">  
+                                    <col style="width:110px;">  
+                                    <col style="width:120px;">  
+                                    <col style="width:110px;">  
+                                    <col style="width:150px;">  
+                                    <col style="width:50px;">   
+                                    <col style="width:130px;">  
+                                    <col style="width:130px;">  
+                                    <col style="width:130px;">  
+                                    <col style="width:130px;">  
+                                    <col style="width:130px;">  
+                                    <col style="width:130px;">  
+                                    <col style="width:130px;">  
+                                    <col style="width:130px;">  
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th data-column="0"> V Type <span class="sort-icon"></span>  </th>
+                                        <th data-column="0"> V No <span class="sort-icon"></span>  </th>
+                                        <th data-column="0"> Sauda Type <span class="sort-icon"></span>  </th>
+                                        <th data-column="0"> Sauda No <span class="sort-icon"></span>  </th>
+                                        <th data-column="1"> Sauda Date <span class="sort-icon"></span> </th>
+                                        <th data-column="2"> Sauda Party Code <span class="sort-icon"></span> </th>
+                                        <th data-column="2"> Sauda Party <span class="sort-icon"></span> </th>
+                                        <th data-column="3"> City Name <span class="sort-icon"></span> </th>
+                                        <th data-column="3"> Expense Billing Party <span class="sort-icon"></span> </th>
+                                        <th data-column="4">  Bill No <span class="sort-icon"></span> </th>
+                                        <th data-column="5"> Bill Date <span class="sort-icon"></span> </th>
+                                        <th data-column="6"> Bill Amount <span class="sort-icon"></span> </th>
+                                        <th data-column="7"> Remarks <span class="sort-icon"></span> </th>
+                                        <th data-column="8">  TRUCK NO <span class="sort-icon"></span> </th>
+                                        <th data-column="8">  Doc Send To Code <span class="sort-icon"></span> </th>
+                                        <th data-column="8">  Doc Send To <span class="sort-icon"></span> </th>
+                                        <th data-column="9">  Send Status <span class="sort-icon"></span>  </th>
+                                        <th data-column="10">  Send Date <span class="sort-icon"></span> </th>
+                                        <th data-column="11"> Recd Status <span class="sort-icon"></span>  </th>
+                                        <th data-column="12"> Recd Datetime <span class="sort-icon"></span>  </th>
+                                        <th data-column="13" class="text-center" style="width:40px;"> <input type="checkbox" id="chkSelectAll" />  </th>
+                                        <th data-column="14"> Send Document <span class="sort-icon"></span> </th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+     let sendToList = [];
+          
+    $(document).ready(function () {
+        var today = new Date();
+        var currentDate = today.getFullYear() + '-' +  String(today.getMonth() + 1).padStart(2, '0') + '-' +  String(today.getDate()).padStart(2, '0');
+
+        $('#DtDatefrom').val(currentDate);
+        $('#Dtto').val(currentDate);
+        $('#Dtfromdate').val(currentDate);
+        $('#Dttodate').val(currentDate);
+
+        $('#btnviewdata').on('click',async function ()
+                {
+                     GetReportData();
+                });
+
+        $('#btn_listofdoc').on('click',async function ()
+            {
+                LoadDropdown();
+            });
+
+        $('#searchBox').on('keyup', function () {
+                    let value = $(this).val().toLowerCase().trim();
+                    $('#tblImportTrackingReport tbody tr').each(function () {
+                        let found = false;
+                        $(this).find('td').each(function () {
+                            if ($(this).text().toLowerCase().indexOf(value) > -1) {
+                                found = true;
+                                return false; 
+                            }
+                        });
+                        $(this).toggle(found);
+                    });
+            });
+
+        $('#btn_search').on('click' ,async function() {
+             await loadSendTo();
+              GetDocumentListData();          
+        });
+
+    });
+        
+    async function GetReportData() {
+                    try {
+
+                        const fromDate = $('#DtDatefrom').val();
+                        const toDate = $('#Dtto').val();
+                    
+                        const res = await $.ajax({
+                            url: '/ImportTrackingReport/GetReportData',
+                            type: 'GET',
+                            data: {FromDate: fromDate,ToDate: toDate}
+                        });
+
+                        console.log("Response:", res);
+                        
+                        if (res.success) {
+                            console.log(res.data);  
+                            bindImportTrackingReport(res.data);
+
+                        } else {
+                            toastr.error(res.message);
+                        }
+
+                    } catch (error) {
+                        console.error("Error:", error);
+                        toastr.error("Failed to load report data.");
+                    }
+                }         
+        
+    function bindImportTrackingReport(data) {
+                const tbody = $('#tblImportTrackingReport tbody');
+                tbody.empty();
+                if (!data || data.length === 0) {
+                    tbody.append(`<tr> <td colspan="123" class="text-center">No data found.</td>  </tr> `);
+                    return;
+                }
+                data.forEach((item, index) => {
+
+
+                    console.log(
+                        "Header:", $('#tblImportTrackingReport thead th').length,
+                        "Body:", $('#tblImportTrackingReport tbody tr:first td').length
+                    );
+
+                    tbody.append(`
+                        <tr>
+                            <td class="hidden-col">${index + 1}</td>
+                            <td class="freeze-item freeze1">${item.saudaNo ?? ''}</td>
+                            <td class="freeze-item freeze2">${item.saudaDate ?? ''}</td>
+                            <td class="freeze-item freeze3">${item.supplierName ?? ''}</td>
+                            <td class="freeze-item freeze4">${item.itemName ?? ''}</td>
+                            <td class="freeze-item freeze5">${item.deliveryLocation ?? ''}</td>
+                            <td>${item.country ?? ''}</td>
+                            <td>${item.expectedLoading ?? ''}</td>
+                            <td>${item.paymentTerm ?? ''}</td>
+                            <td>${item.frtTerm ?? ''}</td>
+                            <td>${item.delTerm ?? ''}</td>
+                            <td>${item.remark ?? ''}</td>
+                            <td>${item.noofContainer ?? 0}</td>
+                            <td>${item.saudaQty ?? 0}</td>
+                            <td>${item.trackingQty ?? 0}</td>
+                            <td>${item.mrnQty ?? 0}</td>
+                            <td>${item.mrnNo ?? ''}</td>
+                            <td>${item.mrnDate ?? ''}</td>
+                            <td>${item.containerNo ?? ''}</td>
+                            <td>${item.containerSize ?? ''}</td>
+                            <td>${item.invNo ?? ''}</td>
+                            <td>${item.invDate ?? ''}</td>
+                            <td>${item.invAmt ?? 0}</td>
+                            <td>${item.pod ?? ''}</td>
+                            <td>${item.pol ?? ''}</td>
+                            <td>${item.vslName ?? ''}</td>
+                            <td>${item.icdName ?? ''}</td>
+                            <td>${item.freeDays ?? 0}</td>
+                            <td>${item.etd ?? ''}</td>
+                            <td>${item.etaPortDate ?? ''}</td>
+                            <td>${item.railDate ?? ''}</td>
+                            <td>${item.icdReachDate ?? ''}</td>
+                            <td>${item.pino ?? ''}</td>
+                            <td>${item.offerno ?? ''}</td>
+                            <td>${item.chaName ?? ''}</td>
+                            <td>${item.scandoC_VERIFYDATE ?? ''}</td>
+                            <td>${item.etA_PLACE ?? ''}</td>
+                            <td>${item.BL_NO ?? ''}</td>
+                            <td>${item.BL_DATE ?? ''}</td>
+                            <td>${item.bL_HANDOVERDATE ?? ''}</td>
+                            <td>${item.chA_CHARGEDETAIL ?? ''}</td>
+                            <td>${item.chklisT_APPROVDATE ?? ''}</td>
+                            <td>${item.bE_NO ?? ''}</td>
+                            <td>${item.bE_DATE ?? ''}</td>
+                            <td>${item.etA_BEDATE ?? ''}</td>
+                            <td>${item.igM_DATE ?? ''}</td>
+                            <td>${item.samplE_COLLECTED ?? ''}</td>
+                            <td>${item.samplE_COLDATE ?? ''}</td>
+                            <td>${item.samplE_TESTREPORTDATE ?? ''}</td>
+                            <td>${item.assesmenT_TYPE ?? ''}</td>
+                            <td>${item.assesmenT_DATE ?? ''}</td>
+                            <td>${item.dutY_AMT ?? ''}</td>
+                            <td>${item.dutY_PAYDATE ?? ''}</td>
+                            <td>${item.dutY_PAYMODE ?? ''}</td>
+                            <td>${item.advancE_LICNO ?? ''}</td>
+                            <td>${item.doC_HANDOVERDTBANK ?? ''}</td>
+                            <td>${item.shiplinE_PAYDATE ?? ''}</td>
+                            <td>${item.shippingLine ?? ''}</td>
+                            <td>${item.hollagE_CHARGES ?? ''}</td>
+                            <td>${item.dO_DATE ?? ''}</td>
+                            <td>${item.securitY_AMT ?? ''}</td>
+                            <td>${item.refunD_AMT ?? ''}</td>
+                            <td>${item.receipT_DATE ?? ''}</td>
+                            <td>${item.tentativE_HODATE ?? ''}</td>
+                            <td>${item.containeR_HODATE ?? ''}</td>
+                            <td>${item.advPaymentAmount ?? ''}</td>
+                            <td>${item.advPaymentReference ?? ''}</td>
+                            <td>${item.advPaymentDate ?? ''}</td>
+                            <td>${item.baPaymentAmount ?? ''}</td>
+                            <td>${item.balPaymentReference ?? ''}</td>
+                            <td>${item.balPaymentDate ?? ''}</td>
+                            <td>${item.difF_DAYS ?? ''}</td>
+                            <td>${item.inT_RATE ?? ''}</td>
+                            <td>${item.otH_CHARGES ?? ''}</td>
+                            <td>${item.sblC_AVLAMT ?? ''}</td>
+                            <td>${item.supplier ?? ''}</td>
+                            <td>${item.agent ?? ''}</td>
+                            <td>${item.bank ?? ''}</td>
+                            <td>${item.shiplinE_NAME ?? ''}</td>
+                            <td>${item.sblC_NO ?? ''}</td>
+                            <td>${item.sblC_APPLDATE ?? ''}</td>
+                            <td>${item.sblC_DUEDATE ?? ''}</td>
+                            <td>${item.sblC_INTRATESOF ?? ''}</td>
+                            <td>${item.seC_DATE ?? ''}</td>
+                            <td>${item.refunD_RECDATE ?? ''}</td>
+                            <td>${item.detentioN_AMT ?? ''}</td>
+                            <td>${item.detentioN_DATE ?? ''}</td>
+                            <td>${item.detentioN_REASON ?? ''}</td>
+                            <td>${item.detreasoN_APPROVBY ?? ''}</td>
+                            <td>${item.custoM_OOCDATE ?? ''}</td>
+                            <td>${item.factorY_DATE ?? ''}</td>
+                            <td>${item.lC_NO ?? ''}</td>
+                            <td>${item.lC_DATE ?? ''}</td>
+                            <td>${item.lC_BENIFICIARY ?? ''}</td>
+                            <td>${item.lC_ISSUEBANK ?? ''}</td>
+                            <td>${item.lC_EXPIRYDATE ?? ''}</td>
+                            <td>${item.lC_AMT ?? ''}</td>
+                            <td>${item.tenconT_HORETDATE ?? ''}</td>
+                            <td>${item.latesT_SHIPDATE ?? ''}</td>
+                            <td>${item.qltY_CLAIMAMT ?? ''}</td>
+                            <td>${item.boE_SUBMITDATE ?? ''}</td>
+                            <td>${item.qC_AMT ?? ''}</td>
+                            <td>${item.enhancE_RATE ?? ''}</td>
+                            <td>${item.passinG_RATE ?? ''}</td>
+                            <td>${item.undeR_PROTEST ?? ''}</td>
+
+                            <td>${item.chA_CHARGETYPE ?? ''}</td>
+                            <td>${item.concoR_EXPS ?? 0}</td>
+                            <td>${item.chA_AMT ?? 0}</td>
+                            <td>${item.cfS_CHARGES ?? 0}</td>
+                            <td>${item.cfS_DSTUFFDATE ?? ''}</td>
+                            <td>${item.cfS_AMT ?? 0}</td>
+                            <td>${item.cfS_PAYDATE ?? ''}</td>
+                            <td>${item.qC_AMTRECD ?? 0}</td>
+                            <td>${item.actuaL_CONTHODATE ?? ''}</td>  
+                            
+                        </tr>
+                    `);
+                });
+            }
+
+    async function LoadDropdown() {
+        try {
+            await Promise.all([
+                cmbDoctype(),
+                cboVType() 
+            ]);
+
+        } catch (error) {
+            console.log("Dropdown load failed:", error);
+            toastr.error("Failed to load dropdown data");
+        }
+    }
+
+    async function cmbDoctype() {
+        try {
+            const res = await fetch('/ImportTrackingReport/cmbDoctype');
+            const data = await res.json();
+            const ddl = $('#ddldoctype');
+            ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Doc Type:", error);
+        }
+    }
+
+    async function cboVType() {
+        try {
+            const res = await fetch('/ImportTrackingReport/cboVType');
+            const data = await res.json();
+            const ddl = $('#ddlvtype');
+            ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+            data.forEach(item => {
+                ddl.append(`<option value="${item.value}">${item.text}</option>`);
+            });
+        } catch (error) {
+            console.error("Error loading Doc Type:", error);
+        }
+    }
+       
+    async function loadSendTo() {
+        try {
+            const textbox = $('#txtsearchby').val();
+
+            const res = await fetch(`/ImportTrackingReport/SendTo?Textbox=${encodeURIComponent(textbox)}`);
+
+            if (!res.ok) {
+                throw new Error("Failed to load data.");
+            }
+
+            const data = await res.json();
+            sendToList = data;
+            console.log(sendToList);          
+
+        } catch (error) {
+            console.error("Error loading Send To list:", error);
+        }
+    }
+
+
+    // Get Documentlist 
+
+   async function GetDocumentListData() {
+            try {
+
+                const DocType = $('#ddldoctype').val();
+                const vType  = $('#ddlvtype').val();
+                const fromDate = $('#Dtfromdate').val();
+                const toDate = $('#Dttodate').val();
+
+                if(DocType == ""  &&  vType == "")
+                {
+                    toastr.info("Data not found");
+                }                           
+
+                const res = await $.ajax({
+                    url: '/ImportTrackingReport/GetDocumentListData',
+                    type: 'GET',
+                    data: {FromDate: fromDate,ToDate: toDate}
+                });
+
+                    console.log("GetDocumentListData:", res);
+
+                    if (res.success)
+                    {
+                        console.log(res.data);
+                         bindDocTabeList(res.data);
+                    } 
+                    else 
+                    {
+                        toastr.error(res.message);
+                    }
+            } 
+            catch (error) 
+            {
+                console.error("Error:", error);
+                toastr.error("Failed to load report data.");
+            }
+       }
+
+    function bindDocTabeList(data) {
+        const tDocbody = $('#tbldocumentsendlist tbody');
+        tDocbody.empty();
+
+        if (!data || data.length === 0) {
+            tDocbody.append(` <tr>  <td colspan="19" class="text-center">No data found.</td>  </tr>  `);
+            return;
+        }
+
+        data.forEach((item, index) => {
+
+            tDocbody.append(`
+                <tr>
+                <td>${item.v_TYPE ?? ''}</td>
+                <td>${item.v_NO ?? ''}</td>
+                <td>${item.saudA_TYPE ?? ''}</td>
+                <td>${item.saudA_NO ?? ''}</td>
+                <td>${item.v_DATE ?? ''}</td>
+                <td>${item.partyName ?? ''}</td>
+                <td>${item.partY_CODE ?? ''}</td>
+                <td>${item.cityName ?? ''}</td>
+                <td>${item.partY_CITY ?? ''}</td>
+                <td>${item.bilL_NO ?? ''}</td>
+                <td>${item.bilL_DATE ?? ''}</td>
+                <td class="text-end">${item.inV_AMT ?? 0}</td>
+                <td>${item.remarks ?? ''}</td>
+                <td>${item.trucK_NO ?? ''}</td>
+                <td>${item.receiverCode ?? ''}</td>
+                <td>${item.receiverName ?? ''}</td>
+                <td>${item.senD_FLAG ?? ''}</td>
+                <td>${item.senD_DATE ?? ''}</td>
+                <td>${item.recD_FLAG ?? ''}</td>
+                <td>${item.recD_DATE ?? ''}</td>
+                <td class="text-center"> <input type="checkbox" class="row-checkbox" value="${item.v_TYPE}_${item.v_NO}"> </td>
+                <td class="text-center"> <button type="button"  class="btn btn-sm btn-primary btnSendDocument" data-vtype="${item.v_TYPE}" data-vno="${item.v_NO}"> Send  </button> </td>
+                </tr>
+            `);
+        });
+    }
+                    
+
+
+
+
+
+
+
+
+
+
+</script>

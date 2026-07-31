@@ -780,20 +780,13 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 using var conn = _dbConnection.GetErpConnection();
                 conn.Open();
 
-                        string sql = @"
-                        SELECT Sauda_No
-                        FROM Order1 
-                        WHERE V_type = @VType 
-                        AND Sauda_Type = @SaudaType 
-                        AND Sauda_No = @SaudaNo 
-                        AND Comp_code = @CompCode";
+                string sql = @"  SELECT Sauda_No FROM Order1  WHERE V_type = @VType   AND Sauda_Type = @SaudaType  AND Sauda_No = @SaudaNo   AND Comp_code = @CompCode";
 
                 using var cmd2 = new SqlCommand(sql, conn);
 
                 // IMPORTANT: ensure variables are actually assigned
                 string vType = "RORD";
                 string saudaType = "PAUD";
-
 
                 cmd2.Parameters.AddWithValue("@VType", vType);
                 cmd2.Parameters.AddWithValue("@SaudaType", saudaType);
