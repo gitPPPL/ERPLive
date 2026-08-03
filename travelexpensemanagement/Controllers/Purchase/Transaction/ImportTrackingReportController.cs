@@ -1,10 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using iText.StyledXmlParser.Jsoup.Select;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Org.BouncyCastle.Bcpg.OpenPgp;
+using Org.BouncyCastle.Ocsp;
 using System.Data;
+using System.Reflection.Emit;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Models.Purchase.Transaction;
 
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
@@ -17,7 +22,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly GlobalValidationdate _globalValidationdate;
         private readonly DropdownService _dropdownService;
-
 
         public ImportTrackingReportController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, DropdownService dropdownService)
         {
@@ -53,8 +57,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
                         cmd.Parameters.AddWithValue("@CompCode", gv.PubCompCode);
                         cmd.Parameters.AddWithValue("@BranchCode", gv.PubBranchCode);
-                        cmd.Parameters.Add("@FromDate", SqlDbType.SmallDateTime).Value = FromDate ;
-                        cmd.Parameters.Add("@ToDate", SqlDbType.SmallDateTime).Value = ToDate ;
+                        cmd.Parameters.Add("@FromDate", SqlDbType.SmallDateTime).Value = FromDate;
+                        cmd.Parameters.Add("@ToDate", SqlDbType.SmallDateTime).Value = ToDate;
 
                         using (SqlDataReader rdr = await cmd.ExecuteReaderAsync())
                         {
@@ -62,141 +66,170 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                             {
                                 dataList.Add(new
                                 {
-                                    SaudaNo = rdr["SaudaNo"]?.ToString(),
-                                    SaudaDate = rdr["SaudaDate"]?.ToString(),
-                                    SupplierName = rdr["SupplierName"]?.ToString(),
-                                    ItemName = rdr["ItemName"]?.ToString(),
-                                    DeliveryLocation = rdr["DeliveryLocation"]?.ToString(),
-                                    Country = rdr["Country"]?.ToString(),
-                                    ExpectedLoading = rdr["ExpectedLoading"]?.ToString(),
-                                    PaymentTerm = rdr["PaymentTerm"]?.ToString(),
-                                    FrtTerm = rdr["FrtTerm"]?.ToString(),
-                                    DelTerm = rdr["DelTerm"]?.ToString(),
-                                    Remark = rdr["Remark"]?.ToString(),
-                                    NoofContainer = rdr["NoofContainer"] == DBNull.Value ? 0 : Convert.ToInt32(rdr["NoofContainer"]),
-                                    SaudaQty = rdr["SaudaQty"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["SaudaQty"]),
-                                    TrackingQty = rdr["TrackingQty"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["TrackingQty"]),
-                                    MRNQty = rdr["MRNQty"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["MRNQty"]),
-                                    MRNNo = rdr["MRNNo"] == DBNull.Value ? 0 : Convert.ToInt32(rdr["MRNNo"]),
-                                    MRNDate = rdr["MRNDate"]?.ToString(),
-                                    ContainerNo = rdr["ContainerNo"]?.ToString(),
-                                    ContainerSize = rdr["ContainerSize"]?.ToString(),
-                                    InvNo = rdr["InvNo"]?.ToString(),
-                                    InvDate = rdr["InvDate"]?.ToString(),
-                                    InvAmt = rdr["InvAmt"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["InvAmt"]),
-                                    POD = rdr["POD"]?.ToString(),
-                                    POL = rdr["POL"]?.ToString(),
-                                    VSLName = rdr["VSLName"]?.ToString(),
-                                    ICDName = rdr["ICDName"]?.ToString(),
-                                    FreeDays = rdr["FreeDays"] == DBNull.Value ? 0 : Convert.ToInt32(rdr["FreeDays"]),
-                                    ETD = rdr["ETD"]?.ToString(),
-                                    ETAPortDate = rdr["ETAPortDate"]?.ToString(),
-                                    RailDate = rdr["RailDate"]?.ToString(),
-                                    ICDReachDate = rdr["ICDReachDate"]?.ToString(),
-                                    PINO = rdr["PINO"]?.ToString(),
-                                    OFFERNO = rdr["OFFERNO"]?.ToString(),
-                                    CHAName = rdr["CHAName"]?.ToString(),
-                                    SCANDOC_VERIFYDATE = rdr["SCANDOC_VERIFYDATE"]?.ToString(),
-                                    ETA_PLACE = rdr["ETA_PLACE"]?.ToString(),
-                                    CHAHANDOVER_DATE = rdr["CHAHANDOVER_DATE"]?.ToString(),                    
-                                    BL_NO = rdr["BL_NO"]?.ToString(),
-                                    BL_DATE = rdr["BL_DATE"]?.ToString(),
-                                    BL_RECDDATE = rdr["BL_RECDDATE"]?.ToString(),
-                                    BL_HANDOVERDATE = rdr["BL_HANDOVERDATE"]?.ToString(),
-                                    CHA_CHARGEDETAIL = rdr["CHA_CHARGEDETAIL"]?.ToString(),
-                                    CHKLIST_APPROVDATE = rdr["CHKLIST_APPROVDATE"]?.ToString(),
-                                    BE_NO = rdr["BE_NO"]?.ToString(),
-                                    BE_DATE = rdr["BE_DATE"]?.ToString(),
-                                    ETA_BEDATE = rdr["ETA_BEDATE"]?.ToString(),
-                                    IGM_DATE = rdr["IGM_DATE"]?.ToString(),
-                                    SAMPLE_COLLECTED = rdr["SAMPLE_COLLECTED"]?.ToString(),
-                                    SAMPLE_COLDATE = rdr["SAMPLE_COLDATE"]?.ToString(),
-                                    SAMPLE_TESTREPORTDATE = rdr["SAMPLE_TESTREPORTDATE"]?.ToString(),
-                                    ASSESMENT_TYPE = rdr["ASSESMENT_TYPE"]?.ToString(),
-                                    ASSESMENT_DATE = rdr["ASSESMENT_DATE"]?.ToString(),
-                                    DUTY_PAYDATE = rdr["DUTY_AMT"]?.ToString(),
-                                    DUTY_AMT = rdr["DUTY_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["DUTY_AMT"]),
-                                    DUTY_PAYMODE = rdr["DUTY_PAYMODE"]?.ToString(),
-                                    ADVANCE_LICNO = rdr["ADVANCE_LICNO"]?.ToString(),
-                                    DOC_HANDOVERDTBANK = rdr["DOC_HANDOVERDTBANK"]?.ToString(),
-                                    SHIPLINE_PAYDATE = rdr["SHIPLINE_PAYDATE"]?.ToString(),
-                                    ShippingLine = rdr["ShippingLine"]?.ToString(),
-                                    HOLLAGE_CHARGES = rdr["HOLLAGE_CHARGES"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["HOLLAGE_CHARGES"]),
-                                    DO_DATE = rdr["DO_DATE"]?.ToString(),
-                                    SECURITY_AMT = rdr["SECURITY_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["SECURITY_AMT"]),
-                                    REFUND_AMT = rdr["REFUND_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["REFUND_AMT"]),
-                                    RECEIPT_DATE = rdr["RECEIPT_DATE"]?.ToString(),
-                                    TENTATIVE_HODATE = rdr["TENTATIVE_HODATE"]?.ToString(),
-                                    CONTAINER_HODATE = rdr["CONTAINER_HODATE"]?.ToString(),
-                                    AdvPaymentDate = rdr["AdvPaymentDate"]?.ToString(),
-                                    BalPaymentDate = rdr["BalPaymentDate"]?.ToString(),                            
-                                    AdvPaymentAmount = rdr["AdvPaymentAmount"] == DBNull.Value ? "" : rdr["AdvPaymentAmount"].ToString(),
-                                    AdvPaymentReference = rdr["AdvPaymentReference"]?.ToString(),
-                                    BaPaymentAmount = rdr["BaPaymentAmount"] == DBNull.Value ? "" : rdr["BaPaymentAmount"].ToString(),
-                                    BalPaymentReference = rdr["BalPaymentReference"]?.ToString(),                   
-                                    DIFF_DAYS = rdr["DIFF_DAYS"] == DBNull.Value ? 0 : Convert.ToInt32(rdr["DIFF_DAYS"]),
-                                    INT_RATE = rdr["INT_RATE"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["INT_RATE"]),
-                                    OTH_CHARGES = rdr["OTH_CHARGES"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["OTH_CHARGES"]),
-                                    SBLC_AVLAMT = rdr["SBLC_AVLAMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["SBLC_AVLAMT"]),
-                                    Supplier = rdr["Supplier"]?.ToString(),
-                                    Agent = rdr["Agent"]?.ToString(),
-                                    Bank = rdr["Bank"]?.ToString(),
-                                    SHIPLINE_NAME = rdr["SHIPLINE_NAME"]?.ToString(),
-                                    SBLC_NO = rdr["SBLC_NO"]?.ToString(),
-                                    SBLC_APPLDATE = rdr["SBLC_APPLDATE"]?.ToString(),
-                                    SBLC_PAYDATE = rdr["SBLC_PAYDATE"]?.ToString(),
-                                    SBLC_DUEDATE = rdr["SBLC_DUEDATE"]?.ToString(),
-                                    SBLC_DISBDATE = rdr["SBLC_DISBDATE"]?.ToString(),
-                                    DO_VALIDDATE = rdr["DO_VALIDDATE"]?.ToString(),
-                                    SEC_DATE = rdr["SEC_DATE"]?.ToString(),
-                                    REFUND_RECDATE = rdr["REFUND_RECDATE"]?.ToString(),
-                                    DETENTION_DATE = rdr["DETENTION_DATE"]?.ToString(),
-                                    CUSTOM_OOCDATE = rdr["CUSTOM_OOCDATE"]?.ToString(),
-                                    FACTORY_DATE = rdr["FACTORY_DATE"]?.ToString(),
-                                    LC_DATE = rdr["LC_DATE"]?.ToString(),
-                                    LC_EXPIRYDATE = rdr["LC_EXPIRYDATE"]?.ToString(),
-                                    TENTATIVE_HORETDATE = rdr["TENTATIVE_HORETDATE"]?.ToString(),
-                                    MOVE_DATE = rdr["MOVE_DATE"]?.ToString(),
-                                    TENCONT_HORETDATE = rdr["TENCONT_HORETDATE"]?.ToString(),
-                                    LATEST_SHIPDATE = rdr["LATEST_SHIPDATE"]?.ToString(),
-                                    BOE_SUBMITDATE = rdr["BOE_SUBMITDATE"]?.ToString(),
-                                    CFS_DSTUFFDATE = rdr["CFS_DSTUFFDATE"]?.ToString(),
-                                    CFS_PAYDATE = rdr["CFS_PAYDATE"]?.ToString(),
-                                    ACTUAL_CONTHODATE = rdr["ACTUAL_CONTHODATE"]?.ToString(),
-                                    SBLC_DISBAMT = rdr["SBLC_DISBAMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["SBLC_DISBAMT"]),                    
-                                    SBLC_INTRATESOFR = rdr["SBLC_INTRATESOFR"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["SBLC_INTRATESOFR"]),
-                                    DETENTION_AMT = rdr["DETENTION_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["DETENTION_AMT"]),                 
-                                    DETENTION_REASON = rdr["DETENTION_REASON"]?.ToString(),
-                                    DETREASON_APPROVBY = rdr["DETREASON_APPROVBY"]?.ToString(),
-                                    LC_NO = rdr["LC_NO"]?.ToString(),                       
-                                    LC_BENIFICIARY = rdr["LC_BENIFICIARY"]?.ToString(),
-                                    LC_ISSUEBANK = rdr["LC_ISSUEBANK"]?.ToString(),                     
-                                    LC_AMT = rdr["LC_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["LC_AMT"]),
-                                    QLTY_CLAIMAMT = rdr["QLTY_CLAIMAMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["QLTY_CLAIMAMT"]),
-                                    QC_AMT = rdr["QC_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["QC_AMT"]),
-                                    ENHANCE_RATE = rdr["ENHANCE_RATE"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["ENHANCE_RATE"]),
-                                    PASSING_RATE = rdr["PASSING_RATE"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["PASSING_RATE"]),
-                                    UNDER_PROTEST = rdr["UNDER_PROTEST"]?.ToString(),
-                                    CHA_CHARGETYPE = rdr["CHA_CHARGETYPE"]?.ToString(),
-                                    CONCOR_EXPS = rdr["CONCOR_EXPS"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["CONCOR_EXPS"]),
-                                    CHA_AMT = rdr["CHA_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["CHA_AMT"]),
-                                    CFS_CHARGES = rdr["CFS_CHARGES"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["CFS_CHARGES"]),           
-                                    CFS_AMT = rdr["CFS_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["CFS_AMT"]),                 
-                                    QC_AMTRECD = rdr["QC_AMTRECD"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["QC_AMTRECD"]),
-                        
+                                    // Dates
+                                    SaudaDate = SafeDate(rdr, "SaudaDate"),
+                                    MRNDate = SafeDate(rdr, "MRNDate"),
+                                    InvDate = SafeDate(rdr, "InvDate"),
+                                    ETAPortDate = SafeDate(rdr, "ETAPortDate"),
+                                    RailDate = SafeDate(rdr, "RailDate"),
+                                    ICDReachDate = SafeDate(rdr, "ICDReachDate"),
+                                    SCANDOC_VERIFYDATE = SafeDate(rdr, "SCANDOC_VERIFYDATE"),
+                                    CHAHANDOVER_DATE = SafeDate(rdr, "CHAHANDOVER_DATE"),
+                                    BL_DATE = SafeDate(rdr, "BL_DATE"),
+                                    BL_RECDDATE = SafeDate(rdr, "BL_RECDDATE"),
+                                    BL_HANDOVERDATE = SafeDate(rdr, "BL_HANDOVERDATE"),
+                                    CHKLIST_APPROVDATE = SafeDate(rdr, "CHKLIST_APPROVDATE"),
+                                    BE_DATE = SafeDate(rdr, "BE_DATE"),
+                                    ETA_BEDATE = SafeDate(rdr, "ETA_BEDATE"),
+                                    IGM_DATE = SafeDate(rdr, "IGM_DATE"),
+                                    SAMPLE_COLDATE = SafeDate(rdr, "SAMPLE_COLDATE"),
+                                    SAMPLE_TESTREPORTDATE = SafeDate(rdr, "SAMPLE_TESTREPORTDATE"),
+                                    ASSESMENT_DATE = SafeDate(rdr, "ASSESMENT_DATE"),
+                                    DUTY_PAYDATE = SafeDate(rdr, "DUTY_PAYDATE"),
+                                    SHIPLINE_PAYDATE = SafeDate(rdr, "SHIPLINE_PAYDATE"),
+                                    DO_DATE = SafeDate(rdr, "DO_DATE"),
+                                    RECEIPT_DATE = SafeDate(rdr, "RECEIPT_DATE"),
+                                    TENTATIVE_HODATE = SafeDate(rdr, "TENTATIVE_HODATE"),
+                                    CONTAINER_HODATE = SafeDate(rdr, "CONTAINER_HODATE"),
+                                    AdvPaymentDate = SafeDate(rdr, "AdvPaymentDate"),
+                                    BalPaymentDate = SafeDate(rdr, "BalPaymentDate"),
+                                    SBLC_APPLDATE = SafeDate(rdr, "SBLC_APPLDATE"),
+                                    SBLC_PAYDATE = SafeDate(rdr, "SBLC_PAYDATE"),
+                                    SBLC_DUEDATE = SafeDate(rdr, "SBLC_DUEDATE"),
+                                    SBLC_DISBDATE = SafeDate(rdr, "SBLC_DISBDATE"),
+                                    DO_VALIDDATE = SafeDate(rdr, "DO_VALIDDATE"),
+                                    SEC_DATE = SafeDate(rdr, "SEC_DATE"),
+                                    REFUND_RECDATE = SafeDate(rdr, "REFUND_RECDATE"),
+                                    DETENTION_DATE = SafeDate(rdr, "DETENTION_DATE"),
+                                    CUSTOM_OOCDATE = SafeDate(rdr, "CUSTOM_OOCDATE"),
+                                    FACTORY_DATE = SafeDate(rdr, "FACTORY_DATE"),
+                                    LC_DATE = SafeDate(rdr, "LC_DATE"),
+                                    LC_EXPIRYDATE = SafeDate(rdr, "LC_EXPIRYDATE"),
+
+                                    // Strings
+                                    SaudaNo = SafeString(rdr, "SaudaNo"),
+                                    SupplierName = SafeString(rdr, "SupplierName"),
+                                    ItemName = SafeString(rdr, "ItemName"),
+                                    DeliveryLocation = SafeString(rdr, "DeliveryLocation"),
+                                    Country = SafeString(rdr, "Country"),
+                                    ExpectedLoading = SafeString(rdr, "ExpectedLoading"),
+                                    PaymentTerm = SafeString(rdr, "PaymentTerm"),
+                                    FrtTerm = SafeString(rdr, "FrtTerm"),
+                                    DelTerm = SafeString(rdr, "DelTerm"),
+                                    Remark = SafeString(rdr, "Remark"),
+                                    ContainerNo = SafeString(rdr, "ContainerNo"),
+                                    ContainerSize = SafeString(rdr, "ContainerSize"),
+                                    InvNo = SafeString(rdr, "InvNo"),
+                                    POD = SafeString(rdr, "POD"),
+                                    POL = SafeString(rdr, "POL"),
+                                    VSLName = SafeString(rdr, "VSLName"),
+                                    ICDName = SafeString(rdr, "ICDName"),
+                                    ETD = SafeString(rdr, "ETD"),
+                                    PINO = SafeString(rdr, "PINO"),
+                                    OFFERNO = SafeString(rdr, "OFFERNO"),
+                                    CHAName = SafeString(rdr, "CHAName"),
+                                    ETA_PLACE = SafeString(rdr, "ETA_PLACE"),
+                                    BL_NO = SafeString(rdr, "BL_NO"),
+                                    CHA_CHARGEDETAIL = SafeString(rdr, "CHA_CHARGEDETAIL"),
+                                    BE_NO = SafeString(rdr, "BE_NO"),
+                                    SAMPLE_COLLECTED = SafeString(rdr, "SAMPLE_COLLECTED"),
+                                    ASSESMENT_TYPE = SafeString(rdr, "ASSESMENT_TYPE"),
+                                    DUTY_PAYMODE = SafeString(rdr, "DUTY_PAYMODE"),
+                                    ADVANCE_LICNO = SafeString(rdr, "ADVANCE_LICNO"),
+                                    DOC_HANDOVERDTBANK = SafeString(rdr, "DOC_HANDOVERDTBANK"),
+                                    ShippingLine = SafeString(rdr, "ShippingLine"),
+                                    AdvPaymentAmount = SafeString(rdr, "AdvPaymentAmount"),
+                                    AdvPaymentReference = SafeString(rdr, "AdvPaymentReference"),
+                                    BaPaymentAmount = SafeString(rdr, "BaPaymentAmount"),
+                                    BalPaymentReference = SafeString(rdr, "BalPaymentReference"),
+                                    Supplier = SafeString(rdr, "Supplier"),
+                                    Agent = SafeString(rdr, "Agent"),
+                                    Bank = SafeString(rdr, "Bank"),
+                                    SHIPLINE_NAME = SafeString(rdr, "SHIPLINE_NAME"),
+                                    SBLC_NO = SafeString(rdr, "SBLC_NO"),
+                                    UNDER_PROTEST = SafeString(rdr, "UNDER_PROTEST"),
+                                    CHA_CHARGETYPE = SafeString(rdr, "CHA_CHARGETYPE"),
+
+                                    // Decimals
+                                    SaudaQty = SafeDecimal(rdr, "SaudaQty"),
+                                    TrackingQty = SafeDecimal(rdr, "TrackingQty"),
+                                    MRNQty = SafeDecimal(rdr, "MRNQty"),
+                                    InvAmt = SafeDecimal(rdr, "InvAmt"),
+                                    HOLLAGE_CHARGES = SafeDecimal(rdr, "HOLLAGE_CHARGES"),
+                                    SECURITY_AMT = SafeDecimal(rdr, "SECURITY_AMT"),
+                                    REFUND_AMT = SafeDecimal(rdr, "REFUND_AMT"),
+                                    INT_RATE = SafeDecimal(rdr, "INT_RATE"),
+                                    OTH_CHARGES = SafeDecimal(rdr, "OTH_CHARGES"),
+                                    SBLC_AVLAMT = SafeDecimal(rdr, "SBLC_AVLAMT"),
+                                    LC_AMT = SafeDecimal(rdr, "LC_AMT"),
+                                    QC_AMT = SafeDecimal(rdr, "QC_AMT"),
+                                    SBLC_DISBAMT = SafeDecimal(rdr, "SBLC_DISBAMT"),
+                                    SBLC_INTRATESOFR = SafeDecimal(rdr, "SBLC_INTRATESOFR"),
+                                    DETENTION_AMT = SafeDecimal(rdr, "DETENTION_AMT"),
+                                    QLTY_CLAIMAMT = SafeDecimal(rdr, "QLTY_CLAIMAMT"),
+                                    ENHANCE_RATE = SafeDecimal(rdr, "ENHANCE_RATE"),
+                                    PASSING_RATE = SafeDecimal(rdr, "PASSING_RATE"),
+                                    DUTY_AMT = SafeDecimal(rdr, "DUTY_AMT"),
+                                    CONCOR_EXPS = SafeDecimal(rdr, "CONCOR_EXPS"),
+                                    CHA_AMT = SafeDecimal(rdr, "CHA_AMT"),
+                                    CFS_CHARGES = SafeDecimal(rdr, "CFS_CHARGES"),
+                                    CFS_AMT = SafeDecimal(rdr, "CFS_AMT"),
+                                    QC_AMTRECD = SafeDecimal(rdr, "QC_AMTRECD"),
+
+                                    // Ints
+                                    NoofContainer = SafeInt(rdr, "NoofContainer"),
+                                    MRNNo = SafeInt(rdr, "MRNNo"),
+                                    FreeDays = SafeInt(rdr, "FreeDays"),
+                                    DIFF_DAYS = SafeInt(rdr, "DIFF_DAYS"),
                                 });
                             }
                         }
                     }
                 }
 
-                return new  { success = true, data = dataList };
+                return new { success = true, data = dataList };
             }
             catch (Exception ex)
             {
-                return new { success = false,  message = ex.Message };
+                return new { success = false, message = ex.Message };
             }
         }
+
+        // ---- Safe conversion helpers ----
+
+        private static DateTime? SafeDate(SqlDataReader rdr, string col)
+        {
+            if (rdr[col] == DBNull.Value) return null;
+            var raw = rdr[col].ToString();
+            if (string.IsNullOrWhiteSpace(raw)) return null;
+            return DateTime.TryParse(raw, out var dt) ? dt : (DateTime?)null;
+        }
+
+        private static decimal SafeDecimal(SqlDataReader rdr, string col)
+        {
+            if (rdr[col] == DBNull.Value) return 0;
+            var raw = rdr[col].ToString();
+            if (string.IsNullOrWhiteSpace(raw)) return 0;
+            return decimal.TryParse(raw, out var val) ? val : 0;
+        }
+
+        private static int SafeInt(SqlDataReader rdr, string col)
+        {
+            if (rdr[col] == DBNull.Value) return 0;
+            var raw = rdr[col].ToString();
+            if (string.IsNullOrWhiteSpace(raw)) return 0;
+            return int.TryParse(raw, out var val) ? val : 0;
+        }
+
+        private static string SafeString(SqlDataReader rdr, string col, string fallback = "")
+        {
+            if (rdr[col] == DBNull.Value) return fallback;
+            var raw = rdr[col].ToString();
+            // treat literal "NULL" text (sometimes returned by SPs) as empty too
+            return string.Equals(raw, "NULL", StringComparison.OrdinalIgnoreCase) ? fallback : raw;
+        }
+
+
         public JsonResult cmbDoctype()
         {
             var getdata = _globalValue.GetGlobalVariables();
@@ -207,7 +240,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(cmbDoctype);
             }
         }
-
         public JsonResult cboVType()
         {
             var getdata = _globalValue.GetGlobalVariables();
@@ -219,7 +251,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
 
         }
-        public JsonResult SendTo(string Textbox)
+        public JsonResult SendTo(string Textbox , string v_type)
         {
             var getdata = _globalValue.GetGlobalVariables();
             using (SqlConnection con = _dbcontext.GetErpConnection())
@@ -231,12 +263,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                      l1 = " and d.full_name like '" + Textbox + "%'";
                 }
 
-                string query = @"Select distinct d.full_name,d.CODE from DOCFLOW_USERS a 
+                string query = @"Select distinct d.CODE , d.full_name from DOCFLOW_USERS a 
                     Left join DOCTYPE_MAST b on a.Doc_code=b.code 
                     Left join SUBUSER_MAST c on a.USER_CODE=c.USER_CODE 
                     Left join USER_MAST d on c.USER_CODE=d.code and 
                     a.COMP_CODE = d.COMP_CODE 
-                    where a.Comp_code=1 and   a.DOC_CODE='' and SACTION='Receive Document'  " + l1 + "  ORDER by d.full_name  ";
+                    where a.Comp_code=  " + getdata.PubCompCode +" and   a.DOC_CODE='"+ v_type + "' and SACTION='Receive Document'  " + l1 + "  ORDER by d.full_name  ";
 
                 var SendTo = _dropdownService.GetDropdownList(query);
                 return Json(SendTo);
@@ -244,19 +276,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
         }
 
-
-
-
-
-
-
-
-
         [HttpGet]
-        public async Task<object> GetDocumentListData(DateTime FromDate, DateTime ToDate)
+        public async Task<object> GetDocumentListData( DateTime FromDate, DateTime ToDate,string DocStatus, string Searchby,  string SearchText)
         {
             var gv = _globalValue.GetGlobalVariables();
             var dataList = new List<object>();
+
             try
             {
                 using (SqlConnection con = _dbcontext.GetErpConnection())
@@ -271,6 +296,9 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
                         cmd.Parameters.AddWithValue("@CompCode", gv.PubCompCode);
                         cmd.Parameters.AddWithValue("@BranchCode", gv.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@DocStatus", DocStatus);
+                        cmd.Parameters.AddWithValue("@Searchby", Searchby ?? string.Empty);
+                        cmd.Parameters.AddWithValue("@SearchText", SearchText ?? string.Empty);
                         cmd.Parameters.Add("@FromDate", SqlDbType.SmallDateTime).Value = FromDate;
                         cmd.Parameters.Add("@ToDate", SqlDbType.SmallDateTime).Value = ToDate;
 
@@ -278,32 +306,44 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         {
                             while (await rdr.ReadAsync())
                             {
-                                dataList.Add(new
-                                {
-                                    V_TYPE = rdr["V_TYPE"]?.ToString(),
-                                    V_NO = rdr["V_NO"]?.ToString(),
-                                    SAUDA_TYPE = rdr["SAUDA_TYPE"]?.ToString(),
-                                    SAUDA_NO = rdr["SAUDA_NO"]?.ToString(),
-                                    V_DATE = rdr["V_DATE"]?.ToString(),
-                                    PartyName = rdr["PartyName"]?.ToString(),
-                                    PARTY_CODE = rdr["PARTY_CODE"]?.ToString(),
-                                    PARTY_CITY = rdr["PARTY_CITY"]?.ToString(),
-                                    CityName = rdr["CityName"]?.ToString(),
-                                    BILL_NO = rdr["BILL_NO"]?.ToString(),
-                                    BILL_DATE = rdr["BILL_DATE"]?.ToString(),
-                                    INV_AMT = rdr["INV_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["INV_AMT"]),
+                                string sendFlag = "Pending";
+                                string recdFlag = "Pending";
 
-                                    TRUCK_NO = rdr["TRUCK_NO"]?.ToString(),
-                                    SenderCode = rdr["SenderCode"]?.ToString(),
-                                    SenderName = rdr["SenderName"]?.ToString(),
-                                    SEND_DATE = rdr["SEND_DATE"]?.ToString(),
-                                    ReceiverCode = rdr["ReceiverCode"]?.ToString(),
-                                    ReceiverName = rdr["ReceiverName"]?.ToString(),
-                                    RECD_DATE = rdr["RECD_DATE"]?.ToString(),
-                                    SEND_FLAG = rdr["SEND_FLAG"]?.ToString(),
-                                    RECD_FLAG = rdr["RECD_FLAG"]?.ToString(),
-                                    REMARKS = rdr["REMARKS"]?.ToString()
-                                });
+                                if (rdr["SEND_FLAG"] != DBNull.Value && Convert.ToInt32(rdr["SEND_FLAG"]) == 1)
+                                {
+                                    sendFlag = "Send";
+                                }                           
+
+                                if (rdr["RECD_FLAG"] != DBNull.Value && Convert.ToInt32(rdr["RECD_FLAG"]) == 1)
+                                {
+                                    recdFlag = "Received";
+                                }                  
+
+                                    dataList.Add(new
+                                    {
+                                        V_TYPE = rdr["V_TYPE"]?.ToString(),
+                                        V_NO = rdr["V_NO"]?.ToString(),
+                                        SAUDA_TYPE = rdr["SAUDA_TYPE"]?.ToString(),
+                                        SAUDA_NO = rdr["SAUDA_NO"]?.ToString(),
+                                        V_DATE = rdr["V_DATE"]?.ToString(),
+                                        PartyName = rdr["PartyName"]?.ToString(),
+                                        PARTY_CODE = rdr["PARTY_CODE"]?.ToString(),
+                                        PARTY_CITY = rdr["PARTY_CITY"]?.ToString(),
+                                        CityName = rdr["CityName"]?.ToString(),
+                                        BILL_NO = rdr["BILL_NO"]?.ToString(),
+                                        BILL_DATE = rdr["BILL_DATE"]?.ToString(),
+                                        INV_AMT = rdr["INV_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["INV_AMT"]),
+                                        TRUCK_NO = rdr["TRUCK_NO"]?.ToString(),
+                                        SenderCode = rdr["SenderCode"]?.ToString(),
+                                        SenderName = rdr["SenderName"]?.ToString(),
+                                        SEND_DATE = rdr["SEND_DATE"] == DBNull.Value ? "" : Convert.ToDateTime(rdr["SEND_DATE"]).ToString("dd/MM/yyyy"),
+                                        ReceiverCode = rdr["ReceiverCode"]?.ToString(),
+                                        ReceiverName = rdr["ReceiverName"]?.ToString(),
+                                        RECD_DATE = rdr["RECD_DATE"] == DBNull.Value ? "" : Convert.ToDateTime(rdr["RECD_DATE"]).ToString("dd/MM/yyyy"),
+                                        SEND_FLAG = sendFlag,
+                                        RECD_FLAG = recdFlag,
+                                        REMARKS = rdr["REMARKS"]?.ToString()
+                                    });
                             }
                         }
                     }
@@ -313,7 +353,106 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
             catch (Exception ex)
             {
-                return new { success = false, message = ex.Message };
+                return new {  success = false, message = ex.Message };
+            }
+        }
+
+        [HttpPost]
+        public IActionResult SendDocument([FromBody] List<ImportTrackingReport> model)
+        {
+            var GlobalVariable = _globalValue.GetGlobalVariables();
+
+            if (model == null || model.Count == 0)
+            {
+                return BadRequest(new  { success = false, message = "No data received" });
+            }
+
+            try
+            {
+                using (SqlConnection con = _dbcontext.GetErpConnection())
+                {
+                    con.Open();
+
+                    foreach (var item in model)
+                    {
+
+                        if(item.SEND_TO == null)
+                        {
+                            return Json(new { validation = false , success = false, count = model.Count, message = "Please select 'Send To' User." });
+                        }
+
+                        string prQuery = @" SELECT 1 FROM DOCFLOW WHERE COMP_CODE = @CompCode AND BRANCH_CODE = @BranchCode
+                            AND V_TYPE = @VType AND V_NO = @VNo  AND BILL_NO = @BillNo AND ISNULL(SEND_FLAG, 0) = 1";
+
+                        using (SqlCommand cmd = new SqlCommand(prQuery, con))
+                        {
+                            cmd.Parameters.AddWithValue("@CompCode", GlobalVariable.PubCompCode);
+                            cmd.Parameters.AddWithValue("@BranchCode", GlobalVariable.PubBranchCode);
+                            cmd.Parameters.AddWithValue("@VType", item.V_TYPE ?? "");
+                            cmd.Parameters.AddWithValue("@VNo", item.V_NO ?? 0);
+                            cmd.Parameters.AddWithValue("@BillNo", item.BILL_NO ?? "");
+
+                            var exists = cmd.ExecuteScalar();
+
+                            if (exists != null)
+                            {
+                                return Json(new { validation = false, success = false, count = model.Count, message = "Document already sent" });
+                            }
+                        }                               
+
+                        using (SqlCommand cmd = new SqlCommand("sp_ImportTrackingReport", con))
+                        {
+                            cmd.CommandType = CommandType.StoredProcedure;
+
+                            cmd.Parameters.AddWithValue("@Action", "SendDocument");
+
+                            cmd.Parameters.AddWithValue("@YEAR_CODE", GlobalVariable.PubFYearCode );
+                            cmd.Parameters.AddWithValue("@CompCode", GlobalVariable.PubCompCode );
+                            cmd.Parameters.AddWithValue("@BranchCode", GlobalVariable.PubBranchCode);
+                            cmd.Parameters.AddWithValue("@V_TYPE", item.V_TYPE ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@V_NO", item.V_NO ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@SAUDA_TYPE", item.SAUDA_TYPE ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@SAUDA_NO",  item.SAUDA_NO ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@V_DATE", item.V_DATE ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@PARTY_CODE",  item.PARTY_CODE ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@PARTY_NAME",  item.PARTY_NAME ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@CITY_CODE",   item.CITY_CODE ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@CITY_NAME", item.CITY_NAME ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@BILL_NO", item.BILL_NO ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@BILL_DATE", item.BILL_DATE ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@BILL_AMT",  item.BILL_AMT ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@TRUCK_NO",  item.TRUCK_NO ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@SEND_BY",  item.SEND_BY ?? GlobalVariable.PubUserId ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@SEND_TO",  item.SEND_TO ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@SEND_DATE", item.SEND_DATE ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@RECD_DATE",  item.RECD_DATE ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@SEND_FLAG",  item.SEND_FLAG ?? 1);
+                            cmd.Parameters.AddWithValue("@RECD_FLAG", item.RECD_FLAG ?? 0);
+                            cmd.Parameters.AddWithValue("@REMARKS", item.REMARKS ?? (object)DBNull.Value);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                return Json(new { success = true, count = model.Count, message = "Document sent successfully" });
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        private bool isExist(string query)
+        {
+            using (var con = _dbcontext.GetErpConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    var result = cmd.ExecuteScalar();
+                    return result != null && result != DBNull.Value;
+                }
             }
         }
 

@@ -97,7 +97,7 @@
 /* Body */
 .erppagesmodal-body {
     padding: 10px;
-    max-height: 85vh;
+    max-height: 90vh;
     overflow-y: auto;
     overflow-x: hidden;
 }

@@ -33,9 +33,7 @@ builder.Services.AddScoped<IMasterDataService, MasterDataService>();
 
 //  Repository Registration (IMPORTANT)
 
-builder.Services.AddScoped<
-    travelexpensemanagement.Repositories.Interfaces.IApprovalService,
-    travelexpensemanagement.Repositories.Implementations.ApprovalService>();
+builder.Services.AddScoped< travelexpensemanagement.Repositories.Interfaces.IApprovalService, travelexpensemanagement.Repositories.Implementations.ApprovalService>();
 
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
@@ -44,13 +42,8 @@ builder.Services.AddScoped<IInwardEntryRepository, InwardEntryRepository>();
 builder.Services.AddScoped<IInHouseWeighbridgeEntryRepository, InHouseWeighbridgeEntryRepository>();
 builder.Services.AddScoped<IFlakesQCEntryRepository, FlakesQCEntryRepository>();
 builder.Services.AddScoped<IFlakesQCEntryListRepository, FlakesQCEntryListRepository>();
-
 builder.Services.AddScoped<IFlakesQCEntryExcluRepository, FlakesQCEntryExcluRepository>();
 builder.Services.AddScoped<IFlakesQCEntryExcluListRepository, FlakesQCEntryExcluListRepository>();
-
-
-
-
 
 builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
 builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
