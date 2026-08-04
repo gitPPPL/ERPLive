@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Dynamic;
 using travelexpensemanagement.Authorize;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
@@ -20,8 +21,10 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly IQCTemperatureEntryListRepository _qCTempListRepository;
         private readonly GlobalValidationdate _globalValidationdate;
+        private readonly GlobalExcelExport _excel;
         public QCTemperatureEntryListController(DataBaseConnection dbcontext, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, 
-            GlobalVariableService globalValue, ModuleService.ModuleService moduleService, IQCTemperatureEntryListRepository qCTempListRepository, GlobalValidationdate globalValidationdate)
+            GlobalVariableService globalValue, ModuleService.ModuleService moduleService, IQCTemperatureEntryListRepository qCTempListRepository, 
+            GlobalValidationdate globalValidationdate, GlobalExcelExport excel)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
@@ -29,6 +32,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             _moduleService = moduleService;
             _qCTempListRepository = qCTempListRepository;
             _globalValidationdate = globalValidationdate;
+            _excel = excel;
         }
         public IActionResult Index()
         {
@@ -133,7 +137,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     { "@Action", "Excel" }
                 };
 
-                var fileBytes = _globalValidationdate.ExportToExcel("sp_GetQcTempratureEntry", "QC Tape Line", parameters);
+                var fileBytes = _excel.ExportToExcel("sp_GetQcTempratureEntry", "QC Tape Line", parameters);
 
                 return File(
                     fileBytes,

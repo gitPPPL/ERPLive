@@ -2,6 +2,7 @@
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.EncryptionHelper;
+using travelexpensemanagement.Common.GlobalFunction;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.LogService;
@@ -35,6 +36,7 @@ builder.Services.AddScoped<DropdownService>();
 builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<ErrorLoggerService>();
 builder.Services.AddScoped<IMasterDataService, MasterDataService>();
+builder.Services.AddScoped<GlobalFunction>();
 
 //Master page repositories
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();

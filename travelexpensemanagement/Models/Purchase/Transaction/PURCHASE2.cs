@@ -1,4 +1,5 @@
 ﻿using travelexpensemanagement.Models.Purchase.Transaction;
+using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseBillPassEntryModel;
 
 namespace travelexpensemanagement.Models.Purchase.Transiction
 {
@@ -85,11 +86,15 @@ namespace travelexpensemanagement.Models.Purchase.Transiction
         public string? WSID { get; set; }
         public string? LIP { get; set; }
         public string? LID { get; set; }
+        public string? UNIT { get; set; }
+        public string? MAKE { get; set; }
     }
     public class PurchaseWrapper
     {
         public PURCHASE1 header { get; set; }
         public List<PURCHASE2> lineRows { get; set; }
-        public List<PURCHASE3> Attachement { get; set; }
+        //public List<PURCHASE3> Attachement { get; set; }
+        public List<PurchaseBillAttachments> Attachement { get; set; }
+        public List<PurchaseBillAttachments> EPRAttachments { get; set; }
     }   
 }

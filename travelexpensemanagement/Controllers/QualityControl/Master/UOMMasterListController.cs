@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using travelexpensemanagement.Authorize;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
@@ -15,16 +16,18 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly GlobalValidationdate _globalValidationdate;
         private readonly IUOMMasterListRepository _repository;
+        private readonly GlobalExcelExport _excel;
 
         private int? userLevel;
         public UOMMasterListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, IUOMMasterListRepository repository)
+    ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, IUOMMasterListRepository repository, GlobalExcelExport excel)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _moduleService = moduleService;
             _globalValidationdate = globalValidationdate;
             _repository = repository;
+            _excel = excel;
         }
         public IActionResult Index()
         {
@@ -87,7 +90,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     { "@Action", "Excel" }
                 };
 
-                var fileBytes = _globalValidationdate.ExportToExcel("sp_QCPUNIT_MAST", "QC UOM Master", parameters);
+                var fileBytes = _excel.ExportToExcel("sp_QCPUNIT_MAST", "QC UOM Master", parameters);
 
                 return File(
                     fileBytes,

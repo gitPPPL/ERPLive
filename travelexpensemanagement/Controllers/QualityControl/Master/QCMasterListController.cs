@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using travelexpensemanagement.Authorize;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
@@ -17,15 +18,17 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         private readonly ModuleService.ModuleService _moduleService;
         private readonly GlobalValidationdate _globalValidationdate;
         private readonly IQCMasterListRepository _qcMasterListRepository;
+        private readonly GlobalExcelExport _excel;
 
         public QCMasterListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-        ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, IQCMasterListRepository qcMasterListRepository)
+        ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, IQCMasterListRepository qcMasterListRepository, GlobalExcelExport excel)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _moduleService = moduleService;
             _globalValidationdate = globalValidationdate;
             _qcMasterListRepository = qcMasterListRepository;
+            _excel = excel;
         }
         public IActionResult Index()
         {
@@ -97,7 +100,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     { "@Action", "Excel" }
                 };
 
-                var fileBytes = _globalValidationdate.ExportToExcel("Insert_QC_MAST", "QC Master", parameters);
+                var fileBytes = _excel.ExportToExcel("Insert_QC_MAST", "QC Master", parameters);
 
                 return File(
                     fileBytes,

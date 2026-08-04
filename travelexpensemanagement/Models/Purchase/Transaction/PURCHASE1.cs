@@ -189,7 +189,11 @@
         public DateTime? EWB_EXPDATE { get; set; }
         public string? EWB_INVNO { get; set; }
         public decimal? PL_AMT { get; set; }
-
+        
+        public string? ACTION { get; set; }
+        public int? CURRENCY { get; set; }
+        public string? BL_NO { get; set; }
+        public DateTime? BL_DT { get; set; }
     }
 
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using travelexpensemanagement.Authorize;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
@@ -16,15 +17,17 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         private readonly ModuleService.ModuleService _moduleService;
         private readonly GlobalValidationdate _globalValidationdate;
         private readonly IParameterMasterListRepository _repository;
+        private readonly GlobalExcelExport _excel;
 
         public ParameterMasterListController(DataBaseConnection dbcontext, GlobalVariableService globalValue, ModuleService.ModuleService moduleService, 
-            GlobalValidationdate globalValidationdate, IParameterMasterListRepository repository)
+            GlobalValidationdate globalValidationdate, IParameterMasterListRepository repository, GlobalExcelExport excel)
         {
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _moduleService = moduleService;
             _globalValidationdate = globalValidationdate;
             _repository = repository;
+            _excel = excel;
         }
         public IActionResult Index()
         {
@@ -105,7 +108,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     { "@AED", "Excel" }
                 };
 
-                var fileBytes = _globalValidationdate.ExportToExcel("sp_QualityParameterMast_AED", "Qc Parameter Master", parameters);
+                var fileBytes = _excel.ExportToExcel("sp_QualityParameterMast_AED", "Qc Parameter Master", parameters);
 
                 return File(
                     fileBytes,

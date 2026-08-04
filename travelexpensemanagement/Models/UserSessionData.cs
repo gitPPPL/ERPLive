@@ -32,6 +32,7 @@
         public string? RegAdd1 { get; set; }
         public string? RegAdd2 { get; set; }
         public string? CINNO { get; set; }
+        public string? STATE_CODE { get; set; }
 
 
     }
@@ -52,7 +53,7 @@
         public string? RegAdd1 { get; set; }
         public string? RegAdd2 { get; set; }
         public string? CINNO { get; set; }
-
+        public string? STATE_CODE { get; set; }
     }
     public class GlobalGeneralSettingModel
     {

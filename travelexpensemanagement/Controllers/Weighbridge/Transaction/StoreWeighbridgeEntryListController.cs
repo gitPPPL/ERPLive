@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using travelexpensemanagement.Authorize;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
@@ -15,14 +16,16 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
         private readonly IStoreWeighbridgeEntryListRepository _storeWbListRepository;
         private readonly GlobalVariableService _globalVariableService;
         private readonly GlobalValidationdate _globalValidationdate;
+        private readonly GlobalExcelExport _excel;
 
         public StoreWeighbridgeEntryListController(ModuleService.ModuleService moduleService, IStoreWeighbridgeEntryListRepository storeWbListRepository, GlobalVariableService globalVariableService
-            , GlobalValidationdate globalValidationdate)
+            , GlobalValidationdate globalValidationdate, GlobalExcelExport excel)
         {
             _moduleService = moduleService;
             _storeWbListRepository = storeWbListRepository;
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
+            _excel = excel;
         }
         public IActionResult Index()
         {
@@ -105,7 +108,7 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
             { "@Action", "Store_Wb_Excel" }
         };
 
-                var fileBytes = _globalValidationdate.ExportToExcel("sp_GetWBEntry", "Store WeighBridge", parameters);
+                var fileBytes = _excel.ExportToExcel("sp_GetWBEntry", "Store WeighBridge", parameters);
 
                 return File(
                     fileBytes,
