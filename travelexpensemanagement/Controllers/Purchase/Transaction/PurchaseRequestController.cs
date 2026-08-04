@@ -7,6 +7,7 @@ using System.Text.Json;
 using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
@@ -24,10 +25,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly GlobalValidationdate _globalValidationdate;
         private readonly IPurchaseRequestRepository _IPRRepository;
+        private readonly GlobalExcelExport _excel;
 
         public PurchaseRequestController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
             DropdownService dropdownService, DbHelper dbHelper,
-            ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, IPurchaseRequestRepository IPRRepository)
+            ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, IPurchaseRequestRepository IPRRepository, GlobalExcelExport excel)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -36,6 +38,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             _moduleService = moduleService;
             _globalValidationdate = globalValidationdate;
             _IPRRepository = IPRRepository;
+            _excel = excel;
         }
 
         public IActionResult Index()
@@ -430,7 +433,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     { "@Action", "Excel" }
                 };
 
-                var fileBytes = _globalValidationdate.ExportToExcel("sp_PurchaseReq1", "Purchase Request", parameters);
+                var fileBytes = _excel.ExportToExcel("sp_PurchaseReq1", "Purchase Request", parameters);
 
                 return File(
                     fileBytes,

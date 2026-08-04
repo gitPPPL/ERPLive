@@ -1,4 +1,6 @@
-﻿namespace travelexpensemanagement.Models.Purchase.Transaction
+﻿using travelexpensemanagement.Models.Purchase.Transiction;
+
+namespace travelexpensemanagement.Models.Purchase.Transaction
 {
     public class PurchaseBillPassEntryModel
     {
@@ -101,7 +103,7 @@
             public string Department { get; set; }
             public string DEPT_CODE { get; set; }
             public string TAX_CODE { get; set; }
-            public string Make_Code { get; set; }
+            public string MAKE_CODE { get; set; }
             public string UOM_CODE { get; set; }
         }
 
@@ -129,10 +131,11 @@
             public int mrnNo { get; set; }
             public string mrnType { get; set; }
 
-            public int inputType { get; set; }
+            public string inputType { get; set; }
             public decimal FreightAmountPay { get; set; }
             public decimal FreightTax { get; set; }
             public decimal FreightTaxPercent { get; set; }
+            public bool IsFreightTaxChanged { get; set; }
         }
         public class DebitNoteItem
         {
@@ -257,5 +260,99 @@
 
             public int ItemCode { get; set; }
         }
+
+        public class PurchaseQtyValidationResult
+        {
+            public bool IsExcess { get; set; }
+            public decimal TotalPurchaseQty { get; set; }
+            public decimal AllowedQty { get; set; }
+        }
+
+        public class PurchaseRowValidationResult
+        {
+            public bool IsValid { get; set; } = true;
+            public string? pubDefPOInMRN { get; set; }
+
+            // Freight validation
+            public bool FreightWarning { get; set; }
+            public string FreightMessage { get; set; }
+
+            // HSN validation
+            public bool HsnMismatch { get; set; }
+            public string HsnMessage { get; set; }
+
+            // QC validation
+            public bool QcPending { get; set; }
+            public string QcMessage { get; set; }
+
+            public bool Item_vs_Bill_HSNCodeDiff { get; set; } = false;
+        }
+
+        public class ValidationResult
+        {
+            public bool IsValid { get; set; }
+            public string Message { get; set; }
+        }
+
+        public class PurchaseBillAttachments
+        {
+            public string? FILE_NAME { get; set; }
+            public string? FILE_Path { get; set; }
+            public string FILE_DATA { get; set; }
+
+        }
+
+        public class LandAmountRow
+        {
+            public int ItemCode { get; set; }
+            public int PoNo { get; set; }
+            public int Sno { get; set; }
+            public int MrnNo { get; set; }
+            public string MrnType { get; set; } = "";
+            public string VType { get; set; } = "";
+            public int VNo { get; set; }
+
+            public int CompCode { get; set; }
+            public int BranchCode { get; set; }
+            public int YearCode { get; set; }
+
+            public decimal LandAmt { get; set; }
+        }
+
+        public class FullPurchaseBillResponse
+        {
+            public PURCHASE1? Header { get; set; }
+            public List<PURCHASE2> Items { get; set; } = new();
+            public List<PurchaseBillAttachments> Attachments { get; set; } = new();
+            public List<PurchaseBillAttachments> EprAttachments { get; set; } = new();
+        }
+
+        public class PBTdsCalculation
+        {
+            public decimal AdvTds { get; set; }
+            public decimal NetAmt { get; set; }
+            public decimal DrNote { get; set; }
+            public decimal CrNote { get; set; }
+            public decimal Tds194Q { get; set; }
+        }
+
+        public class CopyFromMenuItem
+        {
+            public string? Code { get; set; }
+            public string? Name { get; set; }
+            public string? Modal { get; set; }
+        }
+
+        public class CopyFromRequest
+        {
+            public string vType { get; set; } = string.Empty;
+            public int BillTo { get; set; }
+            public string BillNo { get; set; } = string.Empty;
+            public int VNo { get; set; }
+            public string CurrentVType { get; set; } = string.Empty;
+        }
     }
+
 }
+
+

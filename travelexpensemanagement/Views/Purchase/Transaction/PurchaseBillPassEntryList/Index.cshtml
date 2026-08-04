@@ -134,8 +134,8 @@
 							<td>${doc.status || '0'}</td>
 							<td>
 							  <div class="action-icons">
-							  <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editPruchaseBillPassEntry('${doc.v_NO}')"></i>
-							  <i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewPruchaseBillPassEntry('${doc.v_NO}')"></i>
+							  <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editPruchaseBillPassEntry('${doc.v_NO}', '${doc.v_TYPE}')"></i>
+							  <i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewPruchaseBillPassEntry('${doc.v_NO}', '${doc.v_TYPE}')"></i>
 							  <i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deletePruchaseBillPassEntry('${doc.v_NO}')"></i>
 							   <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showDocumentPopup('${doc.v_NO}')"></i>
 							  </div>
@@ -192,12 +192,12 @@
 		loadPurchaseBillDirectStages();
 	});
 
-	function editPruchaseBillPassEntry(docCode) {
-		window.location.href = `/PurchaseBillPassEntry/Index?id=${encodeURIComponent(docCode)}`;
+	function editPruchaseBillPassEntry(docCode, docType) {
+		window.location.href = `/PurchaseBillPassEntry/Index?id=${encodeURIComponent(docCode)}&vType=${encodeURIComponent(docType)}`;
 	}
 
-	function viewPruchaseBillPassEntry(docCode) {
-		window.location.href = `/PurchaseBillPassEntry/Index?id=${encodeURIComponent(docCode)}&readOnly=true`;
+	function viewPruchaseBillPassEntry(docCode, docType) {
+		window.location.href = `/PurchaseBillPassEntry/Index?id=${encodeURIComponent(docCode)}&vType=${encodeURIComponent(docType)}&readOnly=true`;
 	}
 	
 	function showDocumentPopup(docCode){

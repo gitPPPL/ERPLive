@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
@@ -15,14 +16,16 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly GlobalVariableService _globalVariableService;
         private readonly DataBaseConnection _dbContext;
         private readonly GlobalValidationdate _globalValidationdate;
+        private readonly GlobalExcelExport _excel;
         public VehicleInwardEntryListController(ModuleService.ModuleService moduleService, IVehicleInwardListRepository VehicleInwardListRepository, 
-            GlobalVariableService globalVariableService, DataBaseConnection dbContext, GlobalValidationdate globalValidationdate)
+            GlobalVariableService globalVariableService, DataBaseConnection dbContext, GlobalValidationdate globalValidationdate, GlobalExcelExport excel)
         {
             _moduleService = moduleService;
             _VehicleInwardListRepository = VehicleInwardListRepository;
             _globalVariableService = globalVariableService;
             _dbContext = dbContext;
             _globalValidationdate = globalValidationdate;
+            _excel = excel;
         }
         public IActionResult Index()
         {
@@ -79,7 +82,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     { "@Action", "Excel" }
                 };
 
-                var fileBytes = _globalValidationdate.ExportToExcel("sp_GetTransportInwardEntry", "Transport Inward", parameters);
+                var fileBytes = _excel.ExportToExcel("sp_GetTransportInwardEntry", "Transport Inward", parameters);
 
                 return File(
                     fileBytes,

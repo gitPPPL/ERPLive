@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
@@ -13,15 +14,17 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
         private readonly GlobalValidationdate _globalValidationdate;
         private readonly ModuleService.ModuleService _moduleService;
         private readonly ITapeAndFabricMasterListRepository _repository;
+        private readonly GlobalExcelExport _excel;
 
         public TapeAndFabricMasterListController(DataBaseConnection dbcontext, GlobalVariableService globalValue, 
-            GlobalValidationdate globalValidationdate, ModuleService.ModuleService moduleService, ITapeAndFabricMasterListRepository repository)
+            GlobalValidationdate globalValidationdate, ModuleService.ModuleService moduleService, ITapeAndFabricMasterListRepository repository, GlobalExcelExport excel)
         {
             _dbcontext = dbcontext;
             _globalValue = globalValue;
             _globalValidationdate = globalValidationdate;
             _moduleService = moduleService;
             _repository = repository;
+            _excel = excel;
         }
 
         public IActionResult Index()
@@ -95,7 +98,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Master
                     { "@AED", "Excel" }
                 };
 
-                var fileBytes = _globalValidationdate.ExportToExcel("sp_TapeNFabricMast_AED", "QC Tape And Fabric Master", parameters);
+                var fileBytes = _excel.ExportToExcel("sp_TapeNFabricMast_AED", "QC Tape And Fabric Master", parameters);
 
                 return File(
                     fileBytes,
