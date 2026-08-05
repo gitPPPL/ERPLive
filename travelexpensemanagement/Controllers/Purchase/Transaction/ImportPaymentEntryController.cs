@@ -355,7 +355,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         [HttpGet]
         public IActionResult GetItemMaster( int partyCode)
         {
-           var gv = _globalVariableService.GetGlobalVariables();
+            var gv = _globalVariableService.GetGlobalVariables();
             var data = new List<object>();
             using (SqlConnection con= _dbConnection.GetErpConnection())
             {
@@ -443,6 +443,61 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             
         }
 
+        [HttpGet]
+        public IActionResult GetRawItemMaster()
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            var data = new List<object>();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+
+                string query = @"
+                SELECT
+                    a.CODE,
+                    a.NAME,
+                    ISNULL(a.HSN_CODE,'') AS HSN
+                FROM ITEM_MAST a
+                LEFT JOIN ITEM_GROUP c
+                    ON a.GROUP_CODE = c.CODE
+                   AND c.COMP_CODE = a.COMP_CODE
+                LEFT JOIN ITEM_MGROUP d
+                    ON c.MGROUP_CODE = d.CODE
+                   AND d.COMP_CODE = a.COMP_CODE
+                WHERE a.COMP_CODE = @COMP_CODE
+                  AND d.MGROUP_TYPE = 'Raw'
+                  AND a.ACTIVE = 1
+                ORDER BY a.NAME";
+
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+
+                SqlDataReader rdr = cmd.ExecuteReader();
+
+                while (rdr.Read())
+                {
+                    data.Add(new
+                    {
+                        Code = Convert.ToInt32(rdr["CODE"]),
+                        Name = rdr["NAME"].ToString(),
+                        HSN = rdr["HSN"].ToString()
+                    });
+                }
+            }
+
+            return Json(data);
+        }
+
+        [HttpGet]
+        public IActionResult GetCountryMast()
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            string query = $@"Select Code,Name from Country_mast where name is not null order by name";
+            var moduleList = _dropdownService.GetDropdownList(query);
+            return Json(moduleList);
+        }
+        
         [HttpGet]
         public JsonResult GenerateVNo(string vType)
         {

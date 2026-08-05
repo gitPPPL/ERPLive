@@ -1,17 +1,20 @@
 ﻿
 let poList = [];
+let itemList = [];
+let countryList = [];
 
 $(document).ready(async function () {
 
-    wireEvents();
+    await wireEvents();
     SetCurrentDate();
     await GetDocTypeDDl();
     await BindAllDropdown();
-
     if ($("#tblImportPaymentEntry tbody tr").length === 0) {
         addNewRow();
     }
 
+    await LoadItemMaster();
+    await LoadCountryMaster();
 });
 
 async function wireEvents() {
@@ -61,8 +64,6 @@ async function wireEvents() {
             }
 
             const data = await response.json();
-
-            console.log("Beneficiary Bank Details :", data);
 
             $('#Numbeneficiaryacno').val(data.accountNo);
             $('#Txtbeneficiaryaba').val(data.aba);
@@ -129,6 +130,58 @@ async function wireEvents() {
         }
 
         $(this).closest('tr').remove();
+    });
+
+    //==============================================
+    // Fill Data On Change Of PO No
+    //==============================================
+
+    $('#tblImportPaymentEntry').on('change', '.ddlPoNo', function () {
+
+        const row = $(this).closest('tr');
+        const po = poList.find(x => x.vNo == $(this).val());
+        const itemDDL = row.find('.itemname');
+
+        if (!po) return;
+
+        row.find('.podate').val(formatDate(po.saudaDate));
+        row.find('.invoiceno').val(po.supplierInvNo);
+        row.find('.invoicedate').val(formatDate(po.supplierInvDate));
+        row.find('.amount').val(po.supplierInvAmt);
+        row.find('.quantity').val(po.qty);
+
+        itemDDL.val(po.itemCode).trigger('change');
+
+        row.find('.itemdesc').val(po.itemName);
+
+        //row.find('.hsncode').val(po.hsnCode);
+        row.find('.country').val(po.originCountry);
+        row.find('.shipmentmode').val(po.mode);
+        row.find('.dispatchdate').val(formatDate(po.etd));
+        row.find('.destinationport').val(po.destinationPort);
+        row.find('.blno').val(po.blNo);
+        row.find('.bldate').val(formatDate(po.blDate));
+        row.find('.beno').val(po.beNo);
+        row.find('.bedate').val(formatDate(po.beDate));
+
+    });
+
+    //==============================================
+    // Fil HSN CODE Change On ITEM MAST
+    //==============================================
+    $('#tblImportPaymentEntry').on('change', '.itemname', function () {
+
+        const row = $(this).closest('tr');
+        const itemCode = $(this).val();
+
+        const item = itemList.find(x => x.code == itemCode);
+
+        if (!item) {
+            row.find('.hsncode').val('');
+            return;
+        }
+
+        row.find('.hsncode').val(item.hsn);
     });
 
 }
@@ -337,14 +390,18 @@ function addNewRow() {
 
             <td><input type="text" class="erppagetable-control hsncode"></td>
                                           
-            <td><input type="text" class="erppagetable-control country"></td>
+            <td>
+                <select class="erppagetable-control country">
+                    <option value="">--Select Country--</option>
+                </select>
+            </td>
 
             <td>
                 <select class="erppagetable-control shipmentmode">
                     <option value="">--Select--</option>
-                    <option>Air</option>
-                    <option>Sea</option>
-                    <option>Road</option>
+                    <option value="Air">Air</option>
+                    <option value="Sea">Sea</option>
+                    <option value="Road">Road</option>
                 </select>
             </td>
 
@@ -390,6 +447,8 @@ function addNewRow() {
 
     tbody.append(row);
     const ddl = tbody.find("tr:last .ddlPoNo");
+    const itemDDL = tbody.find("tr:last .itemname");
+    const countryDDL = tbody.find("tr:last .country");
 
     ddl.append('<option value="">-- Select PO No --</option>');
         $.each(poList, function (_, item) {
@@ -401,6 +460,17 @@ function addNewRow() {
 
     });
 
+    itemDDL.empty().append('<option value="">--Select--</option>');
+
+    $.each(itemList, function (_, item) {
+        itemDDL.append(`<option value="${item.code}">${item.name}</option>`);
+    });
+
+    countryDDL.empty().append('<option value="">--Select Country--</option>');
+
+    $.each(countryList, function (_, item) {
+        countryDDL.append(`<option value="${item.value}">${item.text}</option>`);
+    });
 }
 
 async function LoadPODropdown(partyCode) {
@@ -437,4 +507,49 @@ async function LoadPODropdown(partyCode) {
     } catch (e) {
         console.error(e);
     }
+}
+
+async function LoadItemMaster() {
+
+    const response = await fetch('/ImportPaymentEntry/GetRawItemMaster');
+    itemList = await response.json();
+
+    $('.itemname').each(function () {
+
+        const ddl = $(this);
+
+        ddl.empty().append('<option value="">--Select--</option>');
+
+        $.each(itemList, function (_, item) {
+            ddl.append(`<option value="${item.code}">${item.name}</option>`);
+        });
+
+    });
+}
+
+async function LoadCountryMaster() {
+
+    const response = await fetch('/ImportPaymentEntry/GetCountryMast');
+    countryList = await response.json();
+
+    $('#tblImportPaymentEntry .country').each(function () {
+
+        const ddl = $(this);
+
+        ddl.empty().append('<option value="">--Select Country--</option>');
+
+        $.each(countryList, function (_, item) {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+
+    });
+}
+
+function formatDate(date) {
+
+    if (!date) return "";
+
+    const parts = date.split("/"); 
+
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
 }
