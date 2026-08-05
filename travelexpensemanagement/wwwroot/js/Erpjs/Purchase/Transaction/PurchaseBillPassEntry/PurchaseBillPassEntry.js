@@ -2402,6 +2402,23 @@ function GetCrDrNoteRequest(isFreightTaxChanged = false) {
         const poRate = row.querySelector(".po-rate");
         const poLandRate = row.querySelector(".poland-rate");
 
+        const item = row.querySelector(".item-name");
+        const unit = row.querySelector(".uom-name");
+        const amount = row.querySelector(".amount");
+        const recdQty = row.querySelector(".recd-qty");
+        const billQty = row.querySelector(".bill-qty");
+
+        const cgst = row.querySelector(".cgst-per");
+        const sgst = row.querySelector(".sgst-per");
+        const igst = row.querySelector(".igst-per");
+
+        const poType = row.querySelector(".po-type");
+        const poNo = row.querySelector(".po-no");
+
+        const landRate = row.querySelector(".land-rate");
+        const poRate = row.querySelector(".po-rate");
+        const poLandRate = row.querySelector(".poland-rate");
+
         request.items.push({
             itemCode: parseInt(item.value) || 0,
             itemName: item.options[item.selectedIndex]?.text || "",

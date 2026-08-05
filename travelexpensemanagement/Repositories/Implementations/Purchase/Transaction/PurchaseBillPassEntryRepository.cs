@@ -3310,5 +3310,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             return cmd;
         }
 
+                return new RepositoryResponseList<CopyFromMenuItem> { status = true, data = list };
+            }
+            catch (Exception ex)
+            {
+                return new RepositoryResponseList<CopyFromMenuItem> { status = false, message = ex.Message };
+            }
+        }
     }
 }
