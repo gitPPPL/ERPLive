@@ -2,6 +2,7 @@
 let poList = [];
 let itemList = [];
 let countryList = [];
+let PartyList = [];
 
 $(document).ready(async function () {
 
@@ -15,6 +16,7 @@ $(document).ready(async function () {
 
     await LoadItemMaster();
     await LoadCountryMaster();
+    await LoadPartyMaster();
 });
 
 async function wireEvents() {
@@ -306,7 +308,7 @@ async function GetPartyDetails(partyCode) {
         $('#ddlInterestApplicable').val(data.interestApplicable);
         $('#txtROI').val(data.roi);
         $('#txtROIPeriod').val(data.roiPeriod);
-
+          
         //==================================
         // Bank Details
         //==================================
@@ -409,7 +411,11 @@ function addNewRow() {
                                          
             <td><input type="date" class="erppagetable-control dispatchdate"></td>
                                           
-            <td><input type="text" class="erppagetable-control shippingcompany"></td>
+            <td>
+                 <select class="erppagetable-control shippingcompany">
+                        <option value="">--Select shippingcompany--</option>
+                 </select>
+            </td>
                                          
             <td><input type="text" class="erppagetable-control portdispatch"></td>
                                          
@@ -428,7 +434,7 @@ function addNewRow() {
                     <option value="">--Select--</option>
                 </select>
             </td>
-
+           
             <td><input type="number" class="erppagetable-control beamount text-end"></td>
                                             
             <td><input type="number" class="erppagetable-control beutilized text-end"></td>
@@ -449,6 +455,7 @@ function addNewRow() {
     const ddl = tbody.find("tr:last .ddlPoNo");
     const itemDDL = tbody.find("tr:last .itemname");
     const countryDDL = tbody.find("tr:last .country");
+    const PartyDDL = tbody.find("tr:last .shippingcompany");
 
     ddl.append('<option value="">-- Select PO No --</option>');
         $.each(poList, function (_, item) {
@@ -470,6 +477,12 @@ function addNewRow() {
 
     $.each(countryList, function (_, item) {
         countryDDL.append(`<option value="${item.value}">${item.text}</option>`);
+    });
+
+    PartyDDL.empty().append('<option value="">--Select PartyDDL--</option>');
+
+    $.each(countryList, function (_, item) {
+        PartyDDL.append(`<option value="${item.value}">${item.text}</option>`);
     });
 }
 
@@ -539,6 +552,24 @@ async function LoadCountryMaster() {
         ddl.empty().append('<option value="">--Select Country--</option>');
 
         $.each(countryList, function (_, item) {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+
+    });
+}
+
+async function LoadPartyMaster() {
+
+    const response = await fetch('/ImportPaymentEntry/GetPartyMastForFooter');
+    PartyList = await response.json();
+
+    $('#tblImportPaymentEntry .shippingcompany').each(function () {
+
+        const ddl = $(this);
+
+        ddl.empty().append('<option value="">--Select shippingcompany--</option>');
+
+        $.each(PartyList, function (_, item) {
             ddl.append(`<option value="${item.value}">${item.text}</option>`);
         });
 

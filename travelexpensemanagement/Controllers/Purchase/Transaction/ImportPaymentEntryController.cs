@@ -499,6 +499,15 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
         
         [HttpGet]
+        public IActionResult GetPartyMastForFooter()
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            string query = $@" Select Code,Name from Subgroup_mast where nature in ('Customer','Supplier') and Comp_code= {gv.PubCompCode} and Active=1 order by name";
+            var moduleList = _dropdownService.GetDropdownList(query);
+            return Json(moduleList);
+        }
+        
+        [HttpGet]
         public JsonResult GenerateVNo(string vType)
         {
             string newV_NO = "00001";
