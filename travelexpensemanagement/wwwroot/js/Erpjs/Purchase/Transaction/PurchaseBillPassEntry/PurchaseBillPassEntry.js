@@ -540,12 +540,12 @@ function EPRAttachmentEvent() {
         var fileInput = $("#erpFile")[0];
 
         if (docType == "") {
-            showToast("Please select Document Type.", {type:"warning"});
+            showToast("Please select Document Type.", { type: "warning" });
             return;
         }
 
         if (fileInput.files.length == 0) {
-            showToast("Please select a file.", {type:"warning"});
+            showToast("Please select a file.", { type: "warning" });
             return;
         }
 
@@ -4682,11 +4682,11 @@ function OnTDSBtnClick() {
                 $("#NumTDSAmt").val(response.data.tds194Q.toFixed(2));
             }
             else {
-                showToast(response.message, {type:"warning"});
+                showToast(response.message, { type: "warning" });
             }
         },
         error: function (xhr) {
-            showToast(xhr.responseJSON?.message || "Error while calculating TDS.", {type:"error"});
+            showToast(xhr.responseJSON?.message || "Error while calculating TDS.", { type: "error" });
         }
     });
 }
@@ -4701,7 +4701,7 @@ function loadCopyFromMenu(docType) {
         success: function (response) {
 
             if (!response.success) {
-                showToast(response.message, {type:"warning"});
+                showToast(response.message, { type: "warning" });
                 return;
             }
 
@@ -4720,7 +4720,7 @@ function loadCopyFromMenu(docType) {
             });
         },
         error: function (xhr) {
-            showToast("An error occurred while loading Copy From options.", {type:"warning"});
+            showToast("An error occurred while loading Copy From options.", { type: "warning" });
             console.error(xhr);
         }
     });
@@ -4756,7 +4756,7 @@ function getCopyFromData(code) {
         success: function (response) {
 
             if (!response.success) {
-                showToast(response.message, {type:"warning"});
+                showToast(response.message, { type: "warning" });
                 return;
             }
 
@@ -4770,7 +4770,7 @@ function getCopyFromData(code) {
         },
 
         error: function (xhr) {
-            showToast("Unable to load Copy From data.", {type:"error"});
+            showToast("Unable to load Copy From data.", { type: "error" });
             console.log(xhr);
         }
     });
@@ -4896,4 +4896,51 @@ function bindCopyFromGrid(columns, rows) {
     tbody.html(html);
 
     makeColumnsResizable("#tblpurchaseordermodal");
+}
+
+//--------------Pending Approval List---------
+function bindPendingApprovalGrid(data) {
+
+    const tbody = $("#tblpendingapprovalmodal tbody");
+
+    tbody.empty();
+
+    if (!data || data.length === 0) {
+        tbody.append(`
+            <tr>
+                <td colspan="15" class="text-center">
+                    No Record Found
+                </td>
+            </tr>
+        `);
+        return;
+    }
+
+    let rows = "";
+
+    data.forEach(item => {
+
+        rows += `
+        <tr>
+            <td class="hidden-col"></td>
+
+            <td>${item.type ?? ""}</td>
+            <td>${item.docID ?? ""}</td>
+            <td>${item.docDate ?? ""}</td>
+            <td>${item.sendBy ?? ""}</td>
+            <td>${item.sendDate ?? ""}</td>
+            <td>${item.sendTo ?? ""}</td>
+            <td>${item.status ?? ""}</td>
+            <td>${item.approvalStatus ?? ""}</td>
+            <td>${item.remarks ?? ""}</td>
+            <td>${item.createdBy ?? ""}</td>
+            <td>${item.createdDate ?? ""}</td>
+            <td>${item.partyName ?? ""}</td>
+            <td class="text-end">${item.billAmount ?? 0}</td>
+
+            <td class="hidden-col"></td>
+        </tr>`;
+    });
+
+    tbody.html(rows);
 }

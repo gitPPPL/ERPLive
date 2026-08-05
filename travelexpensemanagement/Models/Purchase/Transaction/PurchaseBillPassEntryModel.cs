@@ -364,6 +364,23 @@ namespace travelexpensemanagement.Models.Purchase.Transaction
             public List<CopyFromColumn> Columns { get; set; } = new();
             public List<Dictionary<string, object?>> Rows { get; set; } = new();
         }
+
+        public class PendingApprovalModel
+        {
+            public string? Type { get; set; }
+            public int DocID { get; set; }
+            public string? DocDate { get; set; }
+            public string? SendBy { get; set; }
+            public string? SendDate { get; set; }
+            public string? SendTo { get; set; }
+            public string? Status { get; set; }
+            public string? ApprovalStatus { get; set; }
+            public string? Remarks { get; set; }
+            public string? CreatedBy { get; set; }
+            public string? CreatedDate { get; set; }
+            public string? PartyName { get; set; }
+            public decimal BillAmount { get; set; }
+        }
     }
 
 }

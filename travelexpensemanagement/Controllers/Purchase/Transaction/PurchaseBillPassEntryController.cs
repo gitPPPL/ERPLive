@@ -1918,6 +1918,14 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
             return Json(new {success = result.status, message = result.message, data = result.data});
         }
+
+        [HttpGet]
+        public IActionResult GetPendingApprovalList()
+        {
+            var result = _purchaseBillPassEntry.GetPendingApprovalList();
+
+            return Json(new {success = result.status, message = result.message, data = result.data});
+        }
     }
 }
 

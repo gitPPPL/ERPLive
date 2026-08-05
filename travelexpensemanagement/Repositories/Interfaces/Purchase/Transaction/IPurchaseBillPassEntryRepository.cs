@@ -21,5 +21,6 @@ namespace travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction
         public Task<PBTdsCalculation> CalculateTDS(PURCHASE1 model);
         public RepositoryResponseList<CopyFromMenuItem> GetCopyFromMenu(string docType);
         public RepositoryResponseData<CopyFromGridResponse> GetCopyFromData(CopyFromRequest request);
+        public RepositoryResponseData<List<PendingApprovalModel>> GetPendingApprovalList();
     }
 }

@@ -3366,5 +3366,68 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
 
             return cmd;
         }
+
+        //=================Pending Approval List=============
+        public RepositoryResponseData<List<PendingApprovalModel>> GetPendingApprovalList()
+        {
+            try
+            {
+                using SqlConnection con = _dbConnection.GetErpConnection();
+
+                var gv = _globalVariableService.GetGlobalVariables();
+
+                using SqlCommand cmd = new("sp_PurchaseBillPassEntryDirect", con)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                cmd.Parameters.AddWithValue("@Action", "PendingApprovalList");
+                cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+
+                con.Open();
+
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                List<PendingApprovalModel> list = new();
+
+                while (reader.Read())
+                {
+                    list.Add(new PendingApprovalModel
+                    {
+                        Type = reader["Type"]?.ToString(),
+                        DocID = reader["DocID"] == DBNull.Value ? 0 : Convert.ToInt32(reader["DocID"]),
+                        DocDate = reader["Doc Date"]?.ToString(),
+                        SendBy = reader["Send By"]?.ToString(),
+                        SendDate = reader["Send Date"]?.ToString(),
+                        SendTo = reader["Send To"]?.ToString(),
+                        Status = reader["Status"]?.ToString(),
+                        ApprovalStatus = reader["Approval Status"]?.ToString(),
+                        Remarks = reader["Remarks"]?.ToString(),
+                        CreatedBy = reader["Created By"]?.ToString(),
+                        CreatedDate = reader["Created Date"]?.ToString(),
+                        PartyName = reader["Party Name"]?.ToString(),
+                        BillAmount = reader["Bill Amount"] == DBNull.Value
+                                        ? 0
+                                        : Convert.ToDecimal(reader["Bill Amount"])
+                    });
+                }
+
+                return new RepositoryResponseData<List<PendingApprovalModel>>
+                {
+                    status = true,
+                    data = list
+                };
+            }
+            catch (Exception ex)
+            {
+                return new RepositoryResponseData<List<PendingApprovalModel>>
+                {
+                    status = false,
+                    message = ex.Message
+                };
+            }
+        }
     }
 }
