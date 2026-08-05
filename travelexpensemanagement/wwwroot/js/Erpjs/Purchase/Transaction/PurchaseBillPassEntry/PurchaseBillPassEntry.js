@@ -1,5 +1,6 @@
 ﻿let uploadedFiles = [];
 let EPRUploadedFiles = [];
+let copyFromRows = [];
 
 let changeItem = false;
 let itemVsBillHSNCodeDiff = false;
@@ -664,6 +665,46 @@ function bindButtonsAndModalsEvent() {
         const checked = $("#tblpurchaseordermodal .copyfrom-check:checked").length;
 
         $("#selectAllPR").prop("checked", total > 0 && total === checked);
+
+    });
+
+    //Copy to item grid
+    $("#btnCopy").on("click", async function () {
+
+        const selectedRows = $(".copyfrom-check:checked");
+
+        if (selectedRows.length === 0) {
+            showToast("Please select at least one row.", { type: "warning" });
+            return;
+        }
+
+        showLoader();
+
+        try {
+
+            const count = selectedRows.length;
+
+            for (let i = 0; i < count; i++) {
+
+                const index = $(selectedRows[i]).data("index");
+                await addNewRowBelow(copyFromRows[index]);
+
+                // Keeps UI responsive
+                if (i % 2 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                }
+            }
+
+            $("#purchaseorderModal").modal("hide");
+
+            showToast(
+                `${count} ${count === 1 ? "Row" : "Rows"} copied successfully.`,
+                { type: "success" }
+            );
+        }
+        finally {
+            hideLoader();
+        }
 
     });
 }
@@ -1494,99 +1535,99 @@ function createRowHtml(data = {}) {
 
             <td class="freeze-item"><select class="form-control form-control-sm item-name" disabled></select></td>
 
-            <td><input class="form-control form-control-sm hsn-code" type="text" value="${data.hsN_CODE || ''}"/></td>
+            <td><input class="form-control form-control-sm hsn-code" type="text" value="${data.hsN_CODE || data.HSN_CODE || ''}"/></td>
             <td>
-                <input class="form-control form-control-sm uom-code" type="hidden" value="${data.uoM_CODE || ''}" disabled/>
-                <input class="form-control form-control-sm uom-name" type="text" value="${data.unit || ''}" disabled/>
+                <input class="form-control form-control-sm uom-code" type="hidden" value="${data.uoM_CODE || data.UOM_CODE || ''}" disabled/>
+                <input class="form-control form-control-sm uom-name" type="text" value="${data.unit || data.UNIT || ''}" disabled/>
             </td>
 
-            <td><input class="form-control form-control-sm nos" type="number" value="${data.nos || ''}"/></td>
-            <td><input class="form-control form-control-sm recd-qty" type="number" value="${data.recD_QTY || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm bill-qty" type="number" value="${data.bilL_QTY || ''}"/></td>
+            <td><input class="form-control form-control-sm nos" type="number" value="${data.nos || data.NOS || ''}"/></td>
+            <td><input class="form-control form-control-sm recd-qty" type="number" value="${data.recD_QTY || data.RECD_QTY || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm bill-qty" type="number" value="${data.bilL_QTY || data.BILL_QTY || ''} "/></td>
 
-            <td><input class="form-control form-control-sm usd-rate" type="number" value="${data.usD_RATE || ''}"/></td>
-            <td><input class="form-control form-control-sm exch-rate" type="number" value="${data.excH_RATE || ''}"/></td>
-            <td><input class="form-control form-control-sm rate" type="number" value="${data.rate || ''}"/></td>
-            <td><input class="form-control form-control-sm amount" type="number" value="${data.amount || ''}"/></td>
+            <td><input class="form-control form-control-sm usd-rate" type="number" value="${data.usD_RATE || data.USD_RATE || ''}"/></td>
+            <td><input class="form-control form-control-sm exch-rate" type="number" value="${data.excH_RATE || data.EXCH_RATE || ''}"/></td>
+            <td><input class="form-control form-control-sm rate" type="number" value="${data.rate || data.RATE || ''}"/></td>
+            <td><input class="form-control form-control-sm amount" type="number" value="${data.amount || data.AMOUNT || ''}"/></td>
 
             <td>
                 <select class="form-control form-control-sm rcm-yn">
                     <option value="">-- Select --</option>
-                    <option value="YES" ${(data.rcM_YN || '').toUpperCase() === 'YES' ? 'selected' : ''}>YES</option>
-                    <option value="NO" ${(data.rcM_YN || '').toUpperCase() === 'NO' ? 'selected' : ''}>NO</option>
+                    <option value="YES" ${(data.rcM_YN || data.RCM_YN || '').toUpperCase() === 'YES' ? 'selected' : ''}>YES</option>
+                    <option value="NO" ${(data.rcM_YN || data.RCM_YN || '').toUpperCase() === 'NO' ? 'selected' : ''}>NO</option>
                 </select>
             </td>
 
             <td>
                 <select class="form-control form-control-sm input-yn">
                     <option value="">-- Select --</option>
-                    <option value="YES" ${(data.inpuT_YN || '').toUpperCase() === 'YES' ? 'selected' : ''}>YES</option>
-                    <option value="NO" ${(data.inpuT_YN || '').toUpperCase() === 'NO' ? 'selected' : ''}>NO</option>
+                    <option value="YES" ${(data.inpuT_YN || data.INPUT_YN || '').toUpperCase() === 'YES' ? 'selected' : ''}>YES</option>
+                    <option value="NO" ${(data.inpuT_YN || data.INPUT_YN || '').toUpperCase() === 'NO' ? 'selected' : ''}>NO</option>
                 </select>
             </td>
 
             <td><select class="form-control form-control-sm tax-code"></select></td>
 
-            <td><input class="form-control form-control-sm pack-per" type="number" value="${data.pacK_PER || ''}"/></td>
-            <td><input class="form-control form-control-sm pack-amt" type="number" value="${data.pacK_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm pack-per" type="number" value="${data.pacK_PER || data.PACK_PER || ''}"/></td>
+            <td><input class="form-control form-control-sm pack-amt" type="number" value="${data.pacK_AMT || data.PACK_AMT || ''}"/></td>
 
-            <td><input class="form-control form-control-sm disc-per" type="number" value="${data.disC_PER || ''}"/></td>
-            <td><input class="form-control form-control-sm disc-amt" type="number" value="${data.disC_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm disc-per" type="number" value="${data.disC_PER || data.DISC_PER || ''}"/></td>
+            <td><input class="form-control form-control-sm disc-amt" type="number" value="${data.disC_AMT || data.DISC_AMT || ''}"/></td>
 
-            <td><input class="form-control form-control-sm cgst-per" type="number" value="${data.cgsT_PER || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm cgst-amt" type="number" value="${data.cgsT_AMT || ''}" ${data.cgsT_PER ? '' : 'disabled'} /></td>
+            <td><input class="form-control form-control-sm cgst-per" type="number" value="${data.cgsT_PER || data.CGST_PER || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm cgst-amt" type="number" value="${data.cgsT_AMT || data.CGST_AMT || ''}" ${(data.cgsT_PER || data.CGST_PER) ? '' : 'disabled'} /></td>
 
-            <td><input class="form-control form-control-sm sgst-per" type="number" value="${data.sgsT_PER || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm sgst-amt" type="number" value="${data.sgsT_AMT || ''}" ${data.sgsT_PER ? '' : 'disabled'} /></td>
+            <td><input class="form-control form-control-sm sgst-per" type="number" value="${data.sgsT_PER || data.SGST_PER || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm sgst-amt" type="number" value="${data.sgsT_AMT || data.SGST_AMT || ''}" ${(data.sgsT_PER || data.SGST_PER) ? '' : 'disabled'} /></td>
 
-            <td><input class="form-control form-control-sm igst-per" type="number" value="${data.igsT_PER || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm igst-amt" type="number" value="${data.igsT_AMT || ''}" ${data.igsT_PER ? '' : 'disabled'} /></td>
+            <td><input class="form-control form-control-sm igst-per" type="number" value="${data.igsT_PER || data.IGST_PER || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm igst-amt" type="number" value="${data.igsT_AMT || data.IGST_AMT || ''}" ${(data.igsT_PER || data.IGST_PER) ? '' : 'disabled'} /></td>
 
-            <td><input class="form-control form-control-sm cess-per" type="number" value="${data.cesS_PER || ''}"/></td>
-            <td><input class="form-control form-control-sm cess-amt" type="number" value="${data.cesS_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm cess-per" type="number" value="${data.cesS_PER || data.CESS_PER || ''}"/></td>
+            <td><input class="form-control form-control-sm cess-amt" type="number" value="${data.cesS_AMT || data.CESS_AMT || ''}"/></td>
 
-            <td><input class="form-control form-control-sm vat-per" type="number" value="${data.vaT_PER || ''}"/></td>
-            <td><input class="form-control form-control-sm vat-amt" type="number" value="${data.vaT_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm vat-per" type="number" value="${data.vaT_PER || data.VAT_PER || ''}"/></td>
+            <td><input class="form-control form-control-sm vat-amt" type="number" value="${data.vaT_AMT || data.VAT_AMT || ''}"/></td>
 
-            <td><input class="form-control form-control-sm oth-amt" type="number" value="${data.otH_AMT || ''}"/></td>
-            <td><input class="form-control form-control-sm net-amt" type="number" value="${data.neT_AMT || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm oth-amt" type="number" value="${data.otH_AMT || data.OTH_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm net-amt" type="number" value="${data.neT_AMT || data.NET_AMT || ''}" disabled/></td>
 
             <td>
-                <input class="form-control form-control-sm make-code" type="hidden" value="${data.makE_CODE || ''}"/>
-                <input class="form-control form-control-sm make-name" type="text" value="${data.make || ''}" disabled/>
+                <input class="form-control form-control-sm make-code" type="hidden" value="${data.makE_CODE || data.MAKE_CODE || ''}"/>
+                <input class="form-control form-control-sm make-name" type="text" value="${data.make || data.MAKE || ''}" disabled/>
             </td>
             <td>
                 <select class="form-control form-control-sm dept-code" disabled></select>
             </td>
 
-            <td><input class="form-control form-control-sm remarks" type="text" value="${data.remarks || ''}"/></td>
+            <td><input class="form-control form-control-sm remarks" type="text" value="${data.remarks || data.REMARKS || ''}"/></td>
 
-            <td><input class="form-control form-control-sm land-rate" type="number" value="${data.lanD_RATE || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm land-amt" type="number" value="${data.lanD_AMT || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm land-rate" type="number" value="${data.lanD_RATE || data.LAND_RATE || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm land-amt" type="number" value="${data.lanD_AMT || data.LAND_AMT || ''}" disabled/></td>
 
-            <td><input class="form-control form-control-sm poland-rate" type="number" value="${data.polanD_RATE || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm po-rate" type="number" value="${data.pO_RATE || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm poland-rate" type="number" value="${data.polanD_RATE || data.POLAND_RATE || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm po-rate" type="number" value="${data.pO_RATE || data.PO_RATE || ''}" disabled/></td>
 
-            <td><input class="form-control form-control-sm po-type" type="text" value="${data.pO_TYPE || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm po-no" type="number" value="${data.pO_NO || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm po-type" type="text" value="${data.pO_TYPE || data.PO_TYPE || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm po-no" type="number" value="${data.pO_NO || data.PO_NO || ''}" disabled/></td>
 
-            <td><input class="form-control form-control-sm kanta-type" type="text" value="${data.kantA_TYPE || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm kanta-no" type="number" value="${data.kantA_NO || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm kanta-type" type="text" value="${data.kantA_TYPE || data.KANTA_TYPE || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm kanta-no" type="number" value="${data.kantA_NO || data.KANTA_NO || ''}" disabled/></td>
 
-            <td><input class="form-control form-control-sm req-type" type="text" value="${data.reQ_TYPE || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm req-no" type="number" value="${data.reQ_NO || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm req-type" type="text" value="${data.reQ_TYPE || data.REQ_TYPE || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm req-no" type="number" value="${data.reQ_NO || data.REQ_NO || ''}" disabled/></td>
 
-            <td><input class="form-control form-control-sm ref-type" type="text" value="${data.reF_TYPE || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm ref-no" type="number" value="${data.reF_NO || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm ref-type" type="text" value="${data.reF_TYPE || data.REF_TYPE || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm ref-no" type="number" value="${data.reF_NO || data.REF_NO || ''}" disabled/></td>
 
-            <td><input class="form-control form-control-sm dr-note-amt" type="number" value="${data.dr_notE_AMT || ''}"/></td>
-            <td><input class="form-control form-control-sm cr-note-amt" type="number" value="${data.cr_notE_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm dr-note-amt" type="number" value="${data.dr_notE_AMT || data.DR_NOTE_AMT || ''}"/></td>
+            <td><input class="form-control form-control-sm cr-note-amt" type="number" value="${data.cr_notE_AMT || data.CR_NOTE_AMT || ''}"/></td>
 
-            <td><input class="form-control form-control-sm qlty-diff-dr-amt" type="number" value="${data.qlty_diff_dR_AMT || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm rate-diff-dr-amt" type="number" value="${data.rate_diff_dR_AMT || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm qc-diff-dr-amt" type="number" value="${data.qc_diff_dR_AMT || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm qty-diff-dr-amt" type="number" value="${data.qty_diff_dR_AMT || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm other-dr-amt" type="number" value="${data.other_dR_AMT || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm qlty-diff-dr-amt" type="number" value="${data.qlty_diff_dR_AMT || data.QLTY_DIFF_DR_AMT || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm rate-diff-dr-amt" type="number" value="${data.rate_diff_dR_AMT || data.RATE_DIFF_DR_AMT || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm qc-diff-dr-amt" type="number" value="${data.qc_diff_dR_AMT || data.QC_DIFF_DR_AMT || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm qty-diff-dr-amt" type="number" value="${data.qty_diff_dR_AMT || data.QTY_DIFF_DR_AMT || ''}" disabled/></td>
+            <td><input class="form-control form-control-sm other-dr-amt" type="number" value="${data.other_dR_AMT || data.OTHER_DR_AMT || ''}" disabled/></td>
 
             <td class="action-col">
                 <i class="fas fa-trash text-danger delete-row"></i>
@@ -1607,18 +1648,13 @@ async function addNewRowBelow(data = null) {
 
     const $lastRow = $("#tblItemRecordPBPE tbody tr:last");
 
-    //await loadItemList($lastRow.find(".item-name"), data.iteM_CODE || null);
-
-    //await loadTaxTypeList($lastRow.find(".tax-code"), data.taX_CODE || null);
-
-    //await loadDepartmentList($lastRow.find(".dept-code"), data.depT_CODE || null);
     $lastRow.find(".item-name").html(dropdownCache.Item.html);
     $lastRow.find(".tax-code").html(dropdownCache.Tax.html);
     $lastRow.find(".dept-code").html(dropdownCache.Department.html);
 
-    $lastRow.find(".item-name").val(data.iteM_CODE || "");
-    $lastRow.find(".tax-code").val(data.taX_CODE || "");
-    $lastRow.find(".dept-code").val(data.depT_CODE || "");
+    $lastRow.find(".item-name").val(data.iteM_CODE || data.ITEM_CODE || "");
+    $lastRow.find(".tax-code").val(data.taX_CODE || data.TAX_CODE || "");
+    $lastRow.find(".dept-code").val(data.depT_CODE || data.DEPT_CODE || "");
 }
 
 //-------------- DELETE ROW -----------
@@ -2384,23 +2420,6 @@ function GetCrDrNoteRequest(isFreightTaxChanged = false) {
     $("#tblItemRecordPBPE tbody tr").each(function () {
 
         const row = this;
-
-        const item = row.querySelector(".item-name");
-        const unit = row.querySelector(".uom-name");
-        const amount = row.querySelector(".amount");
-        const recdQty = row.querySelector(".recd-qty");
-        const billQty = row.querySelector(".bill-qty");
-
-        const cgst = row.querySelector(".cgst-per");
-        const sgst = row.querySelector(".sgst-per");
-        const igst = row.querySelector(".igst-per");
-
-        const poType = row.querySelector(".po-type");
-        const poNo = row.querySelector(".po-no");
-
-        const landRate = row.querySelector(".land-rate");
-        const poRate = row.querySelector(".po-rate");
-        const poLandRate = row.querySelector(".poland-rate");
 
         const item = row.querySelector(".item-name");
         const unit = row.querySelector(".uom-name");
@@ -4741,8 +4760,12 @@ function getCopyFromData(code) {
                 return;
             }
 
-            //console.log(response.data);
-            bindCopyFromGrid(response.data);
+            console.log(response.data);
+            bindCopyFromGrid(
+                response.data.columns,
+                response.data.rows
+            );
+
             $('#purchaseorderModal').modal("show");
         },
 
@@ -4752,8 +4775,8 @@ function getCopyFromData(code) {
         }
     });
 }
-
-function bindCopyFromGrid(data) {
+function bindCopyFromGrid(columns, rows) {
+    copyFromRows = rows;
 
     const table = $("#tblpurchaseordermodal");
     const thead = table.find("thead");
@@ -4763,58 +4786,51 @@ function bindCopyFromGrid(data) {
     thead.empty();
     tbody.empty();
 
-    if (!data || data.length === 0) {
-        thead.html("");
-        tbody.html(`<tr><td colspan="100%" class="text-center">No Record Found</td></tr>`);
+    if (!rows || rows.length === 0) {
+
+        tbody.html(`
+            <tr>
+                <td colspan="100%" class="text-center">
+                    No Record Found
+                </td>
+            </tr>`);
+
         return;
     }
 
-    // ---------- Create ColGroup ----------
+    //-------------------------
+    // ColGroup
+    //-------------------------
+
     let colgroup = "<colgroup>";
 
-    // Checkbox column
     colgroup += `<col style="width:50px;">`;
 
-    Object.keys(data[0]).forEach(col => {
+    columns.forEach(col => {
 
-        let maxLength = col.length;
+        let maxLength = col.title.length;
 
-        // Find longest value in this column
-        data.forEach(row => {
-            const value = row[col] == null ? "" : row[col].toString();
+        rows.forEach(r => {
+
+            let value = r[col.field];
+
+            value = value == null ? "" : value.toString();
+
             if (value.length > maxLength)
                 maxLength = value.length;
+
         });
 
         let width;
 
-        // Fixed width for numeric columns
-        if ([
-            "Nos",
-            "Qty",
-            "BalQty",
-            "Rate",
-            "PackPer",
-            "DiscPer",
-            "CGSTPer",
-            "SGSTPer",
-            "IGSTPer",
-            "OthAmt",
-            "RECDQTY",
-            "BILLQTY"
-        ].includes(col)) {
+        if (typeof rows[0][col.field] === "number") {
 
             width = 90;
-        }
-        else {
 
-            // Approximate width: 9px per character
-            width = maxLength * 9;
+        } else {
 
-            // Minimum width
-            width = Math.max(width, 80);
+            width = Math.max(maxLength * 9, 80);
 
-            // Maximum width
             width = Math.min(width, 300);
         }
 
@@ -4826,33 +4842,58 @@ function bindCopyFromGrid(data) {
 
     table.prepend(colgroup);
 
-    // ---------- Header ----------
-    let header = "<tr>";
+    //-------------------------
+    // Header
+    //-------------------------
 
-    header += `<th style="text-align:center;"><input type="checkbox" id="selectAllPR"></th>`;
+    let header = `<tr>
+        <th style="text-align:center">
+            <input type="checkbox" id="selectAllPR">
+        </th>`;
 
-    Object.keys(data[0]).forEach(col => {
-        header += `<th>${col}</th>`;
+    columns.forEach(col => {
+
+        header += `<th>${col.title}</th>`;
+
     });
 
     header += "</tr>";
+
     thead.html(header);
 
-    // ---------- Body ----------
-    let rows = "";
-    data.forEach((row, index) => {
-        rows += "<tr>";
-        rows += `<td style="text-align:center;"> <input type="checkbox" class="copyfrom-check" data-index="${index}"></td>`;
+    //-------------------------
+    // Body
+    //-------------------------
 
-        Object.keys(row).forEach(col => {
-            const value = row[col] ?? "";
-            rows += `<td title="${value}">${value}</td>`;
+    let html = "";
+
+    rows.forEach((row, index) => {
+
+        html += `<tr>`;
+
+        html += `
+            <td style="text-align:center">
+                <input
+                    type="checkbox"
+                    class="copyfrom-check"
+                    data-index="${index}">
+            </td>`;
+
+        columns.forEach(col => {
+
+            const value = row[col.field] ?? "";
+
+            html += `<td title="${value}">
+                        ${value}
+                     </td>`;
+
         });
 
-        rows += "</tr>";
+        html += "</tr>";
+
     });
 
-    tbody.html(rows);
+    tbody.html(html);
+
     makeColumnsResizable("#tblpurchaseordermodal");
 }
-

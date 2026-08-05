@@ -352,6 +352,18 @@ namespace travelexpensemanagement.Models.Purchase.Transaction
             public int VNo { get; set; }
             public string CurrentVType { get; set; } = string.Empty;
         }
+
+        public class CopyFromColumn
+        {
+            public string Field { get; set; } = "";
+            public string Title { get; set; } = "";
+        }
+
+        public class CopyFromGridResponse
+        {
+            public List<CopyFromColumn> Columns { get; set; } = new();
+            public List<Dictionary<string, object?>> Rows { get; set; } = new();
+        }
     }
 
 }

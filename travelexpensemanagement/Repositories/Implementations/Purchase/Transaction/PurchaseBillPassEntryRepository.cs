@@ -3242,38 +3242,95 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             }
         }
 
-        public RepositoryResponseData<List<Dictionary<string, object?>>> GetCopyFromData(CopyFromRequest request)
+        public RepositoryResponseData<CopyFromGridResponse> GetCopyFromData(CopyFromRequest request)
         {
             try
             {
                 using SqlConnection con = _dbConnection.GetErpConnection();
-                using SqlCommand cmd = BuildCopyFromCommand(request, con);
+                using SqlCommand? cmd = BuildCopyFromCommand(request, con);
 
                 if (cmd == null)
                 {
-                    return new RepositoryResponseData<List<Dictionary<string, object?>>>
+                    return new RepositoryResponseData<CopyFromGridResponse>
                     {
                         status = true,
-                        data = new List<Dictionary<string, object?>>()
+                        data = new CopyFromGridResponse()
                     };
                 }
 
                 con.Open();
-                SqlDataAdapter da = new(cmd);
+
                 DataTable dt = new();
-                da.Fill(dt);
 
-                var data = dt.AsEnumerable().Select(row => dt.Columns.Cast<DataColumn>().ToDictionary(
-                    col => col.ColumnName,
-                    col => row[col] == DBNull.Value ? null : row[col]
-                ))
-            .ToList();
+                using (SqlDataAdapter da = new(cmd))
+                {
+                    da.Fill(dt);
+                }
 
-                return new RepositoryResponseData<List<Dictionary<string, object?>>> { status = true, data = data };
+                // Columns
+                var columns = dt.Columns.Cast<DataColumn>()
+                    .Select(col =>
+                    {
+                        string field = col.ColumnName;
+                        string title = col.ColumnName;
+
+                        int start = col.ColumnName.IndexOf(" (");
+
+                        if (start >= 0 && col.ColumnName.EndsWith(")"))
+                        {
+                            field = col.ColumnName[..start];
+                            title = col.ColumnName[(start + 2)..^1];
+                        }
+
+                        return new CopyFromColumn
+                        {
+                            Field = field,
+                            Title = title
+                        };
+                    })
+                    .ToList();
+
+                // Rows
+                var rows = dt.AsEnumerable()
+                    .Select(row =>
+                    {
+                        var dict = new Dictionary<string, object?>();
+
+                        foreach (var col in columns)
+                        {
+                            string originalColumn =
+                                $"{col.Field} ({col.Title})";
+
+                            if (!dt.Columns.Contains(originalColumn))
+                                originalColumn = col.Field;
+
+                            dict[col.Field.ToUpper()] =
+                                row[originalColumn] == DBNull.Value
+                                    ? null
+                                    : row[originalColumn];
+                        }
+
+                        return dict;
+                    })
+                    .ToList();
+
+                return new RepositoryResponseData<CopyFromGridResponse>
+                {
+                    status = true,
+                    data = new CopyFromGridResponse
+                    {
+                        Columns = columns,
+                        Rows = rows
+                    }
+                };
             }
             catch (Exception ex)
             {
-                return new RepositoryResponseData<List<Dictionary<string, object?>>> { status = false, message = ex.Message};
+                return new RepositoryResponseData<CopyFromGridResponse>
+                {
+                    status = false,
+                    message = ex.Message
+                };
             }
         }
 

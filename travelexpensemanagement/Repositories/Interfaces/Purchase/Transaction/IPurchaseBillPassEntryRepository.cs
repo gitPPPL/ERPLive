@@ -20,6 +20,6 @@ namespace travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction
         public Task<RepositoryResponseData<FullPurchaseBillResponse>> GetFullQuotationByVno(int vNo, string vType);
         public Task<PBTdsCalculation> CalculateTDS(PURCHASE1 model);
         public RepositoryResponseList<CopyFromMenuItem> GetCopyFromMenu(string docType);
-        public RepositoryResponseData<List<Dictionary<string, object?>>> GetCopyFromData(CopyFromRequest request);
+        public RepositoryResponseData<CopyFromGridResponse> GetCopyFromData(CopyFromRequest request);
     }
 }
