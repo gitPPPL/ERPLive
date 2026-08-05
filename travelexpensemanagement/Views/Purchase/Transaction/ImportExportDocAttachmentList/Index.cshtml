@@ -15,8 +15,8 @@
             <div class="erppage-divfield">
                 <label class="erppage-label">Type</label>
                 <select class="erppage-input erppage-select" id="ddltype">
-                    <option value="import">Import</option>
-                    <option value="export">Export</option>
+                    <option value="Import">Import</option>
+                    <option value="Export">Export</option>
                 </select>
             </div>
         </div>
@@ -64,67 +64,64 @@
             <div class="excel-wrapper fixed-grid-wrapper">
                 <table id="tblImportExportDocAttachmentList" class="excel-table fixed-grid-table table-width resizable-table">
                     <colgroup>
-                        <col class="hidden-col">          
-                        <col style="width:100px;">        
-                        <col style="width:110px;">        
-                        <col style="width:100px;">        
-                        <col style="width:110px;">        
-                        <col style="width:220px;">        
-                        <col style="width:100px;">        
-                        <col style="width:60px;">         
-                        <col style="width:90px;">         
-                        <col style="width:90px;">         
-                        <col style="width:90px;">         
-                        <col style="width:90px;">         
-                        <col style="width:90px;">         
-                        <col style="width:90px;">         
-                        <col style="width:90px;">         
-                        <col style="width:90px;">         
-                        <col style="width:90px;">         
-                        <col style="width:90px;">         
+                        <col class="hidden-col">             
+                        <col style="width:100px;">           <!-- Sauda No -->
+                        <col style="width:110px;">           <!-- Sauda Date -->
+                        <col style="width:100px;">           <!-- Inv No -->
+                        <col style="width:110px;">           <!-- Inv Date -->
+                        <col style="width:120px;">           <!-- B E No. -->
+                        <col style="width:100px;">           <!-- Exim No -->
+                        <col style="width:110px;">           <!-- Exim Date -->
+                        <col style="width:220px;">           <!-- Party Name -->
+                        <col style="width:100px;">           <!-- Party Code -->
+                        <col style="width:60px;">            <!-- Chk -->
+                        <col style="width:90px;">            <!-- P I Copy -->
+                        <col style="width:90px;">            <!-- B L Copy -->
+                        <col style="width:90px;">            <!-- B E Copy -->
+                        <col style="width:90px;">            <!-- L C Copy -->
+                        <col style="width:90px;">            <!-- INV Copy -->
+                        <col style="width:90px;">            <!-- D P Copy -->
+                        <col style="width:90px;">            <!-- SBLC Copy -->
+                        <col style="width:90px;">            <!-- Oth Copy1 -->
+                        <col style="width:90px;">            <!-- Oth Copy2 -->
+                        <col style="width:90px;">            <!-- Oth Copy3 -->
+                        <col style="width:90px;">            <!-- Oth Copy4 -->
+                        <col style="width:90px;">            <!-- Oth Copy5 -->
+                        <col style="width:90px;">            <!-- Oth Copy6 -->
+                        <col style="width:90px;">            <!-- Oth Copy7 -->
                     </colgroup>
+
                     <thead>
                         <tr>
-                            <th class="hidden-col">Code</th>
-                            <th>Sauda No</th>
-                            <th>Sauda Date</th>
-                            <th>Exim No</th>
-                            <th>Exim Date</th>
-                            <th>Party Name</th>
-                            <th>B E No.</th>
-                            <th>Chk</th>
-                            <th>P I Copy</th>
-                            <th>B L Copy</th>
-                            <th>B E Copy</th>
-                            <th>L C Copy</th>
-                            <th>Inv Copy</th>
-                            <th>D P Copy</th>
-                            <th>Sblc Copy</th>
-                            <th>Brc Copy</th>
-                            <th>Sb Copy</th>
-                            <th class="action-col">Action</th>
+                            <th class="hidden-col">Code</th>   <!-- Column 0 -->
+                            <th>Sauda No</th>                  <!-- Column 1 -->
+                            <th>Sauda Date</th>                <!-- Column 2 -->
+                            <th>Inv No</th>                    <!-- Column 3 -->
+                            <th>Inv Date</th>                  <!-- Column 4 -->
+                            <th>B E No.</th>                   <!-- Column 5 -->
+                            <th>Exim No</th>                   <!-- Column 6 -->
+                            <th>Exim Date</th>                 <!-- Column 7 -->
+                            <th>Party Name</th>                <!-- Column 8 -->
+                            <th>Party Code</th>                <!-- Column 9 -->
+                            <th>Chk</th>                       <!-- Column 10 -->
+                            <th>P I Copy</th>                  <!-- Column 11 -->
+                            <th>B L Copy</th>                  <!-- Column 12 -->
+                            <th>B E Copy</th>                  <!-- Column 13 -->
+                            <th>L C Copy</th>                  <!-- Column 14 -->
+                            <th>INV Copy</th>                  <!-- Column 15 -->
+                            <th>D P Copy</th>                  <!-- Column 16 -->
+                            <th>SBLC Copy</th>                 <!-- Column 17 -->
+                            <th>Oth Copy1</th>                 <!-- Column 18 -->
+                            <th>Oth Copy2</th>                 <!-- Column 19 -->
+                            <th>Oth Copy3</th>                 <!-- Column 20 -->
+                            <th>Oth Copy4</th>                 <!-- Column 21 -->
+                            <th>Oth Copy5</th>                 <!-- Column 22 -->
+                            <th>Oth Copy6</th>                 <!-- Column 22 -->
+                            <th>Oth Copy7</th>                 <!-- Column 22 -->
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
-            </div>
-            <div class="erppagelist-pagination">
-                <div class="pagination-left">
-                    <select id="pageSizeSelect">
-                        <option value="5">5</option>
-                        <option value="10" selected>10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                    </select>
-                </div>
-                <div class="pagination-center">
-                    <button class="page-nav" id="prevBtn">‹</button>
-                    <div id="tablePagination" class="page-numbers"></div>
-                    <button class="page-nav" id="nextBtn">›</button>
-                </div>
-                <div class="pagination-right" id="pageInfoText">
-                    Results: 0 - 0 of 0
-                </div>
             </div>
         </div>
     </div>
@@ -142,12 +139,10 @@
         LoadDropdown();
 
 
-
-        $('#btnexportsave').on('click' , async function() {
-
-          await Viewdata();
-
+        $('#btnviewdata').on('click' , async function() {
+           Viewdata();
         });
+
 
     });
 
@@ -194,24 +189,166 @@
         }
     }
 
-    async function Viewdata()
-    {
-        try{
+    async function Viewdata() {
+        try {
+
             const fromDate = $('#Dtfrom').val();
             const toDate = $('#Dtto').val();
+            const V_TYPE = $('#ddltype').val();
+            const partycode = $('#ddlpartyname').val();
+            const Citycode = $('#ddllocation').val();
+
             const res = await $.ajax({
                 url: '/ImportExportDocAttachmentList/GetViewData',
                 type: 'GET',
-                data: {FromDate: fromDate,ToDate: toDate}
+                data: {  FromDate: fromDate,  
+                        ToDate: toDate, 
+                        V_TYPE: V_TYPE,
+                        partycode : partycode,
+                        Citycode : Citycode
+                }
             });
-            console.log("res",res);
+
+            console.log("Response :", res);
+
+            const tbody = $("#tblImportExportDocAttachmentList tbody");
+            tbody.empty();
+
+            // Get array from response
+            const data = Array.isArray(res)
+                ? res
+                : (res.data || res.result || []);
+
+            if (data.length === 0) {
+                toastr.warning("No data found.");
+                return;
+            }
+
+               data.forEach((item, index) => {
+
+        addRowToTable({
+            code: index + 1,
+            saudaNo: item.saudA_NO ?? "",
+            saudaDate: formatDate(item.sauda_date),
+            invNo: item.saudA_NO ?? "",
+            invDate: formatDate(item.sauda_date),
+            beNo: item.bE_NO ?? "",
+            eximNo: item.v_no ?? "",
+            eximDate: formatDate(item.eximDate),
+            partyName: item.partyName ?? "",
+            partyCode: item.partY_CODE ?? "",
+            chk: false,
+            piCopy: item.pI_COPY ?? "",
+            blCopy: item.bL_COPY ?? "",
+            beCopy: item.bE_COPY ?? "",
+            lcCopy: item.lC_COPY ?? "",
+            invCopy: item.inV_COPY ?? "",
+            dpCopy: item.dP_COPY ?? "",
+            sblcCopy: item.sblC_COPY ?? "",
+            othCopy1: item.otH_COPY1 ?? "",
+            othCopy2: item.otH_COPY2 ?? "",
+            othCopy3: item.otH_COPY3 ?? "",
+            othCopy4: item.otH_COPY4 ?? "",
+            othCopy5: item.otH_COPY5 ?? "",
+            othCopy6: item.otH_COPY6 ?? "",
+            othCopy7: item.otH_COPY7 ?? ""
+        }, index);
+
+    });
+
         }
-        catch(error)
-        {
-            toastr.error("Error",error);
-            console.log("Error",error);
+        catch (error) {
+            console.error("Error:", error);
+            toastr.error("Error loading data.");
+        }
+    }
+
+
+     function addRowToTable(item, index = 0 )
+     {
+
+        let copyColumns = "";
+       let  formtype = ""
+
+
+        if (formtype === "EXIM") {
+
+            copyColumns = `
+                <td>${item.piCopy ?? ""}</td>
+                <td>${item.blCopy ?? ""}</td>
+                <td>${item.beCopy ?? ""}</td>
+                <td>${item.lcCopy ?? ""}</td>
+                <td>${item.invCopy ?? ""}</td>
+                <td>${item.dpCopy ?? ""}</td>
+                <td>${item.sblcCopy ?? ""}</td>
+                <td>${item.OthCopy1 ?? ""}</td>
+                <td>${item.OthCopy2 ?? ""}</td>
+                <td>${item.OthCopy3 ?? ""}</td>
+            `;
+
+        } else {
+
+            copyColumns = `
+                <td>${item.sbCopy ?? ""}</td>
+                <td>${item.blCopy ?? ""}</td>
+                <td>${item.brcCopy ?? ""}</td>
+                <td>${item.OthCopy1 ?? ""}</td>
+                <td>${item.OthCopy2 ?? ""}</td>
+                <td>${item.OthCopy3 ?? ""}</td>
+                <td>${item.OthCopy4 ?? ""}</td>
+                <td>${item.OthCopy5 ?? ""}</td>
+                <td>${item.OthCopy6 ?? ""}</td>
+                <td>${item.OthCopy7 ?? ""}</td>
+            `;
         }
 
+
+        const row = `
+            <tr id="row_${index}">
+                <td class="hidden-col">${item.code ?? ""}</td>
+
+                ${formtype === "EXIM" ? `
+                    <td>${item.saudaNo ?? ""}</td>
+                    <td>${item.saudaDate ?? ""}</td>
+                ` : `
+                    <td>${item.invNo ?? ""}</td>
+                    <td>${item.invDate ?? ""}</td>
+                `}
+
+                <td>${item.invNo ?? ""}</td>
+                <td>${item.invDate ?? ""}</td>
+                <td>${formtype === "EXIM" ? (item.beNo ?? "") : (item.sbNo ?? "")}</td>
+
+                <td>${item.eximNo ?? ""}</td>
+                <td>${item.eximDate ?? ""}</td>
+
+                <td>${item.partyName ?? ""}</td>
+                <td>${item.partyCode ?? ""}</td>
+
+                <td class="text-center">
+                    <input type="checkbox" id="chk_${index}" ${item.chk ? "checked" : ""}>
+                </td>
+
+                ${copyColumns}
+
+            </tr>`;
+
+        $("#tblImportExportDocAttachmentList tbody").append(row);
+    }
+
+    function formatDate(date) {
+
+        if (!date) return "";
+
+        const d = new Date(date);
+
+        if (isNaN(d.getTime())) return "";
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}/${month}/${year}`;
     }
 
 </script>

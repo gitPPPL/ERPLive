@@ -37,7 +37,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return View("~/Views/Purchase/Transaction/ImportExportDocAttachmentList/Index.cshtml");
         }
 
-
         public JsonResult cmbPartyName()
         {
             var getdata = _globalValue.GetGlobalVariables();
@@ -48,8 +47,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(cmbPartyName);
             }
         }
-
-
 
         public JsonResult cmbLocation()
         {
@@ -63,12 +60,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
         }
 
-
-
-
-
         [HttpGet]
-        public async Task<object> GetViewData(DateTime FromDate, DateTime ToDate , string V_TYPE)
+        public async Task<object> GetViewData(DateTime FromDate, DateTime ToDate , string V_TYPE , int partycode , int Citycode)
         {
             var gv = _globalValue.GetGlobalVariables();
             var dataList = new List<object>();
@@ -87,6 +80,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         cmd.Parameters.AddWithValue("@CompCode", gv.PubCompCode);
                         cmd.Parameters.AddWithValue("@BranchCode", gv.PubBranchCode);
                         cmd.Parameters.AddWithValue("@V_TYPE", V_TYPE);
+                        cmd.Parameters.AddWithValue("@partycode", partycode);
+                        cmd.Parameters.AddWithValue("@Citycode", Citycode);
                         cmd.Parameters.Add("@FromDate", SqlDbType.SmallDateTime).Value = FromDate;
                         cmd.Parameters.Add("@ToDate", SqlDbType.SmallDateTime).Value = ToDate;
 
@@ -96,7 +91,14 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                             {
                                 dataList.Add(new
                                 {
-   
+                                    SAUDA_NO = rdr["SAUDA_NO"]?.ToString(),
+                                    V_no = rdr["V_no"]?.ToString(),
+                                    Sauda_date = SafeDate(rdr, "Sauda_date"),                           
+                                    EximDate = SafeDate(rdr, "EximDate"),
+                                    PartyName = rdr["PartyName"]?.ToString(),
+                                    BE_NO = rdr["BE_NO"]?.ToString(),
+                                    City = rdr["City"]?.ToString(),
+                                    PARTY_CODE = rdr["PARTY_CODE"]?.ToString()
                                 });
                             }
                         }
@@ -111,16 +113,13 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
         }
 
-
-
-
-
-
-
-
-
-
-
+        private static DateTime? SafeDate(SqlDataReader rdr, string col)
+        {
+            if (rdr[col] == DBNull.Value) return null;
+            var raw = rdr[col].ToString();
+            if (string.IsNullOrWhiteSpace(raw)) return null;
+            return DateTime.TryParse(raw, out var dt) ? dt : (DateTime?)null;
+        }
 
     }
 }
