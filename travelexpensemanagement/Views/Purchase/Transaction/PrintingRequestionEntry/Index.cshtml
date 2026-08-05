@@ -1,0 +1,649 @@
+﻿@{
+    ViewBag.Title = "Printing Requestion Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-print"></i>
+        </div>
+        <div class="erppage-header-title">Printing Requestion Entry</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PrintingRequestionList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="PrintingRequestionForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Place</label>
+                    <select class="erppage-input erppage-select" id="ddlPlace">
+                        <option value="">Select Place</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-select" id="ddlStatus">
+                        <option value="">Select Status</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Department</label>
+                    <select class="erppage-input erppage-select" id="ddlDepartment">
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Req. Date</label>
+                    <input type="date" class="erppage-input" id="DtRequiredDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Reason</label>
+                    <textarea typeof="text" class="erppage-input" id="TxtReason" placeholder="Enter Reason"></textarea>
+                </div>
+            </div>
+            <div class="erppage-grid2">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Request By</label>
+                    <div class="erppage-inputgroup">
+                        <select class="erppage-input erppage-select" id="ddlrequestby">
+                            <option value="">Select Request By</option>
+                        </select>
+                        <input type="text" class="erppage-input" id="Txtrequestby">
+                    </div> 
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea typeof="text" class="erppage-input" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+            @* item Master *@
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Details</legend>
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblPrintingRequestionEntry" class="excel-table fixed-grid-table table-width resizable-table">
+                        <colgroup>
+                            <col class="hidden-col">                
+                            <col style="width:180px;">              
+                            <col style="width:220px;">              
+                            <col style="width:120px;">              
+                            <col style="width:100px;">              
+                            <col style="width:80px;">               
+                            <col style="width:120px;">              
+                            <col style="width:120px;">              
+                            <col style="width:100px;">              
+                            <col style="width:150px;">              
+                            <col style="width:180px;">              
+                            <col style="width:120px;">              
+                            <col style="width:120px;">              
+                            <col style="width:120px;">              
+                            <col style="width:220px;">              
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="hidden-col">Code</th>
+                                <th>Item Name</th>
+                                <th>Description</th>
+                                <th>Make</th>
+                                <th>Mat. Type</th>
+                                <th>Unit</th>
+                                <th>Req. Quantity</th>
+                                <th>Printing Type</th>
+                                <th>Finish</th>
+                                <th>Place of Use</th>
+                                <th>Reason</th>
+                                <th>Priority Type</th>
+                                <th>Work Type</th>
+                                <th>Scrap Type</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </fieldset>
+            @* item Master *@
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Attachment</legend>
+
+                <div class="erppage-tab-content" id="attachment">
+                    <div class="erppage-accordion-body">
+                        <div class="erppageattachmentsection">
+                            <div class="erppageattachmentsectionrow">
+                                <div class="erppageattachmentsectioncol">
+                                    <div class="erppageattachmentsectionuploadcard">
+                                        <h2 class="erppageattachmentsectiontitle">UPLOAD MULTIPLE FILES</h2>
+                                        <div class="erppageattachmentsectiondropzone" id="dropZone">
+                                            <div class="erppageattachmentsectioncloud">
+                                                <i class="fa fa-cloud"></i>
+                                            </div>
+                                            <div class="erppageattachmentsectiondragtext">
+                                                Drag & Drop your files here
+                                            </div>
+                                            <div class="erppageattachmentsectionor">
+                                                OR
+                                            </div>
+                                            <button type="button" class="erppageattachmentsectionbrowsebtn" id="browseBtn">
+                                                Browse Files
+                                            </button>
+                                            <input type="file" id="fileInput" multiple hidden>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="erppageattachmentsectioncol">
+                                    <div class="erppageattachmentsectionfilecard">
+                                        <div class="erppageattachmentsectionheader">Uploaded Files</div>
+                                        <div class="erppageattachmentsectionfilelist" id="fileList">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+
+                        <div class="modal-dialog erppagesmodal small-modal">
+
+                            <div class="modal-content erppagesmodal-content">
+
+                                <div class="erppagesmodal-header">
+
+                                    <div class="erppagesmodal-header-left">
+
+                                        <div class="erppagesmodal-header-icon">
+                                            <i class="fa fa-image"></i>
+                                        </div>
+
+                                        <h5 class="erppagesmodal-title">
+                                            Attachment Preview
+                                        </h5>
+
+                                    </div>
+
+                                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="erppagesmodal-body text-center">
+                                    <img id="previewImage" src="" style="width:100%;height:75vh; object-fit:contain; display:none;" />
+                                    <iframe id="previewPdf" style="width:100%; height:75vh; border:none; display:none;">
+                                    </iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="erppage-container">
+                <div class="erppage-actions">
+                    <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Save</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let itemList = [];
+    let priorityList = [];
+    let workTypeList = [];
+    let rowsAttachment = [];
+    $(document).ready(function () {
+        ddlDocNo();
+        loadCurrentDate();
+        bindStatus();
+        bindPlace();
+        bindDepartment();
+        bindRequestBy();
+        // Load Priority & WorkType first
+        $.when(
+            $.get('/PrintingRequestionEntry/GetPriority', function (data) {
+                priorityList = data;
+            }),
+            $.get('/PrintingRequestionEntry/GetWorkType', function (data) {
+                workTypeList = data;
+            })
+        ).done(function () {
+            bindItem();
+        });
+        $(document).on("change", ".itemddl", function () {
+
+            var itemCode = $(this).val();
+            var makeDDL = $(this).closest("tr").find(".makeddl");
+
+            makeDDL.empty();
+            makeDDL.append('<option value="">Select Make</option>');
+
+            if (!itemCode)
+                return;
+
+            $.ajax({
+                url: "/PrintingRequestionEntry/GetMake",
+                type: "GET",
+                data: { itemCode: itemCode },
+                success: function (data) {
+
+                    $.each(data, function (i, item) {
+
+                        makeDDL.append(
+                            $('<option>', {
+                                value: item.value,
+                                text: item.text
+                            })
+                        );
+
+                    });
+
+                    if (data.length == 1) {
+                        makeDDL.val(data[0].value);
+                    }
+
+                }
+            });
+
+        });
+        $("#browseBtn").on("click", function () {
+            $("#fileInput").click();
+        });
+        $('#fileInput').on('change', function (e) {
+
+        const files = e.target.files;
+
+        Array.from(files).forEach(file => {
+
+            const reader = new FileReader();
+
+            reader.onload = function (ev) {
+
+                const mime = file.type || 'application/octet-stream';
+
+                // Store selected file
+                rowsAttachment.push({
+                    FileName: file.name,
+                    File: file
+                });
+
+                // UI
+                const card = `
+                <div class="erp-file-row" data-filename="${file.name}">
+
+                    <div class="erp-file-preview">
+                        ${mime.startsWith('image/')
+                        ? `<img src="${ev.target.result}" class="erp-file-thumbnail">`
+                        : mime === 'application/pdf'
+                            ? `<i class="fa fa-file-pdf-o" style="font-size:40px;color:red;"></i>`
+                            : `<i class="fa fa-file" style="font-size:40px;"></i>`
+                    }
+                    </div>
+
+                    <div class="erp-file-info">
+                        <div class="erp-file-name">${file.name}</div>
+                        <div class="erp-file-type">${mime}</div>
+                    </div>
+
+                    <div class="erp-file-actions">
+
+                        <button type="button"
+                                class="erp-btn view btn-view-attachment"
+                                data-src="${ev.target.result}"
+                                data-type="${mime}">
+                            <i class="fa fa-eye"></i>
+                        </button>
+
+                        <button type="button"
+                                class="erp-btn delete btn-delete-attachment"
+                                data-filename="${file.name}">
+                            <i class="fa fa-trash"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+                $('#fileList').append(card);
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+        $(this).val('');
+    });
+
+            $(document).on("click", ".btn-view-attachment", function () {
+
+        const src = $(this).data("src");
+        const type = $(this).data("type");
+
+        $("#previewImage").hide();
+        $("#previewPdf").hide();
+
+        if (type.startsWith("image/")) {
+
+            $("#previewImage").attr("src", src).show();
+        }
+        else if (type === "application/pdf") {
+
+            $("#previewPdf").attr("src", src).show();
+        }
+        else {
+
+            alert("Preview not available for this file type.");
+            return;
+
+        }
+
+        $("#imagePreviewModal").modal("show");
+    });
+
+        $(document).on("click", ".btn-delete-attachment", function () {
+
+        const fileName = $(this).data("filename");
+        rowsAttachment = rowsAttachment.filter(x => x.FileName !== fileName);
+        $(this).closest(".erp-file-row").remove();
+
+    });
+
+    });
+    function ddlDocNo() {
+        $.ajax({
+            url: '/PrintingRequestionEntry/GetDocNo',
+            type: 'GET',
+            success: function (data) {
+                if (data.success) {
+                    $("#NumDocNo").val(data.nextVNo);
+                }
+                else {
+                    alert(data.message);
+                }
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+            }
+        });
+    }
+    function loadCurrentDate() {
+        const currentDate = new Date().toISOString().split('T')[0];
+        console.log('kks', currentDate)
+        $('#DtDocDate').val(currentDate);
+        $('#DtRequiredDate').val(currentDate);
+    }
+    function bindPlace() {
+        $.get('/PrintingRequestionEntry/GetPlace', function (data) {
+            $("#ddlPlace").empty();
+            $("#ddlPlace").append('<option value="">Select Place</option>');
+            $.each(data, function (i, item) {
+                $("#ddlPlace").append(
+                    '<option value="' + item.value + '">' + item.text + '</option>'
+                );
+            });
+        });
+    }
+    function bindStatus() {
+        $.get('/PrintingRequestionEntry/GetStatus', function (data) {
+            $("#ddlStatus").empty();
+            $("#ddlStatus").append('<option value="">Select Status</option>');
+            $.each(data, function (i, item) {
+                $("#ddlStatus").append(
+                    '<option value="' + item.value + '">' + item.text + '</option>'
+                );
+            });
+        });
+    }
+    function loadCurrentDate() {
+         var today = new Date();
+         var yyyy = today.getFullYear();
+         var mm = String(today.getMonth() + 1).padStart(2, '0');
+         var dd = String(today.getDate()).padStart(2, '0');
+         var currentDate = yyyy + "-" + mm + "-" + dd;
+         $("#DtDocDate").val(currentDate);
+         $("#DtRequiredDate").val(currentDate);
+    }
+    function bindDepartment() {
+        $.get('/PrintingRequestionEntry/GetDepartment', function (data) {
+            $("#ddlDepartment").empty();
+            $("#ddlDepartment").append('<option value="">Select Department</option>');
+            $.each(data, function (i, item) {
+                $("#ddlDepartment").append(
+                    '<option value="' + item.value + '">' + item.text + '</option>'
+                );
+            });
+        });
+    }
+    function bindRequestBy() {
+        $.get('/PrintingRequestionEntry/GetRequestBy', function (data) {
+            $("#ddlrequestby").empty();
+            $("#ddlrequestby").append('<option value="">Select Request By</option>');
+            $.each(data, function (i, item) {
+                console.log('kks',data)
+                $("#ddlrequestby").append(
+                    '<option value="' + item.value + '">' + item.text + '</option>'
+                );
+            });
+        });
+    }
+    function addNewRow() {
+        let rowIndex = $("#tblPrintingRequestionEntry tbody tr").length;
+        // Item Dropdown
+        let options = '<option value="">Select Item</option>';
+        $.each(itemList, function (i, item) {
+            options += `<option value="${item.value}">${item.text}</option>`;
+        });
+        // Priority Dropdown
+        let priorityOptions = '<option value="">Select Priority</option>';
+        $.each(priorityList, function (i, item) {
+            priorityOptions += `<option value="${item.value}">${item.text}</option>`;
+
+        });
+
+        // WorkType Dropdown
+        let workTypeOptions = '<option value="">Select Work Type</option>';
+        $.each(workTypeList, function (i, item) {
+            workTypeOptions += `<option value="${item.value}">${item.text}</option>`;
+        });
+
+        let row = `
+        <tr>
+            <td class="hidden-col">
+                <input type="hidden" id="ItemCode_${rowIndex}" />
+            </td>
+            <td>
+                <select id="ddlItem_${rowIndex}" class="erppage-input erppage-select itemddl">
+                    ${options}
+                </select>
+            </td>
+            <td>
+                <input type="text" id="txtDescription_${rowIndex}" class="erppage-input description"/>
+            </td>
+            <td>
+                <select id="ddlMake_${rowIndex}" class="erppage-input erppage-select makeddl">
+                    <option value="">Select Make</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" id="txtMatType_${rowIndex}" class="erppage-input mattype"/>
+            </td>
+            <td>
+                <input type="text" id="txtUnit_${rowIndex}" class="erppage-input unit"/>
+            </td>
+            <td>
+                <input type="number" id="txtQty_${rowIndex}" class="erppage-input qty"/>
+            </td>
+            <td>
+                <input type="text" id="txtPrintingType_${rowIndex}" class="erppage-input printingtype"/>
+            </td>
+            <td>
+                <input type="text" id="txtFinish_${rowIndex}" class="erppage-input finish"/>
+            </td>
+            <td>
+                <input type="text" id="txtPlaceUse_${rowIndex}" class="erppage-input placeuse"/>
+            </td>
+            <td>
+                <input type="text" id="txtReason_${rowIndex}" class="erppage-input reason"/>
+            </td>
+            <td>
+                <select id="ddlPriority_${rowIndex}" name="PriorityType"
+                class="erppage-input erppage-select priority">
+                ${priorityOptions}
+                </select>
+            </td>
+            <td>
+                <select id="ddlWorkType_${rowIndex}" name="WorkType"
+                    class="erppage-input erppage-select worktype">${workTypeOptions}
+                </select>
+            </td>
+            <td>
+                <select id="ddlScrapType_${rowIndex}" name="ScrapType" class="erppage-input erppage-select scraptype">
+                    <option value="">Select</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" id="txtRemarks_${rowIndex}" class="erppage-input remarks"/>
+            </td>
+        </tr>`;
+
+        $("#tblPrintingRequestionEntry tbody").append(row);
+
+    }
+    function bindItem() {
+
+        $.ajax({
+
+            url: '/PrintingRequestionEntry/GetItem',
+            type: 'GET',
+
+            success: function (data) {
+
+                itemList = data;
+
+                addNewRow();
+
+            }
+
+        });
+
+    }
+
+        function getdataImage(Imagedata) {
+
+        const $list = $('#fileList');
+        $list.empty();
+
+        rowsAttachment = [];
+
+        if (!Array.isArray(Imagedata) || Imagedata.length === 0)
+            return;
+
+        Imagedata.forEach(item => {
+
+            const fileName = item.filE_NAME || "File";
+            const base64 = item.imG_FILE;
+            const mimeType = getMimeType(fileName);
+
+            if (!base64) return;
+
+            // Save for Update
+            rowsAttachment.push({
+                FileName: fileName,
+                FileContentBase64: base64,
+                FileType: mimeType
+            });
+
+            const dataUrl = `data:${mimeType};base64,${base64}`;
+
+            const html = `
+                <div class="erp-file-row" data-filename="${fileName}">
+
+                    <div class="erp-file-preview">
+                        ${mimeType.startsWith("image/")
+                    ? `<img src="${dataUrl}" class="erp-file-thumbnail">`
+                    : mimeType === "application/pdf"
+                        ? `<i class="fa fa-file-pdf-o" style="font-size:40px;color:red;"></i>`
+                        : `<i class="fa fa-file"></i>`
+                }
+                    </div>
+
+                    <div class="erp-file-info">
+                        <div class="erp-file-name">${fileName}</div>
+                        <div class="erp-file-type">${mimeType}</div>
+                    </div>
+
+                    <div class="erp-file-actions">
+
+                        <button type="button"
+                                class="erp-btn view btn-view-attachment"
+                                data-src="${dataUrl}"
+                                data-type="${mimeType}">
+                            <i class="fa fa-eye"></i>
+                        </button>
+
+                        <button type="button"
+                                class="erp-btn delete btn-delete-attachment"
+                                data-filename="${fileName}">
+                            <i class="fa fa-trash"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+
+            $list.append(html);
+
+        });
+    }
+
+
+        function getMimeType(fileName) {
+
+        const ext = fileName?.split('.').pop()?.toLowerCase();
+
+        switch (ext) {
+
+            case 'jpg':
+            case 'jpeg':
+                return 'image/jpeg';
+
+            case 'png':
+                return 'image/png';
+
+            case 'gif':
+                return 'image/gif';
+
+            case 'bmp':
+                return 'image/bmp';
+
+            case 'webp':
+                return 'image/webp';
+
+            case 'pdf':
+                return 'application/pdf';
+
+            default:
+                return 'application/octet-stream';
+        }
+    }
+
+
+</script>

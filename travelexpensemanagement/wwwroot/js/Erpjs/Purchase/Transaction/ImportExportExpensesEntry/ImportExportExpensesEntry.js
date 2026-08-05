@@ -1,48 +1,43 @@
-﻿function getQueryParam(param) {
+﻿var ddlGateNo = "";
+let itemList = [];
+let taxList = [];
+let makeList = [];
+let deptList = [];
+let readOnly = false;
+let isEditMode = false;
+let rowsAttachment = [];
+function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
 }
-
 const code = getQueryParam('vNo');
 const vType = getQueryParam('vType');
-let isReadOnly = getQueryParam('readOnly') === 'true';
-let rowsAttachment = [];
-
+const mode = getQueryParam("mode");
 $(document).ready(function () {
-    let currentDocNo = null;
     ddlDocType();
+    ddlRefType();
     ddlDocStatus();
-    ddlBillFrom();
+    ddlReturnTo();
     GetddlCityBillDetails();
     GetddlstateBillDetails();
     GetddlCityShipDetails();
     GetddlstateShipDetails();
     ddlShipDetails();
-    /* ddlTransportName();*/
+    //ddlTransportName();
     bindDropdownNew('ImportExportExpensesEntry', 'TransportName', '#ddlTransportName', '-- Select Tran --');
-
-    ddlOrdertype();
-    GetDocTypeCopyFrom();
-    const today = new Date().toISOString().split('T')[0];
-    
-    document.getElementById('DtDocDate').value = today;
-    const billDate = document.getElementById('DtBillDate');
-    if (billDate) billDate.min = today;
-    const challanDate = document.getElementById('DtChallanDate');
-    if (challanDate) challanDate.min = today;
-
+    ddlTransportAC()
+    ddlCreditAC();
+    ddlDebitAC();
+    ddlFreightCreditAC()
+    ddlFreightDebitAC()
     ddlDocStatus(() => {
-        $('#ddlDocStatus').val(1);
+        $('#ddlDocStatus').val(1).prop('disabled', true);
     });
 
-    $('#ddlDocType').on('blur', function () {
-        $(this).prop('disabled', true);
-    });
-    
-    if (isReadOnly) {
-        setFormReadOnly();
-    }
-
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('DtDocDate').value = today;
+    checkApprovalStatus(vType, code, 'PURCHASE1');
+    readOnly = (mode === 'view');
     if (code) {
         $.ajax({
             url: '/ImportExportExpensesEntry/GetAllDatadetails',
@@ -50,142 +45,675 @@ $(document).ready(function () {
             contentType: 'application/json',
             data: JSON.stringify({ VNO: code, vType: vType }),
             success: function (response) {
-                const $attachmentTbody = $('#tblAttachmentPRE tbody');
+                isEditMode = true;
                 GetallDatapurchase1purchase2purchase3(response);
+                if (readOnly) {
+                    setTimeout(function () {
+                        makePageReadOnly();
+                    }, 100);
+                }
             },
             error: function (xhr) {
                 toastr.error('Error: ' + xhr.responseText);
             }
         });
     }
-
-    //==========document type changes==========
+    // When document type changes
     $('#ddlDocType').on('change', function () {
         const selectedValue = $(this).val();
         const selectedText = $(this).find("option:selected").text();
+        $('#NumDocNo').prop('readonly', true);
         if (selectedValue !== "") {
             sendDocType(selectedValue, selectedText);
-            $('#NumDocNo').prop('readonly', true);
         }
-
     });
-    
-    //=========Fill Data on Change Gate No==============
-    $('#ddlGateNo').on('change', function () {
-        var selectedNo = $(this).val(); 
-        const selectedText = $(this).find('option:selected').text();
-        $('#NumDocNo').prop('readonly', true);
-
-        $('#txtNetAmount').prop('readonly', true);
-        $('#ddlBillFrom').prop('disabled', true);
-        $('#txtAddLine1').prop('readonly', true);
-        $('#txtAddLine2').prop('readonly', true);
-        $('#txtAddLine3').prop('readonly', true);
-        $('#ddlCity').prop('disabled', true);
-        $('#txtPincode').prop('readonly', true);
-        $('#ddlState').prop('disabled', true);
-        $('#txtGST').prop('readonly', true);
-
-        $('#txtShipAddLine1').prop('readonly', true);
-        $('#txtShipAddLine2').prop('readonly', true);
-        $('#txtShipAddLine3').prop('readonly', true);
-        $('#ddlShipCity').prop('disabled', true);
-        $('#ddlShipState').prop('disabled', true);
-        $('#NumShipPincode').prop('readonly', true);
-        $('#txtShipGST').prop('readonly', true);
-        
-        if (selectedNo !== "0" && selectedNo !== "") {
-            $.ajax({
-                url: '/ImportExportExpensesEntry/GetGatDetailsList',
-                type: 'POST',
-                data: { StrVNo: selectedNo, StrV_type: selectedText },
-                success: function (response) {
-                    console.log("Full Data", response);
-                    GetalldatafetchGatonchange(response);
-                },
-                error: function (xhr) {
-                    console.error("Error:", xhr.responseText);
+    // Ref Type dropdown list banding Start
+    $('#ddlRefType').on('change', function () {
+        const selectedValue = $(this).val();
+        const selectedText = $(this).find("option:selected").text();
+        ddlRefNo(selectedValue);
+    });
+    // Ref Type dropdown list banding End
+    // How to get data on change start Block
+    $('#ddlRefNo').on('change', function () {
+        var selectedNo = $(this).val();
+        var selectedText = $(this).find("option:selected").text();
+        if (selectedNo == "0" || selectedNo == "")
+            return;
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetRefNoList',
+            type: 'POST',
+            data: {
+                StrVNo: selectedNo,
+                StrV_type: selectedText.substring(0, 4)
+            },
+            success: function (res) {
+                if (!res.success) {
+                    alert(res.message);
+                    return;
                 }
-            });
-        }
+                GetalldatafetchGatonchange(res.data);
+            },
+            error: function (xhr) {
+                alert("Server Error");
+            }
+        });
     });
-
     $('#ddlBillFrom').on('change', function () {
         const selectedBillFrom = $(this).val();
         if (selectedBillFrom !== "") {
-            getBillFrom(selectedBillFrom); 
+            getBillFrom(selectedBillFrom);
         }
     });
-
-    $('#ddladdressBD1').on('change', function () {
-        const selectedBillFromValue = $('#ddlBillFrom').val();
-        var selectedId = $(this).val();
-        getBillDetailsAddLine1(selectedBillFromValue, selectedId)
-    });
-
-    $('#ddladdressSD1').on('change', function () {
-        const selectedBillFromValue = $('#ddlShipFrom').val();
-        var selectedId = $(this).val();
-        getShipDetailsAddLine1(selectedBillFromValue, selectedId)
-    });
-
-    //=======Transport(freight Pay and Tax) Calulation==========
-    $("#NumFreightPay, #NumFrtTax1").on("input", function () {
-
-        const freightPay = parseFloat($("#NumFreightPay").val()) || 0;
-        const freightTaxPer = parseFloat($("#NumFrtTax1").val()) || 0;
-
-        const freightTaxAmt = (freightPay * freightTaxPer) / 100;
-
-        $("#NumFrtTax2").val(freightTaxAmt.toFixed(2));
-
-        $('#tblPurchaseReceiptIR tbody tr').each(function () {
-            recalculateRow($(this));
-        });
-
-        calculateTotalRecQty();
-    });
-
-    //=========USD Rate and Ex rate Calculation=========
-    $(document).on('change', 'input[name="USDRate"], input[name="ExRate"]', function () {
-        const row = $(this).closest('tr');
-        console.log("USD =", row.find('input[name="USDRate"]').val());
-        console.log("EX =", row.find('input[name="ExRate"]').val());
-        recalculateRow(row);
-        calculateTotalRecQty();
-    });
-
-    //==========Add new row=================
-    $('#tblPurchaseReceiptIR tbody tr').each(function () {
+    // Add new row
+    $('#tblItemRecordPO tbody tr').each(function () {
         loadItemDropdown($(this).find('.item-name-dropdown'));
         loadTaxTypeDropdown($(this).find('.TaxType-dropdown'));
-        loadDepartmentDropdown($(this).find('.Department-dropdown'));
-        loadBinDropdown($(this).find('.bin-dropdown'));
-        loadUnitDropdown($(this).find('.Unit-dropdown'));
-        loadMakeDropdown($(this).find('.Make-dropdown'));
-    });
+        loadMakeList($(this).find('.Make-dropdown'));
+        loadDeptList($(this).find('.Department-dropdown'));
 
+    });
     $('#btnAddRow').on('click', function () {
         addRow();
     });
-
-    //==========Delete row==================
+    // Delete row
     $(document).on('click', '.btn-delete-row', function () {
-        if ($('#tblPurchaseReceiptIR tbody tr').length > 1) {
+        if ($('#tblItemRecordPO tbody tr').length > 1) {
             $(this).closest('tr').remove();
         } else {
-            toastr.error('At least one row is required.');
+            toastr.warning('At least one row is required.');
         }
     });
 
-    //============For Attachment============
+    $(document).on('change', '.item-name-dropdown', function () {
+        const selectedCode = $(this).val();
+        const row = $(this).closest('tr');
+        getHSNCode(selectedCode, row);
+        getItemMakeList(selectedCode);
+    })
+
+    $(document).on('change', 'input[name="BillQty"], input[name="Rate"]', function () {
+        const row = $(this).closest('tr');
+        const billQty = parseFloat(row.find('input[name="BillQty"]').val()) || 0;
+        const rate = parseFloat(row.find('input[name="Rate"]').val()) || 0;
+        const amount = billQty * rate;
+        row.find('input[name="Amount"]').val(amount.toFixed(2));
+    });
+    // allData calculation this method onanimation start block
+    $(document).on('change', '.TaxType-dropdown', function () {
+        const selectedCode = $(this).val();
+        const row = $(this).closest('tr');
+        getTaxType(selectedCode, row);
+    })
+    // checked last time when page is complate
+    $(document).on('input', '#tblItemRecordPO tbody input', function () {
+        const row = $(this).closest('tr');
+        calculateTotalRecQty();
+        recalculateRow(row);
+    });
+    const $attachmentTbody = $('#tblAttachmentPRE tbody');
+    // Function to add a new row
+    function addAttachmentRow(data = {}) {
+        const row = `
+            <tr class="no-border-input">
+                <td style="display:none;">${data.code || ''}</td>
+                <td>
+                    <input type="text" class="form-control mb-1" value="${data.fileName || ''}" placeholder="Enter file name"/>
+                </td>
+                <td>
+                    <input type="file" class="form-control file-upload" />
+                </td>
+                <td>
+                    <i class="fa fa-plus btn-add-action text-success me-2" title="Add Row" style="cursor:pointer;"></i>
+                    <i class="fa fa-edit btn-edit-action text-primary me-2" title="Edit Row" style="cursor:pointer;"></i>
+                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+                </td>
+            </tr>
+        `;
+        $attachmentTbody.append(row);
+    }
+    // Add initial row on page load
+    addAttachmentRow();
+    // Add new row on plus icon click or global Add Row icon
+    $(document).on('click', '#tab3 .btn-add-row, #tab3 .btn-add-action', function () {
+        addAttachmentRow();
+    });
+
+    $(document).on('click', '.btn-add-row', function () {
+        const currentRow = $(this).closest('tr');
+        const newRow = currentRow.clone();
+        // Clear values
+        newRow.find('input').val('');
+        newRow.find('select').prop('selectedIndex', 0);
+        // New row editable
+        newRow.find('input').prop('readonly', false);
+        newRow.find('select').prop('disabled', false);
+
+        // Reload dropdowns
+        loadItemDropdown(newRow.find('.item-name-dropdown'));
+        loadTaxTypeDropdown(newRow.find('.TaxType-dropdown'));
+        loadMakeList(newRow.find('.make-dropdown'));
+        loadDeptList(newRow.find('select[name="Department"]'));
+
+        currentRow.after(newRow);
+    });
+
+    $(document).on('click', '.btn-delete', function () {
+        $(this).closest('tr').remove();
+    });
+    $(document).on('click', '.btn-edit', function () {
+        const row = $(this).closest('tr');
+        row.find('input').prop('readonly', false);
+        row.find('select').prop('disabled', false);
+    });
+    // Delete row on trash icon click
+    $('#selectAllIOSM').on('change', function () {
+        let checked = $(this).is(':checked');
+        $('#tblindendorderstore tbody input[type="checkbox"]').prop('checked', checked).trigger('change');
+    });
+    // checked box checked multiple row insert onanimationstart Block
+    $('#tblindendorderstore').on('change', 'input[type="checkbox"]', function () {
+        let $row = $(this).closest('tr');
+
+        // Extract required fields
+        let itemCode = $row.find('td:eq(4)').text().trim();
+        let reqNo = $row.find('td:eq(25)').text().trim();
+        let vtype = $row.find('td:eq(2)').text().trim();
+        let poNo = $row.find('td:eq(1)').text().trim();
+        let uniqueKey = `${itemCode}_${reqNo}_${vtype}_${poNo}`;
+
+        if (this.checked) {
+            dubgger;
+            // ✅ Check if row with this unique key already exists
+            if ($('#tblItemRecordPO tbody tr[data-unique="' + uniqueKey + '"]').length > 0) return;
+
+            // Continue extracting values
+            let vdate = $row.find('td:eq(3)').text().trim();
+            let itemName = $row.find('td:eq(5)').text().trim();
+            let unit = $row.find('td:eq(6)').text().trim();
+            let nos = $row.find('td:eq(7)').text().trim();
+            let qty = $row.find('td:eq(8)').text().trim();
+            let balqty = $row.find('td:eq(9)').text().trim();
+            let rate = $row.find('td:eq(10)').text().trim();
+            let taxtype = $row.find('td:eq(11)').text().trim();
+            let pack = $row.find('td:eq(12)').text().trim();
+            let disc = $row.find('td:eq(13)').text().trim();
+            let cgst = $row.find('td:eq(14)').text().trim();
+            let sgst = $row.find('td:eq(15)').text().trim();
+            let igst = $row.find('td:eq(16)').text().trim();
+            let cessPer = $row.find('td:eq(17)').text().trim();
+            let cess = $row.find('td:eq(18)').text().trim();
+            let vat = $row.find('td:eq(19)').text().trim();
+            let othAmt = $row.find('td:eq(20)').text().trim();
+            let make = $row.find('td:eq(21)').text().trim();
+            let dept = $row.find('td:eq(22)').text().trim();
+            let remarks = $row.find('td:eq(23)').text().trim();
+            let reqType = $row.find('td:eq(24)').text().trim();
+            let amount = (parseFloat(rate || 0) * parseFloat(qty || 0)).toFixed(2);
+            let newRow = `
+                <tr data-unique="${uniqueKey}">
+                    <td style="display:none;"><input type="text" class="form-control" name="Code" value="${itemCode}" /></td>
+                    <td><select class="form-control item-name-dropdown" name="ItemName"></select></td>
+                    <td><input type="text" class="form-control" name="HSNCode" value="1402" /></td>
+                    <td><input type="text" class="form-control" name="Unit" value="${unit}" /></td>
+
+                    <td><input type="number" class="form-control" name="PackPer" value="${pack}" /></td>
+                    <td><input type="number" class="form-control" name="PackAmt" /></td>
+                    <td><input type="number" class="form-control" name="DiscPer" value="${disc}" /></td>
+                    <td><input type="number" class="form-control" name="DiscAmt" /></td>
+                    <td><input type="number" class="form-control" name="WBQty" /></td>
+                    <td><input type="number" class="form-control" name="CGSTPer" value="${cgst}" /></td>
+                    <td><input type="number" class="form-control" name="CGSTAmt" /></td>
+                    <td><input type="number" class="form-control" name="SGSTPer" value="${sgst}" /></td>
+                    <td><input type="number" class="form-control" name="SGSTAmt" /></td>
+                    <td><input type="number" class="form-control" name="IGSTPer" value="${igst}" /></td>
+                    <td><input type="number" class="form-control" name="IGSTAmt" /></td>
+                    <td><input type="number" class="form-control" name="CESSPer" value="${cessPer}" /></td>
+                    <td><input type="number" class="form-control" name="CESSAmt" value="${cess}" /></td>
+                    <td><input type="number" class="form-control" name="OthAmt" value="${othAmt}" /></td>
+                    <td><input type="number" class="form-control" name="NetAmt" /></td>
+                    <td>
+                        <select class="form-control" style="width: 100PX;" name="Make" value="${make}"></select>
+                    </td>
+                    <td>
+                        <select class="form-control" style="width: 100PX;" name="Department" value="${dept}"></select>
+                    </td>
+                    <td><input type="text" class="form-control" name="Remarks" value="${remarks}" /></td>
+                    <td><input type="number" class="form-control" name="LDRate" /></td>
+                    <td><input type="number" class="form-control" name="LDAmt" /></td>
+                    <td><input type="number" class="form-control" name="VATPer" value="${vat}" /></td>
+                    <td><input type="number" class="form-control" name="VATAmt" /></td>
+                    <td><input type="number" class="form-control" name="PlusMinusQty" /></td>
+                    <td><input type="number" class="form-control" name="USDRate" /></td>
+                    <td><input type="number" class="form-control" name="ExRate" /></td>
+                    <td>
+                        <select class="form-control EmptyYN-dropdown" name="EmptyYN">
+                            <option value="">--Select--</option>
+                            <option>Yes</option>
+                            <option>No</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control" name="BinLocation" /></td>
+                    <td><input type="text" class="form-control" name="POType" value="${vtype}" /></td>
+                    <td><input type="text" class="form-control" name="PONo" value="${poNo}" /></td>
+                    <td><input type="text" class="form-control" name="KantaType" /></td>
+                    <td><input type="text" class="form-control" name="KantaNo" /></td>
+                    <td><input type="text" class="form-control" name="ReqType" value="${reqType}" /></td>
+                    <td><input type="text" class="form-control" name="ReqNo" value="${reqNo}" /></td>
+                    <td><input type="text" class="form-control" name="GateType" /></td>
+                    <td><input type="text" class="form-control" name="GateNo" /></td>
+                    <td><button type="button" class="btn btn-danger btn-sm btn-delete-row">Delete</button></td>
+                </tr>
+            `;
+
+            $('#tblItemRecordPO tbody').append(newRow);
+
+            // Bind dropdowns after row is added
+            let $lastRow = $('#tblItemRecordPO tbody tr').last();
+
+            let $itemDropdown = $lastRow.find('select[name="ItemName"]');
+            loadItemDropdown($itemDropdown, itemCode);
+
+            let $taxDropdown = $lastRow.find('select[name="TaxType"]');
+            loadTaxTypeDropdown($taxDropdown, taxtype);
+
+            let $MakeDropdown = $lastRow.find('select[name="Make"]');
+            loadMakeList($MakeDropdown, make);
+
+            let $DeptDropdown = $lastRow.find('select[name="Department"]');
+            loadDeptList($DeptDropdown, dept);
+
+
+
+        } else {
+
+            $('#tblItemRecordPO tbody tr[data-unique="' + uniqueKey + '"]').remove();
+        }
+    });
+    // checked box checked multiple row insert onanimationstart Block
+    $('#btn-save').on('click', function (e) {
+        e.preventDefault();
+        if (!validateSave())
+            return;
+        // 1. Header data
+
+        var header = {
+            // Document Header
+            Vno: $('#NumDocNo').val() || null,
+            Vtype: $('#ddlDocType').val() || null,
+            DocType: $('#ddlDocType').val() || null,
+            DocNo: $('#NumDocNo').val() || null,
+            DocDate: $('#DtDocDate').val() || null,
+            WbNo: $('#WBNo').val() || null,
+            RefType: $('#ddlRefType').val() || null,
+            RefNo: (function () {
+                const val = $('#ddlRefNo option:selected').text();
+                const match = val.match(/\d+$/);
+                return match ? parseInt(match[0]) : null;
+            })(),
+
+            // Return To
+            ReturnTo: $('#ddlReturnTo').val() || null,
+            ReturnAddLine1: $('#txtAddLine1').val() || null,
+            ReturnAddLine2: $('#txtAddLine2').val() || null,
+            ReturnAddLine3: $('#txtAddLine3').val() || null,
+            ReturnCity: $('#ddlCity').val() || null,
+            ReturnGST: $('#txtGST').val() || null,
+
+            // Ship To
+            ShipTo: $('#ddlShipFrom').val() || null,
+            ShipAddLine1: $('#txtShipAddLine1').val() || null,
+            ShipAddLine2: $('#txtShipAddLine2').val() || null,
+            ShipAddLine3: $('#txtShipAddLine3').val() || null,
+            ShipCity: $('#ddlShipCity').val() || null,
+            ShipGST: $('#txtShipGST').val() || null,
+
+            // Accounting
+            CreditAC: $('#ddlcreditAC').val() || null,
+            DebitAC: $('#ddldebitAC').val() || null,
+
+            // Document Details
+            BillNo: $('#txtBillNo').val() || null,
+            BillDate: $('#DtBillDate').val() || null,
+            BLNo: $('#TxtBLNo').val() || null,
+            BLDate: $('#DtBLDate').val() || null,
+            WaybillNo: $('#TxtWaybillNo').val() || null,
+            TransitNo: $('#txtTransitNo').val() || null,
+            InputType: $('#ddlInputType').val() || null,
+            ExpensesType: $('#ddlExpensesType').val() || null,
+            NetAmount: $('#txtNetAmount').val() || null,
+            Status: $('#ddlDocStatus').val() || null,
+
+            // Optional
+            Remarks: $('#txtRemarks').val() || null,
+            GateNo: $('#ddlGateNo').val() || null,
+            ChallanNo: $('#NumChallanNo').val() || null,
+            ChallanDate: $('#DtChallanDate').val() || null,
+            WaybillDate: $('#DtWaybillDate').val() || null,
+            WaybillExpiry: $('#DtWaybillExpiry').val() || null,
+            ExchangeRate: $('#txtExchangeRate').val() || null,
+            BillFrom: $('#ddlBillFrom').val() || null,
+            ReturnType: $('#ddlReturnType').val() || null,
+
+            // Transport
+            TransportName: $('#ddlTransportName').val() || null,
+            TransportCode: $('#hdnTransport').val() || null,
+            VehicleNo: $('#txtVehicleNo').val() || null,
+            ContainerNo: $('#txtContainerNo').val() || null,
+            GRNo: $('#txtGRNo').val() || null,
+            GRDate: $('#DtGRDate').val() || null,
+            TransportAC: $('#ddlTransportAC').val() || null,
+            FreightDebit: $('#ddlFreightDebitAC').val() || null,
+            FreightCredit: $('#ddlFreightCreditAC').val() || null,
+            TDSonFreight: $('#NumTDSFreight1').val() || null,
+            TDSonFreight: $('#NumTDSFreight2').val() || null,
+
+            //Freight Details
+            FreightPay: $('#NumFreightPay').val() || null,
+            FrtTax1: $('#NumFrtTax1').val() || null,
+            FrtTax2: $('#NumFrtTax2').val() || null,
+            FrtPayNarr: $('#TxtFreightPayNarration').val() || null,
+
+            // Amount Breakdown
+            NumReceivedQty: $('#NumReceivedQty').val() || 0,
+            NumBillQty: $('#NumBillQty').val() || 0,
+            NumAmount: $('#NumAmount').val() || 0,
+            NumPacking: $('#NumPacking').val() || 0,
+            NumDiscount: $('#NumDiscount').val() || 0,
+            NumCGST: $('#NumCGST').val() || 0,
+            NumSGST: $('#NumSGST').val() || 0,
+            NumIGST: $('#NumIGST').val() || 0,
+            NumCESS: $('#NumCESS').val() || 0,
+            NumVAT: $('#NumVAT').val() || 0,
+            NumOtherAmt: $('#NumOtherAmt').val() || 0,
+            NumTCSPer1: $('#NumTCSPer1').val() || 0,
+            NumTCSPer2: $('#NumTCSPer2').val() || 0,
+            NumRoundOff: $('#NumRoundOff').val() || 0,
+            NumFinalNetAmt: $('#NumFinalNetAmt').val() || 0,
+
+            ACTION: code > 0 ? "UPDATE" : "INSERT"
+        };
+        // 2. Items (from table rows)
+        const allData = [];
+        $('#tblItemRecordPO tbody tr').each(function () {
+            const row = $(this);
+            const getIntOrNull = val => {
+                const parsed = parseInt(val);
+                return isNaN(parsed) ? null : parsed;
+            };
+
+            const getDecimalOrZero = val => {
+                const parsed = parseFloat(val);
+                return isNaN(parsed) ? 0 : parsed;
+            };
+
+            const getIntOrZero = val => {
+                const parsed = parseInt(val);
+                return isNaN(parsed) ? 0 : parsed;
+            };
+            const rowData = {
+                Code: getIntOrNull(row.find('input[name="Code"]').val()),
+                ItemCode: parseInt(row.find('select[name="ItemName"]').val()) || null,
+                HSNCode: row.find('input[name="HSNCode"]').val() || null,
+                Unit: row.find('input[name="Unit"]').val() || '',
+                Nos: getIntOrNull(row.find('input[name="Nos"]').val()),
+                ReturnQty: getDecimalOrZero(row.find('input[name="ReturnQty"]').val()),
+                BillQty: getDecimalOrZero(row.find('input[name="BillQty"]').val()),
+                Rate: getDecimalOrZero(row.find('input[name="Rate"]').val()),
+                Amount: getDecimalOrZero(row.find('input[name="Amount"]').val()),
+                RCMYN: row.find('select[name="RCMYN"]').val() || null,
+                InputYN: row.find('select[name="InputYN"]').val() || null,
+                TaxType: row.find('select[name="TaxType"]').val() || null,
+                PackPer: getDecimalOrZero(row.find('input[name="PackPer"]').val()),
+                PackAmt: getDecimalOrZero(row.find('input[name="PackAmt"]').val()),
+                DiscPer: getDecimalOrZero(row.find('input[name="DiscPer"]').val()),
+                DiscAmt: getDecimalOrZero(row.find('input[name="DiscAmt"]').val()),
+                WBQty: getDecimalOrZero(row.find('input[name="WBQty"]').val()),
+                CGSTPer: getDecimalOrZero(row.find('input[name="CGSTPer"]').val()),
+                CGSTAmt: getDecimalOrZero(row.find('input[name="CGSTAmt"]').val()),
+                SGSTPer: getDecimalOrZero(row.find('input[name="SGSTPer"]').val()),
+                SGSTAmt: getDecimalOrZero(row.find('input[name="SGSTAmt"]').val()),
+                IGSTPer: getDecimalOrZero(row.find('input[name="IGSTPer"]').val()),
+                IGSTAmt: getDecimalOrZero(row.find('input[name="IGSTAmt"]').val()),
+                CESSPer: getDecimalOrZero(row.find('input[name="CessPer"]').val()),
+                CESSAmt: getDecimalOrZero(row.find('input[name="CessAmt"]').val()),
+                OthAmt: getDecimalOrZero(row.find('input[name="OthAmt"]').val()),
+                NetAmt: getDecimalOrZero(row.find('input[name="NetAmt"]').val()),
+                Make: parseInt(row.find('select[name="Make"]').val()) || null,
+                Department: parseInt(row.find('select[name="Department"]').val()) || null,
+                Remarks: row.find('input[name="Remarks"]').val() || null,
+                LDRate: getDecimalOrZero(row.find('input[name="LDRate"]').val()),
+                LDAmt: getDecimalOrZero(row.find('input[name="LDAmt"]').val()),
+                WBType: row.find('input[name="WBType"]').val() || null,
+                WBNo: row.find('input[name="WBNo"]').val() || null,
+                RefType: row.find('input[name="RefType"]').val() || null,
+                RefNo: row.find('input[name="RefNo"]').val() || null,
+                RefBatchNo: row.find('input[name="RefBatchNo"]').val() || null,
+                RefBagNo: row.find('input[name="RefBagNo"]').val() || null
+            };
+            allData.push(rowData);
+        });
+        // 3. FormData
+        const formData = new FormData();
+        formData.append("Header", JSON.stringify(header));
+        // formData.append("ItemDetails", JSON.stringify(allData));
+        allData.forEach((item, i) => {
+            for (const key in item) {
+                formData.append(`ItemDetails[${i}].${key}`, item[key]);
+            }
+        });
+
+        // 4. Attachments
+        rowsAttachment.forEach((attachment, index) => {
+            formData.append(`Attachments[${index}].FileName`, attachment.FileName);
+            formData.append(`Attachments[${index}].File`, attachment.File);
+
+        });
+        console.log('kks')
+
+        // 5. Add Attachments
+        $.ajax({
+            url: '/ImportExportExpensesEntry/SaveAllData',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (resp) {
+                if (resp.success) {
+
+                    if (resp.action === "INSERT") {
+                        toastr.success("Data saved successfully.");
+                    }
+                    else if (resp.action === "UPDATE") {
+                        toastr.success("Data updated successfully.");
+                    }
+                    else {
+                        toastr.success(resp.message);
+                    }
+
+                    setTimeout(function () {
+                        window.location.href = "/ImportExportExpensesEntryList/Index";
+                    }, 500);
+                }
+                else {
+                    toastr.error(resp.message);
+                }
+            },
+            error: function (xhr, status, error) {
+
+                console.log("XHR:", xhr);
+                console.log("Status:", status);
+                console.log("Error:", error);
+                console.log("Response:", xhr.responseText);
+
+                toastr.error(xhr.responseText);
+            }
+        });
+    });
+
+    function validateSave() {
+
+        // Header Validation
+        if (!validateRequiredField('#ddlDocType', 'Voucher Type'))
+            return false;
+
+        if ($('#NumDocNo').val() == "" || parseInt($('#NumDocNo').val()) == 0) {
+            toastr.error("Invalid Voucher No.");
+            $('#NumDocNo').focus();
+            return false;
+        }
+
+        if (!validateRequiredField('#DtDocDate', 'Document Date'))
+            return false;
+
+        if (!validateRequiredField('#ddlRefType', 'Reference Type'))
+            return false;
+
+        if (!validateRequiredField('#ddlInputType', 'Input Type'))
+            return false;
+
+        if (!validateRequiredField('#ddlRefNo', 'Reference No'))
+            return false;
+
+        //if ($('#txtRemarks').val().trim().length <= 5) {
+        //    toastr.error("Reason for Return must be mentioned in Remarks.");
+        //    $('#txtRemarks').focus();
+        //    return false;
+        //}
+
+        if (!validateRequiredField('#ddlReturnTo', 'Party'))
+            return false;
+
+        if (!validateRequiredField('#ddlShipFrom', 'Ship To'))
+            return false;
+
+        if (!validateRequiredField('#ddlcreditAC', 'Debit Account'))
+            return false;
+
+        if (!validateRequiredField('#ddldebitAC', 'Credit Account'))
+            return false;
+
+        // Freight Validation
+
+        let freight = parseFloat($('#NumFreightPay').val()) || 0;
+
+        if (freight > 0 && !$('#ddlFreightDebitAC').val()) {
+            toastr.error("Freight Debit A/C not selected.");
+            $('#ddlFreightDebitAC').focus();
+            return false;
+        }
+
+        if (freight > 0 && !$('#ddlFreightCreditAC').val()) {
+            toastr.error("Freight Credit A/C not selected.");
+            $('#ddlFreightCreditAC').focus();
+            return false;
+        }
+
+        if (freight > 0 &&
+            $('#ddlFreightDebitAC').val() == $('#ddlFreightCreditAC').val()) {
+
+            toastr.error("Freight Debit A/C and Credit A/C must be different.");
+            $('#ddlFreightCreditAC').focus();
+            return false;
+        }
+
+        let freightTax =
+            (parseFloat($('#NumFrtTax1').val()) || 0) +
+            (parseFloat($('#NumFrtTax2').val()) || 0);
+
+        if (freight == 0 && freightTax > 0) {
+            toastr.error("Freight Tax not applicable when Freight Amount is 0.");
+            return false;
+        }
+
+        let tds =
+            (parseFloat($('#NumTDSFreight1').val()) || 0) +
+            (parseFloat($('#NumTDSFreight2').val()) || 0);
+
+        if (tds > 0 && freight == 0) {
+            toastr.error("Freight TDS not applicable when Freight Amount is 0.");
+            return false;
+        }
+
+        if (freight > 0 && !$('#ddlTransportName').val()) {
+            toastr.error("Transport Name is required.");
+            $('#ddlTransportName').focus();
+            return false;
+        }
+        // Item Grid Validation
+        let itemCount = 0;
+        let isValid = true;
+
+        $('#tblItemRecordPO tbody tr').each(function () {
+
+            let row = $(this);
+            let item = row.find('select[name="ItemName"]').val();
+
+            if (!item) {
+                toastr.error("Item not selected.");
+                row.find('select[name="ItemName"]').focus();
+                isValid = false;
+                return false;
+            }
+            itemCount++;
+            let returnQty = row.find('input[name="ReturnQty"]');
+
+            if (returnQty == 0) {
+                toastr.error("Received Qty is 0.");
+                row.find('input[name="ReturnQty"]').focus();
+                isValid = false;
+                return false;
+            }
+            let amount = parseFloat(row.find('input[name="Amount"]').val()) || 0;
+            if (amount == 0) {
+                toastr.error("Amount must not be 0.");
+                row.find('input[name="Amount"]').focus();
+                isValid = false;
+                return false;
+            }
+            let taxType = row.find('select[name="TaxType"]').val();
+            if (!taxType) {
+                toastr.error("Tax Type not selected.");
+                row.find('select[name="TaxType"]').focus();
+                isValid = false;
+                return false;
+            }
+            let make = row.find('select[name="Make"]').val();
+            if (!make) {
+                toastr.error("Make is required.");
+                row.find('select[name="Make"]').focus();
+                isValid = false;
+                return false;
+            }
+            let refType = row.find('input[name="RefType"]').val();
+            let refNo = row.find('input[name="RefNo"]').val();
+            if ((!refType || refType == "") &&
+                (!refNo || refNo == "")) {
+
+                toastr.error("Reference Type and Reference No required.");
+                isValid = false;
+                return false;
+            }
+
+        });
+
+        if (!isValid)
+            return false;
+
+        if (itemCount == 0) {
+            toastr.error("No Record in grid to save.");
+            return false;
+        }
+
+        return true;
+    }
+
     $("#browseBtn").on("click", function () {
         $("#fileInput").click();
     });
-
+    //----------------------------------------------Image----------------------------------------
     $('#fileInput').on('change', function (e) {
-        console.log("Before Adding New", JSON.stringify(rowsAttachment));
-        console.log(rowsAttachment);
+
         const files = e.target.files;
 
         Array.from(files).forEach(file => {
@@ -204,41 +732,41 @@ $(document).ready(function () {
 
                 // UI
                 const card = `
-                <div class="erp-file-row" data-filename="${file.name}">
+            <div class="erp-file-row" data-filename="${file.name}">
 
-                    <div class="erp-file-preview">
-                        ${mime.startsWith('image/')
+                <div class="erp-file-preview">
+                    ${mime.startsWith('image/')
                         ? `<img src="${ev.target.result}" class="erp-file-thumbnail">`
                         : mime === 'application/pdf'
                             ? `<i class="fa fa-file-pdf-o" style="font-size:40px;color:red;"></i>`
                             : `<i class="fa fa-file" style="font-size:40px;"></i>`
                     }
-                    </div>
+                </div>
 
-                    <div class="erp-file-info">
-                        <div class="erp-file-name">${file.name}</div>
-                        <div class="erp-file-type">${mime}</div>
-                    </div>
+                <div class="erp-file-info">
+                    <div class="erp-file-name">${file.name}</div>
+                    <div class="erp-file-type">${mime}</div>
+                </div>
 
-                    <div class="erp-file-actions">
+                <div class="erp-file-actions">
 
-                        <button type="button"
-                                class="erp-btn view btn-view-attachment"
-                                data-src="${ev.target.result}"
-                                data-type="${mime}">
-                            <i class="fa fa-eye"></i>
-                        </button>
+                    <button type="button"
+                            class="erp-btn view btn-view-attachment"
+                            data-src="${ev.target.result}"
+                            data-type="${mime}">
+                        <i class="fa fa-eye"></i>
+                    </button>
 
-                        <button type="button"
-                                class="erp-btn delete btn-delete-attachment"
-                                data-filename="${file.name}">
-                            <i class="fa fa-trash"></i>
-                        </button>
-
-                    </div>
+                    <button type="button"
+                            class="erp-btn delete btn-delete-attachment"
+                            data-filename="${file.name}">
+                        <i class="fa fa-trash"></i>
+                    </button>
 
                 </div>
-            `;
+
+            </div>
+        `;
                 $('#fileList').append(card);
             };
 
@@ -248,7 +776,6 @@ $(document).ready(function () {
         $(this).val('');
     });
 
-    //=========For Preview Image=========
     $(document).on("click", ".btn-view-attachment", function () {
 
         const src = $(this).data("src");
@@ -271,10 +798,10 @@ $(document).ready(function () {
             return;
 
         }
-        
+
         $("#imagePreviewModal").modal("show");
     });
-                
+
     //=======For Image Delete========
     $(document).on("click", ".btn-delete-attachment", function () {
 
@@ -283,156 +810,1336 @@ $(document).ready(function () {
         $(this).closest(".erp-file-row").remove();
 
     });
+    //----------------------------------------------Image----------------------------------------
+    function GetallDatapurchase1purchase2purchase3(data) {
+        const purchase1 = data.purchase1;
+        const purchase2 = data.purchase2;
+        const purchase3 = data.purchase3;
+        // ====== Purchase1 Header Bind ======
+        if (purchase1 && purchase1.length > 0) {
+            const p1 = purchase1[0];
+            console.log('Header List', p1)
 
-    //order  type select drop down List start block
-    $('#ddlcopyFromDropdown').on('change', function () {
-        var selectedId = $('#ddlcopyFromDropdown').val();
+            ddlDocType(() => {
+                $('#ddlDocType').val(p1.v_TYPE);
+            });
 
-        const allItemCodes = [];
-        $('#tblPurchaseReceiptIR tbody tr').each(function () {
-            const itemCode = $(this).find('select[name="ItemName"]').val()?.trim() || null;
-            if (itemCode) allItemCodes.push(itemCode);
+            $('#NumDocNo').val(p1.v_NO);
+            $('#DtDocDate').val(formatDateForInput(p1.v_DATE));
+
+            $('#ddlRefNo').val(p1.reF_NO);
+            if (p1.reF_TYPE && p1.reF_NO) {
+                ddlRefNo(p1.reF_NO, p1.reF_TYPE, p1.reF_NO);
+            } else {
+                ddlRefNo('', p1.reF_TYPE);
+            }
+            ddlGateNo = p1.gatE_NO;
+            ddlRefType(() => {
+                $('#ddlRefType').val(p1.reF_TYPE);
+            });
+            ddlReturnTo(function () {
+                $('#ddlReturnTo').val(String(p1.partY_CODE)).trigger('change.select2');
+            });
+            ddlShipDetails(function () {
+                $('#ddlShipFrom').val(String(p1.shiP_CODE)).trigger('change.select2');
+            });
+            $('#txtAddLine1').val(p1.bilL_ADD1);
+            $('#txtAddLine2').val(p1.bilL_ADD2);
+            $('#txtAddLine3').val(p1.bilL_ADD3);
+
+            $('#txtShipAddLine1').val(p1.shiP_ADD1);
+            $('#txtShipAddLine2').val(p1.shiP_ADD2);
+            $('#txtShipAddLine3').val(p1.shiP_ADD3);
+
+            $('#ddlCity').val(p1.bilL_CITY).trigger('change');
+            $('#ddlShipCity').val(p1.shiP_CITY).trigger('change');
+
+            $('#ddlReturnTo').val(p1.partY_CODE).trigger('change');
+            $('#ddlShipFrom').val(p1.shiP_CODE).trigger('change');
+
+
+            $('#txtPincode').val(p1.bilL_PINCODE);
+            $('#NumShipPincode').val(p1.shiP_PINCODE);
+
+            $('#txtGST').val(p1.bilL_GST);
+            $('#txtShipGST').val(p1.shiP_GST);
+
+            $('#txtBillNo').val(p1.bilL_NO);
+            $('#DtBillDate').val(formatDateForInput(p1.bilL_DATE));
+            $('#NumChallanNo').val(p1.chalL_NO);
+            $('#DtChallanDate').val(formatDateForInput(p1.chalL_DATE));
+            $('#TxtWaybillNo').val(p1.waybilL_NO);
+
+            $('#txtExchangeRate').val(p1.excH_RATE);
+            $('#txtNetAmount').val(p1.namount);
+            ddlDebitAC(() => {
+                $('#ddldebitAC').val(p1.frtpaY_DRAC);
+            });
+            ddlCreditAC(() => {
+                $('#ddlcreditAC').val(p1.frtpaY_CRAC);
+            });
+
+            //Item Total
+            $('#NumReceivedQty').val(p1.recD_QTY);
+            $('#NumBillQty').val(p1.bilL_QTY);
+            $('#NumAmount').val(p1.amount);
+            $('#NumPacking').val(p1.pacK_AMT);
+            $('#NumDiscount').val(p1.disC_AMT);
+            $('#NumCGST').val(p1.cgsT_AMT);
+            $('#NumSGST').val(p1.sgsT_AMT);
+            $('#NumIGST').val(p1.igsT_AMT);
+            $('#NumCESS').val(p1.cesS_AMT);
+            $('#NumVAT').val(p1.vaT_AMT);
+            $('#NumOtherAmt').val(p1.otH_AMT);
+            $('#NumSubTotal').val(p1.amount);
+            $('#NumRoundOff').val(p1.rounD_OFF);
+            $('#NumFinalNetAmt').val(p1.namount);
+
+            $('#txtVehicleNo').val(p1.trucK_NO);
+            $('#txtContainerNo').val(p1.containeR_NO);;
+            $('#NumFreightPay').val(p1.frtpaY_AMT);
+            $('#NumFrtTax1').val(p1.frtpaY_TAXPER);
+            $('#NumFrtTax2').val(p1.frtpaY_TAX);
+            $('#TxtFreightPayNarration').val(p1.frtpaY_NAR);
+            $('#NumTDSFreight1').val(p1.frtpaY_TAXPER);
+            $('#txtGRNo').val(p1.gR_NO);
+            // $('#DtGRDate').val(p1.gR_DATE);
+            if (p1.gR_DATE) {
+                const grDate = new Date(p1.gR_DATE).toISOString().split('T')[0];
+                $('#DtGRDate').val(grDate);
+            }
+
+            $('#NumGRNo').val(p1.gR_NO);
+
+            $('#txtremarks').val(p1.remarks);
+
+            $('#DtGRDate').val(formatDateForInput(p1.gR_DATE));
+            $('#DtBLDate').val(formatDateForInput(p1.bilL_DATE));
+            bindDropdownNew('ImportExportExpensesEntry', 'TransportName', '#ddlTransportName', '-- Select Transport --', p1.transporT_NAME);
+            ddlTransportAC(() => {
+                $('#ddlTransportAC').val(p1.transporT_AC);
+            });
+            ddlDocStatus(() => {
+                $('#ddlDocStatus').val(p1.status);
+            });
+
+            ddlFreightCreditAC(() => {
+                $('#ddlFreightCreditAC').val(p1.crediT_AC);
+            });
+            ddlFreightDebitAC(() => {
+                $('#ddlFreightDebitAC').val(p1.debiT_AC);
+            });
+            $('#TxtWaybillNo').val(p1.waybilL_NO);
+            $('#TxtBLNo').val(p1.bL_NO);
+            if (p1.inpuT_TYPE) {
+                $('#ddlInputType').val(p1.inpuT_TYPE);
+            }
+            if (p1.inpuT_TYPE) {
+                $('#ddlExpensesType').val(p1.expS_TYPE);
+            }
+            // khushahal
+
+        }
+        // ====== Purchase2 Item Rows Bind ======
+        bindItemsdata(purchase2);
+        getdataImage(purchase3);
+    }
+    // LOAD BY V_NO ==========================
+    function bindItemsdata(items) {
+        console.log('khushahal', items)
+        const $tbody = $('#tblItemRecordPO tbody').empty();
+
+        items.forEach(i => {
+            const qty = i.recD_QTY ?? 0;
+            const rate = i.rate ?? 0;
+            const amount = qty * rate;
+            const inputYN = (i.inpuT_YN || '').trim().toUpperCase();
+            const rcmYN = (i.rcM_YN || '').trim().toUpperCase();
+            debugger;
+            const $tr = $(`
+                <tr>
+                    <td>
+                        <select class="form-control item-name-dropdown" name="ItemName" style="width:200px;"></select>
+                    </td>
+                    <td><input class="form-control" style="width: 100PX;" name="HSNCode" value="${i.hsN_CODE ?? 0}"  /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="Unit" value="${i.uoM_NAME || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="Nos" value="${i.nos ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="RecQty" value="${i.recD_QTY ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="BillQty" value="${i.bilL_QTY ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="Rate" value="${i.rate ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="Amount" value="${i.amount}" /></td>
+                    <td>
+                        <select class="form-control" name="RCMYN">
+                              <option value="">--Select--</option>
+                              <option value="Yes" ${(rcmYN === 'Y' || rcmYN === 'YES') ? 'selected' : ''}>Yes</option>
+                              <option value="No" ${(rcmYN === 'N' || rcmYN === 'NO') ? 'selected' : ''}>No</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control" name="InputYN">
+                             <option value="">--Select--</option>
+                             <option value="Yes" ${(inputYN === 'Y' || inputYN === 'YES') ? 'selected' : ''}>Yes</option>
+                             <option value="No" ${(inputYN === 'N' || inputYN === 'NO') ? 'selected' : ''}>No</option>
+                        </select>
+                    </td>
+                    <td><select class="form-control TaxType-dropdown" name="TaxType"></select></td>
+                    <td><input class="form-control" style="width: 100PX;" name="PackPer" value="${i.pacK_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="PackAmt" value="${i.pacK_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="DiscPer" value="${i.disC_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="DiscAmt" value="${i.disC_AMT ?? 0}" /></td>
+                    <td><input name="WBQty" class="form-control" style="width: 100PX;" value="${i.wB_QTY ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="CGSTPer" value="${i.cgsT_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="CGSTAmt" value="${i.cgsT_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="SGSTPer" value="${i.sgsT_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="SGSTAmt" value="${i.sgsT_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="IGSTPer" value="${i.igsT_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="IGSTAmt" value="${i.igsT_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="CESSPer" value="${i.cesS_PER ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="CESSAmt" value="${i.cesS_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="OthAmt" value="${i.otH_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="NetAmt" value="${i.neT_AMT ?? amount}" /></td>
+                     <td>
+                        <select class="form-control make-dropdown" style="width: 100PX;" name="Make"}"></select>
+                    </td>
+                    <td>
+                        <select class="form-control" style="width: 100PX;" name="Department"}"></select>
+                    </td>
+                    <td><input class="form-control" style="width: 100PX;" name="Remarks" value="${i.remarks || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="LDRate" value="${i.lanD_RATE ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="LDAmt" value="${i.lanD_AMT ?? 0}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="WBType" value="${i.kantA_TYPE || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="WBNo" value="${i.kantA_NO || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="RefType" value="${i.reF_TYPE || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="RefNo" value="${i.reF_NO || ''}" /></td>
+
+                    <td><input class="form-control" style="width: 100PX;" name="RefBatchNo" value="${i.batcH_NO || ''}" /></td>
+                    <td><input class="form-control" style="width: 100PX;" name="RefBagNo" value="${i.baG_NO || ''}" /></td>
+
+                    <td class="action-col">
+                    <div class="action-wrap">
+                        <button type="button" class="act-btn add btn-add-row"  title="Add" style="cursor:pointer;"><i class="fa fa-plus-circle"></i></button>
+                        <button type="button" class="act-btn edit btn-edit"  title="edit" style="cursor:pointer;"><i class="fa fa-edit"></i></button>
+                        <button type="button" class="act-btn delete btn-delete"  title="delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
+                     </div>
+                    </td>
+                </tr>
+            `);
+
+            $tbody.append($tr);
+            const $lastRow = $tbody.find('tr').last();
+            const $itemDropdown = $lastRow.find('select[name="ItemName"]');
+            const $taxDropdown = $lastRow.find('select[name="TaxType"]');
+            const $makeDropdown = $lastRow.find('select[name="Make"]');
+            const $deptDropdown = $lastRow.find('select[name="Department"]');
+            // Load dropdowns
+            loadItemDropdowngat($itemDropdown, i.iteM_CODE);
+            loadTaxTypeDropdowngatCode($taxDropdown, i.taX_CODE);
+            loadMakeList($makeDropdown, i.makE_CODE);
+            loadDeptList($deptDropdown, i.depT_CODE);
+            // Default ReadOnly
+            $lastRow.find('input').prop('readonly', true);
+            $lastRow.find('select').prop('disabled', true);
+            // Action buttons enabled rahenge
+            $lastRow.find('.btn-add-row, .btn-edit, .btn-delete').prop('disabled', false);
         });
 
-        if (selectedId) {
-            const modal = new bootstrap.Modal(document.getElementById('indendorderstoreModal'));
-            modal.show();
+        // delete row event
+        $tbody.off('click', '.btn-delete').on('click', '.btn-delete', function () {
+            $(this).closest('tr').remove();
+        });
+    }
+    function loadTaxTypeDropdowngatCode($dropdown, selectedType = "") {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetTaxTypeList',
+            method: 'GET',
+            success: function (data) {
+                $dropdown.empty();
+                $dropdown.append('<option value="">--Select Tax Type--</option>');
+                $.each(data, function (index, tax) {
+                    // ✅ use selectedType instead of selectedCode
+                    let selected = String(tax.code) === String(selectedType) ? 'selected' : '';
+                    $dropdown.append(`<option value="${tax.code}" ${selected}>${tax.name}</option>`);
+                });
+            },
+            error: function () {
+                toastr.error('Failed to load tax types.');
+            }
+        });
+    }
+    //function getdataImage(Imagedata) {
+    //    const $attachmentTbody = $('#tblAttachmentPRE tbody');
+    //    $attachmentTbody.empty();
 
-            $.ajax({
-                url: '/ImportExportExpensesEntry/GetOrderDetailsList',
-                type: 'GET',
-                data: { StrID: selectedId, ItemCodes: allItemCodes },
-                traditional: true, 
-                success: function (response) {
-                    let tbody = $('#tblindendorderstore tbody');
-                    tbody.empty(); 
+    //    if (!Array.isArray(Imagedata) || Imagedata.length === 0) {
+    //        console.warn("⚠️ No attachment data to display");
+    //        return;
+    //    }
 
-                    if (!response || response.length === 0) {
-                        showToast("No order details found for the selected ID", { type: "warning" });
-                        return;
+    //    Imagedata.forEach(item => {
+    //        const fullPath = item.attachment; // "/attachments/Purchase/sdfsf.PNG"
+    //        if (!fullPath) return;
+
+    //        const fileName = fullPath.split('/').pop();
+
+    //        // Check if it's an image
+    //        let previewHtml = '';
+    //        if (/\.(jpg|jpeg|png|gif|bmp)$/i.test(fileName)) {
+    //            previewHtml = `
+    //                <img src="${fullPath}" alt="${fileName}"
+    //                     style="max-width:80px; max-height:80px; border:1px solid #ccc; border-radius:4px;" />`;
+    //        } else {
+    //            previewHtml = `<a href="${fullPath}" target="_blank" class="text-info">View File</a>`;
+    //        }
+
+    //        const row = `
+    //            <tr>
+    //                <td >${item.doC_ID || ''}</td>
+    //                <td style="display:none;"><label>${fileName}</label></td>
+    //                <td><input type="file" class="form-control file-upload" /></td>
+    //                <td>${previewHtml}</td>
+    //                <td>
+    //                    <i class="fa fa-plus btn-add-action text-success me-2" title="Add Row" style="cursor:pointer;"></i>
+    //                    <i class="fa fa-edit btn-edit-action text-primary me-2" title="Edit Row" style="cursor:pointer;"></i>
+    //                    <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
+    //                </td>
+    //            </tr>
+    //        `;
+    //        $attachmentTbody.append(row);
+    //    });
+    //}
+    function ddlDocType(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlDocType',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlDocType');
+                ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlDocType:", xhr.responseText);
+            }
+        });
+    }
+    function ddlRefType(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlRefType',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlRefType');
+                ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlRefType:", xhr.responseText);
+            }
+        });
+    }
+    function ddlDocStatus(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlDocStatus',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlDocStatus');
+                ddl.empty().append('<option value="">-- Select Doc Status --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlDocStatus:", xhr.responseText);
+            }
+        });
+    }
+    function sendDocType(docType, docName) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetDocNo',
+            type: 'POST',
+            data: {
+                docType: docType,
+                docName: docName
+            },
+            success: function (response) {
+                if (response.success) {
+                    // Update value in a textbox
+                    $('#NumDocNo').val(response.nextVNo);
+                }
+            },
+            error: function (xhr) {
+                console.error("Error:", xhr.responseText);
+            }
+        });
+    }
+    function ddlRefNo(selectedValue = '', vType = '', vNo = '') {
+
+        const ddl = $('#ddlRefNo');
+
+        // If parameters are not passed, use current control values
+        vType = vType || $('#ddlRefType').val();
+        vNo = vNo || $('#NumDocNo').val();
+
+        if (!vType) {
+            return;
+        }
+
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlRefNo',
+            type: 'GET',
+            dataType: 'json',
+            data: { VNo: vNo, Vtype: vType },
+            success: function (data) {
+
+                if (ddl.hasClass("select2-hidden-accessible")) {
+                    ddl.select2('destroy');
+                }
+
+                ddl.empty().append('<option value="">-- Select Reference No --</option>');
+
+                $.each(data, function (i, item) {
+                    ddl.append(new Option(item.text, item.value));
+                });
+
+                ddl.select2({
+                    placeholder: "-- Select Reference No --",
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                if (selectedValue) {
+                    // ddl.val(selectedValue).trigger('change');
+                    ddl.val(selectedValue).trigger('change.select2');
+                }
+            }
+        });
+    }
+    function ddlReturnTo(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlReturnTo',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlReturnTo');
+                ddl.empty().append('<option value="">-- Select Bill --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlReturnTo:", xhr.responseText);
+            }
+        });
+    }
+    function getBillFrom(code) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetBillDetails',
+            type: 'POST',
+            data: { code: code },
+            success: function (response) {
+                if (response) {
+                    $('#txtAddLine1').val(response.address1);
+                    $('#txtAddLine2').val(response.address2);
+                    $('#txtAddLine3').val(response.address3);
+                    GetddlCityBillDetails(function () {
+                        $('#ddlCity').val(response.CITY_CODE);
+                    })
+                    GetddlstateBillDetails(function () {
+                        $('#ddlShipFrom').val(code);
+                    })
+                    $('#txtPincode').val(response.pincode);
+                    $('#txtGST').val(response.gstin);
+                    // Ship Details banding dropdown List
+                    ddlShipDetails(function () {
+                        $('#ddlShipFrom').val(code);
+                    })
+
+                    $('#txtShipAddLine1').val(response.address1);
+                    $('#txtShipAddLine2').val(response.address2);
+                    $('#txtShipAddLine3').val(response.address3);
+                    GetddlCityShipDetails(function () {
+                        $('#ddlShipCity').val(response.CITY_CODE);
+                    })
+
+                    GetddlstateShipDetails(function () {
+                        $('#ddlShipState').val(response.stateCode);
+                    })
+                    $('#NumShipPincode').val(response.pincode);
+                    $('#txtShipGST').val(response.gstin);
+
+                } else {
+                    console.warn("No supplier data found for code:", code);
+                }
+            },
+            error: function (xhr) {
+                console.error("Error:", xhr.responseText);
+            }
+        });
+    }
+    function GetddlCityBillDetails(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlCityBillDetails',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlCity');
+                ddl.empty().append('<option value="">-- Select City--</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlCity:", xhr.responseText);
+            }
+        });
+    }
+    function GetddlstateBillDetails(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlstateBillDetails',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlState');
+                ddl.empty().append('<option value="">-- Select State --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlState:", xhr.responseText);
+            }
+        });
+    }
+    function GetddlCityShipDetails(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlCityShipDetails',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlShipCity');
+                ddl.empty().append('<option value="">-- Select City--</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlShipCity:", xhr.responseText);
+            }
+        });
+    }
+    function GetddlstateShipDetails(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlstateShipDetails',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlShipState');
+                ddl.empty().append('<option value="">-- Select State --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlShipState:", xhr.responseText);
+            }
+        });
+    }
+    function ddlShipDetails(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlShipDetails',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlShipFrom');
+                ddl.empty().append('<option value="">-- Select Ship --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlShipFrom:", xhr.responseText);
+            }
+        });
+    }
+    function ddlCreditAC(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlCreditAC',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddlCredit = $('#ddlcreditAC');
+                ddlCredit.empty().append('<option value="">-- Select Bill --</option>');
+
+                $.each(data, function (index, item) {
+                    ddlCredit.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlCreditAC:", xhr.responseText);
+            }
+        });
+    }
+    function ddlDebitAC(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlDebitAC',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddlDebit = $('#ddldebitAC');
+                ddlDebit.empty().append('<option value="">-- Select Bill --</option>');
+
+                $.each(data, function (index, item) {
+                    ddlDebit.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlDebitAC:", xhr.responseText);
+            }
+        });
+    }
+
+    function ddlFreightCreditAC(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlFreightCreditAC',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddlFreight = $('#ddlFreightCreditAC');
+                ddlFreight.empty().append('<option value="">-- Select Bill --</option>');
+                $.each(data, function (index, item) {
+                    ddlFreight.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlCreditAC:", xhr.responseText);
+            }
+        });
+    }
+    function ddlFreightDebitAC(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlFreightDebitAC',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddlFreight = $('#ddlFreightDebitAC');
+                ddlFreight.empty().append('<option value="">-- Select Bill --</option>');
+                $.each(data, function (index, item) {
+                    ddlFreight.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlDebitAC:", xhr.responseText);
+            }
+        });
+    }
+    function ddlTransportAC(callback) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetddlTransportAc',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlTransportAC');
+                ddl.empty().append('<option value="">-- Transport Name --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlTransportAC:", xhr.responseText);
+            }
+        });
+    }
+    //Transport Name End ddl banding
+    function addRow() {
+        const tbody = $('#tblItemRecordPO tbody');
+        const firstRow = tbody.find('tr:first');
+        const newRow = firstRow.clone();
+        newRow.find('input').val('');
+        tbody.append(newRow);
+        loadItemDropdown(newRow.find('.item-name-dropdown'));
+        loadTaxTypeDropdown(newRow.find('.TaxType-dropdown'));
+
+        loadMakeList(newRow.find('.Make-dropdown'));
+        loadDeptList(newRow.find('.Department-dropdown'));
+
+
+    }
+    function loadItemDropdown(dropdown, selectedCode = "") {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetItemList',
+            method: 'GET',
+            success: function (data) {
+                dropdown.empty();
+                dropdown.append('<option value="">--Select Item--</option>');
+                $.each(data, function (index, item) {
+                    let selected = item.code === selectedCode ? 'selected' : '';
+                    dropdown.append('<option value="' + item.code + '" ' + selected + '>' + item.name + '</option>');
+                });
+            },
+            error: function () {
+                toastr.error('Failed to load items.');
+            }
+        });
+    }
+    function getHSNCode(code, row) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetHSNCode',
+            type: 'GET',
+            data: { code: code },
+            success: function (response) {
+                row.find('input[name="HSNCode"]').val(response.hsnCode);
+                row.find('input[name="Unit"]').val(response.unit);
+            },
+            error: function (xhr) {
+                console.error("Error fetching HSNCode:", xhr.responseText);
+            }
+        });
+    }
+    function loadTaxTypeDropdown($dropdown, selectedCode = '') {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetTaxTypeList',
+            method: 'GET',
+            success: function (data) {
+                $dropdown.empty();
+                $dropdown.append('<option value="">--Select--</option>');
+                $.each(data, function (index, item) {
+                    const selected = item.code === selectedCode ? ' selected' : '';
+                    $dropdown.append('<option value="' + item.code + '"' + selected + '>' + item.name + '</option>');
+                });
+            },
+            error: function () {
+                toastr.error('Failed to load Tax Types.');
+            }
+        });
+    }
+    function getTaxType(code, row) {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetTaxTypeDetails',
+            type: 'GET',
+            data: { code: code },
+            success: function (response) {
+                const rate = parseFloat(row.find('input[name="Rate"]').val()) || 0;
+                const billQty = parseFloat(row.find('input[name="BillQty"]').val()) || 0;
+                const totalAmount = rate * billQty;
+
+                if (response) {
+
+                    const igstPer = parseFloat(response.igsT_PER) || 0;
+                    const cgstPer = parseFloat(response.cgsT_PER) || 0;
+                    const sgstPer = parseFloat(response.sgsT_PER) || 0;
+
+                    // CGST
+                    row.find('input[name="CGSTPer"]').val(cgstPer);
+                    let CGSTAmt = 0;
+                    if (cgstPer === 0) {
+                        row.find('input[name="CGSTAmt"]').val(0);
+                    } else {
+                        CGSTAmt = (totalAmount * cgstPer) / 100;
+                        row.find('input[name="CGSTAmt"]').val(CGSTAmt.toFixed(2));
                     }
 
-                    $.each(response, function (index, item) {
-                        let row = '<tr>' +
-                            '<td><input type="checkbox" class="rowCheckbox" /></td>' +
-                            `<td>${item["VNo"] ?? ''}</td>` +
-                            `<td>${item["VType"] ?? ''}</td>` +
-                            `<td>${item["VDate"] ?? ''}</td>` +
-                            `<td>${item["Item Code"] ?? ''}</td>` +
-                            `<td${item["Item Name"] ?? ''}</td>` +
-                            `<td>${item["Unit"] ?? ''}</td>` +
-                            `<td>${item["Nos"] ?? ''}</td>` +
-                            `<td>${item["qty"] ?? ''}</td>` +
-                            `<td>0</td>` +
-                            `<td>${item["Rate"] ?? ''}</td>` +
-                            `<td${item["TaxType"] ?? ''}</td>` +
-                            `<td>${item["Pack%"] ?? ''}</td>` +
-                            `<td>${item["Disc%"] ?? ''}</td>` +
-                            `<td>${item["CGST%"] ?? ''}</td>` +
-                            `<td>${item["SGST%"] ?? ''}</td>` +
-                            `<td>${item["IGST%"] ?? ''}</td>` +
-                            `<td>${item["Cess%"] ?? ''}</td>` +
-                            `<td>${item["Cess"] ?? ''}</td>` +
-                            `<td>0</td>` +
-                            `<td>${item["Oth Amt"] ?? '0'}</td>` +
-                            `<td>${item["Make"] ?? ''}</td>` +
-                            `<td>${item["Department"] ?? ''}</td>` +
-                            `<td></td>` +
-                            `<td>${item["Req Type"] ?? ''}</td>` +
-                            `<td>${item["Req No"] ?? ''}</td>` +
-                            `<td>${item["DeptCode"] ?? ''}</td>` +
-                            `<td>${item["MakeCode"] ?? ''}</td>` +
-                            `<td>${item["UCode"] ?? ''}</td>` +
-                            `<td>${item["TaxType"] ?? ''}</td>` +
-                            '</tr>';
+                    // SGST
+                    row.find('input[name="SGSTPer"]').val(sgstPer);
+                    let SGSTAmt = 0;
+                    if (sgstPer === 0) {
+                        row.find('input[name="SGSTAmt"]').val(0);
+                    } else {
+                        SGSTAmt = (totalAmount * sgstPer) / 100;
+                        row.find('input[name="SGSTAmt"]').val(SGSTAmt.toFixed(2));
+                    }
 
-                        tbody.append(row);
-                    });
-                },
-                error: function (xhr, status, error) {
-                    showToast("Failed To Load Order Details: " + error, { type: "error" });
+                    // IGST
+                    row.find('input[name="IGSTPer"]').val(igstPer);
+                    let IGSTAmt = 0;
+                    if (igstPer === 0) {
+                        row.find('input[name="IGSTAmt"]').val(0);
+                    } else {
+                        IGSTAmt = (totalAmount * igstPer) / 100;
+                        row.find('input[name="IGSTAmt"]').val(IGSTAmt.toFixed(2));
+                    }
+                    const NetAmt = totalAmount + CGSTAmt + SGSTAmt + IGSTAmt;
+                    const LDRate = NetAmt / billQty;
+                    row.find('input[name="NetAmt"]').val(NetAmt.toFixed(2));
+                    row.find('input[name="LDAmt"]').val(NetAmt.toFixed(2));
+                    row.find('input[name="LDRate"]').val(LDRate.toFixed(2));
+
+                    calculateTotalRecQty();
                 }
-            });
-        }
-    });
-     
-    //order  type select drop down List End block
-    $(document).on('change', '.item-name-dropdown', function () {
-        const selectedCode = $(this).val();
-        const row = $(this).closest('tr');
-        getHSNCode(selectedCode, row);
-    });
+            },
+            error: function () {
+                toastr.error("Failed to get item details.");
+            }
+        });
+    }
+    function calculateTotalRecQty() {
+        let totalRecQty = 0;
+        let totalBillQty = 0;
+        let totalAmount = 0;
+        let totalPacking = 0;
+        let totalDiscount = 0;
+        let totalCgst = 0;
+        let totalSgst = 0;
+        let totalIGST = 0;
+        let totalCess = 0;
+        let totalVAT = 0;
+        let totalOtherAmt = 0;
+        let SubTotal = 0;
+        $('#tblItemRecordPO tbody tr').each(function () {
+            const row = $(this);
+            const recQty = parseFloat(row.find('input[name="RecQty"]').val()) || 0;
+            const billQty = parseFloat(row.find('input[name="BillQty"]').val()) || 0;
+            const totalAmountQty = parseFloat(row.find('input[name="Amount"]').val()) || 0;
+            const PackingQty = parseFloat(row.find('input[name="PackPer"]').val()) || 0;
+            const DiscountQty = parseFloat(row.find('input[name="DiscPer"]').val()) || 0;
+            const CgstQty = parseFloat(row.find('input[name="CGSTAmt"]').val()) || 0;
+            const SgstQty = parseFloat(row.find('input[name="SGSTAmt"]').val()) || 0;
+            const IGSTQty = parseFloat(row.find('input[name="IGSTAmt"]').val()) || 0;
+            const CESSQty = parseFloat(row.find('input[name="CESSAmt"]').val()) || 0;
+            const VATQty = parseFloat(row.find('input[name="VATAmt"]').val()) || 0;
+            const OtherAmtQty = parseFloat(row.find('input[name="OthAmt"]').val()) || 0;
+            const SubTotalQty = parseFloat(row.find('input[name="NetAmt"]').val()) || 0;
 
-    $(document).on('change', 'input[name="BillQty"], input[name="Rate"]', function () {
-        const row = $(this).closest('tr');
-        const rate = parseFloat(row.find('input[name="Rate"]').val()) || 0;
+            totalRecQty += recQty;
+            totalBillQty += billQty;
+            totalAmount += totalAmountQty;
+            totalPacking += PackingQty;
+            totalDiscount += DiscountQty;
+            totalCgst += CgstQty;
+            totalSgst += SgstQty;
+            totalIGST += IGSTQty;
+            totalCess += CESSQty;
+            totalVAT += VATQty;
+            totalOtherAmt += OtherAmtQty;
+            SubTotal += SubTotalQty;
+        });
+
+        // Display in your input fields
+        $('#NumReceivedQty').val(totalRecQty);
+        $('#NumBillQty').val(totalBillQty);
+        $('#NumAmount').val(totalAmount.toFixed(2));
+        $('#NumPacking').val(totalPacking.toFixed(2));
+        $('#NumDiscount').val(totalDiscount.toFixed(2));
+        $('#NumCGST').val(totalCgst.toFixed(2));
+        $('#NumSGST').val(totalSgst.toFixed(2));
+        $('#NumIGST').val(totalIGST.toFixed(2));
+        $('#NumCESS').val(totalCess.toFixed(2));
+        $('#NumVAT').val(totalVAT.toFixed(2));
+        $('#NumOtherAmt').val(totalOtherAmt.toFixed(2));
+        $('#NumSubTotal').val(SubTotal.toFixed(2));
+
+
+        // Optional: Calculate Round Off
+        let rounded = Math.round(SubTotal);
+        let roundOff = (rounded - SubTotal).toFixed(2);
+
+        $('#NumRoundOff').val(roundOff);
+        $('#NumFinalNetAmt').val(rounded.toFixed(2));
+        $('#txtNetAmount').val(rounded.toFixed(2));
+    }
+    function recalculateRow(row) {
+        const rateInput = row.find('input[name="Rate"]');
+        const rate = parseFloat(rateInput.val()) || 0;
         const billQty = parseFloat(row.find('input[name="BillQty"]').val()) || 0;
 
-        const amount = rate * billQty;
+        const totalAmount = rate * billQty;
 
-        row.find('input[name="Amount"]').val(amount.toFixed(2));
-    });
+        // Don't overwrite user typing
+        if (!rateInput.is(':focus')) {
+            rateInput.val(rate.toFixed(2));
+        }
 
-    // allData calculation this method onanimation start block
-    $(document).on('change', '.TaxType-dropdown', function () {
-        const selectedCode = $(this).val();
-        const row = $(this).closest('tr');
-        getTaxType(selectedCode, row);
-    });
+        row.find('input[name="Amount"]').val(totalAmount.toFixed(2));
 
-    $(document).on('input', '#tblPurchaseReceiptIR tbody input', function () {
-        const row = $(this).closest('tr');
-        recalculateRow(row);         
-        calculateTotalRecQty();      
-    });
+        const cgstPer = parseFloat(row.find('input[name="CGSTPer"]').val()) || 0;
+        const sgstPer = parseFloat(row.find('input[name="SGSTPer"]').val()) || 0;
+        const igstPer = parseFloat(row.find('input[name="IGSTPer"]').val()) || 0;
 
-    // allData calculation this method onanimation End block
-    //Attachment start Block
-    const $attachmentTbody = $('#tblAttachmentPRE tbody');
+        const CGSTAmt = (totalAmount * cgstPer) / 100;
+        const SGSTAmt = (totalAmount * sgstPer) / 100;
+        const IGSTAmt = (totalAmount * igstPer) / 100;
 
-    // Function to add a new row
-    function addAttachmentRow(data = {}) {
-        const row = `
-                    <tr class="no-border-input">
-                        <td style="display:none;">${data.code || ''}</td>
-                        <td>
-                            <input type="text" class="form-control mb-1" value="${data.fileName || ''}" placeholder="Enter file name"/>
-                        </td>
-                        <td>
-                            <input type="file" class="form-control file-upload" />
-                        </td>
-                        <td>
-                            <i class="fa fa-plus btn-add-action text-success me-2" title="Add Row" style="cursor:pointer;"></i>
-                            <i class="fa fa-edit btn-edit-action text-primary me-2" title="Edit Row" style="cursor:pointer;"></i>
-                            <i class="fa fa-trash btn-delete-action text-danger" title="Delete Row" style="cursor:pointer;"></i>
-                        </td>
-                    </tr>
-                `;
-        $attachmentTbody.append(row);
+        row.find('input[name="CGSTAmt"]').val(CGSTAmt.toFixed(2));
+        row.find('input[name="SGSTAmt"]').val(SGSTAmt.toFixed(2));
+        row.find('input[name="IGSTAmt"]').val(IGSTAmt.toFixed(2));
+
+        const NetAmt = totalAmount + CGSTAmt + SGSTAmt + IGSTAmt;
+        const LDRate = billQty > 0 ? NetAmt / billQty : 0;
+
+        row.find('input[name="NetAmt"]').val(NetAmt.toFixed(2));
+        row.find('input[name="LDAmt"]').val(NetAmt.toFixed(2));
+        row.find('input[name="LDRate"]').val(LDRate.toFixed(2));
     }
-    
-    // Add initial row on page load
-    addAttachmentRow();
+    //-------------------------------------GetRefNoList----------------------------------
+    function GetalldatafetchGatonchange(response) {
 
-    // Add new row on plus icon click or global Add Row icon
-    $(document).on('click', '#tab3 .btn-add-row, #tab3 .btn-add-action', function () {
-        addAttachmentRow();
+        if (!response || !response.header || response.header.length === 0)
+            return;
+        const header = response.header[0];
+        // Party
+        $('#TxtWaybillNo').val(header.WAYBILL_NO || '');
+
+        ddlReturnTo(function () {
+            $('#ddlReturnTo').val(String(header.PARTY_CODE)).trigger('change.select2');
+        });
+        ddlShipDetails(function () {
+            $('#ddlShipFrom').val(String(header.SHIP_CODE)).trigger('change.select2');
+        });
+        // Address
+        $('#txtAddLine1').val(header.ADD1 || '');
+        $('#txtAddLine2').val(header.ADD2 || '');
+        $('#txtAddLine3').val(header.ADD3 || '');
+
+        $('#txtShipAddLine1').val(header.SHIP_ADD1 || '');
+        $('#txtShipAddLine2').val(header.SHIP_ADD2 || '');
+        $('#txtShipAddLine3').val(header.ADD3 || '');
+
+        // City
+        GetddlCityBillDetails(function () {
+            $('#ddlCity').val(header.CITY_CODE);
+
+        });
+
+        GetddlCityShipDetails(function () {
+            $('#ddlShipCity').val(header.SHIP_CITY);
+        })
+        // State (Only if available in API)
+        GetddlstateBillDetails(function () {
+            if (header.StateCode)
+                $('#ddlState').val(header.StateCode);
+
+            if (header.SHIP_STATE)
+                $('#ddlShipState').val(header.SHIP_STATE);
+        });
+
+        // GST
+        $('#txtGST').val(header.GSTIN || '');
+        $('#txtShipGST').val(header.SHIP_GST || '');
+
+        // Pincode
+        $('#txtPincode').val(header.PARTY_PINCODE || '');
+        $('#NumShipPincode').val(header.SHIP_PINCODE || '');
+
+        // Bill Details
+        $('#txtBillNo').val(header.BILL_NO || '');
+        $('#DtBillDate').val(header.BILL_DATE ? header.BILL_DATE.split('T')[0] : '');
+
+        $('#NumChallanNo').val(header.CHALL_NO || '');
+        $('#DtChallanDate').val(header.CHALL_DATE ? header.CHALL_DATE.split('T')[0] : '');
+
+        // E-Way Bill
+        $('#TxtWaybillInvNo').val(header.WAYBILL_NO || '');
+        $('#DtWaybillExpiry').val(header.EWB_EXPDATE ? header.EWB_EXPDATE.split('T')[0] : '');
+
+        // Transport
+        $('#ddlTransport').val(header.TRANSPORT_CODE || '');
+        $('#txtVehicleNo').val(header.TRUCK_NO || '');
+        $('#txtContainerNo').val(header.CONTAINER_NO || '');
+        // GR Details
+        const today = new Date().toISOString().split('T')[0];
+        $('#DtGRDate').val(header.GR_DATE ? header.GR_DATE.split('T')[0] : ($('#DtDocDate').val() || today));
+        // Freight
+        $('#txtFreightAmount').val(header.FRTPAY_AMT || 0);
+        $('#txtFreightTaxPer').val(header.FRTPAY_TAXPER || 0);
+        $('#txtFreightTax').val(header.FRTPAY_TAX || 0);
+        $('#txtFreightNarration').val(header.FRTPAY_NAR || '');
+
+        // Remarks
+        $('#txtRemarks').val(header.REMARKS || '');
+
+        // Items
+        if (response.items && response.items.length > 0) {
+            bindItems(response.items);
+        }
+    }
+    function bindItems(items) {
+
+        const $tbody = $("#tblItemRecordPO tbody");
+        $tbody.empty();
+        console.log("kks", items);
+        $.each(items, function (index, i) {
+
+            let qty = parseFloat(i.RECD_QTY || 0);
+            let rate = parseFloat(i.RATE || 0);
+            let amount = qty * rate;
+
+            let row = `
+            <tr>
+                <td style="display:none">
+                    <input type="hidden" name="Code" value="${i.ITEM_CODE || ''}">
+                </td>
+
+                <td>
+                    <select class="form-control item-name-dropdown" name="ItemName"></select>
+                </td>
+
+                <td>
+                    <input type="text" class="form-control" name="HSNCode"
+                           value="${i.HSN_CODE || ''}">
+                </td>
+
+                <td>
+                    <input type="text" class="form-control" name="Unit"
+                           value="${i.Unit || ''}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="Nos"
+                           value="${i.NOS || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="ReturnQty"
+                           value="${i.RECD_QTY || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="BillQty"
+                           value="${i.BILL_QTY || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="Rate"
+                           value="${i.RATE || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="Amount"
+                           value="${amount.toFixed(2)}">
+                </td>
+
+                <td>
+                     <select class="form-control" name="RCMYN">
+                        <option value="">--Select--</option>
+                        <option value="Y" ${i.rcM_YN === 'Y' ? 'selected' : ''}>Yes</option>
+                        <option value="N" ${i.rcM_YN === 'N' ? 'selected' : ''}>No</option>
+                    </select>
+                </td>
+
+                <td>
+                  <select class="form-control" name="InputYN">
+                    <option value="">--Select--</option>
+                    <option value="Y" ${i.inpuT_YN === 'Y' ? 'selected' : ''}>Yes</option>
+                    <option value="N" ${i.inpuT_YN === 'N' ? 'selected' : ''}>No</option>
+                </select>
+                </td>
+
+                <td>
+                    <select class="form-control TaxType-dropdown" name="TaxType"></select>
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="PackPer"
+                           value="${i.PACK_PER || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="PackAmt"
+                           value="${i.PACK_AMT || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="DiscPer"
+                           value="${i.DISC_PER || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="DiscAmt"
+                           value="${i.DISC_AMT || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="WBQty"
+                           value="${i.WB_QTY || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="CGSTPer"
+                           value="${i.CGST_PER || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="CGSTAmt"
+                           value="${i.CGST_AMT || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="SGSTPer"
+                           value="${i.SGST_PER || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="SGSTAmt"
+                           value="${i.SGST_AMT || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="IGSTPer"
+                           value="${i.IGST_PER || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="IGSTAmt"
+                           value="${i.IGST_AMT || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="CessPer"
+                           value="${i.CESS_PER || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="CessAmt"
+                           value="${i.CESS_AMT || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="OthAmt"
+                           value="${i.OTH_AMT || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="NetAmt"
+                           value="${i.NET_AMT || amount}">
+                </td>
+
+                <td>
+                    <select class="form-control make-dropdown" name="Make"></select>
+                </td>
+
+                <td>
+                    <select class="form-control department-dropdown" name="Department"></select>
+                </td>
+
+                <td>
+                    <input type="text" class="form-control" name="Remarks"
+                           value="${i.REMARKS || ''}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="LDRate"
+                           value="${i.POLAND_RATE || 0}">
+                </td>
+
+                <td>
+                    <input type="number" class="form-control" name="LDAmt"
+                           value="${i.LAND_AMT || 0}">
+                </td>
+
+                <td>
+                    <input type="text" class="form-control" name="WBType"
+                           value="${i.KANTA_TYPE || ''}">
+                </td>
+
+                <td>
+                    <input type="text" class="form-control" name="WBNo"
+                           value="${i.KANTA_NO || ''}">
+                </td>
+
+                <td>
+                    <input type="text" class="form-control" name="RefType"
+                           value="${i.PO_TYPE || ''}">
+                </td>
+
+                <td>
+                    <input type="text" class="form-control" name="RefNo"
+                           value="${i.PO_NO || ''}">
+                </td>
+
+                <td><input class="form-control" style="width: 100PX;" name="RefBatchNo" value="${i.BATCH_NO || ''}" /></td>
+                <td><input class="form-control" style="width: 100PX;" name="RefBagNo" value="${i.BAG_NO || ''}" /></td>
+
+
+                 <td class="action-col">
+                    <div class="action-wrap">
+                        <button type="button" class="act-btn add btn-add-row"  title="Add" style="cursor:pointer;"><i class="fa fa-plus-circle"></i></button>
+                        <button type="button" class="act-btn edit btn-edit"  title="edit" style="cursor:pointer;"><i class="fa fa-edit"></i></button>
+                        <button type="button" class="act-btn delete btn-delete"  title="delete" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
+                     </div>
+                 </td>
+
+            </tr>`;
+
+            $tbody.append(row);
+            let $lastRow = $tbody.find("tr:last");
+            $lastRow.find('[name="RCMYN"]').val(i.rcM_YN);
+            $lastRow.find('[name="InputYN"]').val(i.inpuT_YN);
+            loadItemDropdowngat($lastRow.find(".item-name-dropdown"), i.ITEM_CODE);
+            loadTaxTypeDropdowngat($lastRow.find(".TaxType-dropdown"), i.TAX_CODE);
+            loadMakeList($lastRow.find(".make-dropdown"), i.MAKE_CODE);
+            loadDeptList($lastRow.find(".department-dropdown"), i.DEPT_CODE);
+
+        });
+
+        $("#tblItemRecordPO tbody tr").each(function () {
+            recalculateRow($(this));
+        });
+        calculateTotalRecQty();
+        $tbody.off("click", ".btn-delete").on("click", ".btn-delete", function () {
+            $(this).closest("tr").remove();
+            calculateTotalRecQty();
+        });
+    }
+    function loadTaxTypeDropdowngat($dropdown, selectedCode) {
+
+        $.get('/ImportExportExpensesEntry/GetTaxTypeList', function (data) {
+
+            $dropdown.empty();
+
+            $dropdown.append('<option value="">--Select--</option>');
+
+            $.each(data, function (i, item) {
+
+                $dropdown.append(
+                    `<option value="${item.code}" ${item.code == selectedCode ? "selected" : ""}>
+                        ${item.name}
+                     </option>`
+                );
+
+            });
+
+        });
+
+    }
+    function loadItemDropdowngat($dropdown, selectedCode = "") {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetItemList',
+            method: 'GET',
+            success: function (data) {
+                $dropdown.empty();
+                $dropdown.append('<option value="">--Select Item--</option>');
+                $.each(data, function (index, item) {
+                    let selected = String(item.code) === String(selectedCode) ? 'selected' : '';
+                    $dropdown.append(`<option value="${item.code}" ${selected}>${item.name}</option>`);
+                });
+            },
+            error: function () {
+                toastr.error('Failed to load items.');
+            }
+        });
+    }
+    function loadMakeList($dropdown, selectedCode = "") {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetMakeListByItem',
+            method: 'GET',
+            success: function (data) {
+                $dropdown.empty().append('<option value="">--Select Make--</option>');
+                $.each(data, function (index, item) {
+                    const option = $('<option></option>').val(item.value).text(item.text);
+                    if (String(item.value) === String(selectedCode)) {
+                        option.prop('selected', true);
+                    }
+                    $dropdown.append(option);
+                });
+            },
+            error: function () {
+                toastr.error('Failed to load makes.');
+            }
+        });
+    }
+    function loadDeptList($dropdown, selectedCode = "") {
+        $.ajax({
+            url: '/ImportExportExpensesEntry/GetDepartmentList',
+            method: 'GET',
+            success: function (data) {
+                $dropdown.empty().append('<option value="">--Select Department--</option>');
+                $.each(data, function (index, item) {
+                    const $option = $('<option></option>').val(item.value).text(item.text);
+                    if (String(item.value) === String(selectedCode)) {
+                        $option.prop('selected', true);
+                    }
+                    $dropdown.append($option);
+                });
+            },
+            error: function () {
+                toastr.error('Failed to load departments.');
+            }
+        });
+    }
+    //-------------------------------------GetRefNoList----------------------------------
+    function formatDateForInput(dateString) {
+        if (!dateString) return "";
+        const dateObj = new Date(dateString);
+        if (isNaN(dateObj)) return "";
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    $(document).on('click', '#btn_Sendapproval', function () {
+        var FromName = window.location.pathname.split('/')[1];
+        $.ajax({
+            url: '/Approval/CheckPendingUser',
+            type: 'POST',
+            data: {
+                vNo: code,
+                vType: vType
+            },
+            success: function (response) {
+                console.log('Response:', response);
+                // Pending with another user
+                if (response.success === false) {
+                    showToast(`Pending With Another User : ${response.fullName} (${response.userCode})`,
+                        { type: "warning" });
+                    return;
+                }
+                // Approval_Code = 5
+                if (response.approvalCode8 === true) {
+                    OpenApprovalModal({
+                        DocType: vType,
+                        DocNo: code,
+                        TableName: 'PURCHASE1'
+                    });
+                    return;
+                }
+                // Approval_Code != 8
+                OpenSendForApprovalModal({
+                    DocType: vType,
+                    DocNo: code,
+                    UserCode: null,
+                    UserName: null,
+                    DocDate: null,
+                    TableName: 'PURCHASE1',
+                    FromName, FromName
+                });
+
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+                alert('Error while checking approval status.');
+            }
+        });
+
+    });
+    $(document).on('click', '#btn_Approved', function () {
+        OpenApprovalModal({
+            DocType: vType,
+            DocNo: code,
+            TableName: 'PURCHASE1'
+        });
     });
 
-    // Delete row on trash icon click
-    $(document).on('click', '.btn-delete-action', function () {
-        $(this).closest('tr').remove();
-    });
-
-    //Attachment End Block
-    $('#selectAllIOSM').on('change', function () {
-        let checked = $(this).is(':checked');
-        $('#tblindendorderstore tbody input[type="checkbox"]').prop('checked', checked).trigger('change');
-    });
-
-    //================================================================
-    //                  Show Production Batch
-    //================================================================
+    //------------------------------------------ProductionBatch---------------------------------
 
     $("#btnShowProductionBatch").click(function () {
 
@@ -464,24 +2171,25 @@ $(document).ready(function () {
 
                 $.each(data, function (i, row) {
 
-                totalApproxWeight += parseFloat(row.approxWeight || 0);
-                totalActualWeight += parseFloat(row.actualWeight || 0);
+                    totalApproxWeight += parseFloat(row.approxWeight || 0);
+                    totalActualWeight += parseFloat(row.actualWeight || 0);
 
-                tbody.append(`
-                    <tr>
-                        <td><input type="checkbox"></td>
-                        <td>${row.refType}</td>
-                        <td>${row.refNo}</td>
-                        <td>${row.itemCode}</td>
-                        <td>${row.itemName}</td>
-                        <td>${row.barcodeNo}</td>
-                        <td>${row.batchNo}</td>
-                        <td>${row.approxWeight}</td>
-                        <td>${row.actualWeight}</td>
-                    </tr>
-                `);
-            });
-              
+                    tbody.append(`
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>${row.refType}</td>
+                <td>${row.refNo}</td>
+                <td>${row.itemCode}</td>
+                <td>${row.itemName}</td>
+                <td>${row.barcodeNo}</td>
+                <td>${row.batchNo}</td>
+                <td>${row.approxWeight}</td>
+                <td>${row.actualWeight}</td>
+            </tr>
+        `);
+                });
+
+                // Show totals
                 var modal = new bootstrap.Modal(document.getElementById("showproductionbatchmodal"));
                 modal.show();
             },
@@ -490,12 +2198,13 @@ $(document).ready(function () {
 
                 console.log(xhr.responseText);
 
+                alert("Something went wrong.");
+
             }
 
         });
 
     });
-
     $(document).on("change", "#tblshowproductionbatchModal tbody input[type='checkbox']", function () {
 
         var totalApprox = 0;
@@ -518,1801 +2227,157 @@ $(document).ready(function () {
         $("#NumActualWeight").val(totalActual.toFixed(2));
 
     });
+    $("#btn_modalsubmit").click(function () {
 
-    //================================================================
-    //                  Copy From Tables
-    //================================================================
+        var rows = [];
 
-    $(document).on('click', '.copy-from-item', function (e) {
+        $("#tblshowproductionbatchModal tbody tr").each(function (index) {
 
-        e.preventDefault();
+            if ($(this).find("input[type='checkbox']").is(":checked")) {
 
-        const vType = $(this).data('vtype');
-        const docName = $(this).text().trim();
-        const receiptType = $('#ddlDocType').val();
-        const partyCode = $('#ddlBillFrom').val();
-
-        if (!partyCode) {
-            showToast("Please select Bill From.", { type: "warning" });
-            $('#ddlBillFrom').focus();
-            return;
-        }
-        console.log(vType);
-        console.log(docName);   
-
-        $('#purchaseRequestLabel').text(`Copy From - ${docName}`);
-        loadCopyFrom(vType, receiptType, partyCode);
-         
-    });
-   
-    //================================================================
-    //                     Create Intimation
-    //================================================================
-    $("#btnCreateIntimation").click(function (e) {
-
-        e.preventDefault();
-
-        const formData = buildPurchaseReceiptFormData();
-
-        $.ajax({
-            url: '/ImportExportExpensesEntry/CreateIntimation',
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function (res) {
-
-                if (res.success) {
-                    toastr.success(res.message);
-                }
-                else {
-                    toastr.warning(res.message);
-                }
-            },
-            error: function () {
-                toastr.error("Error creating intimation.");
+                rows.push({
+                    RefType: $(this).find("td:eq(1)").text(),
+                    RefNo: parseInt($(this).find("td:eq(2)").text()),
+                    ItemCode: parseInt($(this).find("td:eq(3)").text()),
+                    BarcodeNo: $(this).find("td:eq(5)").text(),
+                    BatchNo: $(this).find("td:eq(6)").text(),
+                    ApproxWeight: parseFloat($(this).find("td:eq(7)").text()),
+                    ActualWeight: parseFloat($(this).find("td:eq(8)").text()),
+                    Sno: index + 1
+                });
             }
+
         });
 
-    });
-
-    //================================================================
-    //             Bind Table Data on Change
-    //================================================================
-
-    $('#tblindendorderstore').on('change', 'input[type="checkbox"]', function () {
-        let $row = $(this).closest('tr');
-
-        let itemCode = $row.find('td:eq(4)').text().trim();
-        let reqNo = $row.find('td:eq(25)').text().trim();
-        let vtype = $row.find('td:eq(2)').text().trim();
-        let poNo = $row.find('td:eq(1)').text().trim();
-
-        let uniqueKey = `${itemCode}_${reqNo}_${vtype}_${poNo}`;
-
-        if (this.checked) {
-            if ($('#tblPurchaseReceiptIR tbody tr[data-unique="' + uniqueKey + '"]').length > 0) return;
-
-            let vdate = $row.find('td:eq(3)').text().trim();
-            let itemName = $row.find('td:eq(5)').text().trim();
-            let unit = $row.find('td:eq(6)').text().trim();
-            let nos = $row.find('td:eq(7)').text().trim();
-            let qty = $row.find('td:eq(8)').text().trim();
-            let balqty = $row.find('td:eq(9)').text().trim();
-            let rate = $row.find('td:eq(10)').text().trim();
-            let taxtype = $row.find('td:eq(11)').text().trim();
-            let pack = $row.find('td:eq(12)').text().trim();
-            let disc = $row.find('td:eq(13)').text().trim();
-            let cgst = $row.find('td:eq(14)').text().trim();
-            let sgst = $row.find('td:eq(15)').text().trim();
-            let igst = $row.find('td:eq(16)').text().trim();
-            let cessPer = $row.find('td:eq(17)').text().trim();
-            let cess = $row.find('td:eq(18)').text().trim();
-            let vat = $row.find('td:eq(19)').text().trim();
-            let othAmt = $row.find('td:eq(20)').text().trim();
-            let make = $row.find('td:eq(21)').text().trim();
-            let dept = $row.find('td:eq(22)').text().trim();
-            let remarks = $row.find('td:eq(23)').text().trim();
-            let reqType = $row.find('td:eq(24)').text().trim(); 
-            let taxcode = $row.find('td:eq(29)').text().trim();
-             
-            let amount = (parseFloat(rate || 0) * parseFloat(qty || 0)).toFixed(2);
-
-            let newRow = `
-                    <tr data-unique="${uniqueKey}">
-                       <td style="display:none;">
-                         <input type="hidden" name="PackOnBasic" value="${i.PACK_ONBASIC ?? 0}" />
-                     </td>
-                        <td style="display:none;"><input type="text" class="form-control" name="Code" value="${itemCode}" /></td>
-                        <td class="freeze-item"><select class="form-control item-name-dropdown" name="ItemName"></select></td>
-                        <td><input type="text" class="form-control" name="HSNCode" /></td>
-                        <td>
-                            <select class="form-control Unit-dropdown"
-                                    name="Unit"
-                                    data-selected-value="${unit}">
-                            </select>
-                        </td
-                        <td><input type="number" class="form-control" name="Nos" value="${nos}" /></td>
-                        <td><input type="number" class="form-control" name="PlusMinusQty" /></td>
-                        <td><input type="number" class="form-control" name="RecQty" value="${qty}" /></td>
-                        <td><input type="number" class="form-control" name="BillQty" value="${qty}" /></td>
-                        <td><input type="number" class="form-control" name="USDRate" /></td>
-                        <td><input type="number" class="form-control" name="ExRate" /></td>
-                        <td><input type="number" class="form-control" name="Rate" value="${rate}" /></td>
-                        <td><input type="number" class="form-control" name="Amount" value="${amount}" /></td>
-                        <td>
-                            <select class="form-control EmptyYN-dropdown" name="EmptyYN">
-                                <option value="">--Select--</option>
-                                <option>Yes</option>
-                                <option>No</option>
-                            </select>
-                        </td>
-                        <td><input type="number" class="form-control" name="WBQty" /></td>
-                        <td><select class="form-control TaxType-dropdown" name="TaxType" data-selected-value="${taxcode}"></select></td>
-                        <td><input type="number" class="form-control" name="PackPer" value="${pack}" /></td>
-                        <td><input type="number" class="form-control" name="PackAmt" /></td>
-                        <td><input type="number" class="form-control" name="DiscPer" value="${disc}" /></td>
-                        <td><input type="number" class="form-control" name="DiscAmt" /></td>
-                        <td><input type="number" class="form-control" name="CGSTPer" value="${cgst}" /></td>
-                        <td><input type="number" class="form-control" name="CGSTAmt" /></td>
-                        <td><input type="number" class="form-control" name="SGSTPer" value="${sgst}" /></td>
-                        <td><input type="number" class="form-control" name="SGSTAmt" /></td>
-                        <td><input type="number" class="form-control" name="IGSTPer" value="${igst}" /></td>
-                        <td><input type="number" class="form-control" name="IGSTAmt" /></td>
-                        <td><input type="number" class="form-control" name="CESSPer" value="${cessPer}" /></td>
-                        <td><input type="number" class="form-control" name="CESSAmt" value="${cess}" /></td>
-                        <td><input type="number" class="form-control" name="VATPer" value="${vat}" /></td>
-                        <td><input type="number" class="form-control" name="VATAmt" /></td>
-                        <td><input type="number" class="form-control" name="OthAmt" value="${othAmt}" /></td>
-                        <td><input type="number" class="form-control" name="NetAmt" /></td>
-
-                        <td>
-                            <select class="form-control Make-dropdown"
-                                    name="Make"
-                                    data-selected-value="${make}">
-                            </select>
-                        </td>
-
-                        <td>
-                            <select class="form-control Department-dropdown"
-                                    name="Department"
-                                    data-selected-value="${dept}">
-                            </select>
-                        </td>
-
-                        <td><input type="text" class="form-control" name="Remarks" value="${remarks}" /></td>
-                        <td><input type="number" class="form-control" name="LDRate" /></td>
-                        <td><input type="number" class="form-control" name="LDAmt" /></td>
-                        <td>
-                            <select class="form-control bin-dropdown"
-                                    name="BinLocation"
-                                    data-selected-value="${bin}">
-                            </select>
-                        </td>
-                        <td><input type="text" class="form-control" name="POType" value="${vtype}" /></td>
-                        <td><input type="text" class="form-control" name="PONo" value="${poNo}" /></td>
-                        <td><input type="text" class="form-control" name="KantaType" /></td>
-                        <td><input type="text" class="form-control" name="KantaNo" /></td>
-                        <td><input type="text" class="form-control" name="ReqType" value="${reqType}" /></td>
-                        <td><input type="text" class="form-control" name="ReqNo" value="${reqNo}" /></td>
-                        <td><input type="text" class="form-control" name="GateType" /></td>
-                        <td><input type="text" class="form-control" name="GateNo" /></td>
-                        <td><button type="button" class="btn btn-danger btn-sm btn-delete-row">Delete</button></td>
-                    </tr>
-                `;
-                 
-            $('#tblPurchaseReceiptIR tbody').append(newRow);
-
-            let $lastRow = $('#tblPurchaseReceiptIR tbody tr').last();
-
-            let $itemDropdown = $lastRow.find('select[name="ItemName"]');
-            loadItemDropdown($itemDropdown, itemCode);
-
-            let $taxDropdown = $lastRow.find('select[name="TaxType"]');
-            loadTaxTypeDropdown($taxDropdown, taxtype);
-
-            let $deptDropdown = $lastRow.find('select[name="Department"]');
-            loadDepartmentDropdown($deptDropdown, dept);
-
-            let $BinDropdown = $lastRow.find('select[name="BinLocation"]');
-            loadBinDropdown($BinDropdown, binlocation);
-                
-            let $UnitDropdown = $lastRow.find('select[name="Unit"]');
-            loadUnitDropdown($UnitDropdown, unit);
-
-            let $MakeDropdown = $lastRow.find('select[name="Make"]');
-            loadMakeDropdown($MakeDropdown, make);
-
-        } else {
-            $('#tblPurchaseReceiptIR tbody tr[data-unique="' + uniqueKey + '"]').remove();
-        }
-    });
-
-    //================================================================
-    //                Save And Update
-    //================================================================
-
-    $('#btn-save').on('click', async function (e) {
-        e.preventDefault(); 
-
-        const gateText = $('#ddlGateNo option:selected').text();
-
-        if (!validateDataForPRMRN()) {
-            return;
-        }
-
-        const isValidDate = await checkValidDate();
-        if (!isValidDate) {
-            return;
-        }
-
-        var header = {
-            DocType: $('#ddlDocType').val() || null,
-            DocNo: $('#NumDocNo').val() || null,
-            BillNo: $('#txtBillNo').val() || null,
-            ChallanNo: $('#NumChallanNo').val() || null,
-            WaybillNo: $('#TxtWaybillNo').val() || null,
-            EWB_INVNO: $('#TxtWaybillInvNo').val() || 0,
-            ReturnType: $('#ddlReturnType').val() || 0,
-            DocStatus: $('#ddlDocStatus').val() || 0,
-            DocDate: $('#DtDocDate').val() || 0,
-            GateNo: $('#ddlGateNo').val() || null,
-            GATE_TYPE: gateText ? gateText.match(/^[A-Za-z]+/)?.[0] : null,
-            BillDate: $('#DtBillDate').val() || null,
-            ChallanDate: $('#DtChallanDate').val() || null,
-            EWB_DATE: $('#DtWaybillDate').val() || null,
-            EWB_EXPDATE: $('#DtWaybillExpiry').val() || null,
-            ExchangeRate: $('#txtExchangeRate').val() || null,
-            NetAmount: $('#txtNetAmount').val() || null,
-            BillFrom: $('#ddlBillFrom').val() || null,
-            AddLine1: $('#txtAddLine1').val() || null,
-            AddLine2: $('#txtAddLine2').val() || null,
-            AddLine3: $('#txtAddLine3').val() || null,
-            City: $('#ddlCity').val() || null,
-            Pincode: $('#txtPincode').val() || null,
-            BILL_ADDRESSID: $('#ddladdressBD1').val() || 0,
-            SHIP_ADDRESSID: $('#ddladdressSD1').val() || 0,
-            GST: $('#txtGST').val() || null,
-            Remarks: $('#txtRemarks').val() || null,
-            ShipFrom: $('#ddlShipFrom').val() || null,
-            ShipAddLine1: $('#txtShipAddLine1').val() || null,
-            ShipAddLine2: $('#txtShipAddLine2').val() || null,
-            ShipAddLine3: $('#txtShipAddLine3').val() || null,
-            ShipCity: $('#ddlShipCity').val() || null,
-            ShipPincode: $('#NumShipPincode').val(),
-            ShipState: $('#ddlShipState').val(),
-            ShipGST: $('#txtShipGST').val(),
-            TransportName: $('#ddlTransportName option:selected').text(),
-            TRANSPORT_CODE: $('#ddlTransportName').val() || 0,
-            VehicleNo: $('#TxtVehicleNo').val(),
-            ContainerNo: $('#TxtContainerNo').val() || 0, 
-            FreightPay: $('#NumFreightPay').val() ,
-            FrtTax1: $('#NumFrtTax1').val() || 0,
-            FrtTax2: $('#NumFrtTax2').val() || 0,
-            FrtPayNarr: $('#txtFrtPayNarr').val() || 0,
-            GRNo: $('#NumGRNo').val() || 0,
-            GRDate: $('#DtGRDate').val(),
-            NumReceivedQty: $('#NumReceivedQty').val() || 0,
-            NumBillQty: $('#NumBillQty').val() || 0,
-            NumAmount: $('#NumAmount').val() || 0,
-            NumPacking: $('#NumPacking').val() || 0,
-            NumDiscount: $('#NumDiscount').val() || 0,
-            NumCGST: $('#NumCGST').val() || 0,
-            NumSGST: $('#NumSGST').val() || 0,
-            NumIGST: $('#NumIGST').val() || 0,
-            NumCESS: $('#NumCESS').val() || 0,
-            NumVAT: $('#NumVAT').val() || 0,
-            NumOtherAmt: $('#NumOtherAmt').val() || 0,
-            NumTCSPer1: $('#NumTCSPer1').val() || 0,
-            NumTCSPer2: $('#NumTCSPer2').val() || 0,
-            NumSubTotal: $('#NumSubTotal').val() || 0,
-            NumRoundOff: $('#NumRoundOff').val() || 0,
-            NumFinalNetAmt: $('#NumFinalNetAmt').val() || 0,
-            HOLD_PAY: $('#ddlPaymentIT option:selected').text() || 0,
-            HOLD_REASON: $('#txtReason').val(), 
-            HOLD_DATE: $('#DtHoldDate').val(),
-            ACTION: code > 0 ? "UPDATE" : "INSERT",
-            code: code
+        var model = {
+            VNo: $("#NumDocNo").val(),
+            VType: $("#ddlDocType").val(),
+            VDate: $("#DtDocDate").val(),
+            ItemCode: $("#hdnItemCode").val(),
+            FromDeptCode: $("#hdnFromDept").val(),
+            ToDeptCode: $("#hdnToDept").val(),
+            Rows: rows
         };
-
-        //Items (from table rows)
-        const allData = [];
-        $('#tblPurchaseReceiptIR tbody tr').each(function () {
-
-            const row = $(this);
-            const itemSelect = row.find('select[name="ItemName"]');
-            const rowData = {
-                Code: row.find('input[name="Code"]').val() || null,
-                ItemCode: itemSelect.val() || null,
-                ItemName: itemSelect.find("option:selected").text(),
-                HSNCode: row.find('input[name="HSNCode"]').val() || 0,
-                UOMCode: row.find('select[name="Unit"]').val() || 0,
-                UOMName: row.find('select[name="Unit"] option:selected').text() || '',
-                Nos: parseFloat(row.find('input[name="Nos"]').val()) || 0,
-                PlusMinusQty: parseFloat(row.find('input[name="PlusMinusQty"]').val()) || 0,
-                RecQty: parseFloat(row.find('input[name="RecQty"]').val()) || 0,
-                BillQty: parseFloat(row.find('input[name="BillQty"]').val()) || 0,
-                USDRate: parseFloat(row.find('input[name="USDRate"]').val()) || 0,
-                ExRate: parseFloat(row.find('input[name="ExRate"]').val()) || 0,
-                Rate: parseFloat(row.find('input[name="Rate"]').val()) || 0,
-                Amount: parseFloat(row.find('input[name="Amount"]').val()) || 0,
-                EmptyYN: row.find('select[name="EmptyYN"]').val(),
-                WBQty: parseFloat(row.find('input[name="WBQty"]').val()) || 0,
-                TaxCode: row.find('select[name="TaxType"]').val() || 0,
-                PackPer: parseFloat(row.find('input[name="PackPer"]').val()) || 0,
-                PackAmt: parseFloat(row.find('input[name="PackAmt"]').val()) || 0,
-                DiscPer: parseFloat(row.find('input[name="DiscPer"]').val()) || 0,
-                DiscAmt: parseFloat(row.find('input[name="DiscAmt"]').val()) || 0,
-                CGSTPer: parseFloat(row.find('input[name="CGSTPer"]').val()) || 0,
-                CGSTAmt: parseFloat(row.find('input[name="CGSTAmt"]').val()) || 0,
-                SGSTPer: parseFloat(row.find('input[name="SGSTPer"]').val()) || 0,
-                SGSTAmt: parseFloat(row.find('input[name="SGSTAmt"]').val()) || 0,
-                IGSTPer: parseFloat(row.find('input[name="IGSTPer"]').val()) || 0,
-                IGSTAmt: parseFloat(row.find('input[name="IGSTAmt"]').val()) || 0,
-                CESSPer: parseFloat(row.find('input[name="CESSPer"]').val()) || 0,
-                CESSAmt: parseFloat(row.find('input[name="CESSAmt"]').val()) || 0,
-                VATPer: parseFloat(row.find('input[name="VATPer"]').val()) || 0,
-                VATAmt: parseFloat(row.find('input[name="VATAmt"]').val()) || 0,
-                OthAmt: parseFloat(row.find('input[name="OthAmt"]').val()) || 0,
-                NetAmt: parseFloat(row.find('input[name="NetAmt"]').val()) || 0,
-                MakeCode: row.find('select[name="Make"]').val() || 0,
-                DeptCode: row.find('select[name="Department"]').val() || 0,
-                Remarks: row.find('input[name="Remarks"]').val(),
-                LDRate: parseFloat(row.find('input[name="LDRate"]').val()) || 0,
-                LDAmt: parseFloat(row.find('input[name="LDAmt"]').val()) || 0,
-                BinLocation: row.find('select[name="BinLocation"]').val() || "",
-                POType: row.find('input[name="POType"]').val(),
-                PONo: row.find('input[name="PONo"]').val() || 0,
-                KantaType: row.find('input[name="KantaType"]').val(),
-                KantaNo: row.find('input[name="KantaNo"]').val() || 0,
-                ReqType: row.find('input[name="ReqType"]').val(),
-                ReqNo: row.find('input[name="ReqNo"]').val() || 0,
-                GateType: row.find('input[name="GateType"]').val(),
-                GateNo: row.find('input[name="GateNo"]').val() || 0
-            };
-            allData.push(rowData);
-        });
-
-        const formData = new FormData();
-        formData.append("Header", JSON.stringify(header));
-        
-        allData.forEach((item, i) => {
-            for (const key in item) {
-                formData.append(`ItemDetails[${i}].${key}`, item[key]);
-            }
-        });
-
-        rowsAttachment.forEach((attachment, index) => {
-            
-            formData.append(`Attachments[${index}].FileName`, attachment.FileName);
-
-            if (attachment.File) {
-                console.log("NEW FILE", attachment.File.name);
-                formData.append(`Attachments[${index}].File`, attachment.File);
-            }
-            else {
-                formData.append(`Attachments[${index}].IMG_FILE`, attachment.IMG_FILE);
-                formData.append(`Attachments[${index}].FILE_NAME`, attachment.FILE_NAME);
-                formData.append(`Attachments[${index}].FILE_TYPE`, attachment.FILE_TYPE);
-            }
-
-        });
+        console.log('Production Batch data', model)
 
         $.ajax({
-            url: '/ImportExportExpensesEntry/SaveAllData',
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function (resp) {
-                if (resp.status === "success") {
-                    toastr.success(resp.message);
-                    //setTimeout(function () {
-                    //    window.location.href = '/ImportExportExpensesEntryList';
-                    //}, 1500);
-                } else {
-                    showToast("Data Saved Failed: " + resp.message, { type: "error" });
-                }
-            },
-            error: function (xhr, status, error) {
-
-                let message = "Data Saved Failed.";
-
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    message = xhr.responseJSON.message;
-                }
-                else if (xhr.responseText) {
-                    try {
-                        const resp = JSON.parse(xhr.responseText);
-                        message = resp.message || message;
-                    } catch (e) {
-                        message = xhr.responseText;
-                    }
-                }
-
-                showToast(message, { type: "error" });
-               
-                console.error("AJAX Error:", status, error, xhr.responseText);
+            url: "/ImportExportExpensesEntry/SaveProductionBatch",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(model),
+            success: function (res) {
+                alert(res.message);
             }
         });
+
     });
+
+    //------------------------------------------ProductionBatch---------------------------------
 });
-
-function ddlDocType(callback) {
+function PrintPurchaseReturnEntryReport() {
+    var model = {
+        VType: $('#ddlDocType').val(),
+        VNo: code,
+        Amount: $("#txtNetAmount").val()
+    };
     $.ajax({
-        url: '/ImportExportExpensesEntry/GetddlDocType',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            const ddl = $('#ddlDocType');
-            ddl.empty().append('<option value="">-- Select Doc Type --</option>');
-            $.each(data, function (index, item) {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            if (typeof callback === "function") callback();
-        },
-        error: function (xhr) {
-            showToast("Error loading ddlDocType: " + xhr.responseText, { type: "error" });
-        }
-    });
-}
-
-function ddlDocStatus(callback) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetddlDocStatus',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            const ddl = $('#ddlDocStatus');
-            ddl.empty().append('<option value="">-- Select Doc Status --</option>');
-            $.each(data, function (index, item) {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            if (typeof callback === "function") callback();
-        },
-        error: function (xhr) {
-            showToast("Error loading ddlDocStatus: " + xhr.responseText, { type: "error" });
-        }
-    });
-}
-
-function sendDocType(docType, docName) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetDocNo',
+        url: '/ImportExportExpensesEntry/PrintPurchaseReturnEntryReport',
         type: 'POST',
-        data: {
-            docType: docType,
-            docName: docName
-        },
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify(model),
+
         success: function (response) {
-            if (response.success) {
-
-                const vNo = response.nextVNo;
-                const vType = response.docType;
-
-                $('#NumDocNo').val(vNo);
-                ddlGateNo(vNo, vType);
-            }
-        },
-        error: function (xhr) {
-            showToast("Error: " + xhr.responseText, { type: "error" });
-        }
-    });
-}
-
-function ddlGateNo(vNo, vType1) {
-    const ddl = $('#ddlGateNo');
-    return $.ajax({
-        url: '/ImportExportExpensesEntry/GetddlGateNo',
-        type: 'GET',
-        dataType: 'json',
-        data: { VNo: vNo, Vtype: vType1 },
-        success: function (data) {
-            if (ddl.hasClass("select2-hidden-accessible")) {
-                ddl.select2('destroy');
-            }
-            ddl.empty().append('<option value="" disabled selected hidden>-- Select Party --</option>');
-            data.forEach(item => {
-                ddl.append(new Option(item.text, item.value));
-            });
-            ddl.select2({
-                placeholder: "-- Select GateNo --",
-                allowClear: true,
-                width: '100%'
-            });
-            $('.select2-selection').addClass('form-control');
-        },
-        error: function (xhr, status, error) {
-            showToast("Error loading Gate Number: " + error, { type: "error" });
-            console.error("Error loading Gate Number:", xhr.responseText);
-        }
-    });
-}
-
-function ddlBillFrom(callback) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetddlBillFrom',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            const ddl = $('#ddlBillFrom');
-            ddl.empty().append('<option value="">-- Select Bill --</option>');
-            $.each(data, function (index, item) {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            if (typeof callback === "function") callback();
-        },
-        error: function (xhr) {
-            showToast("Error loading Bill From", { type: "error" });
-            console.error("Error loading ddlBillFrom:", xhr.responseText);
-        }
-    });
-}
-
-function getBillFrom(code) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetBillDetails',
-        type: 'POST',
-        data: { code: code },
-        success: function (response) {
-            if (response) {
-                $('#txtAddLine1').val(response.address1).prop('readonly', true);
-                $('#txtAddLine2').val(response.address2).prop('readonly', true);
-                $('#txtAddLine3').val(response.address3).prop('readonly', true);
-                $('#txtPincode').val(response.pincode).prop('readonly', true);
-                $('#txtGST').val(response.gstin).prop('readonly', true);
-
-                $('#txtShipAddLine1').val(response.address1).prop('readonly', true);
-                $('#txtShipAddLine2').val(response.address2).prop('readonly', true);
-                $('#txtShipAddLine3').val(response.address3).prop('readonly', true);
-                $('#NumShipPincode').val(response.pincode).prop('readonly', true);
-                $('#txtShipGST').val(response.gstin).prop('readonly', true);
-
-                GetddlCityBillDetails(function () {
-                   $('#ddlCity').val(response.cityCode).prop('disabled', true);
-                });
-
-                GetddlstateBillDetails(function () {
-                   $('#ddlState').val(response.stateCode).prop('disabled', true);
-                });
-
-                ddlShipDetails(function () {
-                   $('#ddlShipFrom').val(code).prop('disabled', true);
-                });
-
-                GetddlCityShipDetails(function () {
-                    $('#ddlShipCity').val(response.cityCode).prop('disabled', true);
-                });
-
-                GetddlstateShipDetails(function () {
-                    $('#ddlShipState').val(response.stateCode).prop('disabled', true);
-                });
-
-            } else {
-                showToast("No supplier data found for Bill from Dropdown", { type: "warning" });
-            }
-        },
-        error: function (xhr) {
-            showToast("Error : No supplier data found for bill From Dropdown" + xhr.responseText, { type: "error" });
-            console.error("Error:", xhr.responseText);
-        }
-    });
-}
-
-function getBillDetailsAddLine1(code, AddressID) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetBillDetailsAddLine1',
-        type: 'POST',
-        data: { code: code, AddressID: AddressID },
-        success: function (response) {
-            if (response) {
-                $('#txtAddLine1').val(response.address1);
-                $('#txtAddLine2').val(response.address2);
-                $('#txtAddLine3').val(response.address3);
-                GetddlCityBillDetails(function () {
-                    $('#ddlCity').val(response.cityCode);
-                })
-                GetddlstateBillDetails(function () {
-                    $('#ddlState').val(response.stateCode);
-                })
-                $('#txtPincode').val(response.pincode);
-                $('#txtGST').val(response.gstin);
-            } else {
-                showToast("Address Line1 not found for Bill From Dropdown", { type: "warning" });
-                console.warn("No supplier data found for code:", code);
-            }
-        },
-        error: function (xhr) {
-            showToast("Error: " + xhr.responseText, { type: "error" });
-        }
-    });
-}
-
-function getShipDetailsAddLine1(code, AddressID) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetShipDetailsAddLine1',
-        type: 'POST',
-        data: { code: code, AddressID: AddressID },
-        success: function (response) {
-            if (response) {
-                $('#txtShipAddLine1').val(response.address1);
-                $('#txtShipAddLine2').val(response.address2);
-                $('#txtShipAddLine3').val(response.address3);
-                GetddlCityShipDetails(function () {
-                    $('#ddlShipCity').val(response.cityCode);
-                });
-                GetddlstateShipDetails(function () {
-                    $('#ddlShipState').val(response.stateCode);
-                });
-                $('#NumShipPincode').val(response.pincode);
-                $('#txtShipGST').val(response.gstin);
-
-            } else {
-                showToast("Address Line1 not found for Ship From Dropdown", { type: "warning" });
-            }
-        },
-        error: function (xhr) {
-            showToast("Error: " + xhr.responseText, { type: "error" });
-            console.error("Error:", xhr.responseText);
-        }
-    });
-}
-
-function BillDetailsddlAddLine1(code, callback) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetBillDetailsddlAddLine1',
-        type: 'GET',
-        dataType: 'json',
-        data: { code: code },
-        success: function (data) {
-            const ddl = $('#ddladdressBD1');
-            ddl.empty().append();
-            $.each(data, function (index, item) {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            if (typeof callback === "function") callback();
-        },
-        error: function (xhr) {
-            console.error("Error loading ddladdressBD1:", xhr.responseText);
-        }
-    });
-}
-
-function ShipDetailsddlAddLine1(code, callback) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetShipDetailsddlAddLine1',
-        type: 'GET',
-        dataType: 'json',
-        data: { code: code },
-        success: function (data) {
-            const ddl = $('#ddladdressSD1');
-            ddl.empty().append();
-            $.each(data, function (index, item) {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            if (typeof callback === "function") callback();
-        },
-        error: function (xhr) {
-            console.error("Error loading ddladdressSD1:", xhr.responseText);
-        }
-    });
-}
-
-function GetddlCityBillDetails(callback) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetddlCityBillDetails',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            const ddl = $('#ddlCity');
-            ddl.empty().append('<option value="">-- Select City--</option>');
-            $.each(data, function (index, item) {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            if (typeof callback === "function") callback();
-        },
-        error: function (xhr) {
-            console.error("Error loading ddlCity:", xhr.responseText);
-        }
-    });
-}
-
-function GetddlstateBillDetails(callback) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetddlstateBillDetails',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            const ddl = $('#ddlState');
-            ddl.empty().append('<option value="">-- Select State --</option>');
-            $.each(data, function (index, item) {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            if (typeof callback === "function") callback();
-        },
-        error: function (xhr) {
-            console.error("Error loading ddlState:", xhr.responseText);
-        }
-
-    });
-}
-
-function GetddlCityShipDetails(callback) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetddlCityShipDetails',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            const ddl = $('#ddlShipCity');
-            ddl.empty().append('<option value="">-- Select City--</option>');
-            $.each(data, function (index, item) {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            if (typeof callback === "function") callback();
-        },
-        error: function (xhr) {
-            console.error("Error loading ddlShipCity:", xhr.responseText);
-        }
-    });
-}
-
-function GetddlstateShipDetails(callback) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetddlstateShipDetails',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            const ddl = $('#ddlShipState');
-            ddl.empty().append('<option value="">-- Select State --</option>');
-            $.each(data, function (index, item) {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            if (typeof callback === "function") callback();
-        },
-        error: function (xhr) {
-            console.error("Error loading ddlShipState:", xhr.responseText);
-        }
-    });
-}
-
-function ddlShipDetails(callback) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetddlShipDetails',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            const ddl = $('#ddlShipFrom');
-            ddl.empty().append('<option value="">-- Select Ship --</option>');
-            $.each(data, function (index, item) {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            if (typeof callback === "function") callback();
-        },
-        error: function (xhr) {
-            console.error("Error loading ddlShipFrom:", xhr.responseText);
-        }
-    });
-}
-
-//function ddlTransportName(callback) {
-//    $.ajax({
-//        url: '/ImportExportExpensesEntry/GetddlTransportName',
-//        type: 'GET',
-//        dataType: 'json',
-//        success: function (data) {
-//            const ddl = $('#ddlTransportName');
-//            ddl.empty().append('<option value="">-- Transport Name --</option>');
-//            $.each(data, function (index, item) {
-//                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-//            });
-//            if (typeof callback === "function") callback();
-//        },
-//        error: function (xhr) {
-//            console.error("Error loading ddlTransportName:", xhr.responseText);
-//        }
-//    });
-//}
-
-function ddlOrdertype(callback) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetddlOrdertype',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            const ddl = $('#ddlcopyFromDropdown');
-            ddl.empty().append('<option value="">-- Order Type --</option>');
-            $.each(data, function (index, item) {
-                ddl.append(`<option value="${item.value}">${item.text}</option>`);
-            });
-            if (typeof callback === "function") callback();
-        },
-        error: function (xhr) {
-            console.error("Error loading ddlcopyFromDropdown:", xhr.responseText);
-        }
-    });
-}
-
-function GetStateByCity(cityCode, stateDropdown, callback) {
-
-    if (!cityCode) return;
-
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetStateByCity',
-        type: 'GET',
-        data: { cityCode: cityCode },
-        success: function (res) {
-
-            if (res) {
-                $(stateDropdown).val(res.stateCode);
-
-                if (callback)
-                    callback(res);
-            }
-        },
-        error: function () {
-            showToast("State Binding Failed", { type: "error" });
-        }
-    });
-}
-
-//================================================================
-//            Add new Row in Table 
-//================================================================
-function addRow() {
-    const tbody = $('#tblPurchaseReceiptIR tbody');
-    const firstRow = tbody.find('tr:first');
-    const newRow = firstRow.clone();
-    newRow.find('input').val('');
-    tbody.append(newRow);
-    loadItemDropdown(newRow.find('.item-name-dropdown'));
-    loadTaxTypeDropdown(newRow.find('.TaxType-dropdown'));
-    loadDepartmentDropdown(newRow.find('.Department-dropdown'));
-    loadBinDropdown(newRow.find('.bin-dropdown'));
-    loadUnitDropdown(newRow.find('.Unit-dropdown'));
-    loadMakeDropdown(newRow.find('.Make-dropdown'));
-}
-
-function loadItemDropdown(dropdown, selectedCode = "") {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetItemList',
-        method: 'GET',
-        success: function (data) {
-            dropdown.empty();
-            dropdown.append('<option value="">--Select Item--</option>');
-            $.each(data, function (index, item) {
-                let selected = item.code === selectedCode ? 'selected' : '';
-                dropdown.append('<option value="' + item.code + '" ' + selected + '>' + item.name + '</option>');
-            });
-        },
-        error: function () {
-            showToast("Failed To load Items", { type: "error" });
-        }
-    });
-}
-
-function loadDepartmentDropdown($ddl, selectedValue = "") {
-    $.get('/ImportExportExpensesEntry/GetDepartment', function (data) {
-        $ddl.empty();
-        $ddl.append('<option value="">Select</option>');
-
-        $.each(data, function (i, item) {
-            $ddl.append(
-                `<option value="${item.text}">${item.value}</option>`
-            );
-        });
-
-        if (selectedValue) {
-            $ddl.val(selectedValue);
-        }
-    });
-}
-
-function loadBinDropdown($ddl, selectedValue = "") {
-   
-    $.get('/ImportExportExpensesEntry/GetBINMAST', function (data) {
-        $ddl.empty();
-        $ddl.append('<option value="">Select</option>');
-
-        $.each(data, function (i, item) {
-            $ddl.append(
-                `<option value="${item.text}">${item.value}</option>`
-            );
-        });
-
-        if (selectedValue) {
-            $ddl.val(selectedValue);
-        }
-    });
-}
-
-function loadUnitDropdown($ddl, selectedValue = "") {
-   
-    $.get('/ImportExportExpensesEntry/GetUnitMast', function (data) {
-        $ddl.empty();
-        $ddl.append('<option value="">Select</option>');
-
-        $.each(data, function (i, item) {
-            $ddl.append(
-                `<option value="${item.value}">${item.text}</option>`
-            );
-        });
-
-        if (selectedValue) {
-            $ddl.val(selectedValue);
-        }
-    });
-}
-
-function loadMakeDropdown($ddl, selectedValue = "") {
-   
-    $.get('/ImportExportExpensesEntry/GetMakeMast', function (data) {
-        $ddl.empty();
-        $ddl.append('<option value="">Select</option>');
-
-        $.each(data, function (i, item) {
-            $ddl.append(
-                `<option value="${item.value}">${item.text}</option>`
-            );
-        });
-
-        if (selectedValue) {
-            $ddl.val(selectedValue);
-        }
-    });
-}
-
-function getHSNCode(code, row) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetHSNCode',
-        type: 'GET',
-        data: { code: code },
-        success: function (response) {
-
-            row.find('input[name="HSNCode"]').val(response.hsnCode);
-            row.find('input[name="Unit"]').val(response.unit);
-        },
-        error: function (xhr) {
-            showToast("Error while fetching HSNCode", { type: "error" });
-            console.error("Error fetching HSNCode:", xhr.responseText);
-        }
-    });
-}
-
-function loadTaxTypeDropdown($dropdown, selectedCode = '') {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetTaxTypeList',
-        method: 'GET',
-        success: function (data) {
-            $dropdown.empty();
-            $dropdown.append('<option value="">--Select--</option>');
-            $.each(data, function (index, item) {
-                const selected = item.code === selectedCode ? ' selected' : '';
-                $dropdown.append('<option value="' + item.code + '"' + selected + '>' + item.name + '</option>');
-            });
-        },
-        error: function () {
-            showToast("Failed To load tax Drodpown", { type: "error" });
-        }
-    });
-}
-
-//================================================================
-//         Calculation Block Start
-//================================================================
-function getTaxType(code, row) {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetTaxTypeDetails',
-        type: 'GET',
-        data: { code: code },
-        success: function (response) {
-            console.log(response);
-            console.log(row);
-            const rate = parseFloat(row.find('input[name="Rate"]').val()) || 0;
-            const billQty = parseFloat(row.find('input[name="BillQty"]').val()) || 0;
-            const totalAmount = rate * billQty;
-
-            row.find('input[name="Amount"]').val(totalAmount.toFixed(2));
-
-            if (response) {
-                const igstPer = parseFloat(response.igsT_PER) || 0;
-                const cgstPer = parseFloat(response.cgsT_PER) || 0;
-                const sgstPer = parseFloat(response.sgsT_PER) || 0;
-
-                // Set tax percentages
-                row.find('input[name="CGSTPer"]').val(cgstPer);
-                row.find('input[name="SGSTPer"]').val(sgstPer);
-                row.find('input[name="IGSTPer"]').val(igstPer);
-
-                // Calculate tax amounts
-                const CGSTAmt = (totalAmount * cgstPer) / 100;
-                const SGSTAmt = (totalAmount * sgstPer) / 100;
-                const IGSTAmt = (totalAmount * igstPer) / 100;
-
-                row.find('input[name="CGSTAmt"]').val(CGSTAmt.toFixed(2));
-                row.find('input[name="SGSTAmt"]').val(SGSTAmt.toFixed(2));
-                row.find('input[name="IGSTAmt"]').val(IGSTAmt.toFixed(2));
-                row.find('input[name="PackOnBasic"]').val(
-                    parseInt(response.pacK_ONBASIC ?? response.PACK_ONBASIC ?? 0)
-                );
-                // Final calculation
-                const NetAmt = totalAmount + CGSTAmt + SGSTAmt + IGSTAmt;
-                const LDRate = billQty !== 0 ? NetAmt / billQty : 0;
-
-                row.find('input[name="NetAmt"]').val(NetAmt.toFixed(2));
-                row.find('input[name="LDAmt"]').val(NetAmt.toFixed(2));
-                row.find('input[name="LDRate"]').val(LDRate.toFixed(2));
-
-                // Recalculate totals
-                recalculateRow(row);
-                calculateTotalRecQty();
-            }
-        },
-        error: function () {
-            showToast("Failed to get tax type details", { type: "error" });
-        }
-    });
-}
-
-function recalculateRow(row) {
-
-    const usdRate = parseFloat(row.find('input[name="USDRate"]').val()) || 0;
-    const exchRate = parseFloat(row.find('input[name="ExRate"]').val()) || 0;
-    let rate = parseFloat(row.find('input[name="Rate"]').val()) || 0;
-    const billQty = parseFloat(row.find('input[name="BillQty"]').val()) || 0;
-
-    if (exchRate > 0) {
-        rate = usdRate * exchRate;
-        row.find('input[name="Rate"]').val(rate.toFixed(2));
-    }
-
-    const amount = rate * billQty;
-
-    row.find('input[name="Amount"]').val(amount.toFixed(2));
-
-    const packPer = parseFloat(row.find('input[name="PackPer"]').val()) || 0;
-    const discPer = parseFloat(row.find('input[name="DiscPer"]').val()) || 0;
-
-    const cgstPer = parseFloat(row.find('input[name="CGSTPer"]').val()) || 0;
-    const sgstPer = parseFloat(row.find('input[name="SGSTPer"]').val()) || 0;
-    const igstPer = parseFloat(row.find('input[name="IGSTPer"]').val()) || 0;
-    const cessPer = parseFloat(row.find('input[name="CESSPer"]').val()) || 0;
-
-    const otherAmt = parseFloat(row.find('input[name="OthAmt"]').val()) || 0;
-    const vatAmt = parseFloat(row.find('input[name="VATAmt"]').val()) || 0;
-
-    //================ PACK_ONBASIC Logic =================
-    const discAmt = amount * discPer / 100;
-
-    const packOnBasic = parseInt(row.find('input[name="PackOnBasic"]').val()) || 0;
-
-    let packAmt = 0;
-
-    if (packOnBasic === 1) {
-        packAmt = amount * packPer / 100;
-    } else {
-        packAmt = (amount - discAmt) * packPer / 100;
-    }
-
-    const taxable = amount + packAmt - discAmt;
-
-    const cgstAmt = taxable * cgstPer / 100;
-    const sgstAmt = taxable * sgstPer / 100;
-    const igstAmt = taxable * igstPer / 100;
-    const cessAmt = taxable * cessPer / 100;
-
-    const ldAmt =
-        amount +
-        packAmt -
-        discAmt +
-        cessAmt +
-        vatAmt +
-        otherAmt;
-    
-    const netAmt =
-        ldAmt +
-        cgstAmt +
-        sgstAmt +
-        igstAmt;
-
-    const ldRate = billQty > 0 ? netAmt / billQty : 0;
-
-    row.find('input[name="PackAmt"]').val(packAmt.toFixed(2));
-    row.find('input[name="DiscAmt"]').val(discAmt.toFixed(2));
-    row.find('input[name="CGSTAmt"]').val(cgstAmt.toFixed(2));
-    row.find('input[name="SGSTAmt"]').val(sgstAmt.toFixed(2));
-    row.find('input[name="IGSTAmt"]').val(igstAmt.toFixed(2));
-    row.find('input[name="CESSAmt"]').val(cessAmt.toFixed(2));
-
-    row.find('input[name="LDAmt"]').val(ldAmt.toFixed(2));
-    row.find('input[name="NetAmt"]').val(netAmt.toFixed(2));
-    row.find('input[name="LDRate"]').val(ldRate.toFixed(2));
-}
-
-function calculateTotalRecQty() {
-    let totalRecQty = 0;
-    let totalBillQty = 0;
-    let totalAmount = 0;
-    let totalPacking = 0;
-    let totalDiscount = 0;
-    let totalCgst = 0;
-    let totalSgst = 0;
-    let totalIGST = 0;
-    let totalCess = 0;
-    let totalVAT = 0;
-    let totalOtherAmt = 0;
-    let SubTotal = 0;
-
-    $('#tblPurchaseReceiptIR tbody tr').each(function () {
-        const row = $(this);
-        const recQty = parseFloat(row.find('input[name="RecQty"]').val()) || 0;
-        const billQty = parseFloat(row.find('input[name="BillQty"]').val()) || 0;
-        const totalAmountQty = parseFloat(row.find('input[name="Amount"]').val()) || 0;
-        const PackingQty = parseFloat(row.find('input[name="PackAmt"]').val()) || 0;
-        const DiscountQty = parseFloat(row.find('input[name="DiscAmt"]').val()) || 0;
-        const CgstQty = parseFloat(row.find('input[name="CGSTAmt"]').val()) || 0;
-        const SgstQty = parseFloat(row.find('input[name="SGSTAmt"]').val()) || 0;
-        const IGSTQty = parseFloat(row.find('input[name="IGSTAmt"]').val()) || 0;
-        const CESSQty = parseFloat(row.find('input[name="CESSAmt"]').val()) || 0;
-        const VATQty = parseFloat(row.find('input[name="VATAmt"]').val()) || 0;
-        const OtherAmtQty = parseFloat(row.find('input[name="OthAmt"]').val()) || 0;
-        const SubTotalQty = parseFloat(row.find('input[name="NetAmt"]').val()) || 0;
-
-        totalRecQty += recQty;
-        totalBillQty += billQty;
-        totalAmount += totalAmountQty;
-        totalPacking += PackingQty;
-        totalDiscount += DiscountQty;
-        totalCgst += CgstQty;
-        totalSgst += SgstQty;
-        totalIGST += IGSTQty;
-        totalCess += CESSQty;
-        totalVAT += VATQty;
-        totalOtherAmt += OtherAmtQty;
-        SubTotal += SubTotalQty;
-    });
-    
-    $('#NumReceivedQty').val(totalRecQty.toFixed(3));
-    $('#NumBillQty').val(totalBillQty.toFixed(3));
-    $('#NumAmount').val(totalAmount.toFixed(2));
-    $('#NumPacking').val(totalPacking.toFixed(2));
-    $('#NumDiscount').val(totalDiscount.toFixed(2));
-    $('#NumCGST').val(totalCgst.toFixed(2));
-    $('#NumSGST').val(totalSgst.toFixed(2));
-    $('#NumIGST').val(totalIGST.toFixed(2));
-    $('#NumCESS').val(totalCess.toFixed(2));
-    $('#NumVAT').val(totalVAT.toFixed(2));
-    $('#NumOtherAmt').val(totalOtherAmt.toFixed(2));
-    // TCS Calculation
-    const tcsPer = parseFloat($("#NumTCSPer1").val()) || 0;
-    const tcsAmount = (SubTotal * tcsPer) / 100;
-
-    $("#NumTCSPer2").val(tcsAmount.toFixed(2));
-
-    // Sub Total = Net Total + TCS
-    const finalAmount = SubTotal + tcsAmount;
-    $("#NumSubTotal").val(finalAmount.toFixed(2));
-
-    // Round Off
-    const rounded = Math.round(finalAmount);
-    $("#NumRoundOff").val((rounded - finalAmount).toFixed(2));
-
-    // Final Net Amount
-    const netAmount = rounded.toFixed(2);
-
-    $("#NumFinalNetAmt").val(netAmount);
-    $("#txtNetAmount").val(netAmount);
-}
-//================================================================
-//         Calculation Block End
-//================================================================
-
-//================================================================
-//        Bind All Data On Change of Gate No 
-//================================================================
-function GetalldatafetchGatonchange(response) {
-    const header = response.header;
-
-    ddlBillFrom(function () {
-
-        ddlShipDetails(function () {
-
-            $('#ddlBillFrom').val(header.PARTY_CODE);
-            $('#ddlShipFrom').val(header.SHIP_PARTY);
-
-            BillDetailsddlAddLine1(header.PARTY_CODE, function () {
-
-                $('#ddladdressBD1').val(header.PARTY_ADDRESSID);
-                $('#ddladdressBD1').trigger('change');
-
-            });
-
-            if (header.SHIP_PARTY && header.SHIP_PARTY != 0) {
-
-                $('#ddlShipFrom').prop('disabled', false);
-                $('#ddlShipFrom').val(header.SHIP_PARTY);
-
-                ShipDetailsddlAddLine1(header.SHIP_PARTY, function () {
-
-                    $('#ddladdressSD1').val(header.PARTY_ADDRESSID);
-                    $('#ddladdressSD1').trigger('change');
-
-                });
-
-            } else {
-
-                $('#ddlShipFrom').val(header.PARTY_CODE);
-                $('#ddlShipFrom').prop('disabled', true);
-
-                ShipDetailsddlAddLine1(header.PARTY_CODE, function () {
-
-                    $('#ddladdressSD1').val(header.PARTY_ADDRESSID);
-                    $('#ddladdressSD1').trigger('change');
-
-                });
-
-            }
-
-        });
-            
-    });
-
-    $('#txtAddLine1, #txtShipAddLine1').val(header.ADD1);
-    $('#txtAddLine2, #txtShipAddLine2').val(header.ADD2);
-    $('#txtAddLine3, #txtShipAddLine3').val(header.ADD3);
-
-    GetddlCityBillDetails(() => {
-        $('#ddlCity, #ddlShipCity').val(header.CITY_CODE);
-    });
-
-    GetddlstateBillDetails(() => {
-        $('#ddlState, #ddlShipState').val(header.StateCode);
-    });
-
-    $('#txtPincode, #NumShipPincode').val(header.PARTY_PINCODE);
-    $('#txtGST, #txtShipGST').val(header.GSTIN || '');
-
-    //=========================
-    // Documents Detail
-    //=========================
-    $('#txtBillNo').val(header.BILL_NO);
-    $('#DtBillDate').val(header.BILL_DATE?.split('T')[0] || '');
-    $('#NumChallanNo').val(header.CHALL_NO || '');
-    $('#DtChallanDate').val(header.CHALL_DATE?.split('T')[0] || '');
-    $('#TxtWaybillNo').val(header.WAYBILL_NO || header.EWB_INVNO || '');
-    $('#TxtWaybillInvNo').val(header.EWB_INVNO || '');
-    $('#DtWaybillExpiry').val(header.EWB_EXPDATE?.split('T')[0] || '');
-    $('#DtWaybillDate').val(header.EWB_DATE?.split('T')[0] || '');
-
-    //==========================
-    // Transport Details
-    //==========================
-    $("#ddlTransportName").val(header.TRANSPORT_CODE).trigger("change");
-    $("#TxtVehicleNo").val(header.TRUCK_NO || "");
-    //$("#TxtContainerNo").val(header.CONTAINER_NO || "");
-    $("#NumFreightPay").val(header.FREIGHT_PAY || 0);
-    $("#NumFrtTax1").val(header.FRT_TAX_PER || 0);
-    $("#NumFrtTax2").val(header.FRT_TAX_AMT || 0);
-    $("#txtFrtPayNarr").val(header.FRT_PAY_NARR || "");
-    $("#NumGRNo").val(header.GR_NO || "");
-    $("#DtGRDate").val(header.GR_DATE?.split("T")[0] || "");
-    if (header.ContainerList && header.ContainerList.length > 0) {
-        $("#TxtContainerNo").val(header.ContainerList[0]);
-    } else {
-        $("#TxtContainerNo").val("");
-    }
-
-    //=================
-    // FooterData
-    //==================
-    bindItems(response.items);
-
-    //==========================
-    // Payment & TCS
-    //==========================
-    if (response.items && response.items.length > 0) {
-
-        $("#NumTCSPer1").val(response.items[0].TCS_PER || 0);
-
-        $("#ddlPaymentIT").val(response.items[0].Payment).trigger("change");
-
-        if (response.items[0].IsHold) {
-
-            if (!$("#DtHoldDate").val()) {
-                $("#DtHoldDate").val($("#DtDocDate").val());
-            }
-
-            $("#ddlPaymentIT").prop("disabled", true);
-            $("#DtHoldDate").prop("disabled", true);
-        }
-        else {
-            $("#ddlPaymentIT").prop("disabled", false);
-            $("#DtHoldDate").prop("disabled", false);
-        }
-    }
-}
-
-//======Bind Items(On change of gate no)========
-function bindItems(items) {
-    recalculateRow($(this));
-
-    const $tbody = $('#tblPurchaseReceiptIR tbody').empty();
-
-    items.forEach(i => {
-        const qty = i.QTY ?? 0;
-        const recQty = i.RecQty ?? 0;
-        const billQty = i.QTY ?? 0;
-        const rate = i.RATE ?? 0;
-        //const amount = qty * rate;
-        const amount = (qty * rate).toFixed(2);
-
-        const $tr = $(`
-                <tr class="no-border-input">
-                    <td style="display:none;">
-                         <input type="hidden" name="PackOnBasic" value="${i.PACK_ONBASIC ?? 0}" />
-                    </td>
-                    <td class="freeze-item">
-                        <select class="erppagetable-control erppagetabledynamic-table item-name-dropdown" name="ItemName"></select>
-                    </td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="HSNCode" value="${i.HSN_CODE || ''}" /></td>
-                    <td>
-                        <select class="erppagetable-control erppagetabledynamic-table Unit-dropdown"
-                                name="Unit"
-                                data-selected-value="${i.Unit || i.UOM_CODE || ''}">
-                        </select>
-                    </td>
-
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="Nos" value="${fmt(i.NOS ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="PlusMinusQty" value="${fmt(i.PlusMinusQty ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="RecQty" value="${fmt(recQty)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="BillQty" value="${fmt(billQty)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="USDRate" value="${fmt(i.USDRate ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="ExRate" value="${fmt(i.ExRate ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="Rate" value="${fmt(rate)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="Amount" value="${amount}" /></td>
-                    <td>
-                        <select class="erppagetable-control erppagetabledynamic-table EmptyYN-dropdown" name="EmptyYN">
-                            <option value="Yes" ${i.EMPTY === 'Yes' ? 'selected' : ''}>Yes</option>
-                            <option value="No" ${i.EMPTY !== 'Yes' ? 'selected' : ''}>No</option>
-                        </select>
-                    </td>
-                    <td><input name="WBQty"  class="erppagetable-control erppagetabledynamic-table" value="${fmt(i.WBQty ?? 0)}" /></td>
-                    <td><select class="erppagetable-control erppagetabledynamic-table TaxType-dropdown" name="TaxType"></select></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="PackPer" value="${fmt(i.PACK_PER ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="PackAmt" value="${fmt(i.PACK_AMT ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="DiscPer" value="${fmt(i.DISC_PER ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="DiscAmt" value="${fmt(i.DISC_AMT ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="CGSTPer" value="${fmt(i.CGST_PER ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="CGSTAmt" value="${fmt(i.CGSTAmt ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="SGSTPer" value="${fmt(i.SGST_PER ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="SGSTAmt" value="${fmt(i.SGSTAmt ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="IGSTPer" value="${fmt(i.IGST_PER ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="IGSTAmt" value="${fmt(i.IGSTAmt ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="CESSPer" value="${fmt(i.CESS_PER ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="CESSAmt" value="${fmt(i.CESS_AMT ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="VATPer" value="${fmt(i.VATPer ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="VATAmt" value="${fmt(i.VATAmt ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="OthAmt" value="${fmt(i.OTH_AMT ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="NetAmt" value="${fmt(i.NetAmt ?? amount)}" /></td>
-
-                    <td>
-                        <select class="erppagetable-control erppagetabledynamic-table Make-dropdown"
-                                name="Make"
-                                data-selected-value="${i.Make || i.MAKE_CODE || ''}">
-                        </select>
-                    </td>
-
-                    <td>
-                        <select class="erppagetable-control erppagetabledynamic-table Department-dropdown"
-                                name="Department"
-                                data-selected-value="${i.Department || i.DEPT_CODE || ''}">
-                        </select>
-                    </td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="Remarks" value="${i.Remarks || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="LDRate" value="${fmt(i.LDRate ?? 0)}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="LDAmt" value="${fmt(i.LDAmt ?? 0)}" /></td>
-                    <td>
-                        <select class="erppagetable-control erppagetabledynamic-table bin-dropdown"
-                                name="BinLocation"
-                                data-selected-value="${i.BinLocation || i.BIN_CODE || ''}">
-                        </select>
-                    </td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="POType" value="${i.REF_TYPE || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="PONo" value="${i.REF_NO ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="KantaType" value="${i.KantaType || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="KantaNo" value="${i.KantaNo || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="ReqType" value="${i.REQUEST_TYPE || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="ReqNo" value="${i.REQUEST_NO ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="GateType" value="${i.v_type || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table"  name="GateNo" value="${i.v_no ?? 0}" /></td>
-                    <td class="action-col">
-                        <div class="action-wrap">
-                            <button class="act-btn edit btn-edit" title="Edit Row" style="cursor:pointer;" ><i class="fa fa-edit"></i></button>
-                            <button class="act-btn delete btn-delete btn-delete-row" title="Delete Row" style="cursor:pointer;"><i class="fa fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-        `);
-                          
-        $tbody.append($tr);
-
-        const $lastRow = $tbody.find('tr').last();
-        const recQtyInput = $lastRow.find('input[name="RecQty"]');
-        const plusMinusInput = $lastRow.find('input[name="PlusMinusQty"]');
-
-        if (i.WB_YN === "Yes") {
-
-            recQtyInput.prop("readonly", true);
-            plusMinusInput.prop("readonly", false);
-
-        }
-        else {
-
-            recQtyInput.prop("readonly", false);
-            plusMinusInput.prop("readonly", true);
-
-        }
-
-        const $itemDropdown = $lastRow.find('select[name="ItemName"]');
-        const $taxDropdown = $lastRow.find('select[name="TaxType"]');
-        const $departmentDropdown = $lastRow.find('.Department-dropdown');
-        const $BinDropdown = $lastRow.find('.bin-dropdown');
-        const $UnitDropdown = $lastRow.find('.Unit-dropdown');
-        const $MakeDropdown = $lastRow.find('.Make-dropdown');
-
-        loadItemDropdowngat($itemDropdown, i.ITEM_CODE || i.ITEM_NAME);
-        loadTaxTypeDropdowngat($taxDropdown, i.TaxType);
-        loadDepartmentDropdown($departmentDropdown, i.DEPT_CODE);
-        loadBinDropdown($BinDropdown, i.BinLocation);
-        loadUnitDropdown($UnitDropdown, i.UOM_CODE);
-        loadMakeDropdown($MakeDropdown, i.MAKE_CODE);
-        recalculateRow($lastRow);
-    });
-
-    //Delete row handler
-    $tbody.off('click', '.btn-delete').on('click', '.btn-delete', function () {
-        $(this).closest('tr').remove();
-        calculateTotalRecQty();
-    });
-
-    calculateTotalRecQty();
-}
-
-function loadItemDropdowngat($dropdown, selectedItem = "") {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetItemList',
-        method: 'GET',
-        success: function (data) {
-            $dropdown.empty();
-            $dropdown.append('<option value="">--Select Item--</option>');
-
-            const selectedValue = String(selectedItem).trim().toLowerCase();
-
-            $.each(data, function (index, item) {
-                const itemCode = String(item.code).trim().toLowerCase();
-                const itemName = String(item.name).trim().toLowerCase();
-
-                const isSelected = (selectedValue === itemCode || selectedValue === itemName) ? 'selected' : '';
-                $dropdown.append(`<option value="${item.code}" ${isSelected}>${item.name}</option>`);
-            });
-        },
-        error: function () {
-            showToast("Failed To load items", { type: "error" });
-        }
-    });
-}
-
-//=======Tax Tpe Dropdown Load Function=======
-function loadTaxTypeDropdowngat($dropdown, selectedType = "") {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetTaxTypeList',
-        method: 'GET',
-        success: function (data) {
-            $dropdown.empty();
-            $dropdown.append('<option value="">--Select Tax Type--</option>');
-            $.each(data, function (index, tax) {
-                let selected = tax.name == selectedType ? 'selected' : '';
-                $dropdown.append(`<option value="${tax.code}" ${selected}>${tax.name}</option>`);
-            });
-        },
-        error: function () {
-            showToast("Failed to load tax types", { type: "error" });
-        }
-    });
-}
-
-//======Load Data On Edit===========
-function GetallDatapurchase1purchase2purchase3(data) {
-
-    const purchase1 = data.purchase1;
-    const purchase2 = data.purchase2;
-    const purchase3 = data.purchase3;
-
-    if (purchase1 && purchase1.length > 0) {
-
-        const p1 = purchase1[0];
-
-        //==========================
-        // Simple Controls
-        //==========================
-
-        ddlDocType(function () {
-            $('#ddlDocType').val(p1.v_TYPE);
-        });
-
-        $('#NumDocNo').val(p1.v_NO);
-        $('#DtDocDate').val(formatDateForInput(p1.v_DATE));
-
-        ddlGateNo(p1.gatE_NO, p1.v_TYPE).done(function () {
-            $('#ddlGateNo').val(p1.gatE_NO).trigger('change.select2');
-        });
-
-        $('#txtAddLine1').val(p1.bilL_ADD1);
-        $('#txtAddLine2').val(p1.bilL_ADD2);
-        $('#txtAddLine3').val(p1.bilL_ADD3);
-
-        $('#txtShipAddLine1').val(p1.shiP_ADD1);
-        $('#txtShipAddLine2').val(p1.shiP_ADD2);
-        $('#txtShipAddLine3').val(p1.shiP_ADD3);
-
-        $('#txtPincode').val(p1.bilL_PINCODE);
-        $('#NumShipPincode').val(p1.shiP_PINCODE);
-
-        $('#txtGST').val(p1.bilL_GST);
-        $('#txtShipGST').val(p1.shiP_GST);
-
-        $('#txtBillNo').val(p1.bilL_NO);
-        $('#DtBillDate').val(formatDateForInput(p1.bilL_DATE));
-
-        $('#NumChallanNo').val(p1.chalL_NO);
-        $('#DtChallanDate').val(formatDateForInput(p1.chalL_DATE));
-
-        $('#TxtWaybillNo').val(p1.waybilL_NO);
-
-        $('#txtExchangeRate').val(p1.excH_RATE);
-        $('#txtNetAmount').val(p1.namount);
-
-        //==========================
-        // Totals
-        //==========================
-
-        $('#NumReceivedQty').val(p1.recD_QTY);
-        $('#NumBillQty').val(p1.bilL_QTY);
-        $('#NumAmount').val(p1.amount);
-        $('#NumPacking').val(p1.pacK_AMT);
-        $('#NumDiscount').val(p1.disC_AMT);
-        $('#NumCGST').val(p1.cgsT_AMT);
-        $('#NumSGST').val(p1.sgsT_AMT);
-        $('#NumIGST').val(p1.igsT_AMT);
-        $('#NumCESS').val(p1.cesS_AMT);
-        $('#NumVAT').val(p1.vaT_AMT);
-        $('#NumOtherAmt').val(p1.otH_AMT);
-        $('#NumSubTotal').val(p1.amount);
-        $('#NumRoundOff').val(p1.rounD_OFF);
-        $('#NumFinalNetAmt').val(p1.namount);
-        
-        //==========================
-        // Transport
-        //==========================
-
-        $('#TxtVehicleNo').val(p1.trucK_NO);
-        $('#TxtContainerNo').val(p1.containeR_NO);
-        $('#NumFreightPay').val(p1.frtpaY_AMT);
-        $('#NumFrtTax1').val(p1.frtpaY_TAXPER);
-        $('#NumFrtTax2').val(p1.frtpaY_TAX);
-        $('#txtFrtPayNarr').val(p1.frtpaY_NAR);
-        $('#NumGRNo').val(p1.gR_NO);
-        $('#DtGRDate').val(formatDateForInput(p1.gR_DATE));
-
-        $('#txtremarks').val(p1.remarks);
-
-        //ddlTransportName(function () {
-        //    $('#ddlTransportName').val(p1.transporT_CODE);
-        //});
-
-        ddlDocStatus(function () {
-            $('#ddlDocStatus').val(p1.status);
-        });
-
-        //==========================================================
-        // Sequential Loading (Race Condition Fixed)
-        //==========================================================
-
-        ddlBillFrom(function () {
-
-            $('#ddlBillFrom').val(p1.partY_CODE);
-
-            ddlShipDetails(function () {
-
-                $('#ddlShipFrom').val(p1.shiP_CODE);
-
-                BillDetailsddlAddLine1(p1.partY_CODE, function () {
-
-                    // Agar address dropdown ki value save hai to uncomment karo
-                    // $('#ddladdressBD1').val(p1.PARTY_ADDRESSID);
-
-                    ShipDetailsddlAddLine1(p1.shiP_CODE, function () {
-
-                        // Agar ship address dropdown ki value save hai to uncomment karo
-                        // $('#ddladdressSD1').val(p1.SHIP_ADDRESSID);
-
-                        GetddlCityBillDetails(function () {
-
-                            $('#ddlCity').val(p1.bilL_CITY);
-
-                            GetStateByCity(p1.bilL_CITY, '#ddlState', function () {
-
-                                $('#ddlShipCity').val(p1.shiP_CITY);
-
-                                GetStateByCity(p1.shiP_CITY, '#ddlShipState');
-                            });
-                        });
+            var requestData = response.report;
+            $.ajax({
+                url: "http://localhost:34087/Report/PendingQCReport",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(requestData),
+                xhrFields: {
+                    responseType: "blob"
+                },
+                success: function (pdf) {
+                    var file = new Blob([pdf], {
+                        type: "application/pdf"
                     });
-                });
-            });
-        });
-    }
-
-    //==========================
-    // Items & Attachments
-    //==========================
-
-    bindItemsdata(purchase2);
-    getdataImage(purchase3);
-}
-
-//=======Helper for Date=======
-function formatDateForInput(dateString) {
-    if (!dateString) return "";
-    const dateObj = new Date(dateString);
-    if (isNaN(dateObj)) return "";
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-//=======Bind Purchase2 Item Rows=======
-function bindItemsdata(items) {
-
-    const $tbody = $('#tblPurchaseReceiptIR tbody').empty();
-    items.forEach(i => {
-        const qty = i.recD_QTY ?? 0;
-        const rate = i.rate ?? 0;
-        const amount = qty * rate;
-
-        const $tr = $(`
-                <tr>
-                   <td style="display:none;">
-                        <input type="hidden" name="PackOnBasic" value="${i.PACK_ONBASIC ?? 0}" />
-                    </td>
-                    <td class="freeze-item">
-                        <select class="erppagetable-control erppagetabledynamic-table item-name-dropdown" name="ItemName"></select>
-                    </td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="HSNCode" value="${i.hsN_CODE || ''}" /></td>
-                    <td>
-                        <select class="erppagetable-control erppagetabledynamic-table Unit-dropdown"
-                                name="Unit"
-                                data-selected-value="${i.uoM_CODE || i.uoM_NAME}">
-                        </select>
-                    </td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="Nos" value="${i.nos ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="PlusMinusQty" value="${i.pluS_MINUSQTY ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="RecQty" value="${i.recD_QTY ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="BillQty" value="${i.bilL_QTY ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="USDRate" value="${i.usD_RATE ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="ExRate" value="${i.excH_RATE ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="Rate" value="${i.rate ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="Amount" value="${amount}" /></td>
-                    <td>
-                        <select class="erppagetable-control erppagetabledynamic-table EmptyYN-dropdown" name="EmptyYN">
-                            <option value="">--Select--</option>
-                            <option value="Yes" ${i.emptY_YN === 'Yes' ? 'selected' : ''}>Yes</option>
-                            <option value="No" ${i.emptY_YN === 'No' ? 'selected' : ''}>No</option>
-                        </select>
-                    </td>
-                    <td><input name="WBQty" class="erppagetable-control erppagetabledynamic-table" style="width: 100PX;" value="${i.wB_QTY ?? 0}" /></td>
-
-                    <td><select class="erppagetable-control erppagetabledynamic-table TaxType-dropdown" name="TaxType"></select></td>
-
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="PackPer" value="${i.pacK_PER ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="PackAmt" value="${i.pacK_AMT ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="DiscPer" value="${i.disC_PER ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="DiscAmt" value="${i.disC_AMT ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="CGSTPer" value="${i.cgsT_PER ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="CGSTAmt" value="${i.cgsT_AMT ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="SGSTPer" value="${i.sgsT_PER ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="SGSTAmt" value="${i.sgsT_AMT ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="IGSTPer" value="${i.igsT_PER ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="IGSTAmt" value="${i.igsT_AMT ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="CESSPer" value="${i.cesS_PER ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="CESSAmt" value="${i.cesS_AMT ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="VATPer" value="${i.vaT_PER ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="VATAmt" value="${i.vaT_AMT ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="OthAmt" value="${i.otH_AMT ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="NetAmt" value="${i.neT_AMT ?? amount}" /></td>
-
-                    <td>
-                        <select class="erppagetable-control erppagetabledynamic-table Make-dropdown"
-                                name="Make"
-                                data-selected-value="${i.makE_CODE ?? ''}">
-                        </select>
-                    </td>
-
-                    <td>
-                        <select class="erppagetable-control erppagetabledynamic-table Department-dropdown"
-                                name="Department"
-                                data-selected-value="${i.depT_CODE ?? ''}">
-                        </select>
-                    </td>
-                    
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="Remarks" value="${i.remarks || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="LDRate" value="${i.lanD_RATE ?? 0}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="LDAmt" value="${i.lanD_AMT ?? 0}" /></td>
-                     <td>
-                        <select class="erppagetable-control erppagetabledynamic-table bin-dropdown"
-                                name="BinLocation"
-                                data-selected-value="${i.biN_LOCATION ?? ''}">
-                        </select>
-                    </td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="POType" value="${i.pO_TYPE || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="PONo" value="${i.pO_NO || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="KantaType" value="${i.kantA_TYPE || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="KantaNo" value="${i.kantA_NO || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="ReqType" value="${i.reQ_TYPE || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="ReqNo" value="${i.reQ_NO || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="GateType" value="${i.gatE_TYPE || ''}" /></td>
-                    <td><input class="erppagetable-control erppagetabledynamic-table" name="GateNo" value="${i.doC_ID || ''}" /></td>
-                    <td class="action-col">
-                        <div class="action-wrap">
-                            <button type="button" class="act-btn edit btn-edit"><i class="fa fa-edit"></i></button>
-                            <button type="button" class="act-btn delete btn-delete btn-delete-row"><i class="fa fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-        `);
-        $tbody.append($tr);
-        let $lastRow = $tbody.find('tr').last();
-        let $itemDropdown = $lastRow.find('select[name="ItemName"]');
-        let $taxDropdown = $lastRow.find('select[name="TaxType"]');
-        let $departmentDropdown = $lastRow.find('.Department-dropdown');
-        let $BinDropdown = $lastRow.find('.bin-dropdown');
-        let $UnitDropdown = $lastRow.find('.Unit-dropdown');
-        let $MakeDropdown = $lastRow.find('.Make-dropdown');
-
-        loadItemDropdowngat($itemDropdown, i.iteM_CODE);
-        loadTaxTypeDropdowngatCode($taxDropdown, i.taX_CODE);
-        loadDepartmentDropdown($departmentDropdown, i.depT_CODE);
-        loadBinDropdown($BinDropdown, i.biN_LOCATION);
-        loadUnitDropdown($UnitDropdown, i.uoM_CODE);
-        loadMakeDropdown($MakeDropdown, i.makE_CODE);
-    });
-
-    $tbody.off('click', '.btn-delete').on('click', '.btn-delete', function () {
-        $(this).closest('tr').remove();
-    });
-
-}
-
-function loadTaxTypeDropdowngatCode($dropdown, selectedType = "") {
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetTaxTypeList',
-        method: 'GET',
-        success: function (data) {
-            $dropdown.empty();
-            $dropdown.append('<option value="">--Select Tax Type--</option>');
-            $.each(data, function (index, tax) {
-                let selected = String(tax.code) === String(selectedType) ? 'selected' : '';
-                $dropdown.append(`<option value="${tax.code}" ${selected}>${tax.name}</option>`);
+                    var url = window.URL.createObjectURL(file);
+                    window.open(url, "_blank");
+                },
+                error: function (xhr) {
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        alert(reader.result);
+                    };
+                    reader.readAsText(xhr.response);
+                }
             });
         },
-        error: function () {
-            console.error('Failed to load tax types.');
+        error: function (xhr) {
+            alert("Error occurred.");
         }
     });
 }
+function makePageReadOnly() {
+    // Textbox
+    $("input[type='text']").prop("readonly", true);
+    $("input[type='number']").prop("readonly", true);
+    $("input[type='date']").prop("readonly", true);
+    $("input[type='email']").prop("readonly", true);
+    // Textarea
+    $("textarea").prop("readonly", true);
+    // Dropdown
+    $("select").prop("disabled", true);
+    // Checkbox & Radio
+    $("input[type='checkbox']").prop("disabled", true);
+    $("input[type='radio']").prop("disabled", true);
+    // Select2
+    $(".select2").prop("disabled", true).trigger("change");
 
-//================= Attachment Data Bind =====================
+    $(".select2-selection").css({
+        "pointer-events": "none",
+        "background": "#f5f5f5"
+    });
+    // Datepicker
+    $(".datepicker").datepicker("disable");
+    // Item Grid
+    $("#tblItemRecordPO input").prop("readonly", true);
+    $("#tblItemRecordPO select").prop("disabled", true);
+    $("#tblItemRecordPO button").hide();
+    // Tax Grid
+    $("#tblTaxRecord input").prop("readonly", true);
+    $("#tblTaxRecord select").prop("disabled", true);
+    $("#tblTaxRecord button").hide();
+    // Attachment Grid
+    $("#tblAttachmentPRE input").prop("readonly", true);
+    $("#tblAttachmentPRE select").prop("disabled", true);
+    $("#tblAttachmentPRE button").hide();
+    // Hide Buttons
+    $("#btnSave").hide();
+    $("#btnDelete").hide();
+    $("#btnSubmit").hide();
+    $("#btnAdd").hide();
+
+    $(".btn-save").hide();
+    $(".btn-delete").hide();
+    $(".btn-edit").hide();
+    $(".btn-add").hide();
+    $(".btn-remove").hide();
+    // Remove onclick events
+    $("#btnSave").removeAttr("onclick");
+    $("#btnDelete").removeAttr("onclick");
+    $("#btnAdd").removeAttr("onclick");
+    $("#btnSubmit").removeAttr("onclick");
+
+    // Grid buttons
+    $("#tblItemRecordPO .btn-delete").removeAttr("onclick");
+    $("#tblItemRecordPO .btn-edit").removeAttr("onclick");
+    $("#tblItemRecordPO .btn-add").removeAttr("onclick");
+
+}
+
+//------------------------------------------------Images Start Block-----------------------------------
 function getdataImage(Imagedata) {
+
     const $list = $('#fileList');
     $list.empty();
 
@@ -2320,7 +2385,7 @@ function getdataImage(Imagedata) {
 
     if (!Array.isArray(Imagedata) || Imagedata.length === 0)
         return;
-    
+
     Imagedata.forEach(item => {
 
         const fileName = item.filE_NAME || "File";
@@ -2329,12 +2394,13 @@ function getdataImage(Imagedata) {
 
         if (!base64) return;
 
+        // Save for Update
         rowsAttachment.push({
             FileName: fileName,
-            IMG_FILE: base64,
-            FILE_NAME: fileName,
-            FILE_TYPE: mimeType
+            FileContentBase64: base64,
+            FileType: mimeType
         });
+
         const dataUrl = `data:${mimeType};base64,${base64}`;
 
         const html = `
@@ -2362,13 +2428,13 @@ function getdataImage(Imagedata) {
                             data-type="${mimeType}">
                         <i class="fa fa-eye"></i>
                     </button>
-                
+
                     <button type="button"
                             class="erp-btn delete btn-delete-attachment"
                             data-filename="${fileName}">
                         <i class="fa fa-trash"></i>
                     </button>
-                
+
                 </div>
 
             </div>
@@ -2378,45 +2444,6 @@ function getdataImage(Imagedata) {
 
     });
 }
-
-//================================================================
-//        ReadOnly Mode
-//================================================================
-function setFormReadOnly() {
-
-    $('#PurchaseReceiptEntryForm').find('input:not([type=button]):not([type=submit]):not([type=hidden])').prop('readonly', true);
-
-    $('#PurchaseReceiptEntryForm').find('select, textarea').prop('disabled', true);
-
-    $('#customToggle').css('pointer-events', 'none');
-
-    $('#btn-save').hide();
-    $('#btnShowProductionBatch').hide();
-
-    $('#tblPurchaseReceiptIR tbody').find('input:not([type=button])').prop('readonly', true);
-
-    $('#tblPurchaseReceiptIR tbody').find('select, textarea').prop('disabled', true);
-
-    $('#tblPurchaseReceiptIR .btn-edit').hide();
-    $('#tblPurchaseReceiptIR .btn-delete').hide();
-    $('#tblPurchaseReceiptIR .btn-delete-row').hide();
-
-    $('.btn-add-row').hide();
-
-    $('#tblPurchaseReceiptIR tbody').css('pointer-events', 'none');
-
-    $('.erppage-btn-print').show();       
-    $('.erppage-btn-common').show();      
-    $('.erppage-header-back').show();     
-    $('#btnCreateIntimation').show();     
-}
-
-//=====helper function for decimal ============
-function fmt(val) {
-    const num = parseFloat(val);
-    return isNaN(num) ? "0.00" : num.toFixed(2);
-}
-
 function getMimeType(fileName) {
 
     const ext = fileName?.split('.').pop()?.toLowerCase();
@@ -2426,530 +2453,25 @@ function getMimeType(fileName) {
         case 'jpg':
         case 'jpeg':
             return 'image/jpeg';
-        
+
         case 'png':
             return 'image/png';
 
         case 'gif':
             return 'image/gif';
-                     
+
         case 'bmp':
             return 'image/bmp';
-        
+
         case 'webp':
             return 'image/webp';
 
         case 'pdf':
             return 'application/pdf';
-               
+
         default:
             return 'application/octet-stream';
     }
 }
 
-//================================================================
-//        Foam Validation
-//================================================================
-function validateDataForPRMRN() {
-
-    const docNo = parseInt($('#NumDocNo').val()) || 0;
-    const qty = parseFloat($('#txtQty').val()) || 0;
-    const billNo = $('#txtBillNo').val().trim();
-    const billDate = $('#DtBillDate').val().trim();
-    const DocDate = $('#DtDocDate').val();
-    const challanNo = $('#NumChallanNo').val().trim();
-    const challanDate = $('#DtChallanDate').val().trim();
-    const recQty = parseFloat(row.find('input[name="RecQty"]').val()) || 0;
-    const plusMinusQty = parseFloat(row.find('input[name="PlusMinusQty"]').val()) || 0;
-    const wbQty = parseFloat(row.find('input[name="WBQty"]').val()) || 0;
-    const returnType = $('#ddlReturnType').val(); 
-    const amount = parseFloat(row.find('input[name="Amount"]').val()) || 0;
-    const itemName = row.find('select[name="ItemName"] option:selected').text();
-    const taxCode = row.find('.TaxType-dropdown').val();
-    const poType = row.find('input[name="POType"]').val();
-
-    if (!validateRequiredField('#ddlDocType', 'Doc Type')) return;
-    if (!validateRequiredField('#ddlBillFrom', 'Bill From')) return;
-    if (!validateRequiredField('#txtBillNo', 'Bill No')) return;
-    if (!validateRequiredField('#ddlCity', 'Bill City')) return;
-    if (!validateRequiredField('#ddlShipCity', 'Ship City')) return;
-    
-    if (docNo <= 0) {
-        setInvalid($('#NumDocNo'), "Invalid Voucher No. Record not saved.");
-        return false;
-    }
-
-    if (qty <= 0) {
-        setInvalid($('#txtQty'), "Quantity should be greater than zero.");
-        return false;
-    }
-
-    if (billNo !== "" && billDate === "") {
-        setInvalid($('#dtpBillDate'), "Bill date not entered.");
-        return false;
-    }
-
-    if (billDate !== "" && new Date(billDate) > new Date(DocDate)) {
-        setInvalid($('#dtpBillDate'), "Bill date can not be greater than Voucher date.");
-        return false;
-    }
-
-    if (challanNo !== "" && challanDate === "") {
-        setInvalid($('#dtpChallanDate'), "Challan date not entered.");
-        return false;
-    }
-
-    if (challanDate !== "" && new Date(challanDate) > new Date(DocDate)) {
-        setInvalid($('#dtpChallanDate'), "Challan date can not be greater than Voucher date.");
-        return false;
-    }
-
-    // ============================
-    // RCPT WB Qty vs Received Qty Validation
-    // ============================
-    if ($('#ddlDocType').val() === "RCPT") {
-
-        let totalWBQty = 0;
-        let totalRecQty = 0;
-
-        $('#tblPurchaseReceiptIR tbody tr').each(function () {
-
-            const itemCode = $(this).find('.item-name-dropdown').val();
-            if (!itemCode) return;
-
-            const wbQty = parseFloat($(this).find('.WBQty').val()) || 0;
-            const recQty = parseFloat($(this).find('.RecQty').val()) || 0;
-
-            totalWBQty += wbQty;
-            totalRecQty += recQty;
-        });
-
-        if (totalWBQty !== totalRecQty) {
-            showToast("Please check, Received Qty and WB Qty Not Matched in totality", { type: "error" });
-            return false;
-        }
-    }
-
-    const rows = $('#tblPurchaseReceiptIR tbody tr');
-
-    for (let i = 0; i < rows.length; i++) {
-
-        const row = $(rows[i]);
-
-        const itemName = row.find('select[name="ItemName"] option:selected').text().trim();
-        const itemCode = parseInt(row.find('input[name="Code"]').val()) || 0;
-
-        if (itemName !== "Select" && itemName !== "" && itemCode === 0) {
-            showToast("Item code not valid.", { type: "error" });
-            row.find('select[name="ItemName"]').focus();
-            return false;
-        }
-    }
-
-    if (recQty === 0) {
-        showToast("Received Qty is 0.", { type: "warning" });
-        row.find('input[name="RecQty"]').focus();
-    }
-
-    if (wbQty === 0 && plusMinusQty !== 0 && returnType !== "Return") {
-        showToast("+/- Qty is not valid if WB Qty is 0.", { type: "error" });
-        row.find('input[name="WBQty"]').focus();
-        return false;
-    }
-
-    if (amount === 0) {
-        showToast("Amount must not be 0.", { type: "error" });
-        row.find('input[name="Amount"]').focus();
-        return false;
-    }
-
-    if (poType === "PAUD") {
-        showToast(`Kindly make PO of Item => ${itemName}`, { type: "error" });
-        row.find('input[name="POType"]').focus();
-        return false;
-    }
-
-    if (!taxCode || taxCode === "0") {
-        showToast("Tax Type not selected.", { type: "error" });
-        return false;
-    }
-
-    if (docType === "SRPU" && poType !== "PORD") {
-        showToast("Please Select correct Order/Gate No.", { type: "error" });
-        row.find('input[name="POType"]').focus();
-        return false;
-    }
-    
-    if (docType === "SRJW" && poType !== "JORD") {
-        showToast("Please Select correct Order/Gate No.", { type: "error" });
-        row.find('input[name="POType"]').focus();
-        return false;
-    }
-
-}
-
-//============Copy From Code==============
-function GetDocTypeCopyFrom() {
-
-    $.ajax({
-        url: '/ImportExportExpensesEntry/GetDocTypeCopyFrom',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            console.log("Copy Data", data);
-            const $menu = $('#copyFromMenu');
-            $menu.empty();
-
-            $.each(data, function (index, item) {
-
-                $menu.append(`
-                    <li>
-                        <a class="dropdown-item erppagedropdown-item copy-from-item"
-                           href="#"
-                           data-vtype="${item.value}">
-                            ${item.text}
-                        </a>
-                    </li>
-                `);
-
-            });
-
-        },
-        error: function () {
-            showToast("Unable To Load Copy From Documents", { type: "error" });
-        }
-    });
-}
-
-function loadCopyFrom(vType, receiptType, partyCode) {
-
-    const currentVNo = $('#NumDocNo').val(); 
-    
-    $.ajax({
-
-        url: '/ImportExportExpensesEntry/GetCopyFromData',
-        type: 'Get',
-        data: {
-            vType: vType, receiptType: receiptType, partyCode: partyCode, currentVNo: currentVNo
-        },
-        success: function (data) {
-
-            const tbody = $('#tblPurchaseRequest tbody');
-            tbody.empty();
-
-            $.each(data, function (index, item) {
-
-                tbody.append(`
-                    <tr>
-                        <td><input type="checkbox" class="copyRow"></td>
-
-                        <td>${item.vNo}</td>
-                        <td>${item.vType}</td>
-                        <td>${item.vDate}</td>
-                        <td>${item.itemCode}</td>
-                        <td>${item.itemName}</td>     
-                        <td>${item.unit}</td>
-                        <td>${item.nos}</td>
-                        <td>${item.qty}</td>
-                        <td>${item.balQty}</td>
-                        <td>${item.rate}</td>
-                        <td>${item.taxType}</td>
-                        <td>${item.packPer}</td>
-                        <td>${item.discPer}</td>
-                        <td>${item.cgstPer}</td>
-                        <td>${item.sgstPer}</td>
-                        <td>${item.igstPer}</td>
-                        <td>${item.cessPer}</td>
-                        <td>${item.cessAmt}</td>
-                        <td>${item.vatPer}</td>
-                        <td>${item.othAmt}</td>
-                        <td>${item.make}</td>
-                        <td>${item.department}</td>
-                        <td>${item.remarks}</td>
-                        <td>${item.reqType}</td>
-                        <td>${item.reqNo}</td>
-
-                        <td class="hidden-col">${item.uCode}</td>
-                        <td class="hidden-col">${item.makeCode}</td>
-                        <td class="hidden-col">${item.taxCode}</td>
-                        <td class="hidden-col">${item.deptCode}</td>
-
-                        <td class="hidden-col"></td>
-                    </tr>
-                `)
-
-            });
-
-            $('#copyFromModal').modal('show');
-        },
-        error: function () {
-            showToast("Unable to load Copy From data.", { type: "error" });
-        }
-
-    }); 
-}
-
-//========================
-// Reports 
-//========================
-function PendingReport() {
-
-    var reportName = "m_r_note";
-     
-    var SelForMul =
-        "{PURCHASE1.V_TYPE}='" + $("#ddlDocType").val() + "'" +
-        " AND {PURCHASE1.V_NO}= " + $("#NumDocNo").val() +
-        " AND {PURCHASE1.COMP_CODE}= " + window.globalVariables.compCode +
-        " AND {PURCHASE1.BRANCH_CODE}= " + window.globalVariables.branchCode +
-        " AND {PURCHASE1.YEAR_CODE}= " + window.globalVariables.yearCode;
-    var formulaFields = {
-        Reportname: reportName,
-        selectionFormula: SelForMul,
-        Database: window.database.db,
-        Parameters: {
-            comp_name: window.globalVariables.companyName,
-            comp_add1: window.globalVariables.add1,
-            comp_add2: window.globalVariables.add2,
-            RPTNAME: "MATERIAL RECEIPT NOTE"
-        }
-    };
-
-    var now = new Date();
-    var day = String(now.getDate()).padStart(2, '0');
-    var month = String(now.getMonth() + 1).padStart(2, '0');
-    var year = String(now.getFullYear()).slice(-2);
-    var hours = String(now.getHours()).padStart(2, '0');
-    var minutes = String(now.getMinutes()).padStart(2, '0');
-    var seconds = String(now.getSeconds()).padStart(2, '0');
-    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
-
-    $.ajax({
-        url: 'http://localhost:34089/Report/PendingQCReport',
-        type: 'POST',
-        data: JSON.stringify(formulaFields),
-        contentType: "application/json",
-        xhrFields: {
-            responseType: 'blob'
-        },
-        success: function (response) {
-            var file = new Blob([response], { type: 'application/pdf' });
-            var fileName = `${reportName}_${timestamp}.pdf`;
-
-            var link = document.createElement('a');
-            link.href = URL.createObjectURL(file);
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        },
-        error: function (xhr, status, error) {
-            console.error('Error generating report:', error);
-        }
-    });
-}
-
-async function checkIntimation() {
-    try {
-        const mrnType = $('#ddlDocType').val();
-        const mrnNo = $('#NumDocNo').val();
-
-        const url = `/ImportExportExpensesEntry/CheckIntimation?mrnType=${encodeURIComponent(mrnType)}&mrnNo=${encodeURIComponent(mrnNo)}`;
-
-        const response = await fetch(url);
-
-        const result = await response.json();
-
-        if (!result.status) {
-            showToast(result.message, { type: "warning" });
-            return false;
-        }
-
-        return true;
-
-    } catch (error) {
-        console.error(error);
-        showToast("Unable to verify Intimation.", { type: "error" });
-        return false;
-    }
-}
-
-async function PrintIntimation() {
-
-    const isValid = await checkIntimation();
-    if (!isValid) return;
-
-    var reportName = "INTIMATION";
-
-    var SelForMul =
-        "{INTIMATION.MRN_TYPE}='" + $("#ddlDocType").val() + "'" +
-        " AND {INTIMATION.V_TYPE}='INTI'" +
-        " AND {INTIMATION.MRN_NO}= " + $("#NumDocNo").val() +
-        " AND {INTIMATION.COMP_CODE}= " + window.globalVariables.compCode +
-        " AND {INTIMATION.BRANCH_CODE}= " + window.globalVariables.branchCode +
-        " AND {INTIMATION.YEAR_CODE}= " + window.globalVariables.yearCode;
-    var formulaFields = {
-        Reportname: reportName,
-        selectionFormula: SelForMul,
-        Database: window.database.db,
-        Parameters: {
-            comp_name: window.globalVariables.companyName,
-            comp_add1: window.globalVariables.add1,
-            comp_add2: window.globalVariables.add2,
-            RPTNAME: "MATERIAL INTIMATION NOTE"
-        }
-    };
-
-    var now = new Date();
-    var day = String(now.getDate()).padStart(2, '0');
-    var month = String(now.getMonth() + 1).padStart(2, '0');
-    var year = String(now.getFullYear()).slice(-2);
-    var hours = String(now.getHours()).padStart(2, '0');
-    var minutes = String(now.getMinutes()).padStart(2, '0');
-    var seconds = String(now.getSeconds()).padStart(2, '0');
-    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
-
-    $.ajax({
-        url: 'http://localhost:34089/Report/PendingQCReport',
-        type: 'POST',
-        data: JSON.stringify(formulaFields),
-        contentType: "application/json",
-        xhrFields: {
-            responseType: 'blob'
-        },
-        success: function (response) {
-            var file = new Blob([response], { type: 'application/pdf' });
-            var fileName = `${reportName}_${timestamp}.pdf`;
-
-            var link = document.createElement('a');
-            link.href = URL.createObjectURL(file);
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        },
-        error: function (xhr, status, error) {
-            console.error('Error generating report:', error);
-        }
-    });
-}
-
-async function updatePendingGateIn() {
-
-    try {
-
-        const response = await fetch('/ImportExportExpensesEntry/UpdatePendingGateIn', {
-            method: 'POST'
-        });
-
-        const result = await response.json();
-
-        if (!result.status) {
-            showToast(result.message, { type: "error" });
-            return false;
-        }
-
-        return true;
-
-    } catch (error) {
-        console.error(error);
-        showToast("Unable to update Pending Gate In.", { type: "error" });
-        return false;
-    }
-}
-
-async function PendingGateReport() {
-
-    const updated = await updatePendingGateIn();
-    if (!updated) return;
-
-    var reportName = "gatepass2";
-
-    var SelForMul =
-        "{GATE1.COMP_CODE}=" + window.globalVariables.compCode +
-        " AND {GATE1.BRANCH_CODE}=" + window.globalVariables.branchCode +
-        " AND {GATE1.YEAR_CODE}=" + window.globalVariables.yearCode +
-        " AND {GATE2.MRN_NO}=0" +
-        " AND {DOCTYPE_MAST.DOCTYPE}='GateInward'" +
-        " AND ({GATE1.V_TYPE}='INRM' OR {GATE1.V_TYPE}='INST' OR {GATE1.V_TYPE}='INFU')";
-    
-    var formulaFields = {
-        Reportname: reportName,
-        selectionFormula: SelForMul,
-        Database: window.database.db,
-        Parameters: {
-            comp_name: window.globalVariables.companyName,
-            comp_add1: window.globalVariables.add1,
-            comp_add2: window.globalVariables.add2,
-            RPTNAME: "Pending Gate Inward for MRN"
-        }
-    };
-
-    var now = new Date();
-    var day = String(now.getDate()).padStart(2, '0');
-    var month = String(now.getMonth() + 1).padStart(2, '0');
-    var year = String(now.getFullYear()).slice(-2);
-    var hours = String(now.getHours()).padStart(2, '0');
-    var minutes = String(now.getMinutes()).padStart(2, '0');
-    var seconds = String(now.getSeconds()).padStart(2, '0');
-    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
-
-    $.ajax({
-        url: 'http://localhost:34089/Report/PendingQCReport',
-        type: 'POST',
-        data: JSON.stringify(formulaFields),
-        contentType: "application/json",
-        xhrFields: {
-            responseType: 'blob'
-        },
-        success: function (response) {
-            var file = new Blob([response], { type: 'application/pdf' });
-            var fileName = `${reportName}_${timestamp}.pdf`;
-
-            var link = document.createElement('a');
-            link.href = URL.createObjectURL(file);
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        },
-        error: function (xhr, status, error) {
-            console.error('Error generating report:', error);
-        }
-    });
-}
-
-//===============================
-//  Check validate Date
-//===============================
-async function checkValidDate() {
-
-    const data = {
-        vdate: $("#DtDocDate").val(),
-        vtype: $("#ddlDocType").val(),
-        vno: $("#NumDocNo").val()
-    };
-
-    try {
-
-        const response = await fetch('/ImportExportExpensesEntry/CheckValidDate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        const result = await response.json();
-
-        if (result.status === false) {
-            showToast(result.message, { type: "warning" });
-            return false;
-        }
-        return true;
-
-    } catch (error) {
-        console.error(error);
-        showToast("Date validation failed", { type: "error" });
-        return false;
-    }
-}
-
+//------------------------------------------------Images End Block-----------------------------------

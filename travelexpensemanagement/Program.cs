@@ -16,8 +16,8 @@
     // ADD THESE (Repository)
     using travelexpensemanagement.Repositories.Interfaces;
     using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
-using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
-using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
+    using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
+    using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
     using travelexpensemanagement.Services;
     
 
@@ -63,6 +63,7 @@ using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
     //Weighbridge Transaction repositories
     //Purchase
     builder.Services.AddScoped<IPurchaseReturnEntryRepository, PurchaseReturnEntryRepository>();
+    builder.Services.AddScoped<IPendingSaudaOrderRepository, PendingSaudaOrderRepository>();
     //Purchase
 
     builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
@@ -117,12 +118,9 @@ using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 
     app.UseHttpsRedirection();
     app.UseStaticFiles();
-
     app.UseRouting();
-
     app.UseSession();
     app.UseRateLimiter();
-
     app.UseMiddleware<SessionTimeoutMiddleware>();
 
     app.UseAuthorization();

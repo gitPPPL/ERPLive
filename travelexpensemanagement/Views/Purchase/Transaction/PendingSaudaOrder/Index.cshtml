@@ -1,0 +1,446 @@
+﻿@{
+    ViewBag.Title = "Pending Sauda Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-hourglass-half"></i>
+        </div>
+        <div class="erppage-header-title">Pending Sauda Order</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PendingSaudaOrderList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="PendingSaudaOrderForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppagesrow">
+                <div class="erppagescol-3">
+                    <div class="erppage-grid1">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Doc Type</label>
+                            <select class="erppage-input erppage-select" id="ddlDocType">
+                                <option value="">Select Doc Type</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="erppage-grid1">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Doc Date</label>
+                            <input type="date" class="erppage-input" id="DtDocDate">
+                        </div>
+                    </div>
+                    <div class="erppage-grid1">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Doc No</label>
+                            <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No">
+                        </div>
+                    </div>
+                    <div class="erppage-grid1">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Tot. Records:</label>
+                            <input type="number" class="erppage-input" id="Numtotalrecords">
+                        </div>
+                    </div>
+                </div>
+                <div class="erppagescol-9">
+                    <fieldset class="erppagefieldset mt-0">
+                        <legend class="erppagefieldset-legend">Filter By</legend>
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Type</label>
+                                <select class="erppage-input erppage-select" id="ddlType">
+                                    <option value="">Select Type</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Source</label>
+                                <select class="erppage-input erppage-select" id="ddlSource">
+                                    <option value="">-- Select Source --</option>
+                                    <option value="D">Domestic</option>
+                                    <option value="IE">Imported/Exported</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Status</label>
+                                <select class="erppage-input erppage-select" id="ddlStatus">
+                                    <option value="">Select Status</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">From</label>
+                                <input type="date" class="erppage-input" id="DtFrom">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">To</label>
+                                <input type="date" class="erppage-input" id="DtTo">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Item Search</label>
+                                <input type="text" class="erppage-input" id="txtitemsearch">
+                            </div>
+                        </div>
+                        <div class="erppage-internalaction">
+                            <button type="button" id="btnLoad" class="erppage-btn erppage-btn-common-active-disabled">
+                                <i class="fa fa-download"></i>
+                                <span>Load</span>
+                            </button>
+                        </div>
+                    </fieldset>
+                </div>
+                <fieldset class="erppage-fieldset mt-2">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblPendingSaudaOrder" class="excel-table fixed-grid-table table-width resizable-table">
+                            <colgroup>
+                                <col class="hidden-col">
+                                <col style="width:40px;">
+                                <col style="width:90px;">
+                                <col style="width: 86px;">
+                                <col style="width:100px;">
+                                <col style="width: 186px;">
+                                <col style="width: 182px;">
+                                <col style="width: 71px;">
+                                <col style="width: 52px;">
+                                <col style="width: 91px;">
+                                <col style="width:100px;">
+                                <col style="width: 86px;">
+                                <col style="width: 133px;">
+                                <col style="width: 64px;">
+                                <col style="width: 128px;">
+                                <col style="width: 90px;">
+                                <col style="width: 97px;">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="hidden-col">Code</th>
+                                    <th><input class="erppage-checkbox-input" type="checkbox" /></th>
+                                    <th>Ref Type</th>
+                                    <th>Ref No</th>
+                                    <th>Ref Date</th>
+                                    <th>Party Name</th>
+                                    <th>Item Name</th>
+                                    <th>Quantity</th>
+                                    <th>Rate</th>
+                                    <th>Adj Quantity</th>
+                                    <th>Bal Quantity</th>
+                                    <th>Remarks</th>
+                                    <th>Add Sauda Quantity</th>
+                                    <th>Status</th>
+                                    <th>Reason For Close</th>
+                                    <th>Validity Date</th>
+                                    <th>Delivery Date</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </fieldset>
+                <div class="erppage-container">
+                    <div class="erppage-actions">
+                        <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var statusList = [];
+    $(document).ready(function () {
+        const currentDate = new Date().toISOString().split('T')[0];
+        $('#DtDocDate').val(currentDate);
+        $('#DtFrom').val(currentDate);
+        $('#DtTo').val(currentDate);
+
+        ddlDocType();
+        bindStatus();
+        $('#ddlDocType').on('change', function () {
+            docNumber();
+            FilterbindType();
+        });
+        $(document).on("click", "#btnLoad", function () {
+            loadPendingData();
+        });
+        // Search Item
+        $("#txtitemsearch").on("keyup", function () {
+            var value = $(this).val().toLowerCase().trim();
+            $("#tblPendingSaudaOrder tbody tr").each(function () {
+                var refNo = $(this).find(".refNo").text().toLowerCase().trim();
+                var party = $(this).find(".party").text().toLowerCase();
+                var item = $(this).find(".item").text().toLowerCase();
+                if (party.includes(value) || item.includes(value)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+            $("#Numtotalrecords").val($("#tblPendingSaudaOrder tbody tr:visible").length);
+        });
+        $(document).on("click", "#btn-save", function () {
+            saveData();
+        });
+    });
+    function docNumber() {
+        $.ajax({
+            url: '/PendingSaudaOrder/GetdocNumber',
+            type: 'GET',
+            data: {
+                vType: $('#ddlDocType').val()
+            },
+            success: function (response) {
+
+                if (response.success) {
+                    $('#NumDocNo').val(response.nextVNo).prop('readonly', true);
+                }
+                else {
+                    alert(response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+                alert("Unable to generate Doc Number");
+            }
+        });
+
+    }
+    function ddlDocType(callback) {
+        $.ajax({
+            url: '/PendingSaudaOrder/GetddlDocType',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const ddl = $('#ddlDocType');
+                ddl.empty().append('<option value="">-- Select Doc Type --</option>');
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+                if (typeof callback === "function") callback();
+            },
+            error: function (xhr) {
+                console.error("Error loading ddlDocType:", xhr.responseText);
+            }
+        });
+    }
+    function FilterbindType() {
+        $.ajax({
+            url: '/PendingSaudaOrder/GetfilterType',
+            type: 'GET',
+            data: {
+                vType: $('#ddlDocType').val()
+            },
+            success: function (data) {
+                let ddl = $('#ddlType');
+                ddl.empty();
+                ddl.append('<option value="">--Select Type--</option>');
+                $.each(data, function (i, item) {
+                    ddl.append('<option value="' + item.value + '">' + item.text + '</option>');
+
+                });
+            }
+        });
+    }
+    function bindStatus() {
+        $.ajax({
+            url: '/PendingSaudaOrder/GetStatus',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+
+                statusList = data;   // Store for Grid
+
+                const ddl = $('#ddlStatus');
+                ddl.empty();
+                ddl.append('<option value="">-- Select Status --</option>');
+
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.value}">${item.text}</option>`);
+                });
+            },
+            error: function (xhr) {
+                console.error("Error loading Status:", xhr.responseText);
+            }
+        });
+    }
+    function getStatusDropdown(selectedStatus) {
+
+        var html = "<select class='form-control status'>";
+
+        $.each(statusList, function (i, item) {
+
+            var selected = "";
+
+            if ((selectedStatus ?? "").toString() === item.value.toString()) {
+                selected = "selected";
+            }
+
+            html += "<option value='" + item.value + "' " + selected + ">";
+            html += item.text;
+            html += "</option>";
+        });
+
+        html += "</select>";
+
+        return html;
+    }
+
+    function loadPendingData() {
+        $.ajax({
+            url: "/PendingSaudaOrder/GetPendingData",
+            type: "GET",
+            data: {
+                vType: $("#ddlDocType").val(),
+                refType: $("#ddlType").val(),
+                status: $("#ddlStatus").val(),
+                source: $("#ddlSource").val(),
+                fromDate: $("#DtFrom").val(),
+                toDate: $("#DtTo").val()
+            },
+            success: function (response) {
+
+                var tbody = $("#tblPendingSaudaOrder tbody");
+                tbody.empty();
+                console.log('kks',response)
+                if (response.length == 0) {
+                    $("#Numtotalrecords").val(0);
+                    return;
+                }
+
+                $.each(response, function (i, item) {
+
+                    var row = "";
+
+                    row += "<tr>";
+
+                    // Hidden Data
+                    row += "<td class='partyCode d-none'>" + (item.partyCode || 0) + "</td>";
+                    row += "<td class='itemCode d-none'>" + (item.itemCode || 0) + "</td>";
+
+                    row += "<td class='hidden-col'>" + (item.code || "") + "</td>";
+
+                    // Checkbox
+                    row += "<td><input type='checkbox' class='chkSelect'></td>";
+
+                    row += "<td class='refType'>" + (item.refType || "") + "</td>";
+                    row += "<td class='refNo'>" + (item.refNo || "") + "</td>";
+                    row += "<td class='refDate'>" + (item.refDate || "") + "</td>";
+                    row += "<td class='party'>" + (item.party || "") + "</td>";
+                    row += "<td class='item'>" + (item.item || "") + "</td>";
+                    row += "<td class='qty'>" + (item.qty || 0) + "</td>";
+                    row += "<td class='rate'>" + (item.rate || 0) + "</td>";
+                    row += "<td class='adjQty'>" + (item.adjQty || 0) + "</td>";
+                    row += "<td class='balQty'>" + (item.balQty || 0) + "</td>";
+                    row += "<td class='remarks'>" + (item.remarks || "") + "</td>";
+
+                    row += "<td>";
+                    row += "<input type='text' class='form-control newQty'>";
+                    row += "</td>";
+
+                    row += "<td>";
+                    row += getStatusDropdown(item.status);
+                    row += "</td>";
+
+                    row += "<td>";
+                    row += "<input type='text' class='form-control newRemarks'>";
+                    row += "</td>";
+
+                    row += "<td class='validityDate'>" + formatDate(item.validityDate) + "</td>";
+                    row += "<td class='deliveryDate'>" + formatDate(item.deliveryDate) + "</td>";
+
+                    row += "</tr>";
+
+                    tbody.append(row);
+
+                });
+
+                $("#Numtotalrecords").val(response.length);
+
+            },
+            error: function () {
+
+                alert("Error loading data.");
+
+            }
+        });
+
+    }
+    function saveData() {
+        var details = [];
+
+        $("#tblPendingSaudaOrder tbody tr").each(function () {
+            var row = $(this);
+            if (!row.find(".chkSelect").is(":checked"))
+                return;
+            details.push({
+                PartyCode: parseInt(row.find(".partyCode").text()) || 0,
+                ItemCode: parseInt(row.find(".itemCode").text()) || 0,
+
+                RefType: row.find(".refType").text().trim(),
+                RefNo: row.find(".refNo").text().trim(),
+                RefDate: row.find(".refDate").text().trim(),
+
+                Party: row.find(".party").text().trim(),
+                Item: row.find(".item").text().trim(),
+                Qty: parseFloat(row.find(".qty").text()) || 0,
+                Rate: parseFloat(row.find(".rate").text()) || 0,
+                AdjQty: parseFloat(row.find(".adjQty").text()) || 0,
+                BalQty: parseFloat(row.find(".balQty").text()) || 0,
+                Remarks: row.find(".remarks").text().trim(),
+                NewQty: parseFloat(row.find(".newQty").val()) || 0,
+                Status: row.find(".status").val(),
+                NewRemarks: row.find(".newRemarks").val(),
+                ValidityDate: row.find(".validityDate").text().trim(),
+                DeliveryDate: row.find(".deliveryDate").text().trim()
+            });
+        });
+        if (details.length == 0) {
+            toastr.warning("Please select at least one record.");
+            return;
+        }
+        var request = {
+            VType: $("#ddlDocType").val(),
+            VNo: parseInt($("#NumDocNo").val()) || 0,
+            VDate: $("#DtDocDate").val(),
+            Details: details
+        };
+        console.log(JSON.stringify(request));
+        $.ajax({
+            url: "/PendingSaudaOrder/SaveData",
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(request),
+            success: function (res) {
+                console.log(res);
+                if (res.success) {
+                    toastr.success(res.message);
+                    loadPendingData();
+                }
+                else {
+                    toastr.error(res.message);
+                }
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+            }
+        });
+    }
+    function formatDate(value) {
+        if (!value)
+            return "";
+        const d = new Date(value);
+        if (isNaN(d))
+            return "";
+        return d.toLocaleDateString("en-GB");
+    }
+</script>
