@@ -43,13 +43,13 @@ namespace travelexpensemanagement.Controllers.Weighbridge.Transaction
 
                 var yearParams = new Dictionary<string, object> { { "@YearCd", yearCode } };
                 var vnoParams = new Dictionary<string, object>
-            {
-            { "@COMP_CODE", companyCode },
-            { "@BRANCH_CODE", branchCode },
-            { "@YEAR_CODE", yearCode },
-            { "@V_TYPE", vType },
-            { "@TableName", tableName }
-            };
+                {
+                { "@COMP_CODE", companyCode },
+                { "@BRANCH_CODE", branchCode },
+                { "@YEAR_CODE", yearCode },
+                { "@V_TYPE", vType },
+                { "@TableName", tableName }
+                };
 
                 string nextVNo = await _dbHelper.GetExecuteScalarAsync<string>("sp_GetMaxVNo", vnoParams, isStoredProc: true);
                 string year = await _dbHelper.GetExecuteScalarAsync<string>("SELECT dbo.fn_GetCurrentYear(@YearCd)", yearParams);
