@@ -1,0 +1,83 @@
+﻿
+<div class="modal fade" id="costallocationModal" tabindex="-1" aria-labelledby="costallocationLabel" aria-hidden="true">
+    <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+        <div class="modal-content erppagesmodal-content">
+            <div class="erppagesmodal-header">
+                <div class="erppagesmodal-header-left">
+                    <div class="erppagesmodal-header-icon">
+                        <i class="fa fa-sitemap"></i>
+                    </div>
+                    <h5 class="erppagesmodal-title" id="costallocationLabel">
+                        Cost Allocation
+                    </h5>
+                </div>
+                <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="erppagesmodal-body">
+                <div class="erppage-grid2">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" for="TxtPartyNameCA">Party Name</label>
+                        <input type="text" class="erppage-input" id="TxtPartyNameCA" placeholder="Enter Party Name">
+                    </div>
+                    <div class="erppage-internalaction">
+                        <button type="button" class="erppage-btn erppage-btn-common" data-bs-dismiss="modal">
+                            <i class="fa fa-edit"></i> Edit
+                        </button>
+                        <button type="button" class="erppagesmodal-btn" data-bs-dismiss="modal">
+                            <i class="fa fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="erppage-grid3">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" for="NumRefVno">Ref. VNo</label>
+                        <input type="number" class="erppage-input" id="NumRefVno">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" for="TxtTotalAmtAllocated">Total Amt. to be Allocated</label>
+                        <input type="text" class="erppage-input" id="TxtTotalAmtAllocated">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" for="NumSrNo">Sr. No</label>
+                        <input type="number" class="erppage-input" id="NumSrNo">
+                    </div>
+                </div>
+                <div class="erppage-grid3">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" for="DtSrDate">Sr. Date</label>
+                        <input type="date" class="erppage-input" id="DtSrDate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" for="NumBalAmount">Bal. Amount</label>
+                        <input type="number" class="erppage-input" id="NumBalAmount">
+                    </div>
+                </div>
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblpurchaseallocationmodal" class="excel-table width-table fixed-grid-table resizable-table">
+                        <thead>
+                            <tr>
+                                <th class="hidden-col"></th>
+                                <th>Cost Center</th>
+                                <th>Allocated Amt</th>
+                                <th>Narration</th>
+                                <th class="hidden-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <div class="btn-add-row-last">
+                        <i class="fa fa-plus btn-add-row" title="Add Row">
+                            <span>Add New Row</span>
+                        </i>
+                    </div>
+                    <div class="custom-pagination" id="tablePagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -2,6 +2,7 @@
     ViewBag.Title = "Purchase Bill Pass Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@Html.Partial("_CostAllocationModal")
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
     <div class="erppage-header-left">
@@ -349,7 +350,7 @@
                         </li>
                     </ul>
                 </div>
-                <button type="button" class="erppage-btn erppage-btn-common-disabled" data-bs-toggle="modal" data-bs-target="#costallocationModal">
+                <button type="button" class="erppage-btn erppage-btn-common-disabled" onclick="CostAllocation.open();">
                     <i class="fa fa-calculator"></i>
                     <span>Cost Allocation</span>
                 </button>
@@ -1409,7 +1410,7 @@
                 </div>
             </div>
             <!--Cost Allocation Modal-->
-            <div class="modal fade" id="costallocationModal" tabindex="-1" aria-labelledby="costallocationLabel" aria-hidden="true">
+            @* <div class="modal fade" id="costallocationModal" tabindex="-1" aria-labelledby="costallocationLabel" aria-hidden="true">
                 <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
                     <div class="modal-content erppagesmodal-content">
                         <div class="erppagesmodal-header">
@@ -1488,7 +1489,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> *@
             <!--Pending Approval Modal-->
             <div class="modal fade" id="pendingapprovalModal" tabindex="-1"
                  aria-labelledby="pendingapprovalLabel" aria-hidden="true">

@@ -35,9 +35,7 @@ namespace travelexpensemanagement.Dbconnection
                 using var con = new SqlConnection(_conDbConnectionString);
                 con.Open();
 
-                string query = @"SELECT SERVER_IP, DATABASE_NAME 
-                                 FROM Condatabase.dbo.COMP_MAST 
-                                 WHERE Code = @Code";
+                string query = @"SELECT SERVER_IP, DATABASE_NAME  FROM Condatabase.dbo.COMP_MAST  WHERE Code = @Code";
 
                 using var cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@Code", compCode);
@@ -83,6 +81,7 @@ namespace travelexpensemanagement.Dbconnection
             {
                 "192.168.1.218" => ("192.168.1.218", "sa", "deepak123"),
                 "192.168.20.51" => ("192.168.20.51", "sa", "Pass@123"),
+                "192.168.20.52" => ("192.168.20.52", "sa", "Pass@123"),
 
                 _ => throw new Exception("Unknown server IP: " + serverIp)
             };
