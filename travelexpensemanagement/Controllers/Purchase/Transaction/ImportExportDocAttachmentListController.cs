@@ -61,10 +61,11 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
 
         [HttpGet]
-        public async Task<object> GetViewData(DateTime FromDate, DateTime ToDate , string V_TYPE , int partycode , int Citycode)
+        public async Task<IActionResult> GetViewData( DateTime FromDate, DateTime ToDate, string V_TYPE, int? partycode, int? Citycode)
         {
             var gv = _globalValue.GetGlobalVariables();
             var dataList = new List<object>();
+
             try
             {
                 using (SqlConnection con = _dbcontext.GetErpConnection())
@@ -75,15 +76,20 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.AddWithValue("@Action", "Viewdata");
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@CompCode", gv.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BranchCode", gv.PubBranchCode);
-                        cmd.Parameters.AddWithValue("@V_TYPE", V_TYPE);
-                        cmd.Parameters.AddWithValue("@partycode", partycode);
-                        cmd.Parameters.AddWithValue("@Citycode", Citycode);
+                        cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 50).Value = "Viewdata";
+                        cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = gv.PubFYearCode;
+                        cmd.Parameters.Add("@CompCode", SqlDbType.Int).Value = gv.PubCompCode;
+                        cmd.Parameters.Add("@BranchCode", SqlDbType.Int).Value = gv.PubBranchCode;
                         cmd.Parameters.Add("@FromDate", SqlDbType.SmallDateTime).Value = FromDate;
                         cmd.Parameters.Add("@ToDate", SqlDbType.SmallDateTime).Value = ToDate;
+                        cmd.Parameters.Add("@V_TYPE", SqlDbType.NVarChar, 10).Value = V_TYPE ?? "";
+                        cmd.Parameters.Add("@partycode", SqlDbType.Int).Value =
+                            partycode.HasValue && partycode.Value > 0
+                                ? partycode.Value
+                                : DBNull.Value;
+
+                        cmd.Parameters.Add("@Citycode", SqlDbType.Int).Value = Citycode.HasValue && Citycode.Value > 0 ? Citycode.Value
+                                : DBNull.Value;
 
                         using (SqlDataReader rdr = await cmd.ExecuteReaderAsync())
                         {
@@ -92,26 +98,59 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 dataList.Add(new
                                 {
                                     SAUDA_NO = rdr["SAUDA_NO"]?.ToString(),
-                                    V_no = rdr["V_no"]?.ToString(),
-                                    Sauda_date = SafeDate(rdr, "Sauda_date"),                           
-                                    EximDate = SafeDate(rdr, "EximDate"),
+                                    V_NO = rdr["V_NO"]?.ToString(),
+                                    Sauda_Date = rdr["Sauda_Date"]?.ToString(),
+                                    EximDate = rdr["EximDate"]?.ToString(),
                                     PartyName = rdr["PartyName"]?.ToString(),
                                     BE_NO = rdr["BE_NO"]?.ToString(),
                                     City = rdr["City"]?.ToString(),
-                                    PARTY_CODE = rdr["PARTY_CODE"]?.ToString()
+                                    PARTY_CODE = rdr["PARTY_CODE"]?.ToString(),
+
+                                    // Import Columns
+                                    PiCopy = HasColumn(rdr, "PiCopy") ? rdr["PiCopy"]?.ToString() : null,
+                                    BlCopy = HasColumn(rdr, "BlCopy") ? rdr["BlCopy"]?.ToString() : null,
+                                    BeCopy = HasColumn(rdr, "BeCopy") ? rdr["BeCopy"]?.ToString() : null,
+                                    LcCopy = HasColumn(rdr, "LcCopy") ? rdr["LcCopy"]?.ToString() : null,
+                                    InvCopy = HasColumn(rdr, "InvCopy") ? rdr["InvCopy"]?.ToString() : null,
+                                    DpCopy = HasColumn(rdr, "DpCopy") ? rdr["DpCopy"]?.ToString() : null,
+                                    SblcCopy = HasColumn(rdr, "SblcCopy") ? rdr["SblcCopy"]?.ToString() : null,
+
+                                    // Export Columns
+                                    SbCopy = HasColumn(rdr, "SbCopy") ? rdr["SbCopy"]?.ToString() : null,
+                                    BrcCopy = HasColumn(rdr, "BrcCopy") ? rdr["BrcCopy"]?.ToString() : null,
+
+                                    // Common Columns
+                                    OthCopy1 = HasColumn(rdr, "OthCopy1") ? rdr["OthCopy1"]?.ToString() : null,
+                                    OthCopy2 = HasColumn(rdr, "OthCopy2") ? rdr["OthCopy2"]?.ToString() : null,
+                                    OthCopy3 = HasColumn(rdr, "OthCopy3") ? rdr["OthCopy3"]?.ToString() : null,
+                                    OthCopy4 = HasColumn(rdr, "OthCopy4") ? rdr["OthCopy4"]?.ToString() : null,
+                                    OthCopy5 = HasColumn(rdr, "OthCopy5") ? rdr["OthCopy5"]?.ToString() : null,
+                                    OthCopy6 = HasColumn(rdr, "OthCopy6") ? rdr["OthCopy6"]?.ToString() : null,
+                                    OthCopy7 = HasColumn(rdr, "OthCopy7") ? rdr["OthCopy7"]?.ToString() : null
                                 });
                             }
                         }
                     }
                 }
 
-                return new { success = true, data = dataList };
+                return Ok(new  { success = true, data = dataList });
             }
             catch (Exception ex)
             {
-                return new { success = false, message = ex.Message };
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
+
+        private static bool HasColumn(SqlDataReader reader, string columnName)
+        {
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (reader.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }         
 
         private static DateTime? SafeDate(SqlDataReader rdr, string col)
         {

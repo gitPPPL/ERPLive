@@ -97,7 +97,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 app.UseRateLimiter();
-app.UseMiddleware<SessionTimeoutMiddleware>();
+//app.UseMiddleware<SessionTimeoutMiddleware>();
 app.UseAuthorization();
 
 // ======================
