@@ -9,6 +9,11 @@
 
         $('#tblImportExportDocAttachmentList tbody').empty();
 
+
+        // Call once when page loads
+        createTableHeader();
+
+
         Viewdata();
 
     });

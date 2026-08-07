@@ -50,6 +50,50 @@ function formatDate(date) {
     return `${day}/${month}/${year}`;
 }
 
+const tableHeaders = [
+    "Code",
+    "Sauda No",
+    "Sauda Date",
+    "Inv No",
+    "Inv Date",
+    "B E No.",
+    "Exim No",
+    "Exim Date",
+    "Party Name",
+    "Party Code",
+    "Chk",
+    "P I Copy",
+    "B L Copy",
+    "B E Copy",
+    "L C Copy",
+    "INV Copy",
+    "D P Copy",
+    "SBLC Copy",
+    "Oth Copy1",
+    "Oth Copy2",
+    "Oth Copy3",
+    "Oth Copy4",
+    "Oth Copy5",
+    "Oth Copy6",
+    "Oth Copy7"
+];
+
+function createTableHeader() {
+    let headerHtml = "<tr>";
+
+    tableHeaders.forEach((header, index) => {
+        if (index === 0) {
+            headerHtml += `<th class="hidden-col">${header}</th>`;
+        } else {
+            headerHtml += `<th>${header}</th>`;
+        }
+    });
+
+    headerHtml += "</tr>";
+
+    $("#tblImportExportDocAttachmentList thead").html(headerHtml);
+}
+
 function addItemRecordRow(item = null) {
 
     let tbody = $('#tblImportExportDocAttachmentList tbody');
@@ -60,126 +104,26 @@ function addItemRecordRow(item = null) {
     let newRow = `
         <tr id="row${rowCount}" class="no-border-input">
 
-            <!-- 0. Code -->
             <td class="hidden-col">  <input type="hidden" id="TxtCode${rowCount}" value="${item?.code ?? ""}" /> </td>
-
-            <!-- 1. Sauda No -->
-            <td>
-                <input type="text"
-                       id="TxtSaudaNo${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.saudA_NO ?? ""}" />
-            </td>
-
-            <!-- 2. Sauda Date -->
-            <td>
-                <input type="text"
-                       id="TxtSaudaDate${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.sauda_Date ?? ""}" />
-            </td>
-
-            <!-- 3. Inv No -->
-            <td>
-                <input type="text"
-                       id="TxtInvNo${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.v_NO ?? ""}" />
-            </td>
-
-            <!-- 4. Inv Date -->
-            <td>
-                <input type="text"
-                       id="TxtInvDate${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.invDate ?? ""}" />
-            </td>
-
-            <!-- 5. B E No. -->
-            <td>
-                <input type="text"
-                       id="TxtBENo${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.bE_NO ?? ""}" />
-            </td>
-
-            <!-- 6. Exim No -->
-            <td>
-                <input type="text"
-                       id="TxtEximNo${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.eximNo ?? ""}" />
-            </td>
-
-            <!-- 7. Exim Date -->
-            <td>
-                <input type="text"
-                       id="TxtEximDate${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.eximDate ?? ""}" />
-            </td>
-
-            <!-- 8. Party Name -->
-            <td>
-                <input type="text"
-                       id="TxtPartyName${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.partyName ?? ""}" />
-            </td>
-
-            <!-- 9. Party Code -->
-            <td>
-                <input type="text"
-                       id="TxtPartyCode${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.partY_CODE ?? ""}" />
-            </td>
-
-            <!-- 10. Checkbox -->
-            <td class="text-center">
-                <input type="checkbox"
-                       id="Chk${rowCount}" />
-            </td>
-
-            <!-- 11. P I Copy -->
-            <td>
-                <input type="text"
-                       id="TxtPICopy${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.piCopy ?? ""}" />
-            </td>
-
-            <!-- 12. B L Copy -->
-            <td>
-                <input type="text"
-                       id="TxtBLCopy${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.blCopy ?? ""}" />
-            </td>
-
-            <!-- 13. B E Copy -->
-            <td>
-                <input type="text"
-                       id="TxtBECopy${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.beCopy ?? ""}" />
-            </td>
+            <td style="display: none;"> <input type="text" id="TxtSaudaNo${rowCount}" class="erppagetable-control"  value="${item?.saudA_NO ?? ""}" /> </td>
+            <td> <input type="text" id="TxtSaudaDate${rowCount}"  class="erppagetable-control" value="${item?.sauda_Date ?? ""}" />  </td>
+            <td> <input type="text" id="TxtInvNo${rowCount}" class="erppagetable-control"  value="${item?.v_NO ?? ""}" />  </td>
+            <td>  <input type="text"  id="TxtInvDate${rowCount}"  class="erppagetable-control" value="${item?.invDate ?? ""}" />  </td>
+            <td> <input type="text"  id="TxtBENo${rowCount}"  class="erppagetable-control"  value="${item?.bE_NO ?? ""}" /> </td>
+            <td> <input type="text" id="TxtEximNo${rowCount}" class="erppagetable-control" value="${item?.eximNo ?? ""}" />  </td>
+            <td> <input type="text"  id="TxtEximDate${rowCount}"  class="erppagetable-control"  value="${item?.eximDate ?? ""}" />  </td>
+            <td>  <input type="text"  id="TxtPartyName${rowCount}"  class="erppagetable-control"  value="${item?.partyName ?? ""}" />  </td>
+            <td> <input type="text"  id="TxtPartyCode${rowCount}"   class="erppagetable-control" value="${item?.partY_CODE ?? ""}" />  </td> 
+            <td class="text-center"> <input type="checkbox" id="Chk${rowCount}" /> </td>
+            <td>  <input type="text"  id="TxtPICopy${rowCount}"  class="erppagetable-control"  value="${item?.piCopy ?? ""}" />  </td>
+            <td>  <input type="text"  id="TxtBLCopy${rowCount}"  class="erppagetable-control"  value="${item?.blCopy ?? ""}" /> </td>
+            <td> <input type="text"  id="TxtBECopy${rowCount}" class="erppagetable-control"  value="${item?.beCopy ?? ""}" />  </td>
 
             <!-- 14. L C Copy -->
-            <td>
-                <input type="text"
-                       id="TxtLCCopy${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.lcCopy ?? ""}" />
-            </td>
+            <td>  <input type="text" id="TxtLCCopy${rowCount}" class="erppagetable-control" value="${item?.lcCopy ?? ""}" />  </td>
 
             <!-- 15. INV Copy -->
-            <td>
-                <input type="text"
-                       id="TxtINVCopy${rowCount}"
-                       class="erppagetable-control"
-                       value="${item?.invCopy ?? ""}" />
-            </td>
+            <td>  <input type="text" id="TxtINVCopy${rowCount}"  class="erppagetable-control"  value="${item?.invCopy ?? ""}" />  </td>
 
             <!-- 16. D P Copy -->
             <td>
