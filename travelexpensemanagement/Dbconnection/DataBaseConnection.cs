@@ -82,7 +82,8 @@ namespace travelexpensemanagement.Dbconnection
             return serverIp switch
             {
                 "192.168.1.218" => ("192.168.1.218", "sa", "deepak123"),
-                "192.168.20.51" => ("192.168.20.51", "sa", "Pass@123"),
+                //"192.168.20.51" => ("192.168.20.51", "sa", "Pass@123"),
+                "192.168.20.52" => ("192.168.20.51", "sa", "Pass@123"),
 
                 _ => throw new Exception("Unknown server IP: " + serverIp)
             };

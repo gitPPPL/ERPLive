@@ -1,7 +1,6 @@
 ﻿@{
     ViewBag.Title = "Import Payment Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
-
 }
 @* <style>
     .erppage-grid4 {
@@ -79,9 +78,6 @@
             <div class="erppage-grid4">
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Party Name</label>
-                    @* <select class="erppage-input erppage-select" id="ddlpartyname">
-                        <option value="">Select Party Name</option>
-                    </select> *@
                     <input type="text" id="txtSupplierName" class="form-control" placeholder="Search Supplier" />
                     <input type="hidden" id="hdnSupplierCode">
                 </div>
@@ -340,48 +336,43 @@
                     </div>
                 </div>
             </fieldset>
+
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Document Attached</legend>
                 <div class="erppagesrow" style="gap:12px; padding:10px;">
                     <div class="erppage-divfield">
                         <div class="erppage-checkbox-wrap">
-                            <input type="checkbox" id="Chkproformainvoice" class="erppage-checkbox-input">
+                            <input type="checkbox" id="cbCDAttach1" class="erppage-checkbox-input">
                             <label class="erppage-checkbox-label">Proforma Invoice</label>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <div class="erppage-checkbox-wrap">
-                            <input type="checkbox" id="Chkpurchaseorderraised" class="erppage-checkbox-input">
+                            <input type="checkbox" id="cbCDAttach2" class="erppage-checkbox-input">
                             <label class="erppage-checkbox-label">Purchase Order Raised</label>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <div class="erppage-checkbox-wrap">
-                            <input type="checkbox" id="Chktransportdocument" class="erppage-checkbox-input">
+                            <input type="checkbox" id="cbCDAttach3" class="erppage-checkbox-input">
                             <label class="erppage-checkbox-label">Transport Document</label>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <div class="erppage-checkbox-wrap">
-                            <input type="checkbox" id="Chkcopybillentry" class="erppage-checkbox-input">
+                            <input type="checkbox" id="cbCDAttach4" class="erppage-checkbox-input">
                             <label class="erppage-checkbox-label">Copy of Bill Entry</label>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <div class="erppage-checkbox-wrap">
-                            <input type="checkbox" id="Chkcopybillentry" class="erppage-checkbox-input">
-                            <label class="erppage-checkbox-label">Copy of Bill Entry</label>
-                        </div>
-                    </div>
-                    <div class="erppage-divfield">
-                        <div class="erppage-checkbox-wrap">
-                            <input type="checkbox" id="Chkforma2" class="erppage-checkbox-input">
+                            <input type="checkbox" id="cbCDAttach5" class="erppage-checkbox-input">
                             <label class="erppage-checkbox-label">Form A2</label>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <div class="erppage-checkbox-wrap">
-                            <input type="checkbox" id="ChkPaymentmade" class="erppage-checkbox-input">
+                            <input type="checkbox" id="cbCDAttach6" class="erppage-checkbox-input">
                             <label class="erppage-checkbox-label">If Payment is being made</label>
                         </div>
                     </div>
@@ -389,25 +380,26 @@
                 <div class="erppagesrow" style="gap:12px; padding: 0px 10px 0px 10px;">
                     <div class="erppage-divfield">
                         <div class="erppage-checkbox-wrap">
-                            <input type="checkbox" id="ChkOriginallicence" class="erppage-checkbox-input">
+                            <input type="checkbox" id="cbCDAttach7" class="erppage-checkbox-input">
                             <label class="erppage-checkbox-label">Original Licence</label>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <div class="erppage-checkbox-wrap">
-                            <input type="checkbox" id="ChkOriginallicence" class="erppage-checkbox-input">
+                            <input type="checkbox" id="cbCDAttach8" class="erppage-checkbox-input">
                             <label class="erppage-checkbox-label">Original Bank Guarantee</label>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <div class="erppage-checkbox-wrap">
-                            <input type="checkbox" id="ChkAnyOtherDocument" class="erppage-checkbox-input">
+                            <input type="checkbox" id="cbCDAttach9" class="erppage-checkbox-input">
                             <label class="erppage-checkbox-label">Any Other Document</label>
                         </div>
                     </div>
                 </div>
             </fieldset>
         </div>
+
         <!-- Form A2 -->
         <div class="erppage-tab-content" id="forma2">
             <div class="erppagesrow" style="gap:12px; padding:10px;">
@@ -452,6 +444,8 @@
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Name and Bank Address</label>
                     <textarea typeof="text" class="erppage-input" rows="2" id="Txtnamebankaddress" placeholder="Enter Name and Bank Address"></textarea>
+                    <textarea typeof="text" class="erppage-input" rows="2" id="txtA2_3"></textarea>
+                    <textarea typeof="text" class="erppage-input" rows="2" id="txtA2_4"></textarea>
                 </div>
             </div>
             <div class="erppage-grid4">
@@ -472,7 +466,7 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Description</label>
-                    <textarea typeof="text" class="erppage-input" rows="2" id="Txtnamebankaddress" placeholder="Enter Name and Bank Address"></textarea>
+                    <textarea typeof="text" class="erppage-input" rows="2" id="TxtDes" placeholder="Enter Description"></textarea>
                 </div>
             </div>
         </div>
@@ -784,12 +778,12 @@
                         <col style="width:250px;">
                         <col style="width:120px;">
                         <col style="width:150px;">
-                        <col style="width:150px;">
+                        <col style="width: 181px;">
                         <col style="width:120px;">
                         <col style="width:170px;">
-                        <col style="width:180px;">
-                        <col style="width:150px;">
-                        <col style="width:150px;">
+                        <col style="width: 200px;">
+                        <col style="width: 184px;">
+                        <col style="width: 180px;">
                         <col style="width:120px;">
                         <col style="width:110px;">
                         <col style="width:120px;">
@@ -834,6 +828,12 @@
                 </table>
             </div>
         </div>
+    </div>
+    <div class="erppage-internalaction mt-2">
+        <button type="submit" id="btnSave" class="erppage-btn erppage-btn-save">
+            <i class="fa fa-save"></i>
+            <span>Save</span>
+        </button>
     </div>
 </div>
 
