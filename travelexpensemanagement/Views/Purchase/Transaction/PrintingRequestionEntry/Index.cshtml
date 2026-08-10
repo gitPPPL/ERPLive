@@ -66,7 +66,7 @@
                             <option value="">Select Request By</option>
                         </select>
                         <input type="text" class="erppage-input" id="Txtrequestby">
-                    </div> 
+                    </div>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Remarks</label>
@@ -79,21 +79,22 @@
                 <div class="excel-wrapper fixed-grid-wrapper">
                     <table id="tblPrintingRequestionEntry" class="excel-table fixed-grid-table table-width resizable-table">
                         <colgroup>
-                            <col class="hidden-col">                
-                            <col style="width:180px;">              
-                            <col style="width:220px;">              
-                            <col style="width:120px;">              
-                            <col style="width:100px;">              
-                            <col style="width:80px;">               
-                            <col style="width:120px;">              
-                            <col style="width:120px;">              
-                            <col style="width:100px;">              
-                            <col style="width:150px;">              
-                            <col style="width:180px;">              
-                            <col style="width:120px;">              
-                            <col style="width:120px;">              
-                            <col style="width:120px;">              
-                            <col style="width:220px;">              
+                            <col class="hidden-col">
+                            <col style="width:180px;">
+                            <col style="width:220px;">
+                            <col style="width:120px;">
+                            <col style="width:100px;">
+                            <col style="width:80px;">
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:100px;">
+                            <col style="width:150px;">
+                            <col style="width:180px;">
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:120px;">
+                            <col style="width:220px;">
+                            <col style="width:220px;">
                         </colgroup>
                         <thead>
                             <tr>
@@ -112,6 +113,7 @@
                                 <th>Work Type</th>
                                 <th>Scrap Type</th>
                                 <th>Remarks</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -121,7 +123,6 @@
             @* item Master *@
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Attachment</legend>
-
                 <div class="erppage-tab-content" id="attachment">
                     <div class="erppage-accordion-body">
                         <div class="erppageattachmentsection">
@@ -208,6 +209,14 @@
     let priorityList = [];
     let workTypeList = [];
     let rowsAttachment = [];
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+    const code = getQueryParam('vNo');
+    const vType = getQueryParam('vType');
+    const mode = getQueryParam("mode");
+
     $(document).ready(function () {
         ddlDocNo();
         loadCurrentDate();
@@ -215,45 +224,80 @@
         bindPlace();
         bindDepartment();
         bindRequestBy();
-        // Load Priority & WorkType first
         $.when(
-            $.get('/PrintingRequestionEntry/GetPriority', function (data) {
-                priorityList = data;
-            }),
-            $.get('/PrintingRequestionEntry/GetWorkType', function (data) {
-                workTypeList = data;
-            })
-        ).done(function () {
-            bindItem();
-        });
-        $(document).on("change", ".itemddl", function () {
+            $.get('/PrintingRequestionEntry/GetPriority'),
+            $.get('/PrintingRequestionEntry/GetWorkType'),
+            $.get('/PrintingRequestionEntry/GetItem')
+        )
+        .done(function (priorityResponse, workTypeResponse, itemResponse) {
+        priorityList = priorityResponse[0] || [];
+        workTypeList = workTypeResponse[0] || [];
+        itemList = itemResponse[0] || [];
 
+        // Now itemList is ready
+        if (code) {
+           $.ajax({
+            url: '/PrintingRequestionEntry/GetById',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify({
+                vNo: parseInt(code, 10),
+                vType: vType
+            }),
+            success: function (response) {
+                console.log("GetById Response:", response);
+                if (!response.success) {
+                    toastr.error(
+                        response.message || "Unable to load record.",
+                        "Error"
+                    );
+                    return;
+                }
+                fillHeaderData(response.header);
+                fillDetailData(response.details);
+                getdataImage(response.images);
+            },
+            error: function (xhr, status, error) {
+                toastr.error(xhr.responseText || "Unable to load record.","Error");
+            }
+        });
+        } else {
+            // New entry
+            addNewRow();
+        }
+    })
+        .fail(function (xhr) {
+
+        console.error("Dropdown loading failed:", xhr.responseText);
+
+        toastr.error(
+            "Unable to load dropdown data.",
+            "Error"
+        );
+    });
+        readOnly = (mode === 'view');
+        $(document).on("change", ".itemddl", function () {
             var itemCode = $(this).val();
             var makeDDL = $(this).closest("tr").find(".makeddl");
-
             makeDDL.empty();
             makeDDL.append('<option value="">Select Make</option>');
 
             if (!itemCode)
                 return;
-
             $.ajax({
                 url: "/PrintingRequestionEntry/GetMake",
                 type: "GET",
                 data: { itemCode: itemCode },
                 success: function (data) {
-
                     $.each(data, function (i, item) {
-
                         makeDDL.append(
                             $('<option>', {
                                 value: item.value,
                                 text: item.text
                             })
                         );
-
                     });
-
                     if (data.length == 1) {
                         makeDDL.val(data[0].value);
                     }
@@ -266,103 +310,131 @@
             $("#fileInput").click();
         });
         $('#fileInput').on('change', function (e) {
-
-        const files = e.target.files;
-
-        Array.from(files).forEach(file => {
-
+            const files = e.target.files;
+            Array.from(files).forEach(file => {
             const reader = new FileReader();
-
             reader.onload = function (ev) {
-
                 const mime = file.type || 'application/octet-stream';
-
-                // Store selected file
-                rowsAttachment.push({
-                    FileName: file.name,
-                    File: file
-                });
-
-                // UI
+                // New File
+                rowsAttachment.push({FileName: file.name, File: file, IsExisting: false });
                 const card = `
-                <div class="erp-file-row" data-filename="${file.name}">
-
-                    <div class="erp-file-preview">
-                        ${mime.startsWith('image/')
-                        ? `<img src="${ev.target.result}" class="erp-file-thumbnail">`
-                        : mime === 'application/pdf'
-                            ? `<i class="fa fa-file-pdf-o" style="font-size:40px;color:red;"></i>`
-                            : `<i class="fa fa-file" style="font-size:40px;"></i>`
-                    }
+                    <div class="erp-file-row new-file"
+                         data-filename="${file.name}">
+                        <div class="erp-file-preview">
+                            ${
+                                mime.startsWith('image/') ? `<img src="${ev.target.result}" class="erp-file-thumbnail">`
+                                : mime === 'application/pdf' ? `<i class="fa fa-file-pdf-o" style="font-size:40px;color:red;"></i>`
+                                : `<i class="fa fa-file" style="font-size:40px;"></i>`
+                            }
+                        </div>
+                        <div class="erp-file-info">
+                            <div class="erp-file-name"> ${file.name} </div>
+                            <div class="erp-file-type"> ${mime} </div>
+                        </div>
+                        <div class="erp-file-actions">
+                            <button type="button" class="erp-btn view btn-view-attachment" data-src="${ev.target.result}" data-type="${mime}">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                            <button type="button" class="erp-btn delete btn-delete-attachment" data-filename="${file.name}"> <i class="fa fa-trash"></i></button>
+                        </div>
                     </div>
-
-                    <div class="erp-file-info">
-                        <div class="erp-file-name">${file.name}</div>
-                        <div class="erp-file-type">${mime}</div>
-                    </div>
-
-                    <div class="erp-file-actions">
-
-                        <button type="button"
-                                class="erp-btn view btn-view-attachment"
-                                data-src="${ev.target.result}"
-                                data-type="${mime}">
-                            <i class="fa fa-eye"></i>
-                        </button>
-
-                        <button type="button"
-                                class="erp-btn delete btn-delete-attachment"
-                                data-filename="${file.name}">
-                            <i class="fa fa-trash"></i>
-                        </button>
-
-                    </div>
-
-                </div>
-            `;
+                `;
                 $('#fileList').append(card);
             };
-
             reader.readAsDataURL(file);
         });
-
-        $(this).val('');
-    });
-
-            $(document).on("click", ".btn-view-attachment", function () {
-
+            $(this).val('');
+        });
+        $(document).on("click", ".btn-view-attachment", function () {
         const src = $(this).data("src");
         const type = $(this).data("type");
-
         $("#previewImage").hide();
         $("#previewPdf").hide();
-
         if (type.startsWith("image/")) {
-
             $("#previewImage").attr("src", src).show();
         }
         else if (type === "application/pdf") {
-
             $("#previewPdf").attr("src", src).show();
         }
         else {
-
             alert("Preview not available for this file type.");
             return;
-
         }
-
         $("#imagePreviewModal").modal("show");
     });
-
         $(document).on("click", ".btn-delete-attachment", function () {
-
         const fileName = $(this).data("filename");
         rowsAttachment = rowsAttachment.filter(x => x.FileName !== fileName);
         $(this).closest(".erp-file-row").remove();
-
     });
+        $(document).on("click", ".btn-add-row", function () {
+         addNewRow();
+        });
 
+        $("#btn-save").click(function () {
+         var formData = new FormData();
+         // Header
+         formData.append("Header.DocNo", $("#NumDocNo").val());
+         formData.append("Header.DocDate", $("#DtDocDate").val());
+         formData.append("Header.Place", $("#ddlPlace").val());
+         formData.append("Header.Status", $("#ddlStatus").val());
+         formData.append("Header.Department", $("#ddlDepartment").val());
+         formData.append("Header.RequiredDate", $("#DtRequiredDate").val());
+         formData.append("Header.RequestBy", $("#ddlrequestby").val());
+         formData.append("Header.RequestByName", $("#Txtrequestby").val());
+         formData.append("Header.Reason", $("#TxtReason").val());
+         formData.append("Header.Remarks", $("#TxtRemarks").val());
+         var action = code > 0 ? "UPDATE" : "INSERT";
+         formData.append("ACTION", action);
+
+        // Detail Rows
+         var details = [];
+         $("#tblPrintingRequestionEntry tbody tr").each(function (i) {
+            formData.append(`Details[${i}].ItemCode`, $(this).find(".itemddl").val());
+            formData.append(`Details[${i}].Description`, $(this).find(".description").val());
+            formData.append(`Details[${i}].Make`, $(this).find(".makeddl").val());
+            formData.append(`Details[${i}].MatType`, $(this).find(".mattype").val());
+            formData.append(`Details[${i}].Unit`, $(this).find(".unit").val());
+            formData.append(`Details[${i}].Qty`, $(this).find(".qty").val());
+            formData.append(`Details[${i}].PrintingType`, $(this).find(".printingtype").val());
+            formData.append(`Details[${i}].Finish`, $(this).find(".finish").val());
+            formData.append(`Details[${i}].PlaceUse`, $(this).find(".placeuse").val());
+            formData.append(`Details[${i}].Reason`, $(this).find(".reason").val());
+            formData.append(`Details[${i}].Priority`, $(this).find(".priority").val());
+            formData.append(`Details[${i}].WorkType`, $(this).find(".worktype").val());
+            formData.append(`Details[${i}].ScrapType`, $(this).find(".scraptype").val());
+            formData.append(`Details[${i}].Remarks`, $(this).find(".remarks").val());
+        });
+         rowsAttachment.forEach(function (attachment) {
+           if (attachment.File) {
+               formData.append("Files", attachment.File);
+           }
+         });
+
+        console.log("===== FormData =====");
+        for (const pair of formData.entries()) {
+         console.log(pair[0], pair[1]);
+        }
+         console.log('kks',formData)
+         $.ajax({
+              url: "/PrintingRequestionEntry/SaveAllData",
+              type: "POST",
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (res) {
+               console.log(res);
+                 if (res.success)
+                 {
+                      toastr.success(res.message, "Success");
+                 }
+                 else
+                 {
+                      toastr.error(res.message, "Error");
+                 }
+              }
+         });
+    });
     });
     function ddlDocNo() {
         $.ajax({
@@ -383,7 +455,6 @@
     }
     function loadCurrentDate() {
         const currentDate = new Date().toISOString().split('T')[0];
-        console.log('kks', currentDate)
         $('#DtDocDate').val(currentDate);
         $('#DtRequiredDate').val(currentDate);
     }
@@ -434,7 +505,6 @@
             $("#ddlrequestby").empty();
             $("#ddlrequestby").append('<option value="">Select Request By</option>');
             $.each(data, function (i, item) {
-                console.log('kks',data)
                 $("#ddlrequestby").append(
                     '<option value="' + item.value + '">' + item.text + '</option>'
                 );
@@ -454,13 +524,11 @@
             priorityOptions += `<option value="${item.value}">${item.text}</option>`;
 
         });
-
         // WorkType Dropdown
         let workTypeOptions = '<option value="">Select Work Type</option>';
         $.each(workTypeList, function (i, item) {
             workTypeOptions += `<option value="${item.value}">${item.text}</option>`;
         });
-
         let row = `
         <tr>
             <td class="hidden-col">
@@ -483,7 +551,7 @@
                 <input type="text" id="txtMatType_${rowIndex}" class="erppage-input mattype"/>
             </td>
             <td>
-                <input type="text" id="txtUnit_${rowIndex}" class="erppage-input unit"/>
+                 <input type="number" id="txtUnit_${rowIndex}" class="erppage-input unit"/>
             </td>
             <td>
                 <input type="number" id="txtQty_${rowIndex}" class="erppage-input qty"/>
@@ -501,15 +569,11 @@
                 <input type="text" id="txtReason_${rowIndex}" class="erppage-input reason"/>
             </td>
             <td>
-                <select id="ddlPriority_${rowIndex}" name="PriorityType"
-                class="erppage-input erppage-select priority">
-                ${priorityOptions}
-                </select>
+                <select id="ddlPriority_${rowIndex}" name="PriorityType" class="erppage-input erppage-select priority">
+                ${priorityOptions} </select>
             </td>
             <td>
-                <select id="ddlWorkType_${rowIndex}" name="WorkType"
-                    class="erppage-input erppage-select worktype">${workTypeOptions}
-                </select>
+                <select id="ddlWorkType_${rowIndex}" name="WorkType" class="erppage-input erppage-select worktype">${workTypeOptions} </select>
             </td>
             <td>
                 <select id="ddlScrapType_${rowIndex}" name="ScrapType" class="erppage-input erppage-select scraptype">
@@ -521,35 +585,28 @@
             <td>
                 <input type="text" id="txtRemarks_${rowIndex}" class="erppage-input remarks"/>
             </td>
+             <td style="text-align:center;">
+                <button type="button" class="btn btn-success btn-add-row">Add</button>
+            </td>
         </tr>`;
-
         $("#tblPrintingRequestionEntry tbody").append(row);
-
     }
     function bindItem() {
-
         $.ajax({
-
             url: '/PrintingRequestionEntry/GetItem',
             type: 'GET',
-
             success: function (data) {
-
                 itemList = data;
-
-                addNewRow();
-
             }
-
         });
-
     }
-
-        function getdataImage(Imagedata) {
+    function getdataImage(Imagedata) {
 
         const $list = $('#fileList');
+
         $list.empty();
 
+        // Existing images + New images दोनों इसी array में रहेंगे
         rowsAttachment = [];
 
         if (!Array.isArray(Imagedata) || Imagedata.length === 0)
@@ -559,34 +616,68 @@
 
             const fileName = item.filE_NAME || "File";
             const base64 = item.imG_FILE;
+
+            if (!base64)
+                return;
+
             const mimeType = getMimeType(fileName);
-
-            if (!base64) return;
-
-            // Save for Update
-            rowsAttachment.push({
-                FileName: fileName,
-                FileContentBase64: base64,
-                FileType: mimeType
-            });
 
             const dataUrl = `data:${mimeType};base64,${base64}`;
 
+            // ==========================================
+            // IMPORTANT
+            // Existing DB image को File object बनाओ
+            // ==========================================
+
+            const file = base64ToFile(
+                base64,
+                fileName,
+                mimeType
+            );
+
+            // Existing image भी rowsAttachment में रहेगा
+            rowsAttachment.push({
+                FileName: fileName,
+                File: file,
+                IsExisting: true
+            });
+
+            // ==========================================
+            // UI
+            // ==========================================
+
             const html = `
-                <div class="erp-file-row" data-filename="${fileName}">
+                <div class="erp-file-row existing-file"
+                     data-filename="${fileName}">
 
                     <div class="erp-file-preview">
-                        ${mimeType.startsWith("image/")
-                    ? `<img src="${dataUrl}" class="erp-file-thumbnail">`
-                    : mimeType === "application/pdf"
-                        ? `<i class="fa fa-file-pdf-o" style="font-size:40px;color:red;"></i>`
-                        : `<i class="fa fa-file"></i>`
-                }
+
+                        ${
+                            mimeType.startsWith("image/")
+                            ? `<img src="${dataUrl}"
+                                    class="erp-file-thumbnail">`
+
+                            : mimeType === "application/pdf"
+
+                            ? `<i class="fa fa-file-pdf-o"
+                                  style="font-size:40px;color:red;"></i>`
+
+                            : `<i class="fa fa-file"
+                                  style="font-size:40px;"></i>`
+                        }
+
                     </div>
 
                     <div class="erp-file-info">
-                        <div class="erp-file-name">${fileName}</div>
-                        <div class="erp-file-type">${mimeType}</div>
+
+                        <div class="erp-file-name">
+                            ${fileName}
+                        </div>
+
+                        <div class="erp-file-type">
+                            ${mimeType}
+                        </div>
+
                     </div>
 
                     <div class="erp-file-actions">
@@ -610,17 +701,62 @@
             `;
 
             $list.append(html);
-
         });
     }
+    function base64ToFile(base64, fileName, mimeType) {
 
+        // Base64 से binary string
+        const byteCharacters = atob(base64);
 
-        function getMimeType(fileName) {
+        const byteArrays = [];
 
+        const sliceSize = 1024;
+
+        for (let offset = 0;
+             offset < byteCharacters.length;
+             offset += sliceSize) {
+
+            const slice =
+                byteCharacters.slice(
+                    offset,
+                    offset + sliceSize
+                );
+
+            const byteNumbers =
+                new Array(slice.length);
+
+            for (let i = 0;
+                 i < slice.length;
+                 i++) {
+
+                byteNumbers[i] =
+                    slice.charCodeAt(i);
+            }
+
+            const byteArray =
+                new Uint8Array(byteNumbers);
+
+            byteArrays.push(byteArray);
+        }
+
+        const blob = new Blob(
+            byteArrays,
+            {
+                type: mimeType
+            }
+        );
+
+        return new File(
+            [blob],
+            fileName,
+            {
+                type: mimeType
+            }
+        );
+    }
+    function getMimeType(fileName) {
         const ext = fileName?.split('.').pop()?.toLowerCase();
-
         switch (ext) {
-
             case 'jpg':
             case 'jpeg':
                 return 'image/jpeg';
@@ -644,6 +780,206 @@
                 return 'application/octet-stream';
         }
     }
+    function formatDateForInput(value) {
+
+        if (!value)
+            return "";
+
+        if (typeof value === "string") {
+
+            if (value.includes("T")) {
+
+                return value.split("T")[0];
+
+            }
+
+            if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+
+                return value;
+
+            }
+        }
+
+        var date = new Date(value);
+
+        if (isNaN(date.getTime()))
+            return "";
+
+        var yyyy = date.getFullYear();
+
+        var mm = String(
+            date.getMonth() + 1
+        ).padStart(2, '0');
+
+        var dd = String(
+            date.getDate()
+        ).padStart(2, '0');
+
+        return yyyy + "-" + mm + "-" + dd;
+    }
+    function fillHeaderData(header) {
+
+        if (!header)
+            return;
+
+        console.log("Header:", header);
+
+        // =====================================
+        // Doc No
+        // =====================================
+
+        $("#NumDocNo").val(header.V_NO ?? "");
 
 
+        // =====================================
+        // Doc Date
+        // =====================================
+
+        $("#DtDocDate").val(
+            formatDateForInput(header.V_DATE)
+        );
+
+
+        // =====================================
+        // Place
+        // =====================================
+
+        $("#ddlPlace").val(
+            header.PLACE_CODE ?? ""
+        );
+
+
+        // =====================================
+        // Status
+        // =====================================
+
+        $("#ddlStatus").val(
+            header.STATUS ?? ""
+        );
+
+
+        // =====================================
+        // Department
+        // =====================================
+
+        $("#ddlDepartment").val(
+            header.DEPT_CODE ?? ""
+        );
+
+
+        // =====================================
+        // Required Date
+        // =====================================
+
+        $("#DtRequiredDate").val(
+            formatDateForInput(header.TARGET_DATE)
+        );
+
+
+        // =====================================
+        // Request By
+        // =====================================
+
+        $("#ddlrequestby").val(
+            header.OWNER_CODE ?? ""
+        );
+
+
+        // =====================================
+        // Request By Name
+        // =====================================
+
+        $("#Txtrequestby").val(
+            header.OWNER_NAME ?? ""
+        );
+
+
+        // =====================================
+        // Reason
+        // =====================================
+
+        $("#TxtReason").val(
+            header.REASON ?? ""
+        );
+
+
+        // =====================================
+        // Remarks
+        // =====================================
+
+        $("#TxtRemarks").val(
+            header.REMARKS ?? ""
+        );
+    }
+    async function fillDetailData(details) {
+        $("#tblPrintingRequestionEntry tbody").empty();
+        if (!details || details.length === 0) {
+            addNewRow();
+            return;
+        }
+        for (let i = 0; i < details.length; i++) {
+            const detail = details[i];
+            addNewRow();
+            const row = $(
+                "#tblPrintingRequestionEntry tbody tr"
+            ).last();
+            // Item
+            row.find(".itemddl").val(detail.ITEM_CODE ?? "");
+            // Description
+            row.find(".description").val(detail.TECH_DESC ?? "");
+            // Material Type
+            row.find(".mattype").val(detail.MAT_TYPE ?? "");
+            // Unit
+            row.find(".unit").val(detail.UOM_CODE ?? "");
+            // Quantity
+            row.find(".qty").val(detail.REQ_QTY ?? "");
+            // Printing Type
+            row.find(".printingtype").val(detail.PRINT_TYPE ?? "");
+            // Finish
+            row.find(".finish").val(detail.FINISH ?? "");
+            // Place Use
+            row.find(".placeuse").val(detail.PLACE_USE ?? "");
+            // Reason
+            row.find(".reason").val(detail.REQ_REASON ?? "");
+            // Priority
+            row.find(".priority").val(detail.PRIORITY_TYPE ?? "");
+            // Work Type
+            row.find(".worktype").val(detail.WORK_TYPE ?? "");
+            // Scrap Type
+            row.find(".scraptype").val(detail.SCRAP_TYPE ?? "");
+            // Remarks
+            row.find(".remarks").val(detail.REMARKS ?? "");
+            // Make Dropdown
+            await loadMakeForRow(
+                row,
+                detail.ITEM_CODE,
+                detail.MAKE_CODE
+            );
+        }
+    }
+    function loadMakeForRow(row, itemCode, selectedMakeCode) {
+        return $.ajax({
+            url: "/PrintingRequestionEntry/GetMake",
+            type: "GET",
+            data: {
+                itemCode: itemCode
+            }
+        }).then(function (data) {
+            const makeDDL = row.find(".makeddl");
+            makeDDL.empty();
+            makeDDL.append(
+                '<option value="">Select Make</option>'
+            );
+            $.each(data, function (i, item) {
+                makeDDL.append(
+                    $('<option>', {
+                        value: item.value,
+                        text: item.text
+                    })
+                );
+            });
+            // Select existing Make
+            makeDDL.val(selectedMakeCode ?? "");
+        });
+    }
 </script>

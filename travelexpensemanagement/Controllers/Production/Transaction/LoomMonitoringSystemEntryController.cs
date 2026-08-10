@@ -54,11 +54,7 @@ namespace travelexpensemanagement.Controllers.LoomMonitoringSystem
 
                     // Load shift order
                     var shiftsOrder = new List<string>();
-                    string shiftQuery = @"
-                SELECT SHIFT, MIN(CODE) AS MinCode
-                FROM  [SHIFT_MAST]
-                GROUP BY SHIFT
-                ORDER BY MinCode";
+                    string shiftQuery = @" SELECT SHIFT, MIN(CODE) AS MinCode FROM [SHIFT_MAST] GROUP BY SHIFT ORDER BY MinCode";
 
                     using (SqlCommand cmdShift = new SqlCommand(shiftQuery, conn))
                     using (SqlDataReader reader = cmdShift.ExecuteReader())
@@ -72,7 +68,6 @@ namespace travelexpensemanagement.Controllers.LoomMonitoringSystem
                             }
                         }
                     }
-
                     // Query to fetch loom data
                     string query = @"
                 SELECT 
@@ -112,8 +107,7 @@ namespace travelexpensemanagement.Controllers.LoomMonitoringSystem
                 LEFT JOIN  ITEM_MAST I ON P.ITEM_CODE = I.CODE
                 LEFT JOIN  MESH_MAST MS ON P.MESH_CODE = MS.CODE
                 WHERE M.BLOCK = @GroupCode 
-                ORDER BY M.CODE;
-            ";
+                ORDER BY M.CODE; ";
 
                     List<LoomProductionInfo> GetDataForShift(string shift, DateTime date)
                     {
