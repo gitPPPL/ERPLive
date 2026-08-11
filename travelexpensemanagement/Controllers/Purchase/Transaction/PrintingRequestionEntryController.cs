@@ -111,7 +111,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             var list = _dropdownService.GetDropdownList(query);
             return Json(list);
         }
-
         [HttpGet]
         public JsonResult GetRequestBy(string search = "")
         {
@@ -152,21 +151,23 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
         public JsonResult GetPriority()
         {
-            string query = @"SELECT CODE AS Value, NAME AS Text  FROM DOCSTATUS_MAST
-            WHERE V_TYPE='Preority' ORDER BY CODE";
+            string query = @"SELECT CODE AS Value, NAME AS Text  FROM DOCSTATUS_MAST WHERE V_TYPE='Preority' ORDER BY CODE";
             var list = _dropdownService.GetDropdownList(query);
             return Json(list);
         }
         public JsonResult GetWorkType()
         {
-            string query = @"SELECT CODE AS Value, NAME AS Text FROM DOCSTATUS_MAST
-             WHERE V_TYPE='WorkType' ORDER BY NAME";
+            string query = @"SELECT CODE AS Value, NAME AS Text FROM DOCSTATUS_MAST WHERE V_TYPE='WorkType' ORDER BY NAME";
             var list = _dropdownService.GetDropdownList(query);
             return Json(list);
         }
         [HttpPost]
         public async Task<IActionResult> SaveAllData([FromForm] PrintingRequestModel model)
         {
+            bool isApprovalBody = false;
+            bool isFinalApprovalBody = false;
+            string fappStatus = "";
+            string fappRemark = "";
             if (model == null || model.Header == null)
             {
                 return Json(new
@@ -199,25 +200,47 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         {
                             throw new Exception("Document number is required.");
                         }
-
                         int vNoInt = Convert.ToInt32(vNo);
                         string compCode = globalVar.PubCompCode;
                         int branchCode = globalVar.PubBranchCode;
                         string yearCode = globalVar.PubFYearCode;
                         string docId = vType + vNo;
-                        // INSERT
-                        if (action == "INSERT")
+            
+                    string approvalQuery = @"SELECT APPROV_USER FROM DOC_APPROSTAGE WHERE USER_CODE = @USER_CODE AND DOC_CODE = @DOC_CODE AND COMP_CODE = @COMP_CODE";
+                    using (SqlCommand cmdApproval = new SqlCommand(approvalQuery, con, tran))
+                    {
+                        cmdApproval.Parameters.Add("@USER_CODE", SqlDbType.Int).Value = globalVar.PubUserId;
+                        cmdApproval.Parameters.Add("@DOC_CODE", SqlDbType.NVarChar, 50).Value = vType;
+                        cmdApproval.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = Convert.ToInt32(compCode);
+                        object result = await cmdApproval.ExecuteScalarAsync();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            isApprovalBody = true;
+                            string approvUser = result.ToString().Trim();
+                            if (approvUser.Equals("FINAL", StringComparison.OrdinalIgnoreCase))
+                            {
+                                isFinalApprovalBody = true;
+                            }
+                        }
+                    }
+                    // FINAL APPROVAL
+                    if (isFinalApprovalBody)
+                    {
+                        fappStatus = "Approved";
+                        fappRemark = "Document Approved.";
+                    }
+                    // INSERT
+                    if (action == "INSERT")
                         {
                             // HEADER INSERT
-
                             string qryHeader = @"
                             INSERT INTO PRINT_REQUEST1 (COMP_CODE, BRANCH_CODE, YEAR_CODE, V_TYPE, V_NO, V_DATE, DOC_ID,
-                            PLACE_CODE, OWNER_CODE, OWNER_NAME, DEPT_CODE, STATUS, TARGET_DATE, REASON, VALID_DATE, REMARKS, ACTIVE,
+                            PLACE_CODE, OWNER_CODE, OWNER_NAME, DEPT_CODE, STATUS, TARGET_DATE, REASON, VALID_DATE, REMARKS,FAPROV_STATUS,FAPROV_REMARKS, ACTIVE,
                             UUSER, UDATE, AED, WSID, LIP, LID)
                             VALUES (@COMP_CODE, @BRANCH_CODE, @YEAR_CODE, @V_TYPE, @V_NO, @V_DATE, @DOC_ID, @PLACE_CODE,
-                            @OWNER_CODE, @OWNER_NAME, @DEPT_CODE, @STATUS, @TARGET_DATE, @REASON, @VALID_DATE, @REMARKS, 1, @UUSER, @UDATE,
+                            @OWNER_CODE, @OWNER_NAME, @DEPT_CODE, @STATUS, @TARGET_DATE, @REASON, @VALID_DATE, @REMARKS,@FAPROV_STATUS,@FAPROV_REMARKS, 1, @UUSER, @UDATE,
                             'A', @WSID, @LIP, @LID)";
-
+            
                             using (SqlCommand cmdHeader =  new SqlCommand(qryHeader, con, tran))
                             {
                                 cmdHeader.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = compCode;
@@ -235,6 +258,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 cmdHeader.Parameters.Add("@TARGET_DATE", SqlDbType.DateTime).Value = model.Header.RequiredDate.HasValue
                                         ? (object)model.Header.RequiredDate.Value : DBNull.Value;
                                 cmdHeader.Parameters.Add("@REASON", SqlDbType.NVarChar, 500).Value =  model.Header.Reason ?? "";
+                                cmdHeader.Parameters.Add("@FAPROV_STATUS", SqlDbType.NVarChar, 500).Value = fappStatus ?? "";
+                                cmdHeader.Parameters.Add("@FAPROV_REMARKS", SqlDbType.NVarChar, 500).Value = fappRemark ?? "";
                                 cmdHeader.Parameters.Add("@VALID_DATE", SqlDbType.DateTime).Value = DateTime.Now;
                                 cmdHeader.Parameters.Add("@REMARKS", SqlDbType.NVarChar, 500).Value =  model.Header.Remarks ?? "";
                                 cmdHeader.Parameters.Add("@UUSER", SqlDbType.Int).Value = globalVar.PubUserId;
@@ -251,117 +276,82 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                             // HEADER UPDATE
                             string qryHeaderUpdate = @"UPDATE PRINT_REQUEST1 SET V_DATE = @V_DATE, DOC_ID = @DOC_ID,
                             PLACE_CODE = @PLACE_CODE, OWNER_CODE = @OWNER_CODE, OWNER_NAME = @OWNER_NAME, DEPT_CODE = @DEPT_CODE, STATUS = @STATUS,
-                            TARGET_DATE = @TARGET_DATE, REASON = @REASON, VALID_DATE = @VALID_DATE, REMARKS = @REMARKS, UUSER = @UUSER,
+                            TARGET_DATE = @TARGET_DATE, REASON = @REASON, VALID_DATE = @VALID_DATE, REMARKS = @REMARKS, FAPROV_STATUS = @FAPROV_STATUS,FAPROV_REMARKS =@FAPROV_REMARKS, UUSER = @UUSER,
                             UDATE = @UDATE, AED = 'E', WSID = @WSID, LIP = @LIP,
                             LID = @LID WHERE COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE
                             AND V_TYPE = @V_TYPE AND V_NO = @V_NO";
                             using (SqlCommand cmdHeader = new SqlCommand(qryHeaderUpdate, con, tran))
                             {
                                 cmdHeader.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = compCode;
-
                                 cmdHeader.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = branchCode;
-
                                 cmdHeader.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = yearCode;
-
                                 cmdHeader.Parameters.Add("@V_TYPE", SqlDbType.NVarChar, 10).Value = vType;
-
                                 cmdHeader.Parameters.Add("@V_NO", SqlDbType.Int).Value = vNoInt;
-
                                 cmdHeader.Parameters.Add("@V_DATE", SqlDbType.DateTime).Value = model.Header.DocDate;
-
                                 cmdHeader.Parameters.Add("@DOC_ID", SqlDbType.NVarChar, 50).Value = docId;
-
                                 cmdHeader.Parameters.Add("@PLACE_CODE", SqlDbType.Int).Value = Convert.ToInt32(model.Header.Place);
-
                                 cmdHeader.Parameters.Add("@OWNER_CODE", SqlDbType.Int).Value = Convert.ToInt32(model.Header.RequestBy);
-
                                 cmdHeader.Parameters.Add("@OWNER_NAME", SqlDbType.NVarChar, 200).Value = model.Header.RequestByName ?? "";
-
                                 cmdHeader.Parameters.Add("@DEPT_CODE", SqlDbType.Int).Value = Convert.ToInt32(model.Header.Department);
-
                                 cmdHeader.Parameters.Add("@STATUS", SqlDbType.Int).Value = Convert.ToInt32(model.Header.Status);
-
                                 cmdHeader.Parameters.Add("@TARGET_DATE", SqlDbType.DateTime).Value = model.Header.RequiredDate.HasValue
                                         ? (object)model.Header.RequiredDate.Value : DBNull.Value;
-
                                 cmdHeader.Parameters.Add("@REASON", SqlDbType.NVarChar, 500).Value = model.Header.Reason ?? "";
-
                                 cmdHeader.Parameters.Add("@VALID_DATE", SqlDbType.DateTime).Value = DateTime.Now;
-
                                 cmdHeader.Parameters.Add("@REMARKS", SqlDbType.NVarChar, 500).Value = model.Header.Remarks ?? "";
-
+                                cmdHeader.Parameters.Add("@FAPROV_STATUS", SqlDbType.NVarChar, 500).Value = fappStatus ?? "";
+                                cmdHeader.Parameters.Add("@FAPROV_REMARKS", SqlDbType.NVarChar, 500).Value = fappRemark ?? "";
                                 cmdHeader.Parameters.Add("@UUSER", SqlDbType.Int).Value = globalVar.PubUserId;
-
                                 cmdHeader.Parameters.Add("@UDATE", SqlDbType.DateTime).Value = DateTime.Now;
-
                                 cmdHeader.Parameters.Add("@WSID", SqlDbType.NVarChar, 100).Value = globalVar.PubWorkStationID ?? "";
-
                                 cmdHeader.Parameters.Add("@LIP", SqlDbType.NVarChar, 100).Value = globalVar.PubLocalId ?? "";
-
                                 cmdHeader.Parameters.Add("@LID", SqlDbType.NVarChar, 100).Value = Environment.MachineName;
-
                                 int headerRows = await cmdHeader.ExecuteNonQueryAsync();
-
                                 if (headerRows == 0)
                                 {
                                     throw new Exception("Printing request header not found for update.");
                                 }
                             }
-
-                            // =================================================
                             // DELETE OLD DETAILS
-                            // =================================================
-
                             string qryDeleteDetails = @" DELETE FROM PRINT_REQUEST2 WHERE COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE
                             AND YEAR_CODE = @YEAR_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO";
                             using (SqlCommand cmdDeleteDetails = new SqlCommand(qryDeleteDetails, con, tran))
                             {
                                 cmdDeleteDetails.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = compCode;
-
                                 cmdDeleteDetails.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = branchCode;
-
                                 cmdDeleteDetails.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = yearCode;
-
                                 cmdDeleteDetails.Parameters.Add("@V_TYPE", SqlDbType.NVarChar, 10).Value = vType;
-
                                 cmdDeleteDetails.Parameters.Add("@V_NO", SqlDbType.Int).Value = vNoInt;
-
                                 await cmdDeleteDetails.ExecuteNonQueryAsync();
                             }
                             // DELETE OLD IMAGES
-                            string qryDeleteImages = @" DELETE FROM IMG_TABLE WHERE COMP_CODE = @COMP_CODE  AND BRANCH_CODE = @BRANCH_CODE
+                            string qryDeleteImages = @"DELETE FROM IMG_TABLE WHERE COMP_CODE = @COMP_CODE  AND BRANCH_CODE = @BRANCH_CODE
                             AND YEAR_CODE = @YEAR_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO";
-
+            
                             using (SqlCommand cmdDeleteImages = new SqlCommand(qryDeleteImages, con, tran))
                             {
                                 cmdDeleteImages.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = compCode;
-
                                 cmdDeleteImages.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = branchCode;
-
                                 cmdDeleteImages.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = yearCode;
-
                                 cmdDeleteImages.Parameters.Add("@V_TYPE", SqlDbType.NVarChar, 10).Value = vType;
-
                                 cmdDeleteImages.Parameters.Add("@V_NO", SqlDbType.Int).Value = vNoInt;
-
                                 await cmdDeleteImages.ExecuteNonQueryAsync();
                             }
                         }
                         // INSERT DETAILS
-
                         if (model.Details != null && model.Details.Any())
                         {
                             int srNo = 1;
                             foreach (var item in model.Details)
                             {
                                 string qryDetail = @"
-                            INSERT INTO PRINT_REQUEST2(COMP_CODE, BRANCH_CODE, YEAR_CODE, V_TYPE, V_NO, V_DATE, DOC_ID,
-                            ITEM_CODE, MAKE_CODE, TECH_DESC, UOM_CODE, REQ_QTY, MAT_TYPE, PRINT_TYPE, FINISH, REMARKS, REQ_REASON,
-                            PLACE_USE, WORK_TYPE, PRIORITY_TYPE, SCRAP_TYPE, ACTIVE, STATUS, SRNO, AED)
-                            VALUES(@COMP_CODE, @BRANCH_CODE, @YEAR_CODE, @V_TYPE, @V_NO, @V_DATE, @DOC_ID, @ITEM_CODE,
-                            @MAKE_CODE, @TECH_DESC, @UOM_CODE, @REQ_QTY, @MAT_TYPE, @PRINT_TYPE, @FINISH, @REMARKS, @REQ_REASON, @PLACE_USE,
-                            @WORK_TYPE, @PRIORITY_TYPE, @SCRAP_TYPE, 1, @STATUS, @SRNO,'A')";
-
+                                INSERT INTO PRINT_REQUEST2(COMP_CODE, BRANCH_CODE, YEAR_CODE, V_TYPE, V_NO, V_DATE, DOC_ID,
+                                ITEM_CODE, MAKE_CODE, TECH_DESC, UOM_CODE, REQ_QTY, MAT_TYPE, PRINT_TYPE, FINISH, REMARKS, REQ_REASON,
+                                PLACE_USE, WORK_TYPE, PRIORITY_TYPE, SCRAP_TYPE, ACTIVE, STATUS, SRNO, AED)
+                                VALUES(@COMP_CODE, @BRANCH_CODE, @YEAR_CODE, @V_TYPE, @V_NO, @V_DATE, @DOC_ID, @ITEM_CODE,
+                                @MAKE_CODE, @TECH_DESC, @UOM_CODE, @REQ_QTY, @MAT_TYPE, @PRINT_TYPE, @FINISH, @REMARKS, @REQ_REASON, @PLACE_USE,
+                                @WORK_TYPE, @PRIORITY_TYPE, @SCRAP_TYPE, 1, @STATUS, @SRNO,'A')";
+            
                                 using (SqlCommand cmdDetail = new SqlCommand(qryDetail, con, tran))
                                 {
                                     cmdDetail.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = compCode;
@@ -391,12 +381,8 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 }
                             }
                         }
-
-                        // =====================================================
                         // INSERT FILES
                         // INSERT FOR BOTH INSERT & UPDATE
-                        // =====================================================
-
                         if (model.Files != null && model.Files.Any())
                         {
                             int rowId = 1;
@@ -410,120 +396,39 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                     await file.CopyToAsync(ms);
                                     fileBytes = ms.ToArray();
                                 }
-
                                 string qryImage = @"
-            INSERT INTO IMG_TABLE
-            (
-                COMP_CODE,
-                BRANCH_CODE,
-                YEAR_CODE,
-                DOC_ID,
-                V_NO,
-                V_TYPE,
-                V_DATE,
-                ROWID,
-                IMG_FILE,
-                FILE_NAME,
-                FILE_TYPE,
-                UUSER,
-                UDATE,
-                AED,
-                WSID,
-                LIP,
-                LID
-            )
-            VALUES
-            (
-                @COMP_CODE,
-                @BRANCH_CODE,
-                @YEAR_CODE,
-                @DOC_ID,
-                @V_NO,
-                @V_TYPE,
-                @V_DATE,
-                @ROWID,
-                @IMG_FILE,
-                @FILE_NAME,
-                @FILE_TYPE,
-                @UUSER,
-                GETDATE(),
-                'A',
-                @WSID,
-                @LIP,
-                @LID
-            )";
-
-                                using (SqlCommand cmdImage =
-                                       new SqlCommand(qryImage, con, tran))
+                                    INSERT INTO IMG_TABLE(COMP_CODE, BRANCH_CODE, YEAR_CODE, DOC_ID, V_NO, V_TYPE, V_DATE, ROWID,
+                                    IMG_FILE, FILE_NAME, FILE_TYPE, UUSER, UDATE, AED, WSID, LIP, LID)
+                                    VALUES(@COMP_CODE, @BRANCH_CODE, @YEAR_CODE, @DOC_ID, @V_NO, @V_TYPE, @V_DATE,
+                                    @ROWID, @IMG_FILE, @FILE_NAME, @FILE_TYPE, @UUSER, GETDATE(), 'A', @WSID, @LIP, @LID)";
+            
+                                using (SqlCommand cmdImage = new SqlCommand(qryImage, con, tran))
                                 {
-                                    cmdImage.Parameters.Add("@COMP_CODE",
-                                        SqlDbType.Int).Value = compCode;
-
-                                    cmdImage.Parameters.Add("@BRANCH_CODE",
-                                        SqlDbType.Int).Value = branchCode;
-
-                                    cmdImage.Parameters.Add("@YEAR_CODE",
-                                        SqlDbType.Int).Value = yearCode;
-
-                                    cmdImage.Parameters.Add("@DOC_ID",
-                                        SqlDbType.NVarChar, 50).Value = docId;
-
-                                    cmdImage.Parameters.Add("@V_NO",
-                                        SqlDbType.Int).Value = vNoInt;
-
-                                    cmdImage.Parameters.Add("@V_TYPE",
-                                        SqlDbType.NVarChar, 10).Value = vType;
-
-                                    cmdImage.Parameters.Add("@V_DATE",
-                                        SqlDbType.DateTime).Value =
-                                        model.Header.DocDate;
-
-                                    cmdImage.Parameters.Add("@ROWID",
-                                        SqlDbType.Int).Value = rowId++;
-
-                                    cmdImage.Parameters.Add("@IMG_FILE",
-                                        SqlDbType.VarBinary, -1).Value = fileBytes;
-
-                                    cmdImage.Parameters.Add("@FILE_NAME",
-                                        SqlDbType.NVarChar, 255).Value =
-                                        file.FileName;
-
-                                    cmdImage.Parameters.Add("@FILE_TYPE",
-                                        SqlDbType.NVarChar, 50).Value =
-                                        Path.GetExtension(file.FileName);
-
-                                    cmdImage.Parameters.Add("@UUSER",
-                                        SqlDbType.Int).Value =
-                                        globalVar.PubUserId;
-
-                                    cmdImage.Parameters.Add("@WSID",
-                                        SqlDbType.NVarChar, 100).Value =
-                                        globalVar.PubWorkStationID ?? "";
-
-                                    cmdImage.Parameters.Add("@LIP",
-                                        SqlDbType.NVarChar, 100).Value =
-                                        globalVar.PubLocalId ?? "";
-
-                                    cmdImage.Parameters.Add("@LID",
-                                        SqlDbType.NVarChar, 100).Value =
-                                        Environment.MachineName;
-
+                                    cmdImage.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = compCode;
+                                    cmdImage.Parameters.Add("@BRANCH_CODE",SqlDbType.Int).Value = branchCode;
+                                    cmdImage.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = yearCode;
+                                    cmdImage.Parameters.Add("@DOC_ID", SqlDbType.NVarChar, 50).Value = docId;
+                                    cmdImage.Parameters.Add("@V_NO", SqlDbType.Int).Value = vNoInt;
+                                    cmdImage.Parameters.Add("@V_TYPE", SqlDbType.NVarChar, 10).Value = vType;
+                                    cmdImage.Parameters.Add("@V_DATE", SqlDbType.DateTime).Value = model.Header.DocDate;
+                                    cmdImage.Parameters.Add("@ROWID", SqlDbType.Int).Value = rowId++;
+                                    cmdImage.Parameters.Add("@IMG_FILE", SqlDbType.VarBinary, -1).Value = fileBytes;
+                                    cmdImage.Parameters.Add("@FILE_NAME", SqlDbType.NVarChar, 255).Value = file.FileName;
+                                    cmdImage.Parameters.Add("@FILE_TYPE", SqlDbType.NVarChar, 50).Value = Path.GetExtension(file.FileName);
+                                    cmdImage.Parameters.Add("@UUSER", SqlDbType.Int).Value = globalVar.PubUserId;
+                                    cmdImage.Parameters.Add("@WSID",SqlDbType.NVarChar, 100).Value = globalVar.PubWorkStationID ?? "";
+                                    cmdImage.Parameters.Add("@LIP", SqlDbType.NVarChar, 100).Value = globalVar.PubLocalId ?? "";
+                                    cmdImage.Parameters.Add("@LID", SqlDbType.NVarChar, 100).Value = Environment.MachineName;
                                     await cmdImage.ExecuteNonQueryAsync();
                                 }
                             }
                         }
-                        // =====================================================
                         // COMMIT
-                        // =====================================================
-
                         await tran.CommitAsync();
-
                         return Json(new
                         {
                             success = true,
-                            message = action == "INSERT"
-                                ? "Saved Successfully"
-                                : "Updated Successfully",
+                            message = action == "INSERT" ? "Saved Successfully" : "Updated Successfully",
                             action = action,
                             vType = vType,
                             vNo = vNo,
@@ -540,7 +445,6 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                         {
                             // Ignore rollback error
                         }
-
                         return Json(new
                         {
                             success = false,
@@ -557,61 +461,32 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             try
             {
                 var global = _globalVariableService.GetGlobalVariables();
-
                 int vNo = request.VNo;
                 string vType = request.VType;
-
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 using (SqlCommand cmd = new SqlCommand("sp_GetPrintingRequestion", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int)
-                        .Value = global.PubCompCode;
-
-                    cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int)
-                        .Value = global.PubBranchCode;
-
-                    cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int)
-                        .Value = global.PubFYearCode;
-
-                    cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 15)
-                        .Value = "GetById";
-
-                    cmd.Parameters.Add("@V_TYPE", SqlDbType.NVarChar, 50)
-                        .Value = vType;
-
-                    cmd.Parameters.Add("@V_NO", SqlDbType.Int)
-                        .Value = vNo;
-
+                    cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = global.PubCompCode;
+                    cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = global.PubBranchCode;
+                    cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = global.PubFYearCode;
+                    cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 15).Value = "GetById";
+                    cmd.Parameters.Add("@V_TYPE", SqlDbType.NVarChar, 50).Value = vType;
+                    cmd.Parameters.Add("@V_NO", SqlDbType.Int).Value = vNo;
                     con.Open();
-
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        // ==========================================
                         // HEADER
-                        // ==========================================
-
                         var header = new Dictionary<string, object>();
-
                         if (reader.Read())
                         {
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
-                                header[reader.GetName(i)] =
-                                    reader.IsDBNull(i)
-                                        ? null
-                                        : reader.GetValue(i);
+                                header[reader.GetName(i)] = reader.IsDBNull(i) ? null: reader.GetValue(i);
                             }
                         }
-
-
-                        // ==========================================
                         // DETAILS
-                        // ==========================================
-
                         var details = new List<Dictionary<string, object>>();
-
                         if (reader.NextResult())
                         {
                             while (reader.Read())
@@ -620,53 +495,32 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                                 for (int i = 0; i < reader.FieldCount; i++)
                                 {
-                                    detail[reader.GetName(i)] =
-                                        reader.IsDBNull(i)
-                                            ? null
-                                            : reader.GetValue(i);
+                                    detail[reader.GetName(i)] = reader.IsDBNull(i) ? null : reader.GetValue(i);
                                 }
-
                                 details.Add(detail);
                             }
                         }
-
-
-                        // ==========================================
                         // FILES / IMAGES
-                        // ==========================================
-
                         var images = new List<object>();
-
                         if (reader.NextResult())
                         {
                             while (reader.Read())
                             {
                                 string fileName = "";
                                 string base64 = "";
-
                                 // FILE NAME
                                 int fileNameIndex = reader.GetOrdinal("FILE_NAME");
-
                                 if (!reader.IsDBNull(fileNameIndex))
                                 {
-                                    fileName =
-                                        reader.GetValue(fileNameIndex).ToString();
+                                    fileName = reader.GetValue(fileNameIndex).ToString();
                                 }
-
-
                                 // IMAGE BYTES
                                 int imageIndex = reader.GetOrdinal("IMG_FILE");
-
                                 if (!reader.IsDBNull(imageIndex))
                                 {
-                                    byte[] imageBytes =
-                                        (byte[])reader.GetValue(imageIndex);
-
-                                    base64 =
-                                        Convert.ToBase64String(imageBytes);
+                                    byte[] imageBytes = (byte[])reader.GetValue(imageIndex);
+                                    base64 = Convert.ToBase64String(imageBytes);
                                 }
-
-
                                 images.Add(new
                                 {
                                     filE_NAME = fileName,
@@ -674,12 +528,7 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                                 });
                             }
                         }
-
-
-                        // ==========================================
                         // RESPONSE
-                        // ==========================================
-
                         return Json(new
                         {
                             success = true,
@@ -699,6 +548,107 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 });
             }
         }
-
+        [HttpPost]
+        public async Task<IActionResult> PrintingRequestionEntryReport([FromBody] PrintReportModelPrintingRequestion model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid report request."
+                    });
+                }
+                if (string.IsNullOrWhiteSpace(model.VType))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "VType is required."
+                    });
+                }
+                if (string.IsNullOrWhiteSpace(model.VNo))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "VNo is required."
+                    });
+                }
+                if (!int.TryParse(model.VNo, out int vNo))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid VNo."
+                    });
+                }
+                var gv = _globalVariableService.GetGlobalVariables();
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    await con.OpenAsync();
+                    // 1. CHECK PRINTING REQUISITION EXISTS
+                    string sql = @" SELECT 1 FROM PRINT_REQUEST1 WHERE COMP_CODE = @COMP_CODE
+                    AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO";
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = Convert.ToInt32(gv.PubCompCode);
+                        cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = Convert.ToInt32(gv.PubBranchCode);
+                        cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = Convert.ToInt32(gv.PubFYearCode);
+                        cmd.Parameters.Add("@V_TYPE", SqlDbType.NVarChar, 50).Value = model.VType.Trim();
+                        cmd.Parameters.Add("@V_NO", SqlDbType.Int).Value = vNo;
+                        var exists = await cmd.ExecuteScalarAsync();
+                        if (exists == null)
+                        {
+                            return Json(new
+                            {
+                                success = false,
+                                message = $"Printing Requisition not found. " + $"VType: {model.VType}, VNo: {model.VNo}"
+                            });
+                        }
+                    }
+                    // 2. REPORT NAME
+                    string reportName = "storereqslip";
+                    // 3. CRYSTAL REPORT SELECTION FORMULA
+                    string selectionFormula = "{PRINT_REQUEST1.COMP_CODE} = " +
+                        gv.PubCompCode + " AND {PRINT_REQUEST1.BRANCH_CODE} = " +
+                        gv.PubBranchCode + " AND {PRINT_REQUEST1.YEAR_CODE} = " +
+                        gv.PubFYearCode + " AND {PRINT_REQUEST1.V_TYPE} = '" +
+                        model.VType.Trim() + "'" + " AND {PRINT_REQUEST1.V_NO} = " + vNo;
+                    // 4. REPORT DATA
+                    var requestData = new
+                    {
+                        Reportname = reportName,
+                        Database = "ERPDB",
+                        selectionFormula = selectionFormula,
+                        Parameters = new
+                        {
+                            comp_name = gv.CompanyName,
+                            comp_add1 = gv.Address1,
+                            comp_add2 = gv.Address2,
+                            RPTNAME = "Printing Requisition Form",
+                            approvedBy = "kks"
+                        }
+                    };
+                    // 5. RETURN REPORT DATA TO JAVASCRIPT
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Report data generated successfully.",
+                        report = requestData
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

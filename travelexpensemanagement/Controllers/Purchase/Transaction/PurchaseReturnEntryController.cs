@@ -303,29 +303,5 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 });
             }
         }
-
-        [HttpPost]
-        public async Task<IActionResult> PrintPurchaseReturnEntryReport([FromBody] PrintReportModelPurchaseReturnEntry model)
-        {
-            if (model == null)
-                return BadRequest();
-
-            try
-            {
-                var result = await _purchaseReturnEntryRepository
-                    .PrintPurchaseReturnEntryReport(model);
-
-                return Json(result);
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
-            }
-        }
-       
     }
 }

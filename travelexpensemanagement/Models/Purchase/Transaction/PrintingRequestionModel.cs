@@ -79,5 +79,10 @@
         public string FILE_NAME { get; set; }
         public string FILE_TYPE { get; set; }
     }
+    public class PrintReportModelPrintingRequestion
+    {
+        public string VType { get; set; }
+        public string VNo { get; set; }
+    }
 
 }

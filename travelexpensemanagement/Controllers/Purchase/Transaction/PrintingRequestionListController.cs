@@ -106,6 +106,43 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             }
             return Json(response);
         }
-        
+
+        [HttpPost]
+        public JsonResult Delete(int vNo, string vType)
+        {
+            vType = "PRPI";
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                using (SqlCommand cmd = new SqlCommand("sp_GetPrintingRequestion", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@Action", SqlDbType.NVarChar, 15).Value = "Delete";
+                    cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = gv.PubFYearCode;
+                    cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = gv.PubCompCode;
+                    cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = gv.PubBranchCode;
+                    cmd.Parameters.Add("@V_NO", SqlDbType.Int).Value = vNo;
+                    cmd.Parameters.Add("@V_TYPE", SqlDbType.VarChar, 20).Value = vType;
+                    con.Open();
+                    cmd.ExecuteNonQuery();
+                }
+                return Json(new
+                {
+                    status = true,
+                    message = "Record deleted successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = ex.Message
+                });
+            }
+        }
+
     }
 }

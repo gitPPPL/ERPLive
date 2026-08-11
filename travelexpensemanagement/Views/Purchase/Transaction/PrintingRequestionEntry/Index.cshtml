@@ -11,6 +11,11 @@
         <div class="erppage-header-title">Printing Requestion Entry</div>
     </div>
     <div class="erppage-header-right">
+
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" onclick="PrintingRequestionEntryReport()">
+            <i class="fa fa-print"></i> Print
+        </button>
+
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PrintingRequestionList")', readOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -233,7 +238,9 @@
         priorityList = priorityResponse[0] || [];
         workTypeList = workTypeResponse[0] || [];
         itemList = itemResponse[0] || [];
-
+        if (mode === 'view') {
+          setPageReadOnly();
+        } 
         // Now itemList is ready
         if (code) {
            $.ajax({
@@ -371,7 +378,11 @@
          addNewRow();
         });
 
-        $("#btn-save").click(function () {
+         $("#btn-save").click(function () {
+         
+         if (!validateData()) {
+             return false;
+         }
          var formData = new FormData();
          // Header
          formData.append("Header.DocNo", $("#NumDocNo").val());
@@ -436,6 +447,118 @@
          });
     });
     });
+    function validateData() {
+        // DOCUMENT NO
+        var docNo = $("#NumDocNo").val();
+        if (!docNo || parseInt(docNo) <= 0) {
+            toastr.warning("Doc no is 0, record not saved.", "Validation");
+            $("#NumDocNo").focus();
+            return false;
+        }
+        // DEPARTMENT
+        var department = $("#ddlDepartment").val();
+        if (!department) { toastr.warning("Department Name is required.", "Validation" );
+            $("#ddlDepartment").focus();
+            return false;
+        }
+        var place = $("#ddlPlace").val();
+        if (!place) {
+            toastr.warning("Place is required.", "Validation");
+            $("#ddlPlace").focus();
+            return false;
+        }
+        var requestBy = $("#ddlrequestby").val();
+        if (!requestBy) {
+            toastr.warning("Requested by Name is required.", "Validation");
+            $("#ddlrequestby").focus();
+            return false;
+        }
+        var docDateValue = $("#DtDocDate").val();
+        if (!docDateValue) {
+            toastr.warning("Document Date is required.","Validation");
+            $("#DtDocDate").focus();
+            return false;
+        }
+        var requiredDateValue = $("#DtRequiredDate").val();
+        if (!requiredDateValue) {
+            toastr.warning("Required Date is required.","Validation");
+            $("#DtRequiredDate").focus();
+            return false;
+        }
+        var docDate = new Date(docDateValue);
+        var requiredDate = new Date(requiredDateValue);
+        // REQUIRED DATE < DOCUMENT DATE
+        if (requiredDate < docDate) {
+            toastr.warning("Required Date can not less than Document date.","Validation");
+            $("#DtRequiredDate").focus();
+            return false;
+        }
+        // REASON IF LESS THAN 5 DAYS
+        var fiveDaysLater = new Date(docDate);
+        fiveDaysLater.setDate(fiveDaysLater.getDate() + 5);
+        if (requiredDate < fiveDaysLater && $.trim($("#TxtReason").val()) === "")
+        {
+            toastr.warning("Please specify the Reason for Urgent Requirement less than 5 days.", "Validation");
+            $("#TxtReason").focus();
+            return false;
+        }
+        // DETAIL ROW CHECK
+        var validItemCount = 0;
+        var itemCodes = [];
+        var duplicateFound = false;
+        $("#tblPrintingRequestionEntry tbody tr").each(function () {
+            var row = $(this);
+            var itemCode = row.find(".itemddl").val();
+            var description = row.find(".description").val();
+            var qty = row.find(".qty").val();
+            var placeUse = row.find(".placeuse").val();
+            // ITEM CODE
+            if (description && (!itemCode || parseInt(itemCode) === 0))
+            {
+                toastr.warning("Item code not valid.","Validation");
+                row.find(".itemddl").focus();
+                duplicateFound = true;
+                return false;
+            }
+            // VALID ITEM
+            if (itemCode && parseInt(itemCode) > 0) {
+                validItemCount++;
+                // DUPLICATE ITEM
+                if ($.inArray(itemCode, itemCodes) !== -1) {
+                    toastr.warning("Duplicate record found for item: " + description + ". Kindly Remove Duplicate items.", "Validation");
+                    row.find(".itemddl").focus();
+                    duplicateFound = true;
+                    return false;
+                }
+                itemCodes.push(itemCode);
+                // QUANTITY
+                if (!qty || parseFloat(qty) <= 0) {
+                    toastr.warning("Request Qty of " + description + " must not be 0.", "Validation");
+                    row.find(".qty").focus();
+                    duplicateFound = true;
+                    return false;
+                }
+                // PLACE OF USE
+                if ($.trim(placeUse) === "") {
+                    toastr.warning("Place of use of " + description + " is required/Compulsory.", "Validation");
+                    row.find(".placeuse").focus();
+                    duplicateFound = true;
+                    return false;
+                }
+            }
+        });
+        // Stop if detail validation failed
+        if (duplicateFound) {
+            return false;
+        }
+        // AT LEAST ONE ITEM
+        if (validItemCount === 0) {
+            toastr.warning("Item Details Should not be Blank, Kindly Check in Grid.","Validation");
+            return false;
+        }
+        return true;
+    }
+
     function ddlDocNo() {
         $.ajax({
             url: '/PrintingRequestionEntry/GetDocNo',
@@ -784,132 +907,37 @@
 
         if (!value)
             return "";
-
         if (typeof value === "string") {
-
             if (value.includes("T")) {
-
                 return value.split("T")[0];
-
             }
-
             if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-
                 return value;
-
             }
         }
 
         var date = new Date(value);
-
         if (isNaN(date.getTime()))
             return "";
-
         var yyyy = date.getFullYear();
-
-        var mm = String(
-            date.getMonth() + 1
-        ).padStart(2, '0');
-
-        var dd = String(
-            date.getDate()
-        ).padStart(2, '0');
-
+        var mm = String(date.getMonth() + 1).padStart(2, '0');
+        var dd = String(date.getDate()).padStart(2, '0');
         return yyyy + "-" + mm + "-" + dd;
     }
     function fillHeaderData(header) {
-
         if (!header)
-            return;
-
+         return;
         console.log("Header:", header);
-
-        // =====================================
-        // Doc No
-        // =====================================
-
         $("#NumDocNo").val(header.V_NO ?? "");
-
-
-        // =====================================
-        // Doc Date
-        // =====================================
-
-        $("#DtDocDate").val(
-            formatDateForInput(header.V_DATE)
-        );
-
-
-        // =====================================
-        // Place
-        // =====================================
-
-        $("#ddlPlace").val(
-            header.PLACE_CODE ?? ""
-        );
-
-
-        // =====================================
-        // Status
-        // =====================================
-
-        $("#ddlStatus").val(
-            header.STATUS ?? ""
-        );
-
-
-        // =====================================
-        // Department
-        // =====================================
-
-        $("#ddlDepartment").val(
-            header.DEPT_CODE ?? ""
-        );
-
-
-        // =====================================
-        // Required Date
-        // =====================================
-
-        $("#DtRequiredDate").val(
-            formatDateForInput(header.TARGET_DATE)
-        );
-
-
-        // =====================================
-        // Request By
-        // =====================================
-
-        $("#ddlrequestby").val(
-            header.OWNER_CODE ?? ""
-        );
-
-
-        // =====================================
-        // Request By Name
-        // =====================================
-
-        $("#Txtrequestby").val(
-            header.OWNER_NAME ?? ""
-        );
-
-
-        // =====================================
-        // Reason
-        // =====================================
-
-        $("#TxtReason").val(
-            header.REASON ?? ""
-        );
-
-
-        // =====================================
-        // Remarks
-        // =====================================
-
-        $("#TxtRemarks").val(
-            header.REMARKS ?? ""
-        );
+        $("#DtDocDate").val(formatDateForInput(header.V_DATE));
+        $("#ddlPlace").val(header.PLACE_CODE ?? "");
+        $("#ddlStatus").val(header.STATUS ?? "");
+        $("#ddlDepartment").val(header.DEPT_CODE ?? "");
+        $("#DtRequiredDate").val(formatDateForInput(header.TARGET_DATE));
+        $("#ddlrequestby").val(header.OWNER_CODE ?? "");
+        $("#Txtrequestby").val(header.OWNER_NAME ?? "");
+        $("#TxtReason").val(header.REASON ?? "");
+        $("#TxtRemarks").val(header.REMARKS ?? "");
     }
     async function fillDetailData(details) {
         $("#tblPrintingRequestionEntry tbody").empty();
@@ -950,26 +978,18 @@
             // Remarks
             row.find(".remarks").val(detail.REMARKS ?? "");
             // Make Dropdown
-            await loadMakeForRow(
-                row,
-                detail.ITEM_CODE,
-                detail.MAKE_CODE
-            );
+            await loadMakeForRow(row, detail.ITEM_CODE, detail.MAKE_CODE);
         }
     }
     function loadMakeForRow(row, itemCode, selectedMakeCode) {
         return $.ajax({
             url: "/PrintingRequestionEntry/GetMake",
             type: "GET",
-            data: {
-                itemCode: itemCode
-            }
+            data: {itemCode: itemCode}
         }).then(function (data) {
             const makeDDL = row.find(".makeddl");
             makeDDL.empty();
-            makeDDL.append(
-                '<option value="">Select Make</option>'
-            );
+            makeDDL.append('<option value="">Select Make</option>');
             $.each(data, function (i, item) {
                 makeDDL.append(
                     $('<option>', {
@@ -982,4 +1002,73 @@
             makeDDL.val(selectedMakeCode ?? "");
         });
     }
+   function PrintingRequestionEntryReport() {
+        const code = getQueryParam('vNo');
+        const vType = getQueryParam('vType');
+        if (!vType) {
+            toastr.error("VType is required.");
+            return;
+        }
+        if (!code) 
+        {
+            toastr.error("VNo is required.");
+            return;
+        }
+        const model = {VType: vType, VNo: code };
+        console.log("Sending:", model);
+        $.ajax({
+            url: '@Url.Action("PrintingRequestionEntryReport", "PrintingRequestionEntry")',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(model),
+            success: function (response) {
+                console.log("Controller Response:", response);
+                if (!response.success) {
+                    toastr.error(response.message);
+                    return;
+                }
+                const requestData = response.report;
+                console.log("Report Data:", requestData);
+                $.ajax({
+                    url: "http://localhost:34087/Report/PendingQCReport",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(requestData),
+                    xhrFields: {
+                        responseType: "blob"
+                    },
+                    success: function (pdf) {
+                        const file = new Blob([pdf], {
+                            type: "application/pdf"
+                        });
+                        const url = window.URL.createObjectURL(file);
+                        window.open(url, "_blank");
+                    },
+                    error: function (xhr) {
+                        console.log("Report API Error:", xhr);
+                        toastr.error("Unable to generate report.");
+                    }
+                });
+            },
+            error: function (xhr) {
+                    console.log("Controller Error:", xhr);
+                    toastr.error(xhr.responseJSON?.message || "Error occurred while generating report."
+                );
+            }
+        });
+    }
+
+    function setPageReadOnly() {
+        $('input[type="text"]').prop('readonly', true);
+        $('input[type="number"]').prop('readonly', true);
+        $('input[type="date"]').prop('readonly', true);
+        $('textarea').prop('readonly', true);
+        $('select').prop('disabled', true);
+        $('input[type="checkbox"]').prop('disabled', true);
+        $('input[type="radio"]').prop('disabled', true);
+        $('input[type="file"]').prop('disabled', true);
+        $('#btn-save').prop('disabled', true);
+        $('#btn-save').closest('.erppage-actions').hide();
+    }
+
 </script>

@@ -10,20 +10,17 @@ namespace travelexpensemanagement.Common.Globalvariable
 {
     public class GlobalVariableService
     {
-        //private readonly string _connectionString;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly DataBaseConnection _dbConnection;
 
         public GlobalVariableService(DataBaseConnection dbConnection, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
-            //_connectionString = configuration.GetConnectionString("CONDATABASE");
             _httpContextAccessor = httpContextAccessor;
             _dbConnection = dbConnection;
         }
         public UserSessionData GetGlobalVariables()
         {
             var httpContext = _httpContextAccessor.HttpContext;
-
             if (httpContext == null)
                 throw new Exception("HttpContext is null.");
 
@@ -31,25 +28,18 @@ namespace travelexpensemanagement.Common.Globalvariable
             var sessionYearCode = httpContext.Session.GetString("SessionYearCode");
             var sessionComp = httpContext.Session.GetString("COMP_CODE");
             var formattedDate = httpContext.Session.GetString("SessionLogindate");
-            
-            //var CurrentMenuId = httpContext.Session.GetString("CurrentMenuId");
 
             var CompanyData = GetCompanydata();
-             string pubCompGSTIN = CompanyData.gstin;
-
+            string pubCompGSTIN = CompanyData.gstin;
 
             if (string.IsNullOrEmpty(userCode))
                 throw new Exception("User code not found in session. Login first.");
-
             DateTime loginDate = DateTime.Now;
 
-            if (!string.IsNullOrEmpty(formattedDate))
-                DateTime.TryParse(formattedDate, out loginDate);
+            if (!string.IsNullOrEmpty(formattedDate)) DateTime.TryParse(formattedDate, out loginDate);
             UserSessionData sessionData = null;
-
             string query = @" SELECT COMP_CODE, CODE, USER_NAME, USER_LEVEL, PC_NAME, LIP  FROM USER_MAST WHERE CODE = @UserCode";
 
-            //using (SqlConnection con = new SqlConnection(_dbConnection.GetConDbConnection()))
             using (SqlConnection con = _dbConnection.GetConDbConnection())
             using (SqlCommand cmd = new SqlCommand(query, con))
             {
@@ -100,7 +90,6 @@ namespace travelexpensemanagement.Common.Globalvariable
                     }
                 }
             }
-
             return sessionData;
         }
         public CompanyModel GetCompanydata()
@@ -116,9 +105,7 @@ namespace travelexpensemanagement.Common.Globalvariable
             using (SqlCommand cmd = new SqlCommand(query, con))
             {
                 cmd.Parameters.AddWithValue("@Code", sessionComp);
-
                 con.Open();
-
                 using (SqlDataReader reader = cmd.ExecuteReader())
                 {
                     if (reader.Read())
@@ -129,22 +116,16 @@ namespace travelexpensemanagement.Common.Globalvariable
                             Address1 = reader["ADD1"]?.ToString(),
                             Address2 = reader["ADD2"]?.ToString(),
                             Address3 = reader["ADD3"]?.ToString(),
-
                             gstin = reader["GSTIN"]?.ToString(),
                             PAN = reader["PAN"]?.ToString(),
-
                             Phone = reader["PHONE"]?.ToString(),
                             Fax = reader["FAX"]?.ToString(),
-
                             Email = reader["EMAIL"]?.ToString(),
                             Website = reader["WEBSITE"]?.ToString(),
-
                             Excise = reader["EXCISE"]?.ToString(),
                             ServiceTax = reader["SERVICETAX"]?.ToString(),
-
                             RegAdd1 = reader["RegAdd1"]?.ToString(),
                             RegAdd2 = reader["RegAdd2"]?.ToString(),
-
                             CINNO = reader["CINNO"]?.ToString()
                         };
                     }

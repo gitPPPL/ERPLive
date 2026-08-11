@@ -40,18 +40,18 @@
     <div class="excel-wrapper fixed-grid-wrapper">
         <table id="tblPrintingRequestionList" class="excel-table fixed-grid-table table-width resizable-table">
             <colgroup>
-                <col class="hidden-col">                 <!-- Code -->
-                <col style="width:100px;">               <!-- Doc Type -->
-                <col style="width:100px;">               <!-- Doc No -->
-                <col style="width:110px;">               <!-- Doc Date -->
-                <col style="width:180px;">               <!-- Department -->
-                <col style="width:180px;">               <!-- Owner Name -->
-                <col style="width:150px;">               <!-- Place -->
-                <col style="width:110px;">               <!-- Valid Date -->
-                <col style="width:110px;">               <!-- Target Date -->
-                <col style="width:220px;">               <!-- Remarks -->
-                <col style="width:90px;">                <!-- Status -->
-                <col style="width:120px;">               <!-- Action -->
+                <col class="hidden-col">      <!-- Code -->
+                <col style="width:100px;">    <!-- Doc Type -->
+                <col style="width:100px;">    <!-- Doc No -->
+                <col style="width:110px;">    <!-- Doc Date -->
+                <col style="width:180px;">    <!-- Department -->
+                <col style="width:180px;">    <!-- Owner Name -->
+                <col style="width:150px;">    <!-- Place -->
+                <col style="width:110px;">    <!-- Valid Date -->
+                <col style="width:110px;">    <!-- Target Date -->
+                <col style="width:220px;">    <!-- Remarks -->
+                <col style="width:90px;">     <!-- Status -->
+                <col style="width:120px;">    <!-- Action -->
             </colgroup>
             <thead>
                 <tr>
@@ -91,7 +91,7 @@
         </div>
     </div>
 </div>
-
+<script src="~/common/delete.js"></script>
 <script>
     let currentPage = 1;
     let pageSize = 10;
@@ -151,16 +151,8 @@
                             <td colspan="12" class="text-center text-muted"> No records found.</td>
                         </tr>
                     `);
-                    renderPagination(
-                        totalCount,
-                        pageSize,
-                        currentPage
-                    );
-                    updatePageInfo(
-                        totalCount,
-                        pageSize,
-                        currentPage
-                    );
+                    renderPagination(totalCount,pageSize,currentPage);
+                    updatePageInfo(totalCount,pageSize,currentPage);
                     return;
                 }
                 // RECORDS
@@ -198,10 +190,10 @@
                                <button class="act-btn view btn-view"  title="View" style="cursor:pointer;" onclick="viewPrintingRequestion('${doc.vNo || ''}', '${doc.vType || ''}')">
                                        <i class="fa fa-eye"></i>
                                </button>
-                               <button class="act-btn delete btn-delete" title="Delete Row" onclick="deletePrintingRequestion('${doc.vNo || ''}', '${doc.vType || ''}')">
-                                   <i class="fa fa-trash"></i>
+                               <button class="act-btn delete btn-delete" title="Delete Row" data-vno="${doc.vNo}" data-vtype="${doc.vType}" onclick="deletePrintingRequestion(this)">
+                               <i class="fa fa-trash"></i>
                                </button>
-                                </div>
+                           </div>
                             </td>
                         </tr>
                     `);
@@ -283,46 +275,21 @@
         window.location.href =`/PrintingRequestionEntry/Index?vNo=${encodeURIComponent(vNo)}&vType=${encodeURIComponent(vType)}&mode=edit`;
     }
     function viewPrintingRequestion(vNo, vType) {
-        window.location.href =   `/PrintingRequestionEntry/Index?vNo=${encodeURIComponent(vNo)}&vType=${encodeURIComponent(vType)}&mode=view`;
+        window.location.href = `/PrintingRequestionEntry/Index?vNo=${encodeURIComponent(vNo)}&vType=${encodeURIComponent(vType)}&mode=view`;
     }
     // DELETE
-    function deletePrintingRequestion(vNo, vType) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this deletion!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
-        }).then(function (result) {
-            if (!result.isConfirmed) {
-                return;
+    function deletePrintingRequestion(el) {
+        const vNo = $(el).data("vno");
+        const vType = "PRPI";
+        deleteRecordbytype("PrintingRequestionList", vNo, vType, {
+            action: "Delete",
+            text: "This will permanently delete the Printing Requisition entry.",
+            successCallback: function (response) {
+                console.log("Delete response:", response);
+                toastr.success(response?.message || "Record deleted successfully.");
+                // Delete ke baad list refresh
+                loadPrintingRequestionList();
             }
-            $.ajax({
-                url: '/PrintingRequestionList/DeletePrintingRequestion',
-                type: 'POST',
-                data: {
-                    vNo: vNo,
-                    vType: vType
-                },
-                success: function (response) {
-                    if (response.success) {
-                        toastr.success(response.message || "Record deleted successfully.");
-                        loadPrintingRequestionList();
-                    }
-                    else {
-                        toastr.warning(
-                            response.message ||
-                            "Delete failed."
-                        );
-                    }
-                },
-                error: function (xhr) {
-                    console.error(xhr.responseText);
-                    toastr.error("An error occurred while deleting.");
-                }
-            });
         });
     }
     // HTML ENCODE
