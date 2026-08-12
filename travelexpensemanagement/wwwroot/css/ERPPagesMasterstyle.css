@@ -995,7 +995,8 @@
     }
 
 .fixed-grid-table thead th.freeze-item {
-    
+    position: sticky;
+    left: 0;
     top: 0;
     z-index: 50;
 }
@@ -1014,56 +1015,6 @@
     white-space: nowrap !important;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-/* Common style for frozen columns */
-.fixed-grid-table th.freeze-item,
-.fixed-grid-table td.freeze-item {
-    position: sticky;
-    background: #161616;
-    z-index: 5;
-    white-space: nowrap;
-}
-
-
-
-/* 1st frozen column - Sauda No */
-.fixed-grid-table th.freeze1,
-.fixed-grid-table td.freeze1 {
-    left: 0;
-    min-width: 100px;
-    width: 100px;
-}
-
-/* 2nd frozen column - Sauda Date */
-.fixed-grid-table th.freeze2,
-.fixed-grid-table td.freeze2 {
-    left: 100px;
-    min-width: 100px;
-    width: 100px;
-}
-
-/* 3rd frozen column - Supplier Name */
-.fixed-grid-table th.freeze3,
-.fixed-grid-table td.freeze3 {
-    left: 200px;
-    min-width: 180px;
-    width: 180px;
-}
-
-/* 4th frozen column - Item Name */
-.fixed-grid-table th.freeze4,
-.fixed-grid-table td.freeze4 {
-    left: 380px;
-    min-width: 180px;
-    width: 180px;
-}
-
-/* 5th frozen column - Delivery Location */
-.fixed-grid-table th.freeze5,
-.fixed-grid-table td.freeze5 {
-    left: 560px;
-    min-width: 220px;
-    width: 220px;
 }
 
 /*table First columns fixed and position sticky End*/
@@ -1214,6 +1165,14 @@
     padding: 4px;
     align-items: baseline;
 }
+.erppage-grid6 {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    column-gap: 16px;
+    row-gap: 10px;
+    padding: 4px;
+    align-items: baseline;
+}
 /* Tablet */
 @media (max-width: 1024px) {
     .erppage-grid5 {
@@ -1329,6 +1288,20 @@
 .erppagescol-9 {
     flex: 0 0 75%;
     max-width: 75%;
+}
+.erppagescol-7 {
+    flex: 0 0 58.333%;
+    max-width: 58.333%;
+}
+
+.erppagescol-8 {
+    flex: 0 0 66.666%;
+    max-width: 66.666%;
+}
+
+.erppagescol-10 {
+    flex: 0 0 83.333%;
+    max-width: 83.333%;
 }
 
 .erppagescol-6 .erppagetabledynamic-wrapper {
@@ -1730,7 +1703,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 30px;
+    min-height: 22px;
 }
 
 .erppage-checkbox-input {

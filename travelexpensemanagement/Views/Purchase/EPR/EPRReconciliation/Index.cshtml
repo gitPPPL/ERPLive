@@ -1,0 +1,271 @@
+﻿@{
+    ViewBag.Title = "EPR Reconciliation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-exchange-alt"></i>
+        </div>
+        <div class="erppage-header-title">EPR Reconciliation</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "EPRReconciliationList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="EPRReconciliationForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppage-grid6">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option value="">Select DOC Type</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Ref No 1</label>
+                    <input type="number" class="erppage-input" id="NumRefNo1" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Ref No 2</label>
+                    <input type="number" class="erppage-input" id="NumRefNo2" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Total</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumTotal1" />
+                        <input type="number" class="erppage-input" id="NumTotal2" />
+                    </div>
+                </div>
+            </div>
+
+
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Filter By</legend>
+                <div class="erppage-grid6">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Bill Date From</label>
+                        <input type="date" class="erppage-input" id="DtBillDatefrom">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Bill Date To</label>
+                        <input type="date" class="erppage-input" id="DtBillDateto">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Party Name</label>
+                        <select class="erppage-input erppage-select" id="ddlPartyname">
+                            <option value="">Select Party Name</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Allot. Party</label>
+                        <select class="erppage-input erppage-select" id="ddlAllotparty">
+                            <option value="">Select Allot. Party</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">City</label>
+                        <select class="erppage-input erppage-select" id="ddlcity">
+                            <option value="">Select City</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">State</label>
+                        <select class="erppage-input erppage-select" id="ddlstate">
+                            <option value="">Select State</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="erppage-grid6">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ref 1</label>
+                        <select class="erppage-input erppage-select" id="ddlref1">
+                            <option value="">Select Ref 1</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ref 2</label>
+                        <select class="erppage-input erppage-select" id="ddlref2">
+                            <option value="">Select Ref2</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">&nbsp;</label>
+                        <div class="erppage-checkbox-wrap">
+                            <input type="checkbox" id="ChkIgnoreBillShip" class="erppage-checkbox-input">
+                            <label class="erppage-checkbox-label">Ignore Bill To Ship To</label>
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">HSN</label>
+                        <input type="text" class="erppage-input" id="TxtHSN" placeholder="Enter HSN">
+                    </div>
+                </div>
+                <div class="erppage-internalaction">
+                    <button type="button" id="btn_peplwaste" class="erppage-btn erppage-btn-common-disabled"><i class="fa fa-cubes"></i>PEPL Waste Sold Qty => <span id="btn_peplwastesoldqty"></span></button>
+                </div>
+            </fieldset>
+            <div class="erppage-internalaction mt-2">
+                <div class="erppage-radio-group">
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdbottle" name="PrintType" value="Bottle">
+                        <span>Bottle</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdother" name="PrintType" value="Other">
+                        <span>Other</span>
+                    </label>
+                    <button type="button" id="btn_show" class="erppage-btn erppage-btn-common-active-disabled"><i class="fa fa-search"></i>Show</button>
+                    <button type="button" id="btn_purchaselist" class="erppage-btn erppage-btn-common-active-disabled"><i class="fa fa-list-alt"></i>Purchase List</button>
+                    <button type="button" id="btn_purchaselist2" class="erppage-btn erppage-btn-common-active-disabled"><i class="fa fa-file"></i>Purchase List 2</button>
+                    <button type="button" id="btn_pendingEPR" class="erppage-btn erppage-btn-common-pending-disabled"><i class="fa fa-clock"></i>Pending EPR</button>
+                    <button type="button" id="btn_allotedEPR" class="erppage-btn erppage-btn-common"><i class="fa fa-check-circle"></i>Alloted EPR</button>
+                </div>
+            </div>
+            <fieldset class="erppagefieldset">
+                <div class="erppage-radio-group">
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdpurchcity" name="PrintType" value="purchcity">
+                        <span>Purchase (City)</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdpurchstate" name="PrintType" value="purchstate">
+                        <span>Purchase (State)</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdpurchsupplier" name="PrintType" value="purchsupplier">
+                        <span>Purchase (Supplier)</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdpendingeprcity" name="PrintType" value="pendingeprcity">
+                        <span>Pending EPR (City)</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdpendingeprstate" name="PrintType" value="pendingeprstate">
+                        <span>Pending EPR (State)</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdpendingeprsupplier" name="PrintType" value="pendingeprsupplier">
+                        <span>Pending EPR (Supplier)</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdallotedEPRcity" name="PrintType" value="allotedeprcity">
+                        <span>Alloted EPR (City)</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdallotedeprstate" name="PrintType" value="allotedeprstate">
+                        <span>Alloted EPR (State)</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdallotedeprcustomer" name="PrintType" value="allotedeprcustomer">
+                        <span>Alloted EPR (Customer)</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdallotedstatecust" name="PrintType" value="allotedstatecust">
+                        <span>Alloted State/Cust</span>
+                    </label>
+                    <button type="button" id="btn_printlist" class="erppage-btn erppage-btn-common"><i class="fa fa-print"></i>Print List</button>
+
+                </div>
+            </fieldset>
+            <div class="erppage-internalaction mt-2">
+                <button type="button" id="btn_differencepurchaseweight" class="erppage-btn erppage-btn-common-active-disabled"><i class="fa fa-balance-scale"></i>Difference between WB and Purchase Weight</button>
+                <button type="button" id="btn_missingfirstdocument" class="erppage-btn erppage-btn-common-active-disabled"><i class="fa fa-file-text"></i>Missing First 5 document</button>
+            </div>
+            <fieldset class="erppage-fieldset">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblEPRReconciliation" class="excel-table fixed-grid-table width-table resizable-table">
+                        <colgroup>
+                            <col style="width:70px;">   
+                            <col style="width:180px;">  
+                            <col style="width:180px;">  
+                            <col style="width:220px;">  
+                            <col style="width:90px;">   
+                            <col style="width:90px;">   
+                            <col style="width:90px;">   
+                            <col style="width:120px;">  
+                            <col style="width:120px;">  
+                            <col style="width:120px;">  
+                            <col style="width:140px;">  
+                            <col style="width:180px;">  
+                            <col style="width:180px;">  
+                            <col style="width:120px;">  
+                            <col style="width:110px;">  
+                            <col style="width:120px;">  
+                            <col style="width:60px;">   
+                            <col style="width:120px;">  
+                            <col style="width:120px;">  
+                            <col style="width:120px;">  
+                            <col style="width:100px;">  
+                            <col style="width:120px;">  
+                            <col style="width:100px;">  
+                            <col style="width:100px;">  
+                            <col style="width:100px;">  
+                            <col style="width:100px;">  
+                            <col style="width:100px;">  
+                            <col style="width:120px;">  
+                            <col style="width:150px;">  
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th data-column="0">Vno <span class="sort-icon"></span></th>
+                                <th data-column="1">Bill From <span class="sort-icon"></span></th>
+                                <th data-column="2">Ship From <span class="sort-icon"></span></th>
+                                <th data-column="3">Item Name <span class="sort-icon"></span></th>
+                                <th data-column="4">Hsn <span class="sort-icon"></span></th>
+                                <th data-column="5">Recd Qty <span class="sort-icon"></span></th>
+                                <th data-column="6">Bill Qty <span class="sort-icon"></span></th>
+                                <th data-column="7">City <span class="sort-icon"></span></th>
+                                <th data-column="8">State <span class="sort-icon"></span></th>
+                                <th data-column="9">Ewb No <span class="sort-icon"></span></th>
+                                <th data-column="10">Bill Gstin <span class="sort-icon"></span></th>
+                                <th data-column="11">Alloted To Party <span class="sort-icon"></span></th>
+                                <th data-column="12">Remarks <span class="sort-icon"></span></th>
+                                <th data-column="13">Bill No <span class="sort-icon"></span></th>
+                                <th data-column="14">Bill Date <span class="sort-icon"></span></th>
+                                <th data-column="15">Truck No <span class="sort-icon"></span></th>
+                                <th data-column="16" class="text-center"><input type="checkbox" id="chkSelectAll" title="Select All" /></th>
+                                <th data-column="17">Comp Wb Copy <span class="sort-icon"></span></th>
+                                <th data-column="18">Party Wb Copy <span class="sort-icon"></span></th>
+                                <th data-column="19">Party Inv Copy <span class="sort-icon"></span></th>
+                                <th data-column="20">Gr Copy <span class="sort-icon"></span></th>
+                                <th data-column="21">Ewb Copy <span class="sort-icon"></span></th>
+                                <th data-column="22">Oth Copy1 <span class="sort-icon"></span></th>
+                                <th data-column="23">Oth Copy2 <span class="sort-icon"></span></th>
+                                <th data-column="24">Oth Copy3 <span class="sort-icon"></span></th>
+                                <th data-column="25">Oth Copy4 <span class="sort-icon"></span></th>
+                                <th data-column="26">Oth Copy5 <span class="sort-icon"></span></th>
+                                <th data-column="27">Disp State <span class="sort-icon"></span></th>
+                                <th data-column="28">Disp City <span class="sort-icon"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </fieldset>
+
+            <div class="erppage-actions">
+                <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

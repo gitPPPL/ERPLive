@@ -74,7 +74,6 @@ function loadItemNameDropdown() {
             itemNameOptions = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
         }
     });
-
 }
 function DDLGridStatus() {
     $.ajax({
@@ -84,8 +83,6 @@ function DDLGridStatus() {
             DDLGridStatuslist = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
         }
     });
-
-
 }
 
 async function DDlInspBy() {
