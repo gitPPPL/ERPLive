@@ -49,8 +49,10 @@ function formatDate(date) {
     return `${day}/${month}/${year}`;
 }
 
+
 const tableHeadersExport = [
-    { text: "Code", className: "hidden-col", width: "0px" },
+    { text: "Code", width: "0px", style: "display:none;" },
+
     { text: "Inv No", width: "120px" },
     { text: "Inv Date", width: "110px" },
     { text: "Exim No", width: "120px" },
@@ -58,31 +60,43 @@ const tableHeadersExport = [
     { text: "Party Name", width: "220px" },
     { text: "Party Code", width: "120px" },
     { text: "S B No.", width: "120px" },
-        {
-            text: ` <input type="checkbox" id="chkSelectAllExport" class="form-check-input" title="Select All"> `, width: "60px"
-        },
-    { text: "S B Copy", width: "120px" },
-    { text: "S B Path", width: "120px" },
-    { text: "B L Copy", width: "120px" },
-    { text: "B L Path", width: "120px" },
-    { text: "BRC Copy", width: "120px" },
-    { text: "BRC Path", width: "120px" },
-    { text: "Oth Copy1", width: "120px" },
-    { text: "Oth Path1", width: "120px" },
-    { text: "Oth Copy2", width: "120px" },
-    { text: "Oth Path2", width: "120px" },
-    { text: "Oth Copy3", width: "120px" },
-    { text: "Oth Path3", width: "120px" },
-    { text: "Oth Copy4", width: "120px" },
-    { text: "Oth Path4", width: "120px" },
-    { text: "Oth Copy5", width: "120px" },
-    { text: "Oth Path5", width: "120px" },
-    { text: "Oth Copy6", width: "120px" },
-    { text: "Oth Path6", width: "120px" },
-    { text: "Oth Copy7", width: "120px" },
-    { text: "Oth Path7", width: "120px" }
 
+    {
+        text: `<input type="checkbox" id="chkSelectAllExport" class="form-check-input" title="Select All">`,
+        width: "60px"
+    },
+
+    { text: "S B Copy", width: "120px" },
+    { text: "S B Path", className: "hidden-col", width: "0px" },
+
+    { text: "B L Copy", width: "120px" },
+    { text: "B L Path", className: "hidden-col", width: "0px" },
+
+    { text: "BRC Copy", width: "120px" },
+    { text: "BRC Path", className: "hidden-col", width: "0px" },
+
+    { text: "Oth Copy1", width: "120px" },
+    { text: "Oth Path1", className: "hidden-col", width: "0px" },
+
+    { text: "Oth Copy2", width: "120px" },
+    { text: "Oth Path2", className: "hidden-col", width: "0px" },
+
+    { text: "Oth Copy3", width: "120px" },
+    { text: "Oth Path3", className: "hidden-col", width: "0px" },
+
+    { text: "Oth Copy4", width: "120px" },
+    { text: "Oth Path4", className: "hidden-col", width: "0px" },
+
+    { text: "Oth Copy5", width: "120px" },
+    { text: "Oth Path5", className: "hidden-col", width: "0px" },
+
+    { text: "Oth Copy6", width: "120px" },
+    { text: "Oth Path6", className: "hidden-col", width: "0px" },
+
+    { text: "Oth Copy7", width: "120px" },
+    { text: "Oth Path7", className: "hidden-col", width: "0px" }
 ];
+
 
 const tableHeadersForImport = [
     { text: "Code", className: "hidden-col", width: "0px" },
@@ -98,24 +112,24 @@ const tableHeadersForImport = [
         text: ` <input type="checkbox" id="chkSelectAllImport" class="form-check-input" title="Select All"> `, width: "60px"
     },
 
-        { text: "P I Copy", width: "120px" },
-        { text: "P I Path", width: "120px" },
-        { text: "B L Copy", width: "120px" },
-        { text: "B L Path", width: "120px" },
-        { text: "B E Copy", width: "120px" },
-        { text: "B E Path", width: "120px" },
-        { text: "L C Copy", width: "120px" },
-        { text: "L C Path", width: "120px" },
-        { text: "INV Copy", width: "120px" },
-        { text: "INV Path", width: "120px" },
-        { text: "D P Copy", width: "120px" },
-        { text: "D P Path", width: "120px" },
-        { text: "SBLC Copy", width: "120px" },
-        { text: "SBLC Path", width: "120px" },
-        { text: "Oth Copy1", width: "120px" },
-        { text: "Oth Path1", width: "120px" },
-        { text: "Oth Copy2", width: "120px" },
-        { text: "Oth Path2", width: "120px" }
+    { text: "P I Copy", width: "120px" },
+    { text: "P I Path", className: "hidden-col", width: "0px" },
+    { text: "B L Copy", width: "120px" },
+    { text: "B L Path", className: "hidden-col", width: "0px" },
+    { text: "B E Copy", width: "120px" },
+    { text: "B E Path", className: "hidden-col", width: "0px" },
+    { text: "L C Copy", width: "120px" },
+    { text: "L C Path", className: "hidden-col", width: "0px" },
+    { text: "INV Copy", width: "120px" },
+    { text: "INV Path", className: "hidden-col", width: "0px" },
+    { text: "D P Copy", width: "120px" },
+    { text: "D P Path", className: "hidden-col", width: "0px" },
+    { text: "SBLC Copy", width: "120px" },
+    { text: "SBLC Path", className: "hidden-col", width: "0px" },
+    { text: "Oth Copy1", width: "120px" },
+    { text: "Oth Path1", className: "hidden-col", width: "0px" },
+    { text: "Oth Copy2", width: "120px" },
+    { text: "Oth Path2", className: "hidden-col", width: "0px" }
 ];
 function createTableHeader() {
 
@@ -136,7 +150,6 @@ function createTableHeader() {
 
     $("#tblImportExportDocAttachmentList colgroup").remove();
     $("#tblImportExportDocAttachmentList").prepend(`<colgroup>${colgroupHtml}</colgroup>`);
-
     $("#tblImportExportDocAttachmentList thead").html(theadHtml);
 }
 
@@ -214,24 +227,24 @@ function addItemRecordRow(item = null) {
              <input type="checkbox" id="Chk${rowCount}" class="form-check-input row-select" />
             </td>
 
-            <td>  <input type="text"  id="TxtPICopy${rowCount}"  class="erppagetable-control"  value="${item?.piCopy ?? ""}" readonly />  </td>
-            <td>  <input type="text"  id="TxtPIPath${rowCount}"  class="erppagetable-control"  value="${item?.piCopyFILE_Path ?? ""}" readonly />  </td>
+            <td >  <input type="text"  id="TxtPICopy${rowCount}"  class="erppagetable-control"  value="${item?.piCopy ?? ""}" readonly />  </td>
+            <td class="hidden-col">  <input type="text"  id="TxtPIPath${rowCount}"  class="erppagetable-control"  value="${item?.piCopyFILE_Path ?? ""}" readonly />  </td>
             <td>  <input type="text"  id="TxtBLCopy${rowCount}"  class="erppagetable-control"  value="${item?.blCopy ?? ""}"  readonly/> </td>
-            <td>  <input type="text"  id="TxtBLPath${rowCount}"  class="erppagetable-control"  value="${item?.blCopyFILE_Path ?? ""}"  readonly/> </td>
+            <td class="hidden-col">  <input type="text"  id="TxtBLPath${rowCount}"  class="erppagetable-control"  value="${item?.blCopyFILE_Path ?? ""}"  readonly/> </td>
             <td> <input type="text"  id="TxtBECopy${rowCount}" class="erppagetable-control"  value="${item?.beCopy ?? ""}"  readonly/>  </td>
-            <td> <input type="text"  id="TxtBEPath${rowCount}" class="erppagetable-control"  value="${item?.beCopyFILE_Path ?? ""}"  readonly/>  </td>
+            <td class="hidden-col"> <input type="text"  id="TxtBEPath${rowCount}" class="erppagetable-control"  value="${item?.beCopyFILE_Path ?? ""}"  readonly/>  </td>
             <td>  <input type="text" id="TxtLCCopy${rowCount}" class="erppagetable-control" value="${item?.lcCopy ?? ""}" readonly />  </td>
-            <td>  <input type="text" id="TxtLCPath${rowCount}" class="erppagetable-control" value="${item?.lcCopyFILE_Path ?? ""}" readonly />  </td>
+            <td class="hidden-col">  <input type="text" id="TxtLCPath${rowCount}" class="erppagetable-control" value="${item?.lcCopyFILE_Path ?? ""}" readonly />  </td>
             <td>  <input type="text" id="TxtINVCopy${rowCount}"  class="erppagetable-control"  value="${item?.invCopy ?? ""}"  readonly/>  </td>
-            <td>  <input type="text" id="TxtINVPath${rowCount}"  class="erppagetable-control"  value="${item?.invCopyFILE_Path ?? ""}"  readonly/>  </td>
+            <td class="hidden-col">  <input type="text" id="TxtINVPath${rowCount}"  class="erppagetable-control"  value="${item?.invCopyFILE_Path ?? ""}"  readonly/>  </td>
             <td> <input type="text"  id="TxtDPCopy${rowCount}"  class="erppagetable-control"  value="${item?.dpCopy ?? ""}"  readonly/>   </td>
-            <td> <input type="text"  id="TxtDPPath${rowCount}"  class="erppagetable-control"  value="${item?.dpCopyFILE_Path ?? ""}"  readonly/>   </td>
+            <td class="hidden-col"> <input type="text"  id="TxtDPPath${rowCount}"  class="erppagetable-control"  value="${item?.dpCopyFILE_Path ?? ""}"  readonly/>   </td>
             <td> <input type="text"  id="TxtSBLCCopy${rowCount}"  class="erppagetable-control"  value="${item?.sblcCopy ?? ""}"  readonly/>  </td>
-            <td> <input type="text"  id="TxtSBLCPath${rowCount}"  class="erppagetable-control"  value="${item?.sblcCopyFILE_Path ?? ""}"  readonly/>  </td>
+            <td class="hidden-col"> <input type="text"  id="TxtSBLCPath${rowCount}"  class="erppagetable-control"  value="${item?.sblcCopyFILE_Path ?? ""}"  readonly/>  </td>
             <td>  <input type="text" id="TxtOthCopy1${rowCount}"  class="erppagetable-control" value="${item?.othCopy1 ?? ""}"  readonly/>  </td>
-            <td>  <input type="text" id="TxtOthPath${rowCount}"  class="erppagetable-control" value="${item?.othCopy1FILE_Path ?? ""}"  readonly/>  </td>
+            <td class="hidden-col">  <input type="text" id="TxtOthPath${rowCount}"  class="erppagetable-control" value="${item?.othCopy1FILE_Path ?? ""}"  readonly/>  </td>
             <td> <input type="text"  id="TxtOthCopy2${rowCount}"  class="erppagetable-control"  value="${item?.othCopy2 ?? ""}" readonly /> </td>
-            <td> <input type="text"  id="TxtOthPath${rowCount}"  class="erppagetable-control"  value="${item?.othCopy2FILE_Path ?? ""}" readonly /> </td>
+            <td class="hidden-col"> <input type="text"  id="TxtOthPath${rowCount}"  class="erppagetable-control"  value="${item?.othCopy2FILE_Path ?? ""}" readonly /> </td>
             </tr>
     `;
     }
@@ -251,25 +264,25 @@ function addItemRecordRow(item = null) {
             <input type="checkbox" id="Chk${rowCount}" class="form-check-input row-select" />
             </td>
             <td> <input type="text"  id="TxtSBLCCopy${rowCount}"  class="erppagetable-control"  value="${item?.sbCopy ?? ""}" readonly />  </td>
-            <td> <input type="text"  id="TxtSBLCCopy${rowCount}"  class="erppagetable-control"  value="${item?.sbCopyFILE_Path ?? ""}" readonly />  </td>
+            <td class="hidden-col"> <input type="text"  id="TxtSBLCCopy${rowCount}"  class="erppagetable-control"  value="${item?.sbCopyFILE_Path ?? ""}" readonly />  </td>
             <td> <input type="text"  id="TxtSBLCCopy${rowCount}"  class="erppagetable-control"  value="${item?.blCopy ?? ""}"  readonly />  </td>
-            <td> <input type="text"  id="TxtSBLCCopy${rowCount}"  class="erppagetable-control"  value="${item?.blCopyFILE_Path ?? ""}"  readonly />  </td>
+            <td class="hidden-col"> <input type="text"  id="TxtSBLCCopy${rowCount}"  class="erppagetable-control"  value="${item?.blCopyFILE_Path ?? ""}"  readonly />  </td>
             <td> <input type="text"  id="TxtSBLCCopy${rowCount}"  class="erppagetable-control"  value="${item?.brcCopy ?? ""}" readonly />  </td>
-            <td> <input type="text"  id="TxtSBLCCopy${rowCount}"  class="erppagetable-control"  value="${item?.brcCopyFILE_Path ?? ""}" readonly />  </td>
+            <td class="hidden-col"> <input type="text"  id="TxtSBLCCopy${rowCount}"  class="erppagetable-control"  value="${item?.brcCopyFILE_Path ?? ""}" readonly />  </td>
             <td>  <input type="text" id="TxtOthCopy1${rowCount}"  class="erppagetable-control" value="${item?.othCopy1 ?? ""}"  readonly />  </td>
-            <td>  <input type="text" id="TxtOthCopy1${rowCount}"  class="erppagetable-control" value="${item?.othCopy1FILE_Path ?? ""}"  readonly />  </td>
+            <td class="hidden-col">  <input type="text" id="TxtOthCopy1${rowCount}"  class="erppagetable-control" value="${item?.othCopy1FILE_Path ?? ""}"  readonly />  </td>
             <td> <input type="text"  id="TxtOthCopy2${rowCount}"  class="erppagetable-control"  value="${item?.othCopy2 ?? ""}"  readonly /> </td>
-            <td> <input type="text"  id="TxtOthCopy2${rowCount}"  class="erppagetable-control"  value="${item?.othCopy2FILE_Path ?? ""}"  readonly /> </td>
+            <td class="hidden-col"> <input type="text"  id="TxtOthCopy2${rowCount}"  class="erppagetable-control"  value="${item?.othCopy2FILE_Path ?? ""}"  readonly /> </td>
             <td> <input type="text" id="TxtOthCopy3${rowCount}" class="erppagetable-control" value="${item?.othCopy3 ?? ""}" readonly />  </td>
-            <td> <input type="text" id="TxtOthCopy3${rowCount}" class="erppagetable-control" value="${item?.othCopy3FILE_Path ?? ""}" readonly />  </td>
-            <td> <input type="text"  id="TxtOthCopy4${rowCount}"  class="erppagetable-control"  value="${item?.othCopy4 ?? ""}"  readonly /> </td>
-            <td> <input type="text"  id="TxtOthCopy4${rowCount}"  class="erppagetable-control"  value="${item?.othCopy4FILE_Path ?? ""}"  readonly /> </td>
-            <td> <input type="text"  id="TxtOthCopy5${rowCount}"  class="erppagetable-control" value="${item?.othCopy5 ?? ""}" readonly /> </td>
-            <td> <input type="text"  id="TxtOthCopy5${rowCount}"  class="erppagetable-control" value="${item?.othCopy5FILE_Path ?? ""}" readonly /> </td>
+            <td class="hidden-col"> <input type="text" id="TxtOthCopy3${rowCount}" class="erppagetable-control" value="${item?.othCopy3FILE_Path ?? ""}" readonly />  </td>
+            <td > <input type="text"  id="TxtOthCopy4${rowCount}"  class="erppagetable-control"  value="${item?.othCopy4 ?? ""}"  readonly /> </td>
+            <td  class="hidden-col"> <input type="text"  id="TxtOthCopy4${rowCount}"  class="erppagetable-control"  value="${item?.othCopy4FILE_Path ?? ""}"  readonly /> </td>
+            <td > <input type="text"  id="TxtOthCopy5${rowCount}"  class="erppagetable-control" value="${item?.othCopy5 ?? ""}" readonly /> </td>
+            <td class="hidden-col"> <input type="text"  id="TxtOthCopy5${rowCount}"  class="erppagetable-control" value="${item?.othCopy5FILE_Path ?? ""}" readonly /> </td>
             <td> <input type="text" id="TxtOthCopy6${rowCount}" class="erppagetable-control" value="${item?.othCopy6 ?? ""}" readonly />  </td>
-            <td> <input type="text" id="TxtOthCopy6${rowCount}" class="erppagetable-control" value="${item?.othCopy6FILE_Path ?? ""}" readonly />  </td>
+            <td class="hidden-col"> <input type="text" id="TxtOthCopy6${rowCount}" class="erppagetable-control" value="${item?.othCopy6FILE_Path ?? ""}" readonly />  </td>
             <td>  <input type="text"  id="TxtOthCopy7${rowCount}" class="erppagetable-control" value="${item?.othCopy7 ?? ""}" readonly /> </td>
-            <td>  <input type="text"  id="TxtOthCopy7${rowCount}" class="erppagetable-control" value="${item?.othCopy7FILE_Path ?? ""}" readonly /> </td>
+            <td class="hidden-col">  <input type="text"  id="TxtOthCopy7${rowCount}" class="erppagetable-control" value="${item?.othCopy7FILE_Path ?? ""}" readonly /> </td>
         </tr>
     `;
     }
