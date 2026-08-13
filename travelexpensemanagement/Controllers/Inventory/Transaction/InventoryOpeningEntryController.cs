@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using System.Data;
 using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Models.GateEntry;
+using travelexpensemanagement.Models.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
 namespace travelexpensemanagement.Controllers.Inventory.Transaction
@@ -114,8 +117,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                 return Json(data);
             }
         }
-
-
         public JsonResult GetDataByItemcode(int ItemCode)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -152,10 +153,131 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             });
         }
 
+        [HttpPost]
+        public async Task<JsonResult> SavedData( [FromBody] InventoryOpeningEntry_Model request)
+        {
+            if (request?.Header == null)
+            {
+                return Json(new  {  success = false,  status = "Error",  message = "Input model is null" });
+            }
 
+            var action = string.Equals( request.Header.action, "INSERT", StringComparison.OrdinalIgnoreCase)  ? "INSERT" : "UPDATE";
 
+            var result = await SubmitRequest( request.Header, request.Details,action);
 
+            return Json(new  {  success = result.Status == "Success",   status = result.Status,  message = result.Message });
+        }
 
+        private async Task<(string Status, string Message)> SubmitRequest( InventoryOpeningEntry_Header header, List<InventoryOpeningEntry_Details> details,string action)
+        {
+            try
+            {
+                var g = _globalVariableService.GetGlobalVariables();
+
+                using var conn = _dbConnection.GetErpConnection();
+
+                await conn.OpenAsync();
+
+                if (action == "INSERT")
+                {
+                    var jsonResult = GetVNo(header.V_TYPE) as JsonResult;
+
+                    dynamic data = jsonResult?.Value;
+
+                    if (data == null || data.V_NO == null)
+                    {
+                        return ( "Error", "Unable to generate voucher number." );
+                    }
+
+                    header.V_NO = Convert.ToInt32(data.V_NO);
+                }
+
+                string docId = string.IsNullOrWhiteSpace(header.DOC_ID) ? $"{header.V_TYPE}{header.V_NO}" : header.DOC_ID;
+          
+                using (var cmd = new SqlCommand( "sp_InventoryOpening", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Action", action);
+                    cmd.Parameters.AddWithValue("@SaveAction", "Header");
+
+                    cmd.Parameters.AddWithValue(  "@YEAR_CODE",  g.PubFYearCode);
+                    cmd.Parameters.AddWithValue( "@COMP_CODE", g.PubCompCode);
+                    cmd.Parameters.AddWithValue(  "@BRANCH_CODE",  g.PubBranchCode);
+                    cmd.Parameters.AddWithValue(  "@V_TYPE",  (object?)header.V_TYPE ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue( "@V_NO", header.V_NO);
+                    cmd.Parameters.Add( "@V_DATE",  SqlDbType.SmallDateTime).Value = header.V_DATE;
+                    cmd.Parameters.AddWithValue( "@DOC_ID", docId);
+                    cmd.Parameters.AddWithValue("@REMARKS",  (object?)header.REMARKS ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue( "@UUSER", g.PubUserId);
+                    cmd.Parameters.AddWithValue( "@UDATE",  DateTime.Now);
+                    cmd.Parameters.AddWithValue( "@EUSER", g.PubUserId);
+                    cmd.Parameters.AddWithValue( "@EDATE", DateTime.Now);
+                    cmd.Parameters.AddWithValue( "@AED",  "A");
+                    cmd.Parameters.AddWithValue( "@WSID",  g.PubWorkStationID);
+                    cmd.Parameters.AddWithValue( "@LIP", g.PubLocalId);
+                    cmd.Parameters.AddWithValue(  "@LID",  Environment.MachineName);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+
+                // ---------------------------------------------------------
+                // DETAILS
+                // ---------------------------------------------------------
+                if (details != null && details.Count > 0)
+                {
+                    foreach (var detail in details)
+                    {
+            
+                        if (detail == null || detail.ITEM_CODE <= 0)
+                            continue;
+
+                        using var cmd = new SqlCommand(  "sp_InventoryOpening",  conn);
+
+                        cmd.CommandType =  CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue( "@Action",  action);
+                        cmd.Parameters.AddWithValue(  "@SaveAction",  "Details");
+                        cmd.Parameters.AddWithValue(  "@YEAR_CODE",  g.PubFYearCode);
+                        cmd.Parameters.AddWithValue(  "@COMP_CODE", g.PubCompCode);
+                        cmd.Parameters.AddWithValue( "@BRANCH_CODE",  g.PubBranchCode);
+                        cmd.Parameters.AddWithValue( "@V_TYPE", (object?)header.V_TYPE ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue(  "@V_NO",  header.V_NO);
+                        cmd.Parameters.Add( "@V_DATE",  SqlDbType.SmallDateTime).Value =  header.V_DATE;
+                        cmd.Parameters.AddWithValue( "@DOC_ID", docId);
+                        cmd.Parameters.AddWithValue( "@SNO",  detail.SNO);
+                        cmd.Parameters.AddWithValue(  "@ITEM_CODE",  detail.ITEM_CODE);
+                        cmd.Parameters.AddWithValue(  "@ITEM_NAME", (object?)detail.ITEM_NAME ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue( "@MAKE_CODE", (object?)detail.MAKE_CODE ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue( "@UOM_CODE",  (object?)detail.UOM_CODE ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue( "@UOM_NAME", (object?)detail.UOM_NAME ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue(  "@FROM_DEPT", (object?)detail.FROM_DEPT ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue(  "@TO_DEPT", (object?)detail.TO_DEPT ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue(  "@MAC_CODE",  (object?)detail.MAC_CODE ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue( "@NOS",  (object?)detail.NOS ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue( "@QTY",  (object?)detail.QTY ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue( "@RATE", (object?)detail.RATE ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue( "@AMOUNT",   (object?)detail.AMOUNT ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue( "@LAND_AMT", (object?)detail.LAND_AMT ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue(  "@REMARKS",  (object?)detail.REMARKS ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue( "@UUSER",  g.PubUserId);
+                        cmd.Parameters.AddWithValue( "@UDATE",  DateTime.Now);
+                        cmd.Parameters.AddWithValue(  "@EUSER",  g.PubUserId);
+                        cmd.Parameters.AddWithValue( "@EDATE", DateTime.Now);
+                        cmd.Parameters.AddWithValue(  "@AED",  "A");
+                        cmd.Parameters.AddWithValue(  "@WSID",  g.PubWorkStationID);
+                        cmd.Parameters.AddWithValue(  "@LIP",  g.PubLocalId);
+                        cmd.Parameters.AddWithValue(  "@LID",  Environment.MachineName);
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                return ( "Success",  "Data Save Successfully");
+            }
+            catch (Exception ex)
+            {
+                return ( "Error",  ex.Message);
+            }
+        }
 
 
     }

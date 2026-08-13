@@ -4,6 +4,7 @@
     var currentMenu = ViewBag.CurrentMenu as string;
 }
 <div id="erp-toast-container"></div>
+
 <div class="erppagelist-header">
     <div class="erppagelist-title">
         <i class="fa fa-list"></i>
@@ -15,6 +16,7 @@
         </button>
     </div>
 </div>
+
 <div class="erppagelist-toolbar">
     <div class="erppagelist-search-wrapper">
         <i class="fa fa-search"></i>
@@ -36,6 +38,7 @@
         </button>
     </div>
 </div>
+
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
         <table id="tblInventoryOpeningList" class="excel-table fixed-grid-table table-width resizable-table">
@@ -51,14 +54,6 @@
                 <col style="width:90px;">  
                 <col style="width:70px;">  
                 <col style="width:90px;">  
-                <col style="width:100px;"> 
-                <col style="width:100px;"> 
-                <col style="width:100px;"> 
-                <col style="width:100px;"> 
-                <col style="width:100px;"> 
-                <col style="width:200px;"> 
-                <col style="width:100px;"> 
-                <col style="width:80px;">  
                 <col style="width:100px;"> 
                 <col style="width:100px;"> 
                 <col style="width:110px;"> 
@@ -96,14 +91,6 @@
                     <th>Cons Type</th>
                     <th>Status</th>
                     <th>Amount</th>
-                    <th>User</th>
-                    <th>Udate</th>
-                    <th>Euser</th>
-                    <th>Edate</th>
-                    <th>Aed</th>
-                    <th>Wsid</th>
-                    <th>Lip</th>
-                    <th>Lid</th>
                     <th>Plan Type</th>
                     <th>Plan No</th>
                     <th>Faprov Status</th>
@@ -134,180 +121,297 @@
     </div>
 </div>
 
-
-
-
-
 <script>
 
     let currentPage = 1;
     let pageSize = 10;
+    let totalCount = 0;
+    var controllerName = window.location.pathname.split('/')[1];
 
     $(document).ready(function () {
-        loadAllMachineMainGroups();
+
+          loadAllInward();
+            // checkPermission(controllerName, function () {
+            //   loadAllInward();
+            // });
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadAllInward();
+        });
+
+        $('#button_export').on('click', function () {
+            var text = $('#searchBox').val();
+            window.location.href = '/InventoryOpeningList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+        });
+
+        $('#button_print').on('click', function () {
+            var text = $('#searchBox').val();
+            window.open('/InventoryOpeningList/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
+        });
+
     });
 
-    function loadAllMachineMainGroups() {
-        const searchTerm = $('#searchBox').val();
+    // ================= LOAD DATA =================
+    function loadAllInward() {
 
         $.ajax({
-            url: '/MachineMainGroupMasterList/GetMachineMainGroups', // 🔁 Update with your actual controller route
+            url: '/InventoryOpeningList/GetList',
             type: 'GET',
             dataType: 'json',
             data: {
-                searchTerm: searchTerm,
+                searchTerm: $('#searchBox').val(),
                 pageNumber: currentPage,
                 pageSize: pageSize
             },
             success: function (res) {
-                console.log(res);
-                const lists = res.lists;
-                const totalCount = res.totalCount;
 
-                let tbody = $('#tblMachineMain tbody');
-                tbody.empty();
-
-                if (!lists || lists.length === 0) {
-                    tbody.append('<tr><td colspan="4" class="text-center text-muted">No records found.</td></tr>');
-                    renderPagination(0, pageSize, currentPage);
+                if (!res.success) {
+                    toastr.error("Failed to load data.");
                     return;
                 }
 
-                $.each(lists, function (index, item) {
-                    tbody.append(`
-                        <tr>
-                            <td>${item.name || ''}</td>
-                            <td>${item.code || ''}</td>
-                            <td>${item.year_Code || ''}</td>
-                            <td>${item.comp_Code || ''}</td>
-                            <td>${item.branch_Code || ''}</td>
-                            <td>${item.v_Type || ''}</td>
-                            <td>${item.v_No || ''}</td>
-                            <td>${item.v_Date || ''}</td>
-                            <td>${item.doc_Id1 || ''}</td>
-                            <td>${item.shift || ''}</td>
-                            <td>${item.slip_No || ''}</td>
-                            <td>${item.pord_Type || ''}</td>
-                            <td>${item.pord_No || ''}</td>
-                            <td>${item.place_Code || ''}</td>
-                            <td>${item.emp_Code || ''}</td>
-                            <td>${item.dept_Code || ''}</td>
-                            <td>${item.remarks || ''}</td>
-                            <td>${item.cons_Type || ''}</td>
-                            <td>${item.status || ''}</td>
-                            <td>${item.amount || ''}</td>
-                            <td>${item.user || ''}</td>
-                            <td>${item.udate || ''}</td>
-                            <td>${item.euser || ''}</td>
-                            <td>${item.edate || ''}</td>
-                            <td>${item.aed || ''}</td>
-                            <td>${item.wsid || ''}</td>
-                            <td>${item.lip || ''}</td>
-                            <td>${item.lid || ''}</td>
-                            <td>${item.plan_Type || ''}</td>
-                            <td>${item.plan_No || ''}</td>
-                            <td>${item.faprov_Status || ''}</td>
-                            <td>${item.faprov_Remarks || ''}</td>
-                            <td class="action-col">
-                              <div class="action-wrap">
-                                 <button class="act-btn edit btn-edit" title="Edit Row" style="cursor:pointer;" onclick="editMachineGroup(${item.code})"><i class="fa fa-edit"></i></button>
-                                 <button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewMachineGroup(${item.code})"><i class="fa fa-eye"></i></button>
-                                 <button class="act-btn delete btn-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteMachineGroup(${item.code})"><i class="fa fa-trash"></i></button>
-                              </div>
-                           </td>
-                        </tr>
-                    `);
-                });
+                const list = res.lists || [];
+                totalCount = res.totalCount || 0;
 
-                renderPagination(totalCount, pageSize, currentPage);
+                renderTable(list);
+                renderPagination();
             },
             error: function (xhr) {
-                alert('Error loading data: ' + xhr.responseText);
+                toastr.error('Error loading list: ' + xhr.responseText);
             }
         });
     }
 
-    function renderPagination(total, pageSize, currentPage) {
-        const totalPages = Math.ceil(total / pageSize);
-        const paginationContainer = $('#tablePagination');
-        paginationContainer.empty();
+    // ================= TABLE =================
+    function renderTable(list) {
 
-        if (totalPages <= 1) return;
+        const tbody = $('#tblInwardEntryList tbody');
+        tbody.empty();
+
+        if (!list || list.length === 0) {
+            tbody.append('<tr><td colspan="13" class="text-center text-muted">No list found.</td></tr>');
+            return;
+        }
+
+        $.each(list, function (index, item) {
+            tbody.append(`
+                <tr>
+                    <td style="display:none;">${item.v_NO || ''}</td>
+                    <td>${item.v_NO || ''}</td>
+                    <td>${item.v_TYPE || ''}</td>
+                    <td>${formatDate(item.v_DATE)}</td>
+                    <td>${item.trucK_NO || ''}</td>
+                    <td>${item.bilL_NO || ''}</td>
+                    <td>${formatDate(item.bilL_DATE)}</td>
+                    <td>${item.partY_NAME || ''}</td>
+                    <td>${item.transiT_NO || ''}</td>
+                    <td>${item.waybilL_NO || ''}</td>
+                    <td>${formatDate(item.r_DATE)}</td>
+                    <td>${item.r_TIME || ''}</td>
+                    <td>${item.status || ''}</td>
+
+                    <td class="action-col">
+                    <div class="action-wrap">
+
+                    <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}' ,'${item.v_DATE}')"><i class="fa fa-edit"></i></button>
+
+                    <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
+
+                    <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
+
+                    <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `);
+            applyGridPermission();
+        });
+
+    }
+
+    // ================= PAGINATION =================
+    function renderPagination() {
+
+        const totalPages = Math.ceil(totalCount / pageSize) || 1;
 
         let html = '';
+        let maxVisible = 5;
 
-        if (currentPage > 1) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = startPage + maxVisible - 1;
+
+        if (endPage > totalPages) {
+            endPage = totalPages;
+            startPage = Math.max(1, endPage - maxVisible + 1);
         }
 
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, currentPage + 2);
-
-        if (currentPage <= 3) endPage = Math.min(5, totalPages);
-        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+        if (startPage > 1) {
+            html += `<span class="page-number" onclick="goToPage(1)">1</span>`;
+            if (startPage > 2) html += `<span class="dots">...</span>`;
+        }
 
         for (let i = startPage; i <= endPage; i++) {
-            html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+            html += `<span class="page-number ${i === currentPage ? 'active' : ''}"
+                        onclick="goToPage(${i})">${i}</span>`;
         }
 
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += `<span class="dots">...</span>`;
+            html += `<span class="page-number" onclick="goToPage(${totalPages})">${totalPages}</span>`;
+        }
+
+        $('#pageNumbers').html(html);
+
+        let start = (currentPage - 1) * pageSize + 1;
+        let end = Math.min(currentPage * pageSize, totalCount);
+
+        if (totalCount === 0) {
+            start = 0;
+            end = 0;
+        }
+
+        $('#pageInfoText').text(`Results: ${start} - ${end} of ${totalCount}`);
+
+        $('#prevBtn').prop('disabled', currentPage === 1);
+        $('#nextBtn').prop('disabled', currentPage === totalPages);
+    }
+
+    // ================= PAGINATION ACTIONS =================
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadAllInward();
+        }
+    }
+
+    function nextPage() {
+        const totalPages = Math.ceil(totalCount / pageSize);
         if (currentPage < totalPages) {
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+            currentPage++;
+            loadAllInward();
         }
-
-        paginationContainer.html(html);
     }
 
     function goToPage(page) {
         currentPage = page;
-        loadAllMachineMainGroups();
+        loadAllInward();
     }
 
-    $('#searchBox').on('keyup', function () {
+    function changeRowsPerPage() {
+        pageSize = parseInt($('#pageSizeSelect').val());
         currentPage = 1;
-        loadAllMachineMainGroups();
-    });
-
-
-
-    function editMachineGroup(rowId) {
-        window.location.href = '/MachineMainGroupMaster/Index?id=' + encodeURIComponent(rowId);
-    }
-    function viewMachineGroup(rowId) {
-        window.location.href = '/MachineMainGroupMaster/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+        loadAllInward();
     }
 
-    function deleteMachineGroup(code) {
+    // ================= UTIL =================
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '';
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    }
+
+    // ================= ACTIONS =================
+    function AddOrEditFunction() {
+        //Cheackview(vtype,code ,v_DATE);
+          window.location.href = `/InventoryOpening/Index?id=${encodeURIComponent(v_no)}&vtype=${encodeURIComponent(v_type)}`;
+
+    }
+
+    function viewMenuDetails(code, vtype) {
+        window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(code)}&vtype=${encodeURIComponent(vtype)}&mode=view`;
+    }
+
+    function Cheackview(v_type, v_no, vdate) {
+
+        $.ajax({
+            url: '/InventoryOpeningList/CheackEdit',
+            type: 'POST',
+            data: {
+                v_type: v_type,
+                v_no: v_no,
+                v_DATE: formatDate(vdate)
+            },
+            success: function (res) {
+                  console.log("res.status",res.status);
+                if (res.status== false )
+                {
+                    Swal.fire({
+                    title: 'Warning',
+                    text: res.message,
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                    });
+                    return ;
+                }
+                else{
+                   window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(v_no)}&vtype=${encodeURIComponent(v_type)}`;
+                }
+
+
+            },
+            error: function (xhr) {
+                alert("Error: " + xhr.responseText);
+            }
+        });
+    }
+
+    function deleteTemp(code, VType) {
         Swal.fire({
-            title: 'Are you sure?',
-            text: "This action will permanently delete the Machine group.",
-            icon: 'warning',
+            title: "Are you sure?",
+            text: "You want to delete this Inward Entry?",
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel'
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
         }).then((result) => {
+
             if (result.isConfirmed) {
+
                 $.ajax({
-                    url: '/MachineMainGroupMaster/DeleteMachinMainGrpByCode',
+                    url: '/InventoryOpeningList/Delete',
                     type: 'POST',
-                    data: { code: code },
-                    success: function (response) {
-                        if (response.success) {
-                            Swal.fire('Deleted!', response.message, 'success').then(() => {
-                                loadAllMachineMainGroups();
-                            });
+                    data: { code: code, VType: VType },
+                    success: function (res) {
+
+                        if (res.success) {
+                            toastr.success(res.message || "Deleted successfully");
+                            loadAllInward();
                         } else {
-                            Swal.fire('Failed', response.message, 'warning');
+                            toastr.error(res.message || 'Failed to delete.');
                         }
                     },
-                    error: function (xhr, status, error) {
-                        console.error("Delete error:", status, error);
-                        Swal.fire('Error!', 'An error occurred while deleting record.', 'error');
+                    error: function () {
+                        toastr.error('Error deleting record.');
                     }
                 });
+            }
+        });
+    }
+
+    function showDocumentPopup(docCode) {
+
+        $.ajax({
+            url: '/InventoryOpeningList/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',
+            data: { docCode: docCode },
+            success: function (response) {
+                if (response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function () {
+                toastr.error("Error fetching document details.");
             }
         });
     }

@@ -220,98 +220,102 @@ async function LoadDropDown() {
         throw error;
     }
 }
-
 function AddRow(data = {}) {
 
     let tbody = $('#tblInventoryOpeningEntry tbody');
 
-    // Generate next row number
-    let rowCount = tbody.find('tr[id^="row"]').length + 1;
-
     let newRow = `
-        <tr id="row${rowCount}" class="no-border-input">
-            <td class="hidden-col"> <input type="hidden"   value="${data.code ?? ""}" /> </td>
-     
+        <tr class="no-border-input">
+            <td class="hidden-col"> <input type="hidden" class="ItemCode" value="${data.code ?? ''}" /> </td>
             <td>
-                <select  class="erppagetable-control ddlItemname">  <option value="">-- Select Item --</option>  ${ItemNameList} </select>
-            </td>
-
-      
-            <td>
-                <select  class="erppagetable-control ItemMake"> <option value="">-- Select Make --</option>  ${ItemmakeList} </select>
-            </td>
-                
-            <td>
-                <select   class="erppagetable-control Unit">  <option value="">-- Select Unit --</option> ${unitnameList} </select>
+                <select class="erppagetable-control ddlItemname"> <option value="">-- Select Item --</option> ${ItemNameList}
+                </select>
             </td>
 
             <td>
-                <input type="text"   class="erppagetable-control TxtNos" value="${data.nos ?? ""}" />
+                <select class="erppagetable-control ItemMake">
+                    <option value="">-- Select Make --</option>
+                    ${ItemmakeList}
+                </select>
             </td>
 
             <td>
-                <input type="text"   class="erppagetable-control TxtQty"  value="${data.qty ?? ""}" />
+                <select class="erppagetable-control ddlUnit">
+                    <option value="">-- Select Unit --</option>
+                    ${unitnameList}
+                </select>
             </td>
 
+            <td>
+                <input type="text" class="erppagetable-control TxtNos" value="${data.nos ?? ''}" />
+            </td>
+
+            <td>
+                <input type="text" class="erppagetable-control TxtQty" value="${data.qty ?? ''}" />
+            </td>
+
+            <td>
+                <input type="text" class="erppagetable-control TxtRate" value="${data.rate ?? ''}" />
+            </td>
+
+            <td>
+                <input type="text" class="erppagetable-control TxtAmount" value="${data.amount ?? ''}"  readonly />
+            </td>
+
+            <td>
+                <select class="erppagetable-control ItemDept">
+                    <option value="">-- Select Department --</option>
+                    ${ItemDeptList}
+                </select>
+            </td>
    
             <td>
-                <input type="text"   class="erppagetable-control TxtRate" value="${data.rate ?? ""}" />
+                <input type="text"
+                       class="erppagetable-control TxtRemarks"
+                       value="${data.Remark ?? ''}" />
             </td>
-
-   
-            <td>
-                <input type="text"   class="erppagetable-control TxtAmount" value="${data.amount ?? ""}"  readonly />
+                    <td class="text-center">  <button type="button"  class="act-btn add"  onclick="AddRow()"> <i class="fa fa-plus-circle"></i> </button>
+                    <button type="button" class="act-btn delete"  onclick="DeleteRow(this)"> <i class="fa fa-trash"></i> </button>
             </td>
-
-            <td>
-                <select  class="erppagetable-control ItemDept">  <option value="">-- Select Department --</option> ${ItemDeptList}  </select>
-            </td>
-
-            <td>
-                <input type="text"   class="erppagetable-control TxtRemarks"  value="${data.Remark}" />
-            </td>
-
-            <td class="text-center">
-                <button type="button"  class="act-btn add" onclick="AddRow()">  <i class="fa fa-plus-circle"></i>  </button>
-                <button type="button" class="act-btn delete" onclick="DeleteRow(this)">   <i class="fa fa-trash"></i> </button>
-            </td>
-
         </tr>
     `;
 
     tbody.append(newRow);
-
-
-    // =========================================================
-    // Set Existing Data When Editing
-    // =========================================================
-
-    if (Object.keys(data).length > 0) {
-
-        $(`#ddlItemname${rowCount}`)
-            .val(data.itemCode ?? data.itemName ?? data.itemname ?? "");
-
-        $(`#ItemMake${rowCount}`)
-            .val(data.itemMake ?? data.itemmake ?? "");
-
-        $(`#Unit${rowCount}`)
-            .val(data.unit_code ?? data.unit ?? "");
-
-        $(`#ItemDept${rowCount}`)
-            .val(data.itemDept ?? data.itemdept ?? "");
-
-
-        // Calculate amount for existing row
-        let qty = parseFloat(data.qty) || 0;
-        let rate = parseFloat(data.rate) || 0;
-
-        if (qty && rate) {
-            $(`#TxtAmount${rowCount}`).val(
-                (qty * rate).toFixed(2)
-            );
-        }
-    }
 }
+
+
+
+function GetInventoryOpeningData() {
+
+    let data = [];
+
+    $('#tblInventoryOpeningEntry tbody tr').each(function () {
+
+        let row = $(this);
+
+        let item = {
+            code: row.find('.ItemCode').val() || '',
+            ItemName: row.find('.ddlItemname').val() || '',
+            ItemMake: row.find('.ItemMake').val() || '',
+            Unit: row.find('.ddlUnit').val() || '',
+            Nos: row.find('.TxtNos').val() || '',
+            Qty: row.find('.TxtQty').val() || '',
+            Rate: row.find('.TxtRate').val() || '',
+            Amount: row.find('.TxtAmount').val() || '',
+            Department: row.find('.ItemDept').val() || '',
+            Remark: row.find('.TxtRemarks').val() || ''
+        };
+
+        data.push(item);
+    });
+
+    return data;
+}
+
+
+
+
+
 
 function DeleteRow(button) {
 
@@ -322,26 +326,4 @@ function DeleteRow(button) {
     }
 
     row.remove();
-}
-
-async function FetchdatabyItemCode(ItemCode) {
-
-    try {
-
-        const res = await $.ajax({
-            url: 'InventoryOpeningEntry/GetDataByItemcode',
-            type: 'POST',
-            data: {
-                ItemCode: ItemCode
-            }
-        });
-
-        return res;
-
-    } catch (error) {
-
-        console.log("Error:", error);
-        return null;
-
-    }
 }
