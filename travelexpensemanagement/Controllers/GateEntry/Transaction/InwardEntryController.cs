@@ -217,17 +217,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     fappstatus = "Approved";
                     fappRemark = "Document Approved.";
                 }       
-                              
-                if (action == "INSERT")
-                {
-                    var jsonResult = GetVNo(header.V_TYPE) as JsonResult;
-                    dynamic data = jsonResult.Value;
-                    header.V_NO = Convert.ToInt32(data.V_NO);
-                }                     
-                 
+                                  
                 using (var cmd = new SqlCommand("sp_InwardEntry", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
+                { 
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Action", action);
                     cmd.Parameters.AddWithValue("@SaveAction", "Header");
@@ -255,8 +247,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd.Parameters.AddWithValue("@TRANSPORT_CODE", header.TRANSPORT_CODE);
                     cmd.Parameters.AddWithValue("@DRIVER_NAME", header.DRIVER_NAME);
                     cmd.Parameters.AddWithValue("@DRIVER_NO", header.DRIVER_NO);
-                    cmd.Parameters.Add("@EWB_DATE", SqlDbType.SmallDateTime).Value =
-                    header.EWB_EXPDATE == null ? DBNull.Value : Convert.ToDateTime(header.EWB_EXPDATE);                   
+                    cmd.Parameters.Add("@EWB_DATE", SqlDbType.SmallDateTime).Value =  header.EWB_EXPDATE == null ? DBNull.Value : Convert.ToDateTime(header.EWB_EXPDATE);                   
                     cmd.Parameters.AddWithValue("@EWB_INVNO", header.EWB_INVNO);
                     cmd.Parameters.AddWithValue("@EWB_INVAMT", header.EWB_INVAMT);
                     cmd.Parameters.AddWithValue("@PARTY_WBSLIPNO", header.PARTY_WBSLIPNO);
@@ -292,7 +283,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     cmd.Parameters.AddWithValue("@CONTAINER_NO", header.CONTAINER_NO);
                     cmd.Parameters.AddWithValue("@FAPROV_REMARKS",fappRemark);
                     cmd.Parameters.AddWithValue("@ACTIVE", header.ACTIVE);
-                    cmd.Parameters.AddWithValue("@Out_Date", header.OUT_DATE);
+                    cmd.Parameters.Add("@Out_Date", SqlDbType.SmallDateTime).Value = header.OUT_DATE == null ? DBNull.Value : Convert.ToDateTime(header.OUT_DATE);                
                     cmd.Parameters.AddWithValue("@UUSER", g.PubUserId);
                     cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
                     cmd.Parameters.AddWithValue("@EUSER", g.PubUserId);
@@ -468,8 +459,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                         if (g.PubUserId != "1" && g.PubUserId != "53")
                         {
-                            return new ApiResponse  { Status = "VALIDATION",  Message = $"Gate no. {vno} exist in MRN No. {header.V_NO} Modification not allowed."
-                            };
+                            return new ApiResponse  { Status = "VALIDATION",  Message = $"Gate no. {vno} exist in MRN No. {header.V_NO} Modification not allowed." };
                         }
                     }
                 }

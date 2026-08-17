@@ -227,10 +227,7 @@ function AddRow(data = {}) {
     let newRow = `
         <tr class="no-border-input">
 
-            <td class="hidden-col">
-                <input type="hidden"
-                       class="ItemCode"
-                       value="${data.itemCode ?? ''}" />
+            <td class="hidden-col"> <input type="hidden" class="ItemCode" value="${data.itemCode ?? ''}" />
             </td>
 
             <td>
@@ -255,59 +252,35 @@ function AddRow(data = {}) {
             </td>
 
             <td>
-                <input type="text"
-                       class="erppagetable-control TxtNos"
-                       value="${data.nos ?? ''}" />
+                <input type="number"  class="erppagetable-control TxtNos"  value="${data.nos ?? ''}" />
             </td>
 
             <td>
-                <input type="text"
-                       class="erppagetable-control TxtQty"
-                       value="${data.qty ?? ''}" />
+                <input type="number" class="erppagetable-control TxtQty" value="${data.qty ?? ''}" />
             </td>
 
             <td>
-                <input type="text"
-                       class="erppagetable-control TxtRate"
-                       value="${data.rate ?? ''}" />
+                <input type="number" class="erppagetable-control TxtRate" value="${data.rate ?? ''}" />
             </td>
 
             <td>
-                <input type="text"
-                       class="erppagetable-control TxtAmount"
-                       value="${data.amount ?? ''}"
-                       readonly />
+                <input type="number"   class="erppagetable-control TxtAmount" value="${data.amount ?? ''}" readonly />
             </td>
 
             <td>
-                <select class="erppagetable-control ItemDept">
-                    <option value="">-- Select Department --</option>
+                <select class="erppagetable-control ItemDept">  <option value="">-- Select Department --</option>
                     ${ItemDeptList}
                 </select>
             </td>
 
             <td>
-                <input type="text"
-                       class="erppagetable-control TxtRemarks"
-                       value="${data.remarks ?? ''}" />
+                <input type="text"  class="erppagetable-control TxtRemarks" value="${data.remarks ?? ''}" />
             </td>
 
             <td class="text-center">
-
-                <button type="button"
-                        class="act-btn add"
-                        onclick="AddRow()">
-                    <i class="fa fa-plus-circle"></i>
-                </button>
-
-                <button type="button"
-                        class="act-btn delete"
-                        onclick="DeleteRow(this)">
-                    <i class="fa fa-trash"></i>
-                </button>
-
+                <button type="button" class="act-btn add" onclick="AddRow()">   <i class="fa fa-plus-circle"></i> </button>
+                <button type="button" class="act-btn delete"  onclick="DeleteRow(this)"> <i class="fa fa-trash"></i> </button>
             </td>
-
         </tr>
     `;
 
@@ -520,4 +493,134 @@ function TransitReport() {
     });
 }
 
+function setFormReadOnly() {
 
+    const form = document.getElementById("InventoryOpeningform");
+    if (!form) return;
+
+    form.classList.add("erppage-readonly");
+    form.classList.add("readonly-mode");
+
+    // --------------------------------------------------
+    // Inputs
+    // --------------------------------------------------
+    form.querySelectorAll("input").forEach(el => {
+
+        // Hidden fields remain unchanged
+        if (el.type === "hidden") return;
+
+        if (
+            el.type === "text" ||
+            el.type === "date" ||
+            el.type === "time" ||
+            el.type === "number"
+        ) {
+            el.readOnly = true;
+        }
+        else {
+            el.disabled = true;
+        }
+    });
+
+    // --------------------------------------------------
+    // Textareas
+    // --------------------------------------------------
+    form.querySelectorAll("textarea").forEach(el => {
+        el.readOnly = true;
+    });
+
+    // --------------------------------------------------
+    // Selects
+    // --------------------------------------------------
+    form.querySelectorAll("select").forEach(el => {
+        el.disabled = true;
+    });
+
+    // --------------------------------------------------
+    // Buttons
+    // --------------------------------------------------
+    form.querySelectorAll("button").forEach(btn => {
+
+        const id = (btn.id || "").toLowerCase();
+        const txt = (btn.innerText || "").trim().toLowerCase();
+
+        // Keep Back button enabled
+        if (
+            id === "button_print" ||
+            txt.includes("back") ||
+            txt.includes("close")
+        ) {
+            btn.disabled = false;
+            return;
+        }
+
+        // Disable all other buttons
+        btn.disabled = true;
+    });
+
+    // --------------------------------------------------
+    // Disable clickable icons / lookup controls
+    // --------------------------------------------------
+    form.querySelectorAll(`
+        .input-icon,
+        .fa-search,
+        .fa-cog,
+        .fa-database,
+        .fa-ellipsis-h
+    `).forEach(icon => {
+
+        icon.style.pointerEvents = "none";
+        icon.style.opacity = "0.5";
+        icon.style.cursor = "not-allowed";
+    });
+
+    // --------------------------------------------------
+    // Disable modal triggers
+    // --------------------------------------------------
+    form.querySelectorAll("[data-bs-toggle='modal']").forEach(el => {
+
+        el.removeAttribute("data-bs-toggle");
+        el.removeAttribute("data-bs-target");
+
+        el.style.pointerEvents = "none";
+        el.style.opacity = "0.5";
+        el.style.cursor = "not-allowed";
+    });
+
+    // --------------------------------------------------
+    // Table controls
+    // --------------------------------------------------
+    form.querySelectorAll(`
+        table input,
+        table select,
+        table textarea,
+        table button,
+        table .fa,
+        table span
+    `).forEach(el => {
+
+        if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+            el.readOnly = true;
+        }
+        else if (
+            el.tagName === "SELECT" ||
+            el.tagName === "BUTTON"
+        ) {
+            el.disabled = true;
+        }
+
+        el.style.pointerEvents = "none";
+        el.style.opacity = "0.5";
+    });
+
+    // --------------------------------------------------
+    // Keep Print button enabled
+    // --------------------------------------------------
+    const printButton = document.getElementById("button_print");
+
+    if (printButton) {
+        printButton.disabled = false;
+        printButton.style.pointerEvents = "auto";
+        printButton.style.opacity = "1";
+    }
+}

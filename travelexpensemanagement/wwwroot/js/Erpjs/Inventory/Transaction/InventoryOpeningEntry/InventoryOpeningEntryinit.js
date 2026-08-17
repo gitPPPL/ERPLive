@@ -37,7 +37,14 @@ $(document).ready(async function ()
 
         else
         {
+          
             await LoadData(rowId);
+
+            if (mode === "view") {
+                setFormReadOnly();
+            }
+
+
         }
 
     }
