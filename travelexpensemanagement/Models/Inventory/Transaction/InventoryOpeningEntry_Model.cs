@@ -35,18 +35,12 @@ namespace travelexpensemanagement.Models.Inventory.Transaction
         public string? FAPROV_STATUS { get; set; }
         public string? FAPROV_REMARKS { get; set; }
         public string? action { get; set; }
+        public string? CODE { get; set; }
 
     }
 
     public class InventoryOpeningEntry_Details
     {
-        public int YEAR_CODE { get; set; }
-        public int COMP_CODE { get; set; }
-        public int BRANCH_CODE { get; set; }
-        public string V_TYPE { get; set; } 
-        public int V_NO { get; set; }
-        public DateTime? V_DATE { get; set; }
-        public string? DOC_ID { get; set; }
         public int SNO { get; set; }
         public string? SHIFT { get; set; }
         public string? PORD_TYPE { get; set; }

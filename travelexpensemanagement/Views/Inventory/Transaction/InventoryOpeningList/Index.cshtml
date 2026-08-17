@@ -23,10 +23,10 @@
         <input type="text" id="searchBox" placeholder="Search Module..." />
     </div>
     <div class="erppagelist-actions">
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print">
             <i class="fa fa-print"></i> Print
         </button>
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="button_export">
             <i class="fa fa-file-excel"></i> Export
         </button>
         <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
@@ -131,9 +131,6 @@
     $(document).ready(function () {
 
           loadAllInward();
-            // checkPermission(controllerName, function () {
-            //   loadAllInward();
-            // });
 
         $('#searchBox').on('keyup', function () {
             currentPage = 1;
@@ -166,6 +163,9 @@
             },
             success: function (res) {
 
+                console.log("Table List",res);
+
+
                 if (!res.success) {
                     toastr.error("Failed to load data.");
                     return;
@@ -186,48 +186,77 @@
     // ================= TABLE =================
     function renderTable(list) {
 
-        const tbody = $('#tblInwardEntryList tbody');
+        const tbody = $('#tblInventoryOpeningList tbody');
         tbody.empty();
 
         if (!list || list.length === 0) {
-            tbody.append('<tr><td colspan="13" class="text-center text-muted">No list found.</td></tr>');
+            tbody.append(`
+                <tr>
+                    <td colspan="25" class="text-center text-muted">
+                        No list found.
+                    </td>
+                </tr>
+            `);
             return;
         }
 
         $.each(list, function (index, item) {
+
             tbody.append(`
                 <tr>
-                    <td style="display:none;">${item.v_NO || ''}</td>
-                    <td>${item.v_NO || ''}</td>
+                    <td>${item.name || ''}</td>
+                    <td>${item.code || ''}</td>
+                    <td>${item.yeaR_CODE ?? ''}</td>
+                    <td>${item.comP_CODE ?? ''}</td>
+                    <td>${item.brancH_CODE ?? ''}</td>
                     <td>${item.v_TYPE || ''}</td>
+                    <td>${item.v_NO ?? ''}</td>
                     <td>${formatDate(item.v_DATE)}</td>
-                    <td>${item.trucK_NO || ''}</td>
-                    <td>${item.bilL_NO || ''}</td>
-                    <td>${formatDate(item.bilL_DATE)}</td>
-                    <td>${item.partY_NAME || ''}</td>
-                    <td>${item.transiT_NO || ''}</td>
-                    <td>${item.waybilL_NO || ''}</td>
-                    <td>${formatDate(item.r_DATE)}</td>
-                    <td>${item.r_TIME || ''}</td>
-                    <td>${item.status || ''}</td>
+                    <td>${item.doC_ID || ''}</td>
+                    <td>${item.shift || ''}</td>
+                    <td>${item.sliP_NO || ''}</td>
+                    <td>${item.porD_TYPE || ''}</td>
+                    <td>${item.porD_NO ?? ''}</td>
+                    <td>${item.placE_CODE ?? ''}</td>
+                    <td>${item.emP_CODE ?? ''}</td>
+                    <td>${item.depT_CODE ?? ''}</td>
+                    <td>${item.remarks || ''}</td>
+                    <td>${item.conS_TYPE || ''}</td>
+                    <td>${item.status ?? ''}</td>
+                    <td>${item.amount ?? ''}</td>
+                    <td>${item.plaN_TYPE || ''}</td>
+                    <td>${item.plaN_NO ?? ''}</td>
+                    <td>${item.faproV_STATUS || ''}</td>
+                    <td>${item.faproV_REMARKS || ''}</td>
 
                     <td class="action-col">
-                    <div class="action-wrap">
+                        <div class="action-wrap">
 
-                    <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}' ,'${item.v_DATE}')"><i class="fa fa-edit"></i></button>
+                            <button class="act-btn edit permission-edit"
+                                onclick="AddOrEditFunction('${item.doC_ID}')">
+                                <i class="fa fa-edit"></i>
+                            </button>
 
-                    <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
+                            <button class="act-btn view btn-view"
+                                onclick="viewMenuDetails('${item.doC_ID}')">
+                                <i class="fa fa-eye"></i>
+                            </button>
 
-                    <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
+                            <button class="act-btn delete permission-delete"
+                                onclick="deleteTemp('${item.doC_ID}')">
+                                <i class="fa fa-trash"></i>
+                            </button>
 
-                    <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+                            <button class="act-btn document btn-document"
+                                onclick="showDocumentPopup('${item.doC_ID}')">
+                                <i class="fa fa-file"></i>
+                            </button>
+
                         </div>
                     </td>
                 </tr>
             `);
-            applyGridPermission();
         });
-
     }
 
     // ================= PAGINATION =================
@@ -318,51 +347,16 @@
     }
 
     // ================= ACTIONS =================
-    function AddOrEditFunction() {
-        //Cheackview(vtype,code ,v_DATE);
-          window.location.href = `/InventoryOpening/Index?id=${encodeURIComponent(v_no)}&vtype=${encodeURIComponent(v_type)}`;
 
+    function AddOrEditFunction(rowId) {
+        window.location.href = `/InventoryOpeningEntry/Index?id=${encodeURIComponent(rowId)}`;
     }
 
-    function viewMenuDetails(code, vtype) {
-        window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(code)}&vtype=${encodeURIComponent(vtype)}&mode=view`;
+    function viewMenuDetails(rowId) {
+        window.location.href = `/InventoryOpeningEntry/Index?id=${encodeURIComponent(rowId)}&mode=view`;
     }
 
-    function Cheackview(v_type, v_no, vdate) {
-
-        $.ajax({
-            url: '/InventoryOpeningList/CheackEdit',
-            type: 'POST',
-            data: {
-                v_type: v_type,
-                v_no: v_no,
-                v_DATE: formatDate(vdate)
-            },
-            success: function (res) {
-                  console.log("res.status",res.status);
-                if (res.status== false )
-                {
-                    Swal.fire({
-                    title: 'Warning',
-                    text: res.message,
-                    icon: 'warning',
-                    confirmButtonText: 'OK'
-                    });
-                    return ;
-                }
-                else{
-                   window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(v_no)}&vtype=${encodeURIComponent(v_type)}`;
-                }
-
-
-            },
-            error: function (xhr) {
-                alert("Error: " + xhr.responseText);
-            }
-        });
-    }
-
-    function deleteTemp(code, VType) {
+    function deleteTemp(DocID) {
         Swal.fire({
             title: "Are you sure?",
             text: "You want to delete this Inward Entry?",
@@ -378,7 +372,7 @@
                 $.ajax({
                     url: '/InventoryOpeningList/Delete',
                     type: 'POST',
-                    data: { code: code, VType: VType },
+                    data: { DocID : DocID},
                     success: function (res) {
 
                         if (res.success) {

@@ -43,6 +43,14 @@
 		</div>
 		<div class="erppage-header-title">Inventory Opening Entry</div>
 	</div>
+
+
+
+	<button type="button" class="erppage-btn erppage-btn-copy" id="button_print" onclick="TransitReport();">
+		<i class="fa-solid fa-print"></i> Print
+	</button>
+
+
 	<div class="erppage-header-right">
 		<button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InventoryOpeningList")', isReadOnly)">
 			<i class="fa-solid fa-arrow-left"></i>Back to list

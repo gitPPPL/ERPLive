@@ -206,6 +206,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     cmd.Parameters.AddWithValue(  "@BRANCH_CODE",  g.PubBranchCode);
                     cmd.Parameters.AddWithValue(  "@V_TYPE",  (object?)header.V_TYPE ?? DBNull.Value);
                     cmd.Parameters.AddWithValue( "@V_NO", header.V_NO);
+                 
                     cmd.Parameters.Add( "@V_DATE",  SqlDbType.SmallDateTime).Value = header.V_DATE;
                     cmd.Parameters.AddWithValue( "@DOC_ID", docId);
                     cmd.Parameters.AddWithValue("@REMARKS",  (object?)header.REMARKS ?? DBNull.Value);
@@ -278,7 +279,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                 return ( "Error",  ex.Message);
             }
         }
-
 
     }
 }

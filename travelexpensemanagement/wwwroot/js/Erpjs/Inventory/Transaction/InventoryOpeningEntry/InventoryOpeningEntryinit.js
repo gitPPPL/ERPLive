@@ -24,12 +24,20 @@ $(document).ready(async function ()
         SetFYDate('DtDocDate', LoginDate);
         await LoadDropDown();
         AddRow();
-        if (rowId == null) {
+
+        if (rowId == null)
+        {
             let v_type = $('#ddlDocType').val();
 
-            if (v_type) {
+            if (v_type)
+            {
                 await GetVNo(v_type);
             }
+        }
+
+        else
+        {
+            await LoadData(rowId);
         }
 
     }
@@ -92,24 +100,50 @@ $(document).ready(async function ()
         }
     });
 
+    $('#btn_save').on('click', function () {
 
-
-
-    $('#btn_save').on('Click', async function () {
+        alert("hh");
 
         let V_TYPE = $('#ddlDocType').val();
         let V_NO = $('#NumDocno').val();
         let V_DATE = $('#DtDocDate').val();
         let REMARKS = $('#TxtRemarks').val();
-        
-
+        let action = $.trim($('#CODE').val()) ? 'UPDATE' : 'INSERT';
         let inventoryData = GetInventoryOpeningData();
 
-        console.log(inventoryData);
-          
+        let requestData = {
+            Header: {
+                action: rowId ? 'UPDATE' : 'INSERT',
+                V_TYPE: V_TYPE,
+                V_NO: V_NO,
+                V_DATE: V_DATE,
+                REMARKS: REMARKS,
+                action: action
+            },
+            Details: inventoryData
+        };
 
+        $.ajax({
+            url: '/InventoryOpeningEntry/SavedData',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(requestData),
+            success: function (response) {
+
+                if (response.success) {
+                    alert(response.message);
+                }
+                else {
+                    alert(response.message);
+                }
+
+            },
+            error: function (xhr, status, error) {
+                console.log(xhr.responseText);
+                alert("Error while saving data.");
+            }
+        });
 
     });
-
 
 });
