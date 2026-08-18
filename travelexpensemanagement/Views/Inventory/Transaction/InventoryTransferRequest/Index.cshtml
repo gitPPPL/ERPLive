@@ -1,7 +1,50 @@
-﻿@{
+﻿
+
+@using System.Text.Json
+
+@{
     ViewBag.Title = "Inventory Transfer Request";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
+    var databaseName = ViewBag.DatabaseName as string;
+    var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0;
+    var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
+    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+
 }
+
+<script>
+    window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
+        CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
+        UserId = globalVariables.PubUserId,
+        UserName = globalVariables.PubUserName,
+        UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
+        FYearCode = globalVariables.PubFYearCode,
+        BranchCode = globalVariables.PubBranchCode,
+        LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
+        CompanyName = globalVariables.CompanyName,
+        Address1 = globalVariables.Address1,
+        Address2 = globalVariables.Address2,
+        GST = globalVariables.gstin,
+        PAN = globalVariables.PAN,
+        Phone = globalVariables.Phone,
+        Email = globalVariables.Email
+    }));
+
+    window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
+</script>
+
+
+
+
+
+
+
+
+
+
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
     <div class="erppage-header-left">
@@ -49,6 +92,41 @@
                             <label class="erppage-label">Remarks</label>
                             <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 58px;" placeholder="Enter Remarks"></textarea>
                         </div>
+
+
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Department</label>
+                            <select class="erppage-input erppage-select" id="ddlHDepartment">
+                                <option value="">Select Department</option>
+                            </select>
+                        </div>
+
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Shift</label>
+                            <select class="erppage-input erppage-select" id="ddlShift">
+                                <option value="">Select Shift</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+
+                            </select>
+                        </div>
+
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Place</label>
+                            <select class="erppage-input erppage-select" id="ddlPlace">
+                                <option value="">Select Place</option>
+                            </select>
+                        </div>
+
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">HOD Name</label>
+                            <select class="erppage-input erppage-select" id="ddlHodName">
+                                <option value="">Select HOD Name</option>
+                            </select>
+                        </div>
+
+
                         <div class="erppage-divfield">
                             <label class="erppage-label">Current Stock</label>
                             <input type="number" class="erppage-input" id="NumCurrentStock" placeholder="Enter Current Stock" />
@@ -142,3 +220,8 @@
 
     </div>
 </div>
+
+
+<script src="~/js/erpjs/inventory/transaction/inventorytransferrequest/inventorytransferrequestinit.js"></script>
+<script src="~/js/erpjs/inventory/transaction/inventorytransferrequest/inventorytransferrequestapi.js"></script>
+<script src="~/js/erpjs/inventory/transaction/inventorytransferrequest/inventorytransferrequest.js"></script>
