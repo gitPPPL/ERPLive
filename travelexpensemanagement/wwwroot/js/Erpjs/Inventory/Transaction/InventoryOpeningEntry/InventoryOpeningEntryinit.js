@@ -1,4 +1,6 @@
-﻿const urlParams = new URLSearchParams(window.location.search);
+﻿
+
+const urlParams = new URLSearchParams(window.location.search);
 const rowId = urlParams.get('id');
 const mode = urlParams.get('mode');
 const isReadOnly = (mode === 'view');
@@ -36,15 +38,11 @@ $(document).ready(async function ()
         }
 
         else
-        {
-          
+        {          
             await LoadData(rowId);
-
             if (mode === "view") {
                 setFormReadOnly();
             }
-
-
         }
 
     }
@@ -107,9 +105,8 @@ $(document).ready(async function ()
         }
     });
 
-    $('#btn_save').on('click', function () {
-
-        alert("hh");
+    $('#btn_save').on('click', function ()
+    {
 
         let V_TYPE = $('#ddlDocType').val();
         let V_NO = $('#NumDocno').val();
@@ -138,16 +135,16 @@ $(document).ready(async function ()
             success: function (response) {
 
                 if (response.success) {
-                    alert(response.message);
+                    showToast(response.message,"Success");
                 }
                 else {
-                    alert(response.message);
+                    showToast(response.message,"Error");
                 }
 
             },
             error: function (xhr, status, error) {
                 console.log(xhr.responseText);
-                alert("Error while saving data.");
+                showToast("Error while saving data.", "Error");
             }
         });
 

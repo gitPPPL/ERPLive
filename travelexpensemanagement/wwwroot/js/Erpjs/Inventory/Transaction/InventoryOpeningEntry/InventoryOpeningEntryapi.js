@@ -252,15 +252,15 @@ function AddRow(data = {}) {
             </td>
 
             <td>
-                <input type="number"  class="erppagetable-control TxtNos"  value="${data.nos ?? ''}" />
+                <input type="number"  class="erppagetable-control TxtNos"  value="${data.nos ?? ''}" oninput="limitMaxLength(this, 10)" />
             </td>
 
             <td>
-                <input type="number" class="erppagetable-control TxtQty" value="${data.qty ?? ''}" />
+                <input type="number" class="erppagetable-control TxtQty" value="${data.qty ?? ''}"  oninput="limitMaxLength(this, 13)" />
             </td>
 
             <td>
-                <input type="number" class="erppagetable-control TxtRate" value="${data.rate ?? ''}" />
+                <input type="number" class="erppagetable-control TxtRate" value="${data.rate ?? ''}"  oninput="limitMaxLength(this, 13)" />
             </td>
 
             <td>
@@ -274,7 +274,7 @@ function AddRow(data = {}) {
             </td>
 
             <td>
-                <input type="text"  class="erppagetable-control TxtRemarks" value="${data.remarks ?? ''}" />
+                <input type="text"  class="erppagetable-control TxtRemarks" value="${data.remarks ?? ''}" maxlength="250"  />
             </td>
 
             <td class="text-center">
@@ -624,3 +624,16 @@ function setFormReadOnly() {
         printButton.style.opacity = "1";
     }
 }
+
+
+function limitMaxLength(input, maxLength) {
+    // Remove anything except digits
+    input.value = input.value.replace(/\D/g, '');
+
+    // Limit maximum digits
+    if (input.value.length > maxLength) {
+        input.value = input.value.substring(0, maxLength);
+    }
+}
+
+

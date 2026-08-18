@@ -1,0 +1,266 @@
+﻿@{
+    ViewBag.Title = "Inventory Transfer Request List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+}
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Inventory Transfer Request List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "InventoryTransferRequest")'">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search Module..." />
+    </div>
+    <div class="erppagelist-actions">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+            <i class="fa fa-envelope"></i> Mail
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
+                data-tooltip="Approve Records">
+            <i class="fa fa-check-circle"></i> Approved
+        </button>
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblInventoryTransferRequestList" class="excel-table fixed-grid-table table-width resizable-table">
+            <colgroup>
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 14%;">
+                <col style="width: 20%;">
+                <col style="width: 10%;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Doc No</th>
+                    <th>Doc Type</th>
+                    <th>Doc Date</th>
+                    <th>Shift</th>
+                    <th>Slip_No</th>
+                    <th>Pord_Type</th>
+                    <th>Remarks</th>
+                    <th>Status</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button class="page-nav" id="prevBtn">‹</button>
+            <div id="tablePagination" class="page-numbers"></div>
+            <button class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+
+    let currentPage = 1;
+    let pageSize = 10;
+
+    $(document).ready(function () {
+        loadAllMachineMainGroups();
+    });
+
+    function loadAllMachineMainGroups() {
+        const searchTerm = $('#searchBox').val();
+
+        $.ajax({
+            url: '/MachineMainGroupMasterList/GetMachineMainGroups', // 🔁 Update with your actual controller route
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: searchTerm,
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log(res);
+                const lists = res.lists;
+                const totalCount = res.totalCount;
+
+                let tbody = $('#tblMachineMain tbody');
+                tbody.empty();
+
+                if (!lists || lists.length === 0) {
+                    tbody.append('<tr><td colspan="4" class="text-center text-muted">No records found.</td></tr>');
+                    renderPagination(0, pageSize, currentPage);
+                    return;
+                }
+
+                $.each(lists, function (index, item) {
+                    tbody.append(`
+                        <tr>
+                            <td>${item.name || ''}</td>
+                            <td>${item.code || ''}</td>
+                            <td>${item.year_Code || ''}</td>
+                            <td>${item.comp_Code || ''}</td>
+                            <td>${item.branch_Code || ''}</td>
+                            <td>${item.v_Type || ''}</td>
+                            <td>${item.v_No || ''}</td>
+                            <td>${item.v_Date || ''}</td>
+                            <td>${item.doc_Id1 || ''}</td>
+                            <td>${item.shift || ''}</td>
+                            <td>${item.slip_No || ''}</td>
+                            <td>${item.pord_Type || ''}</td>
+                            <td>${item.pord_No || ''}</td>
+                            <td>${item.place_Code || ''}</td>
+                            <td>${item.emp_Code || ''}</td>
+                            <td>${item.dept_Code || ''}</td>
+                            <td>${item.remarks || ''}</td>
+                            <td>${item.cons_Type || ''}</td>
+                            <td>${item.status || ''}</td>
+                            <td>${item.amount || ''}</td>
+                            <td>${item.user || ''}</td>
+                            <td>${item.udate || ''}</td>
+                            <td>${item.euser || ''}</td>
+                            <td>${item.edate || ''}</td>
+                            <td>${item.aed || ''}</td>
+                            <td>${item.wsid || ''}</td>
+                            <td>${item.lip || ''}</td>
+                            <td>${item.lid || ''}</td>
+                            <td>${item.plan_Type || ''}</td>
+                            <td>${item.plan_No || ''}</td>
+                            <td>${item.faprov_Status || ''}</td>
+                            <td>${item.faprov_Remarks || ''}</td>
+                            <td class="action-col">
+                              <div class="action-wrap">
+                                 <button class="act-btn edit btn-edit" title="Edit Row" style="cursor:pointer;" onclick="editMachineGroup(${item.code})"><i class="fa fa-edit"></i></button>
+                                 <button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewMachineGroup(${item.code})"><i class="fa fa-eye"></i></button>
+                                 <button class="act-btn delete btn-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteMachineGroup(${item.code})"><i class="fa fa-trash"></i></button>
+                              </div>
+                           </td>
+                        </tr>
+                    `);
+                });
+
+                renderPagination(totalCount, pageSize, currentPage);
+            },
+            error: function (xhr) {
+                alert('Error loading data: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function renderPagination(total, pageSize, currentPage) {
+        const totalPages = Math.ceil(total / pageSize);
+        const paginationContainer = $('#tablePagination');
+        paginationContainer.empty();
+
+        if (totalPages <= 1) return;
+
+        let html = '';
+
+        if (currentPage > 1) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
+        }
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) endPage = Math.min(5, totalPages);
+        if (currentPage >= totalPages - 2) startPage = Math.max(totalPages - 4, 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        if (currentPage < totalPages) {
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
+            html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
+        }
+
+        paginationContainer.html(html);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllMachineMainGroups();
+    }
+
+    $('#searchBox').on('keyup', function () {
+        currentPage = 1;
+        loadAllMachineMainGroups();
+    });
+
+
+
+    function editMachineGroup(rowId) {
+        window.location.href = '/MachineMainGroupMaster/Index?id=' + encodeURIComponent(rowId);
+    }
+    function viewMachineGroup(rowId) {
+        window.location.href = '/MachineMainGroupMaster/Index?id=' + encodeURIComponent(rowId) + '&readOnly=true';
+    }
+
+    function deleteMachineGroup(code) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action will permanently delete the Machine group.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/MachineMainGroupMaster/DeleteMachinMainGrpByCode',
+                    type: 'POST',
+                    data: { code: code },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire('Deleted!', response.message, 'success').then(() => {
+                                loadAllMachineMainGroups();
+                            });
+                        } else {
+                            Swal.fire('Failed', response.message, 'warning');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Delete error:", status, error);
+                        Swal.fire('Error!', 'An error occurred while deleting record.', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+</script>

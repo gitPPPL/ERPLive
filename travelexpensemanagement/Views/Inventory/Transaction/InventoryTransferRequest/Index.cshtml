@@ -1,0 +1,144 @@
+﻿@{
+    ViewBag.Title = "Inventory Transfer Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-industry"></i>
+        </div>
+        <div class="erppage-header-title">Inventory Transfer Request</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InventoryTransferRequestList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="InventoryTransferRequestform">
+    <input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppagesrow">
+                <div class="erppagescol-8">
+                    <div class="erppage-grid4">
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Doc Type</label>
+                            <select class="erppage-input erppage-select" id="ddlDocType">
+                                <option value="">Select Doc Type</option>
+                            </select>
+                        </div>
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Doc No</label>
+                            <input type="number" class="erppage-input" id="NumDocno" placeholder="Enter Doc No">
+                        </div>
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Doc Date</label>
+                            <input type="date" class="erppage-input" id="DtDocDate">
+                        </div>
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Status</label>
+                            <select class="erppage-input erppage-select" id="ddlStatus">
+                                <option value="">Select Status</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="erppage-grid4">
+                        <div class="erppage-divfield erppage-col-span-2">
+                            <label class="erppage-label">Remarks</label>
+                            <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 58px;" placeholder="Enter Remarks"></textarea>
+                        </div>
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Current Stock</label>
+                            <input type="number" class="erppage-input" id="NumCurrentStock" placeholder="Enter Current Stock" />
+                        </div>
+                        <div class="erppage-divfield">
+                            <label class="erppage-label">Dept. Current Stock</label>
+                            <input type="number" class="erppage-input" id="NumDeptCurrentStock" placeholder="Enter Dept. Current Stock" />
+                        </div>
+                    </div>
+                </div>
+                <div class="erppagescol-4">
+                    <fieldset class="erppagefieldset">
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">From Date</label>
+                                <input type="date" class="erppage-input" id="DtFromDate" />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">To Date</label>
+                                <input type="date" class="erppage-input" id="DtToDate" />
+                            </div>
+                        </div>
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Department</label>
+                                <select class="erppage-input erppage-select" id="ddlDepartment">
+                                    <option value="">Select Department</option>
+                                </select>
+                            </div>
+                            <div class="erppage-internalaction">
+                                <button type="button" id="btn_print" class="erppage-btn erppage-btn-copy">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    <span>Print</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </fieldset>
+                </div>
+            </div>
+            <div class="erppage-internalaction">
+                <button type="button" id="btn_refreshstock" class="erppage-btn erppage-btn-common-active-disabled">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Refresh Stock</span>
+                </button>
+            </div>
+
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Details</legend>
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblInventoryTransferRequest" class="excel-table fixed-grid-table width-table resizable-table">
+                        <colgroup>
+                            <col style="width: 75px;">
+                            <col style="width:150px;">
+                            <col style="width:100px;">
+                            <col style="width: 50px;">
+                            <col style="width: 53px;">
+                            <col style="width: 67px;">
+                            <col style="width: 87px;">
+                            <col style="width: 93px;">
+                            <col style="width: 131px;">
+                            <col style="width:90px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Make</th>
+                                <th>Unit</th>
+                                <th>Nos</th>
+                                <th>Quantity</th>
+                                <th>From Place</th>
+                                <th>To Place</th>
+                                <th>Machine</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="erppage-actions">
+            <button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
+
+    </div>
+</div>

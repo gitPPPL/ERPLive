@@ -29,13 +29,10 @@
         <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="button_export">
             <i class="fa fa-file-excel"></i> Export
         </button>
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail" id="button_mail">
             <i class="fa fa-envelope"></i> Mail
         </button>
-        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
-                data-tooltip="Approve Records">
-            <i class="fa fa-check-circle"></i> Approved
-        </button>
+
     </div>
 </div>
 
@@ -130,7 +127,9 @@
 
     $(document).ready(function () {
 
-          loadAllInward();
+        checkPermission(controllerName, function () {
+            loadAllInward();
+        });
 
         $('#searchBox').on('keyup', function () {
             currentPage = 1;
@@ -146,7 +145,7 @@
             var text = $('#searchBox').val();
             window.open('/InventoryOpeningList/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
         });
-
+         
     });
 
     // ================= LOAD DATA =================
@@ -232,30 +231,18 @@
                     <td class="action-col">
                         <div class="action-wrap">
 
-                            <button class="act-btn edit permission-edit"
-                                onclick="AddOrEditFunction('${item.doC_ID}')">
-                                <i class="fa fa-edit"></i>
-                            </button>
-
-                            <button class="act-btn view btn-view"
-                                onclick="viewMenuDetails('${item.doC_ID}')">
-                                <i class="fa fa-eye"></i>
-                            </button>
-
-                            <button class="act-btn delete permission-delete"
-                                onclick="deleteTemp('${item.doC_ID}')">
-                                <i class="fa fa-trash"></i>
-                            </button>
-
-                            <button class="act-btn document btn-document"
-                                onclick="showDocumentPopup('${item.doC_ID}')">
-                                <i class="fa fa-file"></i>
-                            </button>
+                            <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.doC_ID}')"> <i class="fa fa-edit"></i> </button>
+                            <button class="act-btn view btn-view"  onclick="viewMenuDetails('${item.doC_ID}')"> <i class="fa fa-eye"></i>  </button>
+                            <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.doC_ID}')">  <i class="fa fa-trash"></i> </button>
+                            <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"> <i class="fa fa-file"></i> </button>
 
                         </div>
                     </td>
                 </tr>
             `);
+
+              applyGridPermission();
+
         });
     }
 
@@ -392,22 +379,21 @@
 
     function showDocumentPopup(docCode) {
 
-        $.ajax({
-            url: '/InventoryOpeningList/DocDetailsCode',
-            type: 'POST',
-            dataType: 'json',
-            data: { docCode: docCode },
-            success: function (response) {
-                if (response.success) {
-                    showDocumentPopupjQuery(response.data, docCode);
-                } else {
-                    toastr.error("Failed to get document details.");
-                }
-            },
-            error: function () {
-                toastr.error("Error fetching document details.");
-            }
-        });
-    }
-
+         $.ajax({
+             url: '/InventoryOpeningList/DocDetailsCode',
+             type: 'POST',
+             dataType: 'json',
+             data: { docCode: docCode },
+             success: function (response) {
+                 if (response.success) {
+                     showDocumentPopupjQuery(response.data, docCode);
+                 } else {
+                     toastr.error("Failed to get document details.");
+                 }
+             },
+             error: function () {
+                 toastr.error("Error fetching document details.");
+             }
+         });
+     }
 </script>

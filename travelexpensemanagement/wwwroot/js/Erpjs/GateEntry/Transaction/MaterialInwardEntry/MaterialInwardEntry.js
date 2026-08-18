@@ -10,33 +10,33 @@
         return exists;
     }
     function saveInwardEntry() {
-        const PARTY_CODE    = parseInt($('#ddlPartyName').val()) || null;
-        const PARTY_NAME    = $('#ddlPartyName option:selected').text();
-        const V_TYPE        = $('#ddlDocType').val();
-        const STATUS        = parseInt($('#ddlDocStatus').val()) || null;
-        const V_NO          = parseInt($('#TxtDocNo').val()) || null;
-        const R_DATE        = formatDate($("#TxtRptDate").val()) || null;
-        const BILL_NO       = $.trim($('#TxtBillNo').val()) || null;
-        const BILL_DATE     = formatDate($("#DtPartyBillDate").val()) || null;
-        const CHALL_NO      = $.trim($('#TxtChallanNo').val()) || null;
-        const CHALL_DATE    = formatDate($("#TxtChallanDate").val()) || null;
-        const BILL_AMT      = parseFloat($('#TxtBillAmt').val()) || 0.0;
-        const TRUCK_NO      = $.trim($('#TxtVehicleNo').val()) || null;
-        const TRANSPORT_CODE= parseInt($('#TxtTransporter').val()) || null;
-        const DRIVER_NAME   = $.trim($('#TxtDriverName').val()) || null;
-        const DRIVER_NO     = $.trim($('#TxtDriverMobile').val()) || null;
-        const WAYBILL_NO    = $.trim($('#TxtEWayNo').val()) || null;
-        const EWB_DATE      = formatDate($("#DtEWayDate").val()) || null;
-        const EWB_EXPDATE   = formatDate($("#TxtEWayDate").val()) || null;
-        const EWB_INVNO     = $.trim($('#TxtEWBInvNo').val()) || null;
-        const EWB_INVAMT    = parseFloat($('#TxtEWBInvAmt').val()) || 0.0;
-        const V_DATE        = formatDate($("#InDate").val()) || null;
-        const OUT_DATE      = formatDate($("#DtVehicleOutTime").val()) || null;
-        const R_TIME        = $.trim($('#TiRptDate').val()) || null;
-        const SHIP_BILLDATE = formatDate($("#ShipBillDate").val()) || null;
-        const SHIP_PARTY    = parseInt($('#ddlShipFrom').val()) || null;
-        const SHIP_BILLNO   = $.trim($('#ShipBillNo').val()) || null;
-        const TRANSIT_NO    = parseInt($('#ddlTransit').val()) || null;
+        const   PARTY_CODE        = parseInt($('#ddlPartyName').val()) || null;
+        const   PARTY_NAME        = $('#ddlPartyName option:selected').text();
+        const   V_TYPE            = $('#ddlDocType').val();
+        const   STATUS            = parseInt($('#ddlDocStatus').val()) || null;
+        const   V_NO              = parseInt($('#TxtDocNo').val()) || null;
+        const   R_DATE            = formatDate($("#TxtRptDate").val()) || null;
+        const   BILL_NO           = $.trim($('#TxtBillNo').val()) || null;
+        const   BILL_DATE         = formatDate($("#DtPartyBillDate").val()) || null;
+        const   CHALL_NO          = $.trim($('#TxtChallanNo').val()) || null;
+        const   CHALL_DATE        = formatDate($("#TxtChallanDate").val()) || null;
+        const   BILL_AMT          = parseFloat($('#TxtBillAmt').val()) || 0.0;
+        const   TRUCK_NO          = $.trim($('#TxtVehicleNo').val()) || null;
+        const   TRANSPORT_CODE    = parseInt($('#TxtTransporter').val()) || null;
+        const   DRIVER_NAME       = $.trim($('#TxtDriverName').val()) || null;
+        const   DRIVER_NO         = $.trim($('#TxtDriverMobile').val()) || null;
+        const   WAYBILL_NO        = $.trim($('#TxtEWayNo').val()) || null;
+        const   EWB_DATE          = formatDate($("#DtEWayDate").val()) || null;
+        const   EWB_EXPDATE       = formatDate($("#TxtEWayDate").val()) || null;
+        const   EWB_INVNO         = $.trim($('#TxtEWBInvNo').val()) || null;
+        const   EWB_INVAMT        = parseFloat($('#TxtEWBInvAmt').val()) || 0.0;
+        const   V_DATE            = formatDate($("#InDate").val()) || null;
+        const   OUT_DATE          = formatDate($("#DtVehicleOutTime").val()) || null;
+        const   R_TIME            = $.trim($('#TiRptDate').val()) || null;
+        const   SHIP_BILLDATE     = formatDate($("#ShipBillDate").val()) || null;
+        const   SHIP_PARTY        = parseInt($('#ddlShipFrom').val()) || null;
+        const   SHIP_BILLNO       = $.trim($('#ShipBillNo').val()) || null;
+        const   TRANSIT_NO        = parseInt($('#ddlTransit').val()) || null;
 
         if (!R_DATE && !R_TIME)
         {
@@ -49,8 +49,6 @@
                 return;
             }
         }
-
-
 
         if (BILL_NO && !BILL_DATE)
         {         
@@ -86,54 +84,59 @@
             }
         }
 
-        if (WAYBILL_NO) {
-        if (!validateRequiredField('#DtEWayDate', 'Please select EWayBill Date.')) return;
-        if (!validateRequiredField('#TxtEWayDate', 'Please select EWayBill Expiry Date.')) return;
-        if (!validateRequiredField('#TxtEWBInvNo', 'Please fill EWB Party Inv No.')) return;
-        if (!validateRequiredField('#TxtEWBInvAmt', 'Please fill EWB Party Inv Amount.')) return;                                                     
-
+        if (WAYBILL_NO)
+        {
+            if (!validateRequiredField('#DtEWayDate', 'Please select EWayBill Date.')) return;
+            if (!validateRequiredField('#TxtEWayDate', 'Please select EWayBill Expiry Date.')) return;
+            if (!validateRequiredField('#TxtEWBInvNo', 'Please fill EWB Party Inv No.')) return;
+            if (!validateRequiredField('#TxtEWBInvAmt', 'Please fill EWB Party Inv Amount.')) return;                                                   
         }
 
-        if (R_DATE > V_DATE) {
-        if (!validateRequiredField('#TxtRptDate', 'Reporting Date cannot be greater than In Date.')) return;                     
+        if (R_DATE > V_DATE)
+        {
+          if (!validateRequiredField('#TxtRptDate', 'Reporting Date cannot be greater than In Date.')) return;                     
         }
 
-        if (BILL_DATE > V_DATE) {
-        if (!validateRequiredField('#DtPartyBillDate', 'Bill Date cannot be greater than In Date.')) return;
+        if (BILL_DATE > V_DATE)
+        {
+         if (!validateRequiredField('#DtPartyBillDate', 'Bill Date cannot be greater than In Date.')) return;
         }
 
-        if (SHIP_PARTY && !SHIP_BILLNO) {
-        if (!validateRequiredField('#ddlShipFrom', 'Shipping Bill No. is required.')) return;
+        if (SHIP_PARTY && !SHIP_BILLNO)
+        {
+         if (!validateRequiredField('#ddlShipFrom', 'Shipping Bill No. is required.')) return;
         }
 
-        if (SHIP_BILLNO && !SHIP_PARTY) {
-        if (!validateRequiredField('#ShipBillNo', 'Shipping Party is required.')) return;                  
+        if (SHIP_BILLNO && !SHIP_PARTY)
+        {
+         if (!validateRequiredField('#ShipBillNo', 'Shipping Party is required.')) return;                  
         }
 
-        if (["INST", "INFU", "INRM"].includes(V_TYPE)) {
-            if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO) {
+        if (["INST", "INFU", "INRM"].includes(V_TYPE))
+        {
+            if (BILL_AMT == 0 && !TRANSIT_NO && !WAYBILL_NO)
+            {
 
                 invalidateField("TxtBillAmt", `Please enter the Bill Amount. This field is required.`, "warning");
                 return;
             }
 
-            if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO)) {
+            if (BILL_AMT > PubDefEWaybillAmt && (!TRANSIT_NO || !WAYBILL_NO))
+            {
                 showToast(`Transit No./Ewaybill compulsory if Bill Amount > ${PubDefEWaybillAmt}`, { type: "info" });
             }
         }     
 
-        if (TRANSIT_NO && EWB_EXPDATE) {
+        if (TRANSIT_NO && EWB_EXPDATE)
+        {
             const expDate = new Date(EWB_EXPDATE);
             const inDate = new Date(V_DATE);
-            if (expDate < inDate) {
+            if (expDate < inDate)
+            {
                 showToast("Waybill expired on " + EWB_EXPDATE, { type: "info" });            
             }
         }        
-
-   
-
-
-
+        
         const Header = {
         V_TYPE: $('#ddlDocType').val(),
         V_NO: V_NO,
@@ -188,11 +191,13 @@
         PAN_NO: $.trim($('#TxtPAN').val()) || null,
         PARTY_NAME : PARTY_NAME
         };
+
         const Deatils = collectTableRowData();
 
-        if (!Deatils || Deatils.length === 0) {
-        showToast("Please fill at least one row in Detail", { type: "Warning" });
-        return;
+        if (!Deatils || Deatils.length === 0)
+        {
+            showToast("Please fill at least one row in Detail", { type: "Warning" });
+            return;
         }
 
         const itemCodeSet = new Set();

@@ -34,16 +34,16 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
 
         public IActionResult Index()
         {
-            //ViewBag.CurrentMenu = "Material Outward";
-            //var permissions = _moduleService.GetUserMenuPermissions();
-            //var userLevel = _moduleService.GetUserLevel();
-            //var model = new UserMenuPermissionsViewModel
-            //{
-            //    UserMenuPermissions = permissions,
-            //    UserLevel = userLevel
-            //};
+            ViewBag.CurrentMenu = "Material Outward";
+            var permissions = _moduleService.GetUserMenuPermissions();
+            var userLevel = _moduleService.GetUserLevel();
+            var model = new UserMenuPermissionsViewModel
+            {
+                UserMenuPermissions = permissions,
+                UserLevel = userLevel
+            };
 
-            return View("~/Views/Inventory/Transaction/InventoryOpeningList/Index.cshtml" );
+            return View("~/Views/Inventory/Transaction/InventoryOpeningList/Index.cshtml" , model);
         }
 
 
@@ -102,7 +102,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                                 REMARKS = reader["REMARKS"] != DBNull.Value ? reader["REMARKS"].ToString() : string.Empty,
                                 CONS_TYPE = reader["CONS_TYPE"] != DBNull.Value ? reader["CONS_TYPE"].ToString() : string.Empty,
                                 STATUS = reader["STATUS"] != DBNull.Value ? Convert.ToInt32(reader["STATUS"]) : 0,
-                                AMOUNT = reader["STATUS"] != DBNull.Value ? Convert.ToDecimal(reader["STATUS"]) : 0,
+                                AMOUNT = reader["AMOUNT"] != DBNull.Value ? Convert.ToDecimal(reader["AMOUNT"]) : 0,
                                 PLAN_TYPE = reader["PLAN_TYPE"] != DBNull.Value ? reader["PLAN_TYPE"].ToString() : string.Empty,
                                 PLAN_NO = reader["PLAN_NO"] != DBNull.Value ? Convert.ToInt32(reader["PLAN_NO"]) : 0,
                                 FAPROV_STATUS = reader["FAPROV_STATUS"] != DBNull.Value ? reader["FAPROV_STATUS"].ToString() : string.Empty,
@@ -259,8 +259,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                 return Json(new { success = false, message = "Error Deleting Inward Entry .", error = ex.Message });
             }
         }
-
-
 
         [HttpGet]
         public async Task<IActionResult> ExportToExcel(string searchTerm = null)
@@ -448,6 +446,56 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     }
                 }
             }
+        }
+
+
+        public JsonResult DocDetailsCode(string docCode)
+        {
+            var globalVar = _globalVariableService.GetGlobalVariables();
+            List<InwardEntryDetailDto> docDetails = new List<InwardEntryDetailDto>();
+
+            using (SqlConnection conn = _dbConnection.GetErpConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand("sp_InventoryOpening", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "DocDetailID");
+                    cmd.Parameters.AddWithValue("@DOC_ID", docCode);
+
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var InwardEntryDetailDto = new InwardEntryDetailDto
+                            {
+                                Code = reader["Code"]?.ToString(),
+                                UUser = reader["UUser"]?.ToString(),
+                                UDATE = reader["UDATE"] != DBNull.Value ? Convert.ToDateTime(reader["UDATE"]) : (DateTime?)null,
+                                EUSER = reader["EUSER"]?.ToString(),
+                                EDATE = reader["EDATE"] != DBNull.Value ? Convert.ToDateTime(reader["EDATE"]) : (DateTime?)null,
+                                WSID = reader["WSID"]?.ToString(),
+                                LIP = reader["LIP"]?.ToString(),
+                                LID = reader["LID"]?.ToString()
+                            };
+                            docDetails.Add(InwardEntryDetailDto);
+                        }
+                    }
+                }
+            }
+
+            return Json(new { success = true, data = docDetails });
+        }
+        public class InwardEntryDetailDto
+        {
+            public string? Code { get; set; }
+            public string? UUser { get; set; }
+            public DateTime? UDATE { get; set; }
+            public string? EUSER { get; set; }
+            public DateTime? EDATE { get; set; }
+            public string? WSID { get; set; }
+            public string? LIP { get; set; }
+            public string? LID { get; set; }
         }
 
     }

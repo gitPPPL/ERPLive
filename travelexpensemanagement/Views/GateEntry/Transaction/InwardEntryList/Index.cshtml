@@ -10,11 +10,10 @@
         <i class="fa fa-list"></i>
         <span>Material Inward Entry List</span>
     </div>
-
     
-        <div class="erppagelist-header-right">
-         <button type="button" id="button_add" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "InwardEntry")'">  <i class="fa fa-plus"></i> Add New  </button>
-        </div>
+    <div class="erppagelist-header-right">
+        <button type="button" id="button_add" class="erppage-header-back" onclick="location.href='@Url.Action("Index", "InwardEntry")'">  <i class="fa fa-plus"></i> Add New  </button>
+    </div>
     
 </div>
 
@@ -204,12 +203,9 @@
                     <td class="action-col">
                     <div class="action-wrap">
            
-                    <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}' ,'${item.v_DATE}')"><i class="fa fa-edit"></i></button>
- 
+                    <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}' ,'${item.v_DATE}')"><i class="fa fa-edit"></i></button> 
                     <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
-
-                    <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
-                                              
+                    <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>                                              
                     <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
                         </div>
                     </td>
