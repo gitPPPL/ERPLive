@@ -258,6 +258,9 @@
             Deatils: Deatils
         };
 
+
+        console.log("Save payload", payload);
+
         $("#btn-save").prop("disabled", true);
 
         $.ajax({
@@ -266,13 +269,15 @@
             contentType: 'application/json',
             data: JSON.stringify(payload),
 
-            success: function (response) {
-                console.log("Response", response);
+            success: function (response)
+            {
+                console.log("Save Response in saveInwardEntry Function", response);
+
             if (response.status === "Success") {   
-                showToast("Saved successfully!", { type: "success" });         
+                showToast("Saved successfully!", { type: "success" });        
 
                 setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) + '&mode=view'; }, 3000);                                
-               // setTimeout(function () { window.location.href = '/InwardEntry/Index?id=' + V_NO + '&vtype=' + encodeURIComponent(V_TYPE) ; }, 3000);                                
+                          
             }
 
             else if (response.status === "VALIDATION")
@@ -281,7 +286,7 @@
             }
             else
             {
-            showToast(response.message, { type: "error" });
+                showToast(response.message, { type: "error" });
             }
         },
 

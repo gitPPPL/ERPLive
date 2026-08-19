@@ -18,29 +18,33 @@ $(document).ready(async function () {
     checkPermissionForEntryPage(controllerName);
     await LoadDropDown();
 
-    if (PubUserLevel == 1) {
+    if (PubUserLevel == 1)
+    {
         $('#InDate').prop('disabled', false);
         $('#InTime').prop('disabled', false);
     }
-    else {
+    else
+    {
         $('#InDate').prop('disabled', true);
         $('#InTime').prop('disabled', true);
     }
 
-    if (rowId) {
+    if (rowId)
+    {
         await LoadFormByID(rowId, vtype);
         checkApprovalStatus(vtype, rowId, 'GATE1');
         $('.erppagelist-toolbar-end').show();
-        if (mode === "view") {
+        if (mode === "view")
+        {
             setFormReadOnly();   
         }
     }
-    else {
+    else
+    {
         $('#ddlDocStatus').prop('disabled', true);
         let today = new Date().toISOString().split('T')[0];
         $('#TxtRptDate').val(today);
         let now = new Date();
-
         $('#InTime').val(now.toTimeString().slice(0, 8));
         $('#TiRptDate').val(now.toTimeString().slice(0, 8));
         GetVNo($('#ddlDocType').val());
@@ -235,7 +239,8 @@ $(document).ready(async function () {
         }
 
         const isValid = await checkValidDate();
-        if (isValid === false) {
+        if (isValid === false)
+        {
             return;
         }
 

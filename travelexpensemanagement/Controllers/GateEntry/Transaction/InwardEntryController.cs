@@ -110,12 +110,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         {
             if (request?.Header == null)
             {
-                return Json(new
-                {
-                    success = false,
-                    status = "Error",
-                    message = "Input model is null"
-                });
+                return Json(new  {  success = false, status = "Error",  message = "Input model is null" });
             }
 
             var action = request.Header.action == "INSERT" ? "INSERT"  : "UPDATE";
@@ -360,19 +355,9 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
 
                     if (isFinalApprovalBody == true && approval != "")
                     {
-                        string UpdateSql = @"UPDATE approval_status
-                        SET
-                        STATUS = 'CLOSE',
-                        CLOSE_DATE = GETDATE(),
-                        Approval_code = 8,
-                        Approval_remark = 'Approved',
-                        remarks = 'Document Approved'
-                        WHERE
-                        V_Type = @V_Type
-                        AND V_No = @V_No
-                        AND COMP_CODE = @COMP_CODE
-                        AND Branch_Code = @Branch_Code
-                        AND Year_Code = @Year_Code;";
+                        string UpdateSql = @"UPDATE approval_status SET  STATUS = 'CLOSE', CLOSE_DATE = GETDATE(), Approval_code = 8,
+                        Approval_remark = 'Approved',  remarks = 'Document Approved'  WHERE  V_Type = @V_Type
+                        AND V_No = @V_No AND COMP_CODE = @COMP_CODE  AND Branch_Code = @Branch_Code AND Year_Code = @Year_Code;";
 
                         using (var updateCmd = new SqlCommand(UpdateSql, conn))
                         {                           
@@ -938,8 +923,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         {
             var result = await _inwardEntryRepository.ValidateBillNoAsync(PARTY_CODE, BILL_NO, V_NO);
 
-            return Json(new
-            {  success = result.status == true,  message = result.message });
+            return Json(new {  success = result.status == true,  message = result.message });
         }
         [HttpGet]
         public async Task<IActionResult> GatenoValidation(string V_TYPE, int V_NO)

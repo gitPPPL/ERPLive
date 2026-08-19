@@ -349,7 +349,6 @@ async function GetVNo(Vtype) {
     }
 }
 
-
 function AddRow(data = {}) {
 
     let tbody = $('#tblInventoryTransferRequest tbody');
@@ -766,7 +765,6 @@ function setFormReadOnly() {
     }
 }
 
-
 function limitMaxLength(input, maxLength) {
     // Remove anything except digits
     input.value = input.value.replace(/\D/g, '');
@@ -776,5 +774,3 @@ function limitMaxLength(input, maxLength) {
         input.value = input.value.substring(0, maxLength);
     }
 }
-
-
