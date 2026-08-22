@@ -1,55 +1,357 @@
 ﻿@{
-    ViewBag.Title = "Error";
-    Layout = null;
+    ViewData["Title"] = "Error";
+
+    int statusCode = ViewBag.StatusCode ?? 500;
+    string message = ViewBag.ErrorMessage ?? "Something went wrong.";
+    string errorReference = ViewBag.ErrorReference ?? "N/A";
+
+    string title;
+    string icon;
+
+    switch (statusCode)
+    {
+        case 400:
+            title = "Bad Request";
+            icon = "⚠";
+            break;
+
+        case 401:
+            title = "Session Expired";
+            icon = "🔐";
+            break;
+
+        case 403:
+            title = "Access Denied";
+            icon = "🚫";
+            break;
+
+        case 404:
+            title = "Page Not Found";
+            icon = "🔍";
+            break;
+
+        case 405:
+            title = "Method Not Allowed";
+            icon = "⚠";
+            break;
+
+        case 408:
+            title = "Request Timeout";
+            icon = "⏱";
+            break;
+
+        case 409:
+            title = "Conflict";
+            icon = "⚠";
+            break;
+
+        case 429:
+            title = "Too Many Requests";
+            icon = "⏳";
+            break;
+
+        case 502:
+            title = "Bad Gateway";
+            icon = "🌐";
+            break;
+
+        case 503:
+            title = "Service Unavailable";
+            icon = "🔧";
+            break;
+
+        case 504:
+            title = "Gateway Timeout";
+            icon = "⏱";
+            break;
+
+        default:
+            title = "Something Went Wrong";
+            icon = "⚠";
+            break;
+    }
 }
-<style>
-    /* Full page center but content not full screen */
-    .error-wrapper {
-        /* min-height: 100vh; */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
 
-    /* Card-like container */
-    .error-card {
-        max-width: 900px; /* controls screen width */
-        width: 100%;
-        /*  padding: 30px; */
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    /* Image size control */
-    .error-image {
-        max-width: 400px; /* image small */
-        width: 100%;
-        height: auto;
-        margin: 0 auto; /* center image */
-        display: block;
-    }
+    <title>@title</title>
 
-</style>
-<h2 class="text-danger" style="text-align: center; font-size: 50px;">
-    Error @ViewBag.StatusCode
-</h2>
-<p class="fw-bold" style="text-align: center; font-size: 20px;">@ViewBag.ErrorMessage</p>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-<div class="error-wrapper">
-    <div class="row error-card align-items-center text-center">
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            color: #333;
+        }
 
-        <div class="col-md-6 mb-3 mb-md-0">
-            <img src="~/images/error.jpg" class="error-image" alt="Error Image" />
-        </div>
+        .error-wrapper {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-        <div class="col-md-6">
-            <a href="/HomeLogin/Index" class="btn btn-primary mt-3" style="justify-content: center;display: flex;font-size: 20px;">
-                Login Again
-            </a>
+        .error-card {
+            width: 100%;
+            max-width: 650px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 45px 40px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: #fff3cd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 38px;
+        }
+
+        .status-code {
+            font-size: 14px;
+            font-weight: 600;
+            color: #777;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            margin: 0 0 15px;
+            font-size: 30px;
+            color: #222;
+        }
+
+        .message {
+            margin: 0 auto 25px;
+            max-width: 500px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .reference-box {
+            background: #f8f9fa;
+            border: 1px solid #e1e5ea;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+        }
+
+        .reference-label {
+            display: block;
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 6px;
+        }
+
+        .reference-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            word-break: break-all;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 11px 22px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #0d6efd;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .help-text {
+            margin-top: 25px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        @@media (max-width: 600px) {
+
+            .error-card {
+                padding: 35px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .message {
+                font-size: 14px;
+            }
+        }
+
+        .error-details {
+            display: none;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #e1e5ea;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+            .error-details.show {
+                display: block;
+            }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .detail-value {
+            color: #333;
+            word-break: break-all;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="error-wrapper">
+
+        <div class="error-card">
+
+            <div class="error-icon">
+                @icon
+            </div>
+
+            <div class="status-code">
+                HTTP @statusCode
+            </div>
+
+            <h1>
+                @title
+            </h1>
+
+            <p class="message">
+                @message
+            </p>
+
+            <div class="reference-box">
+
+                <span class="reference-label">
+                    Error Reference
+                </span>
+
+                <span class="reference-value">
+                    @errorReference
+                </span>
+
+            </div>
+
+            <div class="button-group">
+
+                <a href="/" class="btn btn-primary">
+                    Go to Home
+                </a>
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        onclick="window.history.back();">
+                    Go Back
+                </button>
+
+            </div>
+
+            <button type="button"
+                    class="btn btn-secondary"
+                    onclick="toggleErrorDetails()">
+                More Details
+            </button>
+
+            <div id="errorDetails" class="error-details">
+
+                <div class="detail-row">
+                    <span class="detail-label">Error Type</span>
+                    <span class="detail-value">@ViewBag.ErrorType</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Category</span>
+                    <span class="detail-value">@ViewBag.ErrorCategory</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Status Code</span>
+                    <span class="detail-value">@statusCode</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Request Path</span>
+                    <span class="detail-value">@ViewBag.RequestPath</span>
+                </div>
+
+            </div>
+
+            <div class="help-text">
+                If the problem continues, please provide the Error Reference
+                to the administrator.
+            </div>
+
         </div>
 
     </div>
-</div>
 
+</body>
+</html>
 
+<script>
+    function toggleErrorDetails() {
+        const details = document.getElementById("errorDetails");
+        const button = event.currentTarget;
+
+        details.classList.toggle("show");
+
+        button.textContent = details.classList.contains("show")
+            ? "Hide Details"
+            : "More Details";
+    }
+</script>

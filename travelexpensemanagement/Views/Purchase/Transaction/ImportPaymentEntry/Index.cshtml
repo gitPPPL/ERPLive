@@ -1,6 +1,7 @@
 ﻿@{
     ViewBag.Title = "Import Payment Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVar = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 @* <style>
     .erppage-grid4 {
@@ -36,9 +37,11 @@
         <span>Import Payment Entry</span>
     </div>
     <div class="erppagelist-header-right">
-        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "ImportPaymentList")'">
-            <i class="fa-solid fa-arrow-left"></i>Back to List
-        </button>
+        <div class="erppage-header-right">
+            <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "ImportPaymentList")', isReadOnly)">
+                <i class="fa-solid fa-arrow-left"></i>Back to list
+            </button>
+        </div>
     </div>
 </div>
 <div class="erppage-fieldset">
@@ -62,7 +65,7 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc No</label>
-                    <input type="number" class="erppage-input" id="Numdocno" readonly/>
+                    <input type="number" class="erppage-input" id="Numdocno" readonly />
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc Date</label>
@@ -76,10 +79,16 @@
                 </div>
             </div>
             <div class="erppage-grid4">
-                <div class="erppage-divfield erppage-col-span-2">
+                @* <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Party Name</label>
                     <input type="text" id="txtSupplierName" class="form-control" placeholder="Search Supplier" />
                     <input type="hidden" id="hdnSupplierCode">
+                </div> *@
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Party Name</label>
+                    <select class="erppage-input erppage-select" id="ddlParty">
+                        <option value="">Select Party</option>
+                    </select>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc Evidence</label>
@@ -97,29 +106,29 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label">Import of</label>
                     <select class="erppage-input erppage-select" id="ddlimport">
-                        <option value="goods">Goods</option>
-                        <option value="services">Services</option>
+                        <option value="Goods">Goods</option>
+                        <option value="Services">Services</option>
                     </select>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Import Remitt.</label>
                     <select class="erppage-input erppage-select" id="ddlimportremitt">
-                        <option value="swift">Swift</option>
-                        <option value="demanddraft">Demand Draft</option>
+                        <option value="Swift">Swift</option>
+                        <option value="DemandDraft">Demand Draft</option>
                     </select>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Pay Type</label>
                     <select class="erppage-input erppage-select" id="ddlpaytype">
-                        <option value="advance">Advance</option>
-                        <option value="direct">Direct</option>
+                        <option value="Advance">Advance</option>
+                        <option value="Direct">Direct</option>
                     </select>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Forn. Bank Ch.</label>
                     <select class="erppage-input erppage-select" id="ddlforeignbankch">
-                        <option value="onus">On Us</option>
-                        <option value="onbeneficiary">On Beneficiary</option>
+                        <option value="Onus">On Us</option>
+                        <option value="OnBeneficiary">On Beneficiary</option>
                     </select>
                 </div>
                 <div class="erppage-divfield">
@@ -153,45 +162,45 @@
                 </div>
             </div>
             <div class="erppage-internalaction mt-2">
-                <button type="button" id="btnRequestLetter" class="erppage-btn erppage-btn-common-disabled">
+                <button type="button" id="btnRequestLetter" class="erppage-btn erppage-btn-common-disabled" onclick="RequestLetterReport()">
                     <i class="fa fa-envelope-open-text"></i>
                     <span>Request Letter</span>
                 </button>
-                <button type="button" id="btnPaymentRequestForm" class="erppage-btn erppage-btn-common-disabled">
+                <button type="button" id="btnPaymentRequestForm" class="erppage-btn erppage-btn-common-disabled" onclick="PaymentRequestForm()">
                     <i class="fa fa-file-invoice-dollar"></i>
                     <span>Payment Request Form</span>
                 </button>
-                <button type="button" id="btnSupplierCredit" class="erppage-btn erppage-btn-common-disabled">
+                <button type="button" id="btnSupplierCredit" class="erppage-btn erppage-btn-common-disabled" onclick="SupplierCredit()">
                     <i class="fa fa-hand-holding-usd"></i>
                     <span>Supplier Credit</span>
                 </button>
-                <button type="button" id="btnFormA2" class="erppage-btn erppage-btn-common-disabled">
+                <button type="button" id="btnFormA2" class="erppage-btn erppage-btn-common-disabled" onclick="FormA2()">
                     <i class="fa fa-file-alt"></i>
                     <span>Form A2</span>
                 </button>
-                <button type="button" id="btnPartB" class="erppage-btn erppage-btn-common-disabled">
+                <button type="button" id="btnPartB" class="erppage-btn erppage-btn-common-disabled" onclick="PartB()">
                     <i class="fa fa-file-signature"></i>
                     <span>Part B</span>
                 </button>
-                <button type="button" id="btnPaymentECB" class="erppage-btn erppage-btn-common-disabled">
+                <button type="button" id="btnPaymentECB" class="erppage-btn erppage-btn-common-disabled" onclick="PaymentEcb()">
                     <i class="fa fa-credit-card"></i>
                     <span>Payment of ECB</span>
                 </button>
-                <button type="button" id="btnBuyerCredit1" class="erppage-btn erppage-btn-common-disabled">
+                <button type="button" id="btnBuyerCredit1" class="erppage-btn erppage-btn-common-disabled" onclick="BuyerCredit1()">
                     <i class="fa fa-university"></i>
                     <span>Buyer Credit 1</span>
                 </button>
             </div>
             <div class="erppage-internalaction mt-2">
-                <button type="button" id="btnBuyerCredit2" class="erppage-btn erppage-btn-common-disabled">
+                <button type="button" id="btnBuyerCredit2" class="erppage-btn erppage-btn-common-disabled" onclick="BuyerCredit2()">
                     <i class="fa fa-bank"></i>
                     <span>Buyer Credit 2</span>
                 </button>
-                <button type="button" id="btnForm1Declaration" class="erppage-btn erppage-btn-common-disabled">
+                <button type="button" id="btnForm1Declaration" class="erppage-btn erppage-btn-common-disabled" onclick="FormDeclaration()">
                     <i class="fa fa-file-text"></i>
                     <span>Form 1 Declaration</span>
                 </button>
-                <button type="button" id="btnCustomDeclaration" class="erppage-btn erppage-btn-common">
+                <button type="button" id="btnCustomDeclaration" class="erppage-btn erppage-btn-common" onclick="CustomDeclaration()">
                     <i class="fa fa-gavel"></i>
                     <span>Custom Declaration</span>
                 </button>
@@ -199,6 +208,115 @@
         </div>
         <!-- Bank Details -->
         <div class="erppage-tab-content" id="bankdetails">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Our Bank</label>
+                    <select class="erppage-input erppage-select" id="ddlourbank">
+                        <option value="">Select Our Bank</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Our A/C No</label>
+                    <input type="number" class="erppage-input" id="Numacno" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Our Shift</label>
+                    <input type="text" class="erppage-input" id="Txtourshift" placeholder="Enter our shift" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">AD Code</label>
+                    <input type="text" class="erppage-input" id="Txtadcode" placeholder="Enter AD Code" />
+                </div>
+            </div>
+            <div class="erppagesrow">
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Beneficiary Bank</label>
+                                <select class="erppage-input erppage-select" id="ddlbeneficiarybank">
+                                    <option value="">Select Beneficiary Bank</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Beneficiary A/C No</label>
+                                <input type="number" class="erppage-input" id="Numbeneficiaryacno" />
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Beneficiary Swift</label>
+                                <input type="text" class="erppage-input" id="Txtbeneficiaryshift" placeholder="Enter Beneficiary shift" />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Beneficiary ABA</label>
+                                <input type="text" class="erppage-input" id="Txtbeneficiaryaba" placeholder="Enter Beneficiary ABA" />
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Beneficiary Routing</label>
+                                <input type="text" class="erppage-input" id="Txtbeneficiaryrouting" placeholder="Enter Beneficiary Routing" />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Beneficiary Source Code</label>
+                                <input type="number" class="erppage-input" id="Numbeneficiaryacno" />
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Beneficiary Bank Address</label>
+                                <textarea typeof="text" class="erppage-input" id="Txtbeneficiarybankaddress" style="height:50px;" placeholder="Enter Beneficiary Bank Address"></textarea>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Correspondance Bank</label>
+                                <select class="erppage-input erppage-select" id="ddlcorrespondancebank">
+                                    <option value="">Select Correspondance Bank</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Correspondance A/C No</label>
+                                <input type="number" class="erppage-input" id="Numcorrespondanceacno" />
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Correspondance Swift</label>
+                                <input type="text" class="erppage-input" id="Txtcorrespondanceshift" placeholder="Enter Correspondance shift" />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Correspondance ABA</label>
+                                <input type="text" class="erppage-input" id="Txtcorrespondanceaba" placeholder="Enter Correspondance ABA" />
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Correspondance Routing</label>
+                                <input type="text" class="erppage-input" id="Txtcorrespondancerouting" placeholder="Enter Correspondance Routing" />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Correspondance Source Code</label>
+                                <input type="number" class="erppage-input" id="Numcorrespondanceacno" />
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Correspondance Bank Address</label>
+                                <textarea typeof="text" class="erppage-input" id="Txtcorrespondancebankaddress" style="height:50px;" placeholder="Enter Correspondance Bank Address"></textarea>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+        @*  <div class="erppage-tab-content" id="bankdetails">
             <div class="erppage-grid4">
                 <div class="erppage-divfield">
                     <label class="erppage-label">Our Bank</label>
@@ -287,9 +405,132 @@
                     <textarea typeof="text" class="erppage-input" id="Txtcorrespondancebankaddress" placeholder="Enter Correspondance Bank Address"></textarea>
                 </div>
             </div>
-        </div>
+        </div> *@
         <!-- Customer Declaration -->
         <div class="erppage-tab-content" id="customerdeclaration">
+            <div class="erppage-grid3">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">SPFC Bank</label>
+                    <select class="erppage-input erppage-select" id="ddlSPFCBank">
+                        <option value="">Select SPFC Bank</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Other Doc Details:</label>
+                    <input type="text" class="erppage-input" id="txtotherdocumentdetails" placeholder="Enter Other Document Details" />
+                </div>
+            </div>
+            <div class="erppagesrow">
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Details of Part Payment as per below Invoice</legend>
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Bill Reference No.</label>
+                                <input type="text" class="erppage-input" id="txtbillreferenceno" placeholder="Enter Bill Reference No." />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">CCY</label>
+                                <input type="text" class="erppage-input" id="txtCCY" placeholder="Enter CCY" />
+                            </div>
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Amount Remitted</label>
+                                <input type="number" class="erppage-input" id="Numamountremitted" placeholder="Enter Amount Remitted" />
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">FEMA Declaration</legend>
+                        <div class="erppagesrow" style="gap:12px; padding:10px;">
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="Chknotcoveredunderprohibited" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Not Covered Under Prohibited</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="Chkreceivedforimport" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Received for import</label>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+            </div>
+            <div class="erppagesrow">
+                <div class="erppagescol-12">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Document Attached</legend>
+                        <div class="erppagesrow" style="gap:12px; padding:10px;">
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="cbCDAttach1" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Proforma Invoice</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="cbCDAttach2" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Purchase Order Raised</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="cbCDAttach3" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Transport Document</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="cbCDAttach4" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Copy of Bill Entry</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="cbCDAttach5" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Form A2</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="cbCDAttach6" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">If Payment is being made</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="cbCDAttach7" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Original Licence</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppagesrow" style="gap:12px; padding: 0px 10px 0px 10px;">
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="cbCDAttach8" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Original Bank Guarantee</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="cbCDAttach9" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Any Other Document</label>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+
+        </div>
+        @*  <div class="erppage-tab-content" id="customerdeclaration">
             <div class="erppage-grid3">
                 <div class="erppage-divfield">
                     <label class="erppage-label">SPFC Bank</label>
@@ -398,77 +639,90 @@
                     </div>
                 </div>
             </fieldset>
-        </div>
+        </div> *@
 
         <!-- Form A2 -->
         <div class="erppage-tab-content" id="forma2">
-            <div class="erppagesrow" style="gap:12px; padding:10px;">
-                <div class="erppage-divfield">
-                    <div class="erppage-checkbox-wrap">
-                        <input type="checkbox" id="Chkissuedraft" class="erppage-checkbox-input">
-                        <label class="erppage-checkbox-label">Issue a Draft</label>
+            <div class="erppagesrow">
+                <div class="erppagescol-4">
+                    <div class="erppagefieldset">
+                        <div class="erppage-divfield">
+                            <div class="erppage-checkbox-wrap">
+                                <input type="checkbox" id="Chkissuedraft" class="erppage-checkbox-input">
+                                <label class="erppage-checkbox-label">Issue a Draft</label>
+                            </div>
+                        </div>
+                        <div class="erppage-divfield">
+                            <div class="erppage-checkbox-wrap">
+                                <input type="checkbox" id="Chkeffectforeignexchange" class="erppage-checkbox-input">
+                                <label class="erppage-checkbox-label">Effect of Foreign Exchange Remittance directly</label>
+                            </div>
+                        </div>
+                        <div class="erppage-divfield">
+                            <div class="erppage-checkbox-wrap">
+                                <input type="checkbox" id="Chkissuetravellerscheque" class="erppage-checkbox-input">
+                                <label class="erppage-checkbox-label">Issue Travellers Cheques for</label>
+                            </div>
+                        </div>
+                        <div class="erppage-divfield">
+                            <div class="erppage-checkbox-wrap">
+                                <input type="checkbox" id="Chkissueforeigncurrencynotes" class="erppage-checkbox-input">
+                                <label class="erppage-checkbox-label">Issue foreign currency notes for</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="erppage-divfield">
-                    <div class="erppage-checkbox-wrap">
-                        <input type="checkbox" id="Chkeffectforeignexchange" class="erppage-checkbox-input">
-                        <label class="erppage-checkbox-label">Effect of Foreign Exchange Remittance directly</label>
-                    </div>
-                </div>
-                <div class="erppage-divfield">
-                    <div class="erppage-checkbox-wrap">
-                        <input type="checkbox" id="Chkissuetravellerscheque" class="erppage-checkbox-input">
-                        <label class="erppage-checkbox-label">Issue Travellers Cheques for</label>
-                    </div>
-                </div>
-                <div class="erppage-divfield">
-                    <div class="erppage-checkbox-wrap">
-                        <input type="checkbox" id="Chkissueforeigncurrencynotes" class="erppage-checkbox-input">
-                        <label class="erppage-checkbox-label">Issue foreign currency notes for</label>
+
+                <div class="erppagescol-8">
+                    <div class="erppagefieldset">
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Benificiary Name</label>
+                                <input type="text" id="ddlBeeficiaryname" class="form-control" placeholder="Search Supplier" />
+                                <input type="hidden" id="hdnBeneficiaryCode">
+                            </div>
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Account No</label>
+                                <input type="number" class="erppage-input" id="NumAccountno" />
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Name and Bank Address</label>
+                                <div class="erppage-inputgroup">
+                                    <textarea typeof="text" class="erppage-input" style="height:50px;" id="Txtnamebankaddress" placeholder="Enter Name and Bank Address"></textarea>
+                                    <input type="text" class="erppage-input" id="txtA2_3" />
+                                    <input type="text" class="erppage-input" id="txtA2_4" />
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Amount</label>
+                                <input type="number" class="erppage-input" id="Numamount" />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Whether Under LRS</label>
+                                <select class="erppage-input erppage-select" id="ddlLRS">
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Purpose Code</label>
+                                <input type="text" class="erppage-input" id="Txtpurposecode" placeholder="Enter Purpose Code" />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Description</label>
+                                <textarea typeof="text" class="erppage-input" style="height:50px;" id="TxtDes" placeholder="Enter Description"></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Benifi. Name</label>
-                    @* <select class="erppage-input erppage-select" id="ddlBeeficiaryname">
-                        <option value="">Select Benificiary Name</option>
-                    </select> *@
-                    <input type="text" id="ddlBeeficiaryname" class="form-control" placeholder="Search Supplier" />
-                    <input type="hidden" id="hdnBeneficiaryCode">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Account No</label>
-                    <input type="number" class="erppage-input" id="NumAccountno" />
-                </div>
-                <div class="erppage-divfield erppage-col-span-2">
-                    <label class="erppage-label">Name and Bank Address</label>
-                    <textarea typeof="text" class="erppage-input" rows="2" id="Txtnamebankaddress" placeholder="Enter Name and Bank Address"></textarea>
-                    <textarea typeof="text" class="erppage-input" rows="2" id="txtA2_3"></textarea>
-                    <textarea typeof="text" class="erppage-input" rows="2" id="txtA2_4"></textarea>
-                </div>
-            </div>
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Amount</label>
-                    <input type="number" class="erppage-input" id="Numamount" />
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Whether Under LRS</label>
-                    <select class="erppage-input erppage-select" id="ddlLRS">
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
-                    </select>
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Purpose Code</label>
-                    <input type="text" class="erppage-input" id="Txtpurposecode" placeholder="Enter Purpose Code" />
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Description</label>
-                    <textarea typeof="text" class="erppage-input" rows="2" id="TxtDes" placeholder="Enter Description"></textarea>
-                </div>
-            </div>
+
         </div>
         <!-- Part B Info. About -->
         <div class="erppage-tab-content" id="partybinfo">
@@ -483,7 +737,7 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Address of lender</label>
-                      <textarea typeof="text" class="erppage-input" id="textaddresslender" placeholder="Enter Address of lender"></textarea>                 
+                    <textarea typeof="text" class="erppage-input" id="textaddresslender" placeholder="Enter Address of lender"></textarea>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Nature of security to be provided</label>
@@ -565,7 +819,7 @@
                     <div class="erppage-divfield">
                         <label class="erppage-label">Rate of Interest</label>
                         <input type="text" class="erppage-input" id="txtrateinterest" />
-                     </div>
+                    </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Up-front fee</label>
                         <input type="text" class="erppage-input" id="txtupfrontfree" placeholder="Enter Up-front free" />
@@ -604,12 +858,15 @@
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Grace/Moratorium period</label>
-                        <input type="text" class="erppage-input" id="txtcommitmentfree" placeholder="Enter Grace/Moratorium period" />
+                        <input type="text" class="erppage-input" id="txtGrace" placeholder="Enter Grace/Moratorium period" />
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Repayment terms</label>
                         <select class="erppage-input erpage-select" id="ddlrepaymentterms">
                             <option value="">Select Repayment terms </option>
+                            <option value="HalfYearly">Half Yearly</option>
+                            <option value="Yearly">Yearly</option>
+                            <option value="Bullet">Bullet</option>
                         </select>
                     </div>
                     <div class="erppage-divfield">
@@ -638,6 +895,7 @@
                         <div class="erppage-inputgroup-item">
                             <label class="erppage-label">Month and Year</label>
                             <input type="date" class="erppage-input" id="Dtmonthyeardraw" />
+                            
                         </div>
                         <div class="erppage-inputgroup-item">
                             <label class="erppage-label">Amount</label>
@@ -686,6 +944,9 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label">Whether Appraised by Financial Institution/Bank</label>
                     <select class="erppage-input erppage-select" id="ddlappraisedfinancial">
+                        <option value=""> </option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
                     </select>
                 </div>
             </div>
@@ -693,6 +954,9 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label">Whether Requires clearance from any Staturity Authority?</label>
                     <select class="erppage-input erppage-select" id="ddlclearancestaturity">
+                        <option value=""> </option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
                     </select>
                 </div>
                 <div class="erppage-divfield">
@@ -759,10 +1023,9 @@
                         </div>
                     </div>
                 </div>
-             
+
             </fieldset>
         </div>
-
         <div class="erppagelist-container">
             <div class="excel-wrapper fixed-grid-wrapper">
                 <table id="tblImportPaymentEntry" class="excel-table fixed-grid-table table-width resizable-table">
@@ -828,7 +1091,9 @@
                 </table>
             </div>
         </div>
+
     </div>
+
     <div class="erppage-internalaction mt-2">
         <button type="submit" id="btnSave" class="erppage-btn erppage-btn-save">
             <i class="fa fa-save"></i>
@@ -840,4 +1105,27 @@
 <script src="~/common/dropdown.js"></script>
 <script src="~/js/erpjs/purchase/transaction/importpaymententryjs/importpaymententry.js"></script>
 
+<script>
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
 
+    window.globalVariables = {
+        compCode: "@globalVar?.PubCompCode",
+        yearCode: "@globalVar?.PubFYearCode",
+        branchCode: "@globalVar?.PubBranchCode",
+
+        companyName: "@globalVar?.CompanyName",
+        add1: "@globalVar?.Address1",
+        add2: "@globalVar?.Address2",
+
+        regAdd1: "@globalVar?.RegAdd1",
+        regAdd2: "@globalVar?.RegAdd2",
+        email: "@globalVar?.Email",
+        cin: "@globalVar?.CINNO"
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
+</script>

@@ -1,6 +1,6 @@
 ﻿namespace travelexpensemanagement.Models.Purchase.Transaction
 {
-    public class ImportPaymentEntry
+    public class ImportPaymentEntryModel
     {
         public class PartyDetailsModel
         {
@@ -24,7 +24,6 @@
             public string? CorrSwift { get; set; }
             public string? CorrAccount { get; set; }
         }
-
         public class SaveImportPaymentEntry
         {
             public InsertHeaderData Header { get; set; } = new();
@@ -89,7 +88,7 @@
             public string? A2_ITFOR { get; set; }
             public int? A2_FCN { get; set; }
             public string? A2_FCNFOR { get; set; }
-            public string? A2_AMOUNT { get; set; }
+            public decimal? A2_AMOUNT { get; set; }
             public string? A2_LRS { get; set; }
             public string? A2_PC { get; set; }
             public string? A2_DESC { get; set; }
@@ -171,6 +170,7 @@
             public string? DEST_PORTCODE { get; set; }
             public string? DEST_PORT { get; set; }
             public string? BL_NO { get; set; }
+            public DateTime? BL_DATE { get; set; }
             public string? BE_NO { get; set; }
             public DateTime? BE_DATE { get; set; }
             public string? BE_CCYNO { get; set; }

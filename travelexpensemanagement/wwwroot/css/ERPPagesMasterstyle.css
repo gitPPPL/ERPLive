@@ -1289,6 +1289,20 @@
     flex: 0 0 75%;
     max-width: 75%;
 }
+.erppagescol-7 {
+    flex: 0 0 58.333%;
+    max-width: 58.333%;
+}
+
+.erppagescol-8 {
+    flex: 0 0 66.666%;
+    max-width: 66.666%;
+}
+
+.erppagescol-10 {
+    flex: 0 0 83.333%;
+    max-width: 83.333%;
+}
 
 .erppagescol-6 .erppagetabledynamic-wrapper {
     min-height: 130px;

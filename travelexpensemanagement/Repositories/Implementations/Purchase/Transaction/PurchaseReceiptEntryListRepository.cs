@@ -43,8 +43,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                     cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
                     cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
                     cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
-                    cmd.Parameters.AddWithValue("@SearchTerm",
-                        string.IsNullOrWhiteSpace(searchTerm) ? (object)DBNull.Value : searchTerm);
+                    cmd.Parameters.AddWithValue("@SearchTerm",string.IsNullOrWhiteSpace(searchTerm) ? (object)DBNull.Value : searchTerm);
                     cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
                     cmd.Parameters.AddWithValue("@PageSize", pageSize);
 

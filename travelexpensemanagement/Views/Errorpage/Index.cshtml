@@ -1,0 +1,296 @@
+﻿@{
+    Layout=null;
+}
+
+<link rel="stylesheet" type="text/css" href="/css/erppageerror.css" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+<section class="erppageerror">
+
+    <div class="erppageerror__background">
+        <span class="erppageerror__orb erppageerror__orb--one"></span>
+        <span class="erppageerror__orb erppageerror__orb--two"></span>
+        <span class="erppageerror__grid"></span>
+    </div>
+
+    <div class="erppageerror__container">
+
+        <!-- Error Illustration -->
+        <div class="erppageerror__visual">
+
+            <div class="erppageerror__code" id="errorCode">
+                500
+            </div>
+
+            @* <div class="erppageerror__iconbox">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+ *@
+           @*  <div class="erppageerror__pulse"></div> *@
+
+        </div>
+
+
+        <!-- Error Content -->
+        <div class="erppageerror__content">
+
+            <span class="erppageerror__eyebrow">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                @* SYSTEM ERROR *@
+                <span id="errorStatus">SYSTEM ERROR</span>
+            </span>
+
+            <h1 class="erppageerror__title" id="errorTitle">
+                Something went wrong
+            </h1>
+
+            <p class="erppageerror__description" id="errorMessage">
+                We couldn't process your request at this moment.
+                The system may be temporarily unavailable or an
+                unexpected error may have occurred.
+            </p>
+
+
+            <!-- Error Information -->
+            <div class="erppageerror__info">
+
+                <div class="erppageerror__info-item">
+
+                    <span class="erppageerror__info-icon">
+                        <i class="fa-solid fa-server"></i>
+                    </span>
+
+                    <div class="erppageerror__info-content">
+                        <span class="erppageerror__info-label">
+                            Status
+                        </span>
+
+                        <strong id="errorStatusText">
+                            Internal Server Error
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="erppageerror__info-item">
+
+                    <span class="erppageerror__info-icon">
+                        <i class="fa-solid fa-clock"></i>
+                    </span>
+
+                    <div class="erppageerror__info-content">
+                        <span class="erppageerror__info-label">
+                            Action
+                        </span>
+
+                        <strong>
+                            Please try again
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Actions -->
+            <div class="erppageerror__actions">
+
+                @* <button type="button"
+                        class="erppageerror__button erppageerror__button--primary"
+                        onclick="window.location.reload();">*@
+                <button type="button"
+                        id="errorActionButton"
+                        class="erppageerror__button erppageerror__button--primary">
+
+                    <i class="fa-solid fa-rotate-right"></i>
+
+                    <span id="errorActionText">
+                        Try Again
+                    </span>
+
+                </button>
+
+
+                <a href="/Dashboard"
+                   class="erppageerror__button erppageerror__button--secondary">
+
+                    <i class="fa-solid fa-house"></i>
+
+                    <span>
+                        Back to Login Page
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <!-- Support -->
+            <div class="erppageerror__support">
+
+                <i class="fa-solid fa-headset"></i>
+
+                <span>
+                    If the problem continues, please contact your
+                    system administrator.
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Footer -->
+    <div class="erppageerror__footer">
+
+        <span>
+            ERP System
+        </span>
+
+        <span class="erppageerror__footer-divider">
+            •
+        </span>
+
+        <span id="errorReference">
+            Error Reference: 500
+        </span>
+
+    </div>
+
+</section>
+
+<script>
+
+    //const idleTimeout = 1 * 60 * 1000; // 1 minute
+    const idleTimeout = 1 * 10 * 1000; // 10 seconds
+
+    let idleTimer;
+
+    function resetIdleTimer() {
+
+        clearTimeout(idleTimer);
+
+        idleTimer = setTimeout(function () {
+
+            // User has been inactive
+            window.location.href = "/Errorpage/Index?code=440";
+
+        }, idleTimeout);
+    }
+
+
+    // Mouse movement / hover
+    document.addEventListener("mousemove", resetIdleTimer);
+
+    // Mouse click
+    document.addEventListener("click", resetIdleTimer);
+
+    // Keyboard
+    document.addEventListener("keydown", resetIdleTimer);
+
+    // Start timer when page loads
+    resetIdleTimer();
+
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const params = new URLSearchParams(window.location.search);
+
+        const code = params.get("code");
+
+        if (!code) {
+            return;
+        }
+
+        const errorCode = document.getElementById("errorCode");
+        const errorStatus = document.getElementById("errorStatus");
+        const errorTitle = document.getElementById("errorTitle");
+        const errorMessage = document.getElementById("errorMessage");
+        const errorStatusText = document.getElementById("errorStatusText");
+        const errorActionText = document.getElementById("errorActionText");
+        const errorActionButton = document.getElementById("errorActionButton");
+        const errorReference = document.getElementById("errorReference");
+
+        switch (code) {
+
+            case "440":
+                errorCode.textContent = "440";
+                errorStatus.textContent = "SESSION TIMEOUT";
+                errorTitle.textContent = "Session Expired";
+                errorMessage.textContent =
+                    "Your session has expired due to inactivity. Please login again to continue.";
+                errorStatusText.textContent = "Session Expired";
+                errorActionText.textContent = "Login Again";
+                errorActionButton.onclick = function () {
+                    window.location.href = "/Login";
+                };
+                errorReference.textContent = "Error Reference: 440";
+                break;
+
+
+            case "401":
+
+                errorCode.textContent = "401";
+
+                errorStatus.textContent = "UNAUTHORIZED";
+
+                errorTitle.textContent = "Unauthorized";
+
+                errorMessage.textContent =
+                    "You are not authorized to access this page.";
+
+                errorStatusText.textContent =
+                    "Unauthorized";
+
+                errorActionText.textContent =
+                    "Login Again";
+
+                break;
+
+
+            case "404":
+
+                errorCode.textContent = "404";
+
+                errorStatus.textContent = "PAGE NOT FOUND";
+
+                errorTitle.textContent = "Page Not Found";
+
+                errorMessage.textContent =
+                    "The page you are looking for could not be found.";
+
+                errorStatusText.textContent =
+                    "Not Found";
+
+                errorActionText.textContent =
+                    "Go Home";
+
+                break;
+
+
+            case "500":
+
+                errorCode.textContent = "500";
+
+                errorStatus.textContent = "SYSTEM ERROR";
+
+                errorTitle.textContent = "Something went wrong";
+
+                errorMessage.textContent =
+                    "We couldn't process your request at this moment.";
+
+                errorStatusText.textContent =
+                    "Internal Server Error";
+
+                errorActionText.textContent =
+                    "Try Again";
+
+                break;
+        }
+    });
+</script>

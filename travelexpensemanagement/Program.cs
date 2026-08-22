@@ -71,6 +71,8 @@ builder.Services.AddScoped<IQuotationRateApprovalListRepository, QuotationRateAp
 builder.Services.AddScoped<IPurchaseReceiptEntryRepository, PurchaseReceiptEntryRepository>();
 builder.Services.AddScoped<IPurchaseReceiptEntryListRepository, PurchaseReceiptEntryListRepository>();
 builder.Services.AddScoped<IIndentStatusUpdateRepository, IndentStatusUpdateRepository>();
+builder.Services.AddScoped<IImportPaymentEntryRepository, ImportPaymentEntryRepository>();
+builder.Services.AddScoped<IImportPaymentListRepository, ImportPaymentListRepository>();
 
 
 // Gete Entry Transaction repositories
@@ -119,11 +121,17 @@ builder.Services.AddRateLimiter(options =>
 var app = builder.Build();
 
 // Middleware Pipeline
-app.UseMiddleware<GlobalErrorHandlingMiddleware>();
+//app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
+//if (!app.Environment.IsDevelopment())
+//{
+//    app.UseExceptionHandler("/Home/Error");
+//    app.UseHsts();
+//}
+
+//-----My Code------
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
@@ -132,7 +140,18 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Session MUST be before Global Error Middleware
 app.UseSession();
+
+app.UseMiddleware<GlobalErrorHandlingMiddleware>();
+
+
+//app.UseHttpsRedirection();
+//app.UseStaticFiles();
+
+//app.UseRouting();
+
+//app.UseSession();
 app.UseRateLimiter();
 
 //app.UseMiddleware<SessionTimeoutMiddleware>();
