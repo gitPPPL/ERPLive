@@ -1,31 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
 using travelexpensemanagement.Common.DbHelper;
-using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.Models.Purchase.Transiction;
+using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
 
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
     public class PurchaseBillPassEntryDirectListController : Controller
     {
-        private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly DropdownService _dropdownService;
         private readonly DbHelper _dbHelper;
-        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        private int? userLevel;
-        public PurchaseBillPassEntryDirectListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    DropdownService dropdownService, DbHelper dbHelper,
-    ModuleService.ModuleService moduleService)
+        private readonly GlobalExcelExport _excel;
+        private readonly IPurchaseBillPassEntryDirectListRepository _IPBPDListRepository;
+        private readonly GlobalValidationdate _globalValidationdate;
+        public PurchaseBillPassEntryDirectListController(GlobalVariableService globalVariableService,
+            DbHelper dbHelper, GlobalExcelExport excel, IPurchaseBillPassEntryDirectListRepository IPBPListRepository,
+            GlobalValidationdate globalValidationdate)
         {
-            _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
-            _dropdownService = dropdownService;
             _dbHelper = dbHelper;
-            _moduleService = moduleService;
+            _excel = excel;
+            _IPBPDListRepository = IPBPListRepository;
+            _globalValidationdate = globalValidationdate;
         }
 
         public IActionResult Index()
@@ -33,73 +29,159 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
             return View("~/Views/Purchase/Transaction/PurchaseBillPassEntryDirectList/Index.cshtml");
         }
         [HttpGet]
-        public IActionResult GetAllPurchaseBillPassEntryDirect(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
+        public IActionResult GetAllPurchaseBillPassEntry(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
-            var globelVar = _globalVariableService.GetGlobalVariables();
-            var purchaseBillDirect = new List<PURCHASE1>();
-            int totalCount = 0;
-
             try
             {
-                using (SqlConnection conn = _dbConnection.GetErpConnection())
+                var result = _IPBPDListRepository.GetAllPurchaseBillPassEntry(searchTerm, pageNumber, pageSize);
+                if (result.data != null)
                 {
-                    using (SqlCommand cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@Action", "SELECT");
-                        cmd.Parameters.AddWithValue("@SubAction", "GETALLBYVNO");
-                        cmd.Parameters.AddWithValue("@SearchTerm", string.IsNullOrWhiteSpace(searchTerm) ? (object)DBNull.Value : searchTerm);
-                        cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
-                        cmd.Parameters.AddWithValue("@PageSize", pageSize);
-                        //cmd.Parameters.AddWithValue("@V_NO", DBNull.Value); 
-                        cmd.Parameters.AddWithValue("@COMP_CODE", globelVar.PubCompCode);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", globelVar.PubFYearCode);
-
-                        conn.Open();
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                purchaseBillDirect.Add(new PURCHASE1
-                                {
-                                    V_NO = reader["V_NO"] != DBNull.Value ? Convert.ToInt32(reader["V_NO"]) : 0,
-                                    V_TYPE = reader["V_TYPE"]?.ToString(),
-                                    V_DATE = reader["V_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["V_DATE"]) : DateTime.MinValue,
-                                    PARTY_NAME = reader["PARTY_NAME"]?.ToString(),
-                                    SHIP_ADD1 = reader["SHIP_ADD1"]?.ToString(),
-                                    DEBIT_AC = reader["DEBIT_AC"] != DBNull.Value ? Convert.ToInt32(reader["DEBIT_AC"]) : 0,
-                                    CREDIT_AC = reader["CREDIT_AC"] != DBNull.Value ? Convert.ToInt32(reader["CREDIT_AC"]) : 0,
-                                    BILL_QTY = reader["BILL_QTY"] != DBNull.Value ? Convert.ToDecimal(reader["BILL_QTY"]) : 0,
-                                    AMOUNT = reader["AMOUNT"] != DBNull.Value ? Convert.ToDecimal(reader["AMOUNT"]) : 0,
-                                    REF_TYPE = reader["REF_TYPE"]?.ToString(),
-                                    REF_NO = reader["REF_NO"] != DBNull.Value ? Convert.ToInt32(reader["REF_NO"]) : 0,
-                                    BILL_NO = reader["BILL_NO"]?.ToString(),
-                                    BILL_DATE = reader["BILL_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["BILL_DATE"]) : DateTime.MinValue,
-                                    CHALL_NO = reader["CHALL_NO"]?.ToString(),
-                                    CHALL_DATE = reader["CHALL_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["CHALL_DATE"]) : DateTime.MinValue,
-                                    DR_FROM_TPT = reader["DR_FROM_TPT"]?.ToString(),
-                                    REMARKS = reader["DR_FROM_TPT"]?.ToString(),  // Consider verifying this — REMARKS might be its own column
-                                    STATUS = reader["STATUS"] != DBNull.Value ? Convert.ToInt32(reader["STATUS"]) : 0
-                                });
-                            }
-
-                            if (reader.NextResult() && reader.Read())
-                            {
-                                totalCount = reader["TotalCount"] != DBNull.Value ? Convert.ToInt32(reader["TotalCount"]) : 0;
-                            }
-                        }
-                    }
+                    return Json(new { success = result.status, purchaseBillDirect = result.data, totalCount = result.totalCount });
                 }
+                return Json(new { success = result.status, message = result.message });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error fetching quotations", error = ex.Message });
+                return Json(new { success = false, message = "Error fetching puchase bill pass", error = ex.Message });
             }
 
-            return Json(new { success = true, purchaseBillDirect, totalCount });
         }
 
+        [HttpGet]
+        public async Task<JsonResult> PBPEntryDetails(string vNo, string vType)
+        {
+            try
+            {
+                var usersession = _globalVariableService.GetGlobalVariables();
+                if (string.IsNullOrEmpty(vNo))
+                {
+                    return Json(new { status = false, message = "Invalid ID" });
+                }
+                var parameter = new Dictionary<string, object>
+                {
+                    {"@COMP_CODE", usersession.PubCompCode },
+                    {"@YEAR_CODE", usersession.PubFYearCode },
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
+                    {"@V_TYPE", vType},
+                    {"@V_NO", vNo },
+                    {"@Action", "EntryDetail" }
+                };
+                var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_PurchaseBillPassEntryDirect]", parameter);
+                return Json(new { status = true, data = entryDetailList });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { status = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ExportAllDocs()
+        {
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "@YEAR_CODE", gv.PubFYearCode },
+                    { "@COMP_CODE", gv.PubCompCode },
+                    { "@BRANCH_CODE", gv.PubBranchCode },
+                    { "@Action", "Excel" },
+                    { "@Doctype", "HighSeaPurchase" }
+                };
+
+                var fileBytes = _excel.ExportToExcel("sp_PurchaseBillPassEntryDirect", "Purchase Bill Pass Direct", parameters);
+
+                return File(
+                    fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"PurchaseBillPassDirect_{DateTime.Now:ddMMyyyy}.xlsx"
+                );
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Delete(int vNo, string docType)
+        {
+            if (vNo <= 0 || string.IsNullOrEmpty(docType))
+            {
+                return Json(new { status = false, message = "Invalid Id!" });
+            }
+            var result = _IPBPDListRepository.DeletePurchaseBillPass(vNo, docType);
+            return Json(new { status = result.status, message = result.message });
+        }
+
+        [HttpGet]
+        public IActionResult GetPurchaseEditStatus(string vType, int vNo)
+        {
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+                var userlevel = gv.PubUserLevel;
+                var result = _IPBPDListRepository.GetPurchaseEditStatus(vType, vNo);
+                return Json(new { success = true, data = result, userlevel });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult checkModificationDays(DateTime? vDate)
+        {
+            if (!vDate.HasValue)
+            {
+                return Json(new { success = false, message = "Doc Date is empty!!" });
+            }
+            var (allowed, message) = _globalValidationdate.CheckModificationDays(vDate.Value);
+            return Json(new { success = true, isAllowed = allowed, message = message });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetApprovalBody(string vType)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            try
+            {
+                string qry = $@"select 1 from DOC_APPROSTAGE where USER_CODE=@USER_CODE and DOC_CODE=@DOC_CODE and comp_code=@comp_code";
+                var parameters = new Dictionary<string, object>{
+                   {"@USER_CODE", gv.PubUserId },
+                   {"@DOC_CODE", vType},
+                   {"@comp_code", gv.PubCompCode},
+                };
+                var result = await _dbHelper.GetExecuteScalarAsync<int>(qry, parameters);
+                bool isApprovalBody = result == 1;
+                return Json(new { success = true, isApprovalBody });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetPurchaseDeleteStatus(string vType, int vNo)
+        {
+            try
+            {
+                var result = _IPBPDListRepository.GetPurchaseDeleteStatus(vType, vNo);
+                return Json(new { success = true, data = result });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
     }
 }

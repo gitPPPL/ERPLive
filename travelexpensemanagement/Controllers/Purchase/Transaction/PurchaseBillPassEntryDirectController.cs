@@ -1,167 +1,125 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using System.Text;
+using System.Text.Json;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
-using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Controllers.AddAttachmentService;
 using travelexpensemanagement.Dbconnection;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using travelexpensemanagement.Models.Purchase.Transiction;
+using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
+using static travelexpensemanagement.Models.CommonModel;
+using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseBillPassEntryModel;
 
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
+    [SessionAuthorize]
     public class PurchaseBillPassEntryDirectController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly DropdownService _dropdownService;
         private readonly DbHelper _dbHelper;
-        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        private int? userLevel;
-        private readonly FileHelper _filehelper;
-        public PurchaseBillPassEntryDirectController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    DropdownService dropdownService, DbHelper dbHelper,
-    ModuleService.ModuleService moduleService)
+        private readonly GlobalValidationdate _globalValidationdate;
+        private readonly IPurchaseBillPassEntryDirectRepository _purchaseBillPassEntryDirect;
+
+        public PurchaseBillPassEntryDirectController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, 
+            DbHelper dbHelper, GlobalValidationdate globalValidationdate, IPurchaseBillPassEntryDirectRepository purchaseBillPassEntryDirect)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
-            _dropdownService = dropdownService;
             _dbHelper = dbHelper;
-            _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
+            _purchaseBillPassEntryDirect = purchaseBillPassEntryDirect;
         }
+
         public IActionResult Index()
         {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            ViewBag.CompCode = globalVar.PubCompCode;
-            ViewBag.BranchCode = 1;
-            ViewBag.YearCode = globalVar.PubFYearCode;
             return View("~/Views/Purchase/Transaction/PurchaseBillPassEntryDirect/Index.cshtml");
         }
 
-        public int GetNextV_NO(string yearCode)
+        [HttpGet]
+        public async Task<IActionResult> GetList(string type, string vType = null, int shipFromCode = 0, int cCode = 0)
         {
-            string newV_NO = "00000";
+            var query = BuildListQuery(type, vType, shipFromCode, cCode);
 
-            using (SqlConnection con = _dbConnection.GetErpConnection())
+            if (query == null)
+                return BadRequest("Invalid list type");
+
+            var data = await _dbHelper.GetJsonDataAsync(query);
+
+            return Json(new { success = true, data });
+        }
+        private string BuildListQuery(string type, string vType, int shipFromCode, int cCode)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            return type switch
             {
-                con.Open();
+                "doctype" => "SELECT CODE as Value, NAME as Text FROM DOCTYPE_MAST WHERE DOCTYPE in ('HighSeaPurchase') ORDER BY NAME",
 
-                // Execute query to get PREFIXYR
-                string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = '" + yearCode + "'";
-                SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con);
-                string prefixYR = prefixCmd.ExecuteScalar()?.ToString() ?? "0000";
+                "party" => $@"select Code as Value, Name as Text, ADD1, ADD2, CITY_CODE, GSTIN, PINCODE 
+                                from SUBGROUP_MAST where NATURE in ('Supplier') and COMP_CODE={gv.PubCompCode} and ACTIVE=1 order by name",
 
-                // Execute query to get last V_NO
-                string lastV_NO_Query = "SELECT TOP 1 V_NO FROM PURCHASE1 ORDER BY V_NO DESC";
-                SqlCommand lastVnoCmd = new SqlCommand(lastV_NO_Query, con);
-                string lastV_NO = lastVnoCmd.ExecuteScalar()?.ToString();
+                "drcrbyvtype" => $@"select code as Value, name as Text ,ADD1, ADD2, ADD3, CITY_CODE, GSTIN from SUBGROUP_MAST where NATURE='Others' and COMP_CODE={gv.PubCompCode}
+                                    and ACTIVE=1 order by name",
 
-                int lastNumber = 0;
-                if (!string.IsNullOrEmpty(lastV_NO) && lastV_NO.Length >= 9)
-                {
-                    string numericPart = lastV_NO.Substring(lastV_NO.Length - 5);
-                    int.TryParse(numericPart, out lastNumber);
-                }
+                "drcr" => $@"select a.code as Value, a.name as Text, a.ADD1, a.ADD2, a.CITY_CODE, a.GSTIN 
+                            from SUBGROUP_MAST a where a.COMP_CODE={gv.PubCompCode} and ACTIVE=1 order by name",
 
-                // Increment and format the new V_NO
-                string newRunningNo = (lastNumber + 1).ToString("D5");
-                newV_NO = prefixYR + newRunningNo;
-            }
+                "item" => $@"Select a.CODE as Value, a.name as Text, c.NAME as unit, c.CODE as ucode from item_mast a 
+                            left join ITEM_MAKE b on a.code=b.ITEM_CODE and b.COMP_CODE=a.COMP_CODE
+                            left join ITEMUNIT_MAST c on a.UNIT_CODE=c.CODE and c.comp_code=a.COMP_CODE
+                            left join item_group d on a.GROUP_CODE=d.CODE and d.COMP_CODE=a.COMP_CODE
+                            left join ITEM_MGROUP e on d.MGROUP_CODE=e.CODE and e.COMP_CODE=a.COMP_CODE
+                            where a.comp_code={gv.PubCompCode} 
+                            --and e.MGROUP_TYPE in('Store','Raw')
+                            group by a.name ,a.CODE , c.NAME ,c.CODE order by a.name",
 
-            return Convert.ToInt32(newV_NO);
-        }
+                "address" => $@"select address_id Value, add1 Text from SUBGROUP_ADDRESS 
+                                where code={shipFromCode} and COMP_CODE={gv.PubCompCode} order by ADDRESS_ID",
 
-        public IActionResult GetDocTypeList()
-        {
-            string query = "SELECT CODE,NAME FROM DOCTYPE_MAST WHERE DOCTYPE= 'HighSeaPurchase' ORDER BY NAME DESC";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
+                "department" => $@"select name as Text,code as Value from ITEMDEPT_MAST where COMP_CODE={gv.PubCompCode} order by name",
 
-        public IActionResult GetStatusList()
-        {
-            string query = "SELECT CODE,NAME FROM DOCSTATUS_MAST WHERE V_TYPE = 'Document' ORDER BY NAME";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
+                "city" => $@"select code as Value, NAME as Text from CITY_MAST where ACTIVE=1 order by Name",
 
-        public IActionResult GetPoList(int cCode, int yCode, int bCode)
-        {
-            string query = "SELECT V_TYPE,DOC_ID FROM PO_MAST WHERE COMP_CODE = '" + cCode + "' AND YEAR_CODE='" + yCode + "' AND BRANCH_CODE='" + bCode + "'";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
+                "tax" => $@"select name as Text, code as Value, CGST_PER,SGST_PER,IGST_PER,isnull(VAT_PER,0)VAT_PER,TDS_PER,TCS_PER,OTH_PER,
+                            isnull(OTH_PER2,0)OTH_PER2 from TAX_MAST
+                            where ACTIVE = 1 order by name",
 
-        public IActionResult GetBillToList(int cCode)
-        {
-            string query = "SELECT CODE,NAME FROM SUBGROUP_MAST WHERE COMP_CODE='" + cCode + "' AND NATURE='Supplier' AND ACTIVE=1 ORDER BY NAME ";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
-        public IActionResult GetShipToList(int cCode)
-        {
-            string query = "SELECT CODE,NAME FROM SUBGROUP_MAST WHERE COMP_CODE='" + cCode + "' AND NATURE='Supplier' AND ACTIVE=1 ORDER BY NAME ";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
+                "status" => $@"SELECT CODE as Value, NAME as Text FROM DOCSTATUS_MAST WHERE V_TYPE = 'Document' ORDER BY CODE",
 
-        public IActionResult GetTransitNoByParty(int cCode, int bCode, int yCode, int pCode)
-        {
-            //var query = "SELECT V_NO,DOC_ID FROM WAYBILL1 WHERE  COMP_CODE='" + cCode + "' AND YEAR_CODE='" + yCode + "' AND BRANCH_CODE='" + bCode + "' AND PARTY_CODE='" + pCode + "' ";
-            var queryBuilder = new StringBuilder();
-            queryBuilder.Append("SELECT V_NO,DOC_ID FROM WAYBILL1 ");
-            queryBuilder.Append("WHERE COMP_CODE='").Append(cCode).Append("' ");
-            queryBuilder.Append("AND YEAR_CODE='").Append(yCode).Append("' ");
-            queryBuilder.Append("AND BRANCH_CODE='").Append(bCode).Append("' ");
-            queryBuilder.Append("AND PARTY_CODE='").Append(pCode).Append("'");
-            string query = queryBuilder.ToString();
+                "transport" => $@"select code as Value, ltrim(name) as Text from TRANSPORT_MAST 
+                                where COMP_CODE={gv.PubCompCode} and ACTIVE=1 order by ltrim(name)",
 
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
-        public IActionResult GetAddressListByBillToParty(int cCode, int pCode)
-        {
-            var query = "SELECT ADDRESS_ID,ADD1 FROM [SUBGROUP_ADDRESS] WHERE  COMP_CODE='" + cCode + "' AND CODE='" + pCode + "'";
-            var moduelList = _dropdownService.GetDropdownList(query);
-            return Json(moduelList);
-        }
-        public IActionResult GetAddressByBillToParty(int cCode, int pCode, int addressId)
-        {
-            var addressDetails = new
-            {
-                add1 = "",
-                add2 = "",
-                add3 = "",
-                pincode = "",
-                gstin = ""
+                _ => ""
             };
+        }
+
+        //============VNO========================
+        [HttpGet]
+        public JsonResult GetVNo(string vType)
+        {
+            var result = _globalValidationdate.GetVNo(vType, "PURCHASE1");
+            return Json(new { status = true, V_NO = result });
+        }
+
+        //============MRN List========================
+        [HttpGet]
+        public async Task<IActionResult> GetMrnNoList()
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = $@"Select a.v_no as Value, a.V_type as vType, concat(a.V_TYPE,a.V_NO) as Text from Order1 a where COMP_CODE={gv.PubCompCode} and YEAR_CODE={gv.PubFYearCode}
+                            and BRANCH_CODE={gv.PubBranchCode}";
+            var moduelList = await _dbHelper.GetJsonDataAsync(query);
+            return Json(new { success = true, data = moduelList });
+        }
+
+        
+        public IActionResult GetAddressByBillToParty(int code, int addressId)
+        {
             try
             {
-                using (SqlConnection connection = _dbConnection.GetErpConnection())
-                {
-                    using (SqlCommand cmd = new SqlCommand("Select ADD1,ADD2,ADD3,PINCODE,GSTIN from SUBGROUP_ADDRESS where COMP_CODE = @COMP_CODE AND Code = @PCODE AND ADDRESS_ID = @ADDRESSID", connection))
-                    {
-                        cmd.Parameters.AddWithValue("@COMP_CODE", cCode);
-                        cmd.Parameters.AddWithValue("@PCODE", pCode);
-                        cmd.Parameters.AddWithValue("@ADDRESSID", addressId);
-                        connection.Open();
-                        using (var reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                addressDetails = new
-                                {
-                                    add1 = reader["ADD1"].ToString(),
-                                    add2 = reader["ADD2"].ToString(),
-                                    add3 = reader["ADD3"].ToString(),
-                                    pincode = reader["PINCODE"].ToString(),
-                                    gstin = reader["GSTIN"].ToString(),
-                                };
-
-                            }
-                        }
-                    }
-                }
+                var addressDetails = _purchaseBillPassEntryDirect.GetAddByParty(code, addressId);
                 return Json(new { success = true, addressDetails });
             }
             catch (Exception)
@@ -169,5 +127,349 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { success = false, message = "Error retrieving the address by specfic address id" });
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetFullQuotationByVno(int vNo, string vtype)
+        {
+            try
+            {
+                var vtypeFromQuery = Request.Query["vtype"].ToString();
+
+                var result = await _purchaseBillPassEntryDirect.GetFullQuotationByVno(vNo, vtype);
+                if (result.data != null)
+                {
+                    return Json(new
+                    {
+                        success = result.status,
+                        header = result.data.Header,
+                        items = result.data.Items,
+                        attachments = result.data.Attachments,
+                        eprAttachments = result.data.EprAttachments
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Data not found!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error fetching quotation", error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SavePurchaseBillPassEntry([FromBody] PurchaseWrapper data)
+        {
+            if (data == null)
+            {
+                return Json(new { success = false, message = "Invalid data!" });
+            }
+            try
+            {
+                var result = await _purchaseBillPassEntryDirect.SavePurchaseBillPassEntry(data);
+                return Json(new { success = result.status, message = result.message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        //==============================================================MRN Change=======================================================
+        [HttpPost]
+        public IActionResult ValidateMRN(string mrnTypeNo, string vType, int vNo)
+        {
+            try
+            {
+                var result = _purchaseBillPassEntryDirect.ValidateMRN(mrnTypeNo, vType, vNo);
+                if (!result.status)
+                {
+                    return Json(new { success = false, message = result.message });
+                }
+                return Json(new { success = true, mrnNo = result.data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPurchaseDetailsByMRN(string vType, int vNo)
+        {
+            try
+            {
+                var model = await _purchaseBillPassEntryDirect.GetPurchaseDetailsByMRN(vType, vNo);
+                if (model == null)
+                {
+                    return Json(new { success = true, message = "Purchase details not found.", });
+                }
+
+                return Json(new { success = true, message = "Purchase details retrieved successfully.", data = model });
+
+            }
+            catch (SqlException ex)
+            {
+                return Json(new { success = false, message = "A database error occurred while retrieving purchase details.", error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An unexpected error occurred.", error = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetPurchaseItemsByMRN(string vType, int vNo)
+        {
+            try
+            {
+                var result = _purchaseBillPassEntryDirect.GetPurchaseItemsByMRN(vType, vNo);
+                return new JsonResult(new { success = result.status, message = result.message, data = result.data });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, message = ex.Message, data = new List<PurchaseItemDto>() });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetItemOrderRatesByPO(string poType, int poNo, int itemCode)
+        {
+            try
+            {
+                bool exists = false;
+                decimal landRate = 0;
+                decimal rate = 0;
+                var result = _purchaseBillPassEntryDirect.GetItemOrderRatesByPO(poType, poNo, itemCode);
+                if (result.LandRate >= 0 && result.Rate >= 0)
+                {
+                    return Json(new { success = true, exists, landRate, rate });
+                }
+                return Json(new { success = true, message = "Rates not found!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetPackOnBasic(int code)
+        {
+            try
+            {
+                var result = await _purchaseBillPassEntryDirect.GetPackOnBasic(code);
+                return Json(new { success = result.status, packOnBasic = result.data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        //--------------- Calc Frieght ---------------------
+        [HttpPost]
+        public async Task<IActionResult> CalculateFrieght([FromBody] DebitNoteRequest request)
+        {
+            try
+            {
+                var result = await _purchaseBillPassEntryDirect.CalculateFrieghtPay(request);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+        //--------------- DR/CR NOTE ---------------------
+        [HttpPost]
+        public async Task<IActionResult> CalculateDebitNote([FromBody] DebitNoteRequest request)
+        {
+            try
+            {
+                var result =
+                await _purchaseBillPassEntryDirect.CalculateDebitNote(request);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
+        //--------------- Get Existing TDS ---------------------
+        [HttpPost]
+        public async Task<IActionResult> CheckExistingTDS(string billNo, int drCode)
+        {
+            try
+            {
+                var result = await _purchaseBillPassEntryDirect.CheckExistingTDS(billNo, drCode);
+                return Json(new { totTDS = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetFrtCrAcByTransCode(int transportCode)
+        {
+
+            try
+            {
+                var result = await _purchaseBillPassEntryDirect.GetFrtCrAcByTransCodeAsync(transportCode);
+                int partyCode = result.PartyCode;
+                string partyName = result.PartyName;
+                return Json(new { success = true, partyCode, partyName });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        //=================================Validate Date===============
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("PURCHASE1", vdate, vtype, vno);
+            return Ok(result);
+        }
+
+        //================================= Validation Helpers ===============
+        
+
+        [HttpGet]
+        public async Task<JsonResult> GetPurchaseOrSaleVoucherNo(string transportName, string grNo, string currentVoucher, string purchaseOrSale)
+        {
+            try
+            {
+                var result = await _purchaseBillPassEntryDirect.GetPurchaseOrSaleVoucherNo(transportName, grNo, currentVoucher, purchaseOrSale);
+                return Json(new { success = result.status, message = result.message, voucherNo = result.data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> CheckPaymentExists(string docType, int docNo)
+        {
+            try
+            {
+                var result = await _purchaseBillPassEntryDirect.CheckPaymentExists(docType, docNo);
+                return Json(new { success = result.status, exists = result.data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> CheckDuplicateBill(int partyCode, string billNo, int currentVNo)
+        {
+            try
+            {
+                var result = await _purchaseBillPassEntryDirect.CheckDuplicateBill(partyCode, billNo, currentVNo);
+                return Json(new { success = true, exists = result.Exists, docId = result.DocId, vDate = result.VDate });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ValidateTaxType(int cityCode, decimal totalIGST, decimal totalCGST, decimal totalSGST)
+        {
+            try
+            {
+                var result = await _purchaseBillPassEntryDirect.ValidateTaxType(cityCode, totalIGST, totalCGST, totalSGST);
+                return Json(new { success = result.status, isValid = result.data, message = result.message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ValidatePurchaseRow(string vType, int itemCode, string itemName, string billHsnCode, decimal qty,
+        decimal freightAmount, string poType, int poNo, string mrnType, int mrnNo)
+        {
+            try
+            {
+                var result = await _purchaseBillPassEntryDirect.ValidatePurchaseRow(vType, itemCode, itemName, billHsnCode, qty,
+                    freightAmount, poType, poNo, mrnType, mrnNo);
+
+                return Json(new { success = true, result });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> getGlobalValues()
+        {
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+                var gs = await _globalVariableService.LoadGeneralSetting();
+                using var erpCon = _dbConnection.GetErpConnection();
+
+                string databaseName;
+                using (var connection = _dbConnection.GetErpConnection())
+                {
+                    databaseName = connection.Database; // Get the database name
+                }
+
+                var response = new
+                {
+                    userLevel = gv.PubUserLevel,
+                    compCode = gv.PubCompCode,
+                    yearCode = gv.PubFYearCode,
+                    branchCode = gv.PubBranchCode,
+                    pubDefPOInMRN = gs.pubDefPOInMRN,
+                    dataSource = erpCon.DataSource,
+                    add1 = gv.Address1,
+                    add2 = gv.Address2,
+                    companyName = gv.CompanyName,
+                    companyGst = gv.gstin,
+                    db = databaseName
+                };
+
+                return Json(new { success = true, data = response });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ValidatePartyGst(string gstType, string partyCode, string gstNo)
+        {
+            try
+            {
+                var result = await _purchaseBillPassEntryDirect.ValidatePartyGst(gstType, partyCode, gstNo);
+                return Json(new { success = true, result });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
     }
 }
+

@@ -602,6 +602,7 @@ function saveUpdate(payload) {
                 showToast("Saved successfully!", { type: "success" });
                 setFormReadOnly();
                 isReadOnly = true;
+
                 setTimeout(() => window.location.href = '/PurchaseRequest/Index?id=' + encodeURIComponent($('#NumDocNo').val()) + '&mode=view', 1000);
                 if (isReadOnly) {
                     const vNo = $('#NumDocNo').val();

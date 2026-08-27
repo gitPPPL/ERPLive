@@ -88,6 +88,13 @@ namespace travelexpensemanagement.Models.Purchase.Transiction
         public string? LID { get; set; }
         public string? UNIT { get; set; }
         public string? MAKE { get; set; }
+        public decimal? DRNOTE_AMT { get; set; }
+        public decimal? CRNOTE_AMT { get; set; }
+        public decimal? QLTDIFF_DRAMT { get; set; }
+        public decimal? RDIFF_DRAMT { get; set; }
+        public decimal? QCDIFF_DRAMT { get; set; }
+        public decimal? QTYDIFF_DRAMT { get; set; }
+        public decimal? OTH_DRAMT { get; set; }
     }
     public class PurchaseWrapper
     {

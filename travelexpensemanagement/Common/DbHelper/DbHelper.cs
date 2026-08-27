@@ -390,7 +390,18 @@ namespace travelexpensemanagement.Common.DbHelper
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error executing {(isStoredProc ? "stored procedure" : "query")}: {ex.Message}", ex);
+                //throw new Exception($"Error executing {(isStoredProc ? "stored procedure" : "query")}: {ex.Message}", ex);
+                var parameterInfo = parameters == null
+           ? ""
+           : string.Join(", ",
+               parameters.Select(p =>
+                   $"{p.ParameterName}={p.Value ?? "NULL"}"));
+
+                throw new Exception(
+                    $"Error executing query: {ex.Message}\n" +
+                    $"Parameters: {parameterInfo}\n" +
+                    $"SQL: {query}",
+                    ex);
             }
         }
         public async Task<string> ExecuteScalarAsync(string sqlQuery, List<SqlParameter> parameters = null)
@@ -444,10 +455,10 @@ namespace travelexpensemanagement.Common.DbHelper
             }
             return result;
         }
-        internal void ExecuteNonQuery(string insertQuery, List<SqlParameter> insertParams)
-        {
-            throw new NotImplementedException();
-        }
+        //internal void ExecuteNonQuery(string insertQuery, List<SqlParameter> insertParams)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
        
 

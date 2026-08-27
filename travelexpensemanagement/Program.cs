@@ -2,25 +2,31 @@
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.EncryptionHelper;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.GlobalFunction;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Common.ModelBinding;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.LogService;
 using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Master;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Test;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
 
 // ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Test;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 using travelexpensemanagement.Services;
 
@@ -28,6 +34,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 builder.Services.AddControllersWithViews();
+//builder.Services
+//    .AddControllersWithViews()
+//    .AddJsonOptions(options =>
+//    {
+//        options.JsonSerializerOptions.Converters.Add(
+//            new SafePrimitiveConverterFactory());
+//    });
+//To store cache for tables schema -----Nandani
+builder.Services.AddMemoryCache();
+
 
 builder.Services.AddScoped<DataBaseConnection>();
 builder.Services.AddScoped<GlobalValidationdate>();
@@ -71,10 +87,22 @@ builder.Services.AddScoped<IPurchaseRequestListRepository, PurchaseRequestListRe
 builder.Services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
 builder.Services.AddScoped<IApprovalService, ApprovalService>();
 builder.Services.AddScoped<IPurchaseBillPassEntryRepository, PurchaseBillPassEntryRepository>();
+builder.Services.AddScoped<IPurchaseBillPassEntryListRepository, PurchaseBillPassEntryListRepository>();
+builder.Services.AddScoped<GlobalExcelExport, GlobalExcelExport>();
+builder.Services.AddScoped<IPurchaseBillPassEntryDirectRepository, PurchaseBillPassEntryDirectRepository>();
+builder.Services.AddScoped<IPurchaseBillPassEntryDirectListRepository, PurchaseBillPassEntryDirectListRepository>();
+builder.Services.AddScoped<ITradingDirectPurchaseRepository, TradingDirectPurchaseRepository>();
+builder.Services.AddScoped<ITradingDirectPurchaseListRepository, TradingDirectPurchaseListRepository>();
+builder.Services.AddScoped<IImportExportExpensesEntryRepository, ImportExportExpensesEntryRepository>();
+builder.Services.AddScoped<IImportExportExpensesEntryListRepository, ImportExportExpensesEntryListRepository>();
+builder.Services.AddScoped<IToolkitIssueEntryRepository, ToolkitIssueEntryRepository>();
+builder.Services.AddScoped<IToolkitIssueListRepository, ToolkitIssueListRepository>();
 
 // Gete Entry Transaction repositories
 
-
+builder.Services.AddScoped<IDatabaseMetadataService, DatabaseMetadataService>();
+builder.Services.AddScoped<ISqlValueConverter, SqlValueConverter>();
+builder.Services.AddScoped<IDataConversionService, DataConversionService>();
 
 builder.Services.Configure<EncryptionSettings>(
     builder.Configuration.GetSection("EncryptionSettings"));

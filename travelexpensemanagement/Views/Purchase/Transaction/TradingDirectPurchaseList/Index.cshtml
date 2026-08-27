@@ -1,0 +1,115 @@
+﻿@{
+	ViewBag.Title = "Trading Direct Purchase List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+	<div class="erppagelist-title">
+		<i class="fa fa-list"></i>
+		<span>Purchase Bill Pass Entry List</span>
+	</div>
+	<div class="erppagelist-header-right">
+		<button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "TradingDirectPurchase")'" id="button_add">
+			<i class="fa fa-plus"></i>Add New
+		</button>
+	</div>
+</div>
+<div class="erppagelist-toolbar">
+	<div class="erppagelist-search-wrapper">
+		<i class="fa fa-search"></i>
+		<input type="text" id="searchBox" placeholder="Search Module..." />
+	</div>
+	<div class="erppagelist-actions">
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print">
+			<i class="fa fa-print"></i> Print
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="button_export">
+			<i class="fa fa-file-excel"></i> Export
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail" id="button_mail">
+			<i class="fa fa-envelope"></i> Mail
+		</button>
+		<button class="erppagelist-btn erppagelist-btn-approve tooltip-btn" data-tooltip="Approve Records" id="button_approve">
+			<i class="fa fa-check-circle"></i> Approved
+		</button>
+	</div>
+</div>
+<div class="erppagelist-container">
+	<div class="excel-wrapper fixed-grid-wrapper">
+		<table id="tblPurchaseBillPassEntry" class="excel-table fixed-grid-table table-width resizable-table">
+			<colgroup>
+				<col class="hidden-col">
+				<col style="width: 95px;">
+				<col style="width: 79px;">
+				<col style="width: 137px;">
+				<col style="width:220px;">
+				<col style="width:220px;">
+				<col style="width: 73px;">
+				<col style="width: 78px;">
+				<col style="width: 90px;">
+				<col style="width: 87px;">
+				<col style="width: 69px;">
+				<col style="width: 61px;">
+				<col style="width: 110px;">
+				<col style="width: 134px;">
+				<col style="width: 84px;">
+				<col style="width: 137px;">
+				<col style="width: 91px;">
+				<col style="width: 71px;">
+				@* <col style="width: 65px;"> *@
+				<col style="width:120px;">
+			</colgroup>
+			<thead>
+				<tr>
+					<th class="hidden-col">Code</th>
+					<th>Doc No</th>
+					<th>Doc Type</th>
+					<th>Doc Date</th>
+					<th>Party Name</th>
+					<th>Ship To</th>
+					<th>Debit A/C</th>
+					<th>Credit A/C</th>
+					<th>Bill Quantity</th>
+					<th>Net Amount</th>
+					<th>Ref Type</th>
+					<th>Ref No</th>
+					<th>Bill No</th>
+					<th>Bill Date</th>
+					<th>Challan No</th>
+					<th>Challan Date</th>
+					<th>Dr From Trpt</th>
+					<th>Remarks</th>
+					<th>Status</th>
+					@* <th>Transport Name</th> *@
+					<th class="action-col">Action</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
+	<div class="erppagelist-pagination">
+		<div class="pagination-left">
+			<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+		<div class="pagination-center">
+			<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+			<div id="pageNumbers" class="page-numbers"></div>
+
+			<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+		</div>
+		<div class="pagination-right" id="pageInfoText">
+			Results: 0 - 0 of 0
+		</div>
+	</div>
+</div>
+
+<script src="~/common/delete.js"></script>
+<script src="~/common/pagination.js"></script>
+<script src="~/js/erpjs/purchase/transaction/tradingdirectpurchaselist/tradingdirectpurchaselist.js"></script>

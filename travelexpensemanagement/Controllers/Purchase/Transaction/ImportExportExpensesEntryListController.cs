@@ -1,155 +1,61 @@
-﻿using Dapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Controllers.Travelexpense;
-using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
 
 namespace travelexpensemanagement.Controllers.Purchase.Transaction
 {
     public class ImportExportExpensesEntryListController : Controller
     {
 
+        private readonly GlobalVariableService _globalVariableService;
         private readonly DbHelper _dbHelper;
-        private readonly DataBaseConnection _dbcontext;
-        private readonly GlobalVariableService _globalValue;
-        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public ImportExportExpensesEntryListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        private readonly GlobalExcelExport _excel;
+        private readonly IImportExportExpensesEntryListRepository _IEEEListRepository;
+        private readonly GlobalValidationdate _globalValidationdate;
+
+        public ImportExportExpensesEntryListController(GlobalVariableService globalVariableService,
+            DbHelper dbHelper, GlobalExcelExport excel, IImportExportExpensesEntryListRepository IEEEListRepository,
+            GlobalValidationdate globalValidationdate)
         {
+            _globalVariableService = globalVariableService;
             _dbHelper = dbHelper;
-            _dbcontext = dbcontext;
-            _globalValue = globalValue;
-            _moduleService = moduleService;
-
+            _excel = excel;
+            _IEEEListRepository = IEEEListRepository;
+            _globalValidationdate = globalValidationdate;
         }
-
         public IActionResult Index()
         {
-            ViewBag.CurrentMenu = "Import Expense Expenses Entry";
-            var permissions = _moduleService.GetUserMenuPermissions();
-            var userLevel = _moduleService.GetUserLevel();
-
-            var model = new UserMenuPermissionsViewModel
-            {
-                UserMenuPermissions = permissions,
-                UserLevel = userLevel
-            };
-            return View("~/Views/Purchase/Transaction/ImportExportExpensesEntryList/Index.cshtml", model);
-        }
- 
-        [HttpGet]
-        public async Task<IActionResult> GetImportExportExpenseList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
-        {
-            try
-            {
-                var UsersessionDt = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", UsersessionDt.PubCompCode },
-                    {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@Action", "ImpExpExpenseEntryList" }
-                };
-
-                var fullList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetImportExportExpenseEntry]", parameter);
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    searchTerm = searchTerm.ToLower();
-                    fullList = fullList
-                        .Where(x =>
-                        {
-                            var dict = (IDictionary<string, object>)x;
-                            string[] searchableKeys = { "DOC_ID" };
-                            return searchableKeys.Any(key =>
-                                dict.ContainsKey(key) &&
-                                dict[key]?.ToString().ToLower().Contains(searchTerm) == true
-                            );
-                        })
-                        .ToList();
-                }
-
-                var totalCount = fullList.Count;
-                var pagedList = fullList
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                return Json(new { status = true, data = pagedList, totalCount });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
-        }
-
-        [HttpDelete]
-        public async Task<IActionResult> DeleteImpExpExpenseEntry(string docid)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(docid))
-                {
-                    return Json(new { status = false, message = "Invalid ID" });
-                }
-
-                var userSession = _globalValue.GetGlobalVariables();
-                string VType = docid.Substring(0, 4);
-                string VNo = docid.Substring(4);
-
-                using (var con = _dbcontext.GetErpConnection())
-                {
-                    await con.OpenAsync();
-                    using (var transaction = con.BeginTransaction())
-                    {
-                        try
-                        {
-
-                            string[] deleteQueries = {
-                        "DELETE FROM PURCHASE1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM PURCHASE2 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM PURCHASE3 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
-                        };
-
-                            foreach (var query in deleteQueries)
-                            {
-                                using (var cmd = new SqlCommand(query, con, transaction))
-                                {
-                                    cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                                    cmd.Parameters.AddWithValue("@V_TYPE", VType);
-                                    cmd.Parameters.AddWithValue("@V_NO", VNo);
-
-                                    await cmd.ExecuteNonQueryAsync();
-                                }
-                            }
-
-                            transaction.Commit();
-                            return Json(new { status = true, data = "Data deleted successfully" });
-                        }
-                        catch (Exception ex)
-                        {
-                            transaction.Rollback();
-                            return Json(new { status = false, message = $"Delete failed: {ex.Message}" });
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
+            return View("~/Views/Purchase/Transaction/ImportExportExpensesEntryList/Index.cshtml");
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetImportExportExpenseEntryDetails(string docid)
+        public IActionResult GetAllPurchaseBillPassEntry(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
             try
             {
-                var usersession = _globalValue.GetGlobalVariables();
-                if (string.IsNullOrEmpty(docid))
+                var result = _IEEEListRepository.GetAllPurchaseBillPassEntry(searchTerm, pageNumber, pageSize);
+                if (result.data != null)
+                {
+                    return Json(new { success = result.status, purchaseBillDirect = result.data, totalCount = result.totalCount });
+                }
+                return Json(new { success = result.status, message = result.message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error fetching puchase bill pass", error = ex.Message });
+            }
+
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> PBPEntryDetails(string vNo, string vType)
+        {
+            try
+            {
+                var usersession = _globalVariableService.GetGlobalVariables();
+                if (string.IsNullOrEmpty(vNo))
                 {
                     return Json(new { status = false, message = "Invalid ID" });
                 }
@@ -157,12 +63,12 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@V_TYPE", docid.Substring(0, 4) },
-                    {"@V_NO", docid.Substring(4) },
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
+                    {"@V_TYPE", vType},
+                    {"@V_NO", vNo },
                     {"@Action", "EntryDetail" }
                 };
-                var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetImportExportExpenseEntry]", parameter);
+                var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_PurchaseBillPassEntryDirect]", parameter);
                 return Json(new { status = true, data = entryDetailList });
             }
             catch (Exception ex)
@@ -172,30 +78,112 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExportAllDocs()
-        {           
-
+        public IActionResult ExportAllDocs()
+        {
             try
             {
-                var usersession = _globalValue.GetGlobalVariables();                
-                var parameter = new Dictionary<string, object>
+                var gv = _globalVariableService.GetGlobalVariables();
+
+                var parameters = new Dictionary<string, object>
                 {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},                   
-                    {"@Action", "Excel" }
+                    { "@YEAR_CODE", gv.PubFYearCode },
+                    { "@COMP_CODE", gv.PubCompCode },
+                    { "@BRANCH_CODE", gv.PubBranchCode },
+                    { "@Doctype", "PurchaseExpenses" },
+                    { "@Action", "Excel" }
                 };
-                var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_GetImportExportExpenseEntry]", parameter);
-                
-                return Json(new { status = true, data = dataList });
+
+                var fileBytes = _excel.ExportToExcel("sp_PurchaseBillPassEntryDirect", "Import Export Expenses", parameters);
+
+                return File(
+                    fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"ImportExportExpenses_{DateTime.Now:ddMMyyyy}.xlsx"
+                );
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, message = ex.Message });
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
         }
 
+        [HttpPost]
+        public JsonResult Delete(int vNo, string docType)
+        {
+            if (vNo <= 0 || string.IsNullOrEmpty(docType))
+            {
+                return Json(new { status = false, message = "Invalid Id!" });
+            }
+            var result = _IEEEListRepository.DeletePurchaseBillPass(vNo, docType);
+            return Json(new { status = result.status, message = result.message });
+        }
 
+        [HttpGet]
+        public IActionResult GetPurchaseEditStatus(string vType, int vNo)
+        {
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+                var userlevel = gv.PubUserLevel;
+                var result = _IEEEListRepository.GetPurchaseEditStatus(vType, vNo);
+                return Json(new { success = true, data = result, userlevel });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult checkModificationDays(DateTime? vDate)
+        {
+            if (!vDate.HasValue)
+            {
+                return Json(new { success = false, message = "Doc Date is empty!!" });
+            }
+            var (allowed, message) = _globalValidationdate.CheckModificationDays(vDate.Value);
+            return Json(new { success = true, isAllowed = allowed, message = message });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetApprovalBody(string vType)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            try
+            {
+                string qry = $@"select 1 from DOC_APPROSTAGE where USER_CODE=@USER_CODE and DOC_CODE=@DOC_CODE and comp_code=@comp_code";
+                var parameters = new Dictionary<string, object>{
+                   {"@USER_CODE", gv.PubUserId },
+                   {"@DOC_CODE", vType},
+                   {"@comp_code", gv.PubCompCode},
+                };
+                var result = await _dbHelper.GetExecuteScalarAsync<int>(qry, parameters);
+                bool isApprovalBody = result == 1;
+                return Json(new { success = true, isApprovalBody });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetPurchaseDeleteStatus(string vType, int vNo)
+        {
+            try
+            {
+                var result = _IEEEListRepository.GetPurchaseDeleteStatus(vType, vNo);
+                return Json(new { success = true, data = result });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
     }
 }

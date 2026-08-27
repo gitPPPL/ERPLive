@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http.Features;
 public class SessionTimeoutMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly TimeSpan _timeout = TimeSpan.FromMinutes(1); // configurable
+    private readonly TimeSpan _timeout = TimeSpan.FromMinutes(30); // configurable
 
     public SessionTimeoutMiddleware(RequestDelegate next)
     {
@@ -37,24 +37,50 @@ public class SessionTimeoutMiddleware
         }
 
         var lastActivityStr = context.Session.GetString("LastActivity");
+        
+        //if (!string.IsNullOrEmpty(lastActivityStr) && DateTime.TryParse(lastActivityStr, out var lastActivity))
+        //{
+        //    if (DateTime.UtcNow - lastActivity > _timeout)
+        //    {
+        //        context.Session.Clear();
 
-        if (!string.IsNullOrEmpty(lastActivityStr) &&
-            DateTime.TryParse(lastActivityStr, out var lastActivity))
+        //        // 🔹 AJAX request
+        //        if (IsAjaxRequest(context))
+        //        {
+        //            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        //            await context.Response.WriteAsync("SessionExpired");
+        //        }
+        //        else
+        //        {
+        //            context.Response.Redirect(
+        //                "/AccessedError/Index?code=440&message=Session%20expired.%20Please%20login%20again");
+        //        }
+
+        //        return;
+        //    }
+        //}
+        if (!string.IsNullOrEmpty(lastActivityStr) && DateTimeOffset.TryParse(lastActivityStr, out var lastActivity))
         {
-            if (DateTime.UtcNow - lastActivity > _timeout)
+            var currentTime = DateTimeOffset.UtcNow;
+
+            var inactiveTime = currentTime - lastActivity;
+
+            if (inactiveTime > _timeout)
             {
                 context.Session.Clear();
 
-                // 🔹 AJAX request
                 if (IsAjaxRequest(context))
                 {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    context.Response.StatusCode =
+                        StatusCodes.Status401Unauthorized;
+
                     await context.Response.WriteAsync("SessionExpired");
                 }
                 else
                 {
-                    context.Response.Redirect(
-                        "/AccessedError/Index?code=440&message=Session%20expired.%20Please%20login%20again");
+                    //context.Response.Redirect(
+                    //    "/AccessedError/Index?code=440&message=Session%20expired.%20Please%20login%20again");
+                    context.Response.Redirect("/Errorpage/Index?code=401");
                 }
 
                 return;
@@ -80,8 +106,10 @@ public class SessionTimeoutMiddleware
             || path.StartsWith("/css")
             || path.StartsWith("/js")
             || path.StartsWith("/images")
-            || path.StartsWith("/lib");
+            || path.StartsWith("/lib")
+            || path.StartsWith("/errorpage");
     }
+
 }
 
 

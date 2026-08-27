@@ -7,8 +7,15 @@ let itemVsBillHSNCodeDiff = false;
 
 let userLevel = "";
 let compCode = "";
+let branchCode = "";
+let yearCode = "";
 let pubDefPOInMRN = "";
 let dataSource = "";
+let companyName = "";
+let companyGst = "";
+let add1 = "";
+let add2 = "";
+let db = "";
 
 let EPRFlg = 0;
 var EPRAttachmentList = [];
@@ -26,8 +33,11 @@ const rowsData = [];
 
 const urlParams = new URLSearchParams(location.search);
 const rowId = parseInt(urlParams.get('id'));
-const rowIdVType = urlParams.get('vType');
-const isReadOnly = urlParams.get('readOnly') === 'true';
+const rowIdVType = urlParams.get('vtype');
+let isReadOnly = urlParams.get('readOnly') === 'true';
+const DBTableName = "PURCHASE1";
+
+let isMRNChange = false;
 
 $(document).ready(async function () {
     $('#ddlDocType').focus();
@@ -37,6 +47,9 @@ $(document).ready(async function () {
     // Initially disable file picker
     $("#erpFile").prop("disabled", true);
     $(".erppage-filepicker-btn").addClass("disabled");
+    // Initially hide all
+    $('#BtnDrNotePrint').hide();
+    $('#BtnCrNotePrint').hide();
 
     try {
 
@@ -49,21 +62,24 @@ $(document).ready(async function () {
 
         // Load once and cache HTML
         await Promise.all([
-            loadItemList($("<select>")),
-            loadTaxTypeList($("<select>")),
-            loadDepartmentList($("<select>"))
+            loadDropdown("item", $("<select>")),
+            loadDropdown("tax", $("<select>")),
+            loadDropdown("department", $("<select>"))
         ]);
 
         if (!isNaN(rowId) && rowId > 0) {
             isLoadForEdit = true;
-            await loadFullQuotationByVno(rowId, rowIdVType);
+            await loadFullQuotationByVno(rowId, rowIdVType, isReadOnly);
             setTimeout(() => {
                 isLoadForEdit = false;
             }, 1000);
+            checkApprovalStatus(rowIdVType, rowId, DBTableName);
         } else {
             addNewRowBelow();
         }
-
+        if (isReadOnly) {
+            setFormReadonly();
+        }
 
     } catch (err) {
         console.error("Error during page initialization:", err);
@@ -95,6 +111,7 @@ function bindHeaderEvents() {
         if (!rowId) {
             GetVNo(vType);
         }
+        $(this).prop('disabled', true);
         loadMRNList(vType);
         $('#TxtMRNNo1').val('');
         SetLatestDebitAccount(vType);
@@ -104,10 +121,14 @@ function bindHeaderEvents() {
     //--------------- MRN Change ------------
     $('#TxtMRNNo2').on('change', function () {
         if (isLoadForEdit) return;
+        const mrnNo = $(this).val();
+        if (!mrnNo) {
+            $("#TxtMRNNo1").val("");
+            return;
+        }
         const mrnTypeNo = $(this).find(':selected').text().trim();
         const mrnType = $(this).find(':selected').data('vtype');
-        if (!mrnTypeNo)
-            return;
+
         $.ajax({
             url: "/PurchaseBillPassEntry/ValidateMRN",
             type: "POST",
@@ -128,6 +149,7 @@ function bindHeaderEvents() {
                     return;
                 }
                 $("#TxtMRNNo1").val(mrnType);
+                isMRNChange = true;
                 LoadMRNData(mrnType, response.mrnNo);
             },
             error: function () {
@@ -160,90 +182,102 @@ function bindHeaderEvents() {
             $("#TxtGSTNoSF").focus();
         }
     })
+
+    //=============Delete Row Button Click==========
+    $(document).on('click', '.btn-delete-action', function () {
+        // Prevent deleting if only one row exists
+        const $tbody = $('#tblItemRecordPBPE tbody');
+        if ($tbody.find('tr').length === 1) {
+            return;
+        }
+        const $row = $(this).closest('tr');
+        $row.remove();
+    });
+
+    //=============Add Row Button Click==========
+    $(document).on('click', '.btn-add-action', async function () {
+        const currentSelect = $(this).closest('tr').find('.item-name')[0];
+        // Duplicate
+        if (checkDuplicateItems(currentSelect)) {
+            return;
+        }
+        await addNewRowBelow();
+    });
 }
 
 function bindAddressEvents() {
     //---------- Ship List Change ------
     $('#ddlShipFrom1').on('change', function () {
-        if (isLoadForEdit) return;
+        if (isLoadForEdit || isMRNChange) return;
         const shipFromCode = $(this).val();
-        loadAddList(shipFromCode, '#ddlShipFromAddress');
+        $('#TxtAdd1SF').val('');
+        $('#TxtAdd2SF').val('');
+        $('#TxtAdd3SF').val('');
+        $('#ddlCitySF').val('');
+        $('#ddlStateSF').val('');
+        $('#TxtPincodeSF').val('');
+        $('#TxtGSTNoSF').val('');
+        loadDropdown("address", "#ddlShipFromAddress", { shipFromCode: shipFromCode }).then(function () {
+            const $addressDropdown = $('#ddlShipFromAddress');
+
+            // Get first actual address, ignoring "-- Select Address --"
+            const $firstAddress = $addressDropdown.find('option[value!=""]').first();
+            if ($firstAddress.length) {
+                $addressDropdown.val($firstAddress.val()).trigger('change');
+            }
+        });
     });
 
     //--------- Bill From List Change --------
     $('#ddlBillFrom').on('change', function () {
-        if (isLoadForEdit) return;
+        if (isLoadForEdit || isMRNChange) return;
         const billFromCode = $(this).val();
-        loadAddList(billFromCode, '#ddlBillFromAddress');
+        $('#TxtAdd1PD').val('');
+        $('#TxtAdd2PD').val('');
+        $('#TxtAdd3PD').val('');
+        $('#ddlCityPD').val('');
+        $('#ddlStatePD').val('');
+        $('#NumPincodeBL').val('');
+        $('#TxtGSTNo').val('');
+        loadDropdown("address", "#ddlBillFromAddress", { shipFromCode: billFromCode }).then(function () {
+            const $addressDropdown = $('#ddlBillFromAddress');
+
+            // Get first actual address, ignoring "-- Select Address --"
+            const $firstAddress = $addressDropdown.find('option[value!=""]').first();
+            if ($firstAddress.length) {
+                $addressDropdown.val($firstAddress.val()).trigger('change');
+            }
+        });
     });
 
     //---------- Ship Address Change -----------
-    $('#ddlShipFromAddress').on('change', function () {
-        if (isLoadForEdit) return;
-        const selectedVal = $(this).val();
-        const code = $('#ddlShipFrom1').val();
-        $.ajax({
-            url: '/PurchaseBillPassEntry/GetAddressByBillToParty',
-            type: 'GET',
-            data: {
-                code: code,
-                addressId: selectedVal
-            },
-            success: function (response) {
-                const res = response.addressDetails;
-                $('#TxtAdd1SF').val(res.add1);
-                $('#TxtAdd2SF').val(res.add2);
-                $('#TxtAdd3SF').val(res.add3);
-                $('#TxtGSTNoSF').val(res.gstin);
-                $('#TxtPincodeSF').val(res.pincode);
-                loadCityList('#ddlCitySF', res.cityCode);
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error loading ship address: ' + error);
-            }
-        });
+    bindAddressChange({
+        addressSelector: '#ddlShipFromAddress',
+        partySelector: '#ddlShipFrom1',
+        add1Selector: '#TxtAdd1SF',
+        add2Selector: '#TxtAdd2SF',
+        add3Selector: '#TxtAdd3SF',
+        gstSelector: '#TxtGSTNoSF',
+        pincodeSelector: '#TxtPincodeSF',
+        citySelector: '#ddlCitySF'
     });
-
     //---------- Bill Address Change ----------
-    $('#ddlBillFromAddress').on('change', function () {
-        if (isLoadForEdit) return;
-        const selectedVal = $(this).val();
-        const code = $('#ddlBillFrom').val();
-        $.ajax({
-            url: '/PurchaseBillPassEntry/GetAddressByBillToParty',
-            type: 'GET',
-            data: {
-                code: code,
-                addressId: selectedVal
-            },
-            success: function (response) {
-                const res = response.addressDetails;
-                $('#TxtAdd1PD').val(res.add1);
-                $('#TxtAdd2PD').val(res.add2);
-                $('#TxtAdd3PD').val(res.add3);
-                $('#TxtGSTNo').val(res.gstin);
-                $('#NumPincodeBL').val(res.pincode);
-                loadCityList('#ddlCityPD', res.cityCode);
-            },
-            error: function (xhr, status, error) {
-                toastr.error('Error loading bill address: ' + error);
-            }
-        });
+    bindAddressChange({
+        addressSelector: '#ddlBillFromAddress',
+        partySelector: '#ddlBillFrom',
+        add1Selector: '#TxtAdd1PD',
+        add2Selector: '#TxtAdd2PD',
+        add3Selector: '#TxtAdd3PD',
+        gstSelector: '#TxtGSTNo',
+        pincodeSelector: '#NumPincodeBL',
+        citySelector: '#ddlCityPD',
+        isBillChange: true
     });
 
-    //--------- Ship City Change ----------
-    $('#ddlCitySF').on('change', function () {
-        if (isLoadForEdit) return;
-        const cCode = parseInt($(this).val()) || 0;
-        loadStateList('#ddlStateSF', cCode);
-    });
+    //--------- Ship City and Bill City Change ----------
+    bindCityStateChange('#ddlCitySF', '#ddlStateSF');
+    bindCityStateChange('#ddlCityPD', '#ddlStatePD');
 
-    //-------- Bill City Change ----------
-    $('#ddlCityPD').on('change', function () {
-        if (isLoadForEdit) return;
-        const cCode = parseInt($(this).val()) || 0;
-        loadStateList('#ddlStatePD', cCode);
-    });
 }
 
 function bindSaveEvents() {
@@ -283,19 +317,19 @@ function bindAttachmentEvents() {
 function bindGridEvents() {
     //--------- Item Change ---------
     $(document).on("change", ".item-name", function () {
-        if (isLoadForEdit) return;
-        const $row = $(this).closest("tr");
-        const selectedOption = $(this).find("option:selected");
-        const uomCode = selectedOption.data("ucode");
-        const uomName = selectedOption.data("unit");
-        $row.find(".uom-code").val(uomCode || "");
-        $row.find(".uom-name").val(uomName || "");
+        //if (isLoadForEdit) return;
+        //const $row = $(this).closest("tr");
+        //const selectedOption = $(this).find("option:selected");
+        //const uomCode = selectedOption.data("ucode");
+        //const uomName = selectedOption.data("unit");
+        //$row.find(".uom-code").val(uomCode || "");
+        //$row.find(".uom-name").val(uomName || "");
 
+        itemNameChanged(this);
     });
 
     //--------- Row Calculation ---------
-    $(document).on(
-        "change",
+    $(document).on("change",
         ".usd-rate,.exch-rate,.rate,.bill-qty,.recd-qty,.pack-per,.disc-per,.cess-per,.oth-amt,.pack-amt,.disc-amt,.cgst-amt,.sgst-amt,.igst-amt,.cess-amt,.vat-per,.vat-amt",
         async function () {
             if (isLoadForEdit) return;
@@ -326,17 +360,14 @@ function bindGridEvents() {
     });
 
     //--------- GST Percentage Change ---------
-    $(document).on(
-        "change",
-        ".cgst-per,.sgst-per,.igst-per",
-        async function () {
-            if (isLoadForEdit) return;
-            const $row = $(this).closest("tr");
-            await processRow($row, {
-                calculateTaxes: true
-            });
-            toggleTaxAmountFields($row);
-        }
+    $(document).on("change", ".cgst-per,.sgst-per,.igst-per", async function () {
+        if (isLoadForEdit) return;
+        const $row = $(this).closest("tr");
+        await processRow($row, {
+            calculateTaxes: true
+        });
+        toggleTaxAmountFields($row);
+    }
     );
 
     //--------- Tax Type Change ---------
@@ -366,6 +397,10 @@ function bindGridEvents() {
         $row.find(".pack-per").focus();
     });
 
+    $(document).on("change", ".dr-note-amt, .cr-note-amt", function () {
+        if (isLoadForEdit) return;
+        calDrCrGrid();
+    });
 }
 
 function bindFreightEvents() {
@@ -409,18 +444,9 @@ function bindFreightEvents() {
         $('#NumUnloadTDS2').val(unloadingTds);
     });
 
-    //----------- Item Total TDS % Change ----------
-    $('#TxtTds1').on('change', async function () {
-        if (isLoadForEdit) return;
-        await calculateTDSAmount('#TxtTds1', '#TxtTds2');
-    });
-
-    //----------- TDS 194Q % Change ----------
-    $('#TxtTds194q1').on('change', async function () {
-        if (isLoadForEdit) return;
-        await calculateTDSAmount('#TxtTds194q1', '#TxtTds194q2');
-    });
-
+    //----------- Item Total TDS % & TDS 194Q % Change ----------
+    bindTDSChange('#TxtTds1', '#TxtTds2');
+    bindTDSChange('#TxtTds194q1', '#TxtTds194q2');
 }
 
 function bindTotalsEvents() {
@@ -449,6 +475,10 @@ function bindTotalsEvents() {
     bindDistributionChange('#NumPacking', '.pack-amt', '.pack-per');
     bindDistributionChange('#NumDiscount', '.disc-amt', '.disc-per');
     bindDistributionChange('#NumOthAmt', '.oth-amt');
+
+    $("#TxtQCCreditNoteAmt, #TxtQualityCreditNoteAmt, #TxtWeightCreditNoteAmt, #TxtRateDiffCreditNoteAmt, #TxtOtherDebitAmt").on("blur", function () {
+        calDrCrGrid();
+    });
 }
 
 function bindTransportEvents() {
@@ -563,7 +593,7 @@ function EPRAttachmentEvent() {
             DocumentType: docType,
             OriginalFileName: fileInput.files[0].name,
             FileName: getEPRAttachmentFileName(docType, fileInput.files[0].name),
-            File: fileInput.files[0]   // agar future me upload karna ho
+            File: fileInput.files[0]
         };
 
         AddEPRAttachmentRow(attachment);
@@ -642,50 +672,38 @@ function bindButtonsAndModalsEvent() {
     //Copy From
     $(document).on("click", ".copy-from-item", function (e) {
         e.preventDefault();
-
         const code = $(this).data("doctype");
-        //const modal = $(this).data("modal");
-
         getCopyFromData(code);
     })
 
     //Select All
     $(document).on("change", "#selectAllPR", function () {
-
         const isChecked = $(this).is(":checked");
-
         $("#tblpurchaseordermodal .copyfrom-check").prop("checked", isChecked);
 
     });
 
     //Select Individual
     $(document).on("change", "#tblpurchaseordermodal .copyfrom-check", function () {
-
         const total = $("#tblpurchaseordermodal .copyfrom-check").length;
         const checked = $("#tblpurchaseordermodal .copyfrom-check:checked").length;
-
         $("#selectAllPR").prop("checked", total > 0 && total === checked);
 
     });
 
     //Copy to item grid
     $("#btnCopy").on("click", async function () {
-
         const selectedRows = $(".copyfrom-check:checked");
-
         if (selectedRows.length === 0) {
             showToast("Please select at least one row.", { type: "warning" });
             return;
         }
-
         showLoader();
 
         try {
 
             const count = selectedRows.length;
-
             for (let i = 0; i < count; i++) {
-
                 const index = $(selectedRows[i]).data("index");
                 await addNewRowBelow(copyFromRows[index]);
 
@@ -694,13 +712,9 @@ function bindButtonsAndModalsEvent() {
                     await new Promise(resolve => setTimeout(resolve, 0));
                 }
             }
-
             $("#purchaseorderModal").modal("hide");
 
-            showToast(
-                `${count} ${count === 1 ? "Row" : "Rows"} copied successfully.`,
-                { type: "success" }
-            );
+            showToast(`${count} ${count === 1 ? "Row" : "Rows"} copied successfully.`, { type: "success" });
         }
         finally {
             hideLoader();
@@ -709,6 +723,71 @@ function bindButtonsAndModalsEvent() {
     });
 }
 
+function bindCityStateChange(citySelector, stateSelector) {
+    $(citySelector).on('change', function () {
+        if (isLoadForEdit) return;
+
+        const cityCode = parseInt($(this).val()) || 0;
+        //loadStateList(stateSelector, cityCode);
+        loadDropdown("state", stateSelector, { cCode: cityCode });
+    });
+}
+
+function bindAddressChange({ addressSelector, partySelector, add1Selector, add2Selector, add3Selector, gstSelector, pincodeSelector,
+    citySelector, isBillChange = false }) {
+    $(addressSelector).on('change', async function () {
+
+        if (isLoadForEdit) return;
+
+        const $address = $(this);
+        let addressId = $address.val();
+
+        if (!addressId) {
+            $address.prop('selectedIndex', 0);
+            addressId = $address.val();
+        }
+
+        const code = $(partySelector).val();
+
+        try {
+            const response = await $.ajax({
+                url: '/PurchaseBillPassEntry/GetAddressByBillToParty',
+                type: 'GET',
+                data: {
+                    code,
+                    addressId
+                }
+            });
+
+            const address = response.addressDetails;
+            console.log("address details on bill/ship change: ", address);
+            $(add1Selector).val(address.add1);
+            $(add2Selector).val(address.add2);
+            $(add3Selector).val(address.add3);
+            $(gstSelector).val(address.gstin);
+            $(pincodeSelector).val(address.pincode);
+            await loadDropdown("city", citySelector, {}, address.cityCode);
+            if (isBillChange) {
+                if (address.einv_party === 1) {
+                    $('#lblE_invoice_suppl').show();
+                }
+                else {
+                    $('#lblE_invoice_suppl').hide();
+                }
+            }
+        } catch (error) {
+            toastr.error('Error loading address');
+        }
+    });
+}
+
+function bindTDSChange(source, target) {
+    $(source).on('change', async function () {
+        if (isLoadForEdit) return;
+
+        await calculateTDSAmount(source, target);
+    });
+}
 //------------- GENERATE VNO -----------------
 async function GetVNo(vType) {
     try {
@@ -726,25 +805,6 @@ async function GetVNo(vType) {
 
 //=====================DROPDOWNS=============================
 
-//--------- DOCTYPE -----------
-function loadDocTypeList(selectedValue = null) {
-    docTypeMap = {};
-    return loadDropdown({
-        url: "/PurchaseBillPassEntry/GetDocTypeList",
-        selector: "#ddlDocType",
-        responsePath: null,
-        valueField: "value",
-        textField: "text",
-        defaultOption: "-- Select Doc Type --",
-        selectedValue,
-        beforeBind(list) {
-            docTypeMap = {};
-            list.forEach(x => {
-                docTypeMap[x.value] = x.text;
-            });
-        }
-    });
-}
 //------------- Latest Debit Account By VType -----------------
 function SetLatestDebitAccount(vType) {
 
@@ -756,7 +816,7 @@ function SetLatestDebitAccount(vType) {
         },
         success: function (response) {
             if (response.success) {
-                loadDrAcListByVtype(vType, response.debitAc);
+                loadDropdown("drcrbyvtype", "#ddlDebitAC", { vType }, response.debitAc);
             }
             else {
                 showToast(response.message, { type: "error" });
@@ -770,409 +830,304 @@ function SetLatestDebitAccount(vType) {
 
 //--------- MRN -----------
 function loadMRNList(vType, selectedValue = null) {
-    return loadDropdown({
+
+    return $.ajax({
         url: "/PurchaseBillPassEntry/GetMrnNoList",
-        selector: "#TxtMRNNo2",
+        type: "GET",
         data: { vType },
-        defaultOption: "--Select MRN No--",
-        selectedValue,
-        isInitSelect2: true,
-        optionBuilder: item => `
+        dataType: "json"
+    }).then(response => {
+
+        const ddl = $("#TxtMRNNo2");
+
+        let html = `<option value="">-- Select MRN No --</option>`;
+
+        html += (response.data || []).map(item => `
             <option
                 value="${item.Value}"
                 data-vtype="${item.vType}">
                 ${item.Text}
             </option>
-        `
-    });
-}
+        `).join("");
 
-//--------- SUPPLIER PARTY -----------
-function loadPartyListNatureSupplier(selector, isSelect2 = false, selectedValue = null) {
-    return loadDropdown({
-        cacheKey: "Supplier",
-        url: "/PurchaseBillPassEntry/GetPartyListNatureSupplier",
-        selector,
-        defaultOption: "-- Select --",
-        isInitSelect2: isSelect2,
-        selectedValue
-    });
-}
-//--------- DR AC BY VTYPE-----------
-function loadDrAcListByVtype(vType, selectedValue = null) {
-    return loadDropdown({
-        url: "/PurchaseBillPassEntry/GetDrAcListByVtype",
-        selector: "#ddlDebitAC",
-        data: { vType },
-        defaultOption: "-- Select --",
-        selectedValue
-    });
-}
+        ddl.html(html);
 
-//--------- PARTY DR CR -----------
-function loadPartyDrCrAcList(selector, selectedValue = null) {
+        initSelect2(ddl);
 
-    return loadDropdown({
-        cacheKey: "PartyDrCr",
-        url: "/PurchaseBillPassEntry/GetPartyDrCrAcList",
-        selector,
-        defaultOption: "-- Select --",
-        isInitSelect2: true,
-        selectedValue
+        if (selectedValue !== null && selectedValue !== "") {
+            ddl.val(selectedValue).trigger("change");
+        }
+
+        return response.data || [];
     });
-
 }
 
 //--------- TRANSPORT GST -----------
 function loadTranGSTByFrtCrAc(code, selectedValue = null) {
-    return loadDropdown({
+    return $.ajax({
         url: "/PurchaseBillPassEntry/GetTranGSTByFrtCrAc",
-        selector: "#ddlTransportGSTNo",
-        data: { frtCrAcCode: code },
-        defaultOption: "-- Select GST--",
-        isInitSelect2: false,
-        selectedValue: selectedValue,
-        afterBind(list, ddl) {
-            if (list.length) {
-                ddl.val(list[0].Value).trigger("change");
-            }
-        }
-    });
-}
-
-//--------- ITEM -----------
-function loadItemList(selector, selectedValue = null) {
-    return loadDropdown({
-        cacheKey: "Item",
-        url: "/PurchaseBillPassEntry/GetItemList",
-        selector,
-        defaultOption: "-- Select --",
-        selectedValue,
-        optionBuilder: item => `
-            <option
-                value="${item.Value}"
-                data-unit="${item.unit}"
-                data-ucode="${item.ucode}">
-                ${item.Text}
-            </option>
-        `
-    });
-}
-
-//--------- ADDRESS -----------
-function loadAddList(shipFromCode, selector) {
-    return loadDropdown({
-        url: "/PurchaseBillPassEntry/GetAddList",
-        selector,
-        data: { shipFromCode },
-        defaultOption: "-- Select Address --"
-    });
-}
-
-//--------- CITY -----------
-function loadCityList(selector, selectedValue = null) {
-    return loadDropdown({
-        cacheKey: "City",
-        url: "/PurchaseBillPassEntry/GetCityList",
-        selector,
-        defaultOption: "-- Select City --",
-        selectedValue
-    });
-}
-
-//--------- STATE -----------
-function loadStateList(selector, cCode) {
-    return loadDropdown({
-        url: "/PurchaseBillPassEntry/GetStateList",
-        selector,
-        data: { cCode },
-        defaultOption: null,
-        optionBuilder: item => `<option value="${item.Value ?? ''}">${item.Text ?? ''}</option>`
-    });
-}
-
-//--------- CURRENCY -----------
-function loadCurrencyList(selectedValue = null) {
-    return loadDropdown({
-        url: "/PurchaseBillPassEntry/GetCurrencyList",
-        selector: "#ddlCurrency",
-        defaultOption: "-- Select Currency --",
-        selectedValue: selectedValue,
-        afterBind(list, ddl) {
-            if (list.length) {
-                ddl.val(list[0].Value).trigger("change");
-            }
-        }
-    });
-}
-
-//--------- TAX -----------
-function loadTaxTypeList(selector, selectedValue = null) {
-    return loadDropdown({
-        cacheKey: "Tax",
-        url: "/PurchaseBillPassEntry/GetTaxList",
-        selector,
-        defaultOption: "-- Select --",
-        selectedValue,
-        optionBuilder(item) {
-            return `
-            <option
-                value="${item.Value}"
-                data-cgst="${item.CGST_PER}"
-                data-sgst="${item.SGST_PER}"
-                data-igst="${item.IGST_PER}"
-                data-vat="${item.VAT_PER}"
-                data-tds="${item.TDS_PER}"
-                data-tcs="${item.TCS_PER}"
-                data-oth="${item.OTH_PER}"
-                data-oth2="${item.OTH_PER2}">
-                ${item.Text}
-            </option>`;
-        }
-    });
-}
-
-//--------- STATUS -----------
-function loadStatusList() {
-
-    statusMap = {};
-
-    return loadDropdown({
-        url: "/PurchaseBillPassEntry/GetStatusList",
-        selector: "#ddlStatus",
-        responsePath: null,
-        valueField: "value",
-        textField: "text",
-        defaultOption: "-- Select Status --",
-        beforeBind(list) {
-            statusMap = {};
-            list.forEach(x => statusMap[x.value] = x.text);
-
+        type: "GET",
+        data: {
+            frtCrAcCode: code
         },
-        afterBind(list, ddl) {
-            if (list.length) {
-                ddl.val(list[0].value).trigger("change");
-            }
+        dataType: "json"
+    }).then(response => {
+
+        const list = response.data || response || [];
+        const ddl = $("#ddlTransportGSTNo");
+
+        let html = `<option value="">-- Select GST--</option>`;
+        html += list.map(item => `<option value="${item.Value}">${item.Text}</option>`).join("");
+        ddl.html(html);
+
+        if (selectedValue !== null && selectedValue !== "") {
+            ddl.val(selectedValue).trigger("change");
         }
+        else if (list.length) {
+            ddl.val(list[0].Value).trigger("change");
+        }
+
+        return list;
     });
-
-}
-
-//--------- TRANSPORT -----------
-function loadTransportList() {
-
-    return loadDropdown({
-        url: "/PurchaseBillPassEntry/GetTransportList",
-        selector: "#ddlTransportName",
-        responsePath: null,
-        valueField: "value",
-        textField: "text",
-        defaultOption: "-- Select Transport --",
-        isInitSelect2: true
-    });
-
-}
-
-//--------- DEPARTMENT -----------
-function loadDepartmentList(selector, selectedValue = null) {
-
-    return loadDropdown({
-        cacheKey: "Department",
-        url: "/PurchaseBillPassEntry/GetDepartmentList",
-        selector,
-        defaultOption: "-- Select --",
-        isInitSelect2: true,
-        selectedValue
-    });
-
 }
 
 //--------- Generic ddl -------
-async function loadDropdown({
-
-    cacheKey = null,
-    url,
-    selector,
-    data = {},
-    responsePath = "data",
-
-    valueField = "Value",
-    textField = "Text",
-
-    defaultOption = "-- Select --",
-    selectedValue = null,
-
-    isInitSelect2 = false,
-
-    beforeBind = null,
-    afterBind = null,
-
-    optionBuilder = null
-
-}) {
+async function loadDropdown(type, selector, data = {}, selectedValue = null) {
 
     const ddl = $(selector);
+    const typeKey = type.toLowerCase();
 
-    let list = [];
-    let html = "";
+    const defaultOptions = {
+        doctype: "-- Select Doc Type --",
+        party: "-- Select --",
+        drcr: "-- Select --",
+        drcrbyvtype: "-- Select --",
+        item: "-- Select --",
+        address: "-- Select Address --",
+        department: "-- Select --",
+        city: "-- Select City --",
+        state: null,
+        currency: "-- Select Currency --",
+        tax: "-- Select --",
+        status: "-- Select Status --",
+        transport: "-- Select Transport --",
+        mrn: "-- Select MRN No --",
+        transportgst: "-- Select GST --"
+    };
 
-    //==========================
-    // Already Cached
-    //==========================
-    if (cacheKey && dropdownCache[cacheKey]) {
+    //const defaultOption = defaultOptions[typeKey] ?? "-- Select --";
+    const defaultOption =
+        Object.prototype.hasOwnProperty.call(defaultOptions, typeKey)
+            ? defaultOptions[typeKey]
+            : "-- Select --";
+    const cacheTypes = [
+        "doctype",
+        "party",
+        "drcr",
+        "item",
+        "department",
+        "city",
+        "currency",
+        "tax"
+    ];
 
-        ({ list, html } = dropdownCache[cacheKey]);
+    const useCache = cacheTypes.includes(typeKey);
 
+    // --------------------------------------------------------
+    // CACHE
+    // --------------------------------------------------------
+    if (useCache && dropdownCache[typeKey]) {
+        const { list, html } = dropdownCache[typeKey];
+        bindPBDdl(ddl, list, html, typeKey, selectedValue);
+        return list;
     }
 
-    //==========================
-    // Request Already Running
-    //==========================
-    else if (cacheKey && dropdownPromiseCache[cacheKey]) {
-
-        ({ list, html } = await dropdownPromiseCache[cacheKey]);
-
+    // --------------------------------------------------------
+    // EXISTING REQUEST
+    // --------------------------------------------------------
+    if (useCache && dropdownPromiseCache[typeKey]) {
+        const { list, html } = await dropdownPromiseCache[typeKey];
+        bindPBDdl(ddl, list, html, typeKey, selectedValue);
+        return list;
     }
 
-    //==========================
-    // Make New Request
-    //==========================
-    else {
+    // --------------------------------------------------------
+    // REQUEST
+    // --------------------------------------------------------
+    const promise = $.ajax({
+        url: "/PurchaseBillPassEntry/GetList",
+        type: "GET",
+        data: {
+            type,
+            ...data
+        },
+        dataType: "json"
 
-        const promise = (async () => {
+    }).then(response => {
 
-            const start = performance.now();
-
-            const response = await $.ajax({
-                url,
-                type: "GET",
-                data,
-                dataType: "json"
-            });
-
-            const dataList = responsePath
-                ? response[responsePath] || []
-                : response || [];
-
-            if (beforeBind) {
-                beforeBind(dataList);
-            }
-
-            let optionHtml = "";
-
-            if (defaultOption !== null) {
-                optionHtml += `<option value="">${defaultOption}</option>`;
-            }
-
-            if (optionBuilder) {
-
-                optionHtml += dataList.map(optionBuilder).join("");
-
-            }
-            else {
-
-                optionHtml += dataList.map(item => `
-                    <option value="${item[valueField]}">
-                        ${item[textField]}
-                    </option>
-                `).join("");
-
-            }
-
-            return {
-                list: dataList,
-                html: optionHtml
-            };
-
-        })();
-
-        if (cacheKey) {
-            dropdownPromiseCache[cacheKey] = promise;
+        if (!response.success) {
+            throw new Error(
+                response.message || "Unable to load list"
+            );
         }
+
+        const list = response.data || [];
+        let html = "";
+
+        // Default option
+        if (defaultOption !== null) {
+            html += `<option value="">${defaultOption}</option>
+            `;
+        }
+
+        // Build options
+        html += buildOptions(typeKey, list);
+
+        return { list, html };
+    });
+
+    // --------------------------------------------------------
+    // SAVE REQUEST
+    // --------------------------------------------------------
+    if (useCache) {
+        dropdownPromiseCache[typeKey] = promise;
+    }
+
+    try {
 
         const result = await promise;
-
-        list = result.list;
-        html = result.html;
-
-        if (cacheKey) {
-
-            dropdownCache[cacheKey] = result;
-
-            delete dropdownPromiseCache[cacheKey];
-
+        // Save cache
+        if (useCache) {
+            dropdownCache[typeKey] = result;
+            delete dropdownPromiseCache[typeKey];
         }
-    }
 
-    //==========================
-    // beforeBind on Cached Data
-    //==========================
-    if (beforeBind && cacheKey && dropdownCache[cacheKey]) {
-        beforeBind(list);
+        // Bind
+        bindPBDdl(ddl, result.list, result.html, typeKey, selectedValue);
+        return result.list;
     }
+    catch (error) {
 
-    //==========================
-    // Bind
-    //==========================
+        if (useCache) {
+            delete dropdownPromiseCache[typeKey];
+        }
+        console.error(`Error loading dropdown: ${type}`, error);
+        throw error;
+    }
+}
+function buildOptions(type, list) {
+
+    switch (type) {
+
+        case "item":
+            return list.map(item => `
+                <option
+                    value="${item.Value}"
+                    data-unit="${item.unit || ""}"
+                    data-ucode="${item.ucode || ""}">
+                    ${item.Text || ""}
+                </option>
+            `).join("");
+
+
+        case "tax":
+            return list.map(item => `
+                <option
+                    value="${item.Value}"
+                    data-cgst="${item.CGST_PER || 0}"
+                    data-sgst="${item.SGST_PER || 0}"
+                    data-igst="${item.IGST_PER || 0}"
+                    data-vat="${item.VAT_PER || 0}"
+                    data-tds="${item.TDS_PER || 0}"
+                    data-tcs="${item.TCS_PER || 0}"
+                    data-oth="${item.OTH_PER || 0}"
+                    data-oth2="${item.OTH_PER2 || 0}">
+                    ${item.Text || ""}
+                </option>
+            `).join("");
+
+
+        case "mrn":
+            return list.map(item => `
+                <option
+                    value="${item.Value}"
+                    data-vtype="${item.vType || ""}">
+                    ${item.Text || ""}
+                </option>
+            `).join("");
+
+
+        default:
+            return list.map(item => `
+                <option value="${item.Value}">
+                    ${item.Text}
+                </option>
+            `).join("");
+    }
+}
+
+function bindPBDdl(ddl, list, html, type, selectedValue = null) {
+
     ddl.html(html);
 
-    //==========================
     // Select2
-    //==========================
-    if (isInitSelect2) {
+    if (
+        [
+            "party",
+            "drcr",
+            "department",
+            "transport",
+            "mrn"
+        ].includes(type)
+    ) {
         initSelect2(ddl);
     }
 
-    //==========================
-    // Selected Value
-    //==========================
-    if (selectedValue !== null && selectedValue !== "") {
-        ddl.val(selectedValue).trigger("change");
+    // Auto-select first value
+    if (
+        [
+            "status",
+            "currency",
+            "transportgst"
+        ].includes(type)
+        && list.length
+    ) {
+        ddl.val(list[0].Value)
+            .trigger("change");
     }
 
-    //==========================
-    // afterBind
-    //==========================
-    if (afterBind) {
-        afterBind(list, ddl);
+    if (selectedValue !== null && selectedValue !== undefined && selectedValue !== "") {
+        ddl.val(String(selectedValue)).trigger("change");
     }
-
-    return list;
 }
-
 //---------- Load All Initially on Page Load -------------
 async function loadInitialDropdowns() {
 
     await Promise.all([
 
-        loadStatusList(),
-        loadDocTypeList(),
+        loadDropdown("status", "#ddlStatus"),
+        loadDropdown("doctype", "#ddlDocType"),
 
-        loadPartyListNatureSupplier('#ddlBillFrom'),
-        loadPartyListNatureSupplier('#ddlShipFrom1', true),
+        loadDropdown("party", "#ddlBillFrom"),
+        loadDropdown("party", "#ddlShipFrom1"),
 
-        loadCityList('#ddlDispCity'),
-        loadCityList('#ddlCityPD'),
-        loadCityList('#ddlCitySF'),
+        loadDropdown("city", "#ddlDispCity"),
+        loadDropdown("city", "#ddlCityPD"),
+        loadDropdown("city", "#ddlCitySF"),
 
-        loadTransportList(),
+        loadDropdown("transport", "#ddlTransportName"),
 
-        loadPartyDrCrAcList('#ddlCreditAC'),
-        loadPartyDrCrAcList('#ddlFreightDebitAC'),
-        loadPartyDrCrAcList('#ddlFreightCreditAC'),
-        loadPartyDrCrAcList('#ddlWBDebitAC'),
-        loadPartyDrCrAcList('#ddlWBCreditAC'),
-        loadPartyDrCrAcList('#ddlUnloadDebitAC'),
-        loadPartyDrCrAcList('#ddlUnloadCreditAC'),
-        loadPartyDrCrAcList('#ddlTdsAccount'),
+        loadDropdown("drcr", "#ddlCreditAC"),
+        loadDropdown("drcr", "#ddlFreightDebitAC"),
+        loadDropdown("drcr", "#ddlFreightCreditAC"),
+        loadDropdown("drcr", "#ddlWBDebitAC"),
+        loadDropdown("drcr", "#ddlWBCreditAC"),
+        loadDropdown("drcr", "#ddlUnloadDebitAC"),
+        loadDropdown("drcr", "#ddlUnloadCreditAC"),
+        loadDropdown("drcr", "#ddlTdsAccount"),
 
-        loadCurrencyList()
-
+        loadDropdown("currency", "#ddlCurrency")
     ]);
-
-    //// Depends on Freight Credit Account
-    //const frtCrAcCode = $('#ddlFreightCreditAC').val();
-    //await loadTranGSTByFrtCrAc(frtCrAcCode);
 }
 //=========== DROPDOWN END ============
 
@@ -1192,7 +1147,7 @@ function convertToDateInputFormat(dateTimeStr) {
 }
 
 //LOAD DATA by V_No
-async function loadFullQuotationByVno(vNo, vType) {
+async function loadFullQuotationByVno(vNo, vType, isViewMode) {
 
     try {
 
@@ -1200,7 +1155,7 @@ async function loadFullQuotationByVno(vNo, vType) {
             url: "/PurchaseBillPassEntry/GetFullQuotationByVno",
             type: "GET",
             dataType: "json",
-            data: { vNo: vNo, vType: vType }
+            data: { vNo: vNo, vtype: vType }
         });
 
         console.log("Quotation :", response);
@@ -1219,7 +1174,7 @@ async function loadFullQuotationByVno(vNo, vType) {
         // Document Details
         //==========================
 
-        await loadDocTypeList(header.v_TYPE);
+        await loadDropdown("doctype", "#ddlDocType", {}, header.v_TYPE);
         $("#DtDocDate").val(formatDateYMD(header.v_DATE));
         $("#NumDocNo").val(header.v_NO);
 
@@ -1231,27 +1186,28 @@ async function loadFullQuotationByVno(vNo, vType) {
         // Bill From
         //==========================
 
-        await loadPartyListNatureSupplier("#ddlBillFrom", false, header.partY_CODE);
+        await loadDropdown("party", "#ddlBillFrom", {}, header.partY_CODE);
         $("#TxtAdd1PD").val(header.bilL_ADD1 || "");
         $("#TxtAdd2PD").val(header.bilL_ADD2 || "");
         $("#TxtAdd3PD").val(header.bilL_ADD3 || "");
-        await loadCityList("#ddlCityPD", header.bilL_CITY);
-        await loadStateList("#ddlStatePD", header.bilL_CITY);
+        await loadDropdown("city", "#ddlCityPD", {}, header.bilL_CITY);
+        await loadDropdown("state", "#ddlStatePD", { cCode: header.bilL_CITY }, header.bilL_STATE);
         $("#NumPincodeBL").val(header.bilL_PINCODE || "");
         $("#TxtGSTNo").val(header.bilL_GST || "");
         $("#TxtDispFromAdd").val(header.disP_ADDRESS || "");
-        await loadCityList("#ddlDispCity", header.disP_CITY);
+        await loadDropdown("city", "#ddlDispCity", {}, header.disP_CITY);
 
         //==========================
         // Ship From
         //==========================
 
-        await loadPartyListNatureSupplier("#ddlShipFrom1", true, header.shiP_CODE);
+        await loadDropdown("party", "#ddlShipFrom1", {}, header.shiP_CODE);
+
         $("#TxtAdd1SF").val(header.shiP_ADD1 || "");
         $("#TxtAdd2SF").val(header.shiP_ADD2 || "");
         $("#TxtAdd3SF").val(header.shiP_ADD3 || "");
-        await loadCityList("#ddlCitySF", header.shiP_CITY);
-        await loadStateList("#ddlStateSF", header.shiP_CITY);
+        await loadDropdown("city", "#ddlCitySF", {}, header.shiP_CITY);
+        await loadDropdown("state", "#ddlStateSF", { cCode: header.shiP_CITY }, header.shiP_STATE);
         $("#TxtPincodeSF").val(header.shiP_PINCODE || "");
         $("#TxtGSTNoSF").val(header.shiP_GST || "");
 
@@ -1261,7 +1217,6 @@ async function loadFullQuotationByVno(vNo, vType) {
 
         $("#TxtBillNo").val(header.bilL_NO || "");
         setDateControl(header.bilL_DATE, "#DtBillDate", "#chkBillDate");
-        console.log(header.bilL_DATE)
 
         $("#TxtChallanNo").val(header.chalL_NO || "");
         setDateControl(header.chalL_DATE, "#DtChDate", "#chkChDate");
@@ -1274,18 +1229,23 @@ async function loadFullQuotationByVno(vNo, vType) {
         $("#DtWaybillDate").val(formatDateYMD(header.ewB_DATE));
         $("#DtWaybillExpiry").val(formatDateYMD(header.ewB_EXPDATE));
 
+        if (header.einV_PARTY === 1) {
+            $('#lblE_invoice_suppl').show();
+        }
+        else {
+            $('#lblE_invoice_suppl').hide();
+        }
+
         //==========================
         // Accounts
         //==========================
-
-        await loadPartyDrCrAcList("#ddlDebitAC", header.debiT_AC);
-        await loadPartyDrCrAcList("#ddlCreditAC", header.crediT_AC);
-
+        await loadDropdown("drcr", "#ddlDebitAC", {}, header.debiT_AC);
+        await loadDropdown("drcr", "#ddlCreditAC", {}, header.crediT_AC);
         $("#txtRemarks").val(header.remarks || "");
+
         //==========================
         // General
         //==========================
-
         $("#ddlInputType").val(header.inpuT_TYPE || "");
         $("#NumExRate").val(header.excH_RATE || 0);
         $("#txtRemarks").val(header.remarks || "");
@@ -1315,11 +1275,12 @@ async function loadFullQuotationByVno(vNo, vType) {
         $("#TxtBankRate2").val(header.banK_AMT || 0);
         $("#TxtDiffAmt").val(header.difF_AMT || 0);
         $("#NumPlNo").val(header.pL_NO || "");
-
-        loadCurrencyList(header.currency);
-
+        loadDropdown("currency", "#ddlCurrency", {}, header.currency);
         setDateControl(header.pL_DATE, "#DtPlDate", "#chkPlDate");
 
+        if (isViewMode) {
+            $('#Dtsysdate').val(formatDateYMD(header.udate));
+        }
         //==========================
         // Transport Details
         //==========================
@@ -1362,8 +1323,9 @@ async function loadFullQuotationByVno(vNo, vType) {
         $("#NumFrtTax1").val(header.frtpaY_TAXPER || 0);
         $("#NumFrtTax2").val(header.frtpaY_TAX || 0);
         $("#TxtFrtPayNarration").val(header.frtpaY_NAR || "");
-        await loadPartyDrCrAcList("#ddlFreightDebitAC", header.frtpaY_DRAC);
-        await loadPartyDrCrAcList("#ddlFreightCreditAC", header.frtpaY_CRAC);
+        await loadDropdown("drcr", "#ddlFreightDebitAC", {}, header.frtpaY_DRAC);
+        await loadDropdown("drcr", "#ddlFreightCreditAC", {}, header.frtpaY_CRAC);
+
         $("#NumTDSonFRT1").val(header.frT_TDSPER || 0);
         $("#NumTDSonFRT2").val(header.frT_TDS || 0);
         $("#TxtBillNoLD").val(header.trP_BILLNO || "");
@@ -1378,8 +1340,8 @@ async function loadFullQuotationByVno(vNo, vType) {
         $("#NumWBTDS1").val(header.wB_TDSPER || 0);
         $("#NumWBTDS2").val(header.wB_TDS || 0);
         $("#TxtWBNarration").val(header.wB_NARR || "");
-        await loadPartyDrCrAcList("#ddlWBDebitAC", header.wB_DRACT);
-        await loadPartyDrCrAcList("#ddlWBCreditAC", header.wB_CRACT);
+        await loadDropdown("drcr", "#ddlWBDebitAC", {}, header.wB_DRACT);
+        await loadDropdown("drcr", "#ddlWBCreditAC", {}, header.wB_CRACT);
 
         //==========================
         // Unloading
@@ -1389,8 +1351,8 @@ async function loadFullQuotationByVno(vNo, vType) {
         $("#NumUnloadTDS1").val(header.uL_TDSPER || 0);
         $("#NumUnloadTDS2").val(header.uL_TDS || 0);
         $("#TxtUnloadNarration").val(header.uL_NARR || "");
-        await loadPartyDrCrAcList("#ddlUnloadDebitAC", header.uL_DRACT);
-        await loadPartyDrCrAcList("#ddlUnloadCreditAC", header.uL_CRACT);
+        await loadDropdown("drcr", "#ddlUnloadDebitAC", {}, header.uL_DRACT);
+        await loadDropdown("drcr", "#ddlUnloadCreditAC", {}, header.uL_CRACT);
 
         //==========================
         // Hold Details
@@ -1485,6 +1447,9 @@ async function loadFullQuotationByVno(vNo, vType) {
             });
 
         });
+
+        //Cr/Dr Btn visibility
+        checkDrCrNoteVisibility();
     }
     catch (error) {
         console.error(error);
@@ -1533,7 +1498,7 @@ function createRowHtml(data = {}) {
     return `
         <tr>
 
-            <td class="freeze-item"><select class="form-control form-control-sm item-name" disabled></select></td>
+            <td class="freeze-item"><select class="form-control form-control-sm item-name" ></select></td>
 
             <td><input class="form-control form-control-sm hsn-code" type="text" value="${data.hsN_CODE || data.HSN_CODE || ''}"/></td>
             <td>
@@ -1543,7 +1508,7 @@ function createRowHtml(data = {}) {
 
             <td><input class="form-control form-control-sm nos" type="number" value="${data.nos || data.NOS || ''}"/></td>
             <td><input class="form-control form-control-sm recd-qty" type="number" value="${data.recD_QTY || data.RECD_QTY || ''}" disabled/></td>
-            <td><input class="form-control form-control-sm bill-qty" type="number" value="${data.bilL_QTY || data.BILL_QTY || ''} "/></td>
+            <td><input class="form-control form-control-sm bill-qty" type="number" value="${data.bilL_QTY || data.BILL_QTY || ''}"/></td>
 
             <td><input class="form-control form-control-sm usd-rate" type="number" value="${data.usD_RATE || data.USD_RATE || ''}"/></td>
             <td><input class="form-control form-control-sm exch-rate" type="number" value="${data.excH_RATE || data.EXCH_RATE || ''}"/></td>
@@ -1630,8 +1595,10 @@ function createRowHtml(data = {}) {
             <td><input class="form-control form-control-sm other-dr-amt" type="number" value="${data.other_dR_AMT || data.OTHER_DR_AMT || ''}" disabled/></td>
 
             <td class="action-col">
-                <i class="fas fa-trash text-danger delete-row"></i>
-                <i class="fas fa-plus-circle text-success add-row"></i>
+                <div class="action-wrap">
+                    <button type="button" class="act-btn delete btn-delete-action" title="Delete Row"><i class="fa fa-trash"></i></button>
+                    <button type="button" class="act-btn add btn-add-action" title="Add Row"><i class="fa fa-plus-circle"></i></button>
+                </div>
             </td>
 
         </tr>
@@ -1643,16 +1610,21 @@ async function addNewRowBelow(data = null) {
     data = data || {};
 
     let rowHtml = createRowHtml(data);
-
+    
     $("#tblItemRecordPBPE tbody").append(rowHtml);
 
     const $lastRow = $("#tblItemRecordPBPE tbody tr:last");
 
-    $lastRow.find(".item-name").html(dropdownCache.Item.html);
-    $lastRow.find(".tax-code").html(dropdownCache.Tax.html);
-    $lastRow.find(".dept-code").html(dropdownCache.Department.html);
+    $lastRow.find(".item-name").html(dropdownCache.item.html);
+    $lastRow.find(".tax-code").html(dropdownCache.tax.html);
+    $lastRow.find(".dept-code").html(dropdownCache.department.html);
 
-    $lastRow.find(".item-name").val(data.iteM_CODE || data.ITEM_CODE || "");
+    //$lastRow.find(".item-name").val(data.iteM_CODE || data.ITEM_CODE || "").trigger("change");
+    const itemName = $lastRow[0].querySelector(".item-name");
+    itemName.value = data.iteM_CODE || data.ITEM_CODE || "";
+    //itemName.dispatchEvent(new Event("change", { bubbles: true }));
+    itemNameChanged(itemName);
+
     $lastRow.find(".tax-code").val(data.taX_CODE || data.TAX_CODE || "");
     $lastRow.find(".dept-code").val(data.depT_CODE || data.DEPT_CODE || "");
 }
@@ -1805,18 +1777,20 @@ function clearPurchaseBillFields() {
     // Hold Date
     $('#DtHoldDate').val('');
     $('#chkHoldDate').prop('checked', false);
+
 }
 
 //----------------------- HEADER DATA BY MRN NO ---------------
-function LoadMRNData(vType, vNo) {
+async function LoadMRNData(vType, vNo) {
     $.ajax({
         url: '/PurchaseBillPassEntry/GetPurchaseDetailsByMRN',
         type: 'GET',
         data: { vType: vType, vNo: vNo },
         dataType: 'json',
-        success: function (response) {
+        success: async function (response) {
             if (response.success) {
                 const data = response.data;
+                console.log("MRN Header data: ", data);
                 const currentDate = getCurrentDateYMD();
 
                 $('#TxtBillNo').val(data.bilL_NO || '');
@@ -1838,27 +1812,35 @@ function LoadMRNData(vType, vNo) {
 
                 $('#NumExRate').val(data.excH_RATE || 0);
 
-                loadPartyDrCrAcList('#ddlCreditAC', data.partY_CODE);
+                loadDropdown("drcr", "#ddlCreditAC", {}, data.partY_CODE);
                 //================Bill Details
-                loadPartyListNatureSupplier('#ddlBillFrom', false, data.partY_CODE);
+                loadDropdown("party", "#ddlBillFrom", {}, data.partY_CODE);
+
                 $('#TxtAdd1PD').val(data.bilL_ADD1 || '');
                 $('#TxtAdd2PD').val(data.bilL_ADD2 || '');
                 $('#TxtAdd3PD').val(data.bilL_ADD3 || '');
-                loadCityList('#ddlCityPD', data.bilL_CITY);
+                loadDropdown("city", "#ddlCityPD", {}, data.bilL_CITY);
                 $('#NumPincodeBL').val(data.bilL_PINCODE || '');
                 $('#TxtGSTNo').val(data.bilL_GST || '');
-                loadStateList('#ddlStateSF', data.bilL_STATE);
+                loadDropdown("state", "#ddlStatePD", { cCode: data.bilL_CITY }, data.bilL_STATE);
+
+                if (data.einV_PARTY === 1) {
+                    $('#lblE_invoice_suppl').show();
+                }
+                else {
+                    $('#lblE_invoice_suppl').hide();
+                }
 
                 //===============Ship Details
-                loadPartyListNatureSupplier('#ddlShipFrom1', true, data.shiP_CODE);
+                loadDropdown("party", "#ddlShipFrom1", {}, data.shiP_CODE);
+
                 $('#TxtAdd1SF').val(data.shiP_ADD1 || '');
                 $('#TxtAdd2SF').val(data.shiP_ADD2 || '');
                 $('#TxtAdd3SF').val(data.shiP_ADD3 || '');
-                loadCityList('#ddlCitySF', data.shiP_CITY);
+                loadDropdown("city", "#ddlCitySF", {}, data.shiP_CITY);
                 $('#TxtPincodeSF').val(data.shiP_PINCODE || '');
                 $('#TxtGSTNoSF').val(data.shiP_GST || '');
-                loadStateList('#ddlStatePD', data.shiP_STATE)
-
+                await loadDropdown("state", "#ddlStateSF", { cCode: data.shiP_CITY }, data.shiP_STATE);
                 $('#txtRemarks').val(data.remarks || '');
 
                 //===================Transport===========
@@ -1866,13 +1848,11 @@ function LoadMRNData(vType, vNo) {
                 const transportName = (data.transporT_NAME || "").trim();
 
                 if (transportCode === 0 && transportName === "") {
-
                     // Clear selection
                     $('#ddlTransportName').val(null).trigger('change');
 
                 }
                 else if (transportCode === 0) {
-
                     // Add temporary option if it doesn't already exist
                     if ($('#ddlTransportName option[value="' + transportName + '"]').length === 0) {
                         $('#ddlTransportName').append(
@@ -1884,17 +1864,12 @@ function LoadMRNData(vType, vNo) {
                     }
 
                     // Select the temporary option
-                    $('#ddlTransportName')
-                        .val(transportName)
-                        .trigger('change');
+                    $('#ddlTransportName').val(transportName).trigger('change');
 
                 }
                 else {
-
                     // Select by Transport Code
-                    $('#ddlTransportName')
-                        .val(transportCode.toString())
-                        .trigger('change');
+                    $('#ddlTransportName').val(transportCode.toString()).trigger('change');
 
                 }
 
@@ -1982,36 +1957,24 @@ async function GetPurchaseItemsByMRN(vType, vNo) {
                 item.pO_RATE = rateData.rate;
 
                 // Add Row
-                //const $row = await addNewRowBelow(item);
                 await addNewRowBelow(item);
 
                 let $row = $("#tblItemRecordPBPE tbody tr:last");
 
                 // Calculations
                 await calculateAmt($row, item.iteM_CODE);
-
                 calculateTax($row, item.iteM_CODE);
-
                 calculateLandAmount($row, item.iteM_CODE);
 
                 // HSN & Qty Check
-                const result = await GetHsnCodeAndQty(
-                    item.iteM_CODE,
-                    item.pO_TYPE,
-                    item.pO_NO
-                );
-
+                const result = await GetHsnCodeAndQty(item.iteM_CODE, item.pO_TYPE, item.pO_NO);
                 if (result.hsnCode !== item.hsN_CODE) {
-                    $row.find(".hsn-code")
-                        .css("background-color", "#f8d7da");
+                    $row.find(".hsn-code").css("background-color", "#f8d7da");
                 }
 
-                const recdQty =
-                    parseFloat($row.find(".recd-qty").val()) || 0;
-
+                const recdQty = parseFloat($row.find(".recd-qty").val()) || 0;
                 if (parseFloat(result.qty) !== recdQty) {
-                    $row.find(".recd-qty")
-                        .css("background-color", "#f8d7da");
+                    $row.find(".recd-qty").css("background-color", "#f8d7da");
                 }
 
             }
@@ -2025,20 +1988,12 @@ async function GetPurchaseItemsByMRN(vType, vNo) {
 
         // Calculate once after all rows are loaded
         calculateItemTotals();
-
         await CalcDrCrNote();
 
     }
     catch (xhr) {
-
         console.error(xhr);
-
-        showToast(
-            xhr.responseJSON?.message ||
-            xhr.responseText ||
-            "Unable to load Purchase Items.",
-            { type: "error" }
-        );
+        showToast(xhr.responseJSON?.message || xhr.responseText || "Unable to load Purchase Items.", { type: "error" });
     }
 }
 
@@ -2097,7 +2052,6 @@ async function calculateAmt($row, itemCode) {
     let igst = parseFloat($row.find('.igst-amt').val()) || 0;
     let otherAmt = parseFloat($row.find('.oth-amt').val()) || 0;
 
-    //let itemCode = $row.find('.item-name').val() ;
     let pob = 0;
     let packAmt = 0;
     let discount = 0;
@@ -2344,11 +2298,6 @@ function calculateItemTotals() {
 //--------------------- ITEM LAND AMOUnT CALCULATIONS ----------------
 function calculateLandAmount($row, itemCode) {
 
-    //$("#tblItemRecordPBPE tbody tr").each(function () {
-
-    //const $row = $(this);
-
-    //const itemCode = $row.find(".item-name").val() || 0;
     const billQty = parseFloat($row.find(".bill-qty").val()) || 0;
     const rate = parseFloat($row.find(".rate").val()) || 0;
 
@@ -2372,14 +2321,16 @@ function calculateLandAmount($row, itemCode) {
         }
     }
 
-    const landRate = rate + packRate - discRate + taxRate;
-    const landAmt = billQty * landRate;
+    const landRate = Number(
+        (rate + packRate - discRate + taxRate).toFixed(2)
+    );
+    const landAmt = Number(
+        (billQty * landRate).toFixed(2)
+    );
 
 
     $row.find(".land-rate").val(landRate.toFixed(2));
     $row.find(".land-amt").val(landAmt.toFixed(2));
-
-    //});
 
 }
 
@@ -2501,6 +2452,8 @@ async function CalcDrCrNote() {
             data: JSON.stringify(request)
         });
 
+        console.log("Cr/Dr Note Response: ", result);
+
         if (result.warnings && result.warnings.length > 0) {
             result.warnings.forEach(function (message) {
                 showToast(message, { type: "warning" });
@@ -2512,18 +2465,12 @@ async function CalcDrCrNote() {
     catch (ex) {
 
         console.error(ex);
-
-        showToast(
-            "Unable to calculate Debit Note.",
-            { type: "error" });
+        showToast("Unable to calculate Debit Note.", { type: "error" });
     }
 }
 
 //------------ CALCULATE FREIGHT -------------
 async function CalcFreightAndCrDr(request) {
-
-    //const request = GetCrDrNoteRequest();
-
     try {
 
         const result = await $.ajax({
@@ -2542,16 +2489,12 @@ async function CalcFreightAndCrDr(request) {
         BindDebitNoteResponse(result);
 
         $('#NumFrtTax2').val(result.txtFrtTaxVal);
-        loadPartyDrCrAcList('#ddlFreightDebitAC', result.frtDrAcCode || 0);
+        loadDropdown("drcr", "#ddlFreightDebitAC", {}, result.frtDrAcCode || 0);
 
     }
     catch (ex) {
-
         console.error(ex);
-
-        showToast(
-            "Unable to calculate Debit Note.",
-            { type: "error" });
+        showToast("Unable to calculate Debit Note.", { type: "error" });
     }
 }
 
@@ -2559,11 +2502,9 @@ async function CalcFreightAndCrDr(request) {
 async function processRow($row, { calculateAmount = false, calculateTaxes = false } = {}) {
 
     const itemCode = Number($row.find(".item-name").val()) || 0;
-
     if (calculateAmount) {
         await calculateAmt($row, itemCode);
     }
-
     if (calculateTaxes) {
         calculateTax($row, itemCode);
     }
@@ -2599,41 +2540,30 @@ function CalculateGrossAmount() {
 function distributeAmount(totalAmt, totalBaseAmt, amountClass, percentClass = null) {
 
     let cumulativeAmt = 0;
-
     const $rows = $('#tblItemRecordPBPE tbody tr');
 
     // Reset
     $rows.each(function () {
-
         if (percentClass) {
             $(this).find(percentClass).val(0);
         }
-
         $(this).find(amountClass).val(0);
     });
 
     // Distribute
     $rows.each(function (index) {
-
         const $row = $(this);
-
         const itemCode = parseInt($row.find('.item-name').val()) || 0;
 
         if (itemCode <= 0)
             return;
 
         let rowAmt = 0;
-
         if (index === $rows.length - 1) {
-
             rowAmt = +(totalAmt - cumulativeAmt).toFixed(2);
-
         } else {
-
             const amount = parseFloat($row.find('.amount').val()) || 0;
-
             rowAmt = +((totalAmt / totalBaseAmt) * amount).toFixed(2);
-
             cumulativeAmt += rowAmt;
         }
 
@@ -2657,15 +2587,8 @@ function bindDistributionChange(inputSelector, amountColumn, perColumn = null) {
         const total = parseFloat($(this).val()) || 0;
         const totalAmount = parseFloat($('#NumAmount').val()) || 0;
 
-        distributeAmount(
-            total,
-            totalAmount,
-            amountColumn,
-            perColumn
-        );
-
+        distributeAmount(total, totalAmount, amountColumn, perColumn);
         $(this).val(total.toFixed(2));
-
     });
 
 }
@@ -2723,9 +2646,7 @@ function getFrtCrAcCodeByTransCode(transportCode) {
                 return;
 
             // Freight Credit A/C
-            $('#ddlFreightCreditAC')
-                .val(response.partyCode)
-                .trigger('change');
+            $('#ddlFreightCreditAC').val(response.partyCode).trigger('change');
         },
         error: function () {
             showToast("Unable to load transport details.", { type: "error" });
@@ -2744,15 +2665,11 @@ async function onExchangeRateChanged() {
     const rows = $('#tblItemRecordPBPE tbody tr');
 
     for (const row of rows) {
-
         const $row = $(row);
-
         const itemCode = parseInt($row.find('.item-name').val()) || 0;
 
         if (itemCode > 0) {
-
             $row.find('.exch-rate').val(exRate.toFixed(2));
-
             await calculateAmt($row, itemCode);
             calculateTax($row, itemCode);
         }
@@ -2802,15 +2719,12 @@ async function collectPurchaseBillData() {
 
         //------------ Document Details -----------
         BILL_NO: $('#TxtBillNo').val() || "",
-        //BILL_DATE: parseNullableDate($('#DtBillDate').val()) || null,
         BILL_DATE: getOptionalDate('#chkBillDate', '#DtBillDate'),
 
         CHALL_NO: $('#TxtChallanNo').val() || "",
-        //CHALL_DATE: parseNullableDate($('#DtChDate').val()) || null,
         CHALL_DATE: getOptionalDate('#chkChDate', '#DtChDate'),
 
         BL_NO: $('#TxtBLNo').val() || "",
-        //BL_DT: parseNullableDate($('#DtBLDate').val()) || null,
         BL_DT: getOptionalDate('#chkBLDate', '#DtBLDate'),
 
         WAYBILL_NO: $('#TxtWaybillNo').val() || "",
@@ -2854,7 +2768,6 @@ async function collectPurchaseBillData() {
         BANK_AMT: parseFloat($('#TxtBankRate2').val()) || 0,
         DIFF_AMT: parseFloat($('#TxtDiffAmt').val()) || 0,
         PL_NO: parseInt($('#NumPlNo').val()) || 0,
-        //PL_DATE: parseNullableDate($('#DtPlDate').val()) || null,
         PL_DATE: getOptionalDate('#chkPlDate', '#DtPlDate'),
         BILLAMT_USD: parseFloat($('#TxtPartyUsd').val()) || 0,
 
@@ -2866,7 +2779,6 @@ async function collectPurchaseBillData() {
         CONTAINER_NO: $('#txtContainerNo').val() || "",
 
         GR_NO: $('#txtGRNo').val() || "",
-        //GR_DATE: parseNullableDate($('#DtGRDate').val()) || null,
         GR_DATE: getOptionalDate('#chkGRDate', '#DtGRDate'),
 
         SEALED_VEHICLE: $('#ChkSealedVehicle').is(':checked') ? 1 : 0,
@@ -2886,7 +2798,6 @@ async function collectPurchaseBillData() {
         TRP_GSTNO: $('#ddlTransportGSTNo').val() || "",
         TRP_TAXTYPE: $('#ddlTaxType').val() || "",
         TRP_BILLNO: $('#TxtBillNoLD').val() || "",
-        //TRP_BILLDATE: parseNullableDate($('#DtBillDateLD').val()) || null,
         FRT_BILLDT: getOptionalDate('#chkBillDateLD', '#DtBillDateLD'),
 
         // Weigh Bridge
@@ -2946,7 +2857,6 @@ async function collectPurchaseBillData() {
 
         HOLD_PAY: $('#ddlPayment').val() || '',
         HOLD_REASON: $('#TxtReason').val() || '',
-        //HOLD_DATE: parseNullableDate($('#DtHoldDate').val()) || null,
         HOLD_DATE: getOptionalDate('#chkHoldDate', '#DtHoldDate'),
 
         ACTION: rowId ? "UPDATE" : "INSERT",
@@ -3083,13 +2993,13 @@ async function collectPurchaseBillData() {
             REF_NO: parseInt(refNo.val()) || 0,
 
             //=================Missing in PURCHASE2================
-            //DRNOTE_AMT: parseFloat(drNoteAmt.val()) || 0,
-            //CRNOTE_AMT: parseFloat(crNoteAmt.val()) || 0,
-            //QLTDIFF_DRAMT: parseFloat(qltyDiffDrAmt.val()) || 0,
-            //RDIFF_DRAMT: parseFloat(rateDiffDrAmt.val()) || 0,
-            //QCDIFF_DRAMT: parseFloat(qcDiffDrAmt.val()) || 0,
-            //QTYDIFF_DRAMT: parseFloat(qtyDiffDrAmt.val()) || 0,
-            //OTH_DRAMT: parseFloat(otherDrAmt.val()) || 0
+            DRNOTE_AMT: parseFloat(drNoteAmt.val()) || 0,
+            CRNOTE_AMT: parseFloat(crNoteAmt.val()) || 0,
+            QLTDIFF_DRAMT: parseFloat(qltyDiffDrAmt.val()) || 0,
+            RDIFF_DRAMT: parseFloat(rateDiffDrAmt.val()) || 0,
+            QCDIFF_DRAMT: parseFloat(qcDiffDrAmt.val()) || 0,
+            QTYDIFF_DRAMT: parseFloat(qtyDiffDrAmt.val()) || 0,
+            OTH_DRAMT: parseFloat(otherDrAmt.val()) || 0
         });
     });
 
@@ -3113,9 +3023,7 @@ async function collectPurchaseBillData() {
 }
 
 async function saveUpdateData() {
-    console.time("Collect");
     const rowsData = await collectPurchaseBillData();
-    console.timeEnd("Collect");
 
     if (rowsData.length === 0) {
         toastr.warning("Please add at least one row before saving.");
@@ -3129,7 +3037,6 @@ async function saveUpdateData() {
         EPRAttachments: rowsData.EPRAttachments
     };
 
-    console.time("Ajax");
     //3. AJAX Save
     $.ajax({
         url: '/PurchaseBillPassEntry/SavePurchaseBillPassEntry',
@@ -3138,10 +3045,14 @@ async function saveUpdateData() {
         data: JSON.stringify(data),
         success: function (response) {
             if (response.success) {
-                toastr.success('Saved successfully!');
-                //setTimeout(() => {
-                //    window.location.href = '/PurchaseBillPassEntryList/Index';
-                //}, 1000);
+                showToast('Saved successfully!', { type: "success" });
+                setFormReadonly();
+                isReadOnly = true;
+                setTimeout(() => window.location.href = '/PurchaseBillPassEntry/Index?id=' + encodeURIComponent($('#NumDocNo').val()) + '&vtype=' + encodeURIComponent($('#ddlDocType').val()) + '&readOnly=true', 1000);
+                if (isReadOnly) {
+                    const vNo = $('#NumDocNo').val();
+                    checkApprovalStatus(vType, vNo, DBTableName);
+                }
             } else {
                 toastr.error('Error: ' + response.message);
             }
@@ -3150,13 +3061,10 @@ async function saveUpdateData() {
             toastr.error('AJAX error: ' + error);
         }
     });
-    console.timeEnd("Ajax");
 }
 
 function getOptionalDate(checkboxSelector, dateSelector) {
-    return $(checkboxSelector).is(':checked')
-        ? (parseNullableDate($(dateSelector).val()) || null)
-        : null;
+    return $(checkboxSelector).is(':checked') ? (parseNullableDate($(dateSelector).val()) || null) : null;
 }
 
 function toggleTaxAmountFields(row) {
@@ -3736,10 +3644,7 @@ async function Validate() {
             return false;
         }
 
-        const taxValidation = await validateTaxType(
-            Number($('#ddlCityPD').val()),
-            Number($('#NumIgst').val()),
-            Number($('#NumCgst').val()),
+        const taxValidation = await validateTaxType(Number($('#ddlCityPD').val()), Number($('#NumIgst').val()), Number($('#NumCgst').val()),
             Number($('#NumSgst').val())
         );
 
@@ -4004,7 +3909,19 @@ async function validateEPRAttachment() {
                     uploadedDocs.push(docType);
             });
 
-            const missing = requiredDocs.filter(x => !uploadedDocs.includes(x));
+            //const missing = requiredDocs.filter(x => !uploadedDocs.includes(x));
+            const missing = requiredDocs.filter(doc => {
+
+                // Other Copy Bill To/Ship To 
+                // Other Copy-1, Other Copy-2, Other Copy-3... anything acceptable
+                if (doc === "Other Copy Bill To/Ship To") {
+                    return !uploadedDocs.some(uploaded =>
+                        uploaded.toLowerCase().startsWith("other copy")
+                    );
+                }
+
+                return !uploadedDocs.includes(doc);
+            });
 
             if (missing.length > 0) {
                 const message =
@@ -4053,8 +3970,6 @@ function validateDrCrNoteAmount() {
             parseFloat($("#TxtWeightDebitTax").val() || 0) +
             parseFloat($("#TxtOtherDebitTax").val() || 0);
 
-        // NOTE: This line is intentionally kept the same as the original VB code.
-        // It overwrites totDrAmtHeader instead of assigning to totCrAmtHeader.
         //totDrAmtHeader = // I have changed to totCrAmtHeader
         totCrAmtHeader =
             parseFloat($("#TxtQualityCreditNoteAmt").val() || 0) +
@@ -4113,7 +4028,6 @@ async function getPurchaseDate(vType, vNo) {
         });
 
         if (response.success) {
-            console.log("Purchase Date:", response.purchaseDate);
             return response.purchaseDate;
         } else {
             showToast(response.message || "Failed to get purchase date.", { type: "error" });
@@ -4141,7 +4055,6 @@ async function getPartyPurchaseAmount(partyCode, vType, vNo, currentAmount) {
         });
 
         if (response.success) {
-            console.log("Total Purchase Amount:", response.totalAmount);
             return parseFloat(response.totalAmount) || 0;
         } else {
             showToast(response.message || "Failed to get purchase amount.", { type: "error" });
@@ -4166,7 +4079,6 @@ async function getTDS206Apply(partyCode) {
         });
 
         if (response.success) {
-            console.log("TDS 206 Apply:", response.tds206Apply);
             return response.tds206Apply || "";
         } else {
             showToast(response.message || "Failed to fetch TDS 206 Apply.", { type: "error" });
@@ -4513,7 +4425,14 @@ function getRowControls(row) {
         refNo: row.querySelector(".ref-no"),
 
         drNoteAmt: row.querySelector(".dr-note-amt"),
-        crNoteAmt: row.querySelector(".cr-note-amt")
+        crNoteAmt: row.querySelector(".cr-note-amt"),
+
+        qltyDiffDrAmt: row.querySelector(".qlty-diff-dr-amt"),
+        rateDiffDrAmt: row.querySelector(".rate-diff-dr-amt"),
+        qcDiffDrAmt: row.querySelector(".qc-diff-dr-amt"),
+        qtyDiffDrAmt: row.querySelector(".qty-diff-dr-amt"),
+        otherDiffDrAmt: row.querySelector(".other-diff-dr-amt"),
+
     };
 }
 
@@ -4527,11 +4446,17 @@ async function getGlobalValues() {
 
         if (response.success) {
             const d = response.data;
-            console.log(d);
             pubDefPOInMRN = d.pubDefPOInMRN;
             compCode = d.compCode;
+            yearCode = d.yearCode;
+            branchCode = d.branchCode;
             dataSource = d.dataSource;
             userLevel = d.userLevel;
+            companyName = d.companyName;
+            add1 = d.add1;
+            add2 = d.add2;
+            db = d.db;
+            companyGst = d.companyGst;
         } else {
             showToast(response.message || "Failed to load global values.", { type: "error" });
         }
@@ -4761,6 +4686,9 @@ function getCopyFromData(code) {
             }
 
             console.log(response.data);
+            console.log("Columns:", response.data.columns);
+            console.log("Rows:", response.data.rows);
+            console.log("Rows Length:", response.data.rows.length);
             bindCopyFromGrid(
                 response.data.columns,
                 response.data.rows
@@ -4787,14 +4715,7 @@ function bindCopyFromGrid(columns, rows) {
     tbody.empty();
 
     if (!rows || rows.length === 0) {
-
-        tbody.html(`
-            <tr>
-                <td colspan="100%" class="text-center">
-                    No Record Found
-                </td>
-            </tr>`);
-
+        tbody.html(`<tr><td colspan="100%" class="text-center">No Record Found</td></tr>`);
         return;
     }
 
@@ -4803,39 +4724,25 @@ function bindCopyFromGrid(columns, rows) {
     //-------------------------
 
     let colgroup = "<colgroup>";
-
     colgroup += `<col style="width:50px;">`;
-
     columns.forEach(col => {
-
         let maxLength = col.title.length;
-
         rows.forEach(r => {
-
             let value = r[col.field];
-
             value = value == null ? "" : value.toString();
-
             if (value.length > maxLength)
                 maxLength = value.length;
-
         });
 
         let width;
-
         if (typeof rows[0][col.field] === "number") {
-
             width = 90;
-
         } else {
-
             width = Math.max(maxLength * 9, 80);
-
             width = Math.min(width, 300);
         }
 
         colgroup += `<col style="width:${width}px;">`;
-
     });
 
     colgroup += "</colgroup>";
@@ -4846,19 +4753,12 @@ function bindCopyFromGrid(columns, rows) {
     // Header
     //-------------------------
 
-    let header = `<tr>
-        <th style="text-align:center">
-            <input type="checkbox" id="selectAllPR">
-        </th>`;
-
+    let header = `<tr><th style="text-align:center"><input type="checkbox" id="selectAllPR"></th>`;
     columns.forEach(col => {
-
         header += `<th>${col.title}</th>`;
-
     });
 
     header += "</tr>";
-
     thead.html(header);
 
     //-------------------------
@@ -4866,53 +4766,27 @@ function bindCopyFromGrid(columns, rows) {
     //-------------------------
 
     let html = "";
-
     rows.forEach((row, index) => {
-
         html += `<tr>`;
-
-        html += `
-            <td style="text-align:center">
-                <input
-                    type="checkbox"
-                    class="copyfrom-check"
-                    data-index="${index}">
-            </td>`;
-
+        html += `<td style="text-align:center"><input type="checkbox" class="copyfrom-check" data-index="${index}"></td>`;
         columns.forEach(col => {
-
             const value = row[col.field] ?? "";
-
-            html += `<td title="${value}">
-                        ${value}
-                     </td>`;
-
+            html += `<td title="${value}">${value}</td>`;
         });
-
         html += "</tr>";
-
     });
 
     tbody.html(html);
-
     makeColumnsResizable("#tblpurchaseordermodal");
 }
 
 //--------------Pending Approval List---------
 function bindPendingApprovalGrid(data) {
-
     const tbody = $("#tblpendingapprovalmodal tbody");
-
     tbody.empty();
 
     if (!data || data.length === 0) {
-        tbody.append(`
-            <tr>
-                <td colspan="15" class="text-center">
-                    No Record Found
-                </td>
-            </tr>
-        `);
+        tbody.append(`<tr><td colspan="15" class="text-center">No Record Found</td></tr>`);
         return;
     }
 
@@ -4943,4 +4817,1028 @@ function bindPendingApprovalGrid(data) {
     });
 
     tbody.html(rows);
+}
+
+function onGetPendingAppListClick() {
+    $.ajax({
+        url: "/PurchaseBillPassEntry/GetPendingApprovalList",
+        type: "GET",
+        success: function (response) {
+
+            if (!response.success) {
+                showToast(response.message, { type: "warning" });
+                return;
+            }
+
+            bindPendingApprovalGrid(response.data);
+
+            $("#pendingapprovalModal").modal("show");
+        },
+        error: function () {
+            showToast("Unable to load pending approval list.", { type: "error" });
+        }
+    });
+}
+
+//----------------Cost Allocation-----------
+function onCostAllocationClick() {
+
+    const drc =
+        (parseFloat($("#TxtQualityDiffDebitAmt").val()) || 0) +
+        (parseFloat($("#TxtRateDiffDebitAmt").val()) || 0) +
+        (parseFloat($("#TxtQCDebitNoteAmt").val()) || 0) +
+        (parseFloat($("#TxtWeightDebitAmt").val()) || 0) +
+        (parseFloat($("#TxtOtherDebitAmt").val()) || 0);
+
+    const crc =
+        (parseFloat($("#TxtQualityCreditNoteAmt").val()) || 0) +
+        (parseFloat($("#TxtRateDiffCreditNoteAmt").val()) || 0) +
+        (parseFloat($("#TxtQCCreditNoteAmt").val()) || 0) +
+        (parseFloat($("#TxtWeightCreditNoteAmt").val()) || 0);
+
+    const drcWT =
+        (parseFloat($("#TxtQualityDiffDebitAmt").val()) || 0) +
+        (parseFloat($("#TxtQualityDiffDebitTax").val()) || 0) +
+        (parseFloat($("#TxtRateDiffDebitAmt").val()) || 0) +
+        (parseFloat($("#TxtRateDiffDebitTax").val()) || 0) +
+        (parseFloat($("#TxtQCDebitNoteAmt").val()) || 0) +
+        (parseFloat($("#TxtQCDebitNoteTax").val()) || 0) +
+        (parseFloat($("#TxtWeightDebitAmt").val()) || 0) +
+        (parseFloat($("#TxtWeightDebitTax").val()) || 0) +
+        (parseFloat($("#TxtOtherDebitAmt").val()) || 0) +
+        (parseFloat($("#TxtOtherDebitTax").val()) || 0);
+
+    const crcWT =
+        (parseFloat($("#TxtQualityCreditNoteAmt").val()) || 0) +
+        (parseFloat($("#TxtQualityCreditNoteVal").val()) || 0) +
+        (parseFloat($("#TxtRateDiffCreditNoteAmt").val()) || 0) +
+        (parseFloat($("#TxtRateDiffCreditNoteVal").val()) || 0) +
+        (parseFloat($("#TxtQCCreditNoteAmt").val()) || 0) +
+        (parseFloat($("#TxtQCCreditNoteVal").val()) || 0) +
+        (parseFloat($("#TxtWeightCreditNoteAmt").val()) || 0) +
+        (parseFloat($("#TxtWeightCreditNoteVal").val()) || 0);
+
+    let vamt = 0;
+
+    if ($("#ddlInputType").val() === "GST Input") {
+        vamt =
+            parseFloat($("#NumAmount").val() || 0) +
+            parseFloat($("#NumPacking").val() || 0) -
+            parseFloat($("#NumDiscount").val() || 0) +
+            crc - drc;
+    } else {
+        vamt =
+            parseFloat($("#NumNetAmount").val() || 0) + crcWT - drcWT;
+    }
+
+    const ddlBillFrom = document.getElementById("ddlBillFrom");
+    const partyCode = ddlBillFrom.value;
+    const partyName = ddlBillFrom.options[ddlBillFrom.selectedIndex].text;
+
+    let data = {
+        partyName: partyName,
+        partyCode: partyCode,
+        refNo: $('#NumDocNo').val(),
+        refType: $('#ddlDocType').val(),
+        amount: vamt,
+        date: $('#DtDocDate').val()
+    }
+
+    CostAllocation.open(data);
+}
+
+//----------------Advance TDS-------------
+function bindAdvanceTdsGrid(data) {
+
+    const tbody = $("#tbladvancetdsmodal tbody");
+
+    tbody.empty();
+
+    // No data
+    if (!Array.isArray(data) || data.length === 0) {
+        tbody.html(`<tr><td colspan="5" class="text-center">No TDS Deducted Found</td></tr>`);
+        return;
+    }
+
+    let rows = "";
+    data.forEach(row => {
+
+        rows += `
+            <tr>
+                <td>${row.vtype ?? ""}</td>
+                <td>${row.vNo ?? ""}</td>
+                <td>${row.vDate ?? ""}</td>
+                <td class="text-end">${row.amount != null ? Number(row.amount).toFixed(2) : "0.00"}</td>
+                <td>${row.partyName ?? ""}</td>
+            </tr>
+        `;
+    });
+
+    tbody.html(rows);
+}
+function onAdvanceTDSClick() {
+    const billNo = ($("#TxtBillNo").val() || "").trim();
+    const drCode = parseInt($("#ddlBillFrom").val()) || 0;
+    $.ajax({
+        url: "/PurchaseBillPassEntry/GetAdvanceTdsList",
+        type: "GET",
+        data: {
+            billNo: billNo,
+            drCode: drCode
+        },
+
+        success: function (response) {
+
+            if (!response.success) {
+                showToast(response.message, { type: "warning" });
+                return;
+            }
+
+            bindAdvanceTdsGrid(response.data);
+            $("#advancetdsModal").modal("show");
+        },
+
+        error: function (xhr) {
+            console.error(xhr);
+            showToast("Unable to load Advance TDS list.", { type: "error" });
+        }
+    });
+}
+
+//---------------Calculate Dr Cr Note------------
+
+function getCalculateDrCrRequest() {
+
+    const billToEl = document.getElementById("ddlBillFrom");
+
+    const rows = Array.from(document.querySelectorAll("#tblItemRecordPBPE tbody tr"))
+        .map(row => {
+            const c = getRowControls(row);
+
+            return {
+                ItemCode: parseInt(c.item?.value || 0),
+
+                RecdQty: parseFloat(c.recdQty?.value || 0),
+                BillQty: parseFloat(c.billQty?.value || 0),
+
+                Rate: parseFloat(c.rate?.value || 0),
+                LandRate: parseFloat(c.landRate?.value || 0),
+                PORate: parseFloat(c.poRate?.value || 0),
+                POLandRate: parseFloat(c.polandRate?.value || 0),
+
+                Amount: parseFloat(c.amount?.value || 0),
+
+                CGSTPer: parseFloat(c.cgstPer?.value || 0),
+                SGSTPer: parseFloat(c.sgstPer?.value || 0),
+                IGSTPer: parseFloat(c.igstPer?.value || 0),
+
+                POType: c.poType?.value || "",
+                PONo: parseInt(c.poNo?.value || 0),
+
+                ItemName: c.item?.selectedOptions?.[0]?.text ||
+                    c.item?.value ||
+                    ""
+            };
+        });
+
+    const request = {
+        vDate: document.getElementById("DtDocDate")?.value || "",
+
+        RefType: document.getElementById("TxtMRNNo1")?.value || "",
+        RefVNo: parseInt(document.getElementById("TxtMRNNo2")?.value || 0),
+        InputType: document.getElementById("ddlInputType")?.value || "",
+        VType: document.getElementById("ddlDocType")?.value || "",
+        BillTo: parseInt(billToEl?.value || 0),
+        billToName: billToEl?.selectedOptions?.[0]?.text || billToEl?.value || "",
+
+        RateDiffDebitAmt: parseFloat(document.getElementById("TxtRateDiffDebitAmt")?.value || 0),
+        RateDiffDebitTax: parseFloat(document.getElementById("TxtRateDiffDebitTax")?.value || 0),
+        RateDiffCreditAmt: parseFloat(document.getElementById("TxtRateDiffCreditNoteAmt")?.value || 0),
+        RateDiffCreditTax: parseFloat(document.getElementById("TxtRateDiffCreditNoteVal")?.value || 0),
+
+        QualityDiffDebitAmt: parseFloat(document.getElementById("TxtQualityDiffDebitAmt")?.value || 0),
+        QualityDiffDebitTax: parseFloat(document.getElementById("TxtQualityDiffDebitTax")?.value || 0),
+        QualityDiffCreditAmt: parseFloat(document.getElementById("TxtQualityCreditNoteAmt")?.value || 0),
+        QualityDiffCreditTax: parseFloat(document.getElementById("TxtQualityCreditNoteVal")?.value || 0),
+
+        WeightDiffDebitAmt: parseFloat(document.getElementById("TxtWeightDebitAmt")?.value || 0),
+        WeightDiffDebitTax: parseFloat(document.getElementById("TxtWeightDebitTax")?.value || 0),
+        WeightDiffCreditAmt: parseFloat(document.getElementById("TxtWeightCreditNoteAmt")?.value || 0),
+        WeightDiffCreditTax: parseFloat(document.getElementById("TxtWeightCreditNoteVal")?.value || 0),
+
+        QCDebitAmt: parseFloat(document.getElementById("TxtQCDebitNoteAmt")?.value || 0),
+        QCDebitTax: parseFloat(document.getElementById("TxtQCDebitNoteTax")?.value || 0),
+        QCCreditAmt: parseFloat(document.getElementById("TxtQCCreditNoteAmt")?.value || 0),
+        QCCreditTax: parseFloat(document.getElementById("TxtQCCreditNoteVal")?.value || 0),
+
+        OthDebitAmt: parseFloat(document.getElementById("TxtOtherDebitAmt")?.value || 0),
+        OthDebitTax: parseFloat(document.getElementById("TxtOtherDebitTax")?.value || 0),
+
+        Rows: rows
+    }
+    return request;
+}
+
+function onBtnCalculateDrCrClick() {
+    const request = getCalculateDrCrRequest();
+
+    console.log("Calculate btn Request: ", request);
+
+    $.ajax({
+        url: "/PurchaseBillPassEntry/CalculateDrCrAmount",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(request),
+        dataType: "json",
+        success: function (response) {
+            if (response.success) {
+                console.log("Calculate btn Response: ", response.data);
+                BindCalcCrDrNoteRoHeader(response.data);
+            }
+            else {
+                showToast(response.message, { type: "warning" });
+            }
+        },
+        error: function (response) {
+            showToast(response.message, { type: "error" });
+        }
+    })
+}
+
+function BindCalcCrDrNoteRoHeader(data) {
+
+    const rowVal = data.rows;
+
+    rowVal.forEach(r => {
+
+        const rows = document.querySelectorAll("#tblItemRecordPBPE tbody tr");
+
+        rows.forEach(row => {
+
+            const c = getRowControls(row);
+
+            const itemCode = parseInt(c.item?.value || 0);
+
+            if (itemCode === parseInt(r.itemCode || 0)) {
+                if (c.drNoteAmt)
+                    c.drNoteAmt.value = r.finalDrNote || 0;
+                if (c.crNoteAmt)
+                    c.crNoteAmt.value = r.finalCrNote || 0;
+                if (c.otherDiffDrAmt)
+                    c.otherDiffDrAmt.value = r.otherDrNoteAmt || 0;
+                if (c.polandRate)
+                    c.polandRate.value = r.poLandRate || 0;
+                if (c.qcDiffDrAmt)
+                    c.qcDiffDrAmt.value = r.qcDiffDrNoteAmt || 0;
+                if (c.qltyDiffDrAmt)
+                    c.qltyDiffDrAmt.value = r.qualityDiffDrAmt || 0;
+                if (c.rateDiffDrAmt)
+                    c.rateDiffDrAmt.value = r.rateDiffDrAmt || 0;
+                if (c.qtyDiffDrAmt)
+                    c.qtyDiffDrAmt.value = r.weightDiffDrAmt || 0;
+            }
+        });
+        if (r.rowWarningMsg)
+            showToast(r.rowWarningMsg, { type: "warning" });
+    });
+
+    $('#dramtheader').val(data.drAmtHeader);
+    $('#dramtgrid').val(data.drAmtGrid);
+    $('#NumDrAmtDiff').val(data.drAmtDiff);
+    $('#cramtheader').val(data.crAmtHeader);
+    $('#cramtgrid').val(data.crAmtGrid);
+    $('#NumcrAmtDiff').val(data.crAmtDiff);
+
+}
+
+function calDrCrGrid() {
+    try {
+        let totDrAmtDetail = 0;
+        let totCrAmtDetail = 0;
+        let totDrAmtHeader = 0;
+        let totCrAmtHeader = 0;
+
+        if ($("#ddlInputType").val() === "GST Input") {
+            totDrAmtHeader =
+                parseFloat($("#TxtQualityDiffDebitAmt").val() || 0) +
+                parseFloat($("#TxtRateDiffDebitAmt").val() || 0) +
+                parseFloat($("#TxtQCDebitNoteAmt").val() || 0) +
+                parseFloat($("#TxtWeightDebitAmt").val() || 0) +
+                parseFloat($("#TxtOtherDebitAmt").val() || 0);
+
+            totCrAmtHeader =
+                parseFloat($("#TxtQualityCreditNoteAmt").val() || 0) +
+                parseFloat($("#TxtRateDiffCreditNoteAmt").val() || 0) +
+                parseFloat($("#TxtQCCreditNoteAmt").val() || 0) +
+                parseFloat($("#TxtWeightCreditNoteAmt").val() || 0);
+        } else {
+            totDrAmtHeader =
+                parseFloat($("#TxtQualityDiffDebitAmt").val() || 0) +
+                parseFloat($("#TxtRateDiffDebitAmt").val() || 0) +
+                parseFloat($("#TxtQCDebitNoteAmt").val() || 0) +
+                parseFloat($("#TxtWeightDebitAmt").val() || 0) +
+                parseFloat($("#TxtOtherDebitAmt").val() || 0) +
+                parseFloat($("#TxtQualityDiffDebitTax").val() || 0) +
+                parseFloat($("#TxtRateDiffDebitAmt").val() || 0) +
+                parseFloat($("#TxtQCDebitNoteTax").val() || 0) +
+                parseFloat($("#TxtWeightDebitTax").val() || 0) +
+                parseFloat($("#TxtOtherDebitTax").val() || 0);
+
+            //totDrAmtHeader = // I have changed to totCrAmtHeader
+            totCrAmtHeader =
+                parseFloat($("#TxtQualityCreditNoteAmt").val() || 0) +
+                parseFloat($("#TxtRateDiffCreditNoteAmt").val() || 0) +
+                parseFloat($("#TxtQCCreditNoteAmt").val() || 0) +
+                parseFloat($("#TxtWeightCreditNoteAmt").val() || 0) +
+                parseFloat($("#TxtQualityCreditNoteVal").val() || 0) +
+                parseFloat($("#TxtRateDiffCreditNoteVal").val() || 0) +
+                parseFloat($("#TxtQCCreditNoteVal").val() || 0) +
+                parseFloat($("#TxtWeightCreditNoteVal").val() || 0);
+        }
+
+        document.querySelectorAll("#tblItemRecordPBPE tbody tr").forEach(row => {
+            const controls = getRowControls(row);
+
+            if (controls.item && controls.item.value) {
+                totDrAmtDetail += parseFloat(controls.drNoteAmt?.value || 0);
+                totCrAmtDetail += parseFloat(controls.crNoteAmt?.value || 0);
+            }
+        });
+
+        const drAmtDiff = Math.round(Math.abs(totDrAmtHeader - totDrAmtDetail));
+        const crAmtDiff = Math.round(Math.abs(totCrAmtHeader - totCrAmtDetail));
+
+        $('#dramtheader').val(totDrAmtHeader);
+        $('#cramtheader').val(totCrAmtHeader);
+        $('#dramtgrid').val(totDrAmtDetail);
+        $('#cramtgrid').val(totCrAmtDetail);
+        $('#NumDrAmtDiff').val(drAmtDiff);
+        $('#NumcrAmtDiff').val(crAmtDiff);
+
+    } catch (ex) {
+        console.error(ex);
+    }
+}
+
+//--------------------Reports------------------
+
+//Pending MRN
+function updatePassDetails(callback) {
+
+    $.ajax({
+        url: "/PurchaseBillPassEntry/UpdatePassDetails",
+        type: "POST",
+        success: function (result) {
+            if (result.status) {
+                alert("Updated!");
+                callback();
+            } else {
+                showToast(
+                    result.message || "Unable to update pass details.",
+                    { type: "warning" }
+                );
+            }
+        },
+        error: function (xhr) {
+            showToast("Error: " + xhr.statusText, { type: "warning" });
+        }
+    });
+}
+function PendingMRNBPReport() {
+
+    updatePassDetails(function () {
+        var reportName = "RAW24";
+
+        // Crystal Report Formula
+        const formula =
+            "{PURCHASE1.comp_code} = " + compCode +
+            " AND {PURCHASE1.branch_code} = " + branchCode +
+            " AND {PURCHASE1.YEAR_CODE} = " + yearCode +
+            " AND {PURCHASE2.PASS_NO} = 0 " +
+            " AND ({DOCTYPE_MAST.DOCTYPE} = 'MaterialReceipt' " +
+            " OR {DOCTYPE_MAST.DOCTYPE} = 'servicereceipt')";
+
+        var formulaFields = {
+            Reportname: reportName,
+            selectionFormula: formula,
+            Database: db,
+            Parameters: {
+                comp_name: companyName,
+                comp_add1: add1,
+                comp_add2: add2,
+                RPTNAME: "Pending Purchase MRN for Bill Passing"
+            }
+        };
+
+        var now = new Date();
+        var day = String(now.getDate()).padStart(2, '0');
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var year = String(now.getFullYear()).slice(-2);
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
+        var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+        $.ajax({
+            url: 'http://localhost:34088/Report/PendingQCReport',
+            type: 'POST',
+            data: JSON.stringify(formulaFields),
+            contentType: "application/json",
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (response) {
+                console.log('PDF response:', response);
+                var file = new Blob([response], { type: 'application/pdf' });
+                var fileName = `${reportName}_${timestamp}.pdf`;
+
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error generating report:', error);
+            }
+        });
+    });
+
+}
+
+//Dr Note
+function GetCrDrNoteAmtForReport(vType, vNo, drOrCr) {
+    return $.ajax({
+        url: '/PurchaseBillPassEntry/GetCrDrNoteAmtForReport',
+        type: 'GET',
+        data: {
+            vType: vType,
+            vNo: vNo,
+            drOrCr: drOrCr,
+        }
+    }).then(function (response) {
+        if (response.success) {
+            return response.data;
+        } else {
+            throw new Error(response.message);
+        }
+    });
+}
+async function DebitNoteReport() {
+
+    var reportName = "";
+    const vType = ($("#ddlDocType").val() || "").trim();
+    const vNo = parseInt($("#NumDocNo").val() || 0);
+
+    if (vType === "RMPB" || vType === "BFPB") {
+        reportName = "rawvoucherRM";
+    }
+    else {
+        reportName = "rawvoucher";
+    }
+    // Crystal Report Formula
+    var formula =
+        "{PURCHASE1.V_TYPE} = '" + vType + "'" +
+        " AND {PURCHASE1.V_NO} = " + vNo +
+        " AND {PURCHASE1.COMP_CODE} = " + compCode +
+        " AND {PURCHASE1.BRANCH_CODE} = " + branchCode +
+        " AND {PURCHASE1.YEAR_CODE} = " + yearCode;
+
+    var debitNoteAmt = 0;
+
+    try {
+        const amount = await GetCrDrNoteAmtForReport(vType, vNo, 'Debit');
+        debitNoteAmt = parseFloat(amount || 0);
+    } catch (error) {
+        console.error(error);
+    }
+
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: db,
+        Parameters: {
+            RPTNAME: "DEBIT NOTE",
+            comp_name: companyName,
+            comp_add1: add1,
+            comp_add2: add2,
+            gst: "GSTIN: " + companyGst
+        }
+    };
+    if (debitNoteAmt > 0) {
+        formulaFields.Parameters.INWORD = numToWord(debitNoteAmt, "Rs.", "PAISE");
+    }
+
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+    $.ajax({
+        url: 'http://localhost:34088/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (response) {
+            console.log('PDF response:', response);
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+        }
+    });
+
+}
+
+//Cr Note
+async function CreditNoteReport() {
+
+    var reportName = "rawvoucher1";
+    const vType = ($("#ddlDocType").val() || "").trim();
+    const vNo = parseInt($("#NumDocNo").val() || 0);
+
+    // Crystal Report Formula
+    const formula =
+        "{PURCHASE1.V_TYPE} = '" + vType + "'" +
+        " AND {PURCHASE1.V_NO} = " + vNo +
+        " AND {PURCHASE1.COMP_CODE} = " + compCode +
+        " AND {PURCHASE1.YEAR_CODE} = " + yearCode +
+        " AND {PURCHASE1.BRANCH_CODE} = " + branchCode;
+    console.log("formula: ", formula);
+
+    var creditNoteAmt = 0;
+
+    try {
+        const amount = await GetCrDrNoteAmtForReport(vType, vNo, 'Credit');
+        creditNoteAmt = parseFloat(amount || 0);
+    } catch (error) {
+        console.error(error);
+    }
+
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: db,
+        Parameters: {
+            RPTNAME: "CREDIT NOTE",
+            comp_name: companyName,
+            comp_add1: add1,
+            comp_add2: add2,
+            //gst: "GSTIN: " + companyGst //Exception occurs during reports generation, uncomment when resolve
+        }
+    };
+    if (creditNoteAmt > 0) {
+        formulaFields.Parameters.INWORD = numToWord(creditNoteAmt, "Rs.", "PAISE");
+    }
+
+    console.log("formulaFields: ", formulaFields);
+
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+    $.ajax({
+        url: 'http://localhost:34088/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (response) {
+            console.log('PDF response:', response);
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+        }
+    });
+
+}
+
+//Purchase Slip
+function PurchaseSlipReport() {
+
+    var reportName = "PURCH_SLIP";
+    const vType = ($("#ddlDocType").val() || "").trim();
+    const vNo = parseInt($("#NumDocNo").val() || 0);
+    // Crystal Report Formula
+    var formula =
+        "{PURCHASE1.V_TYPE} = '" + vType + "'" +
+        " AND {PURCHASE1.V_NO} = " + vNo +
+        " AND {PURCHASE1.COMP_CODE} = " + compCode +
+        " AND {PURCHASE1.YEAR_CODE} = " + yearCode +
+        " AND {PURCHASE1.BRANCH_CODE} = " + branchCode;
+
+
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: db,
+        Parameters: {
+            RPTNAME: "Purchase Slip",
+            comp_name: companyName,
+            comp_add1: add1,
+            comp_add2: add2
+        }
+    };
+
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+    $.ajax({
+        url: 'http://localhost:34088/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (response) {
+            console.log('PDF response:', response);
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+        }
+    });
+
+}
+
+//Payable Amount //Button is not visible in ERP, uncomment if required or remove this function if not required
+function PayableAmountReport() {
+
+    var reportName = "PURCH_SLIPLIST";
+    const vType = ($("#ddlDocType").val() || "").trim();
+    const vNo = parseInt($("#NumDocNo").val() || 0);
+    // Crystal Report Formula
+    var formula =
+        "{PURCHASE1.V_TYPE} = '" + vType + "'" +
+        " AND {PURCHASE1.V_NO} = " + vNo +
+        " AND {PURCHASE1.COMP_CODE} = " + compCode +
+        " AND {PURCHASE1.YEAR_CODE} = " + yearCode +
+        " AND {PURCHASE1.BRANCH_CODE} = " + branchCode;
+
+
+    var formulaFields = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: db,
+        Parameters: {
+            RPTNAME: "Amount Payable List",
+            comp_name: companyName,
+            comp_add1: add1,
+            comp_add2: add2
+        }
+    };
+
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+    $.ajax({
+        url: 'http://localhost:34088/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (response) {
+            console.log('PDF response:', response);
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+        }
+    });
+
+}
+
+//RM Import Bill 
+function generateImportBill() {
+
+    var request = {
+        vNo: parseInt($("#NumDocNo").val()),
+        vType: $("#ddlDocType").val(),
+        vDate: $("#DtDocDate").val(),
+        plNo: parseInt($("#NumPlNo").val() || 0)
+    };
+
+    return $.ajax({
+        url: '/PurchaseBillPassEntry/GenerateImportBill',
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify(request)
+    });
+}
+
+async function RMImportReport() {
+
+    try {
+        var response = await generateImportBill();
+
+        if (!response.success) {
+            showToast(response.message || "Error generating Import Bill.", { type: "warning" });
+            return;
+        }
+
+        var reportName = "voucher6";
+        const vType = ($("#ddlDocType").val() || "").trim();
+        const vNo = parseInt($("#NumDocNo").val() || 0);
+        // Crystal Report Formula
+        var formula =
+            "{IMPORT1.V_TYPE} = '" + vType + "'" +
+            " AND {IMPORT1.V_NO} = " + vNo +
+            " AND {IMPORT1.COMP_CODE} = " + compCode +
+            " AND {IMPORT1.BRANCH_CODE} = " + branchCode +
+            " AND {IMPORT1.YEAR_CODE} = " + yearCode;
+
+
+        var formulaFields = {
+            Reportname: reportName,
+            selectionFormula: formula,
+            Database: db,
+            Parameters: {
+                RPTNAME: "IMPORT BILL",
+                comp_name: companyName,
+                comp_add1: add1,
+                comp_add2: add2
+            }
+        };
+
+        var now = new Date();
+        var day = String(now.getDate()).padStart(2, '0');
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var year = String(now.getFullYear()).slice(-2);
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
+        var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+        $.ajax({
+            url: 'http://localhost:34088/Report/PendingQCReport',
+            type: 'POST',
+            data: JSON.stringify(formulaFields),
+            contentType: "application/json",
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (response) {
+                console.log('PDF response:', response);
+                var file = new Blob([response], { type: 'application/pdf' });
+                var fileName = `${reportName}_${timestamp}.pdf`;
+
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error generating report:', error);
+            }
+        });
+    }
+    catch (xhr) {
+        console.error("Error:", xhr);
+
+        var message = "Error generating Import Bill.";
+
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+            message = xhr.responseJSON.message;
+        }
+        showToast(message, { type: "error" });
+    }
+
+}
+//-----------------End Reports----------------
+//-----------------HELPERS----------------
+function setFormReadonly() {
+    const form = $('#PurchaseBillPassEntryForm');
+    $('#btn-save').hide();
+    form.addClass('erppage-readonly');
+    //form.find('input, textarea, select').prop('disabled', true);
+    $('#copyFromDropdown, .erppagedropdown-toggle').prop('disabled', true).removeAttr('data-bs-toggle')
+        .css({
+            'opacity': '0.5',
+            'cursor': 'not-allowed',
+            'pointer-events': 'none'
+        });
+
+    $('.btn-add-action, .btn-delete-action, #btnAdvanceTDS')
+        .prop('disabled', true)
+        .css({
+            'opacity': '0.5',
+            'cursor': 'not-allowed',
+            'pointer-events': 'none'
+        });
+    $('#dropZone')
+        .css({
+            'pointer-events': 'none',
+            //'opacity': '0.65',      
+            'cursor': 'not-allowed'
+        });
+}
+
+//===================Approval===================
+$(document).on('click', '#btn_Sendapproval', function () {
+    var FromName = window.location.pathname.split('/')[1];
+    $.ajax({
+        url: '/Approval/CheckPendingUser',
+        type: 'POST',
+        data: {
+            vNo: $('#NumDocNo').val(),
+            vType: rowIdVType
+        },
+        success: function (response) {
+            console.log('Response:', response);
+            // Pending with another user
+            if (response.success === false) {
+                showToast(`Pending With Another User : ${response.fullName} (${response.userCode})`,
+                    { type: "warning" });
+                return;
+            }
+            // Approval_Code = 5
+            if (response.approvalCode8 === true) {
+                OpenApprovalModal({
+                    DocType: rowIdVType,
+                    DocNo: $('#NumDocNo').val(),
+                    TableName: DBTableName
+                });
+                return;
+            }
+            // Approval_Code != 8
+            OpenSendForApprovalModal({
+                DocType: rowIdVType,
+                DocNo: $('#NumDocNo').val(),
+                UserCode: null,
+                UserName: null,
+                DocDate: null,
+                TableName: DBTableName,
+                FromName, FromName
+            });
+
+        },
+        error: function (xhr, status, error) {
+            console.log(error);
+            alert('Error while checking approval status.');
+        }
+    });
+
+});
+$(document).on('click', '#btn_Approved', function () {
+    OpenApprovalModal({
+        DocType: rowIdVType,
+        DocNo: $('#NumDocNo').val(),
+        TableName: DBTableName
+    });
+});
+
+//===========Cr/Dr Note Button Visibilty============
+function checkDrCrNoteVisibility() {
+
+    // Initially hide all
+    $('#BtnDrNotePrint').hide();
+    $('#BtnCrNotePrint').hide();
+    
+    const drTotal =
+        (parseFloat($('#TxtTds194q2').val()) || 0) +
+        (parseFloat($('#TxtQualityDiffDebitAmt').val()) || 0) +
+        (parseFloat($('#TxtQualityDiffDebitTax').val()) || 0) +
+        (parseFloat($('#TxtRateDiffDebitAmt').val()) || 0) +
+        (parseFloat($('#TxtRateDiffDebitTax').val()) || 0) +
+        (parseFloat($('#TxtQCDebitNoteAmt').val()) || 0) +
+        (parseFloat($('#TxtQCDebitNoteTax').val()) || 0) +
+        (parseFloat($('#TxtWeightDebitAmt').val()) || 0) +
+        (parseFloat($('#TxtWeightDebitTax').val()) || 0) +
+        (parseFloat($('#TxtOtherDebitAmt').val()) || 0) +
+        (parseFloat($('#TxtOtherDebitTax').val()) || 0);
+
+
+    if (drTotal > 0) {
+
+        $('#BtnDrNotePrint').show();
+        
+        return;
+    }
+
+
+    const crTotal =
+        (parseFloat($('#TxtQualityCreditNoteAmt').val()) || 0) +
+        (parseFloat($('#TxtQualityCreditNoteVal').val()) || 0) +
+        (parseFloat($('#TxtQCCreditNoteAmt').val()) || 0) +
+        (parseFloat($('#TxtQCCreditNoteVal').val()) || 0) +
+        (parseFloat($('#TxtWeightCreditNoteAmt').val()) || 0) +
+        (parseFloat($('#TxtWeightCreditNoteVal').val()) || 0) +
+        (parseFloat($('#TxtRateDiffCreditNoteAmt').val()) || 0) +
+        (parseFloat($('#TxtRateDiffCreditNoteVal').val()) || 0);
+
+
+    if (crTotal > 0) {
+
+        $('#BtnCrNotePrint').show();
+    }
+}
+
+//==========Duplicate==========
+function checkDuplicateItems(currentSelect) {
+
+    const value = currentSelect.value;
+    if (!value) return false;
+
+    let duplicate = false;
+
+    document.querySelectorAll('#tblItemRecordPBPE .item-name').forEach(el => {
+        if (el === currentSelect) return;
+
+        if (el.value === value) {
+            duplicate = true;
+        }
+    });
+
+    if (duplicate) {
+
+        $(currentSelect).addClass("is-invalid");
+        showToast("Duplicate item found!", { type: "warning" });
+    } else {
+        $(currentSelect).removeClass("is-invalid");
+    }
+
+    return duplicate;
+}
+
+function itemNameChanged(itemName) {
+    if (isLoadForEdit) return;
+
+    const row = itemName.closest("tr");
+    const selectedOption = itemName.options[itemName.selectedIndex];
+
+    const uomCode = selectedOption?.dataset.ucode;
+    const uomName = selectedOption?.dataset.unit;
+
+    row.querySelector(".uom-code").value = uomCode || "";
+    row.querySelector(".uom-name").value = uomName || "";
+
+    // Duplicate
+    if (checkDuplicateItems(itemName)) {
+        return;
+    }
 }

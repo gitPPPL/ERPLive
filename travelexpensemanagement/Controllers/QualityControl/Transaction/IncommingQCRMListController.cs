@@ -18,8 +18,8 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private int? userLevel;
         public IncommingQCRMListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-    DropdownService dropdownService, DbHelper dbHelper,
-    ModuleService.ModuleService moduleService)
+        DropdownService dropdownService, DbHelper dbHelper,
+        ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -31,7 +31,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
         {
             return View("~/Views/QualityControl/Transaction/IncommingQCRMList/Index.cshtml");
         }
-        [HttpGet]
         public JsonResult GetQCIncommingQCEntryList(string searchTerm, int pageNumber = 1, int pageSize = 10)
         {
             var results = new List<object>();
@@ -40,8 +39,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
             {
                 var gv = _globalVariableService.GetGlobalVariables();
                 using (var con = _dbConnection.GetErpConnection())
-                using (var cmd = new SqlCommand("usp_InsertQC1PreIncommingQCRM", con))
-                //usp_InsertQC1IncommingQCRMList
+                using (var cmd = new SqlCommand("usp_InsertQC1IncommingQCRM", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -49,7 +47,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     cmd.Parameters.AddWithValue("@Action", "SELECT");
                     cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
                     cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
                     cmd.Parameters.AddWithValue("@V_TYPE", DBNull.Value);
 
                     // Paging + search
@@ -90,7 +88,6 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 STATUS = reader["STATUS"]?.ToString()
                             });
                         }
-                        // Read total count (2nd resultset)
                         if (reader.NextResult() && reader.Read())
                         {
                             totalCount = reader.GetInt32(0);
@@ -108,6 +105,79 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     error = ex.Message
                 });
             }
+        }
+
+        [HttpPost]
+        public JsonResult Delete(int vNo, string docType)
+        {
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("usp_InsertQC1IncommingQCRM", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "DELETE");
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@V_NO", vNo);
+                        cmd.Parameters.AddWithValue("@V_TYPE", docType);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new
+                {
+                    status = true,
+                    message = "Record deleted successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult CreateSession()
+        {
+            try
+            {
+                string userID = _globalVariableService.GetGlobalVariables().PubUserId.ToString();
+                string sessionId = $"{DateTime.Now:ddMMyyyyHHmmss}{userID}";
+                HttpContext.Session.SetString("SESSION_ID", sessionId);
+
+                return Json(new
+                {
+                    success = true,
+                    sessionId = sessionId
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult ClearSession()
+        {
+            HttpContext.Session.Clear();
+
+            return Json(new
+            {
+                success = true
+            });
         }
 
     }

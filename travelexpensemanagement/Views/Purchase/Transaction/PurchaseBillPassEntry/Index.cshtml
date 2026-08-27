@@ -1,4 +1,5 @@
-﻿@{
+﻿@await Html.PartialAsync("_CostAllocationModal")
+@{
     ViewBag.Title = "Purchase Bill Pass Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
@@ -12,6 +13,17 @@
         <div class="erppage-header-title">Purchase Bill Pass Entry</div>
     </div>
     <div class="erppage-header-right">
+        <button type="button"
+                id="btn_Sendapproval"
+                style="display:none;" class="erppagebtn_sendapproval">
+            <i class="fa fa-share"></i>Send For Approval
+        </button>
+        <button type="button"
+                id="btn_Approved"
+                style="display:none;"
+                class="erppagebtn_approved">
+            Approved
+        </button>
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PurchaseBillPassEntryList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -56,7 +68,7 @@
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Bill From</label>
                                 <div class="erppage-inputgroup">
-                                    <select class="erppage-input erppage-width-93" id="ddlBillFrom" disabled>
+                                    <select class="erppage-input erppage-width-93" id="ddlBillFrom" >
                                         <option value="">Select Bill From</option>
                                     </select>
                                     <select class="erppage-input erppage-width-7" id="ddlBillFromAddress">
@@ -132,7 +144,7 @@
                             <div class="erppage-divfield erppage-datefield">
                                 <label class="erppage-label">Sys Date</label>
                                 <div class="erppage-datebox">
-                                    <input type="date" class="erppage-input erppage-dateinput" id="Dtsysdate">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="Dtsysdate" disabled>
                                     <label class="erppage-checkbox-inside">
                                         <input type="checkbox" class="erppage-checkbox-input" id="chksysdate">
                                     </label>
@@ -325,6 +337,8 @@
                         <option value="pending">Pending</option> *@
                     </select>
                 </div>
+                <label id="lblE_invoice_suppl" 
+                    style="color:blue; font-size:large; background-color:yellow; display:none;" >E-Invoice Supplier</label>
             </div>
 
             <div class="erppage-internalaction mt-2">
@@ -351,19 +365,21 @@
                         </li> *@
                     </ul>
                 </div>
-                <button type="button" class="erppage-btn erppage-btn-common-disabled" data-bs-toggle="modal" data-bs-target="#costallocationModal">
+                <button type="button" class="erppage-btn erppage-btn-common-disabled" onclick="onCostAllocationClick();">
                     <i class="fa fa-calculator"></i>
                     <span>Cost Allocation</span>
                 </button>
-                <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" data-bs-toggle="modal" data-bs-target="#pendingapprovalModal">
+                <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" data-bs-toggle="modal" 
+                    data-bs-target="#pendingapprovalModal"
+                        onclick="onGetPendingAppListClick()">
                     <i class="fa fa-clock"></i>
                     <span>List of Pending Approval</span>
                 </button>
-                <button type="button" class="erppage-btn erppage-btn-common-pending-disabled">
+                <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" onclick="PendingMRNBPReport()">
                     <i class="fa fa-file-text"></i>
                     <span>Pending MRN for Bill Passing</span>
                 </button>
-                <button type="button" class="erppage-btn erppage-btn-common-disabled">
+                <button type="button" class="erppage-btn erppage-btn-common-disabled" onclick="RMImportReport()">
                     <i class="fa fa-ship"></i>
                     <span>RM Import Bill</span>
                 </button>
@@ -500,7 +516,7 @@
                         </div>
                         <div class="erppage-divfield erppage-col-span-2 erppage-internalaction">
                             <div class="erppage-divfield">
-                                <button type="button" class="erppage-btn erppage-btn-common-active-disabled" data-bs-toggle="modal" data-bs-target="#advancetdsModal">
+                                <button type="button" class="erppage-btn erppage-btn-common-active-disabled" id="btnAdvanceTDS" data-bs-toggle="modal" data-bs-target="#advancetdsModal" onclick="onAdvanceTDSClick()">
                                     <i class="fa fa-sitemap"></i>
                                     <span>Advance TDS</span>
                                 </button>
@@ -1048,10 +1064,23 @@
                             </div>
                             <!-- Purchase Slip Button -->
                             <div class="erppage-divfield erppage-align-bottom">
-                                <button type="button" class="erppage-btn erppage-btn-common-active" id="BtnPurchaseSlip">
+                                <button type="button" class="erppage-btn erppage-btn-common-active" id="BtnDrNotePrint" onclick="DebitNoteReport()">
+                                    <i class="fa fa-file-text-o"></i>
+                                    <span>Dr Note Print</span>
+                                </button>
+                                <button type="button" class="erppage-btn erppage-btn-common-active" id="BtnCrNotePrint" onclick="CreditNoteReport()">
+                                    <i class="fa fa-file-text-o"></i>
+                                    <span>Cr Note Print</span>
+                                </button>
+                                <button type="button" class="erppage-btn erppage-btn-common-active" id="BtnPurchaseSlip" onclick="PurchaseSlipReport()">
                                     <i class="fa fa-file-text-o"></i>
                                     <span>Purchase Slip</span>
                                 </button>
+                                @* Button is not visible in ERP, uncomment if required *@
+                                @* <button type="button" class="erppage-btn erppage-btn-common-active" id="BtnPayableAmount" onclick="PayableAmountReport()">
+                                    <i class="fa fa-file-text-o"></i>
+                                    <span>Payable Amount</span>
+                                </button> *@ 
                             </div>
 
                         </div>
@@ -1439,7 +1468,7 @@
                 </div>
             </div>
             <!--Cost Allocation Modal-->
-            <div class="modal fade" id="costallocationModal" tabindex="-1" aria-labelledby="costallocationLabel" aria-hidden="true">
+            @* <div class="modal fade" id="costallocationModal" tabindex="-1" aria-labelledby="costallocationLabel" aria-hidden="true">
                 <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
                     <div class="modal-content erppagesmodal-content">
                         <div class="erppagesmodal-header">
@@ -1519,7 +1548,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> *@
             <!--Pending Approval Modal-->
             <div class="modal fade" id="pendingapprovalModal" tabindex="-1"
                  aria-labelledby="pendingapprovalLabel" aria-hidden="true">
@@ -1604,33 +1633,33 @@
                             <div class="erppage-grid3">
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Dr Amt Header</label>
-                                    <input type="number" class="erppage-input" id="dramtheader">
+                                    <input type="number" class="erppage-input" id="dramtheader" readonly>
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Dr Amt Grid</label>
-                                    <input type="number" class="erppage-input" id="dramtgrid">
+                                    <input type="number" class="erppage-input" id="dramtgrid" readonly>
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Dr Amt Diff</label>
-                                    <input type="number" class="erppage-input" id="NumDrAmtDiff">
+                                    <input type="number" class="erppage-input" id="NumDrAmtDiff" readonly>
                                 </div>
                             </div>
                             <div class="erppage-grid3">
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Cr Amt Header</label>
-                                    <input type="number" class="erppage-input" id="cramtheader">
+                                    <input type="number" class="erppage-input" id="cramtheader" readonly>
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Cr Amt Grid</label>
-                                    <input type="number" class="erppage-input" id="cramtgrid">
+                                    <input type="number" class="erppage-input" id="cramtgrid" readonly>
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Cr Amt Diff</label>
-                                    <input type="number" class="erppage-input" id="NumcrAmtDiff">
+                                    <input type="number" class="erppage-input" id="NumcrAmtDiff" readonly>
                                 </div>
                             </div>
                             <div class="erppage-internalaction">
-                                <button type="button" class="erppage-btn erppage-btn-common-active">
+                                <button type="button" class="erppage-btn erppage-btn-common-active" onclick="onBtnCalculateDrCrClick()">
                                     <i class="fa fa-calculator"></i>
                                     <span>Calculate</span>
                                 </button>

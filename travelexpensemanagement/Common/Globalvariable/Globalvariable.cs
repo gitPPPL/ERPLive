@@ -229,6 +229,7 @@ namespace travelexpensemanagement.Common.Globalvariable
                                 model.pubDefWBINSI = Convert.ToString(rdr["WBINSI"]);
                                 model.pubDefISSUEINSI = Convert.ToString(rdr["ISSUEINSI"]);
                                 model.PubDefEWaybillAmt = Convert.ToDecimal(rdr["EWAYBILL_AMT"] ?? 0);
+                                //model.PubDefEWaybillAmt = rdr["EWAYBILL_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(rdr["EWAYBILL_AMT"]);
                                 model.pubDefTaxonInsuInSI = Convert.ToString(rdr["TAXINSINSI"]);
                                 model.pubDefTaxonFrtInSI = Convert.ToString(rdr["TAXFRTINSI"]);
                                 model.pubDefInsuInBillAmtInSI = Convert.ToString(rdr["INSBILLAMTINSI"]);

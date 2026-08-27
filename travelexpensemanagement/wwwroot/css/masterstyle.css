@@ -3230,7 +3230,7 @@ table tbody tr {
 
     .table-width td {
         vertical-align: middle;
-        padding: 4px 8px;
+        padding: 4px 8px !important;
         white-space: nowrap;
     }
     .table-width th {

@@ -1,0 +1,100 @@
+﻿<div id="EmployeeForm">
+    <input type="hidden" class="form-control" id="TxtId" name="Id">
+
+    <div class="erppage-container">
+        <fieldset class="erppage-fieldset">
+
+            <div class="erppage-grid4">
+
+                <!-- Name -->
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Name</label>
+                    <input type="text"
+                           class="erppage-redinput erppage-required"
+                           id="TxtName"
+                           name="Name"
+                           placeholder="Enter employee name">
+                </div>
+
+                <!-- Salary -->
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Salary</label>
+                    <input type="text"
+                           class="erppage-input"
+                           id="NumSalary"
+                           name="Salary"
+                           placeholder="Enter salary"
+                           step="0.01">
+                </div>
+
+                <!-- Joining Date -->
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Joining Date</label>
+                    <input type="datetime-local"
+                           class="erppage-input"
+                           id="DtJoiningDate"
+                           name="JoiningDate">
+                </div>
+
+                <!-- Is Active -->
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Is Active</label>
+                    <select class="erppage-input erppage-required"
+                            id="ddlIsActive"
+                            name="IsActive">
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                    </select>
+                </div>
+
+                <button type="button"
+                        class="erppage-btn erppage-btn-primary"
+                        id="btnSave"
+                        onclick="SaveEmployee()">
+                    Save
+                </button>
+
+            </div>
+
+        </fieldset>
+    </div>
+</div>
+<script>
+    function SaveEmployee() {
+        var request = {
+        Header: {
+            Name: $("#TxtName").val(),
+            Salary: $("#NumSalary").val(),
+            JoiningDate: $("#DtJoiningDate").val(),
+            IsActive: $("#ddlIsActive").val()
+        },
+
+        Details: [
+        {
+            Id: "7",
+            Name: ""
+        }
+    ]
+    };
+
+        console.log("data", request);
+
+        $.ajax({
+            url: '/TestNan/Save',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(request),
+            success: function (response) {
+                if (response.success) {
+                    alert("Employee saved successfully.");
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+                alert("Error while saving employee.");
+            }
+        });
+    }
+</script>

@@ -68,6 +68,7 @@ namespace travelexpensemanagement.Models.Purchase.Transaction
             public DateTime? EWB_EXPDATE { get; set; }
 
             public string EWB_INVNO { get; set; }
+            public int? EINV_PARTY { get; set; }
         }
         public class PurchaseItemDto
         {
@@ -325,6 +326,7 @@ namespace travelexpensemanagement.Models.Purchase.Transaction
             public List<PURCHASE2> Items { get; set; } = new();
             public List<PurchaseBillAttachments> Attachments { get; set; } = new();
             public List<PurchaseBillAttachments> EprAttachments { get; set; } = new();
+            public decimal? existingTDS { get; set; }
         }
 
 
@@ -368,7 +370,7 @@ namespace travelexpensemanagement.Models.Purchase.Transaction
         public class PendingApprovalModel
         {
             public string? Type { get; set; }
-            public int DocID { get; set; }
+            public string? DocID { get; set; }
             public string? DocDate { get; set; }
             public string? SendBy { get; set; }
             public string? SendDate { get; set; }
@@ -380,6 +382,228 @@ namespace travelexpensemanagement.Models.Purchase.Transaction
             public string? CreatedDate { get; set; }
             public string? PartyName { get; set; }
             public decimal BillAmount { get; set; }
+        }
+
+        public class AdvanceTdsModel
+        {
+            public string? Vtype { get; set; }
+            public string? VNo { get; set; }
+            public string? VDate { get; set; }
+            public decimal Amount { get; set; }
+            public string? PartyName { get; set; }
+        }
+
+        public class DrCrCalculationResponse
+        {
+            public List<DrCrRowAmount> Rows { get; set; } = new();
+
+            public decimal DrAmtHeader { get; set; }
+            public decimal CrAmtHeader { get; set; }
+
+            public decimal DrAmtGrid { get; set; }
+            public decimal CrAmtGrid { get; set; }
+
+            public decimal DrAmtDiff { get; set; }
+            public decimal CrAmtDiff { get; set; }
+
+        }
+
+        public class DrCrRowAmount
+        {
+            public int ItemCode { get; set; }
+
+            public decimal poLandRate { get; set; }
+            public decimal QualityDiffDrAmt { get; set; }
+            public decimal RateDiffDrAmt { get; set; }
+            public decimal QCDiffDrNoteAmt { get; set; }
+            public decimal WeightDiffDrAmt { get; set; }
+            public decimal OtherDrNoteAmt { get; set; }
+
+            public decimal FinalDrNote { get; set; }
+            public decimal FinalCrNote { get; set; }
+
+            public string? rowWarningMsg { get; set; }
+        }
+
+        public class CalculateDrCrRequest
+        {
+            public DateTime vDate { get; set; }
+            public string RefType { get; set; } = "";
+            public int RefVNo { get; set; }
+
+            public string InputType { get; set; } = "";
+
+            public string VType { get; set; } = "";
+
+            public int BillTo { get; set; }
+            public string billToName { get; set; } = "";
+
+
+            public decimal RateDiffDebitAmt { get; set; }
+            public decimal RateDiffDebitTax { get; set; }
+            public decimal RateDiffCreditAmt { get; set; }
+            public decimal RateDiffCreditTax { get; set; }
+
+            public decimal QualityDiffDebitAmt { get; set; }
+            public decimal QualityDiffDebitTax { get; set; }
+            public decimal QualityDiffCreditAmt { get; set; }
+            public decimal QualityDiffCreditTax { get; set; }
+
+            public decimal WeightDiffDebitAmt { get; set; }
+            public decimal WeightDiffDebitTax { get; set; }
+            public decimal WeightDiffCreditAmt { get; set; }
+            public decimal WeightDiffCreditTax { get; set; }
+
+            public decimal QCDebitAmt { get; set; }
+            public decimal QCDebitTax { get; set; }
+            public decimal QCCreditAmt { get; set; }
+            public decimal QCCreditTax { get; set; }
+
+            public decimal OthDebitAmt { get; set; }
+            public decimal OthDebitTax { get; set; }
+
+            public List<CalculateGridRow> Rows { get; set; } = new();
+        }
+
+        public class CalculateGridRow
+        {
+            public int ItemCode { get; set; }
+
+            public decimal RecdQty { get; set; }
+            public decimal BillQty { get; set; }
+            public decimal Rate { get; set; }
+            public decimal LandRate { get; set; }
+            public decimal PORate { get; set; }
+            public decimal POLandRate { get; set; }
+            public decimal Amount { get; set; }
+
+            public decimal CGSTPer { get; set; }
+            public decimal SGSTPer { get; set; }
+            public decimal IGSTPer { get; set; }
+
+            public string POType { get; set; } = "";
+            public int PONo { get; set; }
+
+            public string ItemName { get; set; } = "";
+        }
+
+        public class ImportBillRequest
+        {
+            public int VNo { get; set; }
+            public string VType { get; set; }
+            public DateTime VDate { get; set; }
+            public int PlNo { get; set; }
+        }
+
+        public class PurchaseEditStatus
+        {
+            public bool IsApproved { get; set; }
+            public bool IsApprovalInProcess { get; set; }
+            public string? ApprovalUser { get; set; }
+            public bool IsFinalApprovalBody { get; set; }
+            public string? EAFlag { get; set; }
+        }
+
+        public class PurchaseDeleteStatus
+        {
+            public bool IsApprovalInProcess { get; set; }
+            public bool ExistsInLedger { get; set; }
+            public string LedgerNo { get; set; } = "";
+            public string LedgerDate { get; set; } = "";
+        }
+
+        public class AddressDetails
+        {
+            public string add1 { get; set; }
+            public string add2 { get; set; }
+            public string add3 { get; set; }
+            public string pincode { get; set; }
+            public string gstin { get; set; }
+            public string cityCode { get; set; }
+            public int? einv_party { get; set; }
+        }
+
+        public class ValidateCostAllocationRequest
+        {
+            public string DrActCode { get; set; }
+            public string VType { get; set; }
+            public string VNo { get; set; }
+            public string InputType { get; set; }
+
+            public string TotAmt { get; set; }
+            public string TotPacking { get; set; }
+            public string TotDisc { get; set; }
+            public string TotNetAmount { get; set; }
+
+            public string QDiffDrAmt { get; set; }
+            public string QDiffDrTax { get; set; }
+            public string RateDiffDrAmt { get; set; }
+            public string RateDiffDrTax { get; set; }
+
+            public string QcDrNoteAmt { get; set; }
+            public string QcDrNoteTax { get; set; }
+            public string WgtDrNoteAmt { get; set; }
+            public string WgtDrNoteTax { get; set; }
+            public string OthDrNoteAmt { get; set; }
+            public string OthDrNoteTax { get; set; }
+
+            public string QCrNoteAmt { get; set; }
+            public string QCrNoteTax { get; set; }
+            public string RDiffCrNoteAmt { get; set; }
+            public string RDiffCrNoteTax { get; set; }
+
+            public string QcCrNoteAmt { get; set; }
+            public string QcCrNoteTax { get; set; }
+            public string WgtCrNoteAmt { get; set; }
+            public string WgtCrNoteTax { get; set; }
+        }
+
+        public class ImportInvoiceListModel
+        {
+            public string? SaudaNo { get; set; }
+            public string? ExpenseType { get; set; }
+            public string? InvNo { get; set; }
+            public string? InvDate { get; set; }
+            public string? InvAmt { get; set; }
+            public string? PartyName { get; set; }
+        }
+
+        //------------------TDS ADJUSTMENT-------------
+        public class TDSAdjustmentRequest
+        {
+            public int PartyCode { get; set; }
+            public string PartyName { get; set; }
+            public string VType { get; set; }
+            public int VNo { get; set; }
+            public string VDate { get; set; }
+        }
+
+        public class TDSAdjustmentRow
+        {
+            public string VType { get; set; }
+            public int VNo { get; set; }
+            public DateTime? VDate { get; set; }
+            public decimal Amount { get; set; }
+            public string Narration { get; set; }
+
+            // Existing adjustment from database
+            public decimal AdjustedAmount { get; set; }
+
+            // New adjustment entered by user
+            public decimal? BalanceAdjustment { get; set; }
+
+            public int CRCode { get; set; }
+            public string CRName { get; set; }
+        }
+
+        public class TDSAdjustmentSaveRequest
+        {
+            public int PartyCode { get; set; }
+            public string VType { get; set; }
+            public int VNo { get; set; }
+            public string VDate { get; set; }
+
+            public List<TDSAdjustmentRow> Rows { get; set; }
         }
     }
 

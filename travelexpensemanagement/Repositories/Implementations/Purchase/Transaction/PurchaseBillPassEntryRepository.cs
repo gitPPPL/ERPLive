@@ -1,15 +1,13 @@
-﻿using Azure;
-using HarfBuzzSharp;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Globalization;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.GlobalFunction;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Purchase.Transiction;
 using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
-using static travelexpensemanagement.Controllers.Purchase.Transaction.PurchaseBillPassEntryController;
 using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseBillPassEntryModel;
 
 namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transaction
@@ -34,19 +32,13 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         {
             var gv = _globalVariableService.GetGlobalVariables();
 
-            string query = @"
-            SELECT ISNULL(SUM(AMT), 0)
-            FROM LEDGER2
-            WHERE BILL_NO = @BILL_NO
-              AND DR_CODE = @DR_CODE
-              AND COMP_CODE = @COMP_CODE
-              AND BRANCH_CODE = @BRANCH_CODE";
-
             using var con = _dbConnection.GetErpConnection();
-            using var cmd = new SqlCommand(query, con);
+            using var cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", con);
 
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@Action", "CHeckExistingTDS");
             cmd.Parameters.Add("@BILL_NO", SqlDbType.VarChar).Value = billNo;
-            cmd.Parameters.Add("@DR_CODE", SqlDbType.Int).Value = drCode;
+            cmd.Parameters.Add("@DEBIT_AC", SqlDbType.Int).Value = drCode;
             cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = gv.PubCompCode;
             cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = gv.PubBranchCode;
 
@@ -61,23 +53,10 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         {
             var gv = _globalVariableService.GetGlobalVariables();
 
-            string query = @"
-                    SELECT TOP 1
-                        A.DEBIT_AC,
-                        B.NAME
-                    FROM PURCHASE1 A
-                    LEFT JOIN SUBGROUP_MAST B
-                        ON A.DEBIT_AC = B.CODE
-                       AND A.COMP_CODE = B.COMP_CODE
-                    WHERE A.V_TYPE = @V_TYPE
-                      AND A.COMP_CODE = @COMP_CODE
-                      AND A.BRANCH_CODE = @BRANCH_CODE
-                      AND A.YEAR_CODE = @YEAR_CODE
-                    ORDER BY A.V_DATE DESC";
-
             using var con = _dbConnection.GetErpConnection();
-            using var cmd = new SqlCommand(query, con);
-
+            using var cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@Action", "LatestDebitAc");
             cmd.Parameters.Add("@V_TYPE", SqlDbType.VarChar).Value = vType;
             cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = gv.PubCompCode;
             cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = gv.PubBranchCode;
@@ -268,7 +247,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         }
 
         //------------- Quality Difference Note ---------
-        public void CalculateQualityDifferenceNote(DebitNoteRequest request, DebitNoteItem item, decimal taxPer, DebitNoteCalculationState state, DebitNoteResponse response)
+        public async void CalculateQualityDifferenceNote(DebitNoteRequest request, DebitNoteItem item, decimal taxPer, DebitNoteCalculationState state, DebitNoteResponse response)
         {
             var saudaDetails = GetSaudaDetails(item.PoType, item.PoNo);
 
@@ -279,7 +258,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
 
             if (request.VType == "RMPB")
             {
-                q15Result = CalculateQ15Difference(request, item, saudaDetails, taxPer, response);
+                q15Result = await CalculateQ15Difference(request, item, saudaDetails, taxPer, response);
 
                 discItemRate = q15Result.DiscItemRate;
             }
@@ -338,7 +317,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         }
 
         //------------- Q15 Difference ---------
-        public Q15Result CalculateQ15Difference(DebitNoteRequest request, DebitNoteItem item, (decimal rate, int itemCode) saudaDetails, decimal taxPer, DebitNoteResponse response)
+        public async Task<Q15Result> CalculateQ15Difference(DebitNoteRequest request, DebitNoteItem item, (decimal rate, int itemCode) saudaDetails, decimal taxPer, DebitNoteResponse response)
         {
             Q15Result result = new Q15Result();
             var gv = _globalVariableService.GetGlobalVariables();
@@ -351,7 +330,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
 
             if (saudaReq.Equals("YES", StringComparison.OrdinalIgnoreCase))
             {
-                var rmDiscount = GetRMDiscountDetails(saudaDetails.itemCode, item.ItemCode, request.vDate);
+                var rmDiscount = await GetRMDiscountDetails(saudaDetails.itemCode, item.ItemCode, request.vDate);
 
                 if (rmDiscount.SaudaExists)
                 {
@@ -420,15 +399,15 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         }
 
         //------------- Quality Difference Without PO ---------
-        public void CalculateQualityDifferenceWithoutPO(DebitNoteRequest request, DebitNoteItem item, decimal taxPer, DebitNoteCalculationState state, DebitNoteResponse response)
+        public async void CalculateQualityDifferenceWithoutPO(DebitNoteRequest request, DebitNoteItem item, decimal taxPer, DebitNoteCalculationState state, DebitNoteResponse response)
         {
-            item.POLandRate = GetApprovedPOLandRate(item.PoType, item.PoNo);
+            item.POLandRate = await GetApprovedPOLandRate(item.PoType, item.PoNo);
 
             decimal discItemRate = 0;
 
             if (request.VType == "RMPB")
             {
-                var discount = GetDiscountRate(request.billToPartyCode, item.ItemCode);
+                var discount = await GetDiscountRate(request.billToPartyCode, item.ItemCode);
 
                 if (discount.exists)
                 {
@@ -686,7 +665,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             if (saudaNo <= 0)
                 return;
 
-            decimal totalPurchaseQty = GetTotalPurchaseQty(saudaNo, request.VNo);
+            decimal totalPurchaseQty = await GetTotalPurchaseQty(saudaNo, request.VNo);
 
             var sauda = GetSaudaInfo(saudaNo);
 
@@ -873,25 +852,18 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
 
         //---------------------------------- HELPERS ------------------------------
         //-------------- Items Order Rates By PO ----------------
-        private OrderRateDetailsDto GetItemOrderRatesByPO(string poType, int poNo, int itemCode)
+        public OrderRateDetailsDto GetItemOrderRatesByPO(string poType, int poNo, int itemCode)
         {
             var gv = _globalVariableService.GetGlobalVariables();
 
             var rateDetails = new OrderRateDetailsDto();
 
-            string query = @"
-                SELECT LAND_RATE, RATE, ISNULL(QTY,0) as QTY
-                FROM ORDER2
-                WHERE V_TYPE = @V_TYPE
-                  AND V_NO = @V_NO
-                  AND COMP_CODE = @COMP_CODE
-                  AND BRANCH_CODE = @BRANCH_CODE
-                  AND ITEM_CODE = @ITEM_CODE";
-
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (SqlCommand cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", con))
                 {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "OrderRatesByPO");
                     cmd.Parameters.AddWithValue("@V_TYPE", poType);
                     cmd.Parameters.AddWithValue("@V_NO", poNo);
                     cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
@@ -924,24 +896,11 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
 
             var gv = _globalVariableService.GetGlobalVariables();
 
-            string query = @"
-                SELECT TOP 1
-                    b.RATE,
-                    b.ITEM_CODE
-                FROM ORDER2 a
-                LEFT JOIN SAUDA b
-                    ON a.SAUDA_TYPE = b.V_TYPE
-                   AND a.SAUDA_NO = b.V_NO
-                   AND a.COMP_CODE = b.COMP_CODE
-                   AND a.BRANCH_CODE = b.BRANCH_CODE
-                WHERE a.V_TYPE = @V_TYPE
-                  AND a.V_NO = @V_NO
-                  AND a.COMP_CODE = @COMP_CODE
-                  AND a.BRANCH_CODE = @BRANCH_CODE";
-
             using (SqlConnection con = _dbConnection.GetErpConnection())
-            using (SqlCommand cmd = new SqlCommand(query, con))
+            using (SqlCommand cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", con))
             {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Action", "SaudaDetails");
                 cmd.Parameters.AddWithValue("@V_TYPE", poType);
                 cmd.Parameters.AddWithValue("@V_NO", poNo);
                 cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
@@ -953,13 +912,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                 {
                     if (dr.Read())
                     {
-                        rate = dr["RATE"] == DBNull.Value
-                            ? 0
-                            : Convert.ToDecimal(dr["RATE"]);
-
-                        itemCode = dr["ITEM_CODE"] == DBNull.Value
-                            ? 0
-                            : Convert.ToInt32(dr["ITEM_CODE"]);
+                        rate = dr["RATE"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["RATE"]);
+                        itemCode = dr["ITEM_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(dr["ITEM_CODE"]);
                     }
                 }
             }
@@ -974,21 +928,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
 
             var gv = _globalVariableService.GetGlobalVariables();
 
-            string query = @"
-                SELECT ISNULL(SAUDA_REQ, '')
-                FROM ITEM_GROUP
-                WHERE CODE = (
-                    SELECT GROUP_CODE
-                    FROM ITEM_MAST
-                    WHERE CODE = @ITEM_CODE
-                      AND COMP_CODE = @COMP_CODE
-                )
-                AND COMP_CODE = @COMP_CODE";
-
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (SqlCommand cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", con))
                 {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "SaudaReq");
                     cmd.Parameters.AddWithValue("@ITEM_CODE", itemCode);
                     cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
 
@@ -1007,95 +952,61 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         }
 
         //-------------- Discount Details ----------------
-        private RMDiscountDetails GetRMDiscountDetails(int saudaItemCode, int itemCode, DateTime voucherDate)
+        private async Task<RMDiscountDetails> GetRMDiscountDetails(int saudaItemCode, int itemCode, DateTime voucherDate)
         {
             try
             {
                 var RMDiscDetails = new RMDiscountDetails();
                 var gv = _globalVariableService.GetGlobalVariables();
 
+                // Query 1 : Check SAUDA_ITEM exists
+                var parameters = new Dictionary<string, object>
+                    {
+                        {"@Action", "SaudaExists"},
+                        {"@COMP_CODE", gv.PubCompCode},
+                        {"@SAUDA_ITEM", saudaItemCode},
+                    };
+                string saudaExists = await _dbHelper.GetExecuteScalarAsync<string>("sp_PurchaseBillPassEntryDirect", parameters, true);
+                RMDiscDetails.SaudaExists = saudaExists != null;
+
+                if (RMDiscDetails.SaudaExists)
+                {
+                    // Query 2 : Get SAUDA_ITEM discount rate
+                    var parameters1 = new Dictionary<string, object>
+                    {
+                        {"@Action", "SaudaDiscRate"},
+                        {"@COMP_CODE", gv.PubCompCode},
+                        {"@SAUDA_ITEM", saudaItemCode},
+                        {"@ITEM_CODE", itemCode},
+                    };
+                    RMDiscDetails.DiscRate = await _dbHelper.GetExecuteScalarAsync<decimal>("sp_PurchaseBillPassEntryDirect", parameters1, true);
+                }
+
+                // Query 3 : Get Discount Details
                 using (SqlConnection con = _dbConnection.GetErpConnection())
                 {
                     con.Open();
-
-                    //=====================================================
-                    // Query 1 : Check SAUDA_ITEM exists
-                    //=====================================================
-                    string query1 = @"
-                    SELECT TOP 1 1
-                    FROM RMDISC_MAST
-                    WHERE SAUDA_ITEM = @SAUDA_ITEM
-                      AND COMP_CODE = @COMP_CODE";
-
-                    using (SqlCommand cmd = new SqlCommand(query1, con))
+                    using (SqlCommand cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", con))
                     {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "DiscDetails");
+                        cmd.Parameters.AddWithValue("@ITEM_CODE", itemCode);
                         cmd.Parameters.AddWithValue("@SAUDA_ITEM", saudaItemCode);
                         cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@EFF_DATE", voucherDate.Date);
 
-                        RMDiscDetails.SaudaExists = cmd.ExecuteScalar() != null;
-                    }
-                    if (RMDiscDetails.SaudaExists)
-                    {
-                        //=====================================================
-                        // Query 2 : Get SAUDA_ITEM discount rate
-                        //=====================================================
-                        string query2 = @"
-                        select top 1 isnull(RATE,0) from RMDISC_MAST where SAUDA_ITEM=@SAUDA_ITEM and item_code=@ITEM_CODE and COMP_CODE=@COMP_CODE";
-
-                        using (SqlCommand cmd = new SqlCommand(query2, con))
+                        using (SqlDataReader dr = cmd.ExecuteReader())
                         {
-                            cmd.Parameters.AddWithValue("@SAUDA_ITEM", saudaItemCode);
-                            cmd.Parameters.AddWithValue("@ITEM_CODE", itemCode);
-                            cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
-
-                            var result = cmd.ExecuteScalar();
-                            RMDiscDetails.DiscRate = Convert.ToDecimal(result);
-                        }
-
-                        //=====================================================
-                        // Query 3 : Get Discount Details
-                        //=====================================================
-                        string query3 = @"
-                        SELECT TOP 1
-                            ISNULL(RATE,0) AS RATE,
-                            ISNULL(ABOVE_PER,0) AS ABOVE_PER,
-                            ISNULL(ABOVE_AMT,0) AS ABOVE_AMT
-                        FROM RMDISC_MAST
-                        WHERE ITEM_CODE = @ITEM_CODE
-                          AND SAUDA_ITEM = @SAUDA_ITEM
-                          AND COMP_CODE = @COMP_CODE
-                          AND EFF_DATE < @EFF_DATE
-                        ORDER BY EFF_DATE DESC";
-
-                        using (SqlCommand cmd = new SqlCommand(query3, con))
-                        {
-                            cmd.Parameters.AddWithValue("@ITEM_CODE", itemCode);
-                            cmd.Parameters.AddWithValue("@SAUDA_ITEM", saudaItemCode);
-                            cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
-                            cmd.Parameters.AddWithValue("@EFF_DATE", voucherDate.Date);
-
-                            using (SqlDataReader dr = cmd.ExecuteReader())
+                            if (dr.Read())
                             {
-                                if (dr.Read())
-                                {
-                                    RMDiscDetails.Rate = dr["RATE"] != DBNull.Value
-                                        ? Convert.ToDecimal(dr["RATE"])
-                                        : 0;
-
-                                    RMDiscDetails.AbovePer = dr["ABOVE_PER"] != DBNull.Value
-                                        ? Convert.ToDecimal(dr["ABOVE_PER"])
-                                        : 0;
-
-                                    RMDiscDetails.AboveAmt = dr["ABOVE_AMT"] != DBNull.Value
-                                        ? Convert.ToDecimal(dr["ABOVE_AMT"])
-                                        : 0;
-                                }
+                                RMDiscDetails.Rate = dr["RATE"] != DBNull.Value ? Convert.ToDecimal(dr["RATE"]) : 0;
+                                RMDiscDetails.AbovePer = dr["ABOVE_PER"] != DBNull.Value ? Convert.ToDecimal(dr["ABOVE_PER"]) : 0;
+                                RMDiscDetails.AboveAmt = dr["ABOVE_AMT"] != DBNull.Value ? Convert.ToDecimal(dr["ABOVE_AMT"]) : 0;
                             }
                         }
                     }
-
+                    return RMDiscDetails;
                 }
-                return RMDiscDetails;
             }
             catch (Exception ex)
             {
@@ -1104,73 +1015,41 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         }
 
         //-------------- Approved Land Rate ----------------
-        private decimal GetApprovedPOLandRate(string poType, int poNo)
+        private async Task<decimal> GetApprovedPOLandRate(string poType, int poNo)
         {
-            decimal rate = 0;
-
             var gv = _globalVariableService.GetGlobalVariables();
-
-            string query = @"
-            SELECT TOP 1 ISNULL(RATE, 0)
-            FROM ORDER2
-            WHERE V_TYPE = @V_TYPE
-              AND V_NO = @V_NO
-              AND COMP_CODE = @COMP_CODE
-              AND BRANCH_CODE = @BRANCH_CODE
-              AND FAPROV_STATUS = 'Approved'";
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            using (SqlCommand cmd = new SqlCommand(query, con))
+            var parameters = new Dictionary<string, object>
             {
-                cmd.Parameters.AddWithValue("@V_TYPE", poType);
-                cmd.Parameters.AddWithValue("@V_NO", poNo);
-                cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
-                cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
-
-                con.Open();
-
-                var result = cmd.ExecuteScalar();
-
-                if (result != null && result != DBNull.Value)
-                {
-                    rate = Convert.ToDecimal(result);
-                }
-            }
-
+                {"@Action", "AppPOLandRate"},
+                {"@V_TYPE", poType},
+                {"@V_NO", poNo},
+                {"@COMP_CODE", gv.PubCompCode},
+                {"@BRANCH_CODE", gv.PubBranchCode}
+            };
+            decimal rate = await _dbHelper.GetExecuteScalarAsync<decimal>("sp_PurchaseBillPassEntryDirect", parameters, true);
             return rate;
         }
 
         //-------------- Discount Rate ----------------
-        private (bool exists, decimal discountRate) GetDiscountRate(int supplierCode, int itemCode)
+        private async Task<(bool exists, decimal discountRate)> GetDiscountRate(int supplierCode, int itemCode)
         {
             decimal discountRate = 0;
             bool exists = false;
 
             var gv = _globalVariableService.GetGlobalVariables();
-
-            string query = @"
-                SELECT TOP 1 ISNULL(ITEM_DIFF, 0)
-                FROM DISC_MAST
-                WHERE CODE = @CODE
-                  AND ITEM_CODE = @ITEM_CODE
-                  AND COMP_CODE = @COMP_CODE";
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            using (SqlCommand cmd = new SqlCommand(query, con))
+            var parameters = new Dictionary<string, object>
             {
-                cmd.Parameters.AddWithValue("@CODE", supplierCode);
-                cmd.Parameters.AddWithValue("@ITEM_CODE", itemCode);
-                cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                {"@Action", "DiscRate"},
+                {"@PARTY_CODE", supplierCode},
+                {"@ITEM_CODE", itemCode},
+                {"@COMP_CODE", gv.PubCompCode}
+            };
+            var result = await _dbHelper.GetExecuteScalarAsync<decimal>("sp_PurchaseBillPassEntryDirect", parameters, true);
 
-                con.Open();
-
-                var result = cmd.ExecuteScalar();
-
-                if (result != null && result != DBNull.Value)
-                {
-                    exists = true;
-                    discountRate = Convert.ToDecimal(result);
-                }
+            if (result >= 0)
+            {
+                exists = true;
+                discountRate = result;
             }
 
             return (exists, discountRate);
@@ -1183,28 +1062,18 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
 
             QCDetailsDto result = new QCDetailsDto();
 
-            string query = @"
-            SELECT
-                ISNULL(DEDUCT_AMT,0) - ISNULL(ALLOW_AMT,0) AS DEDUCT_AMT,
-                CONCAT(ISNULL(DEDUCT_NARR,''), ISNULL(ALLOW_NARR,'')) AS NARRATION
-            FROM QC1
-            WHERE MRN_TYPE = @MRN_TYPE
-              AND MRN_NO = @MRN_NO
-              AND COMP_CODE = @COMP_CODE
-              AND BRANCH_CODE = @BRANCH_CODE
-              AND YEAR_CODE = @YEAR_CODE";
-
             using SqlConnection con = _dbConnection.GetErpConnection();
-            using SqlCommand cmd = new(query, con);
+            using SqlCommand cmd = new("sp_PurchaseBillPassEntryDirect", con);
 
-            cmd.Parameters.AddWithValue("@MRN_TYPE", mrnType);
-            cmd.Parameters.AddWithValue("@MRN_NO", mrnNo);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@Action", "QCDetails");
+            cmd.Parameters.AddWithValue("@REF_TYPE", mrnType);
+            cmd.Parameters.AddWithValue("@REF_NO", mrnNo);
             cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
             cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
             cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
 
             con.Open();
-
             using SqlDataReader dr = cmd.ExecuteReader();
 
             if (dr.Read())
@@ -1220,51 +1089,22 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         private async Task<int> GetSaudaNo(int vNo)
         {
             var gv = _globalVariableService.GetGlobalVariables();
-
-            const string query = @"SELECT TOP 1 SAUDA_NO FROM ORDER1 WHERE COMP_CODE=@COMP_CODE AND V_TYPE='RORD' AND V_NO IN
-                                  (SELECT PO_NO FROM PURCHASE2 WHERE COMP_CODE=@COMP_CODE AND V_TYPE='RMPB' AND V_NO=@V_NO)";
-
-            return await _dbHelper.GetExecuteScalarAsync<int>(query,
-                new Dictionary<string, object>
-                {
-                    ["@COMP_CODE"] = gv.PubCompCode,
-                    ["@V_NO"] = vNo
-                });
+            return await _dbHelper.GetExecuteScalarAsync<int>("sp_PurchaseBillPassEntryDirect", new Dictionary<string, object>
+            { ["@Action"] = "GetSaudaNo", ["@COMP_CODE"] = gv.PubCompCode, ["@V_NO"] = vNo }, true);
         }
 
         //-------------- Total Purchase Qty ----------------
-        private decimal GetTotalPurchaseQty(int saudaNo, int VNo)
+        private async Task<decimal> GetTotalPurchaseQty(int saudaNo, int VNo)
         {
             var gv = _globalVariableService.GetGlobalVariables();
-
-            const string query = @"
-                SELECT ISNULL(SUM(RECD_QTY),0)
-                FROM PURCHASE2
-                WHERE V_TYPE='RMPB'
-                  AND V_NO<>@V_NO
-                  AND PO_NO IN
-                  (
-                        SELECT V_NO
-                        FROM ORDER1
-                        WHERE V_TYPE='RORD'
-                          AND SAUDA_NO=@SAUDA_NO
-                          AND COMP_CODE=@COMP_CODE
-                  )";
-
-            using SqlConnection con = _dbConnection.GetErpConnection();
-            using SqlCommand cmd = new(query, con);
-
-            cmd.Parameters.AddWithValue("@V_NO", VNo);
-            cmd.Parameters.AddWithValue("@SAUDA_NO", saudaNo);
-            cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
-
-            con.Open();
-
-            object result = cmd.ExecuteScalar();
-
-            return result == DBNull.Value || result == null
-                ? 0
-                : Convert.ToDecimal(result);
+            var parameters = new Dictionary<string, object>
+            {
+                {"@V_NO", VNo},
+                {"@SAUDA_NO", saudaNo},
+                {"@COMP_CODE", gv.PubCompCode}
+            };
+            decimal result = await _dbHelper.GetExecuteScalarAsync<decimal>("sp_PurchaseBillPassEntryDirect", parameters, true);
+            return result;
         }
 
         //-------------- Sauda Details ----------------
@@ -1272,28 +1112,19 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         {
             var gv = _globalVariableService.GetGlobalVariables();
 
-            const string query = @"
-                SELECT ITEM_CODE,
-                       QTY,
-                       RATE,
-                       V_DATE
-                FROM SAUDA
-                WHERE COMP_CODE=@COMP_CODE
-                  AND V_TYPE='PAUD'
-                  AND V_NO=@V_NO";
 
             using SqlConnection con = _dbConnection.GetErpConnection();
-            using SqlCommand cmd = new(query, con);
+            using SqlCommand cmd = new("sp_PurchaseBillPassEntryDirect", con);
 
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@Action", "SaudaInfo");
             cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
             cmd.Parameters.AddWithValue("@V_NO", saudaNo);
 
             con.Open();
-
             using SqlDataReader dr = cmd.ExecuteReader();
 
-            if (!dr.Read())
-                return null;
+            if (!dr.Read()) return null;
 
             return new SaudaInfo
             {
@@ -1308,44 +1139,16 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         private async Task<decimal> GetToleranceQty(decimal saudaQty)
         {
             var gv = _globalVariableService.GetGlobalVariables();
-
-            const string query = @"SELECT TOP 1 TOLRANCE_QTY FROM TOLRANCE_MAST WHERE COMP_CODE=@COMP_CODE AND V_TYPE='RMPB' AND QTY>=@QTY ORDER BY QTY";
-
-            return await _dbHelper.GetExecuteScalarAsync<decimal>(query,
-                new Dictionary<string, object>
-                {
-                    ["@COMP_CODE"] = gv.PubCompCode,
-                    ["@QTY"] = saudaQty
-                });
+            return await _dbHelper.GetExecuteScalarAsync<decimal>("sp_PurchaseBillPassEntryDirect", new Dictionary<string, object>
+            { ["@Action"] = "ToleranceQty", ["@COMP_CODE"] = gv.PubCompCode, ["@QTY"] = saudaQty }, true);
         }
 
         //-------------- Market Rate Details ----------------
         private async Task<decimal> GetMarketRate(DateTime saudaDate, int itemCode)
         {
             var gv = _globalVariableService.GetGlobalVariables();
-
-            const string query = @"
-                SELECT TOP 1 B.MAX_RATE
-                FROM MARKET_RATE1 A
-                INNER JOIN MARKET_RATE2 B
-                    ON A.V_TYPE=B.V_TYPE
-                   AND A.V_NO=B.V_NO
-                   AND A.COMP_CODE=B.COMP_CODE
-                   AND A.BRANCH_CODE=B.BRANCH_CODE
-                   AND A.YEAR_CODE=B.YEAR_CODE
-                WHERE A.COMP_CODE=@COMP_CODE
-                  AND A.FAPROV_STATUS='Approved'
-                  AND @SAUDA_DATE BETWEEN A.EFF_DATE AND A.EXP_DATE
-                  AND B.ITEM_CODE=@ITEM_CODE
-                ORDER BY A.V_DATE DESC,A.V_NO DESC";
-
-            return await _dbHelper.GetExecuteScalarAsync<decimal>(query,
-                    new Dictionary<string, object>
-                    {
-                        ["@COMP_CODE"] = gv.PubCompCode,
-                        ["@SAUDA_DATE"] = saudaDate,
-                        ["@ITEM_CODE"] = itemCode
-                    });
+            return await _dbHelper.GetExecuteScalarAsync<decimal>("sp_PurchaseBillPassEntryDirect", new Dictionary<string, object>
+            { ["@Action"] = "MarketRate", ["@COMP_CODE"] = gv.PubCompCode, ["@EFF_DATE"] = saudaDate, ["@ITEM_CODE"] = itemCode }, true);
         }
 
         //-------------- Market Rate Details ----------------
@@ -1353,37 +1156,24 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         {
             var gv = _globalVariableService.GetGlobalVariables();
 
-            string query = @"
-                SELECT
-                    ISNULL(ONLY_NATURAL, 0) AS ONLY_NATURAL,
-                    ITEM_CODE
-                FROM SAUDA
-                WHERE V_TYPE = 'PAUD'
-                  AND V_NO = @V_NO
-                  AND COMP_CODE = @COMP_CODE
-                  AND BRANCH_CODE = @BRANCH_CODE";
-
             using SqlConnection con = _dbConnection.GetErpConnection();
-            using SqlCommand cmd = new(query, con);
+            using SqlCommand cmd = new("sp_PurchaseBillPassEntryDirect", con);
 
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@Action", "NaturalBottleDetails");
             cmd.Parameters.AddWithValue("@V_NO", saudaNo);
             cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
             cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
 
             con.OpenAsync();
-
             using SqlDataReader dr = cmd.ExecuteReader();
 
             if (dr.Read())
             {
                 return new NaturalBottleDto
                 {
-                    OnlyNatural = dr["ONLY_NATURAL"] != DBNull.Value &&
-                                  Convert.ToInt32(dr["ONLY_NATURAL"]) == 1,
-
-                    ItemCode = dr["ITEM_CODE"] != DBNull.Value
-                        ? Convert.ToInt32(dr["ITEM_CODE"])
-                        : 0
+                    OnlyNatural = dr["ONLY_NATURAL"] != DBNull.Value && Convert.ToInt32(dr["ONLY_NATURAL"]) == 1,
+                    ItemCode = dr["ITEM_CODE"] != DBNull.Value ? Convert.ToInt32(dr["ITEM_CODE"]) : 0
                 };
             }
 
@@ -1394,39 +1184,23 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         {
             var gv = _globalVariableService.GetGlobalVariables();
 
-            string query = @"
-            SELECT ISNULL(SUM(PACK_AMT), 0)
-            FROM ORDER2
-            WHERE V_TYPE = @V_TYPE
-              AND V_NO = @V_NO
-              AND ISNULL(PACK_AMT, 0) > 0
-              AND COMP_CODE = @COMP_CODE
-              AND BRANCH_CODE = @BRANCH_CODE
-              AND YEAR_CODE = @YEAR_CODE";
-
-            return await _dbHelper.GetExecuteScalarAsync<decimal>(query,
-                new Dictionary<string, object>
-                {
-                    ["@V_TYPE"] = poType,
-                    ["@V_NO"] = poNo,
-                    ["@COMP_CODE"] = gv.PubCompCode,
-                    ["@BRANCH_CODE"] = gv.PubBranchCode,
-                    ["@YEAR_CODE"] = gv.PubFYearCode
-                });
+            return await _dbHelper.GetExecuteScalarAsync<decimal>("sp_PurchaseBillPassEntryDirect", new Dictionary<string, object>
+            {
+                ["@Action"] = "POPackingAmt",
+                ["@V_TYPE"] = poType,
+                ["@V_NO"] = poNo,
+                ["@COMP_CODE"] = gv.PubCompCode,
+                ["@BRANCH_CODE"] = gv.PubBranchCode,
+                ["@YEAR_CODE"] = gv.PubFYearCode
+            }, true);
         }
 
         private async Task<bool> IsDebitNoteHoldParty(int partyCode)
         {
             var gv = _globalVariableService.GetGlobalVariables();
-
-            const string query = @"SELECT 1 FROM DEBITNOTEHOLD_MAST WHERE PARTY_CODE=@PARTY_CODE AND COMP_CODE=@COMP_CODE";
-
-            return await _dbHelper.GetExecuteScalarAsync<int>(query,
+            return await _dbHelper.GetExecuteScalarAsync<int>("sp_PurchaseBillPassEntryDirect",
                 new Dictionary<string, object>
-                {
-                    ["@PARTY_CODE"] = partyCode,
-                    ["@COMP_CODE"] = gv.PubCompCode
-                }) == 1;
+                { ["@Action"] = "CheckDebitNoteHold", ["@PARTY_CODE"] = partyCode, ["@COMP_CODE"] = gv.PubCompCode }, true) == 1;
         }
 
         private decimal GetTaxPer(DebitNoteRequest request)
@@ -1470,13 +1244,13 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         private async Task<decimal> GetSaudaQty(int saudaNo)
         {
             var gv = _globalVariableService.GetGlobalVariables();
-            string query = @"SELECT QTY FROM SAUDA WHERE COMP_CODE = @COMP_CODE AND V_TYPE = 'PAUD' AND V_NO = @V_NO";
             var parameters = new Dictionary<string, object>
-                {
-                    { "@COMP_CODE", gv.PubCompCode },
-                    { "@V_NO", saudaNo }
+            {
+                { "@Action", "GetSaudaQty" },
+                { "@COMP_CODE", gv.PubCompCode },
+                { "@V_NO", saudaNo }
             };
-            decimal qty = await _dbHelper.GetExecuteScalarAsync<decimal>(query, parameters);
+            decimal qty = await _dbHelper.GetExecuteScalarAsync<decimal>("sp_PurchaseBillPassEntryDirect", parameters, true);
             return qty;
         }
 
@@ -1495,7 +1269,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             }
 
             // 2. Get Total Purchase Qty
-            var totalPurchaseQty = GetTotalPurchaseQty(vNo, saudaNo);
+            var totalPurchaseQty = await GetTotalPurchaseQty(vNo, saudaNo);
 
             // 3. Get Sauda Qty
             var saudaQty = await GetSaudaQty(saudaNo);
@@ -1531,18 +1305,16 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             //=============================
             if (freightAmount > 0 && gs.pubDefPOInMRN == "Yes")
             {
-                string priceTypeQuery = @"SELECT LEFT(PRICE_TYPE, 1) FROM ORDER1 WHERE V_TYPE = @V_TYPE AND V_NO = @V_NO
-                                            AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE";
-
                 var parameters = new Dictionary<string, object>
                 {
+                    { "@Action", "GetPriceType" },
                     { "@V_TYPE", poType },
                     { "@V_NO", poNo },
                     { "@COMP_CODE", gv.PubCompCode },
                     { "@BRANCH_CODE", gv.PubBranchCode }
                 };
 
-                string freightTerm = await _dbHelper.GetExecuteScalarAsync<string>(priceTypeQuery, parameters);
+                string freightTerm = await _dbHelper.GetExecuteScalarAsync<string>("sp_PurchaseBillPassEntryDirect", parameters, true);
 
                 if (!string.IsNullOrWhiteSpace(freightTerm))
                 {
@@ -1728,9 +1500,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             //=============================
             if (gs.pubDefPOInMRN == "Yes")
             {
-                string poQuery = @"SELECT 1 FROM ORDER1 WHERE FAPROV_STATUS = 'Approved' AND V_TYPE = @V_TYPE
-                                    AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE";
-
+                string poQuery = @"SELECT 1 FROM ORDER1 WHERE FAPROV_STATUS = 'Approved' AND V_TYPE = @V_TYPE AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE";
                 var poParams = new Dictionary<string, object>
                 {
                     { "@V_TYPE", poType },
@@ -1738,24 +1508,17 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                     { "@COMP_CODE", gv.PubCompCode },
                     { "@BRANCH_CODE", gv.PubBranchCode }
                 };
-
                 int approved = await _dbHelper.GetExecuteScalarAsync<int>(poQuery, poParams);
-
                 if (approved != 1)
                 {
-                    return new ValidationResult
-                    {
-                        IsValid = false,
-                        Message = $"PO No. {poType}{poNo} of Item {itemName} is not approved."
-                    };
+                    return new ValidationResult {IsValid = false, Message = $"PO No. {poType}{poNo} of Item {itemName} is not approved."};
                 }
             }
 
             //=============================
             // Sauda Approval Validation
             //=============================
-            string saudaQuery = @"SELECT TOP 1 SAUDA_NO FROM ORDER2 WHERE V_TYPE = @V_TYPE AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE
-                                AND BRANCH_CODE = @BRANCH_CODE";
+            string saudaQuery = @"SELECT TOP 1 SAUDA_NO FROM ORDER2 WHERE V_TYPE = @V_TYPE AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE";
             var saudaParams = new Dictionary<string, object>
             {
                 { "@V_TYPE", poType },
@@ -1763,37 +1526,25 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                 { "@COMP_CODE", gv.PubCompCode },
                 { "@BRANCH_CODE", gv.PubBranchCode }
             };
-
             int saudaNo = await _dbHelper.GetExecuteScalarAsync<int>(saudaQuery, saudaParams);
 
             if (saudaNo > 0)
             {
-                string approvalQuery = @"SELECT TOP 1 1 FROM SAUDA WHERE FAPROV_STATUS = 'Approved' AND V_TYPE = 'PAUD'
-                                            AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE";
-
+                string approvalQuery = @"SELECT TOP 1 1 FROM SAUDA WHERE FAPROV_STATUS = 'Approved' AND V_TYPE = 'PAUD' AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE";
                 var approvalParams = new Dictionary<string, object>
                 {
                     { "@V_NO", saudaNo },
                     { "@COMP_CODE", gv.PubCompCode },
                     { "@BRANCH_CODE", gv.PubBranchCode }
                 };
-
                 int saudaApproved = await _dbHelper.GetExecuteScalarAsync<int>(approvalQuery, approvalParams);
-
                 if (saudaApproved != 1)
                 {
-                    return new ValidationResult
-                    {
-                        IsValid = false,
-                        Message = $"Sauda No. {saudaNo} of Item {itemName} is not approved."
-                    };
+                    return new ValidationResult {IsValid = false, Message = $"Sauda No. {saudaNo} of Item {itemName} is not approved."};
                 }
             }
 
-            return new ValidationResult
-            {
-                IsValid = true
-            };
+            return new ValidationResult {IsValid = true};
         }
 
         public async Task<ValidationResult> ValidatePartyGst(string gstType, string partyCode, string gstNo)
@@ -1802,10 +1553,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
 
             if (string.IsNullOrWhiteSpace(gstNo))
             {
-                return new ValidationResult
-                {
-                    IsValid = true
-                };
+                return new ValidationResult {IsValid = true};
             }
 
             string query;
@@ -1835,22 +1583,15 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                 string dbGstNo = await _dbHelper.GetExecuteScalarAsync<string>(query, parameters);
                 if (!string.Equals(dbGstNo?.Trim(), gstNo.Trim(), StringComparison.OrdinalIgnoreCase))
                 {
-                    return new ValidationResult
-                    {
-                        IsValid = false,
-                        Message = "Mismatch GST No from Master Record."
-                    };
+                    return new ValidationResult {IsValid = false, Message = "Mismatch GST No from Master Record."};
                 }
             }
 
-            return new ValidationResult
-            {
-                IsValid = true
-            };
+            return new ValidationResult {IsValid = true};
         }
 
         //==============================Save & Update======================
-        public async Task<RepositoryResponse> SavePurchaseBillPassEntry([FromBody] PurchaseWrapper data)
+        public async Task<RepositoryResponse> SavePurchaseBillPassEntry(PurchaseWrapper data)
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
 
@@ -1930,28 +1671,22 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             bool isFinalApprovalBodyCN = false;
 
             isFinalApprovalBody = "FINAL".Equals(
-                await _dbHelper.ExecuteScalarAsynctran<string>(
-                    @"SELECT APPROV_USER FROM DOC_APPROSTAGE WHERE USER_CODE=@USER_CODE AND DOC_CODE=@DOC_CODE AND COMP_CODE=@COMP_CODE",
+                await _dbHelper.ExecuteScalarAsynctran<string>(@"SELECT APPROV_USER FROM DOC_APPROSTAGE WHERE USER_CODE=@USER_CODE AND DOC_CODE=@DOC_CODE AND COMP_CODE=@COMP_CODE",
                     new()
                     {
                         new("@USER_CODE", g.PubUserId),
                         new("@DOC_CODE", model.V_TYPE),
                         new("@COMP_CODE", g.PubCompCode)
-                    },
-                    tran),
-                StringComparison.OrdinalIgnoreCase);
+                    }, tran), StringComparison.OrdinalIgnoreCase);
 
-            isFinalApprovalBodyCN = "FINAL".Equals(
-                await _dbHelper.ExecuteScalarAsynctran<string>(
+            isFinalApprovalBodyCN = "FINAL".Equals(await _dbHelper.ExecuteScalarAsynctran<string>(
                     @"SELECT APPROV_USER FROM DOC_APPROSTAGE WHERE FLAG_A='C' AND USER_CODE=@USER_CODE AND DOC_CODE=@DOC_CODE AND COMP_CODE=@COMP_CODE",
                     new()
                     {
                         new("@USER_CODE", g.PubUserId),
                         new("@DOC_CODE", model.V_TYPE),
                         new("@COMP_CODE", g.PubCompCode)
-                    },
-                    tran),
-                StringComparison.OrdinalIgnoreCase);
+                    }, tran), StringComparison.OrdinalIgnoreCase);
 
             string fAppStatus = "";
             string fAppRemark = "";
@@ -2001,13 +1736,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             //=======================
             string gstHold = "No";
 
-            if (model.INPUT_TYPE == "Input GST" ||
-                model.INPUT_TYPE == "GST Input" ||
-                model.INPUT_TYPE == "Local" ||
-                model.INPUT_TYPE == "Central" ||
-                model.INPUT_TYPE == "Import")
+            if (model.INPUT_TYPE == "Input GST" || model.INPUT_TYPE == "GST Input" || model.INPUT_TYPE == "Local" || model.INPUT_TYPE == "Central" || model.INPUT_TYPE == "Import")
             {
-                int gstHoldExist = await _dbHelper.ExecuteScalarAsynctran<int>(
+                object result = await _dbHelper.ExecuteScalarAsynctran<object>(
                     @"SELECT TOP 1 1 FROM GSTHOLD_MAST WHERE PARTY_CODE=@PARTY_CODE AND COMP_CODE=@COMP_CODE",
                     new()
                     {
@@ -2016,9 +1747,11 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                     },
                     tran);
 
-                if (gstHoldExist != 1)
+                bool gstHoldExists = result != null && Convert.ToInt32(result) == 1;
+
+                if (!gstHoldExists)
                 {
-                    int releaseExist = await _dbHelper.ExecuteScalarAsynctran<int>(
+                    object releaseExistResult = await _dbHelper.ExecuteScalarAsynctran<object>(
                         @"SELECT TOP 1 1 FROM GSTHOLD_RELEASE WHERE REF_TYPE=@REF_TYPE AND REF_NO=@REF_NO AND COMP_CODE=@COMP_CODE
                         AND BRANCH_CODE=@BRANCH_CODE",
                         new()
@@ -2029,8 +1762,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                             new("@BRANCH_CODE", globalVar.PubBranchCode)
                         },
                         tran);
-
-                    gstHold = releaseExist == 1 ? "No" : "Yes";
+                    bool releaseExist = releaseExistResult != null && Convert.ToInt32(releaseExistResult) == 1;
+                    gstHold = releaseExist ? "No" : "Yes";
                 }
             }
 
@@ -2400,6 +2133,13 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             dt.Columns.Add("RATE_ANNUALY", typeof(decimal));
             dt.Columns.Add("RATE_SPECIAL", typeof(decimal));
             dt.Columns.Add("FINAL_LOCK", typeof(string));
+            dt.Columns.Add("DRNOTE_AMT", typeof(decimal));
+            dt.Columns.Add("CRNOTE_AMT", typeof(decimal));
+            dt.Columns.Add("QLTDIFF_DRAMT", typeof(decimal));
+            dt.Columns.Add("RDIFF_DRAMT", typeof(decimal));
+            dt.Columns.Add("QCDIFF_DRAMT", typeof(decimal));
+            dt.Columns.Add("QTYDIFF_DRAMT", typeof(decimal));
+            dt.Columns.Add("OTH_DRAMT", typeof(decimal));
 
             int sno = 1;
 
@@ -2471,7 +2211,14 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                     item.RATE_QUARTERLY ?? (object)DBNull.Value,
                     item.RATE_ANNUALY ?? (object)DBNull.Value,
                     item.RATE_SPECIAL ?? (object)DBNull.Value,
-                    item.FINAL_LOCK ?? (object)DBNull.Value
+                    item.FINAL_LOCK ?? (object)DBNull.Value,
+                    item.DRNOTE_AMT ?? (object)DBNull.Value,
+                    item.CRNOTE_AMT ?? (object)DBNull.Value,
+                    item.QLTDIFF_DRAMT ?? (object)DBNull.Value,
+                    item.RDIFF_DRAMT ?? (object)DBNull.Value,
+                    item.QCDIFF_DRAMT ?? (object)DBNull.Value,
+                    item.QTYDIFF_DRAMT ?? (object)DBNull.Value,
+                    item.OTH_DRAMT ?? (object)DBNull.Value
                 );
             }
 
@@ -2560,27 +2307,16 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
             // Existing Ledger Posting Method
             //await _accountPostingService.ACTPostingPurchase("LEDGER2", vDate, vDate, vType, vNo); //Implement Later
 
-            const string sql = @"
-                                IF EXISTS
-                                (
-                                    SELECT 1 FROM approval_status WHERE USER_CODE=@USER_CODE AND V_TYPE=@V_TYPE AND V_NO=@V_NO
-                                      AND COMP_CODE=@COMP_CODE AND BRANCH_CODE=@BRANCH_CODE AND YEAR_CODE=@YEAR_CODE)
-                                BEGIN
-                                    UPDATE approval_status
-                                       SET STATUS='CLOSE', CLOSE_DATE=GETDATE(), APPROVAL_CODE=8, APPROVAL_REMARK='Approved',
-                                           REMARKS='Document Approved' WHERE V_TYPE=@V_TYPE AND V_NO=@V_NO
-                                       AND COMP_CODE=@COMP_CODE AND BRANCH_CODE=@BRANCH_CODE AND YEAR_CODE=@YEAR_CODE
-                                END";
-
-            await ExecuteQueryAsync(con, query: sql, parameters: new()
+            await ExecuteQueryAsync(con, query: "sp_PurchaseBillPassEntryDirect", parameters: new()
             {
+                new("@Action", "UpdateApprovalOnSave"),
                 new("@USER_CODE", g.PubUserId),
                 new("@V_TYPE", vType),
                 new("@V_NO", vNo),
                 new("@COMP_CODE", g.PubCompCode),
                 new("@BRANCH_CODE", g.PubBranchCode),
                 new("@YEAR_CODE", g.PubFYearCode)
-            });
+            }, isProcOrQry: true);
 
             //await loadPendingApprovals(); //Implement Later
         }
@@ -2588,30 +2324,11 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
         private async Task UpdateLandAmountAsync(SqlConnection con, string vType, int? vNo)
         {
             var g = _globalVariableService.GetGlobalVariables();
-
-            const string sql = @"
-            SELECT purchase2.ITEM_CODE, purchase2.po_no, purchase2.SNO, purchase2.REF_NO AS MRN_NO, purchase2.REF_TYPE AS MRN_TYPE, purchase2.AMOUNT as ItemBasicAmt,
-                purchase2.AMOUNT-purchase2.DISC_AMT+purchase2.PACK_AMT+purchase2.VAT_AMT+purchase2.OTH_AMT AS ITEM_AMT,
-                PURCHASE2.CGST_AMT+PURCHASE2.SGST_AMT+PURCHASE2.IGST_AMT AS GST_AMT,
-                --Purchase2.DRNOTE_AMT as ItemRowDrAmt, Purchase2.CRNOTE_AMT as ItemRowCrAmt, // ItemRowDrAmt is missing uncomment after discussion
-                purchase1.comp_code,purchase1.year_code,purchase1.branch_code,
-                purchase1.AMOUNT as BillBasicAmt, purchase1.INPUT_TYPE, purchase1.Namount, purchase1.bank_amt, Frtpay_amt + ul_amt +
-                wb_amt+round_off as FrtAmt, qlt_dr_amt+rdf_dr_amt+qty_dr_amt+qc_dr_amt+oth_dr_amt as DebitAmt, 
-                qlt_dr_tax+rdf_dr_tax+qty_dr_tax+qc_dr_tax+oth_dr_tax as DebitTax, 
-                qlt_cr_amt+rdf_cr_amt+qty_cr_amt+qc_cr_amt as CreditAmt, 
-                qlt_cr_tax+rdf_cr_tax+qty_cr_tax+qc_cr_tax as CreditTax,
-                tcs_amt,import_amt,import_tax,purchase1.v_type,purchase1.v_no,purchase1.v_date,purchase1.pl_amt 
-                FROM purchase2 
-                INNER JOIN  purchase1 ON purchase1.comp_code=purchase2.comp_code AND purchase1.V_TYPE=purchase2.V_TYPE AND purchase1.V_NO=purchase2.V_NO  
-                LEFT JOIN ITEM_MAST ON ITEM_MAST.CODE=purchase2.ITEM_CODE AND ITEM_MAST.COMP_CODE=purchase2.COMP_CODE 
-                WHERE  purchase2.comp_code=@comp_code and purchase2.branch_code=@branch_code and purchase2.year_code=@year_code and 
-                purchase2.v_type=@v_type and purchase2.v_no=@v_no
-                ORDER BY purchase1.V_TYPE,purchase1.V_NO ";
-
-            using var cmd = new SqlCommand(sql, con);
-
+            using var cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", con);
+            cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddRange(new[]
             {
+                new SqlParameter("@Action", "GetDataToUpdateLandAMtOnSave"),
                 new SqlParameter("@comp_code", g.PubCompCode),
                 new SqlParameter("@branch_code", g.PubBranchCode),
                 new SqlParameter("@year_code", g.PubFYearCode),
@@ -2744,12 +2461,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
 
         private async Task UpdatePurchaseLandAmountAsync(SqlConnection con, LandAmountRow row)
         {
-            const string updatePurchaseSql = @"UPDATE PURCHASE2 SET LAND_AMT = @LAND_AMT WHERE COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE
-                                                AND YEAR_CODE = @YEAR_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO AND SNO = @SNO AND ITEM_CODE = @ITEM_CODE 
-                                                AND ISNULL(FINAL_LOCK,'') <> 'Yes'";
-
-            await ExecuteQueryAsync(con, query: updatePurchaseSql, parameters: new()
+            await ExecuteQueryAsync(con, query: "sp_PurchaseBillPassEntryDirect", parameters: new()
             {
+                new("@Action", "UpdateP2LAmtOnSave"),
                 new("@LAND_AMT", row.LandAmt),
                 new("@COMP_CODE", row.CompCode),
                 new("@BRANCH_CODE", row.BranchCode),
@@ -2758,32 +2472,30 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                 new("@V_NO", row.VNo),
                 new("@SNO", row.Sno),
                 new("@ITEM_CODE", row.ItemCode)
-            });
+            }, isProcOrQry: true);
 
             // If V_TYPE <> "RRET" Then update corresponding MRN also
             if (!row.VType.Equals("RRET", StringComparison.OrdinalIgnoreCase))
             {
-                const string updateMrnSql = @"
-                UPDATE PURCHASE2 SET LAND_AMT = @LAND_AMT WHERE COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE
-                  AND V_TYPE = @MRN_TYPE AND V_NO = @MRN_NO AND PO_NO = @PO_NO AND ITEM_CODE = @ITEM_CODE AND ISNULL(FINAL_LOCK,'') <> 'Yes'";
-
-                await ExecuteQueryAsync(con, query: updateMrnSql, parameters: new()
+                await ExecuteQueryAsync(con, query: "sp_PurchaseBillPassEntryDirect", parameters: new()
                 {
+                    new("@Action", "UpdateP2LAmtWithMRNOnSave"),
                     new("@LAND_AMT", row.LandAmt),
                     new("@COMP_CODE", row.CompCode),
                     new("@BRANCH_CODE", row.BranchCode),
                     new("@YEAR_CODE", row.YearCode),
-                    new("@MRN_TYPE", row.MrnType),
-                    new("@MRN_NO", row.MrnNo),
+                    new("@REF_TYPE", row.MrnType),
+                    new("@REF_NO", row.MrnNo),
                     new("@PO_NO", row.PoNo),
                     new("@ITEM_CODE", row.ItemCode)
-                });
+                }, isProcOrQry: true);
             }
         }
 
-        private async Task ExecuteQueryAsync(SqlConnection con, string query, SqlTransaction? tran = null, List<SqlParameter>? parameters = null)
+        private async Task ExecuteQueryAsync(SqlConnection con, string query, SqlTransaction? tran = null, List<SqlParameter>? parameters = null, bool isProcOrQry = false)
         {
             using var cmd = new SqlCommand(query, con, tran);
+            cmd.CommandType = isProcOrQry ? CommandType.StoredProcedure : CommandType.Text;
             if (parameters?.Any() == true)
                 cmd.Parameters.AddRange(parameters.ToArray());
             await cmd.ExecuteNonQueryAsync();
@@ -2835,6 +2547,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                         BILL_ADD2 = rdr["BILL_ADD2"]?.ToString(),
                         BILL_ADD3 = rdr["BILL_ADD3"]?.ToString(),
                         BILL_CITY = rdr["BILL_CITY"] != DBNull.Value ? Convert.ToInt32(rdr["BILL_CITY"]) : null,
+                        BILL_STATE = rdr["BILL_STATE"] != DBNull.Value ? Convert.ToInt32(rdr["BILL_STATE"]) : null,
                         BILL_PINCODE = rdr["BILL_PINCODE"]?.ToString(),
                         BILL_ADDRESSID = rdr["BILL_ADDRESSID"] != DBNull.Value ? Convert.ToInt32(rdr["BILL_ADDRESSID"]) : null,
                         BILL_GST = rdr["BILL_GST"]?.ToString(),
@@ -2843,6 +2556,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                         SHIP_ADD2 = rdr["SHIP_ADD2"]?.ToString(),
                         SHIP_ADD3 = rdr["SHIP_ADD3"]?.ToString(),
                         SHIP_CITY = rdr["SHIP_CITY"] != DBNull.Value ? Convert.ToInt32(rdr["SHIP_CITY"]) : null,
+                        SHIP_STATE = rdr["SHIP_STATE"] != DBNull.Value ? Convert.ToInt32(rdr["SHIP_STATE"]) : null,
                         SHIP_PINCODE = rdr["SHIP_PINCODE"]?.ToString(),
                         SHIP_ADDRESSID = rdr["SHIP_ADDRESSID"] != DBNull.Value ? Convert.ToInt32(rdr["SHIP_ADDRESSID"]) : null,
                         SHIP_GST = rdr["SHIP_GST"]?.ToString(),
@@ -2996,6 +2710,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                         EWB_INVNO = rdr["EWB_INVNO"]?.ToString(),
                         PL_AMT = rdr["PL_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["PL_AMT"]) : null,
                         CURRENCY = rdr["CURRENCY"] != DBNull.Value ? Convert.ToInt32(rdr["CURRENCY"]) : null,
+                        UDATE = rdr["UDATE"] != DBNull.Value ? Convert.ToDateTime(rdr["UDATE"]) : null,
+                        EINV_PARTY = rdr["EINV_PARTY"] != DBNull.Value ? Convert.ToInt32(rdr["EINV_PARTY"]) : null
                     };
                 }
 
@@ -3021,7 +2737,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                             RCM_YN = rdr["RCM_YN"]?.ToString(),
                             INPUT_YN = rdr["INPUT_YN"]?.ToString(),
                             UOM_CODE = rdr["UOM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["UOM_CODE"]) : 0,
-                            UOM_NAME = rdr["UOM_NAME"]?.ToString(),
+                            UNIT = rdr["UOM_NAME"]?.ToString(),
                             DEPT_CODE = rdr["DEPT_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["DEPT_CODE"]) : 0,
                             NOS = rdr["NOS"] != DBNull.Value ? Convert.ToInt32(rdr["NOS"]) : 0,
                             PLUS_MINUSQTY = rdr["PLUS_MINUSQTY"] != DBNull.Value ? Convert.ToDecimal(rdr["PLUS_MINUSQTY"]) : 0,
@@ -3282,13 +2998,15 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                             title = col.ColumnName[(start + 2)..^1];
                         }
 
-                        return new CopyFromColumn
+                        return new
                         {
-                            Field = field,
+                            OriginalColumn = col.ColumnName,
+                            Field = field.ToUpperInvariant(),
                             Title = title
                         };
                     })
                     .ToList();
+
 
                 // Rows
                 var rows = dt.AsEnumerable()
@@ -3298,19 +3016,23 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
 
                         foreach (var col in columns)
                         {
-                            string originalColumn =
-                                $"{col.Field} ({col.Title})";
-
-                            if (!dt.Columns.Contains(originalColumn))
-                                originalColumn = col.Field;
-
-                            dict[col.Field.ToUpper()] =
-                                row[originalColumn] == DBNull.Value
+                            dict[col.Field] =
+                                row[col.OriginalColumn] == DBNull.Value
                                     ? null
-                                    : row[originalColumn];
+                                    : row[col.OriginalColumn];
                         }
 
                         return dict;
+                    })
+                    .ToList();
+
+
+                // Response columns
+                var responseColumns = columns
+                    .Select(col => new CopyFromColumn
+                    {
+                        Field = col.Field,
+                        Title = col.Title
                     })
                     .ToList();
 
@@ -3319,7 +3041,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                     status = true,
                     data = new CopyFromGridResponse
                     {
-                        Columns = columns,
+                        Columns = responseColumns,
                         Rows = rows
                     }
                 };
@@ -3381,7 +3103,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                     CommandType = CommandType.StoredProcedure
                 };
 
-                cmd.Parameters.AddWithValue("@Action", "PendingApprovalList");
+                cmd.Parameters.AddWithValue("@Action", "GetPendingApprovalList");
                 cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
                 cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
                 cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
@@ -3397,7 +3119,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                     list.Add(new PendingApprovalModel
                     {
                         Type = reader["Type"]?.ToString(),
-                        DocID = reader["DocID"] == DBNull.Value ? 0 : Convert.ToInt32(reader["DocID"]),
+                        DocID = reader["DocID"].ToString(),
                         DocDate = reader["Doc Date"]?.ToString(),
                         SendBy = reader["Send By"]?.ToString(),
                         SendDate = reader["Send Date"]?.ToString(),
@@ -3428,6 +3150,1591 @@ namespace travelexpensemanagement.Repositories.Implementations.Purchase.Transact
                     message = ex.Message
                 };
             }
+        }
+        //====================Advance TDS==============
+        public RepositoryResponseData<List<AdvanceTdsModel>> GetAdvanceTdsList(string billNo, int drCode)
+        {
+            try
+            {
+                using SqlConnection con = _dbConnection.GetErpConnection();
+
+                var gv = _globalVariableService.GetGlobalVariables();
+
+                string qry = @"SELECT  a.V_TYPE AS Vtype, a.V_NO AS VNo, FORMAT(a.V_DATE, 'dd/MM/yyyy') AS VDate, a.AMT AS Amount,
+                                            b.NAME AS PartyName FROM Ledger2 a LEFT JOIN SUBGROUP_MAST b ON a.DR_CODE = b.CODE AND a.COMP_CODE = 
+                                            b.COMP_CODE WHERE a.BILL_NO = @BILL_NO AND a.DR_CODE = @DR_CODE AND a.COMP_CODE = @COMP_CODE AND 
+                                            a.BRANCH_CODE = @BRANCH_CODE ORDER BY a.V_DATE, a.V_NO";
+
+                using SqlCommand cmd = new(qry, con);
+
+                cmd.Parameters.AddWithValue("@BILL_NO", billNo);
+                cmd.Parameters.AddWithValue("@DR_CODE", drCode);
+                cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+
+                con.Open();
+
+                var list = new List<AdvanceTdsModel>();
+
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    list.Add(new AdvanceTdsModel
+                    {
+                        Vtype = reader["Vtype"] == DBNull.Value ? null : reader["Vtype"].ToString(),
+                        VNo = reader["VNo"] == DBNull.Value ? null : reader["VNo"].ToString(),
+                        VDate = reader["VDate"] == DBNull.Value ? null : reader["VDate"].ToString(),
+                        Amount = reader["Amount"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Amount"]),
+                        PartyName = reader["PartyName"] == DBNull.Value ? null : reader["PartyName"].ToString()
+                    });
+                }
+
+                return new RepositoryResponseData<List<AdvanceTdsModel>> { status = true, data = list };
+            }
+            catch (Exception ex)
+            {
+                return new RepositoryResponseData<List<AdvanceTdsModel>> { status = false, message = ex.Message };
+            }
+        }
+
+        //====================Calculate Dr Cr Note Amount Button==============
+        public async Task<RepositoryResponseData<DrCrCalculationResponse>> CalculateRowDrCrAmount(CalculateDrCrRequest request)
+        {
+            if (request == null)
+            {
+                return new RepositoryResponseData<DrCrCalculationResponse> { status = false, message = "Invalid request!" };
+            }
+
+            var result = new DrCrCalculationResponse();
+
+            foreach (var gridRow in request.Rows)
+            {
+                if (gridRow != null && gridRow.ItemCode > 0)
+                {
+                    result.Rows.Add(new DrCrRowAmount
+                    {
+                        ItemCode = gridRow.ItemCode
+                    });
+                }
+            }
+            // 1. QC Dr Note
+            result = await CalculateRowQCDrNote(request, result);
+
+            // 2. Rate Difference Dr Note
+            result = CalculateRowRateDiffDrNote(request, result);
+
+            // 3. Weight Difference Dr Note
+            result = CalculateRowWeightDiffDrNote(request, result);
+
+            // 4. Quality Difference Dr Note
+            result = await CalculateRowQualityDiffDrNote(request, result);
+
+            // 5. Final Dr Note
+            result = CalculateFinalDrNoteAmt(result);
+
+            // 5. Header Amt Diff with Grid
+            result = CalculateDrCrHeaderGridDifference(request, result);
+
+            return new RepositoryResponseData<DrCrCalculationResponse>
+            {
+                status = true,
+                message = "Dr/Cr amount calculated successfully.",
+                data = result
+            };
+        }
+
+        private async Task<DrCrCalculationResponse> CalculateRowQCDrNote(CalculateDrCrRequest request, DrCrCalculationResponse result)
+        {
+            if (request == null || result == null)
+                return result;
+
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            const string query = @"SELECT b.ITEM_CODE AS ItemCode, SUM(ISNULL(b.DEDU_AMT1, 0)) AS DedAmt,
+                    CASE
+                        WHEN SUM(ISNULL(b.DEDU_AMT1, 0)) > SUM(ISNULL(b.ALLOW_AMT, 0))
+                            THEN SUM(ISNULL(b.DEDU_AMT1, 0)) - SUM(ISNULL(b.ALLOW_AMT, 0))
+                        ELSE SUM(ISNULL(b.DEDU_AMT1, 0))
+                    END AS QcDrAmt
+                FROM qc1 a
+                LEFT JOIN qc2 b ON a.V_TYPE = b.V_TYPE AND a.V_NO = b.V_NO AND a.COMP_CODE = b.COMP_CODE
+                WHERE a.MRN_TYPE = @MRN_TYPE AND a.MRN_NO = @MRN_NO AND a.COMP_CODE = @COMP_CODE AND a.BRANCH_CODE = @BRANCH_CODE AND a.YEAR_CODE = @YEAR_CODE
+                GROUP BY b.ITEM_CODE 
+                ORDER BY b.ITEM_CODE;
+            ";
+
+            var parameters = new List<SqlParameter>
+            {
+                new SqlParameter("@MRN_TYPE", request.RefType),
+                new SqlParameter("@MRN_NO", request.RefVNo),
+                new SqlParameter("@COMP_CODE", gv.PubCompCode),
+                new SqlParameter("@BRANCH_CODE", gv.PubBranchCode),
+                new SqlParameter("@YEAR_CODE", gv.PubFYearCode)
+            };
+
+            // ---------------------------------------------------------
+            // Read QC Dr Note data
+            // ---------------------------------------------------------
+
+            var qcLookup = new Dictionary<int, decimal>();
+
+            await using var con = _dbConnection.GetErpConnection();
+            await using var cmd = new SqlCommand(query, con);
+
+            cmd.CommandType = CommandType.Text;
+
+            if (parameters != null && parameters.Count > 0)
+            {
+                cmd.Parameters.AddRange(parameters.ToArray());
+            }
+
+            await con.OpenAsync();
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                int itemCode = reader["ItemCode"] == DBNull.Value ? 0 : Convert.ToInt32(reader["ItemCode"]);
+                decimal qcDrAmt = reader["QcDrAmt"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["QcDrAmt"]);
+                if (itemCode > 0)
+                {
+                    qcLookup[itemCode] = qcDrAmt;
+                }
+            }
+
+            // ---------------------------------------------------------
+            // Apply QC Dr Note amount to each grid row
+            // ---------------------------------------------------------
+
+            foreach (var gridRow in request.Rows)
+            {
+                if (gridRow == null || gridRow.ItemCode <= 0)
+                    continue;
+
+                // Find existing response row
+                var rowResult = result.Rows.FirstOrDefault(x => x.ItemCode == gridRow.ItemCode);
+                if (rowResult == null)
+                    continue;
+
+                // -----------------------------------------------------
+                // Find QC amount for current item
+                // -----------------------------------------------------
+
+                if (!qcLookup.TryGetValue(gridRow.ItemCode, out decimal qcDrAmt))
+                {
+                    rowResult.QCDiffDrNoteAmt = 0;
+                    continue;
+                }
+
+                decimal taxPer = gridRow.CGSTPer + gridRow.SGSTPer + gridRow.IGSTPer;
+
+                if (string.Equals(request.InputType, "GST Input", StringComparison.OrdinalIgnoreCase))
+                {
+                    decimal denominator = 100m + taxPer;
+                    rowResult.QCDiffDrNoteAmt = Math.Round((qcDrAmt / denominator) * 100m, 0, MidpointRounding.AwayFromZero);
+                }
+                else
+                {
+                    rowResult.QCDiffDrNoteAmt = Math.Round(qcDrAmt, 0, MidpointRounding.AwayFromZero);
+                }
+            }
+
+            return result;
+        }
+
+        private DrCrCalculationResponse CalculateRowRateDiffDrNote(CalculateDrCrRequest request, DrCrCalculationResponse result)
+        {
+            if (request == null || result == null)
+                return result;
+
+            foreach (var gridRow in request.Rows)
+            {
+                if (gridRow == null || gridRow.ItemCode <= 0)
+                    continue;
+
+                if (gridRow.LandRate != gridRow.POLandRate)
+                {
+                    decimal diffAmt = gridRow.LandRate - gridRow.POLandRate;
+                    decimal rateDiffAmt = Math.Round(diffAmt * gridRow.BillQty, 0, MidpointRounding.AwayFromZero);
+                    decimal taxPer = gridRow.CGSTPer + gridRow.SGSTPer + gridRow.IGSTPer;
+
+                    // Find the corresponding response row
+                    var rowResult = result.Rows.FirstOrDefault(x => x.ItemCode == gridRow.ItemCode);
+                    if (rowResult == null)
+                        continue;
+
+                    if (string.Equals(request.InputType, "GST Input", StringComparison.OrdinalIgnoreCase))
+                    {
+                        rowResult.RateDiffDrAmt = Math.Round((rateDiffAmt / (100m + taxPer)) * 100m, 0, MidpointRounding.AwayFromZero);
+                    }
+                    else
+                    {
+                        rowResult.RateDiffDrAmt = Math.Round(rateDiffAmt, 0, MidpointRounding.AwayFromZero);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private DrCrCalculationResponse CalculateRowWeightDiffDrNote(CalculateDrCrRequest request, DrCrCalculationResponse result)
+        {
+            if (request == null || result == null)
+                return result;
+
+            foreach (var gridRow in request.Rows)
+            {
+                if (gridRow == null || gridRow.ItemCode <= 0)
+                    continue;
+
+                decimal actAmt = gridRow.RecdQty * gridRow.Rate;
+                decimal diffAmt = gridRow.Amount - actAmt;
+
+                // Find existing response row
+                var rowResult = result.Rows.FirstOrDefault(x => x.ItemCode == gridRow.ItemCode);
+                if (rowResult == null) continue;
+
+                rowResult.WeightDiffDrAmt = Math.Round(diffAmt, 0, MidpointRounding.AwayFromZero);
+            }
+
+            return result;
+        }
+
+        private async Task<DrCrCalculationResponse> CalculateRowQualityDiffDrNote(CalculateDrCrRequest request, DrCrCalculationResponse result)
+        {
+            if (request == null || result == null)
+                return result;
+
+            var gs = await _globalVariableService.LoadGeneralSetting();
+            var gv = _globalVariableService.GetGlobalVariables();
+            decimal amt1 = 0.0m, amt2 = 0.0m, amt3 = 0.0m, at1 = 0.0m, at2 = 0.0m, at3 = 0.0m, Q15DrAmt = 0.0m, Q15DrTax = 0.0m,
+                qltDiffDrAmt = 0.0m, qltDiffDrRate = 0.0m, QltQtyDiff = 0.0m;
+            string anr1 = "", anr2 = "", anr3 = "", Q15Narr = "";
+
+            foreach (var gridRow in request.Rows)
+            {
+                decimal discItemRate = 0.0m;
+                if (gridRow == null || gridRow.ItemCode <= 0)
+                    continue;
+
+                var rowResult = result.Rows.FirstOrDefault(x => x.ItemCode == gridRow.ItemCode);
+
+                if (rowResult == null)
+                    continue;
+
+                decimal taxPer = gridRow.CGSTPer + gridRow.SGSTPer + gridRow.IGSTPer;
+
+                string DefPOInMRN = gs.pubDefPOInMRN;
+
+                if (string.Equals(DefPOInMRN, "Yes", StringComparison.OrdinalIgnoreCase))
+                {
+                    string orderQry = $@"select 1 from ORDER2 where V_TYPE='{gridRow.POType}' and V_NO={gridRow.PONo} and COMP_CODE={gv.PubCompCode} 
+                                        and BRANCH_CODE={gv.PubBranchCode} and ITEM_CODE={gridRow.ItemCode}";
+                    bool isOrderExist = await _dbHelper.IsDataExist(orderQry);
+                    if (isOrderExist)
+                    {
+                        rowResult.poLandRate = gridRow.POLandRate;
+                        //Unused
+                        //string saudaQry = $@"select top 1 b.RATE from ORDER2 a 
+                        //               left join SAUDA b on a.SAUDA_TYPE =b.V_TYPE and a.SAUDA_NO=b.V_NO and a.COMP_CODE=b.COMP_CODE and a.BRANCH_CODE=b.BRANCH_CODE 
+                        //               where a.V_TYPE='{gridRow.POType}' and a.V_NO={gridRow.PONo} and a.COMP_CODE={gv.PubCompCode} and a.BRANCH_CODE={gv.PubBranchCode}";
+
+                        //decimal saudaRate = await _dbHelper.GetExecuteScalarAsync<decimal>(saudaQry);
+
+                        string saudaItemQry = $@"select top 1 b.ITEM_CODE from ORDER2 a 
+                                       left join SAUDA b on a.SAUDA_TYPE =b.V_TYPE and a.SAUDA_NO=b.V_NO and a.COMP_CODE=b.COMP_CODE and a.BRANCH_CODE=b.BRANCH_CODE 
+                                       where a.V_TYPE='{gridRow.POType}' and a.V_NO={gridRow.PONo} and a.COMP_CODE={gv.PubCompCode} and a.BRANCH_CODE={gv.PubBranchCode}";
+
+                        int saudaItemCode = await _dbHelper.GetExecuteScalarAsync<int>(saudaItemQry);
+
+                        decimal qtyDiffQty = gridRow.RecdQty - gridRow.BillQty;
+
+                        // -----------------------------------------------------
+                        // RMPB specific logic
+                        // -----------------------------------------------------
+                        if (string.Equals(request.VType, "RMPB", StringComparison.OrdinalIgnoreCase))
+                        {
+                            decimal abovePer = 0m;
+                            decimal aboveRate = 0m;
+
+                            string saudaReqQry = $@"Select isnull(SAUDA_REQ,'') from ITEM_GROUP Where code=(Select Group_code from Item_mast 
+                                                    where code={gridRow.ItemCode} and Comp_code={gv.PubCompCode}) and Comp_code={gv.PubCompCode}";
+
+                            string saudaReq = await _dbHelper.GetExecuteScalarAsync<string>(saudaReqQry);
+
+                            if (string.Equals(saudaReq, "Yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                string rmDiscQry = $@"select top 1 isnull(RATE,0) from RMDISC_MAST where SAUDA_ITEM={saudaItemCode} and COMP_CODE={gv.PubCompCode}";
+
+                                bool discItemExists = await _dbHelper.IsDataExist(rmDiscQry);
+
+                                if (discItemExists)
+                                {
+                                    string rmDiscItemQry = $@"select top 1 isnull(RATE,0) from RMDISC_MAST where SAUDA_ITEM={saudaItemCode} and item_code={gridRow.ItemCode}
+                                                                and COMP_CODE={gv.PubCompCode}";
+                                    discItemRate = await _dbHelper.GetExecuteScalarAsync<decimal>(rmDiscItemQry);
+
+                                    string rmDiscRateQry = $@"Select top 1 isnull(RATE,0) as Rate, isnull(ABOVE_PER,0) as ABOVE_PER, isnull(ABOVE_AMT,0) as ABOVE_AMT 
+                                                                from RMDISC_MAST where item_code={gridRow.ItemCode} and comp_code={gv.PubCompCode} and SAUDA_ITEM=
+                                                                {saudaItemCode} and EFF_DATE< '{request.vDate:yyyyMMdd}' Order by EFF_DATE DESC";
+                                    var rmDiscRateRes = await _dbHelper.ExecuteQueryAsync(rmDiscRateQry);
+                                    if (rmDiscRateRes.Rows.Count > 0)
+                                    {
+                                        var row = rmDiscRateRes.Rows[0];
+
+                                        discItemRate = row["Rate"] == DBNull.Value ? 0m : Convert.ToDecimal(row["Rate"]);
+                                        abovePer = row["ABOVE_PER"] == DBNull.Value ? 0m : Convert.ToDecimal(row["ABOVE_PER"]);
+                                        aboveRate = row["ABOVE_AMT"] == DBNull.Value ? 0m : Convert.ToDecimal(row["ABOVE_AMT"]);
+                                    }
+                                    else
+                                    {
+                                        rowResult.rowWarningMsg += $@"Item {gridRow.ItemName} not found in discount master, Please contact System Administrator.";
+                                    }
+                                }
+
+                            }
+
+                            // -------------------------------------------------
+                            // Quality difference / quantity above percentage
+                            // -------------------------------------------------
+                            decimal sItemQty = 0m;
+                            if (abovePer > 0 && ((gv.PubCompCode == "1" && saudaItemCode == 30001) || (gv.PubCompCode == "7" && saudaItemCode == 3)))
+                            {
+                                foreach (var row in request.Rows)
+                                {
+                                    if (row == null)
+                                        continue;
+
+                                    if (row.ItemCode == saudaItemCode)
+                                    {
+                                        sItemQty += row.BillQty;
+                                    }
+                                }
+                                if (gridRow.RecdQty > (sItemQty * abovePer * 0.01m))
+                                {
+                                    decimal rQty = gridRow.RecdQty;
+                                    decimal trqty = 0.0m;
+                                    decimal rRate = Math.Abs(aboveRate) + discItemRate;
+                                    if (rRate > 0)
+                                    {
+                                        amt1 = Math.Round(rQty * rRate, 0, MidpointRounding.AwayFromZero);
+                                        at1 = Math.Round(amt1 * taxPer * 0.01m, 0, MidpointRounding.AwayFromZero);
+                                        rRate += rRate * taxPer / 100m;
+                                        anr1 = $"{gridRow.ItemName} Qty > {abovePer}% " + $"{rQty} @ {rRate} Rs. {rQty * rRate}";
+                                        trqty += rQty;
+                                    }
+                                }
+                                Q15DrAmt = amt1 + amt2 + amt3;
+                                Q15DrTax = at1 + at2 + at3;
+                                Q15Narr = anr3 + ", " + anr2 + ", " + anr1;
+                            }
+                        }
+
+                        // -----------------------------------------------------
+                        // Quality difference based on negative discount rate
+                        // -----------------------------------------------------
+                        if (qtyDiffQty > 0 && discItemRate < 0)
+                        {
+                            qltDiffDrRate = Math.Abs(discItemRate);
+                            decimal qltDiffTaxRate = qltDiffDrRate * taxPer / 100m;
+                            qltDiffDrRate += qltDiffTaxRate;
+
+                            if (qltDiffDrRate > 0)
+                            {
+                                qltDiffDrAmt = Math.Round(qtyDiffQty * qltDiffDrRate, 0, MidpointRounding.AwayFromZero);
+                                if (string.Equals(request.InputType, "GST Input", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    rowResult.QualityDiffDrAmt = Math.Round((qltDiffDrAmt / (100m + taxPer)) * 100m, 0, MidpointRounding.AwayFromZero);
+                                }
+                                else
+                                {
+                                    rowResult.QualityDiffDrAmt = Math.Round(qltDiffDrAmt, 0, MidpointRounding.AwayFromZero);
+                                }
+                            }
+                        }
+                        Q15DrAmt = 0.0m; Q15DrTax = 0.0m; qltDiffDrAmt = 0.0m;
+                    }
+                    else
+                    {
+                        string poLDRateQry = $@"select RATE from ORDER2 where V_TYPE='{gridRow.POType}' and V_NO={gridRow.PONo} and COMP_CODE={gv.PubCompCode} 
+                        and BRANCH_CODE={gv.PubBranchCode} and FAPROV_STATUS='Approved'";
+
+                        decimal poLandRate = await _dbHelper.GetExecuteScalarAsync<decimal>(poLDRateQry);
+
+                        if (poLandRate > 0)
+                        {
+                            rowResult.poLandRate = poLandRate;
+                        }
+                        else
+                        {
+                            rowResult.poLandRate = gridRow.POLandRate;
+                        }
+
+                        // RMPB
+                        if (string.Equals(request.VType, "RMPB", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string itemDiffQry = $@"select top 1 isnull(ITEM_DIFF,0) from DISC_MAST where code={request.BillTo} and ITEM_CODE={gridRow.ItemCode} and COMP_CODE={gv.PubCompCode}";
+                            bool isItemDiffExists = await _dbHelper.IsDataExist(itemDiffQry);
+                            if (isItemDiffExists)
+                            {
+                                discItemRate = await _dbHelper.GetExecuteScalarAsync<decimal>(itemDiffQry);
+                            }
+                            else
+                            {
+                                rowResult.rowWarningMsg += $@"Discount rate not found of {gridRow.ItemName} of Supplier {request.billToName}";
+                            }
+                        }
+
+                        qltDiffDrRate = gridRow.LandRate - (gridRow.PORate + discItemRate);
+                        decimal qltDiffTaxRate = qltDiffDrRate * taxPer / 100m;
+                        qltDiffDrRate += qltDiffTaxRate;
+
+                        if (qltDiffDrRate > 0)
+                        {
+                            qltDiffDrAmt = Math.Round(gridRow.BillQty * qltDiffDrRate, 0, MidpointRounding.AwayFromZero);
+                            if (string.Equals(request.InputType, "GST Input", StringComparison.OrdinalIgnoreCase))
+                            {
+                                rowResult.QualityDiffDrAmt = Math.Round((qltDiffDrAmt / (100m + taxPer)) * 100m, 0, MidpointRounding.AwayFromZero);
+                            }
+                            else
+                            {
+                                rowResult.QualityDiffDrAmt = Math.Round(qltDiffDrAmt, 0, MidpointRounding.AwayFromZero);
+                            }
+                            // -----------------------------------------------------
+                            // Additional quantity difference
+                            // -----------------------------------------------------
+                            QltQtyDiff = gridRow.RecdQty - gridRow.BillQty;
+
+                            if (discItemRate < 0 && QltQtyDiff > 0)
+                            {
+                                qltDiffDrRate = Math.Abs(discItemRate);
+                                qltDiffTaxRate = qltDiffDrRate * taxPer / 100m;
+                                qltDiffDrRate += qltDiffTaxRate;
+                                qltDiffDrAmt = Math.Round(QltQtyDiff * qltDiffDrRate, 0, MidpointRounding.AwayFromZero);
+                                if (string.Equals(request.InputType, "GST Input", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    rowResult.QCDiffDrNoteAmt = Math.Round((qltDiffDrAmt / (100m + taxPer)) * 100m, 0, MidpointRounding.AwayFromZero);
+                                }
+                                else
+                                {
+                                    rowResult.QCDiffDrNoteAmt = Math.Round(qltDiffDrAmt, 0, MidpointRounding.AwayFromZero);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private DrCrCalculationResponse CalculateFinalDrNoteAmt(DrCrCalculationResponse result)
+        {
+            if (result == null || result.Rows == null)
+                return result;
+            foreach (var rowResult in result.Rows)
+            {
+                if (rowResult == null || rowResult.ItemCode <= 0)
+                    continue;
+                rowResult.FinalDrNote = rowResult.QCDiffDrNoteAmt +
+                                            rowResult.RateDiffDrAmt +
+                                            rowResult.WeightDiffDrAmt +
+                                            rowResult.QualityDiffDrAmt +
+                                            rowResult.OtherDrNoteAmt;
+            }
+            return result;
+        }
+
+        private DrCrCalculationResponse CalculateDrCrHeaderGridDifference(CalculateDrCrRequest request, DrCrCalculationResponse result)
+        {
+            if (request == null || result == null)
+                return result;
+
+            decimal totDrAmtHeader = 0m;
+            decimal totCrAmtHeader = 0m;
+
+            decimal totDrAmtDetail = 0m;
+            decimal totCrAmtDetail = 0m;
+
+            // ---------------------------------------------------------
+            // Header Dr / Cr Amount
+            // ---------------------------------------------------------
+            if (string.Equals(request.InputType, "GST Input", StringComparison.OrdinalIgnoreCase))
+            {
+                totDrAmtHeader = request.QualityDiffDebitAmt + request.RateDiffDebitAmt + request.QCDebitAmt + request.WeightDiffDebitAmt + request.OthDebitAmt;
+                totCrAmtHeader = request.QualityDiffCreditAmt + request.RateDiffCreditAmt + request.QCCreditAmt + request.WeightDiffCreditAmt;
+            }
+            else
+            {
+                totDrAmtHeader = request.QualityDiffDebitAmt + request.RateDiffDebitAmt + request.QCDebitAmt + request.WeightDiffDebitAmt + request.OthDebitAmt
+                                + request.QualityDiffDebitTax + request.RateDiffDebitTax + request.QCDebitTax + request.WeightDiffDebitTax + request.OthDebitTax;
+                totCrAmtHeader = request.QualityDiffCreditAmt + request.RateDiffCreditAmt + request.QCCreditAmt + request.WeightDiffCreditAmt + request.QualityDiffCreditTax
+                                + request.RateDiffCreditTax + request.QCCreditTax + request.WeightDiffCreditTax;
+            }
+
+            foreach (var row in result.Rows)
+            {
+                if (row == null || row.ItemCode <= 0)
+                    continue;
+
+                totDrAmtDetail += row.FinalDrNote;
+                totCrAmtDetail += row.FinalCrNote;
+            }
+
+            // ---------------------------------------------------------
+            // Header vs Grid Difference
+            // ---------------------------------------------------------
+            result.DrAmtHeader = Math.Round(totDrAmtHeader, 0, MidpointRounding.AwayFromZero);
+            result.CrAmtHeader = Math.Round(totCrAmtHeader, 0, MidpointRounding.AwayFromZero);
+            result.DrAmtGrid = Math.Round(totDrAmtDetail, 0, MidpointRounding.AwayFromZero);
+            result.CrAmtGrid = Math.Round(totCrAmtDetail, 0, MidpointRounding.AwayFromZero);
+            result.DrAmtDiff = Math.Abs(totDrAmtDetail) - totDrAmtHeader;
+            result.CrAmtDiff = Math.Abs(totCrAmtDetail) - totCrAmtHeader;
+
+            return result;
+        }
+
+        //Reports
+        public async Task<bool> UpdatePassDetails()
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            using SqlConnection con = _dbConnection.GetErpConnection();
+            await con.OpenAsync();
+            using SqlTransaction tran = con.BeginTransaction();
+
+            try
+            {
+                string query1 = @"UPDATE purchase2 SET pass_type = '', pass_no = 0 WHERE v_type IN ('RCPT','RCPI','BFRC','SRPU','SRJW') AND ISNULL(pass_no, 0) = 0
+                                AND comp_code = @comp_code AND year_code = @year_code AND branch_code = @branch_code;";
+
+                using (SqlCommand cmd = new SqlCommand(query1, con, tran))
+                {
+                    cmd.Parameters.AddWithValue("@comp_code", gv.PubCompCode);
+                    cmd.Parameters.AddWithValue("@branch_code", gv.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@year_code", gv.PubFYearCode);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+
+                string query2 = @"UPDATE mrn2 SET mrn2.pass_type = pass2.v_type, mrn2.pass_no = pass2.v_no FROM purchase2 mrn2 INNER JOIN purchase2 pass2
+                                  ON mrn2.v_type = pass2.ref_type AND mrn2.v_no = pass2.ref_no AND mrn2.comp_code = pass2.comp_code AND mrn2.year_code = pass2.year_code
+                                    AND mrn2.item_code = pass2.item_code WHERE ISNULL(mrn2.pass_no, 0) = 0 AND pass2.comp_code = @comp_code AND pass2.year_code = @year_code
+                                    AND pass2.branch_code = @branch_code AND mrn2.v_type IN ('RCPT','RCPI','BFRC','SRPU','SRJW');";
+
+                using (SqlCommand cmd = new SqlCommand(query2, con, tran))
+                {
+                    cmd.Parameters.AddWithValue("@comp_code", gv.PubCompCode);
+                    cmd.Parameters.AddWithValue("@branch_code", gv.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@year_code", gv.PubFYearCode);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+
+                await tran.CommitAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await tran.RollbackAsync();
+                throw;
+            }
+        }
+
+        List<SqlParameter> GetCommonParams()
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            return new List<SqlParameter>
+            {
+                new SqlParameter("@COMP_CODE", gv.PubCompCode),
+                new SqlParameter("@BRANCH_CODE", gv.PubBranchCode),
+                new SqlParameter("@YEAR_CODE", gv.PubFYearCode)
+            };
+        }
+        public async Task<bool> GenerateImportBillAsync(int vNo, string vType, DateTime vDate, int plNo)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            try
+            {
+                // ---------------------------------------------------------
+                // 1. Check Exchange Rate
+                // ---------------------------------------------------------
+                string exchangeRateQuery = @"SELECT ISNULL(EXCH_RATE, 0) FROM PURCHASE2 WHERE V_NO = @V_NO AND V_TYPE = @V_TYPE AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE
+                                            AND YEAR_CODE = @YEAR_CODE";
+
+                var parameters = GetCommonParams();
+                parameters.Add(new SqlParameter("@V_NO", vNo));
+                parameters.Add(new SqlParameter("@V_TYPE", vType));
+
+                var exchangeRate = await _dbHelper.ExecuteScalarAsync(exchangeRateQuery, parameters);
+
+                if (string.IsNullOrWhiteSpace(exchangeRate) ||
+                    Convert.ToDecimal(exchangeRate, CultureInfo.InvariantCulture) == 0)
+                {
+                    throw new Exception("Please check, Exchange Rate is 0.");
+                }
+
+
+                // ---------------------------------------------------------
+                // 2. Delete existing IMPORT1
+                // ---------------------------------------------------------
+                string deleteImport1 = @"DELETE FROM IMPORT1 WHERE V_NO = @V_NO AND V_TYPE = @V_TYPE AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+                var deleteImport1Parameters = GetCommonParams();
+                deleteImport1Parameters.Add(new SqlParameter("@V_NO", vNo));
+                deleteImport1Parameters.Add(new SqlParameter("@V_TYPE", vType));
+                _dbHelper.ExecuteNonQuery(deleteImport1, deleteImport1Parameters);
+
+                // ---------------------------------------------------------
+                // 3. Delete existing IMPORT2
+                // ---------------------------------------------------------
+                string deleteImport2 = @"DELETE FROM IMPORT2 WHERE V_NO = @V_NO AND V_TYPE = @V_TYPE AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+                var deleteImport2Parameters = GetCommonParams();
+                deleteImport2Parameters.Add(new SqlParameter("@V_NO", vNo));
+                deleteImport2Parameters.Add(new SqlParameter("@V_TYPE", vType));
+                _dbHelper.ExecuteNonQuery(deleteImport2, deleteImport2Parameters);
+
+
+                // ---------------------------------------------------------
+                // 4. Insert IMPORT2
+                // ---------------------------------------------------------
+                
+                var insertImport2Params = GetCommonParams();
+                insertImport2Params.Add(new SqlParameter("@Action", "InsertImport2"));
+                insertImport2Params.Add(new SqlParameter("@WSID", gv.PubWorkStationID));
+                insertImport2Params.Add(new SqlParameter("@USER_CODE", gv.PubUserId));
+                insertImport2Params.Add(new SqlParameter("@V_NO", vNo));
+                insertImport2Params.Add(new SqlParameter("@V_TYPE", vType));
+
+                _dbHelper.ExecuteNonQuery("sp_PurchaseBillPassEntryDirect", insertImport2Params, true);
+
+
+                // ---------------------------------------------------------
+                // 5. Get BL_NO
+                // ---------------------------------------------------------
+                string blNoQuery = @"SELECT CHALL_NO FROM PURCHASE1 WHERE REF_NO = @V_NO AND REF_TYPE = @V_TYPE AND V_TYPE IN ('RMDP', 'SIDP') AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE
+                                    AND YEAR_CODE = @YEAR_CODE AND ISNULL(CHALL_NO, '') <> ''";
+                var blNoParameters = GetCommonParams();
+                blNoParameters.Add(new SqlParameter("@V_NO", vNo));
+                blNoParameters.Add(new SqlParameter("@V_TYPE", vType));
+                string blNo = await _dbHelper.ExecuteScalarAsync(blNoQuery, blNoParameters);
+
+
+                // ---------------------------------------------------------
+                // 6. Get Shipping Line Name
+                // ---------------------------------------------------------
+                string shipNameQuery = @"SELECT B.NAME FROM PURCHASE1 A LEFT JOIN SUBGROUP_MAST B ON A.PARTY_CODE = B.CODE AND A.COMP_CODE = B.COMP_CODE WHERE A.REF_NO = @V_NO AND A.REF_TYPE = 
+                                        @V_TYPE AND A.V_TYPE IN ('RMDP', 'SIDP') AND A.COMP_CODE = @COMP_CODE AND A.BRANCH_CODE = @BRANCH_CODE AND A.YEAR_CODE = @YEAR_CODE AND A.EXPS_TYPE = 
+                                        'Shipping Line'";
+                var shipNameParameters = GetCommonParams();
+                shipNameParameters.Add(new SqlParameter("@V_NO", vNo));
+                shipNameParameters.Add(new SqlParameter("@V_TYPE", vType));
+                string shipName = await _dbHelper.ExecuteScalarAsync(shipNameQuery, shipNameParameters);
+
+
+                // ---------------------------------------------------------
+                // 7. Get Import Quantity
+                // ---------------------------------------------------------
+                string importQtyQuery = @"SELECT COUNT(*) FROM IMPORT2 WHERE V_NO = @V_NO AND V_TYPE = @V_TYPE AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+                var importQtyParameters = GetCommonParams();
+                importQtyParameters.Add(new SqlParameter("@V_NO", vNo));
+                importQtyParameters.Add(new SqlParameter("@V_TYPE", vType));
+                string importQty = await _dbHelper.ExecuteScalarAsync(importQtyQuery, importQtyParameters);
+
+
+                // ---------------------------------------------------------
+                // 8. Get USD Rate
+                // ---------------------------------------------------------
+                string usdRateQuery = @"SELECT ISNULL(AVG(USD_RATE), 0) FROM PURCHASE2 WHERE V_NO = @V_NO AND V_TYPE = @V_TYPE AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+                var usdRateParameters = GetCommonParams();
+                usdRateParameters.Add(new SqlParameter("@V_NO", vNo));
+                usdRateParameters.Add(new SqlParameter("@V_TYPE", vType));
+                string usdRate = await _dbHelper.ExecuteScalarAsync(usdRateQuery, usdRateParameters);
+
+
+                // ---------------------------------------------------------
+                // 9. Get USD Amount
+                // ---------------------------------------------------------
+                string usdAmountQuery = @"SELECT ISNULL(SUM(AMOUNT / EXCH_RATE), 0) FROM PURCHASE2 WHERE V_NO = @V_NO AND V_TYPE = @V_TYPE AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = 
+                                        @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+                var usdAmtParameters = GetCommonParams();
+                usdAmtParameters.Add(new SqlParameter("@V_NO", vNo));
+                usdAmtParameters.Add(new SqlParameter("@V_TYPE", vType));
+                string usdAmount = await _dbHelper.ExecuteScalarAsync(usdAmountQuery, usdAmtParameters);
+
+
+                // ---------------------------------------------------------
+                // 10. Insert IMPORT1
+                // ---------------------------------------------------------
+                var insertImport1Params = GetCommonParams();
+                insertImport1Params.Add(new SqlParameter("@Action", "InsertImport1"));
+                insertImport1Params.Add(new SqlParameter("@WSID", gv.PubWorkStationID));
+                insertImport1Params.Add(new SqlParameter("@USER_CODE", gv.PubUserId));
+                insertImport1Params.Add(new SqlParameter("@BL_NO", (object)blNo ?? DBNull.Value));
+                insertImport1Params.Add(new SqlParameter("@SHIP_NAME", (object)shipName ?? DBNull.Value));
+                insertImport1Params.Add(new SqlParameter("@QTY", Convert.ToInt32(importQty)));
+                insertImport1Params.Add(new SqlParameter("@USD", Convert.ToDecimal(usdRate)));
+                insertImport1Params.Add(new SqlParameter("@USD_AMT", Convert.ToDecimal(usdAmount)));
+                insertImport1Params.Add(new SqlParameter("@V_NO", vNo));
+                insertImport1Params.Add(new SqlParameter("@V_TYPE", vType));
+
+                _dbHelper.ExecuteNonQuery("sp_PurchaseBillPassEntryDirect", insertImport1Params, true);
+
+
+                // ---------------------------------------------------------
+                // 11. Get expense details
+                // ---------------------------------------------------------
+                string expenseQuery = @"SELECT REF_TYPE, REF_NO, COMP_CODE, EXPS_TYPE, ISNULL(SUM(NAMOUNT), 0) AS Amt, ISNULL(SUM(CGST_AMT + SGST_AMT + IGST_AMT), 0) AS TaxAmt, 
+                                        ISNULL(SUM(TDS_PER), 0) AS TDS_PER, ISNULL(SUM(TDS_AMT), 0) AS TDS_AMT FROM PURCHASE1 
+                                        WHERE REF_NO = @V_NO AND REF_TYPE = @V_TYPE AND V_TYPE IN ('RMDP', 'SIDP') AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE
+                                        GROUP BY REF_TYPE, REF_NO, COMP_CODE, EXPS_TYPE";
+                var expenseParameters = GetCommonParams();
+                expenseParameters.Add(new SqlParameter("@V_NO", vNo));
+                expenseParameters.Add(new SqlParameter("@V_TYPE", vType));
+                DataTable expenseTable = await _dbHelper.ExecuteQueryAsync(expenseQuery, expenseParameters);
+
+
+                // ---------------------------------------------------------
+                // 12. Update IMPORT1 expense-wise
+                // ---------------------------------------------------------
+
+                foreach (DataRow row in expenseTable.Rows)
+                {
+                    string expType = row["EXPS_TYPE"]?.ToString();
+                    decimal amount = row["Amt"] == DBNull.Value ? 0 : Convert.ToDecimal(row["Amt"]);
+                    decimal taxAmount = row["TaxAmt"] == DBNull.Value ? 0 : Convert.ToDecimal(row["TaxAmt"]);
+                    decimal tdsPer = row["TDS_PER"] == DBNull.Value ? 0 : Convert.ToDecimal(row["TDS_PER"]);
+                    decimal tdsAmount = row["TDS_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(row["TDS_AMT"]);
+                    string updateColumns = expType switch
+                    {
+                        "Custom Duty" => "CUSTOM = @AMOUNT, TAX_CUST = @TAX_AMOUNT",
+                        "Shipping Line" => "SHIPPING = @AMOUNT, TAX_SHIP = @TAX_AMOUNT, TDS_PER1 = @TDS_PER, TDS_AMT1 = @TDS_AMOUNT",
+                        "Container" => "CONT = @AMOUNT, TAX_CONT = @TAX_AMOUNT, TDS_PER2 = @TDS_PER, TDS_AMT2 = @TDS_AMOUNT",
+                        "Clearing Agent" => "CLEARING = @AMOUNT, TAX_CLEA = @TAX_AMOUNT, TDS_PER = @TDS_PER, TDS_AMT = @TDS_AMOUNT",
+                        "Freight" => "FREIGHT1 = @AMOUNT, TAX_FRT1 = @TAX_AMOUNT, TDS_PER3 = @TDS_PER, TDS_AMT3 = @TDS_AMOUNT",
+                        "Detention" => "DETETATION = @AMOUNT, TAX_DET = @TAX_AMOUNT, TDS_PER4 = @TDS_PER, TDS_AMT4 = @TDS_AMOUNT",
+                        "Clearing Exps" => "CLEXP = @AMOUNT, TAX_CLEX = @TAX_AMOUNT, CLTDS_PER = @TDS_PER, CLTDS_AMT = @TDS_AMOUNT",
+                        "Lab Test" => "OTHEXPS = @AMOUNT, TAX_OTHEXPS = @TAX_AMOUNT, TDSPER_OTHEXPS = @TDS_PER, TDSAMT_OTHEXPS = @TDS_AMOUNT",
+
+                        _ => null
+                    };
+
+                    if (string.IsNullOrWhiteSpace(updateColumns))
+                        continue;
+
+                    string updateImport1 = $@"UPDATE IMPORT1 SET {updateColumns} WHERE V_TYPE = @REF_TYPE AND V_NO = @REF_NO AND COMP_CODE = @REF_COMP_CODE AND BRANCH_CODE = @BRANCH_CODE
+                                            AND YEAR_CODE = @YEAR_CODE";
+
+                    _dbHelper.ExecuteNonQuery(updateImport1, new List<SqlParameter>
+                    {
+                        new SqlParameter("@AMOUNT", amount),
+                        new SqlParameter("@TAX_AMOUNT", taxAmount),
+                        new SqlParameter("@TDS_PER", tdsPer),
+                        new SqlParameter("@TDS_AMOUNT", tdsAmount),
+                        new SqlParameter("@REF_TYPE", row["REF_TYPE"]),
+                        new SqlParameter("@REF_NO", row["REF_NO"]),
+                        new SqlParameter("@REF_COMP_CODE", row["COMP_CODE"]),
+                        new SqlParameter("@BRANCH_CODE", gv.PubBranchCode),
+                        new SqlParameter("@YEAR_CODE", gv.PubFYearCode)
+                    });
+                }
+
+
+                // ---------------------------------------------------------
+                // 13. Update IMPORT1 AMOUNT from IMPORT2
+                // ---------------------------------------------------------
+
+                string updateAmount = @"UPDATE IMPORT1 SET AMOUNT = (SELECT SUM(AMOUNT) FROM IMPORT2 WHERE IMPORT2.V_NO = IMPORT1.V_NO AND IMPORT2.V_TYPE = IMPORT1.V_TYPE AND IMPORT2.COMP_CODE 
+                                        = IMPORT1.COMP_CODE AND IMPORT2.BRANCH_CODE = IMPORT1.BRANCH_CODE AND IMPORT2.YEAR_CODE = IMPORT1.YEAR_CODE)
+                                        WHERE IMPORT1.COMP_CODE = @COMP_CODE AND IMPORT1.BRANCH_CODE = @BRANCH_CODE AND IMPORT1.YEAR_CODE = @YEAR_CODE";
+
+                var updateAmountParameter = GetCommonParams();
+                _dbHelper.ExecuteNonQuery(updateAmount, updateAmountParameter);
+
+
+                // ---------------------------------------------------------
+                // 14. Update ORD_WASTE
+                // ---------------------------------------------------------
+                string updateOrdWaste = @"UPDATE IMPORT2 SET ORD_WASTE = SAUDA.WASTE_PER FROM IMPORT2, SAUDA WHERE SAUDA.V_TYPE = 'PAUD' AND IMPORT2.ORD_NO = SAUDA.V_NO AND IMPORT2.COMP_CODE = 
+                                        SAUDA.COMP_CODE AND IMPORT2.BRANCH_CODE = SAUDA.BRANCH_CODE";
+                _dbHelper.ExecuteNonQuery(updateOrdWaste);
+
+
+                // ---------------------------------------------------------
+                // 15. Calculate IMPORT1 NAMOUNT
+                // ---------------------------------------------------------
+                string updateNetAmount = @"UPDATE IMPORT1 SET NAMOUNT = ISNULL(AMOUNT, 0) + ISNULL(CUSTOM, 0) + ISNULL(SHIPPING, 0) + ISNULL(CONT, 0) + ISNULL(FREIGHT1, 0) + ISNULL(FREIGHT2, 0)
+                                        + ISNULL(FREIGHT3, 0) + ISNULL(FREIGHT4, 0) + ISNULL(CLEARING, 0) + ISNULL(DETETATION, 0) + ISNULL(CLEXP, 0) + ISNULL(OTHEXPS, 0)";
+                _dbHelper.ExecuteNonQuery(updateNetAmount);
+
+
+                // ---------------------------------------------------------
+                // 16. Delete TEMP_VOUCHER
+                // ---------------------------------------------------------
+                _dbHelper.ExecuteNonQuery("DELETE FROM TEMP_VOUCHER");
+
+
+                // ---------------------------------------------------------
+                // 17. Get PURCHASE1 expense/reference records
+                // ---------------------------------------------------------
+                string purchaseRefQuery = @"SELECT * FROM PURCHASE1 WHERE REF_TYPE = @V_TYPE AND REF_NO = @V_NO AND V_TYPE IN ('RMDP', 'SIDP') AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE
+                                            AND YEAR_CODE = @YEAR_CODE";
+                var purchaseRefParameters = GetCommonParams();
+                purchaseRefParameters.Add(new SqlParameter("@V_NO", vNo));
+                purchaseRefParameters.Add(new SqlParameter("@V_TYPE", vType));
+                DataTable purchaseRefTable = await _dbHelper.ExecuteQueryAsync(purchaseRefQuery, purchaseRefParameters);
+
+
+                // ---------------------------------------------------------
+                // 18. Insert DR entries from original voucher into
+                //     TEMP_VOUCHER
+                // ---------------------------------------------------------
+                string insertTempDr = @"INSERT INTO TEMP_VOUCHER (YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DR_CODE, DR_AMT, SNO) 
+                                        SELECT YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DR_CODE, AMT, SNO FROM LEDGER2
+                                        WHERE V_TYPE = @V_TYPE AND V_NO = @V_NO AND V_DATE BETWEEN @V_DATE AND @V_DATE AND DR_CODE IS NOT NULL
+                                        AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+
+                var insertTempDrParameter = GetCommonParams();
+                insertTempDrParameter.Add(new SqlParameter("@V_NO", vNo));
+                insertTempDrParameter.Add(new SqlParameter("@V_TYPE", vType));
+                insertTempDrParameter.Add(new SqlParameter("@V_DATE", vDate.Date));
+                _dbHelper.ExecuteNonQuery(insertTempDr, insertTempDrParameter);
+
+
+                // ---------------------------------------------------------
+                // 19. Insert CR entries from original voucher
+                // ---------------------------------------------------------
+                string insertTempCr = @"INSERT INTO TEMP_VOUCHER (YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DR_CODE, CR_AMT, SNO)
+                                        SELECT YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, CR_CODE, AMT, SNO FROM LEDGER2 WHERE V_TYPE = @V_TYPE AND V_NO = @V_NO AND V_DATE 
+                                        BETWEEN @V_DATE AND @V_DATE AND CR_CODE IS NOT NULL AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+                var insertTempCrParameter = GetCommonParams();
+                insertTempCrParameter.Add(new SqlParameter("@V_NO", vNo));
+                insertTempCrParameter.Add(new SqlParameter("@V_TYPE", vType));
+                insertTempCrParameter.Add(new SqlParameter("@V_DATE", vDate.Date));
+                _dbHelper.ExecuteNonQuery(insertTempCr, insertTempCrParameter);
+
+
+                // ---------------------------------------------------------
+                // 20. Insert RIPL DR entries
+                // ---------------------------------------------------------
+                string insertRiplDr = @"INSERT INTO TEMP_VOUCHER (YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DR_CODE, DR_AMT, SNO)
+                                        SELECT YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DR_CODE, AMT, SNO FROM LEDGER2 WHERE V_TYPE = 'RIPL' AND V_NO = @PL_NO AND DR_CODE IS NOT NULL
+                                        AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+
+                var insertRiplDrParameter = GetCommonParams();
+                insertRiplDrParameter.Add(new SqlParameter("@PL_NO", plNo));
+                _dbHelper.ExecuteNonQuery(insertRiplDr, insertRiplDrParameter);
+
+                // ---------------------------------------------------------
+                // 21. Insert RIPL CR entries
+                // ---------------------------------------------------------
+                string insertRiplCr = @"INSERT INTO TEMP_VOUCHER (YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DR_CODE, CR_AMT, SNO) 
+                                        SELECT YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, CR_CODE, AMT, SNO FROM LEDGER2 
+                                        WHERE V_TYPE = 'RIPL' AND V_NO = @PL_NO AND CR_CODE IS NOT NULL AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+                var insertRiplCrParameter = GetCommonParams();
+                insertRiplCrParameter.Add(new SqlParameter("@PL_NO", plNo));
+                _dbHelper.ExecuteNonQuery(insertRiplCr, insertRiplCrParameter);
+
+
+                // ---------------------------------------------------------
+                // 22. Insert ledger entries for RMDP / SIDP references
+                // ---------------------------------------------------------
+                foreach (DataRow row in purchaseRefTable.Rows)
+                {
+                    string referenceType = row["V_TYPE"]?.ToString();
+                    int referenceNo = Convert.ToInt32(row["V_NO"]);
+                    DateTime referenceDate = Convert.ToDateTime(row["V_DATE"]);
+
+                    string insertReferenceDr = @"INSERT INTO TEMP_VOUCHER (YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DR_CODE, DR_AMT, SNO)
+                                                SELECT YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DR_CODE, AMT, SNO FROM LEDGER2
+                                                WHERE V_TYPE = @REF_TYPE AND V_NO = @REF_NO AND V_DATE BETWEEN @REF_DATE AND @REF_DATE AND DR_CODE IS NOT NULL
+                                                AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+
+                    var insertReferenceDrParameter = GetCommonParams();
+                    insertReferenceDrParameter.Add(new SqlParameter("@REF_TYPE", referenceType));
+                    insertReferenceDrParameter.Add(new SqlParameter("@REF_NO", referenceNo));
+                    insertReferenceDrParameter.Add(new SqlParameter("@REF_DATE", referenceDate.Date));
+                    _dbHelper.ExecuteNonQuery(insertReferenceDr, insertReferenceDrParameter);
+
+
+                    // -----------------------------------------------------
+                    // 23. CR entries for referenced vouchers
+                    // -----------------------------------------------------
+
+                    string insertReferenceCr = @"INSERT INTO TEMP_VOUCHER (YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, DR_CODE, CR_AMT, SNO ) 
+                                                SELECT YEAR_CODE, COMP_CODE, BRANCH_CODE, V_TYPE, V_NO, V_DATE, CR_CODE, AMT, SNO FROM LEDGER2
+                                                WHERE V_TYPE = @REF_TYPE AND V_NO = @REF_NO AND V_DATE BETWEEN @REF_DATE AND @REF_DATE AND CR_CODE IS NOT NULL
+                                                AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+                    var insertReferenceCrParameter = GetCommonParams();
+                    insertReferenceCrParameter.Add(new SqlParameter("@REF_TYPE", referenceType));
+                    insertReferenceCrParameter.Add(new SqlParameter("@REF_NO", referenceNo));
+                    insertReferenceCrParameter.Add(new SqlParameter("@REF_DATE", referenceDate.Date));
+                    _dbHelper.ExecuteNonQuery(insertReferenceCr, insertReferenceCrParameter);
+                }
+
+
+                // ---------------------------------------------------------
+                // Report functionality intentionally excluded.
+                // ---------------------------------------------------------
+
+                return true;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        //Address
+        public AddressDetails GetAddByParty(int code, int addressId)
+        {
+            var addressDetails = new AddressDetails();
+
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection connection = _dbConnection.GetErpConnection())
+            {
+                //using (SqlCommand cmd = new SqlCommand("Select top(1) ADD1,ADD2,ADD3,PINCODE,GSTIN,CITY_CODE from SUBGROUP_ADDRESS where COMP_CODE = @COMP_CODE AND Code = @PCODE", connection))
+                using (SqlCommand cmd = new SqlCommand(
+                    $@"Select a.Add1,a.Add2,a.Add3,a.GSTIN,a.City_Code,b.Name State,c.name City,a.Pincode,a.Distance , d.einv_party
+                            from Subgroup_Address a left join STATE_MAST b on a.STATE_CODE=b.code left join CITY_MAST c on a.CITY_CODE=c.code
+                            left join SUBGROUP_MAST d on d.CODE = a.code 
+                            where a.comp_code=@COMP_CODE and a.Code=@CODE and a.Address_Id=@Address_Id",
+                    connection))
+                {
+                    cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                    cmd.Parameters.AddWithValue("@CODE", code);
+                    cmd.Parameters.AddWithValue("@Address_Id", addressId);
+                    connection.Open();
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            addressDetails.add1 = reader["ADD1"].ToString();
+                            addressDetails.add2 = reader["ADD2"].ToString();
+                            addressDetails.add3 = reader["ADD3"].ToString();
+                            addressDetails.pincode = reader["PINCODE"].ToString();
+                            addressDetails.gstin = reader["GSTIN"].ToString();
+                            addressDetails.cityCode = reader["CITY_CODE"].ToString();
+                            addressDetails.einv_party = reader["einv_party"] != DBNull.Value ? Convert.ToInt32(reader["einv_party"]) : 0;
+
+                        }
+                    }
+                }
+            }
+            return addressDetails;
+        }
+
+        //Validate MRN
+        public RepositoryResponseData<string> ValidateMRN(string mrnTypeNo, string vType, int vNo)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+
+                //-------------------------------------------------------
+                //Check Duplicate
+                //-------------------------------------------------------
+
+                string duplicateQuery = @"Select distinct V_TYPE+cast(V_NO as varchar) from PURCHASE2 where V_TYPE=@V_TYPE and V_NO<>@V_NO and REF_TYPE+cast(REF_NO as varchar)=@REF_TYPE_REF_NO 
+                    and COMP_CODE=@COMP_CODE and BRANCH_CODE=@BRANCH_CODE and YEAR_CODE=@YEAR_CODE";
+
+                SqlCommand cmd = new SqlCommand(duplicateQuery, con);
+
+                cmd.Parameters.AddWithValue("@V_TYPE", vType);
+                cmd.Parameters.AddWithValue("@V_NO", vNo);
+                cmd.Parameters.AddWithValue("@REF_TYPE_REF_NO", mrnTypeNo);
+                cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+
+                var billPassNo = cmd.ExecuteScalar();
+
+                if (billPassNo != null)
+                {
+                    return new RepositoryResponseData<string> { status = false, message = "MRN No exists in Purchase Bill Pass Entry No : " + billPassNo };
+                }
+
+                //-------------------------------------------------------
+                //Check Approval
+                //-------------------------------------------------------
+                string MRNtype = mrnTypeNo.Substring(0, 4);
+                string MRNo = mrnTypeNo.Substring(4);
+                string approveQuery = @"SELECT FAPROV_STATUS FROM Purchase1 WHERE V_TYPE=@MRNType AND V_NO=@MRNNo AND COMP_CODE=@COMP_CODE AND BRANCH_CODE=@BRANCH_CODE";
+
+                SqlCommand cmd2 = new SqlCommand(approveQuery, con);
+
+                cmd2.Parameters.AddWithValue("@MRNType", MRNtype);
+                cmd2.Parameters.AddWithValue("@MRNNo", MRNo);
+                cmd2.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                cmd2.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+
+                var status = Convert.ToString(cmd2.ExecuteScalar());
+
+                if (status != null && status.ToUpper() != "APPROVED")
+                {
+                    return new RepositoryResponseData<string> { status = false, message = "MRN No " + mrnTypeNo + " not approved." };
+                }
+
+                return new RepositoryResponseData<string> { status = true, data = MRNo };
+            }
+        }
+        //Purchase header details by MRN change
+        public async Task<PurchaseDetailsDto> GetPurchaseDetailsByMRN(string vType, int vNo)
+        {
+            PurchaseDetailsDto model = new PurchaseDetailsDto();
+
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+
+                // 1. Check Purchase Exists
+                string purchaseSql = @"SELECT V_No FROM PURCHASE1 WHERE V_TYPE=@V_TYPE AND V_NO=@V_NO AND COMP_CODE=@COMP_CODE AND BRANCH_CODE=@BRANCH_CODE AND YEAR_CODE=@YEAR_CODE";
+                var parameters = new Dictionary<string, object>
+                {
+                    {"@V_TYPE", vType },
+                    {"@V_NO", vNo},
+                    {"@COMP_CODE", gv.PubCompCode},
+                    {"@BRANCH_CODE", gv.PubBranchCode},
+                    {"@YEAR_CODE", gv.PubFYearCode}
+                };
+                model.V_No = await _dbHelper.GetExecuteScalarAsync<int>(purchaseSql, parameters);
+
+                // 2. Deduction Details
+                string deductionSql = @"SELECT DEDUCT_AMT, DEDUCT_NARR FROM QC1 WHERE MRN_TYPE=@V_TYPE AND MRN_NO=@V_NO";
+                using (SqlCommand cmd = new SqlCommand(deductionSql, con))
+                {
+                    cmd.Parameters.AddWithValue("@V_TYPE", vType);
+                    cmd.Parameters.AddWithValue("@V_NO", vNo);
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            model.DeductAmt = dr["DEDUCT_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["DEDUCT_AMT"]);
+                            model.DeductNarr = dr["DEDUCT_NARR"]?.ToString();
+                        }
+                    }
+                }
+
+                // 3. Purchase Header Details
+
+                using (SqlCommand cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Action", "GetPurchaseHeaderByMRN");
+                    cmd.Parameters.AddWithValue("@V_TYPE", vType);
+                    cmd.Parameters.AddWithValue("@V_NO", vNo);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            model.BILL_NO = dr["BILL_NO"]?.ToString();
+                            model.BILL_DATE = dr["BILL_DATE"] as DateTime?;
+                            model.CHALL_NO = dr["CHALL_NO"]?.ToString();
+                            model.CHALL_DATE = dr["CHALL_DATE"] as DateTime?;
+                            model.WAYBILL_NO = dr["WAYBILL_NO"]?.ToString();
+                            model.TRANSIT_NO = dr["TRANSIT_NO"]?.ToString();
+                            model.EXCH_RATE = dr["EXCH_RATE"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["EXCH_RATE"]);
+
+                            model.PARTY_CODE = dr["PARTY_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(dr["PARTY_CODE"]);
+                            model.Party = dr["Party"]?.ToString();
+
+                            model.BILL_ADD1 = dr["BILL_ADD1"]?.ToString();
+                            model.BILL_ADD2 = dr["BILL_ADD2"]?.ToString();
+                            model.BILL_ADD3 = dr["BILL_ADD3"]?.ToString();
+                            model.BILL_CITY = dr["BILL_CITY"]?.ToString();
+                            model.BILL_GST = dr["BILL_GST"]?.ToString();
+                            model.BILL_PINCODE = dr["BILL_PINCODE"]?.ToString();
+                            model.BILL_STATE = dr["BILL_STATE"]?.ToString();
+
+                            model.SHIP_CODE = dr["SHIP_CODE"] == DBNull.Value ? 0 : Convert.ToInt32(dr["SHIP_CODE"]);
+                            model.ShipTo = dr["ShipTo"]?.ToString();
+
+                            model.SHIP_ADD1 = dr["SHIP_ADD1"]?.ToString();
+                            model.SHIP_ADD2 = dr["SHIP_ADD2"]?.ToString();
+                            model.SHIP_ADD3 = dr["SHIP_ADD3"]?.ToString();
+                            model.SHIP_CITY = dr["SHIP_CITY"]?.ToString();
+                            model.SHIP_GST = dr["SHIP_GST"]?.ToString();
+                            model.SHIP_PINCODE = dr["SHIP_PINCODE"]?.ToString();
+                            model.SHIP_STATE = dr["SHIP_STATE"]?.ToString();
+
+                            model.REMARKS = dr["REMARKS"]?.ToString();
+                            model.TRANSPORT_CODE = Convert.ToInt32(dr["TRANSPORT_CODE"]);
+                            model.Transport = dr["Transport"]?.ToString();
+                            model.TRANSPORT_NAME = dr["TRANSPORT_NAME"]?.ToString();
+                            model.TRUCK_NO = dr["TRUCK_NO"]?.ToString();
+                            model.CONTAINER_NO = dr["CONTAINER_NO"]?.ToString();
+                            model.GR_NO = dr["GR_NO"]?.ToString();
+                            model.GR_DATE = dr["GR_DATE"] as DateTime?;
+                            model.FRTPAY_AMT = dr["FRTPAY_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["FRTPAY_AMT"]);
+                            model.FRTPAY_TAXPER = dr["FRTPAY_TAXPER"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["FRTPAY_TAXPER"]);
+                            model.FRTPAY_TAX = dr["FRTPAY_TAX"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["FRTPAY_TAX"]);
+                            model.FRTPAY_NAR = dr["FRTPAY_NAR"]?.ToString();
+                            model.HOLD_REASON = dr["HOLD_REASON"]?.ToString();
+                            model.TCS_PER = dr["TCS_PER"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["TCS_PER"]);
+                            model.TCS_AMT = dr["TCS_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["TCS_AMT"]);
+                            model.EWB_INVNO = dr["EWB_INVNO"]?.ToString();
+                            model.EWB_DATE = dr["EWB_DATE"] as DateTime?;
+                            model.EWB_EXPDATE = dr["EWB_EXPDATE"] as DateTime?;
+                            model.EINV_PARTY = dr["Einv_Party"] == DBNull.Value ? 0 : Convert.ToInt32(dr["Einv_Party"]);
+                        }
+                    }
+                }
+            }
+
+            return model;
+        }
+
+        //Purchase items by MRN change
+        public RepositoryResponseList<PurchaseItemDto> GetPurchaseItemsByMRN(string vType, int vNo)
+        {
+            List<PurchaseItemDto> items = new List<PurchaseItemDto>();
+            var gv = _globalVariableService.GetGlobalVariables();
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_PurchaseBillPassEntryDirect", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "GetPurchaseItemByMRN");
+                        cmd.Parameters.AddWithValue("@V_TYPE", vType);
+                        cmd.Parameters.AddWithValue("@V_NO", vNo);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
+
+                        con.Open();
+
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                items.Add(new PurchaseItemDto
+                                {
+                                    ITEM_CODE = dr["ITEM_CODE"].ToString(),
+                                    ITEM_NAME = dr["ITEM_NAME"].ToString(),
+                                    Unit = dr["Unit"].ToString(),
+                                    HSN_CODE = dr["HSN_CODE"].ToString(),
+                                    NOS = dr["NOS"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["NOS"]),
+                                    RECD_QTY = dr["RECD_QTY"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["RECD_QTY"]),
+                                    BILL_QTY = dr["BILL_QTY"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["BILL_QTY"]),
+                                    USD_RATE = dr["USD_RATE"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["USD_RATE"]),
+                                    EXCH_RATE = dr["EXCH_RATE"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["EXCH_RATE"]),
+                                    RATE = dr["RATE"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["RATE"]),
+                                    PACK_PER = dr["PACK_PER"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["PACK_PER"]),
+                                    PACK_AMT = dr["PACK_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["PACK_AMT"]),
+                                    DISC_PER = dr["DISC_PER"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["DISC_PER"]),
+                                    DISC_AMT = dr["DISC_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["DISC_AMT"]),
+                                    TaxType = dr["TaxType"].ToString(),
+                                    CGST_PER = dr["CGST_PER"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["CGST_PER"]),
+                                    SGST_PER = dr["SGST_PER"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["SGST_PER"]),
+                                    IGST_PER = dr["IGST_PER"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["IGST_PER"]),
+                                    VAT_PER = dr["VAT_PER"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["VAT_PER"]),
+                                    OTH_AMT = dr["OTH_AMT"] == DBNull.Value ? 0 : Convert.ToDecimal(dr["OTH_AMT"]),
+                                    PO_TYPE = dr["PO_TYPE"].ToString(),
+                                    PO_NO = dr["PO_NO"].ToString(),
+                                    REF_TYPE = dr["REF_TYPE"].ToString(),
+                                    REF_NO = dr["REF_NO"] == DBNull.Value ? 0 : Convert.ToInt32(dr["REF_NO"]),
+                                    REQ_TYPE = dr["REQ_TYPE"].ToString(),
+                                    REQ_NO = dr["REQ_NO"].ToString(),
+                                    KANTA_TYPE = dr["KANTA_TYPE"].ToString(),
+                                    KANTA_NO = dr["KANTA_NO"].ToString(),
+                                    Make = dr["Make"].ToString(),
+                                    Department = dr["Department"].ToString(),
+                                    DEPT_CODE = dr["DEPT_CODE"].ToString(),
+                                    TAX_CODE = dr["TAX_CODE"].ToString(),
+                                    MAKE_CODE = dr["MAKE_CODE"].ToString(),
+                                    UOM_CODE = dr["UOM_CODE"].ToString()
+                                });
+                            }
+                        }
+                    }
+                }
+
+                return new RepositoryResponseList<PurchaseItemDto> { status = true, message = "Data fetched successfully.", data = items };
+            }
+            catch (Exception ex)
+            {
+                return new RepositoryResponseList<PurchaseItemDto> { status = false, message = ex.Message };
+            }
+        }
+
+        //Pack on basic
+        public async Task<RepositoryResponseData<int>> GetPackOnBasic(int code)
+        {
+            int packOnBasic = 0;
+            string query = @"SELECT PACK_ONBASIC FROM TAX_MAST WHERE code = @code AND Active = 1";
+            var parameters = new Dictionary<string, object> { { "@CODE", code } };
+            packOnBasic = await _dbHelper.GetExecuteScalarAsync<int>(query, parameters);
+            return new RepositoryResponseData<int> { status = true, data = packOnBasic };
+        }
+
+        //HSN Code and Qty
+        public async Task<RepositoryResponseData<(int HsnCode, decimal Qty)>> GetHsnCodeAndQty(int itemCode, string poType, int poNo)
+        {
+            int hsnCode = 0;
+            decimal qty = 0;
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+
+                // Get HSN_CODE
+                string hsnQuery = @"SELECT ISNULL(HSN_CODE, 0) FROM ITEM_MAST WHERE Code = @ITEM_CODE AND Comp_code = @Comp_code";
+                var hsnParameters = new Dictionary<string, object>
+                    {
+                        { "@ITEM_CODE", itemCode },
+                        { "@COMP_CODE", gv.PubCompCode }
+                    };
+                hsnCode = await _dbHelper.GetExecuteScalarAsync<int>(hsnQuery, hsnParameters);
+
+                // Get QTY
+                string qtyQuery = @"SELECT ISNULL(QTY, 0) FROM ORDER2 WHERE Item_Code = @ITEM_CODE AND V_type = @V_type AND V_No = @V_No
+                      AND Comp_code = @Comp_code AND Branch_code = @Branch_code";
+
+                var qtyParameters = new Dictionary<string, object>
+                    {
+                        { "@ITEM_CODE", itemCode },
+                        { "@V_TYPE", poType },
+                        { "@V_NO", poNo },
+                        { "@COMP_CODE", gv.PubCompCode },
+                        { "@BRANCH_CODE", gv.PubBranchCode }
+                    };
+                qty = await _dbHelper.GetExecuteScalarAsync<decimal>(qtyQuery, qtyParameters);
+            }
+
+            return new RepositoryResponseData<(int HsnCode, decimal Qty)> { status = true, data = (hsnCode, qty) };
+        }
+
+        // Get Freight Credit Account by Transport Code
+        public async Task<(int PartyCode, string PartyName)> GetFrtCrAcByTransCodeAsync(int transportCode)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                await con.OpenAsync();
+
+                // Get Party Code & Party Name
+                string transportQuery = @"
+                SELECT ISNULL(T.PARTY_CODE,0) AS PARTY_CODE, ISNULL(S.NAME,'') AS PARTY_NAME FROM TRANSPORT_MAST T LEFT JOIN SUBGROUP_MAST S ON T.PARTY_CODE = S.CODE AND T.COMP_CODE = S.COMP_CODE
+                WHERE T.COMP_CODE = @COMP_CODE AND T.CODE = @CODE";
+
+                int partyCode = 0;
+                string partyName = "";
+
+                using (SqlCommand cmd = new SqlCommand(transportQuery, con))
+                {
+                    cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
+                    cmd.Parameters.AddWithValue("@CODE", transportCode);
+
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            partyCode = reader["PARTY_CODE"] != DBNull.Value
+                                ? Convert.ToInt32(reader["PARTY_CODE"])
+                                : 0;
+
+                            partyName = reader["PARTY_NAME"]?.ToString() ?? "";
+                        }
+                    }
+                }
+                return (partyCode, partyName);
+            }
+
+        }
+
+        // Get Purchase Date by VType and VNo
+        public async Task<RepositoryResponseData<DateTime>> GetPurchaseDate(string vType, int vNo)
+        {
+            var globalVar = _globalVariableService.GetGlobalVariables();
+            string query = @"SELECT V_DATE FROM PURCHASE1 WHERE V_TYPE = @V_TYPE AND V_NO = @V_NO AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE";
+            var parameter = new Dictionary<string, object>
+                                {
+                                    { "@V_TYPE", vType },
+                                    { "@V_NO", vNo },
+                                    { "@COMP_CODE", globalVar.PubCompCode },
+                                    { "@BRANCH_CODE", globalVar.PubBranchCode }
+                                };
+            DateTime purchaseDate = await _dbHelper.GetExecuteScalarAsync<DateTime>(query, parameter);
+            return new RepositoryResponseData<DateTime> { status = true, data = purchaseDate };
+        }
+        // Get Purchase Amt
+        public async Task<RepositoryResponseData<decimal>> GetPartyPurchaseAmount(int partyCode, string vType, int? vNo = null,
+            decimal? currentAmount = null)
+        {
+            var globalVar = _globalVariableService.GetGlobalVariables();
+
+            string query;
+            var parameters = new Dictionary<string, object>
+                                {
+                                    { "@PARTY_CODE", partyCode },
+                                    { "@V_TYPE", vType },
+                                    { "@COMP_CODE", globalVar.PubCompCode },
+                                    { "@YEAR_CODE", globalVar.PubFYearCode }
+                                };
+
+            if (vNo.HasValue && currentAmount.HasValue)
+            {
+                query = @"SELECT ISNULL(SUM(NAMOUNT), 0) + @CURRENT_AMOUNT FROM PURCHASE1 WHERE PARTY_CODE = @PARTY_CODE AND V_TYPE = @V_TYPE AND V_NO <> @V_NO
+                      AND COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE";
+
+                parameters.Add("@V_NO", vNo.Value);
+                parameters.Add("@CURRENT_AMOUNT", currentAmount.Value);
+            }
+            else
+            {
+                query = @"SELECT ISNULL(SUM(NAMOUNT), 0) FROM PURCHASE1 WHERE PARTY_CODE = @PARTY_CODE AND V_TYPE = @V_TYPE AND COMP_CODE = @COMP_CODE
+                      AND YEAR_CODE = @YEAR_CODE";
+            }
+
+            decimal totalAmount = await _dbHelper.GetExecuteScalarAsync<decimal>(query, parameters);
+
+            return new RepositoryResponseData<decimal> { status = true, data = totalAmount };
+        }
+
+        public async Task<RepositoryResponseData<string>> GetTDS206Apply(int partyCode)
+        {
+            var globalVar = _globalVariableService.GetGlobalVariables();
+
+            string query = @"SELECT ISNULL(TDS_206APPLY, '') FROM SUBGROUP_MAST WHERE COMP_CODE = @COMP_CODE AND CODE = @PARTY_CODE";
+
+            var parameters = new Dictionary<string, object>
+                                {
+                                    { "@COMP_CODE", globalVar.PubCompCode },
+                                    { "@PARTY_CODE", partyCode }
+                                };
+
+            string tds206Apply = await _dbHelper.GetExecuteScalarAsync<string>(query, parameters);
+
+            return new RepositoryResponseData<string> { status = true, data = tds206Apply };
+        }
+        // Get Posting Exist
+        public async Task<RepositoryResponseData<bool>> IsPostingExist(string vType)
+        {
+            var globalVar = _globalVariableService.GetGlobalVariables();
+            string query = @"SELECT TOP 1 1 FROM POSTING_MAST WHERE V_TYPE = @V_TYPE AND DOC_TYPE = 'PURCHASE' AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE";
+            var parameters = new Dictionary<string, object>
+                                {
+                                    { "@V_TYPE", vType },
+                                    { "@COMP_CODE", globalVar.PubCompCode },
+                                    { "@BRANCH_CODE", globalVar.PubBranchCode }
+                                };
+
+            int result = await _dbHelper.GetExecuteScalarAsync<int>(query, parameters);
+            bool isPostingExist = result == 1;
+            return new RepositoryResponseData<bool> { status = true, data = isPostingExist };
+        }
+        //Purchase PL DocId
+        public async Task<RepositoryResponseData<string>> GetPLDocId(int vNo, int plNo)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = @" SELECT TOP (1) Doc_Id FROM Purchase1 WHERE V_Type IN ( SELECT Code FROM Doctype_Mast WHERE Doctype = @DocType)
+                        AND V_No <> @V_No AND PL_No = @PL_No AND Comp_Code = @COMP_CODE AND Branch_Code = @BRANCH_CODE AND Year_Code = @Year_Code";
+
+            var parameters = new Dictionary<string, object>
+                                 {
+                                     { "@DocType", "Purchaseinvoice" },
+                                     { "@V_No", vNo },
+                                     { "@PL_No", plNo },
+                                     { "@COMP_CODE", gv.PubCompCode },
+                                     { "@BRANCH_CODE", gv.PubBranchCode },
+                                     { "@Year_Code", gv.PubFYearCode }
+                                 };
+
+            string docId = await _dbHelper.GetExecuteScalarAsync<string>(query, parameters);
+
+            return new RepositoryResponseData<string> { status = true, data = docId };
+        }
+
+        // Get Debit Account Type
+        public async Task<RepositoryResponseData<string>> GetDebitAcType(int code)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = @"SELECT isnull(gm.type,'') FROM GR_MAST gm  INNER JOIN MGROUP_MAST mg ON gm.code = mg.gr_code AND gm.comp_code = mg.comp_code 
+                             INNER JOIN SUBGROUP_MAST sg ON mg.code = sg.group_code AND mg.comp_code = sg.comp_code WHERE sg.code =@code AND sg.comp_code = @COMP_CODE";
+            var parameters = new Dictionary<string, object>
+                                 {
+                                     { "@COMP_CODE", gv.PubCompCode },
+                                     { "@Code", code }
+                                 };
+
+            string type = await _dbHelper.GetExecuteScalarAsync<string>(query, parameters);
+
+            return new RepositoryResponseData<string> { status = true, data = type };
+        }
+
+        //PO Type
+        public async Task<RepositoryResponseData<string>> GetPOType(string poType, int poNo)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = @"Select isnull(POTYPE,'') from ORDER1 where V_TYPE=@V_TYPE and  V_NO=@V_NO and COMP_CODE=@COMP_CODE and Branch_Code=@Branch_Code";
+            var parameters = new Dictionary<string, object>
+                                 {
+                                     { "@V_TYPE", poType },
+                                     { "@V_NO", poNo },
+                                     { "@COMP_CODE", gv.PubCompCode },
+                                     { "@Branch_Code", gv.PubBranchCode }
+                                 };
+
+            string type = await _dbHelper.GetExecuteScalarAsync<string>(query, parameters);
+
+            return new RepositoryResponseData<string> { status = true, data = type };
+        }
+        //Purchase or Sale Voucher No
+        public async Task<RepositoryResponseData<string>> GetPurchaseOrSaleVoucherNo(string transportName, string grNo, string currentVoucher, string purchaseOrSale)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = "";
+
+            if (purchaseOrSale.Equals("PURCHASE", StringComparison.OrdinalIgnoreCase))
+            {
+                query += @"SELECT TOP 1 CONCAT(V_TYPE, V_NO) FROM Purchase1 WHERE CONCAT(V_TYPE, V_NO) <> @DOCID AND Transport_Name = @Transport_Name AND GR_NO = @GR_NO 
+                            AND V_Type NOT IN (SELECT Code FROM Doctype_Mast WHERE Doctype = 'MaterialReceipt' ) AND Comp_Code = @Comp_Code AND Branch_Code = @Branch_Code 
+                            AND Year_Code = @Year_Code";
+            }
+            else if (purchaseOrSale.Equals("SALE", StringComparison.OrdinalIgnoreCase))
+            {
+                query = @"SELECT TOP 1 CONCAT(V_TYPE, V_NO) FROM Sale1 WHERE CONCAT(V_TYPE, V_NO) <> @DOCID AND Transport_Name = @Transport_Name
+                      AND GR_NO = @GR_NO AND Comp_Code = @Comp_Code AND Branch_Code = @Branch_Code AND Year_Code = @Year_Code";
+            }
+            else
+            {
+                return new RepositoryResponseData<string> { status = false, message = "Invalid data." };
+            }
+
+            var parameters = new Dictionary<string, object>
+                {
+                    { "@DOCID", currentVoucher },
+                    { "@Transport_Name", transportName },
+                    { "@GR_NO", grNo },
+                    { "@Comp_Code", gv.PubCompCode },
+                    { "@Branch_Code", gv.PubBranchCode },
+                    { "@Year_Code", gv.PubFYearCode }
+                };
+
+            string voucherNo = await _dbHelper.GetExecuteScalarAsync<string>(query, parameters);
+
+            return new RepositoryResponseData<string> { status = true, data = voucherNo };
+        }
+
+        //payment exists
+        public async Task<RepositoryResponseData<bool>> CheckPaymentExists(string docType, int docNo)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = @"SELECT TOP 1 1 FROM LEDGER_OS WHERE V_TYPE = 'BPMT' AND DOC_TYPE = @V_TYPE AND DOC_NO = @V_NO AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE";
+            var parameters = new Dictionary<string, object>
+                {
+                    { "@V_TYPE", docType },
+                    { "@V_NO", docNo },
+                    { "@COMP_CODE", gv.PubCompCode },
+                    { "@BRANCH_CODE", gv.PubBranchCode }
+                };
+
+            int result = await _dbHelper.GetExecuteScalarAsync<int>(query, parameters);
+            bool exists = result == 1;
+            return new RepositoryResponseData<bool> { status = true, data = exists };
+        }
+
+        //Duplicate Bill Check
+        public async Task<(bool Exists, string DocId, DateTime? VDate)> CheckDuplicateBill(int partyCode, string billNo, int currentVNo)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = @"SELECT TOP 1 DOC_ID AS DocId, format(V_date, 'dd/MM/yyyy') AS VDate FROM PURCHASE1 WHERE PARTY_CODE = @PARTY_CODE
+                                AND BILL_NO = @BILL_NO AND V_TYPE IN ('STPB','STDP','STJW','RMPB','BFPB','RIMP','RMDP','SIDP','SADP')
+                                AND V_NO <> @V_NO AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+
+            var parameters = new List<SqlParameter>
+                {
+                    new SqlParameter("@PARTY_CODE", partyCode),
+                    new SqlParameter("@BILL_NO", billNo),
+                    new SqlParameter("@V_NO", currentVNo),
+                    new SqlParameter("@COMP_CODE", gv.PubCompCode),
+                    new SqlParameter("@BRANCH_CODE", gv.PubBranchCode),
+                    new SqlParameter("@YEAR_CODE", gv.PubFYearCode)
+                };
+
+            DataTable dt = await _dbHelper.ExecuteQueryAsync(query, parameters);
+
+            if (dt.Rows.Count > 0)
+            {
+                string docId = dt.Rows[0]["DOC_ID"].ToString();
+                DateTime? vDate = dt.Rows[0]["V_DATE"] == DBNull.Value
+                    ? null
+                    : Convert.ToDateTime(dt.Rows[0]["V_DATE"]);
+
+                return (true, docId, vDate);
+            }
+
+            return (false, "", null);
+        }
+
+        public async Task<RepositoryResponseData<bool>> ValidateTaxType(int cityCode, decimal totalIGST, decimal totalCGST, decimal totalSGST)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string query = @"SELECT State_Code FROM CITY_MAST WHERE Code = @CITY_CODE";
+
+            var parameters = new Dictionary<string, object>
+                {
+                    { "@CITY_CODE", cityCode }
+                };
+
+            int stateCode = await _dbHelper.GetExecuteScalarAsync<int>(query, parameters);
+            string stateType = gv.STATE_CODE == stateCode.ToString() ? "Local" : "Central/Other";
+
+            if (gv.STATE_CODE == stateCode.ToString() && totalIGST > 0)
+            {
+                return new RepositoryResponseData<bool> { status = true, data = false, message = $"IGST not applicable as Party State type is {stateType}." };
+            }
+            if (gv.STATE_CODE != stateCode.ToString() && (totalCGST + totalSGST) > 0)
+            {
+                return new RepositoryResponseData<bool> { status = true, data = false, message = $"CGST/SGST not applicable as Party State type is {stateType}." };
+            }
+            if (totalIGST > 0 && (totalCGST + totalSGST) > 0)
+            {
+                return new RepositoryResponseData<bool> { status = true, data = false, message = "CGST + SGST + IGST all three types of tax are not applicable." };
+            }
+
+            return new RepositoryResponseData<bool> { status = true, data = true };
+        }
+
+        // Get CrDr Note Amount for Report
+        public async Task<RepositoryResponseData<decimal>> GetCrDrNoteAmtForReport(string vType, int vNo, string drOrCr)
+        {
+            var gv = _globalVariableService.GetGlobalVariables();
+            string qry = "";
+
+            if (string.Equals(drOrCr, "Debit", StringComparison.OrdinalIgnoreCase))
+            {
+                qry += $@"select QLT_DR_AMT+QLT_DR_TAX+isnull(RDF_DR_AMT,0)+isnull(RDF_DR_TAX,0)+QTY_DR_AMT+QTY_DR_TAX+QC_DR_AMT+QC_DR_TAX+OTH_DR_AMT+OTH_DR_TAX-(QLT_CR_AMT+QLT_CR_TAX+
+                                isnull(RDF_CR_AMT,0)+isnull(RDF_CR_TAX,0)+QTY_CR_AMT+QTY_CR_TAX+QC_CR_AMT+QC_CR_TAX) 
+                                from Purchase1 where V_type='{vType}' and v_no={vNo} and Comp_code={gv.PubCompCode} and Branch_code={gv.PubBranchCode} and Year_Code={gv.PubFYearCode}";
+            }
+            else if (string.Equals(drOrCr, "Credit", StringComparison.OrdinalIgnoreCase))
+            {
+                qry += $@"select isnull(QLT_CR_AMT,0)+isnull(QLT_CR_TAX,0)+isnull(RDF_CR_AMT,0)+isnull(RDF_CR_TAX,0)+isnull(QTY_CR_AMT,0)+isnull(QTY_CR_TAX,0)+isnull(QC_CR_AMT,0)+
+                                isnull(QC_CR_TAX,0) from Purchase1 where V_type='{vType}' and v_no={vNo} and Comp_code={gv.PubCompCode} and Branch_code={gv.PubBranchCode} and Year_Code={gv.PubFYearCode}";
+            }
+
+            var result = await _dbHelper.GetExecuteScalarAsync<decimal>(qry);
+            return new RepositoryResponseData<decimal> { status = true, data = result };
         }
     }
 }

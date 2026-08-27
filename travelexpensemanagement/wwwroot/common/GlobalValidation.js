@@ -510,3 +510,110 @@ function applyGridPermission() {
     $(".permission-edit").toggle(permission.edit);
     $(".permission-delete").toggle(permission.delete);
 }
+
+//------------Number to Words Conversion----------------
+function numToWord(NN, mmajor, mminor) {
+    let words = mmajor;
+    let number = Math.floor(Number(NN));
+    let ps = Math.floor((Number(NN) - number) * 100);
+
+    if (number > 0) {
+        words += " " + convertNumber(number);
+    } else {
+        words += " 0";
+    }
+
+    if (ps > 0) {
+        if (number > 0) {
+            words += " And " + mminor + " ";
+        } else {
+            words += " 0 " + mminor + " ";
+        }
+
+        words += convertNumber(ps);
+    }
+
+    words += " Only";
+
+    return words.trim();
+}
+
+function convertNumber(num) {
+    const units = [
+        "", "One", "Two", "Three", "Four",
+        "Five", "Six", "Seven", "Eight", "Nine"
+    ];
+
+    const teens = [
+        "", "Eleven", "Twelve", "Thirteen", "Fourteen",
+        "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"
+    ];
+
+    const tens = [
+        "", "Ten", "Twenty", "Thirty", "Forty",
+        "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+    ];
+
+    function belowHundred(n) {
+        if (n === 0) return "";
+
+        if (n >= 11 && n <= 19) {
+            return teens[n - 10];
+        }
+
+        if (n < 10) {
+            return units[n];
+        }
+
+        const t = Math.floor(n / 10);
+        const u = n % 10;
+
+        return tens[t] + (u ? " " + units[u] : "");
+    }
+
+    function belowThousand(n) {
+        if (n === 0) return "";
+
+        if (n < 100) {
+            return belowHundred(n);
+        }
+
+        const h = Math.floor(n / 100);
+        const remainder = n % 100;
+
+        let result = units[h] + " Hundred";
+
+        if (remainder > 0) {
+            result += " " + belowHundred(remainder);
+        }
+
+        return result;
+    }
+
+    const result = [];
+
+    if (num >= 10000000) {
+        const crore = Math.floor(num / 10000000);
+        result.push(convertNumber(crore) + " Crore");
+        num %= 10000000;
+    }
+
+    if (num >= 100000) {
+        const lakh = Math.floor(num / 100000);
+        result.push(convertNumber(lakh) + " Lakh");
+        num %= 100000;
+    }
+
+    if (num >= 1000) {
+        const thousand = Math.floor(num / 1000);
+        result.push(convertNumber(thousand) + " Thousand");
+        num %= 1000;
+    }
+
+    if (num > 0) {
+        result.push(belowThousand(num));
+    }
+
+    return result.join(" ");
+}
+//-------------Number to Words Conversion End----------------

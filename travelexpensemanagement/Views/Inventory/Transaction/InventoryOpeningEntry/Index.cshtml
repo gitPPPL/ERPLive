@@ -1,0 +1,90 @@
+﻿@{
+	ViewBag.Title = "Inventory Opening Entry";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+	<div class="erppage-header-left">
+		<div class="erppage-header-icon">
+			<i class="fa fa-industry"></i>
+		</div>
+		<div class="erppage-header-title">Inventory Opening Entry</div>
+	</div>
+	<div class="erppage-header-right">
+		<button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InventoryOpeningEntryList")', isReadOnly)">
+			<i class="fa-solid fa-arrow-left"></i>Back to list
+		</button>
+	</div>
+</div>
+<div id="InventoryOpeningform">
+	<input type="hidden" class="form-control" id="CODE" name="CODE">
+	<div class="erppage-container">
+		<div class="erppage-fieldset">
+			<div class="erppage-grid5">
+				<div class="erppage-divfield">
+					<label class="erppage-label">Doc Type</label>
+					<select class="erppage-input erppage-select" id="ddlDocType">
+						<option value="">Select Doc Type</option>
+					</select>
+				</div>
+				<div class="erppage-divfield">
+					<label class="erppage-label">Doc No</label>
+					<input type="number" class="erppage-input" id="NumDocno" placeholder="Enter Doc No">
+				</div>
+				<div class="erppage-divfield">
+					<label class="erppage-label">Doc Date</label>
+					<input type="date" class="erppage-input" id="DtDocDate">
+				</div>
+				<div class="erppage-divfield">
+					<label class="erppage-label">Remarks</label>
+					<input type="text" class="erppage-input" id="TxtRemarks" placeholder="Enter Remarks">
+				</div>
+
+			</div>
+
+            <fieldset class="erppage-fieldset">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblInventoryOpeningEntry" class="excel-table fixed-grid-table width-table resizable-table">
+						<colgroup>
+							<col style="width:250px;">  
+							<col style="width:150px;">  
+							<col style="width:100px;">  
+							<col style="width:80px;">   
+							<col style="width:100px;">  
+							<col style="width:100px;">  
+							<col style="width:120px;">  
+							<col style="width:180px;">  
+							<col style="width:200px;">  
+							<col style="width:90px;">   
+						</colgroup>
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Item Make Name</th>
+                                <th>Unit Name</th>
+                                <th>Nos</th>
+                                <th>Quantity</th>
+                                <th>Rate</th>
+                                <th>Amount</th>
+                                <th>Item Department</th>
+                                <th>Remarks</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </fieldset>
+
+			<div class="erppage-actions">
+				<button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
+					<i class="fa-solid fa-floppy-disk"></i>
+					<span>Save</span>
+				</button>
+			</div>
+
+
+
+		</div>
+	</div>
+</div>

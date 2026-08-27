@@ -1,0 +1,118 @@
+﻿@{
+    ViewBag.Title = "Toolkit Received Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+        </div>
+        <div class="erppage-header-title">Toolkit Received Entry</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "ToolkitReceivedList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="ToolkitReceivedEntryform">
+    <input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div id="Non-disableFields">
+                <div class="erppage-grid6">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc Type</label>
+                        <select class="erppage-input erppage-select" id="ddlDocType">
+                            <option value="">Select Doc Type</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc No</label>
+                        <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Enter Doc No" disabled>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc Date</label>
+                        <input type="date" class="erppage-redinput" id="DtDocDate">
+                    </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Item Name</label>
+                        <select class="erppage-redinput erppage-required" id="ddlItemName">
+                            <option value="">Select Item Name</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Quantity</label>
+                        <input type="number" class="erppage-redinput" id="Numquantity" placeholder="Enter Quantity" />
+                    </div>
+                </div>
+                <div class="erppage-grid6">
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Employee Name</label>
+                        <select class="erppage-redinput erppage-required" id="ddlEmployeeName">
+                            <option value="">Select Employee Name</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">From Dept</label>
+                        <select class="erppage-redinput erppage-required" id="ddlFromDept">
+                            <option value="">Select from Dept</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">To Dept</label>
+                        <select class="erppage-redinput erppage-required" id="ddlToDept">
+                            <option value="">Select to Dept</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Unit</label>
+                        @* <input type="number" class="erppage-input" id="Numunit" placeholder="Enter Unit" /> *@
+                        <select class="erppage-required erppage-redinput" id="ddlUnit">
+                            <option value="">Select Unit</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Remarks</label>
+                        <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 45px;" placeholder="Enter Remarks"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Print Details</legend>
+                <div class="erppage-grid6">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">From Date</label>
+                        <input type="date" class="erppage-input" id="DtFromdate" />
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">To Date</label>
+                        <input type="date" class="erppage-input" id="DtTodate" />
+                    </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Employee Name</label>
+                        <select class="erppage-input erppage-select" id="ddlPrintEmployeeName">
+                            <option value="">Select Employee Name</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="erppage-internalaction">
+                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="btn_issue" onclick="GenerateIssueReport()"><i class="fa-solid fa-triangle-exclamation"></i> Issue</button>
+                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="btn_balancereport" onclick="GenerateReceivedReport()"><i class="fa-solid fa-scale-balanced"></i> Received</button>
+                </div>
+            </fieldset>
+
+        </div>
+
+        <div class="erppage-actions">
+            <button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+<script src="~/js/erpjs/inventory/transaction/toolkitreceivedentry/toolkitreceivedentry.js"></script>

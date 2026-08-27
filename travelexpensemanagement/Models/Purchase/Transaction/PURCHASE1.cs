@@ -16,19 +16,25 @@
         public string? PARTY_NAME { get; set; }
         public decimal? EXCH_RATE { get; set; }
         public int? CREDIT_AC { get; set; }
+        public string? CREDIT_AC_NAME { get; set; }
         public int? DEBIT_AC { get; set; }
+        public string? DEBIT_AC_NAME { get; set; }
         public string? BILL_ADD1 { get; set; }
         public string? BILL_ADD2 { get; set; }
         public string? BILL_ADD3 { get; set; }
         public int? BILL_CITY { get; set; }
+        public int? BILL_STATE { get; set; }
         public string? BILL_PINCODE { get; set; }
         public int? BILL_ADDRESSID { get; set; }
         public string? BILL_GST { get; set; }
         public int? SHIP_CODE { get; set; }
+        public string? SHIP_NAME { get; set; }
         public string? SHIP_ADD1 { get; set; }
         public string? SHIP_ADD2 { get; set; }
         public string? SHIP_ADD3 { get; set; }
         public int? SHIP_CITY { get; set; }
+        public int? SHIP_STATE { get; set; }
+
         public string? SHIP_PINCODE { get; set; }
         public int? SHIP_ADDRESSID { get; set; }
         public string? SHIP_GST { get; set; }
@@ -194,6 +200,7 @@
         public int? CURRENCY { get; set; }
         public string? BL_NO { get; set; }
         public DateTime? BL_DT { get; set; }
+        public int? EINV_PARTY { get; set; }
     }
 
 }

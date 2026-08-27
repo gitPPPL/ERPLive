@@ -97,6 +97,7 @@
 
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
 	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+	<script src="~/common/CostAllocation.js"></script>
 
 </head>
 <body>
@@ -668,6 +669,179 @@
 				 nav.removeClass('active');
 			 }
 		 });
+	</script>
+
+
+
+	@* Session TimeOut *@
+	<script>
+
+		// ============================================
+		// SESSION TIMEOUT
+		// ============================================
+
+		const idleTimeout = 30 * 60 * 1000; // 10 minutes
+
+		let lastUserActivity = Date.now();
+
+		let sessionExpired = false;
+
+
+		// ============================================
+		// USER ACTIVITY
+		// ============================================
+
+		function userActivity() {
+
+			if (sessionExpired) {
+				return;
+			}
+
+			const now = Date.now();
+
+			const inactiveTime =
+				now - lastUserActivity;
+
+
+			// ========================================
+			// CHECK INACTIVITY
+			// ========================================
+
+			if (inactiveTime >= idleTimeout) {
+
+				expireSession();
+
+				return;
+			}
+
+
+			// ========================================
+			// USER WAS ACTIVE
+			// ========================================
+
+			lastUserActivity = now;
+
+			updateBackendActivity();
+		}
+
+
+		// ============================================
+		// UPDATE BACKEND ACTIVITY
+		// ============================================
+
+		function updateBackendActivity() {
+
+			if (sessionExpired) {
+				return;
+			}
+
+			$.ajax({
+
+				url: "/Errorpage/UpdateActivity",
+
+				type: "POST",
+
+				global: false,
+
+				headers: {
+					"X-Requested-With":
+						"XMLHttpRequest"
+				},
+
+				success: function (response) {
+
+					// Backend activity updated successfully
+
+				},
+
+				error: function (xhr) {
+
+					// Backend says session expired
+					if (xhr.status === 401) {
+
+						sessionExpired = true;
+
+						window.location.href =
+							"/Errorpage/Index?code=401";
+
+						return;
+					}
+
+
+					console.error(
+						"Session activity update failed."
+					);
+				}
+
+			});
+		}
+
+
+		// ============================================
+		// EXPIRE SESSION
+		// ============================================
+
+		function expireSession() {
+
+			if (sessionExpired) {
+				return;
+			}
+
+			sessionExpired = true;
+
+
+			$.ajax({
+
+				url: "/Errorpage/ExpireSession",
+
+				type: "POST",
+
+				global: false,
+
+				headers: {
+					"X-Requested-With":
+						"XMLHttpRequest"
+				},
+
+				complete: function () {
+
+					// Redirect regardless of
+					// whether the request succeeds
+
+					window.location.href =
+						"/Errorpage/Index?code=401";
+				}
+
+			});
+		}
+
+
+		// ============================================
+		// USER INTERACTION
+		// ============================================
+
+		document.addEventListener(
+			"mousemove",
+			userActivity
+		);
+
+		document.addEventListener(
+			"click",
+			userActivity
+		);
+
+		document.addEventListener(
+			"keydown",
+			userActivity
+		);
+
+
+		// ============================================
+		// INITIAL ACTIVITY
+		// ============================================
+
+		lastUserActivity = Date.now();
+
 	</script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.10/lottie.min.js"></script>
 	<script src="~/common/globalfunction.js"></script>
