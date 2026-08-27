@@ -1,13 +1,11 @@
-﻿
-let importPaymentPagination;
-var controllerName = window.location.pathname.split('/')[1];
+﻿let importPaymentPagination;
+//var controllerName = window.location.pathname.split('/')[1];
 $(document).ready(function () {
 
-	checkPermission(controllerName, function () {
-		importPaymentPagination.load();
-	});
+	//checkPermission(controllerName, function () {
+	//	importPaymentPagination.load();
+	//});
 
-	// Initialize Pagination
 	importPaymentPagination = Pagination.create({
 
 		pageSize: parseInt($('#pageSizeSelect').val()) || 10,
@@ -20,16 +18,16 @@ $(document).ready(function () {
 			const searchTerm = $('#searchBox').val().trim();
 
 			$.ajax({
-				url:'/ImportPaymentList/LoadListData',
+				url: '/InventoryConsumptionList/LoadListData',
 				type: 'GET',
 				data: {
 					searchTerm: searchTerm,
-					pageNumber: params.pageNumber,
+					pageNo: params.pageNumber,
 					pageSize: params.pageSize
 				},
 
 				success: function (res) {
-					console.log("Import Payment List Response:", res);
+					console.log("ConsumptionEntry List Response:", res);
 					if (res.success) {
 
 						params.callback({
@@ -43,22 +41,22 @@ $(document).ready(function () {
 							data: [],
 							totalCount: 0
 						});
-						showToast(res.message || "Unable to load data" ,{ type: "error" });
+						showToast(res.message || "Unable to load data", { type: "error" });
 					}
 				},
-				
+
 				error: function (xhr) {
 
-					console.error('Load Import Payment List Error:', xhr);
+					console.error('Load Consumption List Error:', xhr);
 
 					params.callback({
 						data: [],
 						totalCount: 0
 					});
-					showToast("Error while loading Import Payment List", { type: "error" });
-		 
+					showToast("Error while loading Consumption List", { type: "error" });
+
 				}
-			});
+			})
 		},
 
 		render: function (data) {
@@ -67,11 +65,9 @@ $(document).ready(function () {
 
 		}
 	});
-
-	// Initial Load
+	
 	importPaymentPagination.load();
 
-	// Page Size Change
 	$('#pageSizeSelect').on('change', function () {
 
 		const pageSize = parseInt($(this).val());
@@ -80,7 +76,6 @@ $(document).ready(function () {
 
 	});
 
-	// Search
 	let searchTimer;
 
 	$('#searchBox').on('input', function () {
@@ -92,7 +87,7 @@ $(document).ready(function () {
 			importPaymentPagination.load();
 
 		}, 300);
-
+		
 	});
 
 	// Previous
@@ -113,7 +108,7 @@ $(document).ready(function () {
 
 function renderImportPaymentTable(data) {
 
-	const tbody = $('#tblImportPaymentList tbody');
+	const tbody = $('#tblInventoryConsumptionList tbody');
 
 	tbody.empty();
 
@@ -137,11 +132,7 @@ function renderImportPaymentTable(data) {
 				<tr>
 
 					<td class="hidden-col">
-						${item.docId ?? ''}
-					</td>
-
-					<td>
-						${item.vNo ?? ''}
+                       ${item.docId ?? ''}
 					</td>
 
 					<td>
@@ -149,16 +140,26 @@ function renderImportPaymentTable(data) {
 					</td>
 
 					<td>
+						${item.vNo ?? ''}
+					</td>
+
+					<td>
 						${formatDate(item.vDate)}
 					</td>
 
-					<td class="action-col">
+					<td>
+						${item.empName ?? ''}
+					</td>
 
+					<td>
+						${item.remarks ?? ''}
+					</td>
+
+					<td class="action-col">
 					  <div class="action-wrap">
-							<button class="act-btn edit btn-edit permission-edit" title="Edit Row" style="cursor:pointer;" onclick="editImportPayment('${item.docId}')"><i class="fa fa-edit"></i></button>
-							<button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewImportPayment('${item.docId}')"><i class="fa fa-eye"></i></button>
-							<button class="act-btn delete btn-delete permission-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteImportPayment('${item.docId}')"><i class="fa fa-trash"></i></button>
-							<button class="act-btn document btn-document" title="Document Details" style="cursor:pointer;" onclick="showDocumentPopup('${item.docId}')"><i class="fa fa-file"></i></button>
+							<button class="act-btn edit btn-edit permission-edit" title="Edit Row" style="cursor:pointer;" onclick="editConsumptionEntry('${item.docId}')"><i class="fa fa-edit"></i></button>
+							<button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewConsumptionEntry('${item.docId}')"><i class="fa fa-eye"></i></button>
+							<button class="act-btn delete btn-delete permission-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteConsumptionEntry('${item.docId}')"><i class="fa fa-trash"></i></button>
 					  </div>
 
 					</td>
@@ -166,7 +167,7 @@ function renderImportPaymentTable(data) {
 				</tr>
 
 		`);
-		applyGridPermission();
+		//applyGridPermission();
 	});
 
 }
@@ -188,24 +189,10 @@ function formatDate(dateValue) {
 	return `${day}-${month}-${year}`;
 }
 
-function editImportPayment(docId) {
-	window.location.href ='/ImportPaymentEntry/Index?docId=' +encodeURIComponent(docId);
+function editConsumptionEntry(docId) {
+	window.location.href = '/InventoryConsumptionEntry/Index?docId=' + encodeURIComponent(docId);
 }
 
-function viewImportPayment(docId) {
-	window.location.href ='/ImportPaymentEntry/Index?docId=' + encodeURIComponent(docId) + '&readOnly=true';
-}
-
-function deleteImportPayment(docId) {
-
-	deleteRecord('ImportPaymentList', docId, {
-		action: 'DeleteImportPaymentEntry',
-		title: 'Delete Import Payment?',
-		text: 'Are you sure you want to delete this Import Payment Entry?',
-		successCallback: function () {
-
-			// Reload current pagination
-			importPaymentPagination.load();
-		}
-	});
+function viewConsumptionEntry(docId) {
+	window.location.href = '/InventoryConsumptionEntry/Index?docId=' + encodeURIComponent(docId) + '&readOnly=true';
 }

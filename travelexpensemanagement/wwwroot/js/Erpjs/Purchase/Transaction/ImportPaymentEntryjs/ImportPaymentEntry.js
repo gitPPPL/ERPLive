@@ -1064,7 +1064,7 @@ function addNewRow() {
             </td>
             
             <td><input type="number" class="erppagetable-control beamount text-end"></td>
-                                            
+                                             
             <td><input type="number" class="erppagetable-control beutilized text-end"></td>
                                             
             <td><input type="number" class="erppagetable-control fobvalue text-end"></td>
