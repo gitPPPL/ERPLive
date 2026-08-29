@@ -3,32 +3,28 @@
 const urlParams = new URLSearchParams(window.location.search);
 const rowId = urlParams.get('id');
 const vtype = rowId ? rowId.substring(0, 4) : '';
-
-
 const mode = urlParams.get('mode');
 const isReadOnly = (mode === 'view');
-
-
 var globalVars = window.globalVariables || {};
 var database = window.database || "";
 let PubUserLevel = globalVars.UserLevel;
 let CompCode = globalVars.CompCode;
 let LoginDate = globalVars.LoginDate;
 var controllerName = window.location.pathname.split('/')[1];
-
 let ItemNameList = "";
 let unitnameList = "";
 let ItemmakeList = "";
 let ItemDeptList = "";
+let ScrapNameList = "";
 
 
 $(document).ready(async function ()
 {
-
     try {
         SetFYDate('DtDocDate', LoginDate);
-        SetFYDate('DtFromDate', LoginDate);
+        SetFYDate('DtFrom', LoginDate);
         SetFYDate('DtToDate', LoginDate);
+
         checkPermissionForEntryPage(controllerName);
         await LoadDropDown();
         AddRow();
@@ -36,16 +32,15 @@ $(document).ready(async function ()
         if (rowId == null)
         {
             let v_type = $('#ddlDocType').val();
-
             if (v_type)
             {
                 await GetVNo(v_type);
             }
         }
+
         else
         {          
             await LoadData(rowId);
-            checkApprovalStatus(vtype, rowId, 'ISSUE1');
             if (mode === "view")
             {
                 setFormReadOnly();
@@ -139,14 +134,16 @@ $(document).ready(async function ()
         if (!validateRequiredField('#ddlDocType', 'Please select a Doc Type')) return;
         if (!validateRequiredField('#NumDocno', 'Please select a Doc No')) return;
         if (!validateRequiredField('#DtDocDate', 'Please select a Doc Date')) return;
-        if (!validateRequiredField('#ddlHDepartment', 'Please select a Daepartment')) return;
-        if (!validateRequiredField('#ddlShift', 'Please select a Shift')) return;
-        if (!validateRequiredField('#ddlPlace', 'Please select a Place')) return;
-        if (!validateRequiredField('#ddlHodName', 'Please select a HOD Name')) return;
 
-        if (!validateInventoryDetails()) {
+
+        if (!validateScrapReceivedDetails()) {
             return;
         }
+
+
+        //if (!validateInventoryDetails()) {
+        //    return;
+        //}
 
         const isValid = await checkValidDate();
         if (isValid === false) {
@@ -162,20 +159,18 @@ $(document).ready(async function ()
                 V_NO: $('#NumDocno').val() || 0,
                 V_DATE: $('#DtDocDate').val() || '',
                 STATUS: $('#ddlStatus').val() || '',
-                DEPT_CODE: $('#ddlHDepartment').val() || '',
-                SHIFT: $('#ddlShift').val() || '',
-                PLACE_CODE: $('#ddlPlace').val() || '',
-                EMP_CODE: $('#ddlHodName').val() || '',
+                PARTY: $('#ddlACName').val() || '',
+                PLACE_CODE: $('#ddlPlace').val() || '',         
                 DOC_ID: $('#CODE').val() || '',
-                REMARKS: $('#TxtRemarks').val() || ''
+                REMARK: $('#TxtRemarks').val() || ''
             },
 
-            Details: GetInventoryOpeningData()
+            Details: GetScrapReceivedEntryData()
         };
         console.log("requestData", requestData);
 
         $.ajax({
-            url: '/InventoryTransferRequest/SavedData',
+            url: '/ScrapReceivedEntry/SavedData',
             type: 'POST',
             contentType: 'application/json; charset=utf-8',
             data: JSON.stringify(requestData),
@@ -186,7 +181,12 @@ $(document).ready(async function ()
 
                 if (response.status == "Success")
                 {
-                 showToast(response.message, "Success");
+                    showToast(response.message, "Success");
+
+                    setTimeout(function () {
+                        window.location.href = '/ScrapReceivedEntry/Index?id=' + rowId + '&mode=view';
+                    }, 3000);                               
+
                 }
                 else if (response.status == "Info")
                 {
@@ -205,50 +205,6 @@ $(document).ready(async function ()
         });
 
     });
-
-    //kks
-
-    $(document).on('click', '#btn_Sendapproval', function () {
-        var FromName = window.location.pathname.split('/')[1];
-        let vNo = $('#NumDocno').val();
-        let vtype = $('#ddlDocType').val();
-
-        $.ajax({
-            url: '/Approval/CheckPendingUser',
-            type: 'POST',
-            data: { vNo: vNo, vType: vtype },
-            success: function (response) {
-                console.log('Response:', response);
-                // Pending with another user
-                if (response.success === false) {
-                    showToast(`Pending With Another User (${response.userCode})`,
-                        { type: "warning" });
-                    return;
-                }
-                // Approval_Code = 5
-                if (response.approvalCode8 === true) {
-                    OpenApprovalModal({ DocType: vtype, DocNo: vNo, TableName: 'ISSUE1' });
-                    return;
-                }
-                // Approval_Code != 8
-                OpenSendForApprovalModal({ DocType: vtype, DocNo: vNo, UserCode: null, UserName: null,
-                    DocDate: null, TableName: 'ISSUE1', FromName, FromName
-                });
-
-            },
-            error: function (xhr, status, error) {
-                console.log(error);
-                alert('Error while checking approval status.');
-            }
-        });
-
-    });
-
-    $(document).on('click', '#btn_Approved', function () {
-        OpenApprovalModal({ DocType: vtype, DocNo: vNo,  TableName: 'ISSUE1' });
-    });
-
-    //kks
 
     $(document).on('click', '#btn_print', async function () {
 
@@ -284,6 +240,179 @@ $(document).ready(async function ()
 
     });
 
+    $(document).on('click', '#btn_pendinglist', async function ()
+    {
+        let v_date = $('#DtDocDate').val();
+        try {
+
+            const res = await $.ajax({
+                url: '/ScrapReceivedEntry/GetPendingData',
+                type: 'GET',
+                data: { v_date: v_date }
+            });
+
+            $('#tblpendinglist tbody').empty();
+
+            if (Array.isArray(res)) {
+                res.forEach(function (data) {
+                    AddPendingRow(data);
+                });
+            }
+
+        } catch (error) {
+            console.error("Error loading pending data:", error);
+        }
+    });
+
+    $(document).on('click', '#btn_seletedRow', function () {
+
+        const selectedData = GetSelectedPendingRows();
+
+        console.log('Selected Rows:', selectedData);
+
+        $('#tblScrapreceivedentry tbody').empty();
+
+        selectedData.forEach(function (data)
+        {
+
+            AddRow({
+                itemCode: data.ITEM_CODE,
+                qty: data.open_qty,
+                weight: '',
+                froM_DEPT: data.TO_DEPT,
+                PARTY_CODE: data.PARTY_CODE,
+                remarks: ''
+            });
+        });
+    });
+
+
+    $('#btn_dailyreport').on('click', async function () {
+        try {
+            let FromData = $('#DtFrom').val();
+            let ToDate = $('#DtToDate').val();
+            let ItemCdoe = $('#ddlitem').val();
+            let DeptCode = $('#ddlDepartment').val();
+            let UnitCode = $('#ddlUnit').val();
+
+            const res = await $.ajax({
+                url: '/ScrapReceivedEntry/DailyReport',
+                type: 'GET',
+                data: {
+                    From_DATE: FromData,
+                    To_DATE: ToDate,
+                    itemcode: ItemCdoe,
+                    DEPT_CODE: DeptCode,
+                    UnitCode: UnitCode
+                }
+            });
+            console.log('Daily Report', res);
+
+            DailyReportTransitReport();
+
+
+
+        }
+        catch (error) {
+            console.log('Error', error);
+        }  
+
+    });
+
+    $('#btn_pendingdeptreport').on('click', async function () {
+        try {
+            let FromData = $('#DtFrom').val();
+            let ToDate = $('#DtToDate').val();
+            let ItemCdoe = $('#ddlitem').val();
+            let DeptCode = $('#ddlDepartment').val();
+            let UnitCode = $('#ddlUnit').val();
+
+            const res = await $.ajax({
+                url: '/ScrapReceivedEntry/PendingDept',
+                type: 'GET',
+                data: {
+                    From_DATE: FromData,
+                    To_DATE: ToDate,
+                    itemcode: ItemCdoe,
+                    DEPT_CODE: DeptCode,
+                    UnitCode: UnitCode
+                }
+            });
+            console.log('Daily Report', res);
+
+            PendingDeptTransitReport();
+
+
+
+        }
+        catch (error) {
+            console.log('Error', error);
+        }
+
+    });
+
+    $('#btn_ScrapIssueReport').on('click', async function () {
+        try
+        {  
+            ScrapIssueTransitReport();
+        }
+        catch (error)
+        {
+            console.log('Error', error);
+        }
+
+    });
+
+    $('#btn_ScrapReceivedReport').on('click', async function () {
+        try
+        {  
+            RecdPrintTransitReport();
+        }
+        catch (error)
+        {
+            console.log('Error', error);
+        }
+
+    });
+
+
+    
+
+
+    $('#btn_ScrapStockReport').on('click', async function () {
+        try {
+            let FromData = $('#DtFrom').val();
+            let ToDate = $('#DtToDate').val();
+            let ItemCdoe = $('#ddlitem').val();
+            let DeptCode = $('#ddlDepartment').val();
+            let UnitCode = $('#ddlUnit').val();
+
+            const res = await $.ajax({
+                url: '/ScrapReceivedEntry/ScrapStocREPORT',
+                type: 'GET',
+                data: {
+                    From_DATE: FromData,
+                    To_DATE: ToDate,
+                    itemcode: ItemCdoe,
+                    DEPT_CODE: DeptCode,
+                    UnitCode: UnitCode
+                }
+            });
+            console.log('Daily Report', res);
+
+            ScrapStocTransitReport();
+
+
+
+        }
+        catch (error) {
+            console.log('Error', error);
+        }
+
+    });
+
+
 
 
 });
+

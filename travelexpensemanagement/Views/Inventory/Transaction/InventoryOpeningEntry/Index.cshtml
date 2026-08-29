@@ -12,7 +12,6 @@
 	var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
 }
 
-
 <script>
     window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
         CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
@@ -44,14 +43,18 @@
 		<div class="erppage-header-title">Inventory Opening Entry</div>
 	</div>
 
-
-
-	<button type="button" class="erppage-btn erppage-btn-copy" id="button_print" onclick="TransitReport();">
-		<i class="fa-solid fa-print"></i> Print
-	</button>
-
-
 	<div class="erppage-header-right">
+	
+
+
+
+
+
+
+		<button type="button" class="erppage-btn erppage-btn-copy" id="button_print" onclick="TransitReport();">
+			<i class="fa-solid fa-print"></i> Print
+		</button>
+
 		<button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InventoryOpeningList")', isReadOnly)">
 			<i class="fa-solid fa-arrow-left"></i>Back to list
 		</button>

@@ -81,11 +81,14 @@ function showFlashMessageByKey(key, type = 'success') {
 
 $(document).ready(function () {
     const stored = localStorage.getItem('flashMessage');
-    if (stored) {
+    if (stored)
+    {
         const { message, type } = JSON.parse(stored);
-        if (message && type && toastr[type]) {
+        if (message && type && toastr[type])
+        {
             toastr[type](message);
-        } else {
+        } else
+        {
             toastr.info(message);
         }
         localStorage.removeItem('flashMessage');

@@ -1,0 +1,352 @@
+﻿@{
+    ViewBag.Title = "Scrap Received List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+}
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Scrap Received List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "ScrapReceivedEntry")'">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search Module..." />
+    </div>
+    <div class="erppagelist-actions">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="button_export">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+            <i class="fa fa-envelope"></i> Mail
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
+                data-tooltip="Approve Records">
+            <i class="fa fa-check-circle"></i> Approved
+        </button>
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblScrapReceivedList" class="excel-table fixed-grid-table table-width resizable-table">
+            <colgroup>
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 12%;">
+         
+                <col style="width: 12%;">
+        
+                <col style="width: 8%;">
+        
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Doc No</th>
+                    <th>Doc Type</th>
+                    <th>Doc Date</th>
+         
+                    <th>Remarks</th>          
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button class="page-nav" id="prevBtn">‹</button>
+            <div id="tablePagination" class="page-numbers"></div>
+            <button class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
+</div>
+
+<script>
+
+    let currentPage = 1;
+    let pageSize = 10;
+    let totalCount = 0;
+    var controllerName = window.location.pathname.split('/')[1];
+
+    $(document).ready(function () {
+
+     //  checkPermission(controllerName, function () {
+            loadAllInward();
+      // });
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadAllInward();
+        });
+
+        $('#button_export').on('click', function () {
+            var text = $('#searchBox').val();
+            window.location.href = '/ScrapReceivedList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+        });
+
+        $('#button_print').on('click', function ()
+        
+        {
+            var searchTerm = $('#searchBox').val() || '';
+
+            var url = '/ScrapReceivedList/ExportPdf?searchTerm=' + encodeURIComponent(searchTerm);
+
+            window.open(url, '_blank');
+        });
+
+
+
+
+
+
+    });
+
+    // ================= LOAD DATA =================
+    function loadAllInward() {
+
+        $.ajax({
+            url: '/ScrapReceivedList/GetList',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: $('#searchBox').val(),
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+
+                console.log("Table List",res);
+
+
+                if (!res.success) {
+                    toastr.error("Failed to load data.");
+                    return;
+                }
+
+                const list = res.lists || [];
+                totalCount = res.totalCount || 0;
+
+                renderTable(list);
+                renderPagination();
+            },
+            error: function (xhr) {
+                toastr.error('Error loading list: ' + xhr.responseText);
+            }
+        });
+    }
+
+    // ================= TABLE =================
+    function renderTable(list) {
+        console.log("list",list);
+        const tbody = $('#tblScrapReceivedList tbody');
+        tbody.empty();
+
+        if (!list || list.length === 0) {
+            tbody.append(`
+                <tr>
+                    <td colspan="25" class="text-center text-muted">
+                        No list found.
+                    </td>
+                </tr>
+            `);
+            return;
+        }
+
+        $.each(list, function (index, item) {
+
+            tbody.append(`
+                <tr>
+                <td>${item.v_NO ?? ''}</td>
+                <td>${item.v_TYPE || ''}</td>
+                <td>${formatDate(item.v_DATE)}</td>
+                <td>${item.remark || ''}</td>
+                    <td class="action-col">
+                        <div class="action-wrap">
+                            <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.doC_ID}')"> <i class="fa fa-edit"></i> </button>
+                            <button class="act-btn view btn-view"  onclick="viewMenuDetails('${item.doC_ID}')"> <i class="fa fa-eye"></i>  </button>
+                            <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.doC_ID}')">  <i class="fa fa-trash"></i> </button>
+                            <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"> <i class="fa fa-file"></i> </button>
+
+                        </div>
+                    </td>
+                </tr>
+            `);
+
+            // applyGridPermission();
+
+        });
+    }
+
+    // ================= PAGINATION =================
+    function renderPagination() {
+
+        const totalPages = Math.ceil(totalCount / pageSize) || 1;
+
+        let html = '';
+        let maxVisible = 5;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = startPage + maxVisible - 1;
+
+        if (endPage > totalPages) {
+            endPage = totalPages;
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+
+        if (startPage > 1) {
+            html += `<span class="page-number" onclick="goToPage(1)">1</span>`;
+            if (startPage > 2) html += `<span class="dots">...</span>`;
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<span class="page-number ${i === currentPage ? 'active' : ''}"
+                        onclick="goToPage(${i})">${i}</span>`;
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += `<span class="dots">...</span>`;
+            html += `<span class="page-number" onclick="goToPage(${totalPages})">${totalPages}</span>`;
+        }
+
+        $('#pageNumbers').html(html);
+
+        let start = (currentPage - 1) * pageSize + 1;
+        let end = Math.min(currentPage * pageSize, totalCount);
+
+        if (totalCount === 0) {
+            start = 0;
+            end = 0;
+        }
+
+        $('#pageInfoText').text(`Results: ${start} - ${end} of ${totalCount}`);
+
+        $('#prevBtn').prop('disabled', currentPage === 1);
+        $('#nextBtn').prop('disabled', currentPage === totalPages);
+    }
+
+    // ================= PAGINATION ACTIONS =================
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadAllInward();
+        }
+    }
+
+    function nextPage() {
+        const totalPages = Math.ceil(totalCount / pageSize);
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadAllInward();
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllInward();
+    }
+
+    function changeRowsPerPage() {
+        pageSize = parseInt($('#pageSizeSelect').val());
+        currentPage = 1;
+        loadAllInward();
+    }
+
+    // ================= UTIL =================
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '';
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    }
+
+    // ================= ACTIONS =================
+
+    function AddOrEditFunction(rowId) {
+        window.location.href = `/ScrapReceivedEntry/Index?id=${encodeURIComponent(rowId)}`;
+    }
+
+    function viewMenuDetails(rowId) {
+        window.location.href = `/ScrapReceivedEntry/Index?id=${encodeURIComponent(rowId)}&mode=view`;
+    }
+
+    function deleteTemp(DocID) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You want to delete this Inward Entry?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: '/ScrapReceivedList/Delete',
+                    type: 'POST',
+                    data: { DocID : DocID},
+                    success: function (res) {
+
+                        if (res.success) {
+                            toastr.success(res.message || "Deleted successfully");
+                            loadAllInward();
+                        } else {
+                            toastr.error(res.message || 'Failed to delete.');
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Error deleting record.');
+                    }
+                });
+            }
+        });
+    }
+
+    function showDocumentPopup(docCode) {
+
+         $.ajax({
+             url: '/ScrapReceivedList/DocDetailsCode',
+             type: 'POST',
+             dataType: 'json',
+             data: { docCode: docCode },
+             success: function (response) {
+                 if (response.success) {
+                     showDocumentPopupjQuery(response.data, docCode);
+                 } else {
+                     toastr.error("Failed to get document details.");
+                 }
+             },
+             error: function () {
+                 toastr.error("Error fetching document details.");
+             }
+         });
+     }
+
+</script>

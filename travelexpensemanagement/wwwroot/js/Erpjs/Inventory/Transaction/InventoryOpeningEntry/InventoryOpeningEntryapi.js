@@ -429,13 +429,13 @@ function TransitReport() {
         return;
     }
 
-    var reportName = "Inventories Opening Report";
+    var reportName = "RAW11"; 
 
-    var v_no = $('#TxtDocNo').val();
+    var v_no = $('#NumDocno').val();
     var v_type = $('#ddlDocType').val();
-    var v_typetext = $('#ddlDocType option:selected').text();
+
     var formula =
-        "{ISSUE1.V_TYPE} = '" + v_type + " ' "
+        " {ISSUE1.V_TYPE} = '" + v_type + " ' "
         " and {ISSUE1.V_NO} = " + v_no +
         " and {ISSUE1.COMP_CODE} = " + globalVars.CompCode +
         " and {ISSUE1.YEAR_CODE} = " + globalVars.FYearCode +
@@ -449,7 +449,7 @@ function TransitReport() {
             comp_name: globalVars.CompanyName || "",
             comp_add1: globalVars.Address1 || "",
             comp_add2: globalVars.Address2 || "",
-            RPTNAME: 'RAW11'
+            RPTNAME: 'Inventories Opening Report'
         }
     };
 

@@ -26,7 +26,7 @@
                 break;
             case "info":
                 settings.icon = "💡";
-                settings.bg = settings.bg || "#2563eb";
+                settings.bg = settings.bg || "#203354";
                 break;
         }
     }

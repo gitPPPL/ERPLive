@@ -22,7 +22,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
         private readonly IOutwardEntryListRepository _outwardEntryListRepository;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
-
         public InventoryOpeningListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
         DbHelper dbHelper, ModuleService.ModuleService moduleService, IOutwardEntryListRepository outwardEntryListRepository)
         {
@@ -34,7 +33,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
 
         public IActionResult Index()
         {
-            ViewBag.CurrentMenu = "Material Outward";
+            ViewBag.CurrentMenu = "Inventory Opening";
             var permissions = _moduleService.GetUserMenuPermissions();
             var userLevel = _moduleService.GetUserLevel();
             var model = new UserMenuPermissionsViewModel
@@ -45,7 +44,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
 
             return View("~/Views/Inventory/Transaction/InventoryOpeningList/Index.cshtml" , model);
         }
-
 
         [HttpGet]
         public IActionResult GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
@@ -127,7 +125,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
 
             return Json(new { success = true, lists = headerList, totalCount });
         }
-
 
         [HttpPost]
         public IActionResult GetDataByCode(string DocID)
@@ -229,7 +226,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                 return Json(new { success = false, message = "Error fetching purchase requisition data", error = ex.Message });
             }
         }
-
 
         [HttpPost]
         public JsonResult Delete(string DocID)
@@ -447,7 +443,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                 }
             }
         }
-
 
         public JsonResult DocDetailsCode(string docCode)
         {

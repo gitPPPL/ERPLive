@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -9,29 +10,29 @@ using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 
 namespace travelexpensemanagement.Controllers.Inventory.Transaction
 {
-    public class InventoryTransferRequestListController : Controller
+    [SessionAuthorize]
+    public class ScrapReceivedListController : Controller
     {
-
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly IOutwardEntryListRepository _outwardEntryListRepository;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-
-
-
-        public InventoryTransferRequestListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-        DbHelper dbHelper, ModuleService.ModuleService moduleService, IOutwardEntryListRepository outwardEntryListRepository)
+        private readonly GlobalValidationdate _globalValidationdate;
+        public ScrapReceivedListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
+        DbHelper dbHelper, ModuleService.ModuleService moduleService, IOutwardEntryListRepository outwardEntryListRepository, GlobalValidationdate globalValidationdate)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _outwardEntryListRepository = outwardEntryListRepository;
+            _globalValidationdate = globalValidationdate;
             _moduleService = moduleService;
         }
 
         public IActionResult Index()
         {
-            return View("~/Views/Inventory/Transaction/InventoryTransferRequestList/Index.cshtml");
+            return View("~/Views/Inventory/Transaction/ScrapReceivedList/Index.cshtml");
         }
+
 
         [HttpGet]
         public IActionResult GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
@@ -44,12 +45,12 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             }
 
             int totalCount = 0;
-            var headerList = new List<InventoryTransferRequest_Header>();
+            var headerList = new List<ScrapReceivedEntry_Header>();
 
             try
             {
                 using (var conn = _dbConnection.GetErpConnection())
-                using (var cmd = new SqlCommand("sp_InventoryTransferRequest", conn))
+                using (var cmd = new SqlCommand("sp_ScrapReceived", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -67,18 +68,14 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     {
                         while (reader.Read())
                         {
-                            headerList.Add(new InventoryTransferRequest_Header
+                            headerList.Add(new ScrapReceivedEntry_Header
                             {
 
                                 V_NO = reader["V_NO"] != DBNull.Value ? Convert.ToInt32(reader["V_NO"]) : 0,
                                 V_TYPE = reader["V_TYPE"] != DBNull.Value ? reader["V_TYPE"].ToString() : string.Empty,
                                 V_DATE = reader["V_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["V_DATE"]) : null,
-                                SHIFT = reader["SHIFT"] != DBNull.Value ? reader["SHIFT"].ToString() : string.Empty,                             
-                                SLIP_NO = reader["SLIP_NO"] != DBNull.Value ? reader["SLIP_NO"].ToString() : string.Empty,
-                                PORD_TYPE = reader["PORD_TYPE"] != DBNull.Value ? reader["PORD_TYPE"].ToString() : string.Empty,
-                                REMARKS = reader["REMARKS"] != DBNull.Value ? reader["REMARKS"].ToString() : string.Empty,
-                                statusName = reader["STATUS"] != DBNull.Value ? reader["STATUS"].ToString() : string.Empty ,            
-                                DOC_ID = reader["DOC_ID"] != DBNull.Value ? reader["DOC_ID"].ToString() : string.Empty               
+                                DOC_ID = reader["DOC_ID"] != DBNull.Value ? reader["DOC_ID"].ToString() : string.Empty,
+                                REMARK = reader["REMARK"] != DBNull.Value ? reader["REMARK"].ToString() : string.Empty              
 
                             });
                         }
@@ -99,6 +96,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             return Json(new { success = true, lists = headerList, totalCount });
         }
 
+
         [HttpPost]
         public IActionResult GetDataByCode(string DocID)
 
@@ -106,10 +104,10 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
 
 
-            InventoryTransferRequest_Model wrapper = new InventoryTransferRequest_Model
+            ScrapReceivedEntry_Model wrapper = new ScrapReceivedEntry_Model
             {
-                Header = new InventoryTransferRequest_Header(),
-                Details = new List<InventoryTransferRequest_Details>()
+                Header = new ScrapReceivedEntry_Header(),
+                Details = new List<ScrapReceivedEntry_Details>()
 
             };
 
@@ -121,7 +119,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     con.Open();
 
                     #region Fetch Header Data
-                    using (SqlCommand cmd = new SqlCommand("sp_InventoryTransferRequest", con))
+                    using (SqlCommand cmd = new SqlCommand("sp_ScrapReceived", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "ShowData");
@@ -135,18 +133,15 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                         {
                             if (rdr.Read())
                             {
-                                wrapper.Header = new InventoryTransferRequest_Header
+                                wrapper.Header = new ScrapReceivedEntry_Header
                                 {
                                     DOC_ID = rdr["DOC_ID"]?.ToString(),
                                     V_NO = rdr["V_no"] != DBNull.Value ? Convert.ToInt32(rdr["V_no"]) : 0,
                                     V_TYPE = rdr["V_TYPE"]?.ToString(),
+                                    REMARK = rdr["REMARK"]?.ToString(),
                                     V_DATE = rdr["V_date"] != DBNull.Value ? Convert.ToDateTime(rdr["V_date"]) : DateTime.MinValue,
-                                    STATUS = rdr["STATUS"] != DBNull.Value ? Convert.ToInt32(rdr["STATUS"]) : 0,
-                                    DEPT_CODE = rdr["DEPT_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["DEPT_CODE"]) : 0,
-                                    SHIFT = rdr["SHIFT"]?.ToString(),
+                                    PARTY = rdr["PARTY"] != DBNull.Value ? Convert.ToInt32(rdr["PARTY"]) : 0,
                                     PLACE_CODE = rdr["PLACE_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["PLACE_CODE"]) : 0,
-                                    EMP_CODE = rdr["EMP_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["EMP_CODE"]) : 0,
-                                    REMARKS = rdr["REMARKS"]?.ToString()
                                 };
                             }
                         }
@@ -154,7 +149,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     #endregion
 
                     #region Fetch Dispatch Data
-                    using (SqlCommand cmd4 = new SqlCommand("sp_InventoryTransferRequest", con))
+                    using (SqlCommand cmd4 = new SqlCommand("sp_ScrapReceived", con))
                     {
                         cmd4.CommandType = CommandType.StoredProcedure;
                         cmd4.Parameters.AddWithValue("@Action", "ShowData");
@@ -164,24 +159,18 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                         cmd4.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
                         cmd4.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
 
-
                         using (SqlDataReader rdr = cmd4.ExecuteReader())
                         {
                             while (rdr.Read())
                             {
-                                wrapper.Details.Add(new InventoryTransferRequest_Details
+                                wrapper.Details.Add(new ScrapReceivedEntry_Details
                                 {
-                                    ITEM_CODE = rdr["ITEM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["ITEM_CODE"]) : 0,
-                                    MAKE_CODE = rdr["MAKE_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["MAKE_CODE"]) : 0,
-                                    UOM_CODE = rdr["UOM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["UOM_CODE"]) : 0,
-                                    NOS = rdr["NOS"] != DBNull.Value ? Convert.ToInt32(rdr["NOS"]) : 0,
+                                    ITEM_CODE = rdr["ITEM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["ITEM_CODE"]) : 0,                        
                                     QTY = rdr["QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["QTY"]) : 0,
-                                    LAND_RATE = rdr["LAND_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["LAND_RATE"]) : 0,
-                                    LAND_AMT = rdr["LAND_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["LAND_AMT"]) : 0,
-                                    FROM_DEPT = rdr["TO_DEPT"] != DBNull.Value ? Convert.ToInt32(rdr["TO_DEPT"]) : 0,
-                                    TO_DEPT = rdr["TO_DEPT"] != DBNull.Value ? Convert.ToInt32(rdr["TO_DEPT"]) : 0,
-                                    MACH_CODE = rdr["MACH_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["MACH_CODE"]) : 0,
-                                    REMARKS = rdr["REMARKS"]?.ToString()
+                                    WEIGHT = rdr["WEIGHT"] != DBNull.Value ? Convert.ToDecimal(rdr["WEIGHT"]) : 0,
+                                    DEPT_CODE = rdr["DEPT_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["DEPT_CODE"]) : 0,
+                                    SCRAP_CODE = rdr["SCRAP_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["SCRAP_CODE"]) : 0,
+                                    REMARK = rdr["REMARK"]?.ToString()
                                 });
                             }
                         }
@@ -189,22 +178,18 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     #endregion
                 }
 
-                // Return the data as a wrapped result in JSON format
-                var resultWrapper = new
-                {
-                    Header = wrapper.Header,
-                    Details = wrapper.Details
-
-                };
+                var resultWrapper = new  { Header = wrapper.Header,  Details = wrapper.Details };
 
                 return Json(new { success = true, data = resultWrapper });
             }
             catch (Exception ex)
             {
-                // Handle any errors and return them in the JSON response
+               
                 return Json(new { success = false, message = "Error fetching purchase requisition data", error = ex.Message });
             }
         }
+
+
 
         [HttpPost]
         public JsonResult Delete(string DocID)
@@ -216,7 +201,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                 {
                     con.Open();
 
-                    using (SqlCommand cmd = new SqlCommand("sp_InventoryTransferRequest", con))
+                    using (SqlCommand cmd = new SqlCommand("sp_ScrapReceived", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "DELETE");
@@ -239,15 +224,13 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
         {
             var globalVar = _globalVariableService.GetGlobalVariables();
             List<InwardEntryDetailDto> docDetails = new List<InwardEntryDetailDto>();
-
             using (SqlConnection conn = _dbConnection.GetErpConnection())
             {
-                using (SqlCommand cmd = new SqlCommand("sp_InventoryTransferRequest", conn))
+                using (SqlCommand cmd = new SqlCommand("sp_ScrapReceived", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Action", "DocDetailID");
                     cmd.Parameters.AddWithValue("@DOC_ID", docCode);
-
                     conn.Open();
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -284,6 +267,9 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             public string? LID { get; set; }
         }
 
+
+
+
         [HttpGet]
         public async Task<IActionResult> ExportToExcel(string searchTerm = null)
         {
@@ -294,7 +280,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             {
                 await conn.OpenAsync();
 
-                using (SqlCommand cmd = new SqlCommand("sp_InventoryTransferRequest", conn))
+                using (SqlCommand cmd = new SqlCommand("sp_ScrapReceived", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
@@ -306,7 +292,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     using (var workbook = new ClosedXML.Excel.XLWorkbook())
                     {
-                        var ws = workbook.Worksheets.Add("GateInward");
+                        var ws = workbook.Worksheets.Add("ScrapReceivedEntry");
 
                         // Header
                         for (int i = 0; i < reader.FieldCount; i++)
@@ -374,104 +360,23 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
 
             }
         }
+
+
+
         [HttpGet]
-        public async Task<IActionResult> ExportToPdf(string searchTerm = null)
+        public async Task<IActionResult> ExportPdf(  string searchTerm = null, string Sp_Name = "sp_ScrapReceived", string Action = "ExportToExcel", string ReportName = "ScrapReceived")
         {
-            var global = _globalVariableService.GetGlobalVariables();
 
-            using (var conn = _dbConnection.GetErpConnection())
-            {
-                await conn.OpenAsync();
+            byte[] pdfBytes = await _globalValidationdate.ExportToPdf(searchTerm, Sp_Name, Action, ReportName);
 
-                using (SqlCommand cmd = new SqlCommand("sp_InventoryTransferRequest", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
-                    cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
-                    cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Action", "ExportToExcel");
+            string fileName = string.IsNullOrWhiteSpace(ReportName) ? "Report.pdf" : ReportName + ".pdf";
 
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                    using (var stream = new MemoryStream())
-                    {
-                        // ✅ PDF Setup (Landscape A4)
-                        var document = new iTextSharp.text.Document(
-                            iTextSharp.text.PageSize.A4.Rotate(), 10, 10, 10, 10);
+            return File(pdfBytes, "application/pdf", fileName);
 
-                        iTextSharp.text.pdf.PdfWriter.GetInstance(document, stream);
-                        document.Open();
 
-                        // ✅ Fonts (FIXED - no ambiguity)
-                        var titleFont = iTextSharp.text.FontFactory.GetFont(
-                            iTextSharp.text.FontFactory.HELVETICA_BOLD, 14);
+            return File("", "application/pdf");
 
-                        var headerFont = iTextSharp.text.FontFactory.GetFont(
-                            iTextSharp.text.FontFactory.HELVETICA_BOLD, 9);
-
-                        var dataFont = iTextSharp.text.FontFactory.GetFont(
-                            iTextSharp.text.FontFactory.HELVETICA, 8);
-
-                        // ✅ Title
-                        var title = new iTextSharp.text.Paragraph("Gate Inward Report", titleFont);
-                        title.Alignment = iTextSharp.text.Element.ALIGN_CENTER;
-                        document.Add(title);
-
-                        document.Add(new iTextSharp.text.Paragraph(" ")); // spacing
-
-                        // ✅ Table
-                        int columnCount = reader.FieldCount;
-                        var table = new iTextSharp.text.pdf.PdfPTable(columnCount);
-                        table.WidthPercentage = 100;
-
-                        // Header
-                        for (int i = 0; i < columnCount; i++)
-                        {
-                            var cell = new iTextSharp.text.pdf.PdfPCell(
-                                new iTextSharp.text.Phrase(reader.GetName(i), headerFont));
-
-                            cell.HorizontalAlignment = iTextSharp.text.Element.ALIGN_CENTER;
-                            cell.BackgroundColor = iTextSharp.text.BaseColor.LIGHT_GRAY;
-
-                            table.AddCell(cell);
-                        }
-
-                        // Data
-                        while (await reader.ReadAsync())
-                        {
-                            for (int col = 0; col < columnCount; col++)
-                            {
-                                string value = "";
-
-                                if (reader[col] != DBNull.Value)
-                                {
-                                    if (reader.GetFieldType(col) == typeof(DateTime))
-                                    {
-                                        value = Convert.ToDateTime(reader[col])
-                                                        .ToString("dd-MM-yyyy");
-                                    }
-                                    else
-                                    {
-                                        value = reader[col].ToString();
-                                    }
-                                }
-
-                                var cell = new iTextSharp.text.pdf.PdfPCell(
-                                    new iTextSharp.text.Phrase(value, dataFont));
-
-                                table.AddCell(cell);
-                            }
-                        }
-
-                        document.Add(table);
-                        document.Close();
-
-                        return File(stream.ToArray(), "application/pdf", "GateInward.pdf");
-                    }
-                }
-            }
         }
-
 
     }
 }
