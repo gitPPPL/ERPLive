@@ -5,7 +5,6 @@ const rowId = urlParams.get('id');
 const mode = urlParams.get('mode');
 const isReadOnly = (mode === 'view');
 
-
 var globalVars = window.globalVariables || {};
 var database = window.database || "";
 let PubUserLevel = globalVars.UserLevel;
@@ -17,7 +16,6 @@ let ItemNameList = "";
 let unitnameList = "";
 let ItemmakeList = "";
 let ItemDeptList = "";
-
 
 $(document).ready(async function ()
 {
@@ -105,24 +103,37 @@ $(document).ready(async function ()
         }
     });
 
-    $('#btn_save').on('click', function ()
-    {
+    $('#btn_save').on('click', function () {
 
         let V_TYPE = $('#ddlDocType').val();
         let V_NO = $('#NumDocno').val();
         let V_DATE = $('#DtDocDate').val();
         let REMARKS = $('#TxtRemarks').val();
         let action = $.trim($('#CODE').val()) ? 'UPDATE' : 'INSERT';
+
+        if (!validateRequiredField('#ddlDocType', 'Please select a Doc Type')) return;
+        if (!validateRequiredField('#NumDocno', 'Please select a Doc NO')) return;
+        if (!validateRequiredField('#DtDocDate', 'Please select a Doc Date')) return;
+
         let inventoryData = GetInventoryOpeningData();
+
+        // At least one item is required
+        let hasItem = inventoryData.some(function (row) {
+            return $.trim(row.ITEM_CODE) !== '';
+        });
+
+        if (!hasItem) {
+            showToast('Please enter at least one item.', 'Error');
+            return;
+        }
 
         let requestData = {
             Header: {
-                action: rowId ? 'UPDATE' : 'INSERT',
+                action: action,
                 V_TYPE: V_TYPE,
                 V_NO: V_NO,
                 V_DATE: V_DATE,
-                REMARKS: REMARKS,
-                action: action
+                REMARKS: REMARKS
             },
             Details: inventoryData
         };
@@ -132,16 +143,18 @@ $(document).ready(async function ()
             type: 'POST',
             contentType: 'application/json; charset=utf-8',
             data: JSON.stringify(requestData),
+
             success: function (response) {
 
                 if (response.success) {
-                    showToast(response.message,"Success");
+                    showToast(response.message, "Success");
                 }
                 else {
-                    showToast(response.message,"Error");
+                    showToast(response.message, "Error");
                 }
 
             },
+
             error: function (xhr, status, error) {
                 console.log(xhr.responseText);
                 showToast("Error while saving data.", "Error");

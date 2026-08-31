@@ -6,7 +6,7 @@ using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Inventory.Transaction;
-using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+
 
 namespace travelexpensemanagement.Controllers.Inventory.Transaction
 {
@@ -15,15 +15,13 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly IOutwardEntryListRepository _outwardEntryListRepository;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly GlobalValidationdate _globalValidationdate;
         public ScrapReceivedListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-        DbHelper dbHelper, ModuleService.ModuleService moduleService, IOutwardEntryListRepository outwardEntryListRepository, GlobalValidationdate globalValidationdate)
+        DbHelper dbHelper, ModuleService.ModuleService moduleService,  GlobalValidationdate globalValidationdate)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
-            _outwardEntryListRepository = outwardEntryListRepository;
             _globalValidationdate = globalValidationdate;
             _moduleService = moduleService;
         }
@@ -32,7 +30,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
         {
             return View("~/Views/Inventory/Transaction/ScrapReceivedList/Index.cshtml");
         }
-
 
         [HttpGet]
         public IActionResult GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
@@ -95,7 +92,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
 
             return Json(new { success = true, lists = headerList, totalCount });
         }
-
 
         [HttpPost]
         public IActionResult GetDataByCode(string DocID)
@@ -272,5 +268,97 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             string fileName = string.IsNullOrWhiteSpace(ReportName) ? "Report.pdf"  : ReportName + ".pdf";
             return File(pdfBytes, "application/pdf", fileName);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportToExcel(string searchTerm = null)
+        {
+
+            var global = _globalVariableService.GetGlobalVariables();
+
+            using (var conn = _dbConnection.GetErpConnection())
+            {
+                await conn.OpenAsync();
+
+                using (SqlCommand cmd = new SqlCommand("sp_ScrapReceived", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
+                    cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Action", "ExportToExcel");
+
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    using (var workbook = new ClosedXML.Excel.XLWorkbook())
+                    {
+                        var ws = workbook.Worksheets.Add("Scrap Received Entry");
+
+                        // Header
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            var cell = ws.Cell(1, i + 1);
+                            cell.Value = reader.GetName(i);
+                            cell.Style.Font.Bold = true;
+                            cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+                        }
+
+                        int row = 2;
+                        while (await reader.ReadAsync())
+                        {
+                            for (int col = 0; col < reader.FieldCount; col++)
+                            {
+                                var cell = ws.Cell(row, col + 1);
+
+                                if (reader[col] == DBNull.Value)
+                                {
+                                    cell.Value = "";
+                                }
+                                else if (reader.GetFieldType(col) == typeof(DateTime))
+                                {
+                                    cell.Value = Convert.ToDateTime(reader[col]);
+                                    cell.Style.DateFormat.Format = "dd-MM-yyyy";
+                                }
+                                else
+                                {
+                                    cell.Value = reader[col].ToString();
+                                }
+                            }
+                            row++;
+                        }
+
+                        ws.Columns().AdjustToContents();
+
+                        foreach (var col in ws.Columns())
+                        {
+                            if (col.Width > 40) col.Width = 40;
+                            if (col.Width < 10) col.Width = 10;
+                        }
+
+                        ws.Style.Alignment.WrapText = true;
+                        ws.SheetView.FreezeRows(1);
+
+                        var range = ws.RangeUsed();
+                        if (range != null)
+                        {
+                            range.CreateTable();
+                        }
+
+                        using (var stream = new MemoryStream())
+                        {
+                            workbook.SaveAs(stream);
+                            stream.Position = 0;
+
+                            return File(
+                                stream.ToArray(),
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                "ScrapReceivedEntry.xlsx"
+                            );
+                        }
+                    }
+                }
+
+            }
+        }
+
     }
 }

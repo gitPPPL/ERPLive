@@ -167,7 +167,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
 
             return Json(new  {  success = result.Status == "Success",   status = result.Status,  message = result.Message });
         }
-
         private async Task<(string Status, string Message)> SubmitRequest( InventoryOpeningEntry_Header header, List<InventoryOpeningEntry_Details> details,string action)
         {
             try

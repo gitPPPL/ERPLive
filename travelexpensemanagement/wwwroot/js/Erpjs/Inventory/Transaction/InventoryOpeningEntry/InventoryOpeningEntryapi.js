@@ -264,7 +264,7 @@ function AddRow(data = {}) {
             </td>
 
             <td>
-                <input type="number"   class="erppagetable-control TxtAmount" value="${data.amount ?? ''}" readonly />
+                <input type="number"   class="erppagetable-control TxtAmount" value="${data.amount ?? ''}" oninput="limitMaxLength(this, 15)"  readonly />
             </td>
 
             <td>

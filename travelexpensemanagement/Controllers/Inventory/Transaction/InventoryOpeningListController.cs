@@ -19,16 +19,16 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
 
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly IOutwardEntryListRepository _outwardEntryListRepository;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
+        private readonly GlobalValidationdate _globalValidationdate;
 
         public InventoryOpeningListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-        DbHelper dbHelper, ModuleService.ModuleService moduleService, IOutwardEntryListRepository outwardEntryListRepository)
+        DbHelper dbHelper, ModuleService.ModuleService moduleService,GlobalValidationdate globalValidationdate)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
-            _outwardEntryListRepository = outwardEntryListRepository;
             _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
         }
 
         public IActionResult Index()
@@ -278,7 +278,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     using (var workbook = new ClosedXML.Excel.XLWorkbook())
                     {
-                        var ws = workbook.Worksheets.Add("GateInward");
+                        var ws = workbook.Worksheets.Add("Inventory Opening");
 
                         // Header
                         for (int i = 0; i < reader.FieldCount; i++)
@@ -338,7 +338,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                             return File(
                                 stream.ToArray(),
                                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                "GateInward.xlsx"
+                                "InventoryOpening.xlsx"
                             );
                         }
                     }
@@ -346,102 +346,13 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
 
             }
         }
+
         [HttpGet]
-        public async Task<IActionResult> ExportToPdf(string searchTerm = null)
+        public async Task<IActionResult> ExportPdf(string searchTerm = null, string Sp_Name = "sp_InventoryOpening", string Actionparameter = "ExportToExcel", string ReportName = "InventoryOpening")
         {
-            var global = _globalVariableService.GetGlobalVariables();
-
-            using (var conn = _dbConnection.GetErpConnection())
-            {
-                await conn.OpenAsync();
-
-                using (SqlCommand cmd = new SqlCommand("sp_InventoryOpening", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
-                    cmd.Parameters.AddWithValue("@YEAR_CODE", global.PubFYearCode);
-                    cmd.Parameters.AddWithValue("@BRANCH_CODE", global.PubBranchCode);
-                    cmd.Parameters.AddWithValue("@SearchTerm", (object)searchTerm ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Action", "ExportToExcel");
-
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                    using (var stream = new MemoryStream())
-                    {
-                        // ✅ PDF Setup (Landscape A4)
-                        var document = new iTextSharp.text.Document(
-                            iTextSharp.text.PageSize.A4.Rotate(), 10, 10, 10, 10);
-
-                        iTextSharp.text.pdf.PdfWriter.GetInstance(document, stream);
-                        document.Open();
-
-                        // ✅ Fonts (FIXED - no ambiguity)
-                        var titleFont = iTextSharp.text.FontFactory.GetFont(
-                            iTextSharp.text.FontFactory.HELVETICA_BOLD, 14);
-
-                        var headerFont = iTextSharp.text.FontFactory.GetFont(
-                            iTextSharp.text.FontFactory.HELVETICA_BOLD, 9);
-
-                        var dataFont = iTextSharp.text.FontFactory.GetFont(
-                            iTextSharp.text.FontFactory.HELVETICA, 8);
-
-                        // ✅ Title
-                        var title = new iTextSharp.text.Paragraph("Gate Inward Report", titleFont);
-                        title.Alignment = iTextSharp.text.Element.ALIGN_CENTER;
-                        document.Add(title);
-
-                        document.Add(new iTextSharp.text.Paragraph(" ")); // spacing
-
-                        // ✅ Table
-                        int columnCount = reader.FieldCount;
-                        var table = new iTextSharp.text.pdf.PdfPTable(columnCount);
-                        table.WidthPercentage = 100;
-
-                        // Header
-                        for (int i = 0; i < columnCount; i++)
-                        {
-                            var cell = new iTextSharp.text.pdf.PdfPCell(
-                                new iTextSharp.text.Phrase(reader.GetName(i), headerFont));
-
-                            cell.HorizontalAlignment = iTextSharp.text.Element.ALIGN_CENTER;
-                            cell.BackgroundColor = iTextSharp.text.BaseColor.LIGHT_GRAY;
-
-                            table.AddCell(cell);
-                        }
-
-                        // Data
-                        while (await reader.ReadAsync())
-                        {
-                            for (int col = 0; col < columnCount; col++)
-                            {
-                                string value = "";
-
-                                if (reader[col] != DBNull.Value)
-                                {
-                                    if (reader.GetFieldType(col) == typeof(DateTime))
-                                    {
-                                        value = Convert.ToDateTime(reader[col])
-                                                        .ToString("dd-MM-yyyy");
-                                    }
-                                    else
-                                    {
-                                        value = reader[col].ToString();
-                                    }
-                                }
-
-                                var cell = new iTextSharp.text.pdf.PdfPCell(
-                                    new iTextSharp.text.Phrase(value, dataFont));
-
-                                table.AddCell(cell);
-                            }
-                        }
-
-                        document.Add(table);
-                        document.Close();
-
-                        return File(stream.ToArray(), "application/pdf", "GateInward.pdf");
-                    }
-                }
-            }
+            byte[] pdfBytes = await _globalValidationdate.ExportToPdf(searchTerm, Sp_Name, Actionparameter, ReportName);
+            string fileName = string.IsNullOrWhiteSpace(ReportName) ? "Report.pdf" : ReportName + ".pdf";
+            return File(pdfBytes, "application/pdf", fileName);
         }
 
         public JsonResult DocDetailsCode(string docCode)

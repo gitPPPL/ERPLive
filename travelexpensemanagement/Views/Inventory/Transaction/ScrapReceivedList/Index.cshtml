@@ -30,10 +30,7 @@
         <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
             <i class="fa fa-envelope"></i> Mail
         </button>
-        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
-                data-tooltip="Approve Records">
-            <i class="fa fa-check-circle"></i> Approved
-        </button>
+     
     </div>
 </div>
 <div class="erppagelist-container">
@@ -102,20 +99,17 @@
 
         $('#button_export').on('click', function () {
             var text = $('#searchBox').val();
-            window.location.href = '/ScrapReceivedList/ExportExcle?searchTerm=' + encodeURIComponent(text);
+            window.location.href = '/ScrapReceivedList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
         });
 
-         $('#button_print').on('click', function () {
+        $('#button_print').on('click', function () {
 
-        var searchTerm = $('#searchBox').val() || '';
+            var searchTerm = $('#searchBox').val() || '';
 
-        var url = '/ScrapReceivedList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
+            var url = '/ScrapReceivedList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
 
-        window.open(url, '_blank');
-    });
-
-
-
+            window.open(url, '_blank');
+        });
 
     });
 

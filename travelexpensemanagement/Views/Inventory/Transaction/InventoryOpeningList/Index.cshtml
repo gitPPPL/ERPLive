@@ -142,10 +142,11 @@
         });
 
         $('#button_print').on('click', function () {
-            var text = $('#searchBox').val();
-            window.open('/InventoryOpeningList/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
+            var searchTerm = $('#searchBox').val() || '';
+            var url = '/InventoryOpeningList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
+            window.open(url, '_blank');
         });
-         
+
     });
 
     // ================= LOAD DATA =================
