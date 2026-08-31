@@ -102,20 +102,17 @@
 
         $('#button_export').on('click', function () {
             var text = $('#searchBox').val();
-            window.location.href = '/ScrapReceivedList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+            window.location.href = '/ScrapReceivedList/ExportExcle?searchTerm=' + encodeURIComponent(text);
         });
 
-        $('#button_print').on('click', function ()
-        
-        {
-            var searchTerm = $('#searchBox').val() || '';
+         $('#button_print').on('click', function () {
 
-            var url = '/ScrapReceivedList/ExportPdf?searchTerm=' + encodeURIComponent(searchTerm);
+        var searchTerm = $('#searchBox').val() || '';
 
-            window.open(url, '_blank');
-        });
+        var url = '/ScrapReceivedList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
 
-
+        window.open(url, '_blank');
+    });
 
 
 

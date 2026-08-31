@@ -1290,8 +1290,6 @@ namespace travelexpensemanagement.Common.Globalvariable
             }
         }
 
-
-
         public async Task<byte[]> ExportToPdf(  string searchTerm = null, string Sp_Name = null, string Action = null, string ReportName = null)
         {
             var global = _globalVariableService.GetGlobalVariables();
@@ -1303,149 +1301,68 @@ namespace travelexpensemanagement.Common.Globalvariable
                 using (var cmd = new SqlCommand(Sp_Name, conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-
-                    // ==========================================
-                    // STORED PROCEDURE PARAMETERS
-                    // ==========================================
-
-                    cmd.Parameters.Add("@COMP_CODE", SqlDbType.VarChar).Value =
-                        (object)global.PubCompCode ?? DBNull.Value;
-
-                    cmd.Parameters.Add("@YEAR_CODE", SqlDbType.VarChar).Value =
-                        (object)global.PubFYearCode ?? DBNull.Value;
-
-                    cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.VarChar).Value =
-                        (object)global.PubBranchCode ?? DBNull.Value;
-
-                    cmd.Parameters.Add("@SearchTerm", SqlDbType.VarChar).Value =
-                        string.IsNullOrWhiteSpace(searchTerm)
-                            ? DBNull.Value
-                            : searchTerm;
-
-                    cmd.Parameters.Add("@Action", SqlDbType.VarChar).Value =
-                        string.IsNullOrWhiteSpace(Action)
-                            ? DBNull.Value
-                            : Action;
-
-                    // ==========================================
-                    // EXECUTE STORED PROCEDURE
-                    // ==========================================
+                    cmd.Parameters.Add("@COMP_CODE", SqlDbType.VarChar).Value = (object)global.PubCompCode ?? DBNull.Value;
+                    cmd.Parameters.Add("@YEAR_CODE", SqlDbType.VarChar).Value = (object)global.PubFYearCode ?? DBNull.Value;
+                    cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.VarChar).Value =  (object)global.PubBranchCode ?? DBNull.Value;
+                    cmd.Parameters.Add("@SearchTerm", SqlDbType.VarChar).Value =  string.IsNullOrWhiteSpace(searchTerm) ? DBNull.Value : searchTerm;
+                    cmd.Parameters.Add("@Action", SqlDbType.VarChar).Value = string.IsNullOrWhiteSpace(Action) ? DBNull.Value  : Action;
 
                     using (var reader = await cmd.ExecuteReaderAsync())
                     using (var stream = new MemoryStream())
                     {
-                        // ==========================================
-                        // CREATE PDF - A4 LANDSCAPE
-                        // ==========================================
+                      
+                        var document = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4.Rotate(), 10,  10,  10, 10);
 
-                        var document = new iTextSharp.text.Document(
-                            iTextSharp.text.PageSize.A4.Rotate(),
-                            10,
-                            10,
-                            10,
-                            10);
-
-                        var writer = iTextSharp.text.pdf.PdfWriter.GetInstance(
-                            document,
-                            stream);
+                        var writer = iTextSharp.text.pdf.PdfWriter.GetInstance(  document, stream);
 
                         document.Open();
 
-                        // ==========================================
-                        // FONTS
-                        // ==========================================
+                        var titleFont =  iTextSharp.text.FontFactory.GetFont( iTextSharp.text.FontFactory.HELVETICA_BOLD, 14);
 
-                        var titleFont =
-                            iTextSharp.text.FontFactory.GetFont(
-                                iTextSharp.text.FontFactory.HELVETICA_BOLD,
-                                14);
+                        var headerFont = iTextSharp.text.FontFactory.GetFont(  iTextSharp.text.FontFactory.HELVETICA_BOLD,  8);
 
-                        var headerFont =
-                            iTextSharp.text.FontFactory.GetFont(
-                                iTextSharp.text.FontFactory.HELVETICA_BOLD,
-                                8);
+                        var dataFont = iTextSharp.text.FontFactory.GetFont(  iTextSharp.text.FontFactory.HELVETICA,  7);
 
-                        var dataFont =
-                            iTextSharp.text.FontFactory.GetFont(
-                                iTextSharp.text.FontFactory.HELVETICA,
-                                7);
+                        var title = new iTextSharp.text.Paragraph( string.IsNullOrWhiteSpace(ReportName)  ? "Report"  : ReportName, titleFont);
 
-                        // ==========================================
-                        // REPORT TITLE
-                        // ==========================================
-
-                        var title = new iTextSharp.text.Paragraph(
-                            string.IsNullOrWhiteSpace(ReportName)
-                                ? "Report"
-                                : ReportName,
-                            titleFont);
-
-                        title.Alignment =
-                            iTextSharp.text.Element.ALIGN_CENTER;
+                        title.Alignment =  iTextSharp.text.Element.ALIGN_CENTER;
 
                         document.Add(title);
 
-                        document.Add(
-                            new iTextSharp.text.Paragraph(" "));
-
-                        // ==========================================
-                        // GET COLUMN COUNT
-                        // ==========================================
+                        document.Add( new iTextSharp.text.Paragraph(" "));
 
                         int columnCount = reader.FieldCount;
 
                         if (columnCount == 0)
                         {
-                            document.Add(
-                                new iTextSharp.text.Paragraph(
-                                    "No data found.",
-                                    dataFont));
-
+                            document.Add( new iTextSharp.text.Paragraph(  "No data found.",  dataFont));
                             document.Close();
-
                             return stream.ToArray();
                         }
 
-                        // ==========================================
-                        // CREATE TABLE
-                        // ==========================================
 
-                        var table =
-                            new iTextSharp.text.pdf.PdfPTable(columnCount);
+                        var table = new iTextSharp.text.pdf.PdfPTable(columnCount);
 
                         table.WidthPercentage = 100;
 
-                        // ==========================================
-                        // TABLE HEADER
-                        // ==========================================
+    
 
                         for (int i = 0; i < columnCount; i++)
                         {
                             string headerText = reader.GetName(i);
 
-                            var cell =
-                                new iTextSharp.text.pdf.PdfPCell(
-                                    new iTextSharp.text.Phrase(
-                                        headerText,
-                                        headerFont));
+                            var cell =  new iTextSharp.text.pdf.PdfPCell(  new iTextSharp.text.Phrase(  headerText, headerFont));
 
-                            cell.HorizontalAlignment =
-                                iTextSharp.text.Element.ALIGN_CENTER;
+                            cell.HorizontalAlignment = iTextSharp.text.Element.ALIGN_CENTER;
 
-                            cell.VerticalAlignment =
-                                iTextSharp.text.Element.ALIGN_MIDDLE;
+                            cell.VerticalAlignment = iTextSharp.text.Element.ALIGN_MIDDLE;
 
-                            cell.BackgroundColor =
-                                iTextSharp.text.BaseColor.LIGHT_GRAY;
+                            cell.BackgroundColor = iTextSharp.text.BaseColor.LIGHT_GRAY;
 
                             cell.Padding = 4;
 
                             table.AddCell(cell);
                         }
-
-                        // ==========================================
-                        // TABLE DATA
-                        // ==========================================
 
                         while (await reader.ReadAsync())
                         {
@@ -1468,14 +1385,9 @@ namespace travelexpensemanagement.Common.Globalvariable
                                     }
                                 }
 
-                                var cell =
-                                    new iTextSharp.text.pdf.PdfPCell(
-                                        new iTextSharp.text.Phrase(
-                                            value,
-                                            dataFont));
+                                var cell = new iTextSharp.text.pdf.PdfPCell( new iTextSharp.text.Phrase( value,  dataFont));
 
-                                cell.VerticalAlignment =
-                                    iTextSharp.text.Element.ALIGN_MIDDLE;
+                                cell.VerticalAlignment = iTextSharp.text.Element.ALIGN_MIDDLE;
 
                                 cell.Padding = 3;
 
@@ -1483,29 +1395,15 @@ namespace travelexpensemanagement.Common.Globalvariable
                             }
                         }
 
-                        // ==========================================
-                        // ADD TABLE TO DOCUMENT
-                        // ==========================================
-
                         document.Add(table);
 
-                        // ==========================================
-                        // CLOSE PDF
-                        // ==========================================
-
                         document.Close();
-
-                        // ==========================================
-                        // RETURN PDF BYTES
-                        // ==========================================
 
                         return stream.ToArray();
                     }
                 }
             }
         }
-
-
 
     }
 }
