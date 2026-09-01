@@ -1,0 +1,108 @@
+﻿@{
+    ViewBag.Title = "IT Inventory List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+}
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>IT Inventory List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "ITInventoryEntry")'">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search Module..." />
+    </div>
+    <div class="erppagelist-actions">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+            <i class="fa fa-envelope"></i> Mail
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
+                data-tooltip="Approve Records">
+            <i class="fa fa-check-circle"></i> Approved
+        </button>
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblITInventoryList" class="excel-table fixed-grid-table table-width resizable-table">
+            <colgroup>
+                <col class="hidden-col" style="width:15px;">
+                <col style="width: 89px;">   <!-- Sr. No -->
+                <col style="width: 97px;">   <!-- Date -->
+                <col style="width: 118px;">   <!-- Ip Address -->
+                <col style="width: 75px;">   <!-- Category -->
+                <col style="width: 94px;">   <!-- Device Type -->
+                <col style="width: 107px;">   <!-- Employee Code -->
+                <col style="width: 126px;">  <!-- Employee Name -->
+                <col style="width: 80px;">   <!-- Asset Code -->
+                <col style="width: 143px;">   <!-- Device Name -->
+                <col style="width: 80px;">   <!-- Model -->
+                <col style="width: 65px;">   <!-- For Unit -->
+                <col style="width: 80px;">   <!-- Location -->
+                <col style="width: 100px;">  <!-- Purchase Date -->
+                <col style="width: 171px;">  <!-- Purchase By -->
+                <col style="width: 110px;">  <!-- Used By -->
+                <col style="width: 120px;">  <!-- Remarks -->
+                <col class="action-col"> <!-- Action -->
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="hidden-col">docid</th>
+                    <th>Sr. No</th>
+                    <th>Date</th>
+                    <th>Ip Address</th>
+                    <th>Category</th>
+                    <th>Device Type</th>
+                    <th>Employee Code</th>
+                    <th>Employee Name</th>
+                    <th>Asset Code</th>
+                    <th>Device Name</th>
+                    <th>Model</th>
+                    <th>For Unit</th>
+                    <th>Location</th>
+                    <th>Purchase Date</th>
+                    <th>Purchase By</th>
+                    <th>Used By</th>
+                    <th>Remarks</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button class="page-nav" id="prevBtn">‹</button>
+            <div id="tablePagination" class="page-numbers"></div>
+            <button class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
+</div>
+
+<script src="~/common/pagination.js"></script>
+<script src="~/js/erpjs/inventory/transaction/itinventroyentrylistjs/itinventroyentrylist.js"></script>

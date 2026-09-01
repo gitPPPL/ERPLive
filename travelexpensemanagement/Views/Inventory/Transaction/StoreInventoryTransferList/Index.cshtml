@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Inventory Consumption List";
+    ViewBag.Title = "Store Inventory Transfer List";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var currentMenu = ViewBag.CurrentMenu as string;
 }
@@ -7,10 +7,10 @@
 <div class="erppagelist-header">
     <div class="erppagelist-title">
         <i class="fa fa-list"></i>
-        <span>Inventory Consumption List</span>
+        <span>Store Inventory Transfer List</span>
     </div>
     <div class="erppagelist-header-right">
-        <button class="erppage-header-back" id="button_add" onclick="window.location.href='@Url.Action("Index", "InventoryConsumptionEntry")'">
+        <button class="erppage-header-back " id="button_add" onclick="window.location.href='@Url.Action("Index", "StoreInventoryTransfer")'">
             <i class="fa fa-plus"></i>Add New
         </button>
     </div>
@@ -31,23 +31,27 @@
 </div>
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
-        <table id="tblInventoryConsumptionList" class="excel-table fixed-grid-table table-width resizable-table">
+        <table id="tblStoreInventoryTransferList" class="excel-table fixed-grid-table table-width resizable-table">
             <colgroup>
-                <col style="width: 10%;">  
-                <col style="width: 10%;">  
-                <col style="width: 12%;">  
-                <col style="width: 12%;">  
-                <col style="width: 8%;">   
-                <col style="width: 8%;">   
+                <col style="width: 8%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+               
+                <col class="action-col" style="width: 10%;">
             </colgroup>
             <thead>
                 <tr>
                     <th>Doc No</th>
                     <th>Doc Type</th>
                     <th>Doc Date</th>
-                    <th>Emp Name</th>
+                    <th>Shift</th>
+                    <th>Slip No</th>
+                    <th>DeptName</th>
                     <th>Remarks</th>
-   
                     <th class="action-col">Action</th>
                 </tr>
             </thead>
@@ -76,4 +80,5 @@
 
 <script src="~/common/pagination.js"></script>
 <script src="~/common/delete.js"></script>
-<script src="~/js/erpjs/inventory/transaction/inventoryconsumptionentrylistjs/inventoryconsumptionentrylist.js"></script>
+
+<script src="~/js/erpjs/inventory/transaction/storeinventorytransferlistjs/storeinventorytransferlist.js"></script>

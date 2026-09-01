@@ -1,10 +1,10 @@
 ﻿let importPaymentPagination;
-var controllerName = window.location.pathname.split('/')[1];
+//var controllerName = window.location.pathname.split('/')[1];
 $(document).ready(function () {
 
-	checkPermission(controllerName, function () {
-		importPaymentPagination.load();
-	});
+	//checkPermission(controllerName, function () {
+	//	importPaymentPagination.load();
+	//});
 
 	importPaymentPagination = Pagination.create({
 
@@ -18,7 +18,7 @@ $(document).ready(function () {
 			const searchTerm = $('#searchBox').val().trim();
 
 			$.ajax({
-				url: '/InventoryConsumptionList/LoadListData',
+				url: '/ITInventoryList/LoadListData',
 				type: 'GET',
 				data: {
 					searchTerm: searchTerm,
@@ -27,7 +27,7 @@ $(document).ready(function () {
 				},
 
 				success: function (res) {
-					console.log("ConsumptionEntry List Response:", res);
+					console.log("Store Inventory Response:", res);
 					if (res.success) {
 
 						params.callback({
@@ -47,13 +47,13 @@ $(document).ready(function () {
 
 				error: function (xhr) {
 
-					console.error('Load Consumption List Error:', xhr);
+					console.error('Load Store Inentory List Error:', xhr);
 
 					params.callback({
 						data: [],
 						totalCount: 0
 					});
-					showToast("Error while loading Consumption List", { type: "error" });
+					showToast("Error while loading Store Inventory List", { type: "error" });
 
 				}
 			})
@@ -65,7 +65,7 @@ $(document).ready(function () {
 
 		}
 	});
-	
+
 	importPaymentPagination.load();
 
 	$('#pageSizeSelect').on('change', function () {
@@ -87,7 +87,7 @@ $(document).ready(function () {
 			importPaymentPagination.load();
 
 		}, 300);
-		
+
 	});
 
 	// Previous
@@ -108,7 +108,7 @@ $(document).ready(function () {
 
 function renderImportPaymentTable(data) {
 
-	const tbody = $('#tblInventoryConsumptionList tbody');
+	const tbody = $('#tblITInventoryList tbody');
 
 	tbody.empty();
 
@@ -130,36 +130,30 @@ function renderImportPaymentTable(data) {
 		tbody.append(`
 
 				<tr>
-
 					<td class="hidden-col">
                        ${item.docId ?? ''}
 					</td>
-
-					<td>
-						${item.vType ?? ''}
-					</td>
-
-					<td>
-						${item.vNo ?? ''}
-					</td>
-
-					<td>
-						${formatDate(item.vDate)}
-					</td>
-
-					<td>
-						${item.empName ?? ''}
-					</td>
-
-					<td>
-						${item.remarks ?? ''}
-					</td>
-
+					<td> ${item.vNo} </td> 
+					<td> ${formatDate(item.vDate)} </td> 
+					<td> ${item.ipAddress ?? ''} </td> 
+					<td> ${item.assetCat ?? ''} </td> 
+					<td> ${item.deviceType ?? ''} </td> 
+					<td> ${item.empCode ?? ''} </td> 
+					<td> ${item.empName ?? ''} </td> 
+					<td> ${item.assetCode ?? ''} </td> 
+					<td> ${item.deviceName ?? ''} </td> 
+					<td> ${item.deviceModel ?? ''} </td> 
+					<td> ${item.unitName ?? ''} </td> 
+					<td> ${item.location ?? ''} </td> 
+					<td> ${formatDate(item.purchaseDate)} </td> 
+					<td> ${item.purchaseFrom ?? ''} </td> 
+					<td> ${item.usedBy ?? ''} </td>
+					<td> ${item.remarks ?? ''} </td>
 					<td class="action-col">
 					  <div class="action-wrap">
-							<button class="act-btn edit btn-edit permission-edit" title="Edit Row" style="cursor:pointer;" onclick="editConsumptionEntry('${item.docId}')"><i class="fa fa-edit"></i></button>
-							<button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewConsumptionEntry('${item.docId}')"><i class="fa fa-eye"></i></button>
-							<button class="act-btn delete btn-delete permission-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteConsumptionEntry('${item.docId}')"><i class="fa fa-trash"></i></button>
+							<button class="act-btn edit btn-edit permission-edit" title="Edit Row" style="cursor:pointer;" onclick="editITInventory('${item.docId}')"><i class="fa fa-edit"></i></button>
+							<button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewITInventory('${item.docId}')"><i class="fa fa-eye"></i></button>
+							<button class="act-btn delete btn-delete permission-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteITInventroyEntry('${item.docId}')"><i class="fa fa-trash"></i></button>
 					  </div>
 
 					</td>
@@ -167,7 +161,7 @@ function renderImportPaymentTable(data) {
 				</tr>
 
 		`);
-		applyGridPermission();
+		//applyGridPermission();
 	});
 
 }
@@ -189,24 +183,10 @@ function formatDate(dateValue) {
 	return `${day}-${month}-${year}`;
 }
 
-function editConsumptionEntry(docId) {
-	window.location.href = '/InventoryConsumptionEntry/Index?docId=' + encodeURIComponent(docId);
+function editITInventory(docId) {
+	window.location.href = '/ITInventoryEntry/Index?docId=' + encodeURIComponent(docId);
 }
 
-function viewConsumptionEntry(docId) {
-	window.location.href = '/InventoryConsumptionEntry/Index?docId=' + encodeURIComponent(docId) + '&readOnly=true';
-}
-
-function deleteConsumptionEntry(docId) {
-
-	deleteRecord("InventoryConsumptionList", docId, {
-		action: "DeleteData",
-		title: "Delete Consumption Entry?",
-		text: "Are you sure you want to delete this consumption entry?",
-
-		successCallback: function () {
-			importPaymentPagination.load();
-		}
-	});
-
+function viewITInventory(docId) {
+	window.location.href = '/ITInventoryEntry/Index?docId=' + encodeURIComponent(docId) + '&readOnly=true';
 }

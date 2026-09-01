@@ -18,7 +18,7 @@ $(document).ready(function () {
 			const searchTerm = $('#searchBox').val().trim();
 
 			$.ajax({
-				url: '/InventoryConsumptionList/LoadListData',
+				url: '/StoreInventoryTransferList/LoadListData',
 				type: 'GET',
 				data: {
 					searchTerm: searchTerm,
@@ -27,7 +27,7 @@ $(document).ready(function () {
 				},
 
 				success: function (res) {
-					console.log("ConsumptionEntry List Response:", res);
+					console.log("Store Inventory Response:", res);
 					if (res.success) {
 
 						params.callback({
@@ -47,13 +47,13 @@ $(document).ready(function () {
 
 				error: function (xhr) {
 
-					console.error('Load Consumption List Error:', xhr);
+					console.error('Load Store Inentory List Error:', xhr);
 
 					params.callback({
 						data: [],
 						totalCount: 0
 					});
-					showToast("Error while loading Consumption List", { type: "error" });
+					showToast("Error while loading Store Inventory List", { type: "error" });
 
 				}
 			})
@@ -65,7 +65,7 @@ $(document).ready(function () {
 
 		}
 	});
-	
+
 	importPaymentPagination.load();
 
 	$('#pageSizeSelect').on('change', function () {
@@ -87,7 +87,7 @@ $(document).ready(function () {
 			importPaymentPagination.load();
 
 		}, 300);
-		
+
 	});
 
 	// Previous
@@ -108,7 +108,7 @@ $(document).ready(function () {
 
 function renderImportPaymentTable(data) {
 
-	const tbody = $('#tblInventoryConsumptionList tbody');
+	const tbody = $('#tblStoreInventoryTransferList tbody');
 
 	tbody.empty();
 
@@ -148,7 +148,15 @@ function renderImportPaymentTable(data) {
 					</td>
 
 					<td>
-						${item.empName ?? ''}
+						${item.shift ?? ''}
+					</td>
+
+					<td>
+						${item.sliP_NO ?? ''}
+					</td>
+
+					<td>
+						${item.deptName ?? ''}
 					</td>
 
 					<td>
@@ -157,9 +165,9 @@ function renderImportPaymentTable(data) {
 
 					<td class="action-col">
 					  <div class="action-wrap">
-							<button class="act-btn edit btn-edit permission-edit" title="Edit Row" style="cursor:pointer;" onclick="editConsumptionEntry('${item.docId}')"><i class="fa fa-edit"></i></button>
-							<button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewConsumptionEntry('${item.docId}')"><i class="fa fa-eye"></i></button>
-							<button class="act-btn delete btn-delete permission-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteConsumptionEntry('${item.docId}')"><i class="fa fa-trash"></i></button>
+							<button class="act-btn edit btn-edit permission-edit" title="Edit Row" style="cursor:pointer;" onclick="editStoreInventory('${item.docId}')"><i class="fa fa-edit"></i></button>
+							<button class="act-btn view btn-view" title="View Row" style="cursor:pointer;" onclick="viewStoreInventory('${item.docId}')"><i class="fa fa-eye"></i></button>
+							<button class="act-btn delete btn-delete permission-delete" title="Delete Row" style="cursor:pointer;" onclick="deleteStoreInventroyEntry('${item.docId}')"><i class="fa fa-trash"></i></button>
 					  </div>
 
 					</td>
@@ -189,20 +197,20 @@ function formatDate(dateValue) {
 	return `${day}-${month}-${year}`;
 }
 
-function editConsumptionEntry(docId) {
-	window.location.href = '/InventoryConsumptionEntry/Index?docId=' + encodeURIComponent(docId);
+function editStoreInventory(docId) {
+	window.location.href = '/StoreInventoryTransfer/Index?docId=' + encodeURIComponent(docId);
 }
 
-function viewConsumptionEntry(docId) {
-	window.location.href = '/InventoryConsumptionEntry/Index?docId=' + encodeURIComponent(docId) + '&readOnly=true';
+function viewStoreInventory(docId) {
+	window.location.href = '/StoreInventoryTransfer/Index?docId=' + encodeURIComponent(docId) + '&readOnly=true';
 }
 
-function deleteConsumptionEntry(docId) {
+function deleteStoreInventroyEntry(docId) {
 
-	deleteRecord("InventoryConsumptionList", docId, {
+	deleteRecord("StoreInventoryTransferList", docId, {
 		action: "DeleteData",
-		title: "Delete Consumption Entry?",
-		text: "Are you sure you want to delete this consumption entry?",
+		title: "Delete Store Invenroy Entry?",
+		text: "Are you sure you want to delete this Store Inventory entry?",
 
 		successCallback: function () {
 			importPaymentPagination.load();

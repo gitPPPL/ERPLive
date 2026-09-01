@@ -3,12 +3,14 @@ using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.EncryptionHelper;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Controllers.Inventory.Transaction;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.LogService;
 using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Master;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Transaction;
@@ -17,6 +19,8 @@ using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transacti
 // ADD THESE (Repository)
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Inventroy.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Transaction;
@@ -73,6 +77,12 @@ builder.Services.AddScoped<IPurchaseReceiptEntryListRepository, PurchaseReceiptE
 builder.Services.AddScoped<IIndentStatusUpdateRepository, IndentStatusUpdateRepository>();
 builder.Services.AddScoped<IImportPaymentEntryRepository, ImportPaymentEntryRepository>();
 builder.Services.AddScoped<IImportPaymentListRepository, ImportPaymentListRepository>();
+builder.Services.AddScoped<IInventoryConsumptionEntryRepository, InventoryConsumptionEntryRepository>();
+builder.Services.AddScoped<IInventroyConsumptionEntryListRepository, InventroyConsumptionEntryListRepository>();
+builder.Services.AddScoped<IStoreInventoryTransferRepository, StoreInventoryTransferRepository>();
+builder.Services.AddScoped<IStoreInventoryTransferListRepository, StoreInventoryTransferListRepository>();
+builder.Services.AddScoped<IITInventoryEntryRepository, ITInventoryEntryRepository>();
+builder.Services.AddScoped<IITInventroyEntryListRepository, ITInventoryEntryListRepositroy>();
 
 
 // Gete Entry Transaction repositories

@@ -35,9 +35,17 @@ $(document).ready(async function () {
     //=================================
     // Save and Update Data
     //=================================
-    $('#btn_save').on('click', async function () {
+    $('#btn_save').on('click', async function (e) {
 
+        e.preventDefault();
         try {
+
+            if (!(await validateData())) {
+                return;
+            }
+
+            const isValidDate = await checkValidDate();
+            if (!isValidDate) return;
 
             const vType = $('#ddlDocType').val();
             const vNo = $('#NumDocno').val();
@@ -334,12 +342,12 @@ async function wireEvent() {
             const tbody = $('#tblloadpendingrequest tbody');
 
             tbody.html(`
-            <tr>
-                <td colspan="30" class="text-center">
-                    Loading pending requests...
-                </td>
-            </tr>
-        `);
+                <tr>
+                    <td colspan="30" class="text-center">
+                        Loading pending requests...
+                    </td>
+                </tr>
+            `);
 
             const url = `/InventoryConsumptionEntry/GetCopyFromData` + `?vType=${encodeURIComponent(vType)}` + `&placeCode=${encodeURIComponent(placeCode)}` + `&vDate=${encodeURIComponent(vDate)}`;
 
@@ -376,19 +384,19 @@ async function wireEvent() {
             if (pendingRequestData.length === 0) {
 
                 tbody.html(`
-                <tr>
-                    <td colspan="30" class="text-center">
-                        No pending request found.
-                    </td>
-                </tr>
-            `);
+                    <tr>
+                        <td colspan="30" class="text-center">
+                            No pending request found.
+                        </td>
+                    </tr>
+                `);
 
                 return;
             }
 
             pendingRequestData.forEach((item, index) => {
 
-                tbody.append(`
+               tbody.append(`
                 <tr data-index="${index}">
 
                     <td>
@@ -462,15 +470,66 @@ async function wireEvent() {
         rowCheckbox: '.lp-request-check',
     });
 
+    //---------------------------------
+    // Copy Handler 
+    //---------------------------------
+    $('#btn_copyPending').on('click', async function () {
+
+        const selectedIndexes = [];
+
+        $('#tblloadpendingrequest tbody .lp-request-check:checked').each(function () {
+            const index = $(this).data('index');
+            selectedIndexes.push(index);
+        });
+
+        if (selectedIndexes.length === 0) {
+            showToast("Please select at least one pending request.", {
+                type: "warning"
+            });
+            return;
+        }
+
+        try {
+
+            for (const index of selectedIndexes) {
+
+                const item = pendingRequestData[index];
+
+                if (item) {
+                    await fillPendingRequestInFooter(item);
+                }
+            }
+
+        }
+        catch (error) {
+            console.error("Copy Pending Request Error:", error);
+            showToast("Failed to copy pending request: " + error.message, { type: "error" });
+        }
+
+    });
+
+    $('#btn_FillItem').on('click', async function (e) {
+
+        e.preventDefault();
+
+        await FillCapitalItem();
+
+    });
 }
 
 async function fillPendingRequestInFooter(item) {
 
     const tbody = $('#tblInventoryConsumption tbody');
 
-    addNewRow();
+    let row = tbody.find('tr').filter(function () {
+        return !$(this).find('.item-code').val();
+    }).first();
 
-    const row = tbody.find('tr:last');
+    // Agar blank row nahi hai to new row create karo
+    if (row.length === 0) {
+        addNewRow();
+        row = tbody.find('tr:last');
+    }
 
     console.log("Copying Request:", item);
 
@@ -597,6 +656,7 @@ async function GetVNo() {
         if (data.v_NO) {
             $('#NumDocno').val(data.v_NO);
             const docId = vType + data.v_NO;
+           
         } else {
             console.warn("V_NO not found in response");
         }
@@ -1456,16 +1516,12 @@ async function LoadCapitalItemData() {
         });
 
         $('#loadpendingWBModal').modal('show');
-
     }
     catch (error) {
-
         console.error("Capital Item Load Error:", error);
-
         showToast("Capital Item Load Failed: " + error.message, { type: "error" });
     }
 }
-
 
 //===========================
 // Helper functin for popUp
@@ -1512,4 +1568,325 @@ function initPendingPopup({ searchBox, selectAll, table, rowCheckbox }) {
             );
         }
     );
+}
+
+async function validateData() {
+     
+    // =========================
+    // Header Validation
+    // =========================
+    if (!validateRequiredField('#ddlDocType', 'Document Type')) {
+        return false;
+    }
+
+    if (!validateRequiredField('#NumDocno', 'Document Number')) {
+        return false;
+    }
+
+    if (!validateRequiredField('#ddlEmployee', 'Employee Name')) {
+        return false;
+    }
+
+    // =========================
+    // Footer Validation
+    // =========================
+    const tbody = $('#tblInventoryConsumption tbody');
+    const rows = tbody.find('tr');
+
+    if (rows.length === 0) {
+        showToast("At least one item is required.", { type: "warning" });
+        return false;
+    }
+
+    let validItemCount = 0;
+
+    for (let i = 0; i < rows.length; i++) {
+
+        const row = $(rows[i]);
+
+        const itemCode = parseInt(row.find('.item-code').val()) || 0;
+        const itemName = row.find('.item-name').val();
+        const quantity = parseFloat(row.find('.quantity').val()) || 0;
+        const department = parseInt(row.find('.department').val()) || 0;
+        const requestNo = parseInt(row.find('.preq-no').val()) || 0;
+
+        if (itemCode > 0) {
+            validItemCount++;
+        }
+
+        if (itemName && itemCode === 0) {
+            showToast("Item code not valid.", { type: "warning"});
+            row.find('.item-code').focus();
+            return false;
+        }
+
+        if (itemCode > 0 && quantity === 0) {
+            showToast("Quantity is 0.", { type: "warning"});
+            row.find('.quantity').focus();
+            return false;
+        }
+
+        if (itemCode > 0 && department === 0) {
+            showToast("Department not selected.", {type: "warning"});
+            row.find('.department').focus();
+            return false;
+        }
+
+        // ==========================================
+        // SICO Request Number Validation
+        // VB:
+        // If cmbvtype.SelectedValue = "SICO"
+        // ==========================================
+        //if ($('#ddlDocType').val() === 'SICO') {
+
+        //    if (itemCode > 0 && requestNo === 0) {
+
+        //        showToast(`Request Number missing in Row number=>${i + 1}, for item=>${itemName || itemCode}`, { type: "warning" });
+
+        //        // VB condition:
+        //        // If pubUserLevel <> 1 Then Return False
+        //        //
+        //        // Since pubUserLevel is not currently available
+        //        // in your JS, validation will stop here.
+        //        row.find('.preq-no').focus();
+
+        //        return false;
+        //    }
+        //}
+    }
+
+    if (validItemCount === 0) {
+        showToast("At least one valid item is required.", {type: "warning"});
+        return false;
+    }
+
+    return true;
+}
+
+async function FillCapitalItem() {
+    try {
+
+        const billPassNo = $("#NumPassno").val()?.trim();
+        const mrnNo = $("#NumMRNno").val()?.trim();
+
+        if (!billPassNo && !mrnNo) {
+            showToast("Please enter Bill Pass No. or MRN No.", {type: "warning"});
+            return;
+        }
+
+        let url = "/InventoryConsumptionEntry/fillCapitalItemData?";
+
+        if (billPassNo) {
+            url += `billPassNo=${encodeURIComponent(billPassNo)}`;
+        }
+        else {
+            url += `mrnNo=${encodeURIComponent(mrnNo)}`;
+        }
+
+        console.log("Capital Item API URL:", url);
+
+        const response = await fetch(url);
+
+        const result = await response.json();
+
+        console.log("Capital Item Response:", result);
+
+        if (!response.ok || !result.success) {
+            showToast(result.message || "Unable to load capital items.",{ type: "warning" });
+            return;
+        }
+
+        const data = result.items || [];
+
+        if (data.length === 0) {
+            showToast("No Capital Item found.", {type: "warning"});
+            return;
+        }
+
+        const tbody = $("#tblInventoryConsumption tbody");
+
+        for (const item of data) {
+
+            addNewRow();
+
+            const row = tbody.find("tr:last");
+
+            console.log("Adding Capital Item:", item);
+
+            row.find(".item-code").val(item.itemCode ?? "");
+
+            const itemDropdown = row.find(".item-name");
+
+            itemDropdown.empty();
+
+            const itemOption = new Option(
+                item.itemName ?? "",
+                item.itemCode ?? "",
+                true,
+                true
+            );
+
+            itemDropdown.append(itemOption).trigger("change");
+
+            if (item.itemCode) {
+                await LoadMakeDetails(item.itemCode, row);
+            }
+
+            if (item.itemCode) {
+
+                await LoadUnitDetails(item.itemCode, row);
+
+                if (
+                    item.unitCode !== null &&
+                    item.unitCode !== undefined &&
+                    item.unitCode !== ""
+                ) {
+                    row.find(".unit").val(item.unitCode).trigger("change");
+                }
+            }
+
+            row.find(".nos").val(item.balanceQty ?? "");
+            row.find(".quantity").val(item.balanceQty ?? "");
+
+            if (item.deptCode !== null &&item.deptCode !== undefined) {
+                row.find(".department").val(item.deptCode).trigger("change");
+            }
+
+            // =========================================
+            // Other fields remain blank
+            // =========================================
+
+            row.find(".rate").val("");
+            row.find(".amount").val("");
+            row.find(".ld-rate").val("");
+            row.find(".ld-amt").val("");
+            row.find(".remarks").val("");
+
+            row.find(".pord-type").val("");
+            row.find(".pord-no").val("");
+
+            row.find(".ref-wb-type").val("");
+            row.find(".ref-wb-no").val("");
+
+            row.find(".preq-type").val("");
+            row.find(".preq-no").val("");
+        }
+
+        showToast(`${data.length} Capital Item(s) loaded successfully.`,{ type: "success" });
+
+    }
+    catch (error) {
+        console.error("Fill Capital Item Error:", error);
+        showToast("Failed to load Capital Items: " + error.message,{ type: "error" });
+    }
+}
+
+async function checkValidDate() {
+
+    const data = {
+        vdate: $("#DtDocDate").val(),
+        vtype: $("#ddlDocType").val(),
+        vno: $("#NumDocno").val()
+    };
+
+    try {
+
+        const response = await fetch('/InventoryConsumptionEntry/CheckValidDate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+
+        if (result.status === false) {
+            showToast(result.message, { type: "warning" });
+            return false;
+        }
+        return true;
+
+    } catch (error) {
+        console.error(error);
+        showToast("Date validation failed", { type: "error" });
+        return false;
+    }
+}
+
+//=======================
+// Print
+//=======================
+async function ConsumptionPrint() {
+
+    var reportName = "STORE_ISSUE";
+
+    var vType = $('#ddlDocType').val();
+    var vNo = $('#NumDocno').val();
+    var rptName = $('#ddlDocType option:selected').text();
+
+    if (!vType || !vNo) {
+        showToast("V Type and V No are required.", {type: "error"});
+        return;
+    }
+
+    var SelForMul =
+        "{ISSUE1.V_TYPE}='" + vType + "'" +
+        " AND {ISSUE1.V_NO}=" + vNo +
+        " AND {ISSUE1.COMP_CODE}=" + window.globalVariables.compCode +
+        " AND {ISSUE1.YEAR_CODE}=" + window.globalVariables.yearCode +
+        " AND {ISSUE1.BRANCH_CODE}=" + window.globalVariables.branchCode;
+
+    var formulaFields = {
+
+        Reportname: reportName,
+
+        selectionFormula: SelForMul,
+
+        Database: window.database.db,
+
+        Parameters: {
+            RPTNAME: rptName,
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.add1,
+            comp_add2: window.globalVariables.add2
+        }
+    };
+
+    console.log("Consumption Entry ReportData:", formulaFields);
+
+    var now = new Date();
+
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+
+    var timestamp = `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+    $.ajax({
+        url: 'http://localhost:34089/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (response) {
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error generating report:', error);
+        }
+    });
 }

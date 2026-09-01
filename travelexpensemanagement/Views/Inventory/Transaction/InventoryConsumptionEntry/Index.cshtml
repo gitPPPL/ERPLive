@@ -1,6 +1,7 @@
 ﻿@{
     ViewBag.Title = "Inventory Consumption Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVar = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 
 <div id="erp-toast-container"></div>
@@ -12,9 +13,15 @@
         <div class="erppage-header-title">Inventory Consumption Entry</div>
     </div>
     <div class="erppage-header-right">
+        <button id="btn_print" type="button" class="erppage-btn erppage-btn-print"onclick="ConsumptionPrint()">
+            <i class="fa-solid fa-print"></i>
+            <span>Print</span>
+        </button>
+
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InventoryConsumptionList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
+       
     </div>
 </div>
 <div id="InventoryConsumptionform">
@@ -287,7 +294,7 @@
                             </div>
                         </div>
                         <div class="erppage-internalaction">
-                            <button type="button" id="btn_print" class="erppage-btn erppage-btn-copy">
+                            <button type="button" id="btn_FillItem" class="erppage-btn erppage-btn-copy">
                                 <i class="fa-solid fa-boxes-stacked"></i>
                                 <span>Fill Capital Item</span>
                             </button>
@@ -363,9 +370,30 @@
                 <i class="fa-solid fa-floppy-disk"></i>
                 <span>Save</span>
             </button>
+
         </div>
 
     </div>
 </div>
 
+<script src="~/common/dropdown.js"></script>
 <script src="~/js/erpjs/inventory/transaction/inventoryconsumptionentryjs/inventoryconsumptionentry.js"></script>
+<script>
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+
+    window.globalVariables = {
+        compCode: "@globalVar?.PubCompCode",
+        yearCode: "@globalVar?.PubFYearCode",
+        branchCode: "@globalVar?.PubBranchCode",
+
+        companyName: "@globalVar?.CompanyName",
+        add1: "@globalVar?.Address1",
+        add2: "@globalVar?.Address2"
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
+</script>
