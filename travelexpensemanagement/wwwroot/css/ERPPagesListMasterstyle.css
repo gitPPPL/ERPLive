@@ -168,16 +168,16 @@
     }
     
     /* ACTION */
-    .erppagelist-btn-action {
+.erppagelist-btn-action {
+    background: #fff;
+    color: #007bff;
+    border: 1px solid #007bff; 
+}
+    .erppagelist-btn-action:hover {
         background: #007bff;
         color: #fff;
         border: 1px solid rgba(255,255,255,0.25);
     }
-        .erppagelist-btn-action:hover {
-            background: #fff;
-            color: #007bff;
-            border: 1px solid #007bff;
-        }
 /* TOOLBAR */
 .erppagelist-toolbar {
     margin-top: 10px;
@@ -363,7 +363,7 @@
         top: 0;
         background: linear-gradient(135deg, #232323, #0f0f0f);
         padding: 10px;
-        font-size: 12px;
+        font-size: 11px;
         text-align: left;
         user-select: none;
         color: #ffffff;

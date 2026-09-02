@@ -1650,7 +1650,7 @@
 .erppage-input {
     width: 100%;
     border: 1px solid #d1d5db;
-    border-radius: 6px;
+    border-radius: 4px;
     padding: 3px 8px;
     transition: 0.2s;
     box-sizing: border-box;
@@ -1673,7 +1673,7 @@
     border-radius: 6px;
     padding: 6px 10px;
     box-sizing: border-box;
-    font-size: 13px;
+    font-size: 11px;
     color: #2c2c2c;
     resize: none; 
     font-family: inherit;
@@ -1687,6 +1687,7 @@
     .erppage-textarea:focus {
         outline: none;
         border-color: #2f7d32;
+        background-color: #fff3e0 !important;
         box-shadow: 0 0 0 2px rgba(47,125,50,0.15);
     }
 /* ===== SELECT FIX (ONLY ADDITION) ===== */
@@ -1728,14 +1729,14 @@
 .erppage-dateinput {
     width: 100%;
     height: 25px;
-    padding-right: 35px; 
+    padding-right: 25px; 
 }
 .erppage-checkbox-inside {
     position: absolute;
     right: 6px;
     top: 50%;
     transform: translateY(-50%);
-    width: 20px;
+    width: 12px;
     height: 20px;
     display: flex;
     align-items: center;
@@ -1949,7 +1950,7 @@ input[type="number"] {
 }
 
     .erppage-tab.active {
-        background: #2f7d32;
+        background: linear-gradient(135deg, #2d7b46, #1C5E31);
         color: #fff;
     }
 
@@ -2180,6 +2181,18 @@ input[type="number"] {
         background-color: #1c5e31;
         color: #fff !important;
     }
+.erppage-btn-common-print-disabled {
+    color: #007bff !important;
+    font-weight: 600;
+    border: 1px solid #007bff !important;
+    background: #fff;
+}
+
+    /* Hover effect for disabled-style button */
+    .erppage-btn-common-print-disabled:hover {
+        background-color: #007bff;
+        color: #fff !important;
+    }
 .erppage-btn-print {
     background: linear-gradient(135deg, #374151, #111827);
     color: #fff;
@@ -2225,7 +2238,7 @@ input[type="number"] {
 .erppage-actions {
     position: fixed;
     bottom: 0;
-    left: 280px;
+    left: 250px;
     right: 0;
     display: flex;
     justify-content: flex-end;
@@ -2460,4 +2473,132 @@ input[type="number"] {
     .erppage-label {
         margin-bottom: 4px;
     }
+}
+
+/* ===== GRID 7 COLUMNS ===== */
+.erppage-grid7 {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    column-gap: 16px;
+    row-gap: 10px;
+    padding: 4px;
+    align-items: baseline;
+}
+
+/* ===== GRID 8 COLUMNS ===== */
+.erppage-grid8 {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    column-gap: 14px;
+    row-gap: 10px;
+    padding: 4px;
+    align-items: baseline;
+}
+
+
+/* ===== GRID 7/8 BODY PADDING ===== */
+.erppage-subfieldset .erppage-grid7 {
+    padding: 4px 0;
+}
+
+.erppage-subfieldset .erppage-grid8 {
+    padding: 4px 0;
+}
+
+
+/* ===== COLLAPSED STATE ===== */
+.erppage-subfieldset.collapsed .erppage-grid7 {
+    display: none;
+}
+
+.erppage-subfieldset.collapsed .erppage-grid8 {
+    display: none;
+}
+
+
+/* ===== COLUMN SPANS ===== */
+.erppage-col-span-4 {
+    grid-column: span 4;
+}
+
+.erppage-col-span-5 {
+    grid-column: span 5;
+}
+
+.erppage-col-span-6 {
+    grid-column: span 6;
+}
+
+.erppage-col-span-7 {
+    grid-column: span 7;
+}
+
+.erppage-col-span-8 {
+    grid-column: span 8;
+}
+
+
+/* =====================================================
+   RESPONSIVE - LARGE TABLET
+   ===================================================== */
+
+@media (max-width: 1200px) {
+
+    .erppage-grid8 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        column-gap: 14px;
+    }
+
+    .erppage-grid7 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        column-gap: 14px;
+    }
+}
+
+
+/* =====================================================
+   RESPONSIVE - TABLET
+   ===================================================== */
+
+@media (max-width: 992px) {
+
+    .erppage-grid8,
+    .erppage-grid7 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        column-gap: 12px;
+        row-gap: 10px;
+    }
+
+        .erppage-grid8 .erppage-col-span-4,
+        .erppage-grid7 .erppage-col-span-4,
+        .erppage-grid8 .erppage-col-span-5,
+        .erppage-grid7 .erppage-col-span-5,
+        .erppage-grid8 .erppage-col-span-6,
+        .erppage-grid7 .erppage-col-span-6,
+        .erppage-grid8 .erppage-col-span-7,
+        .erppage-grid7 .erppage-col-span-7,
+        .erppage-grid8 .erppage-col-span-8,
+        .erppage-grid7 .erppage-col-span-8 {
+            grid-column: span 3;
+        }
+}
+
+
+/* =====================================================
+   RESPONSIVE - MOBILE
+   ===================================================== */
+
+@media (max-width: 600px) {
+
+    .erppage-grid8,
+    .erppage-grid7 {
+        grid-template-columns: 1fr;
+        column-gap: 8px;
+        row-gap: 10px;
+    }
+
+        .erppage-grid8 [class*="erppage-col-span-"],
+        .erppage-grid7 [class*="erppage-col-span-"] {
+            grid-column: span 1;
+        }
 }

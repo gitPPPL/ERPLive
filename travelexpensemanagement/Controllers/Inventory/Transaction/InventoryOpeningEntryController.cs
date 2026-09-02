@@ -5,9 +5,9 @@ using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.Models.GateEntry;
+
 using travelexpensemanagement.Models.Inventory.Transaction;
-using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+
 
 namespace travelexpensemanagement.Controllers.Inventory.Transaction
 {

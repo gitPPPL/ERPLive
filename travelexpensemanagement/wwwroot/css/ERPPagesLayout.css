@@ -50,7 +50,7 @@ body {
 
 
 .ERPPageLayout-sidebar {
-    width: 280px;
+    width: 250px;
     height: 100vh;
     background: #0f0f0f;
     position: fixed;
@@ -96,7 +96,7 @@ body {
 .ERPPageLayout-logo-text h2 {
     font-size: 16px;
     color: #1C5E31;
-    white-space: nowrap;
+   /* white-space: nowrap;*/
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: 700;
@@ -142,7 +142,7 @@ body {
         font-size: 12px;
         color: #ffffff;
         margin-bottom: 2px;
-        white-space: nowrap;
+        /*white-space: nowrap;*/
         overflow: hidden;
         text-overflow: ellipsis;
         font-weight: 600;
@@ -376,7 +376,7 @@ body {
    MAIN
 ========================================= */
 .ERPPageLayout-main {
-    margin-left: 280px;
+    margin-left: 250px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;

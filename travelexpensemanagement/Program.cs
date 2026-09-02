@@ -10,10 +10,12 @@ using travelexpensemanagement.Middleware.GlobalErrorHandlingMiddleware;
 using travelexpensemanagement.ModuleService;
 using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Implementations.QualityControl;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge;
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge;
 using travelexpensemanagement.Services;
@@ -44,9 +46,11 @@ builder.Services.AddScoped<IFlakesQCEntryRepository, FlakesQCEntryRepository>();
 builder.Services.AddScoped<IFlakesQCEntryListRepository, FlakesQCEntryListRepository>();
 builder.Services.AddScoped<IFlakesQCEntryExcluRepository, FlakesQCEntryExcluRepository>();
 builder.Services.AddScoped<IFlakesQCEntryExcluListRepository, FlakesQCEntryExcluListRepository>();
-
 builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
 builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
+builder.Services.AddScoped< IInventoryDepartmentIssueRepository,  InventoryDepartmentIssueRepository>();
+
+
 builder.Services.Configure<EncryptionSettings>(
 builder.Configuration.GetSection("EncryptionSettings"));
 builder.Services.AddScoped<EncryptionHelper>();

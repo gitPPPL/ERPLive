@@ -1,0 +1,374 @@
+﻿
+
+@using System.Text.Json
+
+@{
+    ViewBag.Title = "Department Issue";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
+    var databaseName = ViewBag.DatabaseName as string;
+    var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0;
+    var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
+    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+}
+
+<script>
+    window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
+        CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
+        UserId = globalVariables.PubUserId,
+        UserName = globalVariables.PubUserName,
+        UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
+        FYearCode = globalVariables.PubFYearCode,
+        BranchCode = globalVariables.PubBranchCode,
+        LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
+        CompanyName = globalVariables.CompanyName,
+        Address1 = globalVariables.Address1,
+        Address2 = globalVariables.Address2,
+        GST = globalVariables.gstin,
+        PAN = globalVariables.PAN,
+        Phone = globalVariables.Phone,
+        Email = globalVariables.Email
+    }));
+
+    window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
+</script>
+
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa-solid fa-building"></i>
+        </div>
+        <div class="erppage-header-title">Department Issue</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "DepartmentIssueList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="DepartmentIssueform">
+    <input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppage-grid8">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option value="">Select Doc Type</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="NumDocno" placeholder="Enter Doc No">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-select" id="ddlStatus">
+                        <option value="">Select Status</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Shift</label>
+                    <select class="erppage-input erppage-select" id="ddlShift">
+                        <option value="">Select Shift</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Slip No</label>
+                    <input type="number" class="erppage-input" id="NumSlipNo" placeholder="Enter Slip No">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Prod Ord No</label>
+                    <select class="erppage-input erppage-select" id="ddlProdOrdNo">
+                        <option value="">Select Prod Ord No</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Do. No.</label>
+                    <select class="erppage-input erppage-select" id="ddlDoNo">
+                        <option value="">Select Do. No.</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppage-grid8">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 45px;" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+            <div class="erppage-internalaction">
+                <div class="dropdown erppagedropdown">
+                    <button class="erppagedropdown-btn" type="button" id="copyFromDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy From</span>
+                    </button>
+                    <button class="erppagedropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu erppagedropdown-menu">
+                        <li>
+                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#adjustmentissuemodal" id="btn_AdjustmentIssue">
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                                <span>Adjustment Issue</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#storereturnmodal" id="btn_StoreReturn">
+                                <i class="fa-solid fa-screwdriver-wrench"></i>
+                                <span>Store Return</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <button type="button"  class="erppage-btn erppage-btn-common-active-disabled" data-bs-toggle="modal" data-bs-target="#linkflakesModal">
+                    <i class="fa-solid fa-link"></i>
+                    <span>Link Flakes</span>
+                </button>
+            </div>
+
+            <!--Modal Popup-->
+            <!--Adjustment Issue Modal-->
+            <div class="modal fade" id="adjustmentissuemodal" tabindex="-1" aria-labelledby="adjustmentissueLabel" aria-hidden="true">
+                <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+                    <div class="modal-content erppagesmodal-content">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-copy"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="adjustmentissueLabel">
+                                    Copy From
+                                </h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="erppagesmodal-body">
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield">
+                                    <div class="erppagelist-search-wrapper">
+                                        <i class="fa fa-search"></i>
+                                        <input type="text" id="searchBoxai" placeholder="Search..." />
+                                    </div>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <div class="erppage-checkbox-wrap">
+                                        <input type="checkbox" id="chkAppendai" class="erppage-checkbox-input">
+                                        <label for="chkAppendai" class="erppage-checkbox-label">Append</label>
+                                    </div>
+                                </div>
+                                <div class="erppagesmodal-action mt-2">
+                                 <button type="button" class="erppagesmodal-btn" data-bs-dismiss="modal" id="btn_copyForm">
+                                    <i class="fa fa-copy"></i>Copy
+                                </button>
+                            </div>
+                               
+                            </div>
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tbladjustmentissue" class="excel-table width-table fixed-grid-table resizable-table">
+                                    <colgroup>
+                                        <col style="width: 50px;">   
+                                        <col style="width: 100px;">  
+                                        <col style="width: 120px;">  
+                                        <col style="width: 250px;">  
+                                        <col style="width: 100px;">  
+                                        <col style="width: 120px;">  
+                                        <col style="width: 100px;">  
+                                        <col style="width: 120px;">  
+                                        <col style="width: 120px;">  
+                                        <col style="width: 250px;">  
+                                        <col class="hidden-col">  
+                                        <col class="hidden-col">  
+                                        <col class="hidden-col">  
+                                        <col class="hidden-col">  
+           
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th class="freeze-item"><input type="checkbox" id="selectAll"></th>
+                                            <th>Vno</th>
+                                            <th>V Date</th>
+                                            <th>Item Name</th>
+                                            <th>Nos</th>
+                                            <th>Qty</th>
+                                            <th>Unit</th>
+                                            <th>Make</th>
+                                            <th>Place</th>
+                                            <th>Remarks</th>
+                                            <th class="hidden-col">Item Code</th>
+                                            <th class="hidden-col">Uom_Code</th>
+                                            <th class="hidden-col">Make_Code</th>
+                                            <th class="hidden-col">Placecode</th>
+                      
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="erppagesmodal-action mt-2">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Store Return Request-->
+            <div class="modal fade" id="storereturnModal" tabindex="-1" aria-labelledby="storereturnLabel" aria-hidden="true">
+                <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+                    <div class="modal-content erppagesmodal-content">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-copy"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="storereturnLabel">
+                                    Copy From
+                                </h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="erppagesmodal-body">
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield">
+                                    <div class="erppagelist-search-wrapper">
+                                        <i class="fa fa-search"></i>
+                                        <input type="text" id="searchBoxsr" placeholder="Search..." />
+                                    </div>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <div class="erppage-checkbox-wrap">
+                                        <input type="checkbox" id="chkAppendsr" class="erppage-checkbox-input">
+                                        <label for="chkAppendsr" class="erppage-checkbox-label">Append</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblstorereturn" class="excel-table width-table fixed-grid-table resizable-table">
+                                    <colgroup>
+                                        <col style="width:50px;">   
+                                        <col style="width:100px;">  
+                                        <col style="width:120px;">  
+                                        <col style="width:250px;">  
+                                        <col style="width:80px;">   
+                                        <col style="width:80px;">   
+                                        <col style="width:100px;">  
+                                        <col style="width:180px;">  
+                                        <col style="width:180px;">  
+                                        <col style="width:150px;">  
+                                        <col style="width:120px;">  
+                                        <col style="width:120px;">  
+                                        <col style="width:100px;">  
+                                        <col style="width:100px;">  
+                                        <col class="hidden-col">    
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAlllsr" /></th>
+                                            <th>Doc No</th>
+                                            <th>Doc Date</th>
+                                            <th>Item Name</th>
+                                            <th>Nos</th>
+                                            <th>Quantity</th>
+                                            <th>Unit</th>
+                                            <th>Make</th>
+                                            <th>Place</th>
+                                            <th>Remarks</th>
+                                            <th>Item Code</th>
+                                            <th>Uom Code</th>
+                                            <th>Make Code</th>
+                                            <th>Place Code</th>
+                                            <th class="hidden-col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="erppagesmodal-action mt-2">
+                                <button type="button" class="erppagesmodal-btn" data-bs-dismiss="modal">
+                                    <i class="fa fa-copy"></i>Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Details</legend>
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblItemdetails" class="excel-table fixed-grid-table width-table resizable-table">
+                        <colgroup>
+                            <col style="width: 75px;">   
+                            <col style="width: 150px;">  
+                            <col style="width: 100px;">  
+                            <col style="width: 50px;">   
+                            <col style="width: 53px;">   
+                            <col style="width: 67px;">   
+                            <col style="width: 87px;">   
+                            <col style="width: 93px;">   
+                            <col style="width: 131px;">  
+                            <col style="width: 90px;">   
+                            <col style="width: 100px;">  
+                            <col style="width: 90px;">   
+                            <col style="width: 100px;">  
+                            <col style="width: 90px;">   
+                            <col style="width: 100px;">  
+                            <col style="width: 80px;">   
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Unit Code</th>
+                                <th>Unit</th>
+                                <th>Lot No</th>
+                                <th>Nos</th>
+                                <th>Weight</th>
+                                <th>From Place</th>
+                                 <th>Show batch</th>
+                                <th>Remarks</th>
+                                <th>Rate</th>
+                                <th>Amount</th>
+                                <th>LD Rate</th>
+                                <th>LD Amount</th>
+                                <th>POrd Type</th>
+                                <th>POrd No</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="erppage-actions">
+            <button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+<script src="~/js/erpjs/inventory/transaction/inventorydepartmentissue/inventorydepartmentissue.js"></script>
+<script src="~/js/erpjs/inventory/transaction/inventorydepartmentissue/inventorydepartmentissueapi.js"></script>
+<script src="~/js/erpjs/inventory/transaction/inventorydepartmentissue/inventorydepartmentissueinit.js"></script>
+<script src="~/js/inventorydepartmentissue.js"></script>
+<script src="~/js/inventorydepartmentissueinit.js"></script>
+
+
