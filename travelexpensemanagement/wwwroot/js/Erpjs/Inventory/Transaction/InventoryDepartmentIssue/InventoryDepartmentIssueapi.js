@@ -61,11 +61,8 @@ async function LoadDropDown()
 
 async function DDLVtype() 
 {
-
     try {
-
         const res = await fetch('/InventoryDepartmentIssue/DDlVType');
-
         if (!res.ok) {
             throw new Error(`HTTP ${res.status}`);
         }
@@ -76,19 +73,14 @@ async function DDLVtype()
 
         ddl.empty();
             
-
         data.forEach(item => {
-
-            ddl.append(
-                `<option value="${item.value}">${item.text}</option>`
-            );
-
+            ddl.append( `<option value="${item.value}">${item.text}</option>` );
         });
 
-    } catch (error) {
-
+    }
+    catch (error)
+    {
         console.error("Error loading VType:", error);
-
         throw error;
     }
 }
@@ -197,8 +189,6 @@ async function DDLDO(VType, VNo)
     }
 }
 
-
-
 function DDlItemName(V_TYPE) {
 
     return $.ajax({
@@ -241,12 +231,13 @@ function AddRow(data = {}) {
 
             <td>   <input class="erppagetable-control ItemCode" value="${data.itemCode ?? ''}" readonly />  </td>
             <td> <select class="erppagetable-control ddlItemname">  <option value="">-- Select Item --</option> ${ItemNameList}  </select> </td>
-            <td> <input class="erppagetable-control txtunitcode" value="${data.unitCode ?? ''}" readonly />  </td>
+            <td class="hidden-col"> <input class="erppagetable-control txtunitcode" value="${data.unitCode ?? ''}" readonly />  </td>
             <td> <input class="erppagetable-control txtunitname"  value="${data.unitName ?? ''}" readonly /> </td>
             <td>  <input type="number"  class="erppagetable-control txt_lot" value="${data.lot ?? ''}" oninput="limitMaxLength(this, 10)" />  </td>
             <td>  <input type="number" class="erppagetable-control TxtNos"  value="${data.nos ?? ''}"  oninput="limitMaxLength(this, 10)" />  </td>
             <td> <input type="number"  class="erppagetable-control Txtweight" value="${data.weight ?? ''}"  oninput="limitMaxLength(this, 13)" />  </td>
-            <td> <input type="number"  class="erppagetable-control TxtPlaceFrom" value="${data.Placefrom ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
+            <td class="hidden-col"> <input type="number"  class="erppagetable-control TxtPlaceCode" value="${data.placeCode ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
+            <td> <input type="number"  class="erppagetable-control TxtPlaceFrom" value="${data.place ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
             <td> <button type="button" class="btn btn-primary">  Show Batch  </button> </td>
             <td> <input type="number"  class="erppagetable-control TxtRemark" value="${data.remark ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
             <td> <input type="number"  class="erppagetable-control TxtRate" value="${data.rate ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
@@ -310,7 +301,6 @@ function CalculateAmount($row) {
     $row.find('.TxtLDRate').val(rate.toFixed(2));
     $row.find('.TxtLDAmount').val(amount.toFixed(2));
 }
-
 function DeleteRow(button) {
 
     let row = $(button).closest('tr');
@@ -415,12 +405,69 @@ function GetSelectedRowsData()
                 remarks: $row.find('.txt_remarks').val(),
                 itemCode: $row.find('.txt_itemcode').val(),
                 unitCode: $row.find('.txt_uomcode').val(),
+                unitName: $row.find('.txt_unit').val(),
                 makE_CODE: $row.find('.txt_makecode').val(),
-                placeCode: $row.find('.txt_placecode').val()
+                placeCode: $row.find('.txt_placecode').val(),
+                place: $row.find('.txt_place').val()
             };
             selectedData.push(rowData);
         }
     });
-
     return selectedData;
 }
+
+
+function GetInventoryDepartmentIssueDetails() {
+
+    let details = [];
+
+    $('#tblItemdetails tbody tr').each(function (index) {
+
+        let $row = $(this);
+
+        details.push({
+
+            SNO: index + 1,
+
+            ITEM_CODE: $row.find('.ItemCode').val() || null,
+
+            ITEM_NAME: $row.find('.ddlItemname option:selected').text() || null,
+
+            UOM_CODE: $row.find('.txtunitcode').val() || null,
+
+            UOM_NAME: $row.find('.txtunitname').val() || null,
+
+            LOT_NO: $row.find('.txt_lot').val() || null,
+
+            NOS: $row.find('.TxtNos').val() || null,
+
+            QTY: $row.find('.Txtweight').val() || null,
+
+            BIN_CODE: $row.find('.TxtPlaceCode').val() || null,
+
+            BIN_LOCATION: $row.find('.TxtPlaceFrom').val() || null,
+
+            REMARKS: $row.find('.TxtRemark').val() || null,
+
+            RATE: $row.find('.TxtRate').val() || null,
+
+            AMOUNT: $row.find('.TxtAmount').val() || null,
+
+            LAND_RATE: $row.find('.TxtLDRate').val() || null,
+
+            LAND_AMT: $row.find('.TxtLDAmount').val() || null,
+
+            PORD_TYPE: $row.find('.TxtProdType').val() || null,
+
+            PORD_NO: $row.find('.TxtProdNo').val() || null
+
+        });
+
+    });
+
+    return details;
+}
+
+
+
+

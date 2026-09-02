@@ -124,7 +124,7 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#storereturnmodal" id="btn_StoreReturn">
+                            <a class="dropdown-item erppagedropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#adjustmentissuemodal" id="btn_StoreReturn">
                                 <i class="fa-solid fa-screwdriver-wrench"></i>
                                 <span>Store Return</span>
                             </a>
@@ -224,88 +224,6 @@
                     </div>
                 </div>
             </div>
-            <!--Store Return Request-->
-            <div class="modal fade" id="storereturnModal" tabindex="-1" aria-labelledby="storereturnLabel" aria-hidden="true">
-                <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
-                    <div class="modal-content erppagesmodal-content">
-                        <div class="erppagesmodal-header">
-                            <div class="erppagesmodal-header-left">
-                                <div class="erppagesmodal-header-icon">
-                                    <i class="fa fa-copy"></i>
-                                </div>
-                                <h5 class="erppagesmodal-title" id="storereturnLabel">
-                                    Copy From
-                                </h5>
-                            </div>
-                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
-                                <i class="fa fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="erppagesmodal-body">
-                            <div class="erppage-grid3">
-                                <div class="erppage-divfield">
-                                    <div class="erppagelist-search-wrapper">
-                                        <i class="fa fa-search"></i>
-                                        <input type="text" id="searchBoxsr" placeholder="Search..." />
-                                    </div>
-                                </div>
-                                <div class="erppage-divfield">
-                                    <div class="erppage-checkbox-wrap">
-                                        <input type="checkbox" id="chkAppendsr" class="erppage-checkbox-input">
-                                        <label for="chkAppendsr" class="erppage-checkbox-label">Append</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="excel-wrapper fixed-grid-wrapper">
-                                <table id="tblstorereturn" class="excel-table width-table fixed-grid-table resizable-table">
-                                    <colgroup>
-                                        <col style="width:50px;">   
-                                        <col style="width:100px;">  
-                                        <col style="width:120px;">  
-                                        <col style="width:250px;">  
-                                        <col style="width:80px;">   
-                                        <col style="width:80px;">   
-                                        <col style="width:100px;">  
-                                        <col style="width:180px;">  
-                                        <col style="width:180px;">  
-                                        <col style="width:150px;">  
-                                        <col style="width:120px;">  
-                                        <col style="width:120px;">  
-                                        <col style="width:100px;">  
-                                        <col style="width:100px;">  
-                                        <col class="hidden-col">    
-                                    </colgroup>
-                                    <thead>
-                                        <tr>
-                                            <th><input type="checkbox" id="selectAlllsr" /></th>
-                                            <th>Doc No</th>
-                                            <th>Doc Date</th>
-                                            <th>Item Name</th>
-                                            <th>Nos</th>
-                                            <th>Quantity</th>
-                                            <th>Unit</th>
-                                            <th>Make</th>
-                                            <th>Place</th>
-                                            <th>Remarks</th>
-                                            <th>Item Code</th>
-                                            <th>Uom Code</th>
-                                            <th>Make Code</th>
-                                            <th>Place Code</th>
-                                            <th class="hidden-col">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                            <div class="erppagesmodal-action mt-2">
-                                <button type="button" class="erppagesmodal-btn" data-bs-dismiss="modal">
-                                    <i class="fa fa-copy"></i>Copy
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Item Details</legend>
@@ -314,11 +232,12 @@
                         <colgroup>
                             <col style="width: 75px;">   
                             <col style="width: 150px;">  
-                            <col style="width: 100px;">  
+                            <col class="hidden-col">  
                             <col style="width: 50px;">   
                             <col style="width: 53px;">   
                             <col style="width: 67px;">   
                             <col style="width: 87px;">   
+                            <col class="hidden-col">   
                             <col style="width: 93px;">   
                             <col style="width: 131px;">  
                             <col style="width: 90px;">   
@@ -333,11 +252,12 @@
                             <tr>
                                 <th>Item Code</th>
                                 <th>Item Name</th>
-                                <th>Unit Code</th>
+                                <th class="hidden-col">Unit Code</th>
                                 <th>Unit</th>
                                 <th>Lot No</th>
                                 <th>Nos</th>
                                 <th>Weight</th>
+                                <th class="hidden-col">From Place code</th>
                                 <th>From Place</th>
                                  <th>Show batch</th>
                                 <th>Remarks</th>

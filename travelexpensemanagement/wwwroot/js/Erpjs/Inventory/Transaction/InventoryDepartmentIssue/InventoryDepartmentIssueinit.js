@@ -61,14 +61,21 @@ $(document).ready(async function ()
         let V_TYPE = $('#ddlDocType').val();
         let V_NO = $('#NumDocno').val();
         let V_DATE = $('#DtDocDate').val();
+        let STATUS = $('#ddlStatus').val();
+        let SHIFT = $('#ddlShift').val();
+        let SLIP_NO = $('#NumSlipNo').val();
+        let PORD_NO = $('#ddlProdOrdNo').val();
+        let PORD_TYPE = $('#ddlProdOrdNo option:selected').text();
         let REMARKS = $('#TxtRemarks').val();
+        let PLAN_NO = $('#ddlDoNo').val();
+        let PLAN_TYPE = $('#ddlDoNo option:selected').text();
         let action = $.trim($('#CODE').val()) ? 'UPDATE' : 'INSERT';
 
         if (!validateRequiredField('#ddlDocType', 'Please select a Doc Type')) return;
         if (!validateRequiredField('#NumDocno', 'Please select a Doc NO')) return;
-        if (!validateRequiredField('#DtDocDate', 'Please select a Doc Date')) return;
+        if (!validateRequiredField('#DtDocDate', 'Please select a Doc Date')) return;    
 
-        let inventoryData = GetInventoryOpeningData();
+        let data = GetInventoryDepartmentIssueDetails();
 
         // At least one item is required
         let hasItem = inventoryData.some(function (row) {
@@ -82,37 +89,48 @@ $(document).ready(async function ()
 
         let requestData = {
             Header: {
-                action: action,
                 V_TYPE: V_TYPE,
                 V_NO: V_NO,
                 V_DATE: V_DATE,
-                REMARKS: REMARKS
+                STATUS: STATUS,
+                SHIFT: SHIFT,
+                SLIP_NO: SLIP_NO,
+                PORD_NO: PORD_NO,
+                PORD_TYPE: PORD_TYPE,
+                REMARKS: REMARKS,
+                PLAN_NO: PLAN_NO ,
+                PLAN_TYPE: PLAN_TYPE,
+                action: action
             },
-            Details: inventoryData
+
+            Details: data
         };
 
-        $.ajax({
-            url: '/InventoryOpeningEntry/SavedData',
-            type: 'POST',
-            contentType: 'application/json; charset=utf-8',
-            data: JSON.stringify(requestData),
 
-            success: function (response) {
+        console.log("requestData", requestData);
 
-                if (response.success) {
-                    showToast(response.message, "Success");
-                }
-                else {
-                    showToast(response.message, "Error");
-                }
+        //$.ajax({
+        //    url: '/InventoryOpeningEntry/SavedData',
+        //    type: 'POST',
+        //    contentType: 'application/json; charset=utf-8',
+        //    data: JSON.stringify(requestData),
 
-            },
+        //    success: function (response) {
 
-            error: function (xhr, status, error) {
-                console.log(xhr.responseText);
-                showToast("Error while saving data.", "Error");
-            }
-        });
+        //        if (response.success) {
+        //            showToast(response.message, "Success");
+        //        }
+        //        else {
+        //            showToast(response.message, "Error");
+        //        }
+
+        //    },
+
+        //    error: function (xhr, status, error) {
+        //        console.log(xhr.responseText);
+        //        showToast("Error while saving data.", "Error");
+        //    }
+        //});
 
     });
 
@@ -124,7 +142,6 @@ $(document).ready(async function ()
 
     });
 
-
     $(document).on('input change', '#tblItemdetails .TxtNos, #tblItemdetails .TxtRate', function () {
 
         let $row = $(this).closest('tr');
@@ -132,8 +149,7 @@ $(document).ready(async function ()
         CalculateAmount($row);
 
     });
-
-  
+     
 
     $('#btn_AdjustmentIssue').on('click', async function ()
     {
@@ -142,12 +158,10 @@ $(document).ready(async function ()
 
     });
 
-    $('#btn_StoreReturn').on('click', async function () {
-
+    $('#btn_StoreReturn').on('click', async function ()
+    {
         const v_type = $('#ddlDocType').val();
-
         await CopyData(v_type);
-
     });
 
     $('#selectAll').on('change', function () {
@@ -158,18 +172,48 @@ $(document).ready(async function ()
     });
 
     $('#btn_copyForm').on('click', function () {
+
         let data = GetSelectedRowsData();
+
         console.log("Selected Data", data);
 
+        if (!data || data.length === 0) {
+            alert("Please select at least one row.");
+            return;
+        }
 
+        $('#tblItemdetails tbody').empty();
 
+        data.forEach(function (item) {
 
+            AddRow({
+                itemCode: item.itemCode,
+                unitCode: item.unitCode,
+                unitName: item.unitCode,
+                lot: item.vNo,
+                nos: item.qty,
+                weight: '',
+                placeCode: item.placeCode,
+                place: item.place,       
+                remark: item.remarks,
+                rate: '',
+                Amount: '',
+                LDRate: '',
+                LDAmount: '',
+                ProdType: '',
+                ProdNo: ''
+            });
 
-
-
-
+        });
 
     });
+
+
+
+
+
+
+
 
 
 });

@@ -18,7 +18,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly IInventoryDepartmentIssueRepository _inventoryDepartmentIssueRepository;
-
+        public string Fromname = "AdjustmentIssue";
         public InventoryDepartmentIssueController( DataBaseConnection dbConnection,
             GlobalVariableService globalVariableService,
             DropdownService dropdownService,
@@ -67,9 +67,9 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
         }
 
         [HttpGet]
-        public JsonResult DDlVType(string FormName)
+        public JsonResult DDlVType()
         {
-            var data = _inventoryDepartmentIssueRepository.DDlVType(FormName);
+            var data = _inventoryDepartmentIssueRepository.DDlVType(Fromname);
             return Json(data);
         }
         
@@ -129,7 +129,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             var data = _inventoryDepartmentIssueRepository.CopyData( V_TYPE);
             return Json(data);
         }
-
-
+        
     }
 }
