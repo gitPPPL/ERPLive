@@ -27,6 +27,7 @@
         public int? PLAN_NO { get; set; }
         public string? FAPROV_STATUS { get; set; }
         public string? FAPROV_REMARKS { get; set; }
+        public string? action { get; set; }
     }
 
     public class InventryDepartmentIssue_Details

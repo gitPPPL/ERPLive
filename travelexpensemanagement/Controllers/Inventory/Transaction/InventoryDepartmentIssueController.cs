@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using System.Data;
 using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Models.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 
 namespace travelexpensemanagement.Controllers.Inventory.Transaction
@@ -72,7 +74,17 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             var data = _inventoryDepartmentIssueRepository.DDlVType(Fromname);
             return Json(data);
         }
-        
+
+
+
+        [HttpGet]
+        public JsonResult DDlPlaceFrom()
+        {
+            var data = _inventoryDepartmentIssueRepository.DDlVType(Fromname);
+            return Json(data);
+        }
+
+
         public JsonResult DDLSTATUS()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -129,6 +141,21 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             var data = _inventoryDepartmentIssueRepository.CopyData( V_TYPE);
             return Json(data);
         }
-        
+
+        [HttpPost]
+        public async Task<JsonResult> SavedData([FromBody] InventryDepartmentIssue_Model request)
+        {
+            if (request?.Header == null)
+            {
+                return Json(new { success = false, status = "Error", message = "Input model is null"});
+            }
+
+            var action = string.Equals( request.Header.action,  "INSERT",  StringComparison.OrdinalIgnoreCase)  ? "INSERT"  : "UPDATE";
+
+            var result = await _inventoryDepartmentIssueRepository.SubmitRequest(  request.Header, request.Details, action);
+
+            return Json(new {  success = result.Status == "Success",  status = result.Status,  message = result.Message });
+        }
+
     }
 }

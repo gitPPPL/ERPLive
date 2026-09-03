@@ -13,6 +13,7 @@ let LoginDate = globalVars.LoginDate;
 var controllerName = window.location.pathname.split('/')[1];
 
 let ItemNameList = '';
+let PlaceFromList = '';
 let ItemDetailsList = [];
 
 $(document).ready(async function ()
@@ -31,7 +32,6 @@ $(document).ready(async function ()
                 await GetVNo(v_type);
             }
         }
-
         else
         {          
             await LoadData(rowId);
@@ -40,7 +40,6 @@ $(document).ready(async function ()
                 setFormReadOnly();
             }
         }
-
     }
     catch (error)
     {
@@ -64,11 +63,12 @@ $(document).ready(async function ()
         let STATUS = $('#ddlStatus').val();
         let SHIFT = $('#ddlShift').val();
         let SLIP_NO = $('#NumSlipNo').val();
+
         let PORD_NO = $('#ddlProdOrdNo').val();
-        let PORD_TYPE = $('#ddlProdOrdNo option:selected').text();
+        let PORD_TYPE = $('#ddlProdOrdNo option:selected').text().substring(0, 4);
         let REMARKS = $('#TxtRemarks').val();
         let PLAN_NO = $('#ddlDoNo').val();
-        let PLAN_TYPE = $('#ddlDoNo option:selected').text();
+        let PLAN_TYPE = $('#ddlDoNo option:selected').text().substring(0, 4);
         let action = $.trim($('#CODE').val()) ? 'UPDATE' : 'INSERT';
 
         if (!validateRequiredField('#ddlDocType', 'Please select a Doc Type')) return;
@@ -77,8 +77,7 @@ $(document).ready(async function ()
 
         let data = GetInventoryDepartmentIssueDetails();
 
-        // At least one item is required
-        let hasItem = inventoryData.some(function (row) {
+        let hasItem = data.some(function (row) {
             return $.trim(row.ITEM_CODE) !== '';
         });
 
@@ -86,7 +85,7 @@ $(document).ready(async function ()
             showToast('Please enter at least one item.', 'Error');
             return;
         }
-
+       
         let requestData = {
             Header: {
                 V_TYPE: V_TYPE,
@@ -102,35 +101,34 @@ $(document).ready(async function ()
                 PLAN_TYPE: PLAN_TYPE,
                 action: action
             },
-
             Details: data
         };
 
 
         console.log("requestData", requestData);
 
-        //$.ajax({
-        //    url: '/InventoryOpeningEntry/SavedData',
-        //    type: 'POST',
-        //    contentType: 'application/json; charset=utf-8',
-        //    data: JSON.stringify(requestData),
+        $.ajax({
+            url: '/InventoryDepartmentIssue/SavedData',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(requestData),
 
-        //    success: function (response) {
+            success: function (response) {
 
-        //        if (response.success) {
-        //            showToast(response.message, "Success");
-        //        }
-        //        else {
-        //            showToast(response.message, "Error");
-        //        }
+                if (response.success) {
+                    showToast(response.message, "Success");
+                }
+                else {
+                    showToast(response.message, "Error");
+                }
 
-        //    },
+            },
 
-        //    error: function (xhr, status, error) {
-        //        console.log(xhr.responseText);
-        //        showToast("Error while saving data.", "Error");
-        //    }
-        //});
+            error: function (xhr, status, error) {
+                console.log(xhr.responseText);
+                showToast("Error while saving data.", "Error");
+            }
+        });
 
     });
 

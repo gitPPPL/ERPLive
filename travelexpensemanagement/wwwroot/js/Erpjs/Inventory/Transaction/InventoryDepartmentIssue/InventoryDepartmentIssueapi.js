@@ -1,5 +1,4 @@
 ﻿
-
 async function GetVNo(Vtype) {
 
     try {
@@ -45,6 +44,7 @@ async function LoadDropDown()
             DDLSTATUS(),
             DDLProdType(),
             DDLDO()
+         
         ]);
 
         let vtype = $('#ddlDocType').val();
@@ -141,9 +141,7 @@ async function DDLProdType() {
 
         data.forEach(item => {
             ddl.append(
-                `<option value="${item.value}">
-                    ${item.value}||${item.text}
-                </option>`
+                `<option value="${item.text}"> ${item.value}||${item.text} </option>`
             );
         });
 
@@ -180,7 +178,7 @@ async function DDLDO(VType, VNo)
         }
         ddl.empty();
         data.forEach(item => {
-            ddl.append( `<option value="${item.value}"> ${item.value}||${item.text} </option>` );
+            ddl.append(`<option value="${item.text}"> ${item.value}||${item.text} </option>` );
         });
         ddl.select2({ placeholder: 'Search ...', allowClear: true, width: '100%' });
     } catch (error) {
@@ -188,7 +186,6 @@ async function DDLDO(VType, VNo)
         throw error;
     }
 }
-
 function DDlItemName(V_TYPE) {
 
     return $.ajax({
@@ -229,27 +226,123 @@ function AddRow(data = {}) {
     let newRow = `
         <tr class="no-border-input">
 
-            <td>   <input class="erppagetable-control ItemCode" value="${data.itemCode ?? ''}" readonly />  </td>
-            <td> <select class="erppagetable-control ddlItemname">  <option value="">-- Select Item --</option> ${ItemNameList}  </select> </td>
-            <td class="hidden-col"> <input class="erppagetable-control txtunitcode" value="${data.unitCode ?? ''}" readonly />  </td>
-            <td> <input class="erppagetable-control txtunitname"  value="${data.unitName ?? ''}" readonly /> </td>
-            <td>  <input type="number"  class="erppagetable-control txt_lot" value="${data.lot ?? ''}" oninput="limitMaxLength(this, 10)" />  </td>
-            <td>  <input type="number" class="erppagetable-control TxtNos"  value="${data.nos ?? ''}"  oninput="limitMaxLength(this, 10)" />  </td>
-            <td> <input type="number"  class="erppagetable-control Txtweight" value="${data.weight ?? ''}"  oninput="limitMaxLength(this, 13)" />  </td>
-            <td class="hidden-col"> <input type="number"  class="erppagetable-control TxtPlaceCode" value="${data.placeCode ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
-            <td> <input type="number"  class="erppagetable-control TxtPlaceFrom" value="${data.place ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
-            <td> <button type="button" class="btn btn-primary">  Show Batch  </button> </td>
-            <td> <input type="number"  class="erppagetable-control TxtRemark" value="${data.remark ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
-            <td> <input type="number"  class="erppagetable-control TxtRate" value="${data.rate ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
-            <td> <input type="number"  class="erppagetable-control TxtAmount" value="${data.Amount ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
-            <td> <input type="number"  class="erppagetable-control TxtLDRate" value="${data.LDRate ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
-            <td> <input type="number"  class="erppagetable-control TxtLDAmount" value="${data.LDAmount ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
-            <td> <input type="number"  class="erppagetable-control TxtProdType" value="${data.ProdType ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
-            <td> <input type="number"  class="erppagetable-control TxtProdNo" value="${data.ProdNo ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
+            <td>
+                <input class="erppagetable-control ItemCode"
+                       value="${data.itemCode ?? ''}" readonly />
+            </td>
 
-            <td  class="action-col"> 
-                <button type="button" class="act-btn add"  onclick="AddRow()">  <i class="fa fa-plus-circle"></i>  </button>
-                <button type="button"  class="act-btn delete"   onclick="DeleteRow(this)"> <i class="fa fa-trash"></i> </button>
+            <td>
+                <select class="erppagetable-control ddlItemname">
+                    <option value="">-- Select Item --</option>
+                    ${ItemNameList}
+                </select>
+            </td>
+
+            <td class="hidden-col">
+                <input class="erppagetable-control txtunitcode"
+                       value="${data.unitCode ?? ''}" readonly />
+            </td>
+
+            <td>
+                <input class="erppagetable-control txtunitname"
+                       value="${data.unitName ?? ''}" readonly />
+            </td>
+
+            <td>
+                <input type="number"
+                       class="erppagetable-control txt_lot"
+                       value="${data.lot ?? ''}"
+                       oninput="limitMaxLength(this, 10)" />
+            </td>
+
+            <td>
+                <input type="number"
+                       class="erppagetable-control TxtNos"
+                       value="${data.nos ?? ''}"
+                       oninput="limitMaxLength(this, 10)" />
+            </td>
+
+            <td>
+                <input type="number"
+                       class="erppagetable-control Txtweight"
+                       value="${data.weight ?? ''}"
+                       oninput="limitMaxLength(this, 13)" />
+            </td>
+
+            <td>
+                <select class="erppagetable-control TxtPlaceFrom">
+                    <option value="">-- Select From Place --</option>
+                    ${PlaceFromList}
+                </select>
+            </td>
+
+            <td>
+                <button type="button" class="btn btn-primary">
+                    Show Batch
+                </button>
+            </td>
+
+            <td>
+                <input type="text"
+                       class="erppagetable-control TxtRemark"
+                       value="${data.remark ?? ''}"
+                       oninput="limitMaxLength(this, 13)" />
+            </td>
+
+            <td>
+                <input type="number"
+                       class="erppagetable-control TxtRate"
+                       value="${data.rate ?? ''}"
+                       oninput="limitMaxLength(this, 13)" />
+            </td>
+
+            <td>
+                <input type="number"
+                       class="erppagetable-control TxtAmount"
+                       value="${data.Amount ?? ''}"
+                       oninput="limitMaxLength(this, 13)" />
+            </td>
+
+            <td>
+                <input type="number"
+                       class="erppagetable-control TxtLDRate"
+                       value="${data.LDRate ?? ''}"
+                       oninput="limitMaxLength(this, 13)" />
+            </td>
+
+            <td>
+                <input type="number"
+                       class="erppagetable-control TxtLDAmount"
+                       value="${data.LDAmount ?? ''}"
+                       oninput="limitMaxLength(this, 13)" />
+            </td>
+
+            <td>
+                <input type="number"
+                       class="erppagetable-control TxtProdType"
+                       value="${data.ProdType ?? ''}"
+                       oninput="limitMaxLength(this, 13)" />
+            </td>
+
+            <td>
+                <input type="number"
+                       class="erppagetable-control TxtProdNo"
+                       value="${data.ProdNo ?? ''}"
+                       oninput="limitMaxLength(this, 13)" />
+            </td>
+
+            <td class="action-col">
+                <button type="button"
+                        class="act-btn add"
+                        onclick="AddRow()">
+                    <i class="fa fa-plus-circle"></i>
+                </button>
+
+                <button type="button"
+                        class="act-btn delete"
+                        onclick="DeleteRow(this)">
+                    <i class="fa fa-trash"></i>
+                </button>
             </td>
 
         </tr>
@@ -257,14 +350,20 @@ function AddRow(data = {}) {
 
     tbody.append(newRow);
 
+    // Get the newly added row
     let $row = tbody.find('tr:last');
+
+    // Set Item
     $row.find('.ddlItemname').val(data.itemCode ?? '');
 
+    // Set Place From
+    $row.find('.TxtPlaceFrom').val(data.placeCode ?? '');
+
+    // Load item details
     if (data.itemCode) {
         SetItemDetails($row);
     }
 }
-
 function SetItemDetails($row) {
 
     let itemCode = $row.find('.ddlItemname').val();
@@ -351,7 +450,6 @@ async function CopyData(V_TYPE) {
         console.error("Error:", error);
     }
 }
-
 function CopyDataAddRow(data = {}) {
 
     let tbody = $('#tbladjustmentissue tbody');
@@ -387,7 +485,6 @@ function CopyDataAddRow(data = {}) {
         SetItemDetails($row);
     }
 }
-
 function GetSelectedRowsData()
 {
     let selectedData = [];
@@ -415,8 +512,6 @@ function GetSelectedRowsData()
     });
     return selectedData;
 }
-
-
 function GetInventoryDepartmentIssueDetails() {
 
     let details = [];
@@ -467,7 +562,3 @@ function GetInventoryDepartmentIssueDetails() {
 
     return details;
 }
-
-
-
-
