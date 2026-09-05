@@ -101,7 +101,7 @@
 
         checkPermission(controllerName, function () {
             loadAllInward();
-        });
+         });
 
         $('#searchBox').on('keyup', function () {
             currentPage = 1;
@@ -110,18 +110,19 @@
 
         $('#button_export').on('click', function () {
             var text = $('#searchBox').val();
-            window.location.href = '/InventoryOpeningList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+            window.location.href = '/InventoryDepartmentIssueList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
         });
 
         $('#button_print').on('click', function () {
             var searchTerm = $('#searchBox').val() || '';
-            var url = '/InventoryOpeningList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
+            var url = '/InventoryDepartmentIssueList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
             window.open(url, '_blank');
         });
 
     });
 
     // ================= LOAD DATA =================
+
     function loadAllInward() {
 
         $.ajax({
@@ -135,16 +136,21 @@
             },
             success: function (res) {
 
-                console.log("Table List",res);
-
+                console.log("Table List", res);
 
                 if (!res.success) {
                     toastr.error("Failed to load data.");
                     return;
                 }
 
-                const list = res.lists || [];
+                // Your API returns "data", not "lists"
+                const list = res.data || [];
+
                 totalCount = res.totalCount || 0;
+
+                // Optional: update pagination values from API
+                currentPage = res.pageNumber || currentPage;
+                pageSize = res.pageSize || pageSize;
 
                 renderTable(list);
                 renderPagination();
@@ -155,69 +161,60 @@
         });
     }
 
+
     // ================= TABLE =================
     function renderTable(list) {
 
-        const tbody = $('#tblInventoryOpeningList tbody');
+        const tbody = $('#tblInventoryDepartmentIssueList tbody');
         tbody.empty();
 
         if (!list || list.length === 0) {
+
             tbody.append(`
                 <tr>
-                    <td colspan="25" class="text-center text-muted">
+                    <td colspan="10" class="text-center text-muted">
                         No list found.
                     </td>
                 </tr>
             `);
+
             return;
         }
 
         $.each(list, function (index, item) {
+            const docId = item.doC_ID || '';
 
             tbody.append(`
                 <tr>
-                    <td>${item.name || ''}</td>
-                    <td>${item.code || ''}</td>
-                    <td>${item.yeaR_CODE ?? ''}</td>
-                    <td>${item.comP_CODE ?? ''}</td>
-                    <td>${item.brancH_CODE ?? ''}</td>
-                    <td>${item.v_TYPE || ''}</td>
                     <td>${item.v_NO ?? ''}</td>
+                    <td>${item.v_TYPE ?? ''}</td>
                     <td>${formatDate(item.v_DATE)}</td>
-                    <td>${item.doC_ID || ''}</td>
-                    <td>${item.shift || ''}</td>
-                    <td>${item.sliP_NO || ''}</td>
-                    <td>${item.porD_TYPE || ''}</td>
+                    <td>${item.shift ?? ''}</td>
+                    <td>${item.sliP_NO ?? ''}</td>
+                    <td>${item.porD_TYPE ?? ''}</td>
                     <td>${item.porD_NO ?? ''}</td>
-                    <td>${item.placE_CODE ?? ''}</td>
-                    <td>${item.emP_CODE ?? ''}</td>
-                    <td>${item.depT_CODE ?? ''}</td>
-                    <td>${item.remarks || ''}</td>
-                    <td>${item.conS_TYPE || ''}</td>
-                    <td>${item.status ?? ''}</td>
-                    <td>${item.amount ?? ''}</td>
-                    <td>${item.plaN_TYPE || ''}</td>
-                    <td>${item.plaN_NO ?? ''}</td>
-                    <td>${item.faproV_STATUS || ''}</td>
-                    <td>${item.faproV_REMARKS || ''}</td>
-
+                    <td>${item.remarks ?? ''}</td>
+                    <td>${item.statusText ?? ''}</td>
                     <td class="action-col">
                         <div class="action-wrap">
-
-                            <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.doC_ID}')"> <i class="fa fa-edit"></i> </button>
-                            <button class="act-btn view btn-view"  onclick="viewMenuDetails('${item.doC_ID}')"> <i class="fa fa-eye"></i>  </button>
-                            <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.doC_ID}')">  <i class="fa fa-trash"></i> </button>
-                            <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"> <i class="fa fa-file"></i> </button>
+                            <button type="button" class="act-btn edit permission-edit" onclick="AddOrEditFunction('${docId}')"> <i class="fa fa-edit"></i> </button>
+                            <button type="button" class="act-btn view btn-view"  onclick="viewMenuDetails('${docId}')"> <i class="fa fa-eye"></i> </button>
+                            <button type="button"
+                            class="act-btn delete permission-delete"
+                            onclick="deleteTemp('${docId}', '${item.v_NO}', '${item.v_TYPE}')">
+                            <i class="fa fa-trash"></i>
+                            </button>
+                            <button type="button"  class="act-btn document btn-document" onclick="showDocumentPopup('${docId}')"> <i class="fa fa-file"></i> </button>
 
                         </div>
                     </td>
                 </tr>
             `);
-
-              applyGridPermission();
-
         });
+
+         applyGridPermission();
     }
+
 
     // ================= PAGINATION =================
     function renderPagination() {
@@ -309,17 +306,17 @@
     // ================= ACTIONS =================
 
     function AddOrEditFunction(rowId) {
-        window.location.href = `/InventoryOpeningEntry/Index?id=${encodeURIComponent(rowId)}`;
+        window.location.href = `/InventoryDepartmentIssue/Index?id=${encodeURIComponent(rowId)}`;
     }
 
     function viewMenuDetails(rowId) {
-        window.location.href = `/InventoryOpeningEntry/Index?id=${encodeURIComponent(rowId)}&mode=view`;
+        window.location.href = `/InventoryDepartmentIssue/Index?id=${encodeURIComponent(rowId)}&mode=view`;
     }
 
-    function deleteTemp(DocID) {
+    function deleteTemp(docId, V_NO, V_TYPE) {
         Swal.fire({
             title: "Are you sure?",
-            text: "You want to delete this Inward Entry?",
+            text: "You want to delete this Department Issue?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -330,20 +327,25 @@
             if (result.isConfirmed) {
 
                 $.ajax({
-                    url: '/InventoryOpeningList/Delete',
+                    url: '/InventoryDepartmentIssueList/Delete',
                     type: 'POST',
-                    data: { DocID : DocID},
+                    data: {
+                        docId: docId,
+                        V_NO: V_NO,
+                        V_TYPE: V_TYPE
+                    },
                     success: function (res) {
 
                         if (res.success) {
                             toastr.success(res.message || "Deleted successfully");
                             loadAllInward();
                         } else {
-                            toastr.error(res.message || 'Failed to delete.');
+                            toastr.error(res.message || "Failed to delete.");
                         }
                     },
-                    error: function () {
-                        toastr.error('Error deleting record.');
+                    error: function (xhr) {
+                        console.log(xhr.responseText);
+                        toastr.error("Error deleting record.");
                     }
                 });
             }
@@ -353,7 +355,7 @@
     function showDocumentPopup(docCode) {
 
          $.ajax({
-             url: '/InventoryOpeningList/DocDetailsCode',
+             url: '/DepartmentIssueList/DocDetailsCode',
              type: 'POST',
              dataType: 'json',
              data: { docCode: docCode },

@@ -54,8 +54,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             return View("~/Views/Inventory/Transaction/InventoryDepartmentIssueList/Index.cshtml");
         }
 
-
-
         [HttpGet]
         public async Task<IActionResult> GetList(  string searchTerm = "", int pageNumber = 1,  int pageSize = 10)
         {
@@ -72,17 +70,50 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
         }
 
 
+        [HttpPost]
+        public async Task<IActionResult> Delete(string docId , int V_NO , string V_TYPE)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(docId))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Document ID is required."
+                    });
+                }
+
+                var result = await _inventoryDepartmentIssueListRepository.DeleteAsync(docId, V_NO, V_TYPE);
+
+                if (result)
+                {
+                    return Json(new {  success = true,  message = "Successfully Deleted"  });
+                }
+
+                return Json(new { success = false, message = "Unable to delete Department Issue."  });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false,  message = "Error Deleting Department Issue.", error = ex.Message });
+            }
+        }
 
 
+        [HttpGet]
+        public async Task<IActionResult> DocDetailsCode(string docCode)
+        {
+            try
+            {
+                var data = await _inventoryDepartmentIssueListRepository.DocDetailsCodeAsync(docCode);
 
-
-
-
-
-
-
-
-
+                return Json(new {  success = true, data = data  });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false,  message = "Error getting document details.",  error = ex.Message });
+            }
+        }
 
     }
 }
