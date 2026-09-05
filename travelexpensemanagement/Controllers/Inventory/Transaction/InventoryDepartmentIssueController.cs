@@ -80,9 +80,10 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
         [HttpGet]
         public JsonResult DDlPlaceFrom()
         {
-            var data = _inventoryDepartmentIssueRepository.DDlVType(Fromname);
+            var data = _inventoryDepartmentIssueRepository.DDlPlaceFrom(Fromname);
             return Json(data);
         }
+
 
 
         public JsonResult DDLSTATUS()

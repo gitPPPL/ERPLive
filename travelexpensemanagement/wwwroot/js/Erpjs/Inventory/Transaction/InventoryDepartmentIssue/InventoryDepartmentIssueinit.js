@@ -148,7 +148,6 @@ $(document).ready(async function ()
 
     });
      
-
     $('#btn_AdjustmentIssue').on('click', async function ()
     {
         const v_type = $('#ddlDocType').val();
@@ -191,8 +190,7 @@ $(document).ready(async function ()
                 lot: item.vNo,
                 nos: item.qty,
                 weight: '',
-                placeCode: item.placeCode,
-                place: item.place,       
+                placeCode: item.placeCode,  
                 remark: item.remarks,
                 rate: '',
                 Amount: '',
@@ -205,13 +203,5 @@ $(document).ready(async function ()
         });
 
     });
-
-
-
-
-
-
-
-
 
 });

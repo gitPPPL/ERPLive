@@ -43,8 +43,8 @@ async function LoadDropDown()
             DDLVtype(),
             DDLSTATUS(),
             DDLProdType(),
-            DDLDO()
-         
+            DDLDO(),
+            DDlFromPlace()         
         ]);
 
         let vtype = $('#ddlDocType').val();
@@ -218,131 +218,62 @@ function DDlItemName(V_TYPE) {
             throw error;
         });
 }
+function DDlFromPlace() {
 
+    return $.ajax({
+        url: `/InventoryDepartmentIssue/DDlPlaceFrom`,
+        method: 'GET',
+        dataType: 'json'
+    })
+        .then(function (data) {
+
+            console.log("DDlPlaceFrom:", data);
+
+            if (!Array.isArray(data)) {
+                throw new Error("DDlPlaceFrom response is not an array");
+            }
+
+
+            PlaceFromList = data
+                .map(x =>
+                    `<option value="${x.value}">${x.text}</option>`
+                )
+                .join('');
+
+        })
+        .catch(function (error) {
+
+            console.error("Error loading ItemName:", error);
+
+            throw error;
+        });
+}
 function AddRow(data = {}) {
 
     let tbody = $('#tblItemdetails tbody');
 
     let newRow = `
         <tr class="no-border-input">
-
-            <td>
-                <input class="erppagetable-control ItemCode"
-                       value="${data.itemCode ?? ''}" readonly />
-            </td>
-
-            <td>
-                <select class="erppagetable-control ddlItemname">
-                    <option value="">-- Select Item --</option>
-                    ${ItemNameList}
-                </select>
-            </td>
-
-            <td class="hidden-col">
-                <input class="erppagetable-control txtunitcode"
-                       value="${data.unitCode ?? ''}" readonly />
-            </td>
-
-            <td>
-                <input class="erppagetable-control txtunitname"
-                       value="${data.unitName ?? ''}" readonly />
-            </td>
-
-            <td>
-                <input type="number"
-                       class="erppagetable-control txt_lot"
-                       value="${data.lot ?? ''}"
-                       oninput="limitMaxLength(this, 10)" />
-            </td>
-
-            <td>
-                <input type="number"
-                       class="erppagetable-control TxtNos"
-                       value="${data.nos ?? ''}"
-                       oninput="limitMaxLength(this, 10)" />
-            </td>
-
-            <td>
-                <input type="number"
-                       class="erppagetable-control Txtweight"
-                       value="${data.weight ?? ''}"
-                       oninput="limitMaxLength(this, 13)" />
-            </td>
-
-            <td>
-                <select class="erppagetable-control TxtPlaceFrom">
-                    <option value="">-- Select From Place --</option>
-                    ${PlaceFromList}
-                </select>
-            </td>
-
-            <td>
-                <button type="button" class="btn btn-primary">
-                    Show Batch
-                </button>
-            </td>
-
-            <td>
-                <input type="text"
-                       class="erppagetable-control TxtRemark"
-                       value="${data.remark ?? ''}"
-                       oninput="limitMaxLength(this, 13)" />
-            </td>
-
-            <td>
-                <input type="number"
-                       class="erppagetable-control TxtRate"
-                       value="${data.rate ?? ''}"
-                       oninput="limitMaxLength(this, 13)" />
-            </td>
-
-            <td>
-                <input type="number"
-                       class="erppagetable-control TxtAmount"
-                       value="${data.Amount ?? ''}"
-                       oninput="limitMaxLength(this, 13)" />
-            </td>
-
-            <td>
-                <input type="number"
-                       class="erppagetable-control TxtLDRate"
-                       value="${data.LDRate ?? ''}"
-                       oninput="limitMaxLength(this, 13)" />
-            </td>
-
-            <td>
-                <input type="number"
-                       class="erppagetable-control TxtLDAmount"
-                       value="${data.LDAmount ?? ''}"
-                       oninput="limitMaxLength(this, 13)" />
-            </td>
-
-            <td>
-                <input type="number"
-                       class="erppagetable-control TxtProdType"
-                       value="${data.ProdType ?? ''}"
-                       oninput="limitMaxLength(this, 13)" />
-            </td>
-
-            <td>
-                <input type="number"
-                       class="erppagetable-control TxtProdNo"
-                       value="${data.ProdNo ?? ''}"
-                       oninput="limitMaxLength(this, 13)" />
-            </td>
-
+            <td>  <input class="erppagetable-control ItemCode" value="${data.itemCode ?? ''}" readonly /> </td>
+            <td> <select class="erppagetable-control ddlItemname"> <option value="">-- Select Item --</option>  ${ItemNameList}  </select> </td>
+            <td class="hidden-col"> <input class="erppagetable-control txtunitcode" value="${data.unitCode ?? ''}" readonly /> </td>
+            <td>  <input class="erppagetable-control txtunitname" value="${data.unitName ?? ''}" readonly />  </td>
+            <td>  <input type="number"  class="erppagetable-control txt_lot" value="${data.lot ?? ''}"  oninput="limitMaxLength(this, 10)" /> </td>
+            <td> <input type="number" class="erppagetable-control TxtNos" value="${data.nos ?? ''}"  oninput="limitMaxLength(this, 10)" />  </td>
+            <td>  <input type="number" class="erppagetable-control Txtweight" value="${data.weight ?? ''}"  oninput="limitMaxLength(this, 13)" />  </td>
+            <td> <select class="erppagetable-control TxtToPlace">  <option value="">-- Select To Place --</option>  ${PlaceFromList} </select>  </td>
+            <td> <select class="erppagetable-control TxtPlaceFrom">  <option value="">-- Select From Place --</option>  ${PlaceFromList} </select>  </td>
+            <td>  <button type="button" class="btn btn-primary">  Show Batch  </button>  </td>
+            <td> <input type="text"  class="erppagetable-control TxtRemark" value="${data.remark ?? ''}"  oninput="limitMaxLength(this, 13)" /> </td>
+            <td>  <input type="number"  class="erppagetable-control TxtRate"  value="${data.rate ?? ''}" oninput="limitMaxLength(this, 13)" />   </td>
+            <td>  <input type="number" class="erppagetable-control TxtAmount" value="${data.Amount ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
+            <td>   <input type="number"  class="erppagetable-control TxtLDRate" value="${data.LDRate ?? ''}" oninput="limitMaxLength(this, 13)" /> </td>
+            <td> <input type="number" class="erppagetable-control TxtLDAmount"  value="${data.LDAmount ?? ''}" oninput="limitMaxLength(this, 13)" />   </td>
+            <td> <input type="number" class="erppagetable-control TxtProdType" value="${data.ProdType ?? ''}"  oninput="limitMaxLength(this, 13)" />  </td>
+            <td>  <input type="number" class="erppagetable-control TxtProdNo" value="${data.ProdNo ?? ''}" oninput="limitMaxLength(this, 13)" /> </td>
             <td class="action-col">
-                <button type="button"
-                        class="act-btn add"
-                        onclick="AddRow()">
-                    <i class="fa fa-plus-circle"></i>
-                </button>
-
-                <button type="button"
-                        class="act-btn delete"
-                        onclick="DeleteRow(this)">
-                    <i class="fa fa-trash"></i>
-                </button>
+                <button type="button"  class="act-btn add"  onclick="AddRow()">   <i class="fa fa-plus-circle"></i> </button>
+                <button type="button"  class="act-btn delete"   onclick="DeleteRow(this)"> <i class="fa fa-trash"></i>  </button>
             </td>
 
         </tr>
@@ -350,14 +281,12 @@ function AddRow(data = {}) {
 
     tbody.append(newRow);
 
-    // Get the newly added row
     let $row = tbody.find('tr:last');
 
-    // Set Item
-    $row.find('.ddlItemname').val(data.itemCode ?? '');
 
-    // Set Place From
+    $row.find('.ddlItemname').val(data.itemCode ?? '');
     $row.find('.TxtPlaceFrom').val(data.placeCode ?? '');
+    $row.find('.TxtToPlace').val(data.TOplaceCode ?? '');
 
     // Load item details
     if (data.itemCode) {
@@ -517,48 +446,26 @@ function GetInventoryDepartmentIssueDetails() {
     let details = [];
 
     $('#tblItemdetails tbody tr').each(function (index) {
-
         let $row = $(this);
-
         details.push({
-
             SNO: index + 1,
-
             ITEM_CODE: $row.find('.ItemCode').val() || null,
-
             ITEM_NAME: $row.find('.ddlItemname option:selected').text() || null,
-
             UOM_CODE: $row.find('.txtunitcode').val() || null,
-
             UOM_NAME: $row.find('.txtunitname').val() || null,
-
             LOT_NO: $row.find('.txt_lot').val() || null,
-
             NOS: $row.find('.TxtNos').val() || null,
-
             QTY: $row.find('.Txtweight').val() || null,
-
-            BIN_CODE: $row.find('.TxtPlaceCode').val() || null,
-
-            BIN_LOCATION: $row.find('.TxtPlaceFrom').val() || null,
-
+            TO_DEPT: $row.find('.TxtToPlace').val() || null,
+            FROM_DEPT: $row.find('.TxtPlaceFrom').val() || null,
             REMARKS: $row.find('.TxtRemark').val() || null,
-
             RATE: $row.find('.TxtRate').val() || null,
-
             AMOUNT: $row.find('.TxtAmount').val() || null,
-
             LAND_RATE: $row.find('.TxtLDRate').val() || null,
-
             LAND_AMT: $row.find('.TxtLDAmount').val() || null,
-
             PORD_TYPE: $row.find('.TxtProdType').val() || null,
-
             PORD_NO: $row.find('.TxtProdNo').val() || null
-
         });
-
     });
-
     return details;
 }

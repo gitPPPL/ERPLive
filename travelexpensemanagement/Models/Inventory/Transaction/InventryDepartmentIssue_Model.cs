@@ -1,4 +1,6 @@
-﻿namespace travelexpensemanagement.Models.Inventory.Transaction
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace travelexpensemanagement.Models.Inventory.Transaction
 {
     public class InventryDepartmentIssue_Model
     {
@@ -8,6 +10,8 @@
 
     public class InventryDepartmentIssue_Header
     {
+
+ 
         public string? V_TYPE { get; set; }
         public int? V_NO { get; set; }
         public DateTime? V_DATE { get; set; }
@@ -24,6 +28,7 @@
         public int? STATUS { get; set; }
         public decimal? AMOUNT { get; set; }
         public string? PLAN_TYPE { get; set; }
+        public string? StatusText { get; set; }
         public int? PLAN_NO { get; set; }
         public string? FAPROV_STATUS { get; set; }
         public string? FAPROV_REMARKS { get; set; }

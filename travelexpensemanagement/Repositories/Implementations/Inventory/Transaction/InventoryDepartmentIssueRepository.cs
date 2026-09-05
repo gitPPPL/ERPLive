@@ -164,13 +164,11 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                     cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
                     cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
                     cmd.Parameters.AddWithValue("@SHIFT", header.SHIFT);
-                    cmd.Parameters.AddWithValue("@SHIFT", header.SHIFT);
                     cmd.Parameters.AddWithValue("@SLIP_NO", header.SLIP_NO);
                     cmd.Parameters.AddWithValue("@REMARKS", (object?)header.REMARKS ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@PORD_TYPE", header.PORD_TYPE);
                     cmd.Parameters.AddWithValue("@PORD_NO", header.PORD_NO);
                     cmd.Parameters.AddWithValue("@PLAN_TYPE", header.PLAN_TYPE);
-                    cmd.Parameters.AddWithValue("@PLAN_NO", header.PLAN_NO);
                     cmd.Parameters.AddWithValue("@PLAN_NO", header.PLAN_NO);
                     cmd.Parameters.AddWithValue("@STATUS", header.STATUS);                            
                     cmd.Parameters.AddWithValue("@UUSER", g.PubUserId);
@@ -243,8 +241,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
             }
         }
 
-
-
         public object DDlPlaceFrom(string formName)
         {
             var getData = _globalVariableService.GetGlobalVariables();
@@ -253,11 +249,11 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                 string query = "";
                 if (formName == "AdjustmentIssue" || formName == "AdjustmentReceived")
                 {
-                    query = " select name,code from ITEMDEPT_MAST where Active=1 and COMP_CODE=" + getData.PubCompCode + " and TRAN_TYPE='Store' order by name";
+                    query = " select code,name from ITEMDEPT_MAST where Active=1 and COMP_CODE=" + getData.PubCompCode + " and TRAN_TYPE='Store' order by name";
                 }
                 else
                 {
-                    query = "select name,code from ITEMDEPT_MAST where Active=1 and COMP_CODE=" + getData.PubCompCode + " and TRAN_TYPE='Production' order by name";
+                    query = "select code,name   from ITEMDEPT_MAST where Active=1 and COMP_CODE=" + getData.PubCompCode + " and TRAN_TYPE='Production' order by name";
                 }
 
                 var data = _dropdownService.GetDropdownList(query);
@@ -265,17 +261,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                 return data;
             }
         }
-
-
-
-
-
-
-
-
-
-
-
 
     }
 }

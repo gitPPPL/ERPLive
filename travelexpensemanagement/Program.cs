@@ -48,8 +48,8 @@ builder.Services.AddScoped<IFlakesQCEntryExcluRepository, FlakesQCEntryExcluRepo
 builder.Services.AddScoped<IFlakesQCEntryExcluListRepository, FlakesQCEntryExcluListRepository>();
 builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
 builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
-builder.Services.AddScoped< IInventoryDepartmentIssueRepository,  InventoryDepartmentIssueRepository>();
-
+builder.Services.AddScoped<IInventoryDepartmentIssueRepository,  InventoryDepartmentIssueRepository>();
+builder.Services.AddScoped< IInventoryDepartmentIssueListRepository, InventoryDepartmentIssuelistRepository>();
 
 builder.Services.Configure<EncryptionSettings>(
 builder.Configuration.GetSection("EncryptionSettings"));
