@@ -1,4 +1,5 @@
-﻿using travelexpensemanagement.Models.Inventory.Transaction;
+﻿using travelexpensemanagement.Models;
+using travelexpensemanagement.Models.Inventory.Transaction;
 using static travelexpensemanagement.Controllers.GateEntry.Transaction.InwardEntryListController;
 
 namespace travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction
@@ -9,6 +10,9 @@ namespace travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction
 
 
         Task<bool> DeleteAsync(string docId, int V_NO, string V_TYPE);
-        Task<List<InwardEntryDetailDto>> DocDetailsCodeAsync(string docCode);
+
+        Task<List<InwardEntryDetailDto_Model>> DocDetailsCodeAsync(string docCode);
+
+        InventryDepartmentIssue_Model GetDataByCode(string DocID);
     }
 }

@@ -469,3 +469,50 @@ function GetInventoryDepartmentIssueDetails() {
     });
     return details;
 }
+
+
+async function LoadData() {
+
+    try {
+
+        const res = await $.ajax({
+            url: '/InventoryDepartmentIssueList/GetDataByCode',
+            type: 'POST',
+            data: {
+                DocID: rowId
+            }
+        });
+
+        console.log("API Response:", res);
+
+        if (!res.success) {
+            console.error("Server Error:", res.message);
+            alert(res.message || "Unable to load data.");
+            return null;
+        }
+
+        const header = res.data.header;
+        const details = res.data.details;
+
+
+        console.log("Header Data:", header);    
+        console.log("Details Data:", details);
+      
+        return res.data;
+    }
+    catch (error) {
+
+        console.error("Error loading data:", error);
+
+        if (error.responseJSON) {
+            console.error("Server Response:", error.responseJSON);
+        }
+
+        alert("Error while loading inventory opening data.");
+
+        return null;
+    }
+}
+
+
+

@@ -352,23 +352,30 @@
         });
     }
 
-    function showDocumentPopup(docCode) {
+      function showDocumentPopup(docCode) {
+        alert("hh");
 
-         $.ajax({
-             url: '/DepartmentIssueList/DocDetailsCode',
-             type: 'POST',
-             dataType: 'json',
-             data: { docCode: docCode },
-             success: function (response) {
-                 if (response.success) {
-                     showDocumentPopupjQuery(response.data, docCode);
-                 } else {
-                     toastr.error("Failed to get document details.");
-                 }
-             },
-             error: function () {
-                 toastr.error("Error fetching document details.");
-             }
-         });
-     }
+        $.ajax({
+            url: '/InventoryDepartmentIssueList/DocDetailsCode',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                docCode: docCode
+            },
+            success: function (response) {
+                if (response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+                console.error("Response:", xhr.responseText);
+
+                toastr.error("Error fetching document details.");
+            }
+        });
+    }
+
 </script>

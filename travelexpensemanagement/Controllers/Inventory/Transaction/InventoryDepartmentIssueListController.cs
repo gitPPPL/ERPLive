@@ -115,5 +115,32 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             }
         }
 
+
+        [HttpPost]
+        public IActionResult GetDataByCode(string DocID)
+        {
+            try
+            {
+                var data = _inventoryDepartmentIssueListRepository.GetDataByCode(DocID);
+
+                return Json(new {  success = true, data = data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false,  message = "Error fetching inventory department issue data", error = ex.Message });
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }

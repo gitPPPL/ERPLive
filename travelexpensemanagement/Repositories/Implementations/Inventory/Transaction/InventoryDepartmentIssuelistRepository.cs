@@ -5,6 +5,7 @@ using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Controllers.GateEntry.Transaction;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Models;
 using travelexpensemanagement.Models.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 
@@ -83,7 +84,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
 
             return (headerList, totalCount);
         }
-               
         
         public async Task<bool> DeleteAsync(string docId, int V_NO, string V_TYPE)
         {
@@ -121,14 +121,20 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
             return true;
         }
 
-
-        public async Task<List<InwardEntryDetailDto>> DocDetailsCodeAsync(string docCode)
+       public async Task<List<InwardEntryDetailDto_Model>> DocDetailsCodeAsync(string docCode)
         {
-            var docDetails = new List<InwardEntryDetailDto>();
+            var docDetails = new List<InwardEntryDetailDto_Model>();
 
             if (string.IsNullOrWhiteSpace(docCode))
             {
                 return docDetails;
+            }
+
+            var globalVar = _globalVariableService.GetGlobalVariables();
+
+            if (globalVar == null)
+            {
+                throw new Exception("Global variable data is not available.");
             }
 
             using (SqlConnection conn = _dbConnection.GetErpConnection())
@@ -146,39 +152,16 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                     {
                         while (await reader.ReadAsync())
                         {
-                            var detail = new InwardEntryDetailDto
+                            var detail = new InwardEntryDetailDto_Model
                             {
-                                Code = reader["Code"] != DBNull.Value
-                                    ? reader["Code"].ToString()
-                                    : null,
-
-                                UUser = reader["UUser"] != DBNull.Value
-                                    ? reader["UUser"].ToString()
-                                    : null,
-
-                                UDATE = reader["UDATE"] != DBNull.Value
-                                    ? Convert.ToDateTime(reader["UDATE"])
-                                    : (DateTime?)null,
-
-                                EUSER = reader["EUSER"] != DBNull.Value
-                                    ? reader["EUSER"].ToString()
-                                    : null,
-
-                                EDATE = reader["EDATE"] != DBNull.Value
-                                    ? Convert.ToDateTime(reader["EDATE"])
-                                    : (DateTime?)null,
-
-                                WSID = reader["WSID"] != DBNull.Value
-                                    ? reader["WSID"].ToString()
-                                    : null,
-
-                                LIP = reader["LIP"] != DBNull.Value
-                                    ? reader["LIP"].ToString()
-                                    : null,
-
-                                LID = reader["LID"] != DBNull.Value
-                                    ? reader["LID"].ToString()
-                                    : null
+                                Code = reader["Code"] != DBNull.Value ? reader["Code"].ToString() : string.Empty,
+                                UUser = reader["UUser"] != DBNull.Value ? reader["UUser"].ToString()  : string.Empty,
+                                UDATE = reader["UDATE"] != DBNull.Value ? Convert.ToDateTime(reader["UDATE"])  : (DateTime?)null,
+                                EUSER = reader["EUSER"] != DBNull.Value ? reader["EUSER"].ToString()  : string.Empty,
+                                EDATE = reader["EDATE"] != DBNull.Value  ? Convert.ToDateTime(reader["EDATE"])  : (DateTime?)null,
+                                WSID = reader["WSID"] != DBNull.Value  ? reader["WSID"].ToString()  : string.Empty,
+                                LIP = reader["LIP"] != DBNull.Value  ? reader["LIP"].ToString() : string.Empty,
+                                LID = reader["LID"] != DBNull.Value ? reader["LID"].ToString()  : string.Empty
                             };
 
                             docDetails.Add(detail);
@@ -191,17 +174,98 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
         }
 
 
-        public class InwardEntryDetailDto
+
+
+        public InventryDepartmentIssue_Model GetDataByCode(string DocID)
         {
-            public string? Code { get; set; }
-            public string? UUser { get; set; }
-            public DateTime? UDATE { get; set; }
-            public string? EUSER { get; set; }
-            public DateTime? EDATE { get; set; }
-            public string? WSID { get; set; }
-            public string? LIP { get; set; }
-            public string? LID { get; set; }
+            var GetGlobalCode = _globalVariableService.GetGlobalVariables();
+
+            InventryDepartmentIssue_Model wrapper = new InventryDepartmentIssue_Model
+            {
+                Header = new InventryDepartmentIssue_Header(),
+                Details = new List<InventryDepartmentIssue_Details>()
+            };
+
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    #region Fetch Header Data
+                    using (SqlCommand cmd = new SqlCommand("sp_InventoryDepartmentIssue", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@Action", "ShowData");
+                        cmd.Parameters.AddWithValue("@SaveAction", "Header");
+                        cmd.Parameters.AddWithValue("@DOC_ID", DocID);
+                        cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
+
+                        using (SqlDataReader rdr = cmd.ExecuteReader())
+                        {
+                            if (rdr.Read())
+                            {
+                                wrapper.Header = new InventryDepartmentIssue_Header
+                                {
+                                    DOC_ID = rdr["DOC_ID"]?.ToString(),
+                                    V_NO = rdr["V_no"] != DBNull.Value ? Convert.ToInt32(rdr["V_no"]) : 0,
+                                    V_TYPE = rdr["V_TYPE"]?.ToString(),
+                                    V_DATE = rdr["V_date"] != DBNull.Value ? Convert.ToDateTime(rdr["V_date"]) : DateTime.MinValue,
+                                    REMARKS = rdr["REMARKS"]?.ToString()
+
+                                };
+                            }
+                        }
+                    }
+                    #endregion
+
+                    #region Fetch Dispatch Data
+                    using (SqlCommand cmd4 = new SqlCommand("sp_InventoryDepartmentIssue", con))
+                    {
+                        cmd4.CommandType = CommandType.StoredProcedure;
+                        cmd4.Parameters.AddWithValue("@Action", "ShowData");
+                        cmd4.Parameters.AddWithValue("@SaveAction", "Details");
+                        cmd4.Parameters.AddWithValue("@DOC_ID", DocID);
+                        cmd4.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                        cmd4.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+                        cmd4.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
+
+
+                        using (SqlDataReader rdr = cmd4.ExecuteReader())
+                        {
+                            while (rdr.Read())
+                            {
+                                wrapper.Details.Add(new InventryDepartmentIssue_Details
+                                {
+                                    ITEM_CODE = rdr["ITEM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["ITEM_CODE"]) : 0,
+                                    MAKE_CODE = rdr["MAKE_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["MAKE_CODE"]) : 0,
+                                    UOM_CODE = rdr["UOM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["UOM_CODE"]) : 0,
+                                    NOS = rdr["NOS"] != DBNull.Value ? Convert.ToInt32(rdr["NOS"]) : 0,
+                                    QTY = rdr["QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["QTY"]) : 0,
+                                    RATE = rdr["RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["RATE"]) : 0,
+                                    AMOUNT = rdr["AMOUNT"] != DBNull.Value ? Convert.ToDecimal(rdr["AMOUNT"]) : 0,
+                                    TO_DEPT = rdr["TO_DEPT"] != DBNull.Value ? Convert.ToInt32(rdr["TO_DEPT"]) : 0,
+                                    REMARKS = rdr["REMARKS"]?.ToString()
+                                });
+                            }
+                        }
+                    }
+                    #endregion.
+                }
+
+                return wrapper;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
+
+
+
+
 
     }
 }
