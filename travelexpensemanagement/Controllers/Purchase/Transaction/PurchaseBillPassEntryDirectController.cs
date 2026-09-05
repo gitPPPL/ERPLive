@@ -7,7 +7,6 @@ using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Purchase.Transiction;
 using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
-using static travelexpensemanagement.Models.CommonModel;
 using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseBillPassEntryModel;
 
 namespace travelexpensemanagement.Controllers.Purchase.Transaction

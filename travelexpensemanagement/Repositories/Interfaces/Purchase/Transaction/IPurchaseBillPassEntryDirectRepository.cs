@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using travelexpensemanagement.Models.Purchase.Transiction;
+﻿using travelexpensemanagement.Models.Purchase.Transiction;
 using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseBillPassEntryModel;
 
 namespace travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction

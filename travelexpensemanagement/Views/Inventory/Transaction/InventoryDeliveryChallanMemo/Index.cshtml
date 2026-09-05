@@ -1,0 +1,120 @@
+﻿@{
+    ViewBag.Title = "Delivery Challan Memo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa-solid fa-truck"></i>
+        </div>
+        <div class="erppage-header-title">Delivery Challan Memo</div>
+    </div>
+    <div class="erppage-header-right">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print" onclick="DeliveryChallanMemoReport()">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InventoryDeliveryChallanMemoList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="DeliveryChallanMemoform">
+    <input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppage-grid6">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-redinput" id="NumDocno" placeholder="Enter Doc No" disabled>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-redinput" id="DtDocDate">
+                </div>
+            </div>
+            <div class="erppage-grid6">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Employee Name</label>
+                    <select class="erppage-redinput erppage-required" id="ddlEmployeeName">
+                        <option value="">Select Employee Name</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Vendor Name</label>
+                    <select class="erppage-redinput erppage-required" id="ddlVendorName">
+                        <option value="">Select Vendor Name</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Transport/Courier</label>
+                    <input type="text" class="erppage-input" id="TxtTransportcourier" placeholder="Enter Transport/Courier" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Through</label>
+                    <input type="text" class="erppage-input" id="TxtThrough" placeholder="Enter Through" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Return Date</label>
+                    <input type="date" class="erppage-input" id="DtReturnDate" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea type="text" class="erppage-textarea" style="height:40px;" id="TxtRemarks" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+
+           
+
+            <div class="erppage-fieldset">
+                <div class="erppage-container">
+                    <div class="erppage-tabs">
+                        <button class="erppage-tab active" data-tab="itemrecord">Item Record</button>
+                    </div>
+                    <!-- Item Record -->
+                    <div class="erppage-tab-content active" id="itemrecord">
+                        <div class="erppagelist-container">
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblItemrecord" class="excel-table fixed-grid-table table-width resizable-table">
+                                    <colgroup>
+                                        <col class="hidden-col">    
+                                        <col style="width:180px;">  
+                                        <col style="width:100px;">  
+                                        <col style="width:80px;">   
+                                        <col style="width:100px;">  
+                                        <col style="width:150px;">  
+                                        <col style="width:200px;">  
+                                        <col class="action-col">    
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th class="hidden-col">Code</th>
+                                            <th>Item Name</th>
+                                            <th>Unit</th>
+                                            <th>Nos</th>
+                                            <th>Quantity</th>
+                                            <th>Approx Amount</th>
+                                            <th>Remark</th>
+                                            <th class="action-col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="erppage-actions">
+            <button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script src="~/js/erpjs/inventory/transaction/inventorydeliverychallanmemo/inventorydeliverychallanmemo.js"></script>

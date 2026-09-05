@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -7,6 +8,7 @@ using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 
 namespace travelexpensemanagement.Controllers.Inventory.Transaction
 {
+    [SessionAuthorize]
     public class ToolkitReceivedEntryController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
@@ -164,14 +166,14 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
         }
 
         [HttpGet]
-        public IActionResult GetDataById(string vType, string vNo)
+        public async Task<IActionResult> GetDataById(string vType, string vNo)
         {
             try
             {
-                var result = _repository.GetDataById(vType, vNo);
+                var result = await _repository.GetDataByIdAsync(vType, vNo);
                 if (result == null || result.data == null)
                 {
-                    return Json(new { success = result.status, message = result.message });
+                    return Json(new { success = false, message = "Data not found!" });
                 }
                 return Json(new { success = result.status, data = result.data });
             }

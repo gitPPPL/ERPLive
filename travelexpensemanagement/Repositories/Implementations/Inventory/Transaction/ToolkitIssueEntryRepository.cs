@@ -4,6 +4,7 @@ using System.Data;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 
@@ -14,11 +15,13 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DbHelper _dbHelper;
-        public ToolkitIssueEntryRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DbHelper dbHelper)
+        private readonly LogService.LogService _logService;
+        public ToolkitIssueEntryRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DbHelper dbHelper, LogService.LogService logService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _dbHelper = dbHelper;
+            _logService = logService;
         }
 
 
@@ -41,21 +44,24 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                         cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
                         cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
                         cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
-                        cmd.Parameters.AddWithValue("@V_TYPE", model.V_TYPE);
-                        cmd.Parameters.AddWithValue("@V_NO", model.V_NO);
-                        cmd.Parameters.AddWithValue("@V_DATE", model.V_DATE);
-                        cmd.Parameters.AddWithValue("@DOC_ID", model.V_TYPE + model.V_NO);
-                        cmd.Parameters.AddWithValue("@PLACE_CODE", model.PLACE_CODE);
-                        cmd.Parameters.AddWithValue("@ITEM_CODE", model.ITEM_CODE);
-                        cmd.Parameters.AddWithValue("@QTY", model.QTY);
-                        cmd.Parameters.AddWithValue("@RATE", model.RATE);
-                        cmd.Parameters.AddWithValue("@AMOUNT", model.AMOUNT);
-                        cmd.Parameters.AddWithValue("@EMP_CODE", model.EMP_CODE);
-                        cmd.Parameters.AddWithValue("@FROM_DEPT", model.FROM_DEPT);
-                        cmd.Parameters.AddWithValue("@TO_DEPT", model.TO_DEPT);
-                        cmd.Parameters.AddWithValue("@REMARK", model.REMARK);
-                        cmd.Parameters.AddWithValue("@RECD_QTY", model.RECD_QTY);
-                        cmd.Parameters.AddWithValue("@DR_AMOUNT", model.DR_AMOUNT);
+                        cmd.Parameters.AddWithValue("@V_TYPE", model.V_TYPE ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@V_NO", model.V_NO ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@V_DATE", model.V_DATE ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DOC_ID", string.IsNullOrEmpty(model.V_TYPE?.ToString()) && 
+                                                                string.IsNullOrEmpty(model.V_NO?.ToString()) 
+                                                                ? (object)DBNull.Value
+                                                                : model.V_TYPE?.ToString() + model.V_NO?.ToString());
+                        cmd.Parameters.AddWithValue("@PLACE_CODE", model.PLACE_CODE ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@ITEM_CODE", model.ITEM_CODE ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@QTY", model.QTY ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@RATE", model.RATE ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@AMOUNT", model.AMOUNT ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@EMP_CODE", model.EMP_CODE ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@FROM_DEPT", model.FROM_DEPT ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@TO_DEPT", model.TO_DEPT ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@REMARK", model.REMARK ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@RECD_QTY", model.RECD_QTY ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DR_AMOUNT", model.DR_AMOUNT ?? (object)DBNull.Value);
 
                         if (model.ACTION == "INSERT")
                         {
@@ -72,6 +78,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
 
                         cmd.ExecuteNonQuery();
 
+                        //string formName = model.V_TYPE == "TOIS" ? "Toolkit Issue" : "Toolkit Received";
+                        //_logService.InsertLog("STOOL", formName, "Transaction", model.ACTION ?? "", model.V_TYPE ?? "", model.V_NO.ToString() ?? "", model.V_DATE);
                     }
                 }
                 return new RepositoryResponse { status = true, message = "Saved Successfully!" };
@@ -82,10 +90,11 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
             }
         }
 
-        public RepositoryResponseData<ToolKitIssueModel> GetDataById(string vType, string vNo)
+        public async Task<RepositoryResponseData<ToolKitIssueModel>> GetDataByIdAsync(string vType, string vNo)
         {
             var gv = _globalVariableService.GetGlobalVariables();
             var data = new ToolKitIssueModel();
+            decimal balanceQty = 0;
             try
             {
                 using (var con = _dbConnection.GetErpConnection())
@@ -121,6 +130,23 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                                 data.ITEM_NAME = reader["ITEM_NAME"]?.ToString();
                             }
                         }
+
+                        if (string.Equals(vType, "TORC", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string qry1 = $@"select ISNULL(SUM(qty), 0) from STOOL where v_type='TOIS'  and EMP_CODE = {data.EMP_CODE} AND ITEM_CODE = {data.ITEM_CODE}
+                                            AND COMP_CODE = {gv.PubCompCode} AND BRANCH_CODE = {gv.PubBranchCode} AND  YEAR_CODE = {gv.PubFYearCode}";
+
+                            decimal totalIssueAmt = await _dbHelper.GetExecuteScalarAsync<decimal>(qry1);
+
+                            string qry2 = $@"select ISNULL(SUM(qty), 0) from STOOL where v_type='TORC'  and EMP_CODE = {data.EMP_CODE} AND ITEM_CODE = {data.ITEM_CODE} 
+                                            AND COMP_CODE = {gv.PubCompCode} AND BRANCH_CODE = {gv.PubBranchCode} AND  YEAR_CODE = {gv.PubFYearCode}";
+
+                            decimal totalRecdAmt = await _dbHelper.GetExecuteScalarAsync<decimal>(qry2);
+
+                            balanceQty = totalIssueAmt - totalRecdAmt;
+                            data.BALANCE_QTY = balanceQty;
+                        }
+
                     }
                 }
                 return new RepositoryResponseData<ToolKitIssueModel> { status = true, data = data };

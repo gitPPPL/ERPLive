@@ -44,7 +44,7 @@
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Quantity</label>
-                        <input type="number" class="erppage-redinput" id="Numquantity" placeholder="Enter Quantity" />
+                        <input type="number" class="erppage-redinput" id="Numquantity" placeholder="Enter Quantity" oninput="SetMaxlength(this);" />
                     </div>
                 </div>
                 <div class="erppage-grid6">
@@ -75,11 +75,14 @@
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Remarks</label>
-                        <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 45px;" placeholder="Enter Remarks"></textarea>
+                        <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 45px;" placeholder="Enter Remarks" maxlength="200"></textarea>
                     </div>
                 </div>
+                <div class="erppage-btn-group-right">
+                    <label id="lblBalanceQty">Balance Quantity : 0</label>
+                </div>
             </div>
-            
+
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Print Details</legend>
                 <div class="erppage-grid6">

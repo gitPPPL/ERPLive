@@ -12,6 +12,7 @@ let add2 = "";
 let db = "";
 let wsid = "";
 let userid = "";
+let balQty = 0;
 
 $(document).ready(async function () {
 
@@ -57,6 +58,11 @@ function wireEvents() {
             !validateRequiredField('#ddlFromDept', 'From department') || !validateRequiredField('#ddlToDept', 'To department')) return;
 
         saveOrUpdate();
+    })
+
+    $(document).on('input', '#Numquantity', function () {
+        let qty = parseFloat($('#Numquantity').val() || 0);
+        $('#lblBalanceQty').text(`Balance Quantity : ${balQty - qty}`);
     })
 }
 
@@ -295,6 +301,11 @@ function fillFormData(data) {
     $('#Numamount').val(data.amount);
     $('#TxtRemarks').val(data.remark);
     $('#Numdebitamount').val(data.dR_AMOUNT);
+
+    balQty = data.balancE_QTY || 0;
+
+    $('#lblBalanceQty').text(`Balance Quantity : ${balQty - data.qty}`);
+
 }
 function setFormReadOnly() {
     const form = $('#Non-disableFields');
@@ -532,3 +543,13 @@ function formatReportDate(dateStr) {
         "/" +
         year;
 }
+
+function SetMaxlength(selector) {
+    console.log(selector);
+    let value = $(selector).val();
+
+    // Allow only 2 decimal places
+    if (!/^\d{0,18}(\.\d{0,4})?$/.test(value)) {
+        $(selector).val(value.slice(0, -1));
+    }
+};

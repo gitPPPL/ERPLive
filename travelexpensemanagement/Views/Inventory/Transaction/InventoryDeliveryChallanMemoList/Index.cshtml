@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Delivery Challan Store List";
+    ViewBag.Title = "Delivery Challan Memo List";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var currentMenu = ViewBag.CurrentMenu as string;
 }
@@ -7,10 +7,10 @@
 <div class="erppagelist-header">
     <div class="erppagelist-title">
         <i class="fa fa-list"></i>
-        <span>Delivery Challan Store List</span>
+        <span>Delivery Challan Memo List</span>
     </div>
     <div class="erppagelist-header-right">
-        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "DeliveryChallanStore")'" id="button_add">
+        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "InventoryDeliveryChallanMemo")'" id="button_add">
             <i class="fa fa-plus"></i>Add New
         </button>
     </div>
@@ -31,28 +31,26 @@
 </div>
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
-        <table id="tblDeliverychallanstoreList" class="excel-table fixed-grid-table table-width resizable-table">
+        <table id="tblInventoryDeliveryChallanMemoList" class="excel-table fixed-grid-table table-width resizable-table">
             <colgroup>
-                <col style="width: 55px;">
-                <col style="width: 70px;">
-                <col style="width: 70px;">
-                <col style="width: 100px;">
-                <col style="width: 70px;">
-                <col style="width: 250px;">
-                <col style="width: 120px;">
+                <col style="width: 80px;">
+                <col style="width: 82px;">
+                <col style="width: 160px;">
+                <col style="width: 200px;">
+                <col style="width: 112px;">
+                <col style="width: 112px;">
+                <col style="width:180px;">
+                <col class="action-col">
             </colgroup>
             <thead>
                 <tr>
-                    <th>Doc Type</th>
-                    <th>Doc No</th>
+                    <th>Doc No.</th>
                     <th>Doc Date</th>
-                    @* <th>Doc Date</th> *@
-                    <th>Bill No</th>
-                    <th>Bill Date</th>
-                    @* <th>Item Type</th> *@
-                    @* <th>Billed To</th> *@
-                    @* <th>Broker Name</th> *@
-                    <th>Party Name</th>
+                    <th>Created By</th>
+                    <th>Vendor Name</th>
+                    <th>Transport/Courier</th>
+                    <th>Through</th>
+                    <th>Remarks</th>
                     <th class="action-col">Action</th>
                 </tr>
             </thead>
@@ -79,6 +77,7 @@
         </div>
     </div>
 </div>
+
 <script src="~/common/delete.js"></script>
 <script src="~/common/pagination.js"></script>
-<script src="~/js/erpjs/inventory/transaction/deliverychallanstorelist/deliverychallanstorelist.js"></script>
+<script src="~/js/erpjs/inventory/transaction/inventorydeliverychallanmemolist/inventorydeliverychallanmemolist.js"></script>

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
@@ -7,6 +8,7 @@ using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 
 namespace travelexpensemanagement.Controllers.Inventory.Transaction
 {
+    [SessionAuthorize]
     public class ToolkitReceivedListController : Controller
     {
         private readonly GlobalVariableService _globalVariableService;

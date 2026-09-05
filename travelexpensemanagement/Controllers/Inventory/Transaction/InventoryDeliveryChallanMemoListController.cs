@@ -1,46 +1,46 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 
 namespace travelexpensemanagement.Controllers.Inventory.Transaction
 {
-    public class DeliveryChallanStoreListController : Controller
+    [SessionAuthorize]
+    public class InventoryDeliveryChallanMemoListController : Controller
     {
         private readonly GlobalVariableService _globalVariableService;
         private readonly GlobalValidationdate _globalValidationdate;
-        private readonly DbHelper _dbHelper;
         private readonly GlobalExcelExport _excel;
-        private readonly IDeliveryChallanStoreListRepository _deliveryChallanStoreListRepository;
-        public DeliveryChallanStoreListController(GlobalVariableService globalVariableService, GlobalValidationdate globalValidationdate, DbHelper dbHelper,
-            IDeliveryChallanStoreListRepository deliveryChallanStoreListRepository, GlobalExcelExport excel)
+        private readonly DbHelper _dbHelper;
+        private readonly IInventoryDeliveryChallanMemoListRepository _repo;
+        public InventoryDeliveryChallanMemoListController(GlobalVariableService globalVariableService, 
+            GlobalValidationdate globalValidationdate, GlobalExcelExport excel, DbHelper dbHelper, IInventoryDeliveryChallanMemoListRepository repo)
         {
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
-            _deliveryChallanStoreListRepository = deliveryChallanStoreListRepository;
             _excel = excel;
             _dbHelper = dbHelper;
+            _repo = repo;
         }
         public IActionResult Index()
         {
-            return View("~/Views/Inventory/Transaction/DeliveryChallanStoreList/Index.cshtml");
+            return View("~/Views/Inventory/Transaction/InventoryDeliveryChallanMemoList/Index.cshtml");
         }
-
+        const string doctype = "GTMO";
         [HttpGet]
-        public IActionResult GetAllDeliveryChallanList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
+        public IActionResult GetAllDeliveryMemoList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
-            var result = _deliveryChallanStoreListRepository.GetAllDeliveryChallanList(searchTerm, pageNumber, pageSize);
-            if (result.status)
-            {
-                return Json(new { status = true, data = result.data, totalCount = result.totalCount });
-            }
-            else
+            var result = _repo.GetAllDeliveryMemoList(searchTerm, pageNumber, pageSize);
+            if(result.data == null || !result.status)
             {
                 return Json(new { status = false, message = result.message });
             }
+            return Json(new { status = true, data = result.data, totalCount = result.totalCount });
         }
-     
+
         [HttpGet]
         public JsonResult checkModificationDays(DateTime? vDate)
         {
@@ -51,23 +51,16 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             var (allowed, message) = _globalValidationdate.CheckModificationDays(vDate.Value);
             return Json(new { success = true, isAllowed = allowed, message = message });
         }
-
+        
         [HttpPost]
-        public IActionResult Delete(int vNo, string docType)
+        public IActionResult Delete(int vNo)
         {
-            var result = _deliveryChallanStoreListRepository.Delete(vNo, docType);
+            var result = _repo.Delete(vNo);
             return Json(new { status = result.status, message = result.message });
         }
-      
-        [HttpGet]
-        public async Task<IActionResult> GetApprovalStatus(int vNo, string vType)
-        {
-            var result = await _deliveryChallanStoreListRepository.GetApprovalStatus(vNo, vType);
-            return Json(new { success = result.status, exists = result.data });
-        }
 
         [HttpGet]
-        public async Task<JsonResult> PBPEntryDetails(string vNo, string vType)
+        public async Task<JsonResult> PBPEntryDetails(string vNo)
         {
             try
             {
@@ -81,11 +74,11 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
                     {"@BRANCH_CODE", usersession.PubBranchCode},
-                    {"@V_TYPE", vType},
+                    {"@V_TYPE", doctype},
                     {"@V_NO", vNo },
                     {"@Action", "EntryDetail" }
                 };
-                var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_DeliveryChallanStore]", parameter);
+                var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_InventoryDeliveryChallanMemo]", parameter);
                 return Json(new { status = true, data = entryDetailList });
             }
             catch (Exception ex)
@@ -109,12 +102,12 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     { "@Action", "Excel" }
                 };
 
-                var fileBytes = _excel.ExportToExcel("sp_DeliveryChallanStore", "Delivery Challan Store", parameters);
+                var fileBytes = _excel.ExportToExcel("sp_InventoryDeliveryChallanMemo", "Delivery Challan Memo", parameters);
 
                 return File(
                     fileBytes,
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    $"DeliveryChallanStore{DateTime.Now:ddMMyyyy}.xlsx"
+                    $"DeliveryChallanMemo{DateTime.Now:ddMMyyyy}.xlsx"
                 );
             }
             catch (Exception ex)

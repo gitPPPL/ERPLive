@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
@@ -9,67 +10,56 @@ using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 namespace travelexpensemanagement.Controllers.Inventory.Transaction
 {
     [SessionAuthorize]
-    public class ToolkitIssueEntryController : Controller
+    public class InventoryDeliveryChallanMemoController : Controller
     {
-        private readonly DataBaseConnection _dbConnection;
+        private readonly GlobalValidationdate _globalValidationdate;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DbHelper _dbHelper;
-        private readonly GlobalValidationdate _globalValidationdate;
-        private readonly IToolkitIssueEntryRepository _repository;
-        public ToolkitIssueEntryController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DbHelper dbHelper,
-            GlobalValidationdate globalValidationdate, IToolkitIssueEntryRepository repository)
+        private readonly DataBaseConnection _dbConnection;
+        private readonly IInventoryDeliveryChallanMemoRepository _repo;
+        public InventoryDeliveryChallanMemoController(GlobalValidationdate globalValidationdate, GlobalVariableService globalVariableService,
+            DbHelper dbHelper, DataBaseConnection dbConnection, IInventoryDeliveryChallanMemoRepository repo)
         {
-            _dbConnection = dbConnection;
+            _globalValidationdate = globalValidationdate;
             _globalVariableService = globalVariableService;
             _dbHelper = dbHelper;
-            _globalValidationdate = globalValidationdate;
-            _repository = repository;
+            _dbConnection = dbConnection;
+            _repo = repo;
         }
-        private string docType = "TOIS";
-
         public IActionResult Index()
         {
-            return View("~/Views/Inventory/Transaction/ToolkitIssueEntry/Index.cshtml");
+            return View("~/Views/Inventory/Transaction/InventoryDeliveryChallanMemo/Index.cshtml");
         }
 
-        public async Task<IActionResult> GetDdlList(string type)
+        [HttpGet]
+        public JsonResult GetVNo()
+        {
+            var result = _globalValidationdate.GetVNo("GTMO", "GATE_MEMO1");
+            return Json(new { status = true, V_NO = result });
+        }
+
+        public async Task<IActionResult> GetDropdown(string type)
         {
             var gv = _globalVariableService.GetGlobalVariables();
 
             string qry = "";
 
-            switch (type)
+            switch (type.ToLower())
             {
-                case "doctype":
-                    qry += $@"SELECT CODE as Value, NAME as Text FROM DOCTYPE_MAST  WHERE code in ('{docType}')    order by name";
+                case "employee":
+                    qry = $@"SELECT CODE as value, CAST(CODE AS NVARCHAR(10)) + SPACE(2) + '|' + SPACE(2) + NAME  as text FROM EMP_MAST where 
+                            COMP_CODE = {gv.PubCompCode} and ACTIVE= 1 AND RESIGN_DATE IS NULL order by NAME";
                     break;
 
-                //case "item":
-                //    qry += $@"SELECT CODE as Value, NAME as Text FROM ITEM_MAST  WHERE comp_code = {gv.PubCompCode}  order by name";
-                //    break;
-                case "employee":
-                    qry += $@"SELECT CODE as Value, name as EmpName, (convert(varchar,code ) + space(2) + '|' + space(2) + NAME) as Text FROM EMP_MAST  
-                            WHERE comp_code = {gv.PubCompCode} order by name ";
-                    break;
-                case "place":
-                    qry += $@"SELECT CODE as Value, NAME as Text FROM PLACE_MAST  WHERE comp_code = {gv.PubCompCode}   order by name";
-                    break;
-                case "department":
-                    qry += $@"SELECT CODE as Value, NAME as Text FROM ITEMDEPT_MAST  WHERE comp_code = {gv.PubCompCode}   order by name";
+                case "vendor":
+                    qry = @"SELECT CODE as value, NAME as text FROM SUBGROUP_MAST where COMP_CODE =1 and ACTIVE= 1 order by NAME";
                     break;
                 default:
-                    break;
+                    return Json(new { success = false, message = "Invalid dropdown type." });
             }
 
             var result = await _dbHelper.GetJsonDataAsync(qry);
             return Json(result);
-        }
-
-        [HttpGet]
-        public JsonResult GetVNo(string vType)
-        {
-            var result = _globalValidationdate.GetVNo(vType, "STOOL");
-            return Json(new { status = true, V_NO = result });
         }
 
         [NonAction]
@@ -92,15 +82,10 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             }
 
             // 2. Build the Total Count Query by wrapping your exact SQL
-            string countQuery = $@"
-        SELECT COUNT(1) as TotalRecords 
-        FROM ({customizedBaseQuery}) AS TempTable";
+            string countQuery = $@"SELECT COUNT(1) as TotalRecords  FROM ({customizedBaseQuery}) AS TempTable";
 
             // 3. Build the Paginated Data Query
-            string dataQuery = $@"
-        {customizedBaseQuery}
-        ORDER BY {orderByColumn}
-        OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY;";
+            string dataQuery = $@"{customizedBaseQuery} ORDER BY {orderByColumn} OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY;";
 
             // 4. Run both queries simultaneously
             var dataListTask = _dbHelper.GetJsonDataAsync(dataQuery);
@@ -129,60 +114,54 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             var gv = _globalVariableService.GetGlobalVariables();
 
             // 1. Define your base query with a {SEARCH_PLACEHOLDER} token
-            string baseQuery = $@"SELECT CODE as Value, NAME as Text FROM ITEM_MAST  WHERE comp_code = {gv.PubCompCode}        
-                            {{SEARCH_PLACEHOLDER}} ";
+            string baseQuery = $@"Select a.name as Text, a.CODE as Value, c.NAME as unit, c.CODE as ucode
+                                from item_mast a 
+                                left join ITEMUNIT_MAST c on a.UNIT_CODE=c.CODE and a.comp_code=c.comp_code
+                                where a.comp_code={gv.PubCompCode}        
+                            {{SEARCH_PLACEHOLDER}} 
+                            group by a.name ,a.CODE , c.NAME ,c.CODE, a.HSN_CODE";
 
             // 2. Define what the SQL engine should filter by when searching
             string safeSearch = searchTerm.Replace("'", "''");
-            string searchFilterSql = $"AND (name LIKE '%{safeSearch}%')";
+            string searchFilterSql = $"AND (a.name LIKE '%{safeSearch}%')";
 
             // 3. Hand it off to the automated execution block
             return await ExecutePaginatedDropdown(
                 baseQuery: baseQuery,
-                orderByColumn: "name",
+                orderByColumn: "a.name",
                 searchTerm: searchTerm,
                 page: page,
                 searchFilterSql: searchFilterSql
             );
         }
 
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("GATE_MEMO1", vdate, vtype, vno);
+            return Ok(result);
+        }
 
         [HttpPost]
-        public IActionResult SaveOrUpdate([FromBody] ToolKitIssueModel model)
+        public IActionResult SaveDeliveryChallanMemo([FromBody] InventoryDeliveryChallanMemoModel model)
         {
-            if (model == null)
-            {
-                return Json(new { success = false, message = "Invalid request!" });
-            }
-            try
-            {
-                var result = _repository.SaveOrUpdate(model);
-                return Json(new { success = result.status, message = result.message });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
+            var result = _repo.SaveDeliveryChallanMemo(model);
+            return Json(new { success = result.status, message = result.message });
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetDataById(string vType, string vNo)
+        public IActionResult GetDataById(string docId)
         {
-            try
+            var result = _repo.GetDataById(docId);
+            if (result.data == null || !result.status)
             {
-                var result = await _repository.GetDataByIdAsync(vType, vNo);
-                if (result == null || result.data == null)
-                {
-                    return Json(new { success = false, message = "Data not found!" });
-                }
-                return Json(new { success = result.status, data = result.data });
+                return Json(new { success = false, message = result.message });
             }
-            catch (Exception ex)
-            {
-                return Json(new { success = true, message = ex.Message });
-            }
+            return Json(new { success = true, data = result.data });
         }
-
         [HttpGet]
         public async Task<JsonResult> getGlobalValues()
         {
@@ -201,30 +180,15 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                 var response = new
                 {
                     compCode = gv.PubCompCode,
+                    yearCode = gv.PubFYearCode,
                     branchCode = gv.PubBranchCode,
                     add1 = gv.Address1,
                     add2 = gv.Address2,
                     companyName = gv.CompanyName,
-                    db = databaseName,
-                    userid = gv.PubUserId,
-                    wsid = gv.PubWorkStationID
+                    db = databaseName
                 };
 
                 return Json(new { success = true, data = response });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> PrepareToolKitBalReport(DateTime fromDate, DateTime toDate)
-        {
-            try
-            {
-                var result = await _repository.PrepareToolKitBalReportAsync(fromDate, toDate);
-                return Json(new { success = result.status, message = result.message });
             }
             catch (Exception ex)
             {

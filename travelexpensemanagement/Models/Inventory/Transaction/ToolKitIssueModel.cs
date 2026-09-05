@@ -27,5 +27,7 @@ namespace travelexpensemanagement.Models.Inventory.Transaction
         public string? UUSER { get; set; }
         public DateTime? UDATE { get; set; }
         public string? ACTION { get; set; }
+
+        public decimal BALANCE_QTY { get; set; }
     }
 }

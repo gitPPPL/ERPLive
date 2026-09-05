@@ -64,7 +64,7 @@
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Quantity</label>
-                        <input type="number" class="erppage-redinput" id="Numquantity" placeholder="Enter Quantity" />
+                        <input type="number" class="erppage-redinput" id="Numquantity" placeholder="Enter Quantity" oninput="SetMaxlength(this);" />
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Unit</label>
@@ -77,19 +77,19 @@
                 <div class="erppage-grid5">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Item Rate</label>
-                        <input type="number" class="erppage-input" id="Numitemrate" placeholder="Enter Item Rate" />
+                        <input type="number" class="erppage-input" id="Numitemrate" placeholder="Enter Item Rate" oninput="SetMaxlength(this);" />
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Amount</label>
-                        <input type="number" class="erppage-input" id="Numamount" placeholder="Enter Amount" />
+                        <input type="number" class="erppage-input" id="Numamount" placeholder="Enter Amount" oninput="SetMaxlength(this);" />
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Debit Amount</label>
-                        <input type="number" class="erppage-input" id="Numdebitamount" placeholder="Enter Debit Amount" />
+                        <input type="number" class="erppage-input" id="Numdebitamount" placeholder="Enter Debit Amount" oninput="SetMaxlength(this);" />
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Remarks</label>
-                        <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 45px;" placeholder="Enter Remarks"></textarea>
+                        <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 45px;" placeholder="Enter Remarks" maxlength="200"></textarea>
                     </div>
                 </div>
             </div>

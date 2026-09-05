@@ -97,6 +97,10 @@ builder.Services.AddScoped<IImportExportExpensesEntryRepository, ImportExportExp
 builder.Services.AddScoped<IImportExportExpensesEntryListRepository, ImportExportExpensesEntryListRepository>();
 builder.Services.AddScoped<IToolkitIssueEntryRepository, ToolkitIssueEntryRepository>();
 builder.Services.AddScoped<IToolkitIssueListRepository, ToolkitIssueListRepository>();
+builder.Services.AddScoped<IDeliveryChallanStoreRepository, DeliveryChallanStoreRepository>();
+builder.Services.AddScoped<IDeliveryChallanStoreListRepository, DeliveryChallanStoreListRepository>();
+builder.Services.AddScoped<IInventoryDeliveryChallanMemoRepository, InventoryDeliveryChallanMemoRepository>();
+builder.Services.AddScoped<IInventoryDeliveryChallanMemoListRepository, InventoryDeliveryChallanMemoListRepository>();
 
 // Gete Entry Transaction repositories
 

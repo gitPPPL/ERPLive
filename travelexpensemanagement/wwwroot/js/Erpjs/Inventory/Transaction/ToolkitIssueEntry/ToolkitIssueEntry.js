@@ -570,3 +570,12 @@ function formatReportDate(dateStr) {
         "/" +
         year;
 }
+function SetMaxlength(selector) {
+    console.log(selector);
+    let value = $(selector).val();
+
+    // Allow only 2 decimal places
+    if (!/^\d{0,18}(\.\d{0,4})?$/.test(value)) {
+        $(selector).val(value.slice(0, -1));
+    }
+};

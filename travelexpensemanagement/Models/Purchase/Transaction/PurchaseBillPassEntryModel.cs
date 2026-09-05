@@ -606,7 +606,7 @@ namespace travelexpensemanagement.Models.Purchase.Transaction
             public List<TDSAdjustmentRow> Rows { get; set; }
         }
     }
-
+    
 }
 
 

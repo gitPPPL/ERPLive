@@ -9,7 +9,6 @@ function bindDropdown(controller, type, dropdownId, placeholder, selectedValue =
         type: 'GET',
         data: requestData,
         success: function (data) {
-
             const ddl = $(dropdownId);
             ddl.empty();
 

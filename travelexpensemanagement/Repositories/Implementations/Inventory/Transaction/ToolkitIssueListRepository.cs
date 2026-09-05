@@ -17,14 +17,16 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
         private readonly GlobalExcelExport _excel;
         private readonly DbHelper _dbHelper;
         private readonly GlobalValidationdate _globalValidationdate;
+        private readonly LogService.LogService _logService;
         public ToolkitIssueListRepository(GlobalVariableService globalVariableService, DataBaseConnection dbConnection
-            , GlobalExcelExport excel, DbHelper dbHelper, GlobalValidationdate globalValidationdate)
+            , GlobalExcelExport excel, DbHelper dbHelper, GlobalValidationdate globalValidationdate, LogService.LogService logService)
         {
             _globalVariableService = globalVariableService;
             _dbConnection = dbConnection;
             _excel = excel;
             _dbHelper = dbHelper;
             _globalValidationdate = globalValidationdate;
+            _logService = logService;
         }
         public RepositoryResponseList<ToolKitIssueModel> GetAllToolkitIssue(string docType, string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
@@ -117,6 +119,10 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                         cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
 
                         cmd.ExecuteNonQuery();
+
+                        //string formName = docType == "TOIS" ? "Toolkit Issue" : "Toolkit Received";
+                        //_logService.InsertLog("STOOL", formName, "Transaction", "DELETE", docType, vNo.ToString(), null);
+
                     }
                 }
 

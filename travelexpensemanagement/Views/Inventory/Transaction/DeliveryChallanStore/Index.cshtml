@@ -11,6 +11,20 @@
         <div class="erppage-header-title">Delivery Challan Store</div>
     </div>
     <div class="erppage-header-right">
+        <button type="button"
+                id="btn_Sendapproval"
+                style="display:none;" class="erppagebtn_sendapproval">
+            <i class="fa fa-share"></i>Send For Approval
+        </button>
+        <button type="button"
+                id="btn_Approved"
+                style="display:none;"
+                class="erppagebtn_approved">
+            Approved
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print" onclick="DeliveryChallanReport()">
+            <i class="fa fa-print"></i> Print
+        </button>
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "DeliveryChallanStoreList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -23,22 +37,26 @@
             <div class="erppage-grid8">
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc Type</label>
-                    <select class="erppage-input erppage-select" id="ddlDocType">
+                    <select class="erppage-redinput erppage-required" id="ddlDocType">
                         <option value="">Select Doc Type</option>
                     </select>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc No</label>
-                    <input type="number" class="erppage-input" id="NumDocno" placeholder="Enter Doc No">
+                    <input type="number" class="erppage-redinput" id="NumDocno" placeholder="Enter Doc No" disabled>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc Date</label>
-                    <input type="date" class="erppage-input" id="DtDocDate">
+                    <input type="date" class="erppage-redinput" id="DtDocDate">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">TranType</label>
-                    <select class="erppage-input erppage-select" id="ddlTranType">
-                        <option value="">Select Tran Type</option>
+                    <select class="erppage-redinput erppage-required" id="ddlTranType">
+                        @* <option value="">Select Tran Type</option> *@
+                        <option value="Regular">Regular</option>
+                        <option value="Bill To-Ship To">Bill To-Ship To</option>
+                        <option value="Bill From - Ship From">Bill From - Ship From</option>
+                        <option value="Combination of 2 and 3">Combination of 2 and 3</option>
                     </select>
                 </div>
                 <div class="erppage-divfield">
@@ -51,7 +69,7 @@
                     <label class="erppage-label">Reference Bill No</label>
                     <div class="erppage-inputgroup">
                         <select class="erppage-input erppage-select" id="ddlRefBillNo">
-                            <option value="">Select Ref Bill Type</option>
+                            <option value="">Select Ref Bill No</option>
                         </select>
                         <button type="button" class="erppage-btn erppage-btn-common-active-disabled" id="btn__load"><i class="fa fa-download"></i> Load</button>
                     </div>
@@ -72,17 +90,18 @@
                         <legend class="erppagefieldset-legend">Bill Details</legend>
                         <div class="erppage-grid3">
                             <div class="erppage-divfield">
-                                <label class="erppage-label">Bill To</label>
-                                <select class="erppage-input" id="ddlbillto">
+                                <label class="erppage-label" id="lblbillTo">Bill To</label>
+                                <select class="erppage-redinput erppage-required" id="ddlbillto">
                                     <option value="">Select Bill To</option>
                                 </select>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Address L1</label>
                                 <div class="erppage-inputgroup">
-                                    <select class="erppage-input erppage-width-70" id="ddladdl1">
+                                    @* <select class="erppage-input erppage-width-70" id="ddladdl1">
                                         <option value="">Select Address L1</option>
-                                    </select>
+                                    </select> *@
+                                    <input type="text" class="erppage-input" id="Txtaddl1" placeholder="Enter Address L1" disabled>
                                     <select class="erppage-input erppage-width-30" id="ddladdl1a">
                                         <option value=""></option>
                                     </select>
@@ -90,37 +109,39 @@
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Address L2</label>
-                                <select class="erppage-input" id="ddladdl2">
+                                @* <select class="erppage-input" id="ddladdl2">
                                     <option value="">Select Address L2</option>
-                                </select>
+                                </select> *@
+                                <input type="text" class="erppage-input" id="Txtaddl2" placeholder="Enter Address L2" disabled>
                             </div>
                         </div>
                         <div class="erppage-grid3">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Address L3</label>
-                                <select class="erppage-input" id="ddladdl3">
+                                @* <select class="erppage-input" id="ddladdl3">
                                     <option value="">Select Address L3</option>
-                                </select>
+                                </select> *@
+                                <input type="text" class="erppage-input" id="Txtaddl3" placeholder="Enter Address L3" disabled>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Bill City</label>
-                                <select class="erppage-input" id="ddlBillCity">
+                                <select class="erppage-input" id="ddlBillCity" disabled>
                                     <option value="">Select Bill City</option>
                                 </select>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Bill GST</label>
-                                <input type="number" class="erppage-input" id="NumBillGST" />
+                                <input type="text" class="erppage-input" id="NumBillGST" placeholder="Enter GST" disabled />
                             </div>
                         </div>
                         <div class="erppage-grid3">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Pincode</label>
-                                <input type="number" class="erppage-input" id="NumPincode" />
+                                <input type="number" class="erppage-input" id="NumPincode" placeholder="Enter PinCode" disabled />
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">POS/City</label>
-                                <select class="erppage-input" id="ddlPOSCity">
+                                <select class="erppage-redinput erppage-required" id="ddlPOSCity" disabled>
                                     <option value="">Select POS/City</option>
                                 </select>
                             </div>
@@ -134,9 +155,10 @@
                         <div class="erppage-grid3">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Desp. From GST</label>
-                                <select class="erppage-input" id="ddldespgst">
+                                @* <select class="erppage-input" id="ddldespgst">
                                     <option value="">Select Desp. From GST</option>
-                                </select>
+                                </select> *@
+                                <input type="text" class="erppage-input" id="ddldespgst" placeholder="Enter GST" />
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Desp. From Loc.</label>
@@ -153,16 +175,17 @@
                         <div class="erppage-grid3">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Ship To</label>
-                                <select class="erppage-input" id="ddlshiptoSD">
+                                <select class="erppage-redinput erppage-required" id="ddlshiptoSD">
                                     <option value="">Select Ship To</option>
                                 </select>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Address L1</label>
                                 <div class="erppage-inputgroup">
-                                    <select class="erppage-input erppage-width-70" id="ddladdl1SD">
+                                    @* <select class="erppage-input erppage-width-70" id="ddladdl1SD">
                                         <option value="">Select Address L1</option>
-                                    </select>
+                                    </select> *@
+                                    <input type="text" class="erppage-input" id="Txtaddl1SD" placeholder="Enter Address L1" disabled>
                                     <select class="erppage-input erppage-width-30" id="ddladdl1aSD">
                                         <option value=""></option>
                                     </select>
@@ -170,58 +193,63 @@
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Address L2</label>
-                                <select class="erppage-input" id="ddladdl2SD">
+                                @* <select class="erppage-input" id="ddladdl2SD">
                                     <option value="">Select Address L2</option>
-                                </select>
+                                </select> *@
+                                <input type="text" class="erppage-input" id="Txtaddl2SD" placeholder="Enter Address L2" disabled>
                             </div>
                         </div>
                         <div class="erppage-grid3">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Address L3</label>
-                                <select class="erppage-input" id="ddladdl3SD">
+                                @* <select class="erppage-input" id="ddladdl3SD">
                                     <option value="">Select Address L3</option>
+                                </select> *@
+                                <input type="text" class="erppage-input" id="Txtaddl3SD" placeholder="Enter Address L3" disabled>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Ship City</label>
+                                <select class="erppage-input" id="ddlBillCitySD" disabled>
+                                    <option value="">Select Ship City</option>
                                 </select>
                             </div>
                             <div class="erppage-divfield">
-                                <label class="erppage-label">Bill City</label>
-                                <select class="erppage-input" id="ddlBillCitySD">
-                                    <option value="">Select Bill City</option>
-                                </select>
-                            </div>
-                            <div class="erppage-divfield">
-                                <label class="erppage-label">Bill GST</label>
-                                <input type="number" class="erppage-input" id="NumBillGSTSD" />
+                                <label class="erppage-label">Ship GST</label>
+                                <input type="text" class="erppage-input" id="NumBillGSTSD" placeholder="Enter GST" disabled />
                             </div>
                         </div>
                         <div class="erppage-grid3">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Pincode</label>
-                                <input type="number" class="erppage-input" id="NumPincodeSD" />
+                                <input type="number" class="erppage-input" id="NumPincodeSD" placeholder="Enter PinCode" disabled />
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Mov. Type</label>
-                                <select class="erppage-input" id="ddlMovtype">
-                                    <option value="">Select Mov. Type</option>
+                                <select class="erppage-redinput erppage-required" id="ddlMovtype">
+                                    @* <option value="">Select Mov. Type</option> *@
+                                    <option value="Outward" selected>Outward</option>
+                                    <option value="Inward">Inward</option>
                                 </select>
                             </div>
                             <div class="erppage-divfield">
-                                <label class="erppage-label">Desp. From Party</label>
+                                <label class="erppage-label">Desp. To Party</label>
                                 <select class="erppage-input" id="ddldesppartySD">
-                                    <option value="">Select Desp. From Party</option>
+                                    <option value="">Select Desp. To Party</option>
                                 </select>
                             </div>
                         </div>
                         <div class="erppage-grid3">
                             <div class="erppage-divfield">
-                                <label class="erppage-label">Desp. From GST</label>
-                                <select class="erppage-input" id="ddldespgstSD">
+                                <label class="erppage-label">Desp. To GST</label>
+                                @* <select class="erppage-input" id="ddldespgstSD">
                                     <option value="">Select Desp. From GST</option>
-                                </select>
+                                </select> *@
+                                <input type="text" class="erppage-input" id="ddldespgstSD" placeholder="Enter GST"/>
                             </div>
                             <div class="erppage-divfield">
-                                <label class="erppage-label">Desp. From Loc.</label>
+                                <label class="erppage-label">Desp. To Loc.</label>
                                 <select class="erppage-input" id="ddldesplocSD">
-                                    <option value="">Select Desp. From Loc.</option>
+                                    <option value="">Select Desp. To Loc.</option>
                                 </select>
                             </div>
                         </div>
@@ -231,6 +259,10 @@
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Other Details</legend>
                 <div class="erppage-grid8">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Bill Doc ID</label>
+                        <input type="text" class="erppage-input" id="TxtBillDocID" placeholder="Enter Bill Doc ID">
+                    </div>
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">WB Doc No</label>
                         <div class="erppage-inputgroup">
@@ -241,7 +273,7 @@
                     <div class="erppage-divfield erppage-datefield">
                         <label class="erppage-label">Bill Date</label>
                         <div class="erppage-datebox">
-                            <input type="date" class="erppage-input erppage-dateinput" id="DtBillDate">
+                            <input type="date" class="erppage-redinput erppage-dateinput" id="DtBillDate">
                             <label class="erppage-checkbox-inside">
                                 <input type="checkbox" class="erppage-checkbox-input" id="chkBillDate">
                             </label>
@@ -249,8 +281,17 @@
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Nature of Work</label>
-                        <select class="erppage-input erppage-select" id="ddlNatureWork">
+                        <select class="erppage-redinput erppage-required" id="ddlNatureWork">
                             <option value="">Select Nature of Work</option>
+                            <option value="Supply">Supply</option>
+                            <option value="Jobwork">Jobwork</option>
+                            <option value="Export">Export</option>
+                            <option value="For Own Use">For Own Use</option>
+                            <option value="Exhibitions or Fairs">Exhibitions or Fairs</option>
+                            <option value="Others">Others</option>
+                            <option value="Import">Import</option>
+                            <option value="Jobwork Return">Jobwork Return</option>
+                            <option value="Sales Return">Sales Return</option>
                         </select>
                     </div>
                     <div class="erppage-divfield">
@@ -267,6 +308,8 @@
                             <option value="">Select Responsible Person</option>
                         </select>
                     </div>
+                </div>
+                <div class="erppage-grid8">
                     <div class="erppage-divfield erppage-datefield">
                         <label class="erppage-label">Expected Return On</label>
                         <div class="erppage-datebox">
@@ -276,8 +319,6 @@
                             </label>
                         </div>
                     </div>
-                </div>
-                <div class="erppage-grid8">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Distance(KM)</label>
                         <input type="number" class="erppage-input" id="NumDistance">
@@ -292,7 +333,7 @@
                     </div>
                 </div>
             </fieldset>
-            
+
             <div class="erppage-fieldset">
                 <div class="erppage-container">
                     <div class="erppage-tabs">
@@ -333,7 +374,7 @@
                                     <thead>
                                         <tr>
                                             <th class="hidden-col">Code</th>
-                                            <th>Item Desc</th>
+                                            <th class="freeze-item">Item Desc</th>
                                             <th>Hsncode</th>
                                             <th>Uom</th>
                                             <th>Nos</th>
@@ -360,7 +401,7 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
-                            <div class="erppagelist-pagination">
+                            @* <div class="erppagelist-pagination">
                                 <div class="pagination-left">
                                     <select id="pageSizeSelect">
                                         <option value="5">5</option>
@@ -377,31 +418,31 @@
                                 <div class="pagination-right" id="pageInfoText">
                                     Results: 0 - 0 of 0
                                 </div>
-                            </div>
+                            </div> *@
                         </div>
-                        
-                       
+
+
                     </div>
                     <!-- Item Total -->
                     <div class="erppage-tab-content" id="itemtotal">
-                       <div class="erppage-grid8">
+                        <div class="erppage-grid8">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Total Nos</label>
-                                <input type="number" class="erppage-input" id="NumTotalnos" placeholder="Enter Total Nos">
+                                <input type="number" class="erppage-input" id="NumTotalnos" placeholder="Enter Total Nos" disabled>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Received Quantity</label>
-                                <input type="number" class="erppage-input" id="NumReceivedQty" placeholder="Enter Received Qty">
+                                <input type="number" class="erppage-input" id="NumReceivedQty" placeholder="Enter Received Qty" disabled>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Bill Qty</label>
-                                <input type="number" class="erppage-input" id="NumBillQty" placeholder="Enter Bill Qty">
+                                <input type="number" class="erppage-input" id="NumBillQty" placeholder="Enter Bill Qty" disabled>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Amount</label>
-                                <input type="number" class="erppage-input" id="NumAmount" placeholder="Enter Amount">
+                                <input type="number" class="erppage-input" id="NumAmount" placeholder="Enter Amount" disabled>
                             </div>
-                       </div>
+                        </div>
                         <div class="erppage-grid8">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Discount</label>
@@ -413,22 +454,22 @@
                             <div class="erppage-divfield">
                                 <label class="erppage-label">CGST</label>
                                 <div class="erppage-inputgroup">
-                                    <input type="number" class="erppage-input erppage-width-30" id="NumCGST1">
-                                    <input type="number" class="erppage-input erppage-width-70" id="NumCGST2" placeholder="0.00">
+                                    <input type="number" class="erppage-input erppage-width-30" id="NumCGST1" disabled>
+                                    <input type="number" class="erppage-input erppage-width-70" id="NumCGST2" placeholder="0.00" disabled>
                                 </div>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">SGST</label>
                                 <div class="erppage-inputgroup">
-                                    <input type="number" class="erppage-input erppage-width-30" id="NumSGST1">
-                                    <input type="number" class="erppage-input erppage-width-70" id="NumSGST2" placeholder="0.00">
+                                    <input type="number" class="erppage-input erppage-width-30" id="NumSGST1" disabled>
+                                    <input type="number" class="erppage-input erppage-width-70" id="NumSGST2" placeholder="0.00" disabled>
                                 </div>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">IGST</label>
                                 <div class="erppage-inputgroup">
-                                    <input type="number" class="erppage-input erppage-width-30" id="NumIGST1">
-                                    <input type="number" class="erppage-input erppage-width-70" id="NumIGST2" placeholder="0.00">
+                                    <input type="number" class="erppage-input erppage-width-30" id="NumIGST1" disabled>
+                                    <input type="number" class="erppage-input erppage-width-70" id="NumIGST2" placeholder="0.00" disabled>
                                 </div>
                             </div>
                             <div class="erppage-divfield">
@@ -444,7 +485,7 @@
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Net Amount</label>
-                                <input type="number" class="erppage-input" id="NumNetAmount" placeholder="Enter Net Amount">
+                                <input type="number" class="erppage-input" id="NumNetAmount" placeholder="Enter Net Amount" disabled>
                             </div>
                         </div>
                     </div>
@@ -489,3 +530,5 @@
 
     </div>
 </div>
+
+<script src="~/js/erpjs/inventory/transaction/deliverychallanstore/deliverychallanstore.js"></script>

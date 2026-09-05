@@ -5,7 +5,7 @@ namespace travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction
     public interface IToolkitIssueEntryRepository
     {
         RepositoryResponse SaveOrUpdate(ToolKitIssueModel model);
-        RepositoryResponseData<ToolKitIssueModel> GetDataById(string vType, string vNo);
+        Task<RepositoryResponseData<ToolKitIssueModel>> GetDataByIdAsync(string vType, string vNo);
         Task<RepositoryResponse> PrepareToolKitBalReportAsync(DateTime fromDate, DateTime toDate);
     }
 }
