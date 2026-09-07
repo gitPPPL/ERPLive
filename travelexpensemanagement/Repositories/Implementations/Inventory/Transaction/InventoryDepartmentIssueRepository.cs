@@ -220,6 +220,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                         cmd.Parameters.AddWithValue("@FROM_DEPT", (object?)detail.FROM_DEPT ?? DBNull.Value);
                         cmd.Parameters.AddWithValue("@TO_DEPT", (object?)detail.TO_DEPT ?? DBNull.Value);
                         cmd.Parameters.AddWithValue("@EMPTY_YN", (object?)detail.EMPTY_YN ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@COSTCAT_CODE", (object?)detail.COSTCAT_CODE ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@COSTSCAT_CODE", (object?)detail.COSTSCAT_CODE ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@COSTCENTER_CODE", (object?)detail.COSTCENTER_CODE ?? DBNull.Value);
                         cmd.Parameters.AddWithValue("@SNO", detail.SNO);
                         cmd.Parameters.AddWithValue("@UUSER", g.PubUserId);
                         cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);

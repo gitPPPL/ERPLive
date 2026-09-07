@@ -24,8 +24,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
             _globalVariableService = globalVariableService;
             _dropdownService = dropdownService;
         }
-
-        public async Task<(List<InventryDepartmentIssue_Header> Lists, int TotalCount)> GetListAsync(string searchTerm = "", int pageNumber = 1, int pageSize = 10 , string FormName = "")
+       public async Task<(List<InventryDepartmentIssue_Header> Lists, int TotalCount)> GetListAsync(string searchTerm = "", int pageNumber = 1, int pageSize = 10 , string FormName = "")
         {
             var globalData = _globalVariableService.GetGlobalVariables();
 
@@ -73,7 +72,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                 });
             }
 
-            // Second result set contains TotalCount
+            // Second result set contains TotalCount\
+
+
             if (await reader.NextResultAsync())
             {
                 if (await reader.ReadAsync())
@@ -84,8 +85,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
 
             return (headerList, totalCount);
         }
-        
-        public async Task<bool> DeleteAsync(string docId, int V_NO, string V_TYPE)
+       public async Task<bool> DeleteAsync(string docId, int V_NO, string V_TYPE)
         {
             if (string.IsNullOrWhiteSpace(docId))
             {
@@ -120,7 +120,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
 
             return true;
         }
-
        public async Task<List<InwardEntryDetailDto_Model>> DocDetailsCodeAsync(string docCode)
         {
             var docDetails = new List<InwardEntryDetailDto_Model>();
@@ -172,11 +171,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
 
             return docDetails;
         }
-
-
-
-
-        public InventryDepartmentIssue_Model GetDataByCode(string DocID)
+       public InventryDepartmentIssue_Model GetDataByCode(string DocID)
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
 
@@ -192,7 +187,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                 {
                     con.Open();
 
-                    #region Fetch Header Data
                     using (SqlCommand cmd = new SqlCommand("sp_InventoryDepartmentIssue", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -213,15 +207,20 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                                     V_NO = rdr["V_no"] != DBNull.Value ? Convert.ToInt32(rdr["V_no"]) : 0,
                                     V_TYPE = rdr["V_TYPE"]?.ToString(),
                                     V_DATE = rdr["V_date"] != DBNull.Value ? Convert.ToDateTime(rdr["V_date"]) : DateTime.MinValue,
-                                    REMARKS = rdr["REMARKS"]?.ToString()
+                                    STATUS = rdr["Status"] != DBNull.Value ? Convert.ToInt32(rdr["Status"]) : 0,
+                                    SHIFT = rdr["SHIFT"]?.ToString(),
+                                    SLIP_NO = rdr["SLIP_NO"]?.ToString(),
+                                    PORD_NO = rdr["PORD_NO"] != DBNull.Value ? Convert.ToInt32(rdr["PORD_NO"]) : 0,
+                                    PLAN_NO = rdr["PLAN_NO"] != DBNull.Value ? Convert.ToInt32(rdr["PLAN_NO"]) : 0,
 
+                            
+
+                                    REMARKS = rdr["REMARKS"]?.ToString()
                                 };
                             }
                         }
                     }
-                    #endregion
 
-                    #region Fetch Dispatch Data
                     using (SqlCommand cmd4 = new SqlCommand("sp_InventoryDepartmentIssue", con))
                     {
                         cmd4.CommandType = CommandType.StoredProcedure;
@@ -232,7 +231,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                         cmd4.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
                         cmd4.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
 
-
                         using (SqlDataReader rdr = cmd4.ExecuteReader())
                         {
                             while (rdr.Read())
@@ -240,21 +238,27 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                                 wrapper.Details.Add(new InventryDepartmentIssue_Details
                                 {
                                     ITEM_CODE = rdr["ITEM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["ITEM_CODE"]) : 0,
-                                    MAKE_CODE = rdr["MAKE_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["MAKE_CODE"]) : 0,
                                     UOM_CODE = rdr["UOM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["UOM_CODE"]) : 0,
+                                    LOT_NO = rdr["LOT_NO"]?.ToString(),
                                     NOS = rdr["NOS"] != DBNull.Value ? Convert.ToInt32(rdr["NOS"]) : 0,
                                     QTY = rdr["QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["QTY"]) : 0,
+                                    FROM_DEPT = rdr["FROM_DEPT"] != DBNull.Value ? Convert.ToInt32(rdr["FROM_DEPT"]) : 0,
+                                    TO_DEPT = rdr["TO_DEPT"] != DBNull.Value ? Convert.ToInt32(rdr["TO_DEPT"]) : 0,
+                                    REMARKS = rdr["REMARKS"]?.ToString(),
                                     RATE = rdr["RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["RATE"]) : 0,
                                     AMOUNT = rdr["AMOUNT"] != DBNull.Value ? Convert.ToDecimal(rdr["AMOUNT"]) : 0,
-                                    TO_DEPT = rdr["TO_DEPT"] != DBNull.Value ? Convert.ToInt32(rdr["TO_DEPT"]) : 0,
-                                    REMARKS = rdr["REMARKS"]?.ToString()
+                                    LAND_AMT = rdr["LAND_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["LAND_AMT"]) : 0,
+                                    LAND_RATE = rdr["LAND_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["LAND_RATE"]) : 0,
+                                    PORD_NO = rdr["PORD_NO"] != DBNull.Value ? Convert.ToInt32(rdr["PORD_NO"]) : 0,
+                                    COSTCAT_CODE = rdr["COSTCAT_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["COSTCAT_CODE"]) : 0,
+                                    COSTSCAT_CODE = rdr["COSTSCAT_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["COSTSCAT_CODE"]) : 0,
+                                    COSTCENTER_CODE = rdr["COSTCENTER_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["COSTCENTER_CODE"]) : 0,
+                                    PORD_TYPE = rdr["PORD_TYPE"]?.ToString()
                                 });
                             }
                         }
-                    }
-                    #endregion.
+                    }         
                 }
-
                 return wrapper;
             }
             catch (Exception)
@@ -262,10 +266,5 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                 throw;
             }
         }
-
-
-
-
-
     }
 }

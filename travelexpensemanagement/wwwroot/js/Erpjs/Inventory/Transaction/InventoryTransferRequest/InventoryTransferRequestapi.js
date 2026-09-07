@@ -841,8 +841,6 @@ function validateInventoryDetails() {
     return isValid;
 }
 
-
-
 function TransitReportHeader() {
 
     if (!rowId)

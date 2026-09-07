@@ -13,10 +13,8 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
 {
 
     [SessionAuthorize]
-
     public class InventoryDepartmentIssueListController : Controller
     {
-
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly GlobalValidationdate _globalValidationdate;
@@ -38,11 +36,8 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             _moduleService = moduleService;
             _inventoryDepartmentIssueListRepository = inventoryDepartmentIssueListRepository;
         }
-
-
         public IActionResult Index()
         {
-
             var globalVariables = _globalVariableService.GetGlobalVariables();
             string databaseName;
             using (var connection = _dbConnection.GetErpConnection())
@@ -130,17 +125,6 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                 return Json(new { success = false,  message = "Error fetching inventory department issue data", error = ex.Message });
             }
         }
-
-
-
-
-
-
-
-
-
-
-
 
     }
 }

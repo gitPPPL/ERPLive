@@ -75,16 +75,12 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             return Json(data);
         }
 
-
-
         [HttpGet]
         public JsonResult DDlPlaceFrom()
         {
             var data = _inventoryDepartmentIssueRepository.DDlPlaceFrom(Fromname);
             return Json(data);
         }
-
-
 
         public JsonResult DDLSTATUS()
         {
@@ -103,9 +99,11 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 string query = @" SELECT V_No, V_Type FROM PROD_ORDER1 WHERE V_Type IN (
-                SELECT CODE FROM DOCTYPE_MAST WHERE DOCTYPE = 'ProductionOrder' AND ACTIVE = 1) AND 
-                COMP_CODE = " + getdata.PubCompCode + @" AND YEAR_CODE = " + getdata.PubFYearCode + @"
-                AND BRANCH_CODE = " + getdata.PubBranchCode + ";";
+                SELECT CODE FROM DOCTYPE_MAST) ";
+
+                //WHERE DOCTYPE = 'ProductionOrder' AND ACTIVE = 1) AND 
+                //COMP_CODE = " + getdata.PubCompCode + @" AND YEAR_CODE = " + getdata.PubFYearCode + @"
+                //AND BRANCH_CODE = " + getdata.PubBranchCode + ";";
 
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
@@ -135,6 +133,41 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
             var data = _inventoryDepartmentIssueRepository.DDlItemName("AdjustmentIssue", V_TYPE);
             return Json(data);
         }
+
+        public JsonResult DDLCOSTCAT()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select CODE,NAME from COSTCAT_MAST  where COMP_CODE = "+  getdata.PubCompCode +" ";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+
+
+        public JsonResult DDLCostSubCategory()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select CODE,NAME from COSTSUBCAT_MAST  where COMP_CODE = " + getdata.PubCompCode + " ";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+
+        public JsonResult DDLCostCenter()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select CODE,NAME from COSTCENTER_MAST  where COMP_CODE = " + getdata.PubCompCode + " ";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+
 
         [HttpGet]
         public JsonResult CopyData(string V_TYPE)

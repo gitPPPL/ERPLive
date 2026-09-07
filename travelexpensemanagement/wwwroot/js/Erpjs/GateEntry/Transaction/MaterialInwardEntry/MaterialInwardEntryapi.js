@@ -1091,7 +1091,6 @@ async function GetTransitnodata(TransitNo) {
     }
 }
 
-
 function TransitReport() {
 
     if (!rowId) {

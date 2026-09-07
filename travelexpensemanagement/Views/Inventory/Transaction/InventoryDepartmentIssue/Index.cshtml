@@ -45,7 +45,7 @@
         <div class="erppage-header-title">Department Issue</div>
     </div>
     <div class="erppage-header-right">
-        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "DepartmentIssueList")', isReadOnly)">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InventoryDepartmentIssueList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
     </div>
@@ -86,7 +86,7 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Slip No</label>
-                    <input type="number" class="erppage-input" id="NumSlipNo" placeholder="Enter Slip No">
+                    <input type="number" class="erppage-input" id="NumSlipNo" placeholder="Enter Slip No" maxlength="100">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Prod Ord No</label>
@@ -104,7 +104,7 @@
             <div class="erppage-grid8">
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Remarks</label>
-                    <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 45px;" placeholder="Enter Remarks"></textarea>
+                    <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 45px;" placeholder="Enter Remarks" maxlength="250"></textarea>
                 </div>
             </div>
             <div class="erppage-internalaction">
@@ -236,8 +236,10 @@
                             <col style="width: 50px;">   
                             <col style="width: 53px;">   
                             <col style="width: 67px;">   
-                            <col style="width: 87px;">   
-        
+                            <col style="width: 87px;">         
+
+                            <col style="width: 93px;">   
+                            <col style="width: 93px;">   
                             <col style="width: 93px;">   
                             <col style="width: 93px;">   
                             <col style="width: 131px;">  
@@ -259,8 +261,10 @@
                                 <th>Nos</th>
                                 <th>Weight</th>                       
                                 <th>To Place</th>
-                                <th>From Place</th>
-                                 <th>Show batch</th>
+                                <th>From Place</th>          
+                                <th>Cost Category</th>          
+                                <th>Cost Sub Category</th>          
+                                <th>Cost Center</th>                                  
                                 <th>Remarks</th>
                                 <th>Rate</th>
                                 <th>Amount</th>

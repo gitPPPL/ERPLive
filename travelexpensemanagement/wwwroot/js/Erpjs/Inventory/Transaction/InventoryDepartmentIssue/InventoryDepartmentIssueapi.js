@@ -44,7 +44,10 @@ async function LoadDropDown()
             DDLSTATUS(),
             DDLProdType(),
             DDLDO(),
-            DDlFromPlace()         
+            DDlFromPlace(),
+            DDLCOSTCAT(),
+            DDLCostSubCategory(),
+            DDLCostCenter()
         ]);
 
         let vtype = $('#ddlDocType').val();
@@ -130,27 +133,21 @@ async function DDLProdType() {
         const data = await res.json();
 
         const ddl = $('#ddlProdOrdNo');
-
-        // Destroy existing Select2 if already initialized
+       
         if (ddl.hasClass("select2-hidden-accessible"))
         {
             ddl.select2('destroy');
         }
 
-        ddl.empty();
+        ddl.empty().append('<option value="">-- Select Prod Type --</option>');
 
         data.forEach(item => {
             ddl.append(
-                `<option value="${item.text}"> ${item.value}||${item.text} </option>`
+                `<option value="${item.value}"> ${item.text}||${item.value} </option>`
             );
         });
-
-        // Enable search
-        ddl.select2({
-            placeholder: 'Search Product...',
-            allowClear: true,
-            width: '100%'
-        });
+               
+        ddl.select2({ placeholder: 'Search Product...', allowClear: true, width: '100%'  });
 
     } catch (error) {
         console.error("Error loading VType:", error);
@@ -176,7 +173,7 @@ async function DDLDO(VType, VNo)
         {
             ddl.select2('destroy');
         }
-        ddl.empty();
+        ddl.empty().append('<option value="">-- Select Do No --</option>');
         data.forEach(item => {
             ddl.append(`<option value="${item.text}"> ${item.value}||${item.text} </option>` );
         });
@@ -214,6 +211,69 @@ function DDlItemName(V_TYPE) {
         .catch(function (error) {
 
             console.error("Error loading ItemName:", error);
+
+            throw error;
+        });
+}
+function DDLCOSTCAT() {
+
+    return $.ajax({
+        url: `/InventoryDepartmentIssue/DDLCOSTCAT`,
+        method: 'GET',
+        dataType: 'json'
+    })
+        .then(function (data) {
+
+            if (!Array.isArray(data)) {
+                throw new Error("DDLCOSTCAT response is not an array");
+            }
+            PCostCategorylist = data.map(x => `<option value="${x.value}">${x.text}</option>` ) .join('');
+        })
+        .catch(function (error) {
+
+            console.error("Error loading DDLCOSTCAT:", error);
+
+            throw error;
+        });
+}
+function DDLCostSubCategory() {
+
+    return $.ajax({
+        url: `/InventoryDepartmentIssue/DDLCostSubCategory`,
+        method: 'GET',
+        dataType: 'json'
+    })
+        .then(function (data) {
+
+            if (!Array.isArray(data)) {
+                throw new Error("DDLCostSubCategory response is not an array");
+            }
+            CostSubCategorylist = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+        })
+        .catch(function (error) {
+
+            console.error("Error loading DDLCostSubCategory:", error);
+
+            throw error;
+        });
+}
+function DDLCostCenter() {
+
+    return $.ajax({
+        url: `/InventoryDepartmentIssue/DDLCostCenter`,
+        method: 'GET',
+        dataType: 'json'
+    })
+        .then(function (data) {
+
+            if (!Array.isArray(data)) {
+                throw new Error("DDLCostCenter response is not an array");
+            }
+            CostCenterlist = data.map(x => `<option value="${x.value}">${x.text}</option>`).join('');
+        })
+        .catch(function (error) {
+
+            console.error("Error loading DDLCostCenter:", error);
 
             throw error;
         });
@@ -263,14 +323,16 @@ function AddRow(data = {}) {
             <td>  <input type="number" class="erppagetable-control Txtweight" value="${data.weight ?? ''}"  oninput="limitMaxLength(this, 13)" />  </td>
             <td> <select class="erppagetable-control TxtToPlace">  <option value="">-- Select To Place --</option>  ${PlaceFromList} </select>  </td>
             <td> <select class="erppagetable-control TxtPlaceFrom">  <option value="">-- Select From Place --</option>  ${PlaceFromList} </select>  </td>
-            <td>  <button type="button" class="btn btn-primary">  Show Batch  </button>  </td>
-            <td> <input type="text"  class="erppagetable-control TxtRemark" value="${data.remark ?? ''}"  oninput="limitMaxLength(this, 13)" /> </td>
+            <td> <select class="erppagetable-control TxtPCostCategory">  <option value="">-- Select c --</option>  ${PCostCategorylist} </select>  </td>
+            <td> <select class="erppagetable-control TxtCostSubCategory">  <option value="">-- Select Cost Sub Category --</option>  ${CostSubCategorylist} </select>  </td>
+            <td> <select class="erppagetable-control TxtCostCenter ">  <option value="">-- Select Cost Center --</option>  ${CostCenterlist} </select>  </td>
+            <td> <input type="text"  class="erppagetable-control TxtRemark" value="${data.remark ?? ''}"  /> </td>
             <td>  <input type="number"  class="erppagetable-control TxtRate"  value="${data.rate ?? ''}" oninput="limitMaxLength(this, 13)" />   </td>
-            <td>  <input type="number" class="erppagetable-control TxtAmount" value="${data.Amount ?? ''}" oninput="limitMaxLength(this, 13)" />  </td>
-            <td>   <input type="number"  class="erppagetable-control TxtLDRate" value="${data.LDRate ?? ''}" oninput="limitMaxLength(this, 13)" /> </td>
-            <td> <input type="number" class="erppagetable-control TxtLDAmount"  value="${data.LDAmount ?? ''}" oninput="limitMaxLength(this, 13)" />   </td>
-            <td> <input type="number" class="erppagetable-control TxtProdType" value="${data.ProdType ?? ''}"  oninput="limitMaxLength(this, 13)" />  </td>
-            <td>  <input type="number" class="erppagetable-control TxtProdNo" value="${data.ProdNo ?? ''}" oninput="limitMaxLength(this, 13)" /> </td>
+            <td>  <input type="number" class="erppagetable-control TxtAmount" value="${data.Amount ?? ''}" oninput="limitMaxLength(this, 13)" readonly />  </td>
+            <td>   <input type="number"  class="erppagetable-control TxtLDRate" value="${data.LDRate ?? ''}" oninput="limitMaxLength(this, 13)" readonly /> </td>
+            <td> <input type="number" class="erppagetable-control TxtLDAmount"  value="${data.LDAmount ?? ''}" oninput="limitMaxLength(this, 13)"  readonly/>   </td>
+            <td> <input type="number" class="erppagetable-control TxtProdType" value="${data.ProdType ?? ''}"   readonly />  </td>
+            <td>  <input type="number" class="erppagetable-control TxtProdNo" value="${data.ProdNo ?? ''}"   readonly/> </td>
             <td class="action-col">
                 <button type="button"  class="act-btn add"  onclick="AddRow()">   <i class="fa fa-plus-circle"></i> </button>
                 <button type="button"  class="act-btn delete"   onclick="DeleteRow(this)"> <i class="fa fa-trash"></i>  </button>
@@ -287,6 +349,9 @@ function AddRow(data = {}) {
     $row.find('.ddlItemname').val(data.itemCode ?? '');
     $row.find('.TxtPlaceFrom').val(data.placeCode ?? '');
     $row.find('.TxtToPlace').val(data.TOplaceCode ?? '');
+    $row.find('.TxtPCostCategory').val(data.COSTCAT_CODE ?? '');
+    $row.find('.TxtCostSubCategory').val(data.COSTSCAT_CODE ?? '');
+    $row.find('.TxtCostCenter').val(data.COSTCENTER_CODE ?? '');
 
     // Load item details
     if (data.itemCode) {
@@ -380,9 +445,7 @@ async function CopyData(V_TYPE) {
     }
 }
 function CopyDataAddRow(data = {}) {
-
     let tbody = $('#tbladjustmentissue tbody');
-
     let newRow = `
         <tr class="no-border-input">
             <td class="freeze-item"> <input type="checkbox" class="erppage-checkbox-input chk_box" /> </td>
@@ -401,16 +464,12 @@ function CopyDataAddRow(data = {}) {
             <td class="hidden-col">  <input type="number"  class="erppagetable-control txt_placecode" value="${data.placeCode ?? ''}" /> </td>
         </tr>
     `;
-
     tbody.append(newRow);
-
     let $row = tbody.find('tr:last');
-
-    // Set item code
     $row.find('.ddlItemname').val(data.itemCode ?? '');
 
-    // Existing item
-    if (data.itemCode) {
+    if (data.itemCode)
+    {
         SetItemDetails($row);
     }
 }
@@ -446,44 +505,54 @@ function GetInventoryDepartmentIssueDetails() {
     let details = [];
 
     $('#tblItemdetails tbody tr').each(function (index) {
+
         let $row = $(this);
+
         details.push({
             SNO: index + 1,
-            ITEM_CODE: $row.find('.ItemCode').val() || null,
+
+            ITEM_CODE: toInt($row.find('.ItemCode').val()),
             ITEM_NAME: $row.find('.ddlItemname option:selected').text() || null,
-            UOM_CODE: $row.find('.txtunitcode').val() || null,
+
+            UOM_CODE: toInt($row.find('.txtunitcode').val()),
             UOM_NAME: $row.find('.txtunitname').val() || null,
+
             LOT_NO: $row.find('.txt_lot').val() || null,
-            NOS: $row.find('.TxtNos').val() || null,
-            QTY: $row.find('.Txtweight').val() || null,
-            TO_DEPT: $row.find('.TxtToPlace').val() || null,
-            FROM_DEPT: $row.find('.TxtPlaceFrom').val() || null,
+
+            NOS: toInt($row.find('.TxtNos').val()),
+            QTY: toDecimal($row.find('.Txtweight').val()),
+
+            TO_DEPT: toInt($row.find('.TxtToPlace').val()),
+            FROM_DEPT: toInt($row.find('.TxtPlaceFrom').val()),
+
+            COSTCAT_CODE: toInt($row.find('.TxtPCostCategory').val()),
+            COSTSCAT_CODE: toInt($row.find('.TxtCostSubCategory').val()),
+            COSTCENTER_CODE: toInt($row.find('.TxtCostCenter').val()),
+
             REMARKS: $row.find('.TxtRemark').val() || null,
-            RATE: $row.find('.TxtRate').val() || null,
-            AMOUNT: $row.find('.TxtAmount').val() || null,
-            LAND_RATE: $row.find('.TxtLDRate').val() || null,
-            LAND_AMT: $row.find('.TxtLDAmount').val() || null,
+
+            RATE: toDecimal($row.find('.TxtRate').val()),
+            AMOUNT: toDecimal($row.find('.TxtAmount').val()),
+
+            LAND_RATE: toDecimal($row.find('.TxtLDRate').val()),
+            LAND_AMT: toDecimal($row.find('.TxtLDAmount').val()),
+
             PORD_TYPE: $row.find('.TxtProdType').val() || null,
-            PORD_NO: $row.find('.TxtProdNo').val() || null
+            PORD_NO: toInt($row.find('.TxtProdNo').val())
         });
     });
+
     return details;
 }
 
-
-async function LoadData() {
-
+async function LoadData()
+{
     try {
-
         const res = await $.ajax({
             url: '/InventoryDepartmentIssueList/GetDataByCode',
             type: 'POST',
-            data: {
-                DocID: rowId
-            }
+            data: { DocID: rowId }
         });
-
-        console.log("API Response:", res);
 
         if (!res.success) {
             console.error("Server Error:", res.message);
@@ -494,13 +563,69 @@ async function LoadData() {
         const header = res.data.header;
         const details = res.data.details;
 
-
         console.log("Header Data:", header);    
         console.log("Details Data:", details);
-      
+
+        // Header
+        $('#CODE').val(header.doC_ID);
+        $('#ddlDocType').val(header.v_TYPE);
+        $('#NumDocno').val(header.v_NO);
+        $('#DtDocDate').val(formatDate(header.v_DATE));
+        $('#ddlStatus').val(header.status);
+        $('#ddlShift').val(header.shift);
+        $('#NumSlipNo').val(header.sliP_NO);
+
+        $('#ddlProdOrdNo').val(header.porD_NO).trigger('change');
+
+   
+        $('#ddlDoNo') .val(header.plaN_NO) .trigger('change');
+
+
+
+        $('#TxtRemarks').val(header.remarks);
+        // Header End
+
+        // Table Data
+        let tbody = $('#tblItemdetails tbody');
+
+        tbody.empty();
+
+        if (Array.isArray(details) && details.length > 0) {
+
+            details.forEach(item => {
+
+                AddRow({
+                    itemCode: item.iteM_CODE ?? '',
+                    unitCode: item.uoM_CODE ?? '',
+                    unitName: item.uoM_NAME ?? '',
+                    lot: item.loT_NO ?? '',
+                    nos: item.nos ?? '',
+                    weight: item.qty ?? '',
+                    placeCode: item.froM_DEPT ?? '',
+                    TOplaceCode: item.tO_DEPT ?? '',
+                    COSTCAT_CODE: item.costcaT_CODE ?? '',
+                    COSTSCAT_CODE: item.costscaT_CODE ?? '',
+                    COSTCENTER_CODE: item.costcenteR_CODE ?? '',
+                    remark: item.remarks ?? '',
+                    rate: item.rate ?? '',
+                    Amount: item.amount ?? '',
+                    LDRate: item.lanD_RATE ?? '',
+                    LDAmount: item.lanD_AMT ?? '',
+                    ProdType: item.porD_TYPE ?? '',
+                    ProdNo: item.porD_NO ?? ''
+                });
+            });
+        }
+        else
+        {
+         AddRow();
+        }
+        //Table End
+              
         return res.data;
     }
-    catch (error) {
+    catch (error)
+    {
 
         console.error("Error loading data:", error);
 
@@ -513,6 +638,72 @@ async function LoadData() {
         return null;
     }
 }
+function validateInventoryDetails() {
+
+    let isValid = true;
+    let firstInvalidRow = null;
+    let hasSelectedItem = false;
+    let v_type = $('#ddlDocType').val();
+    $('#tblItemdetails tbody tr').each(function (index) {
+
+        let row = $(this);
+
+        let itemCode = $.trim(row.find('.ddlItemname').val() || '');
+
+  
+        if (itemCode !== '') {
+
+            hasSelectedItem = true;
+
+            let qty = $.trim(row.find('.TxtNos').val() || '');
+            let fromDept = $.trim(row.find('.TxtPlaceFrom').val() || '');
+            let toDept = $.trim(row.find('.TxtToPlace').val() || '');
+       
+
+            if (PubUserLevel != 1) {
+                if (qty === '') {
+                    showToast(`Please enter Qty in row ${index + 1}`, "Error");
+                    firstInvalidRow = row;
+                    isValid = false;
+                    return false;
+                }
+            }
+                      
+            if (v_type == 'RAID') {
+                if (fromDept === '' || toDept === '') {
+                    showToast(`From Department OR To Department is empty at line no.=> ${index + 1}`, "Error");
+                    firstInvalidRow = row;
+                    isValid = false;
+                    return false;
+                }         
+            }           
+                   
+        }
+    });
+
+    if (!hasSelectedItem) {
+        showToast("Please select at least one Item.", "Error");
+        return false;
+    }
+
+    if (firstInvalidRow) {
+        $('html, body').animate({ scrollTop: firstInvalidRow.offset().top - 150 }, 300);
+    }
+
+    return isValid;
+}
+function toInt(value) {
+    value = $.trim(value || '');
+    return value === '' ? null : parseInt(value, 10);
+}
+function toDecimal(value) {
+    value = $.trim(value || '');
+    return value === '' ? null : parseFloat(value);
+}
+
+
+
+
 
 
 

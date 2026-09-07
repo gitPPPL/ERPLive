@@ -13,6 +13,9 @@ let LoginDate = globalVars.LoginDate;
 var controllerName = window.location.pathname.split('/')[1];
 
 let ItemNameList = '';
+let PCostCategorylist = '';
+let CostSubCategorylist = '';
+let CostCenterlist = '';
 let PlaceFromList = '';
 let ItemDetailsList = [];
 
@@ -22,7 +25,6 @@ $(document).ready(async function ()
         SetFYDate('DtDocDate', LoginDate);
         await LoadDropDown();
         AddRow();
-
         if (rowId == null)
         {
             let v_type = $('#ddlDocType').val();
@@ -57,23 +59,41 @@ $(document).ready(async function ()
 
     $('#btn_save').on('click', function () {
 
+        let PORD_TYPE = '';
+        let PLAN_TYPE = '';
+
+
         let V_TYPE = $('#ddlDocType').val();
         let V_NO = $('#NumDocno').val();
         let V_DATE = $('#DtDocDate').val();
         let STATUS = $('#ddlStatus').val();
         let SHIFT = $('#ddlShift').val();
         let SLIP_NO = $('#NumSlipNo').val();
-
         let PORD_NO = $('#ddlProdOrdNo').val();
-        let PORD_TYPE = $('#ddlProdOrdNo option:selected').text().substring(0, 4);
+
+        if (PORD_NO) {
+            PORD_TYPE = $('#ddlProdOrdNo option:selected').text().substring(0, 5);
+        }
+              
+
         let REMARKS = $('#TxtRemarks').val();
         let PLAN_NO = $('#ddlDoNo').val();
-        let PLAN_TYPE = $('#ddlDoNo option:selected').text().substring(0, 4);
+
+        if (PLAN_NO) {
+            PLAN_TYPE = $('#ddlDoNo option:selected').text().substring(0, 5);
+        }
+
+     
         let action = $.trim($('#CODE').val()) ? 'UPDATE' : 'INSERT';
 
         if (!validateRequiredField('#ddlDocType', 'Please select a Doc Type')) return;
         if (!validateRequiredField('#NumDocno', 'Please select a Doc NO')) return;
         if (!validateRequiredField('#DtDocDate', 'Please select a Doc Date')) return;    
+        if (!validateRequiredField('#ddlShift', 'Please select a Shift')) return;    
+
+        if (!validateInventoryDetails()) {
+            return;
+        }
 
         let data = GetInventoryDepartmentIssueDetails();
 
@@ -88,19 +108,21 @@ $(document).ready(async function ()
        
         let requestData = {
             Header: {
-                V_TYPE: V_TYPE,
-                V_NO: V_NO,
-                V_DATE: V_DATE,
-                STATUS: STATUS,
-                SHIFT: SHIFT,
-                SLIP_NO: SLIP_NO,
-                PORD_NO: PORD_NO,
-                PORD_TYPE: PORD_TYPE,
-                REMARKS: REMARKS,
-                PLAN_NO: PLAN_NO ,
-                PLAN_TYPE: PLAN_TYPE,
-                action: action
+                V_TYPE: V_TYPE || null,
+                V_NO: toInt(V_NO),
+                V_DATE: V_DATE || null,
+                STATUS: toInt(STATUS),
+                SHIFT: SHIFT || null,
+                SLIP_NO: SLIP_NO || null,
+                PORD_NO: PORD_NO || null,
+                PORD_TYPE: PORD_TYPE || null,
+                REMARKS: REMARKS || null,
+                PLAN_NO: toInt(PLAN_NO),
+                PLAN_TYPE: PLAN_TYPE || null,
+
+                action: action || null
             },
+
             Details: data
         };
 
@@ -117,6 +139,9 @@ $(document).ready(async function ()
 
                 if (response.success) {
                     showToast(response.message, "Success");
+                    setTimeout(function () {
+                        window.location.href = '/InventoryDepartmentIssue/Index?id=' + V_TYPE + V_NO + '&mode=view';
+                    }, 3000);
                 }
                 else {
                     showToast(response.message, "Error");
@@ -203,5 +228,4 @@ $(document).ready(async function ()
         });
 
     });
-
 });
