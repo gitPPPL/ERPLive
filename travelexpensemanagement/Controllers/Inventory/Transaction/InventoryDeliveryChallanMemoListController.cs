@@ -31,9 +31,9 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
         }
         const string doctype = "GTMO";
         [HttpGet]
-        public IActionResult GetAllDeliveryMemoList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAllDeliveryMemoList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
-            var result = _repo.GetAllDeliveryMemoList(searchTerm, pageNumber, pageSize);
+            var result = await _repo.GetAllDeliveryMemoList(searchTerm, pageNumber, pageSize);
             if(result.data == null || !result.status)
             {
                 return Json(new { status = false, message = result.message });

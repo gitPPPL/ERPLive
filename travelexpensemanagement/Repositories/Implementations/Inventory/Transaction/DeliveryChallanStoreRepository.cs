@@ -16,13 +16,15 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
         private readonly GlobalVariableService _globalVariableService;
         private readonly DbHelper _dbHelper;
         private readonly GlobalValidationdate _globalValidationdate;
+        private readonly LogService.LogService _logService;
         public DeliveryChallanStoreRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DbHelper dbHelper,
-            GlobalValidationdate globalValidationdate)
+            GlobalValidationdate globalValidationdate, LogService.LogService logService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _dbHelper = dbHelper;
             _globalValidationdate = globalValidationdate;
+            _logService = logService;
         }
         public RepositoryResponseData<AddressDetails> GetAddressByBillToParty(int code, int addressId)
         {
@@ -252,7 +254,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                             fAppRemarks = "Document Approved.";
                             fAppStatus = "Approved";
                         }
-
+                        string mode = "";
                         string action = model.ACTION == "INSERT" ? "HeaderInsert" : "UpdateHeader";
                         string? docId = string.IsNullOrEmpty(model.V_TYPE?.ToString()) && string.IsNullOrEmpty(model.V_NO?.ToString())
                                                                 ? null : model.V_TYPE?.ToString() + model.V_NO?.ToString();
@@ -346,10 +348,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                             if (model.ACTION == "INSERT")
                             {
                                 cmd.Parameters.AddWithValue("@UUSER", gv.PubUserId);
+                                mode = "INSERT";
                             }
                             else
                             {
                                 cmd.Parameters.AddWithValue("@EUSER", gv.PubUserId);
+                                mode = "UPDATE";
                             }
                             cmd.Parameters.AddWithValue("@SRNO", model.SRNO ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@WSID", gv.PubWorkStationID);
@@ -450,6 +454,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                         }
 
                         tran.Commit();
+                        //Log Service
+                        //_logService.InsertLog("DC_NOTE1", "Delivery Challan Store", "Transaction", mode, model.V_TYPE, model.V_NO.ToString(), model.V_DATE);
+                        //_logService.InsertLog("DC_NOTE2", "Delivery Challan Store", "Transaction", mode, model.V_TYPE, model.V_NO.ToString(), model.V_DATE);
                         return new RepositoryResponse { status = true, message = "Saved Successfully!" };
                     }
                     catch (Exception ex)

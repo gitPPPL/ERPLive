@@ -2,6 +2,9 @@
 {
     public class InventoryDeliveryChallanMemoModel
     {
+        public int? COMP_CODE { get; set; }
+        public int? YEAR_CODE { get; set; }
+        public int? BRANCH_CODE { get; set; }
         public int? V_NO { get; set; }
         public DateTime? V_DATE { get; set; }
         public int? EMP_CODE { get; set; }
@@ -15,7 +18,7 @@
         public string? REMARKS { get; set; }
         public int? STATUS { get; set; }
         public int? ACTIVE { get; set; }
-        
+
         public string? ACTION { get; set; }
 
         public List<InventoryDeliveryChallanMemoItemsModel> items { get; set; } = new List<InventoryDeliveryChallanMemoItemsModel>();

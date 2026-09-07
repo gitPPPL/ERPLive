@@ -1,0 +1,333 @@
+﻿@{
+    ViewBag.Title = "Sales Export Costing";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-file-invoice-dollar"></i>
+        </div>
+        <div class="erppage-header-title">Sales Export Costing</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesExportCostingList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="SalesExportCostingform">
+    <input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppage-grid8">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Party Name</label>
+                    <select class="erppage-input erppage-select" id="ddlPartyName">
+                        <option value="">Select Party Name</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Delivery At</label>
+                    <select class="erppage-input erppage-select" id="ddlDeliveryAt">
+                        <option value="">Select Delivery At</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Agent Name</label>
+                    <select class="erppage-input erppage-select" id="ddlAgentName">
+                        <option value="">Select Agent Name</option>
+                    </select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Currency</label>
+                    <select class="erppage-input erppage-select" id="ddlCurrency">
+                        <option value="EURO">EURO</option>
+                        <option value="GBP">GBP</option>
+                        <option value="USD">USD</option>
+                        <option value="Yen">Yen</option>
+                        <option value="Yuan">Yuan</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Loading Qty</label>
+                    <input type="number" class="erppage-input" id="NumLoadingQty">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Stuffing Qty</label>
+                    <input type="number" class="erppage-input" id="NumStuffingQty">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">EPCG Amt</label>
+                    <input type="number" class="erppage-input" id="NumEPCGAmt">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Gross Less 1%</label>
+                    <input type="number" class="erppage-input" id="NumGrossLess">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Disc. Amt</label>
+                    <input type="number" class="erppage-input" id="NumDiscAmt">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">RoadTape Amt</label>
+                    <input type="number" class="erppage-input" id="NumRoadTapeAmt">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Adv. Licence</label>
+                    <input type="number" class="erppage-input" id="NumAdvLicence">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Costing Type</label>
+                    <select class="erppage-input erppage-select" id="ddlCostingType">
+                        <option value="">Select Costing Type</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Ocean Inland Haulage Cost</label>
+                    <select class="erppage-input erppage-select" id="ddlOceanInlandHaulageCost">
+                        <option value="">Select Ocean Inland Haulage Cost</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Busy Season Charges</label>
+                    <input type="number" class="erppage-input" id="NumBusySeasonCharges">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">DDBK Amt</label>
+                    <input type="number" class="erppage-input" id="NumDDBKAmt">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Insurance Cost</label>
+                    <input type="number" class="erppage-input" id="NumInsuranceCost">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Sample Costing (Yes/No)</label>
+                    <select class="erppage-input erppage-select" id="ddlSampleCosting">
+                        <option value="">Select</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Sample Costing Amt</label>
+                    <input type="number" class="erppage-input" id="NumSampleCostingAmt">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">CHA VGM</label>
+                    <input type="number" class="erppage-input" id="NumCHAVGM">
+                </div>
+            </div>
+            <div class="erppage-grid8">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">CHA CGM Cost</label>
+                    <input type="number" class="erppage-input" id="NumCHACGMCost">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Ocean ANS Charges</label>
+                    <input type="number" class="erppage-input" id="NumOceanANSCharges">
+                </div>
+                <div class="erppage-divfield erppage-col-span-4">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea typeof="text" class="erppage-input" id="txtremarks" style="height:50px;" placeholder="Enter Remarks"></textarea>
+                </div>
+            </div>
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Product Details</legend>
+                <div class="erppage-grid8">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Product Value</label>
+                        <input type="text" class="erppage-input" id="txtProductValue" value="0">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ex. Rate for Freight</label>
+                        <input type="text" class="erppage-input" id="txtExRateFreight">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ex. Rate for Rate</label>
+                        <input type="text" class="erppage-input" id="txtExRateRate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ocean Freight (USD)</label>
+                        <div class="erppage-inputgroup">
+                            <input type="text" class="erppage-input" id="txtOceanFreight">
+                            <input type="text" class="erppage-input" id="txtOceanFreightTotal" value="0">
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Door Delivery (USD)</label>
+                        <div class="erppage-inputgroup">
+                            <input type="text" class="erppage-input" id="txtDoorDelivery">
+                            <input type="text" class="erppage-input" id="txtDoorDeliveryTotal" value="0">
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Duty 28%</label>
+                        <input type="text" class="erppage-input" id="txtDuty28">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Rail Freight</label>
+                        <input type="text" class="erppage-input" id="txtRailFreight">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Concer Handling Factory Stuffing</label>
+                        <input type="text" class="erppage-input" id="txtFactoryStuffing">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">THC</label>
+                        <input type="text" class="erppage-input" id="txtTHC">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Seal Charges</label>
+                        <input type="text" class="erppage-input" id="txtSealCharges">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">BL Charges</label>
+                        <input type="text" class="erppage-input" id="txtBLCharges">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Clearing Charges</label>
+                        <input type="text" class="erppage-input" id="txtClearingCharges">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Document Charges</label>
+                        <input type="text" class="erppage-input" id="txtDocumentCharges">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Transport Charges</label>
+                        <input type="text" class="erppage-input" id="txtTransportCharges">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Total Cost</label>
+                        <input type="text" class="erppage-input" id="txtTotalCost" value="0">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Cost/Kg</label>
+                        <input type="text" class="erppage-input" id="txtCostKg" value="NaN">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Cost/Kg (Ex-Plant)</label>
+                        <input type="text" class="erppage-input" id="txtCostKgExPlant">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Total Cost/Kg</label>
+                        <input type="text" class="erppage-input" id="txtTotalCostKg" value="0">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Add : DBK @@ 1.2%</label>
+                        <input type="text" class="erppage-input" id="txtDBK" value="NaN">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Less: MEIS/RODTEP Benefit 1.3%</label>
+                        <input type="text" class="erppage-input" id="txtMEISBenefit" value="NaN">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Total Cost/Kg (Rs)</label>
+                        <input type="text" class="erppage-input" id="txtTotalCostKgRs" value="0">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Total Cost/MT (Rs)</label>
+                        <input type="text" class="erppage-input" id="txtTotalCostMTRs" value="0">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Cost/Kg (USD)</label>
+                        <input type="text" class="erppage-input" id="txtCostKgUSD" value="NaN">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Cost/MT (USD)</label>
+                        <input type="text" class="erppage-input" id="txtCostMTUSD" value="0">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Comm. Rate</label>
+                        <input type="text" class="erppage-input" id="txtCommRate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Total</label>
+                        <input type="text" class="erppage-input" id="txtTotal" value="0">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Our Offer Rate</label>
+                        <input type="text" class="erppage-input" id="txtOurOfferRate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ocean BL Fees</label>
+                        <input type="text" class="erppage-input" id="txtOceanBLFees">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ocean Doc Fee Export</label>
+                        <input type="text" class="erppage-input" id="txtOceanDocFeeExport">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CHA Examination Cost</label>
+                        <input type="text" class="erppage-input" id="txtCHAExaminationCost">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CHA CMC Cost</label>
+                        <input type="text" class="erppage-input" id="txtCHACMCCost">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CHA Loading/Unloading Cost</label>
+                        <input type="text" class="erppage-input" id="txtCHALoadingUnloadingCost">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CHA Agency Cost</label>
+                        <input type="text" class="erppage-input" id="txtCHAAgencyCost">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Banking Charges</label>
+                        <input type="text" class="erppage-input" id="txtBankingCharges">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CHA Nomination Cost</label>
+                        <input type="text" class="erppage-input" id="txtCHANominationCost">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Details</legend>
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblSalesExportCosting" class="excel-table fixed-grid-table width-table resizable-table">
+                        <colgroup>
+                            <col style="width: 75px;">
+                            <col style="width: 150px;">
+                            <col style="width: 100px;">
+                            <col style="width: 80px;">
+                            <col style="width: 90px;">
+                            <col style="width: 90px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Rate</th>
+                                <th>Quantity</th>
+                                <th>HSN Code</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="erppage-actions">
+            <button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
+
+    </div>
+</div>

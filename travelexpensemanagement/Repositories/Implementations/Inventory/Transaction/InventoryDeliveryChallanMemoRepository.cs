@@ -2,6 +2,7 @@
 using System.Data;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 
@@ -11,11 +12,13 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
     {
         private readonly GlobalVariableService _globalVariableService;
         private readonly DataBaseConnection _dbConnection;
+        private readonly LogService.LogService _logService;
         public InventoryDeliveryChallanMemoRepository(GlobalValidationdate globalValidationdate, GlobalVariableService globalVariableService, 
-            DataBaseConnection dbConnection)
+            DataBaseConnection dbConnection, LogService.LogService logService)
         {
             _globalVariableService = globalVariableService;
             _dbConnection = dbConnection;
+            _logService = logService;
         }
         const string doctype = "GTMO";
         public RepositoryResponse SaveDeliveryChallanMemo(InventoryDeliveryChallanMemoModel model)
@@ -35,6 +38,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                         try
                         {
                             //Header
+                            string mode = "";
                             string action = model.ACTION == "INSERT" ? "HEADERINSERT" : "UPDATE";
 
                             using (SqlCommand headCmd = new SqlCommand("sp_InventoryDeliveryChallanMemo", con, tran))
@@ -65,10 +69,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                                 if (model.ACTION == "INSERT")
                                 {
                                     headCmd.Parameters.AddWithValue("@UUSER", gv.PubUserId);
+                                    mode = "INSERT";
                                 }
                                 else
                                 {
                                     headCmd.Parameters.AddWithValue("@EUSER", gv.PubUserId);
+                                    mode = "UPDATE";
                                 }
                                 headCmd.Parameters.AddWithValue("@WSID", gv.PubWorkStationID);
                                 headCmd.Parameters.AddWithValue("@LIP", gv.PubLocalId);
@@ -133,6 +139,10 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                             }
 
                             tran.Commit();
+                            //Log Service
+                            //_logService.InsertLog("GATE_MEMO1", "Delivery Challan Memo", "Transaction", mode, doctype, model.V_NO.ToString(), model.V_DATE);
+                            //_logService.InsertLog("GATE_MEMO2", "Delivery Challan Memo", "Transaction", mode, doctype, model.V_NO.ToString(), model.V_DATE);
+
                             return new RepositoryResponse { status = true, message = "Saved Successfully!" };
                         }
                         catch (Exception ex)

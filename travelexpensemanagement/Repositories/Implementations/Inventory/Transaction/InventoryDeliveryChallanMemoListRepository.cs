@@ -1,7 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Data;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 
@@ -11,12 +14,15 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
     {
         private readonly GlobalVariableService _globalVariableService;
         private readonly DataBaseConnection _dbConnection;
-        public InventoryDeliveryChallanMemoListRepository(GlobalVariableService globalVariableService, DataBaseConnection dbConnection)
+        private readonly LogService.LogService _logService;
+        public InventoryDeliveryChallanMemoListRepository(GlobalVariableService globalVariableService, DataBaseConnection dbConnection, LogService.LogService logService)
         {
             _globalVariableService = globalVariableService;
             _dbConnection = dbConnection;
+            _logService = logService;
         }
-        public RepositoryResponseList<InventoryDeliveryChallanMemoModel> GetAllDeliveryMemoList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
+        const string doctype = "GTMO";
+        public async Task<RepositoryResponseList<InventoryDeliveryChallanMemoModel>> GetAllDeliveryMemoList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
             var gv = _globalVariableService.GetGlobalVariables();
             var data = new List<InventoryDeliveryChallanMemoModel>();
@@ -63,6 +69,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                         }
                     }
                 }
+
+
                 return new RepositoryResponseList<InventoryDeliveryChallanMemoModel> { status = true, data = data, totalCount = totalcount };
             }
             catch (Exception ex)
@@ -70,7 +78,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                 return new RepositoryResponseList<InventoryDeliveryChallanMemoModel> { status = false, message = ex.Message };
             }
         }
-        const string doctype = "GTMO";
         public RepositoryResponse Delete(int vNo)
         {
             if (vNo <= 0)
@@ -100,6 +107,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                                 cmd.ExecuteNonQuery();
                             }
                             tran.Commit();
+                            //Log Service
+                            //_logService.InsertLog("GATE_MEMO1", "Delivery Challan Memo", "Transaction", "DELETE", doctype, vNo.ToString(), null);
+                            //_logService.InsertLog("GATE_MEMO2", "Delivery Challan Memo", "Transaction", "DELETE", doctype, vNo.ToString(), null);
                             return new RepositoryResponse { status = true, message = "Deleted successfully!" };
                         }
                         catch (Exception ex)

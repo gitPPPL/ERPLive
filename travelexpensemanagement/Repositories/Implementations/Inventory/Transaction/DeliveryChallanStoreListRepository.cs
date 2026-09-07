@@ -12,11 +12,13 @@ namespace travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DbHelper _dbHelper;
-        public DeliveryChallanStoreListRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DbHelper dbHelper)
+        private readonly LogService.LogService _logService;
+        public DeliveryChallanStoreListRepository(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DbHelper dbHelper, LogService.LogService logService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _dbHelper = dbHelper;
+            _logService = logService;
         }
         public RepositoryResponseList<DeliveryChallanStoreListModel> GetAllDeliveryChallanList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
@@ -106,6 +108,9 @@ namespace travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction
                                 cmd.ExecuteNonQuery();
                             }
                             tran.Commit();
+                            //Log Service
+                            //_logService.InsertLog("DC_NOTE1", "Delivery Challan Store", "Transaction", "DELETE", docType, vNo.ToString(), null);
+                            //_logService.InsertLog("DC_NOTE2", "Delivery Challan Store", "Transaction", "DELETE", docType, vNo.ToString(), null);
                             return new RepositoryResponse { status = true, message = "Deleted successfully!" };
                         }
                         catch (Exception ex)
