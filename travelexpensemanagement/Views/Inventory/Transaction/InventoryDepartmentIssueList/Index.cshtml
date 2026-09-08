@@ -21,10 +21,10 @@
         <input type="text" id="searchBox" placeholder="Search Module..." />
     </div>
     <div class="erppagelist-actions">
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print">
             <i class="fa fa-print"></i> Print
         </button>
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="button_export">
             <i class="fa fa-file-excel"></i> Export
         </button>
         <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
@@ -88,8 +88,6 @@
     </div>
 </div>
 
-
-
 <script>
 
     let currentPage = 1;
@@ -99,29 +97,27 @@
 
     $(document).ready(function () {
 
-        checkPermission(controllerName, function () {
+      checkPermission(controllerName, function () {
             loadAllInward();
          });
 
-        $('#searchBox').on('keyup', function () {
+      $('#searchBox').on('keyup', function () {
             currentPage = 1;
             loadAllInward();
         });
 
-        $('#button_export').on('click', function () {
+      $('#button_export').on('click', function () {
             var text = $('#searchBox').val();
             window.location.href = '/InventoryDepartmentIssueList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
         });
 
-        $('#button_print').on('click', function () {
+      $('#button_print').on('click', function () {
             var searchTerm = $('#searchBox').val() || '';
             var url = '/InventoryDepartmentIssueList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
             window.open(url, '_blank');
         });
 
     });
-
-    // ================= LOAD DATA =================
 
     function loadAllInward() {
 
@@ -161,8 +157,6 @@
         });
     }
 
-
-    // ================= TABLE =================
     function renderTable(list) {
 
         const tbody = $('#tblInventoryDepartmentIssueList tbody');
@@ -215,8 +209,6 @@
          applyGridPermission();
     }
 
-
-    // ================= PAGINATION =================
     function renderPagination() {
 
         const totalPages = Math.ceil(totalCount / pageSize) || 1;
@@ -263,7 +255,6 @@
         $('#nextBtn').prop('disabled', currentPage === totalPages);
     }
 
-    // ================= PAGINATION ACTIONS =================
     function prevPage() {
         if (currentPage > 1) {
             currentPage--;
@@ -290,7 +281,6 @@
         loadAllInward();
     }
 
-    // ================= UTIL =================
     function formatDate(dateStr) {
         if (!dateStr) return '';
         const d = new Date(dateStr);
@@ -302,8 +292,6 @@
 
         return `${day}-${month}-${year}`;
     }
-
-    // ================= ACTIONS =================
 
     function AddOrEditFunction(rowId) {
         window.location.href = `/InventoryDepartmentIssue/Index?id=${encodeURIComponent(rowId)}`;
@@ -352,7 +340,7 @@
         });
     }
 
-      function showDocumentPopup(docCode) {
+    function showDocumentPopup(docCode) {
         alert("hh");
 
         $.ajax({

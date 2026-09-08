@@ -62,7 +62,6 @@ $(document).ready(async function ()
         let PORD_TYPE = '';
         let PLAN_TYPE = '';
 
-
         let V_TYPE = $('#ddlDocType').val();
         let V_NO = $('#NumDocno').val();
         let V_DATE = $('#DtDocDate').val();
@@ -73,8 +72,7 @@ $(document).ready(async function ()
 
         if (PORD_NO) {
             PORD_TYPE = $('#ddlProdOrdNo option:selected').text().substring(0, 5);
-        }
-              
+        }              
 
         let REMARKS = $('#TxtRemarks').val();
         let PLAN_NO = $('#ddlDoNo').val();
@@ -119,7 +117,6 @@ $(document).ready(async function ()
                 REMARKS: REMARKS || null,
                 PLAN_NO: toInt(PLAN_NO),
                 PLAN_TYPE: PLAN_TYPE || null,
-
                 action: action || null
             },
 

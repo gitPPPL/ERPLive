@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using iText.StyledXmlParser.Jsoup.Select;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
+using StackExchange.Redis;
 using System.Data;
+using System.Data.Common;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -137,16 +141,297 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
             }
         }
 
-        public async Task<(string Status, string Message)> SubmitRequest(InventryDepartmentIssue_Header header, List<InventryDepartmentIssue_Details> details, string action)
+
+        public string GetText(string query)
+        {
+            try
+            {
+                using var con = _dbConnection.GetErpConnection();
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return reader[0].ToString();
+                            }
+                            else
+                            {
+                                return string.Empty;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetText() Error: " + ex.Message);
+                return string.Empty;
+            }
+        }
+
+
+
+
+
+
+
+
+        public async Task<(string Status, string Message)> validation( InventryDepartmentIssue_Header header,  List<InventryDepartmentIssue_Details> details, string action)
         {
             try
             {
                 var g = _globalVariableService.GetGlobalVariables();
+
+                using var conn = _dbConnection.GetErpConnection();
+                await conn.OpenAsync();
+
+                string docId = string.IsNullOrWhiteSpace(header.DOC_ID)
+                    ? $"{header.V_TYPE}{header.V_NO}"
+                    : header.DOC_ID;
+
+                if (details != null && details.Count > 0)
+                {
+                    foreach (var detail in details)
+                    {
+                        if (detail == null || detail.ITEM_CODE <= 0)
+                            continue;
+
+                        if (header.V_TYPE == "RMAI" || header.V_TYPE == "RAID")
+                        {
+                            decimal closStk = 0m;
+
+                            string excludeDoc = $"{header.V_TYPE}{header.V_NO}{detail.SNO}";
+
+                            string sql = $@" SELECT SUM(qty) FROM VW_STOCK_MOVEMENT WHERE comp_code = {g.PubCompCode}
+                            AND branch_code = {g.PubBranchCode} AND v_date <= {(header.V_DATE)}
+                            AND v_type IN ('BFOP','OO','OPRM','BFRC','RCPI','RCPT',
+                            'SRPU','PRDR','SRCO','STAR','RMAR','RAIV') AND item_code = {detail.ITEM_CODE}
+                            AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                            closStk += await GetDecimalAsync(conn, sql);
+
+                            sql = $@" SELECT SUM(qty) FROM VW_STOCK_MOVEMENT  WHERE comp_code = {g.PubCompCode}
+                            AND branch_code = {g.PubBranchCode} AND v_date <= {(header.V_DATE)}
+                            AND v_type IN ('RRET','SRET','BFIS','PRDI','SICO',
+                            'RAIP','STAI','RMAI','RAIT') AND item_code = {detail.ITEM_CODE}
+                            AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                            closStk -= await GetDecimalAsync(conn, sql);
+                                     
+                            sql = $@" SELECT SUM(qty) FROM VW_STOCK_MOVEMENT  WHERE comp_code = {g.PubCompCode}
+                            AND branch_code = {g.PubBranchCode}  AND v_date <= {(header.V_DATE)}
+                            AND v_type IN ('JBRC','SAJR','SART')  AND mgroup_type <> 'Finish'
+                            AND item_code = {detail.ITEM_CODE} AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                            closStk += await GetDecimalAsync(conn, sql);
+                 
+                            sql = $@" SELECT SUM(qty)  FROM VW_STOCK_MOVEMENT  WHERE comp_code = {g.PubCompCode}
+                            AND branch_code = {g.PubBranchCode}  AND v_date <= {(header.V_DATE)}
+                            AND v_type IN ('JBIS','SAJI','ESAG','SAGT') AND mgroup_type <> 'Finish'
+                            AND item_code = {detail.ITEM_CODE}  AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                            closStk -= await GetDecimalAsync(conn, sql);
+
+                            sql = $@" SELECT SUM(qty)  FROM VW_STOCK_MOVEMENT  WHERE comp_code = {g.PubCompCode}
+                            AND branch_code = {g.PubBranchCode}  AND v_date <= {(header.V_DATE)}
+                            AND v_type IN ('FFRC','FLRC','FPDR','FPRC','FRC')  AND mgroup_type = 'Finish'
+                            AND item_code = {detail.ITEM_CODE} AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                            closStk += await GetDecimalAsync(conn, sql);
+
+                            sql = $@" SELECT SUM(qty)  FROM VW_STOCK_MOVEMENT WHERE comp_code = {g.PubCompCode}
+                            AND branch_code = {g.PubBranchCode}  AND v_date <= {(header.V_DATE)}
+                            AND v_type IN ('FFIS','FLIS','FPIS','FSIS')  AND mgroup_type = 'Finish'
+                            AND item_code = {detail.ITEM_CODE} AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                            closStk -= await GetDecimalAsync(conn, sql);
+
+                            closStk = Math.Round(closStk, 2);
+                                       
+
+                            decimal requiredQty = Convert.ToDecimal(detail.QTY);
+
+                            if ((closStk - requiredQty) < 0)
+                            {
+                                string itemName = detail.ITEM_NAME ?? "";
+
+                                string message = $"Item : ({detail.ITEM_CODE}) {itemName}, " + $"Please Check Stock Available = {closStk}";
+                                                  
+
+                                if (g.PubUserId != "1")
+                                {
+                                    return ("Error", message);
+                                }
+                            }
+
+                            if (action == "Insert" && closStk > 0)
+                            {
+                                decimal closAmt = 0m;
+                                decimal balRate = 0m;
+
+        
+                                sql = $@" SELECT SUM(land_amt) FROM VW_STOCK_MOVEMENT WHERE comp_code = {g.PubCompCode}
+                                AND branch_code = {g.PubBranchCode}  AND v_date <= {(header.V_DATE)} AND v_type IN
+                                ('BFOP','OO','OPRM','BFRC','RCPI','RCPT', 'SRPU','PRDR','SRCO','STAR','RMAR','RAIV')
+                                AND item_code = {detail.ITEM_CODE} AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                                closAmt += await GetDecimalAsync(conn, sql);
+
+                                sql = $@" SELECT SUM(land_amt)  FROM VW_STOCK_MOVEMENT  WHERE comp_code = {g.PubCompCode}
+                                AND branch_code = {g.PubBranchCode} AND v_date <= {(header.V_DATE)} AND v_type IN
+                                ('RRET','SRET','BFIS','PRDI','SICO',  'RAIP','STAI','RMAI','RAIT')
+                                AND item_code = {detail.ITEM_CODE} AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                                closAmt -= await GetDecimalAsync(conn, sql);
+
+                                sql = $@"  SELECT SUM(land_amt)  FROM VW_STOCK_MOVEMENT
+                                WHERE comp_code = {g.PubCompCode} AND branch_code = {g.PubBranchCode}
+                                AND v_date <= {(header.V_DATE)} AND v_type IN ('JBRC','SAJR','SART')
+                                AND mgroup_type <> 'Finish' AND item_code = {detail.ITEM_CODE} AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                                closAmt += await GetDecimalAsync(conn, sql);
+
+                                sql = $@" SELECT SUM(land_amt)  FROM VW_STOCK_MOVEMENT WHERE comp_code = {g.PubCompCode}
+                                AND branch_code = {g.PubBranchCode} AND v_date <= {(header.V_DATE)}
+                                AND v_type IN ('JBIS','SAJI','ESAG','SAGT') AND mgroup_type <> 'Finish'
+                                AND item_code = {detail.ITEM_CODE}  AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                                closAmt -= await GetDecimalAsync(conn, sql);
+
+                                sql = $@" SELECT SUM(land_amt) FROM VW_STOCK_MOVEMENT
+                                WHERE comp_code = {g.PubCompCode} AND branch_code = {g.PubBranchCode}
+                                AND v_date <= {(header.V_DATE)}  AND v_type IN ('FFRC','FLRC','FPDR','FPRC','FRC')
+                                AND mgroup_type = 'Finish'  AND item_code = {detail.ITEM_CODE}  AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                                closAmt += await GetDecimalAsync(conn, sql);
+
+                                sql = $@" SELECT SUM(land_amt)  FROM VW_STOCK_MOVEMENT
+                                WHERE comp_code = {g.PubCompCode}  AND branch_code = {g.PubBranchCode}
+                                AND v_date <= {(header.V_DATE)}  AND v_type IN ('FFIS','FLIS','FPIS','FSIS')
+                                AND mgroup_type = 'Finish'  AND item_code = {detail.ITEM_CODE} AND CONCAT(v_type,v_no,sno) <> '{excludeDoc}'";
+
+                                closAmt -= await GetDecimalAsync(conn, sql);
+
+
+                                closAmt = Math.Round(closAmt, 2);
+                                        
+                                if (closAmt > 0 && closStk > 0)
+                                {
+                                    balRate = closAmt / closStk;
+                                    detail.RATE = Math.Round(balRate, 2);
+                                    detail.AMOUNT =  Math.Round(requiredQty * balRate, 2);
+                                }
+                            }
+                        }
+
+                        if (g.PubCompCode == "4"  && detail.ITEM_CODE > 0 && detail.PORD_NO > 0 && detail.EMPTY_YN == "BT")
+                        {
+                                string sql = $@"
+                                SELECT COUNT(*)  FROM PROD_SFG2  WHERE V_TYPE = '{header.V_TYPE}'
+                                AND V_DATE = '{header.V_DATE:yyyy-MM-dd}'  AND SHIFT = '{header.SHIFT}'
+                                AND COMP_CODE = {g.PubCompCode} AND BRANCH_CODE = {g.PubBranchCode} AND YEAR_CODE = {g.PubFYearCode}
+                                AND ITEM_CODE = {detail.ITEM_CODE} AND PORD_NO = {detail.PORD_NO} AND ISNULL(LMRC_NO, 0) = 0";
+
+                            decimal qc = await GetDecimalAsync(conn, sql);
+
+                            if (qc >= 2)
+                            {
+                                string itemName = detail.ITEM_NAME ?? "";
+
+                                return (  "Error", $"Quality Control is not Done of Item => {itemName}" );
+                            }
+                        }
+
+
+                        String QUERY = $@"SELECT isnull(MANAGE_TYPE,'') FROM ITEM_MAST WHERE COMP_CODE={g.PubCompCode} AND CODE={detail.ITEM_CODE}";
+
+
+                        string managetype = GetText(QUERY);
+
+
+                        if (managetype.ToLower() == "Batch".ToLower())
+                        {
+
+                            string query = @"
+                            SELECT  ISNULL(SUM(QTY), 0) AS QTY, COUNT(1) AS NOS  FROM PROD_BATCH  WHERE V_TYPE = @V_TYPE
+                            AND V_NO = @V_NO AND TO_DEPT = @TO_DEPT  AND ITEM_CODE = @ITEM_CODE AND COMP_CODE = @COMP_CODE
+                            AND BRANCH_CODE = @BRANCH_CODE";
+
+                            using var cmd = new SqlCommand(query, conn);
+
+                            cmd.Parameters.AddWithValue("@V_TYPE", header.V_TYPE);
+                            cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
+                            cmd.Parameters.AddWithValue("@TO_DEPT", detail.TO_DEPT);
+                            cmd.Parameters.AddWithValue("@ITEM_CODE", detail.ITEM_CODE);
+                            cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
+                            cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
+
+                            decimal qty = 0;
+                            int nos = 0;
+
+                            using (var reader = await cmd.ExecuteReaderAsync())
+                            {
+                                if (await reader.ReadAsync())
+                                {
+                                    qty = reader["QTY"] != DBNull.Value ? Convert.ToDecimal(reader["QTY"]) : 0; 
+                                    nos = reader["NOS"] != DBNull.Value ? Convert.ToInt32(reader["NOS"])  : 0;
+                                }
+
+                                if(nos != detail.NOS || qty != detail.QTY)
+                                {
+                                    return ("Error", $"Bag number OR Quantity is not matched from Batch-wise selection, Check for Item = > {detail.ITEM_NAME}");
+                                }                                                             
+
+                            }
+                        }
+
+                    }
+                }
+
+                return ("Success", "Data Save Successfully");
+            }
+            catch (Exception ex)
+            {
+                return ("Error", ex.Message);
+            }
+        }
+
+        private async Task<decimal> GetDecimalAsync( DbConnection conn, string sql)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+
+            object result = await cmd.ExecuteScalarAsync();
+
+            if (result == null || result == DBNull.Value)
+                return 0m;
+
+            return decimal.TryParse(
+                Convert.ToString(result),
+                out decimal value)
+                ? value
+                : 0m;
+        }
+
+        public async Task<(string Status, string Message)> SubmitRequest(InventryDepartmentIssue_Header header, List<InventryDepartmentIssue_Details> details, string action)
+        {
+            try
+            {
+                var validationResult = await validation(header, details, action);
+
+                if (validationResult.Status != "Success")
+                {
+                    return validationResult;
+                }
+
+                var g = _globalVariableService.GetGlobalVariables();
                 using var conn = _dbConnection.GetErpConnection();
 
                 await conn.OpenAsync();
-
-
 
                 string docId = string.IsNullOrWhiteSpace(header.DOC_ID) ? $"{header.V_TYPE}{header.V_NO}" : header.DOC_ID;
 
@@ -192,7 +477,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                         {
                             CommandType = CommandType.StoredProcedure
                         };
-
+                        
                         cmd.Parameters.AddWithValue("@Action", action);
                         cmd.Parameters.AddWithValue("@SaveAction", "DETAILS");
                         cmd.Parameters.AddWithValue("@DOC_ID", docId);

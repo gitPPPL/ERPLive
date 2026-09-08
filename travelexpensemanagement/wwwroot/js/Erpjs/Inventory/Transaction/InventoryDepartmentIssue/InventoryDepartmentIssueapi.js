@@ -322,7 +322,7 @@ function AddRow(data = {}) {
             <td> <input type="number" class="erppagetable-control TxtNos" value="${data.nos ?? ''}"  oninput="limitMaxLength(this, 10)" />  </td>
             <td>  <input type="number" class="erppagetable-control Txtweight" value="${data.weight ?? ''}"  oninput="limitMaxLength(this, 13)" />  </td>
             <td> <select class="erppagetable-control TxtToPlace">  <option value="">-- Select To Place --</option>  ${PlaceFromList} </select>  </td>
-            <td> <select class="erppagetable-control TxtPlaceFrom">  <option value="">-- Select From Place --</option>  ${PlaceFromList} </select>  </td>
+            <td class="hidden-col"> <select class="erppagetable-control TxtPlaceFrom">  <option value="">-- Select From Place --</option>  ${PlaceFromList} </select>  </td>
             <td> <select class="erppagetable-control TxtPCostCategory">  <option value="">-- Select c --</option>  ${PCostCategorylist} </select>  </td>
             <td> <select class="erppagetable-control TxtCostSubCategory">  <option value="">-- Select Cost Sub Category --</option>  ${CostSubCategorylist} </select>  </td>
             <td> <select class="erppagetable-control TxtCostCenter ">  <option value="">-- Select Cost Center --</option>  ${CostCenterlist} </select>  </td>
@@ -700,10 +700,78 @@ function toDecimal(value) {
     value = $.trim(value || '');
     return value === '' ? null : parseFloat(value);
 }
+function TransitReport() {
+
+    if (!rowId) {
+        showToast(`Please save the data before printing the report.`, { type: "info" });
+        return;
+    }
+
+    var reportName = "RAW11";
+
+    var v_no = $('#NumDocno').val();
+    var v_type = $('#ddlDocType').val();
+    var selectedText = $('#ddlDocType option:selected').text();
+
+    var formula =
+        "{ISSUE1.V_TYPE} = '" + v_type + "'" +
+        " and {ISSUE1.V_NO} = " + v_no + "" +
+        " and {ISSUE1.COMP_CODE} = " + globalVars.CompCode + "" +
+        " and {ISSUE1.YEAR_CODE} = " + globalVars.FYearCode + "" +
+        " and {ISSUE1.BRANCH_CODE} = " + globalVars.BranchCode + "";
 
 
+    var payload = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: database,
+        Parameters: {
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",        
+            RPTNAME: selectedText
+        }
+    };
 
 
+    var now = new Date();
+    var timestamp =
+        String(now.getDate()).padStart(2, '0') +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getFullYear()).slice(-2) + "_" +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
 
 
+    $.ajax({
+        url: 'http://localhost:24085/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: { responseType: 'blob' },
 
+        success: function (response) {
+
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        error: function (xhr, status, error) {
+            if (xhr.status === 0) {
+                console.error("Cannot connect to API. Is the backend running?");
+            } else {
+                console.error('Error generating report:', xhr.status, xhr.statusText, error);
+                xhr.responseText && console.error('Response:', xhr.responseText);
+            }
+        }
+    });
+}

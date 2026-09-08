@@ -45,6 +45,12 @@
         <div class="erppage-header-title">Department Issue</div>
     </div>
     <div class="erppage-header-right">
+
+        <button type="button" class="erppage-btn erppage-btn-copy" id="button_print" onclick="TransitReport();">
+         <i class="fa-solid fa-print"></i> Print
+        </button>
+
+
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "InventoryDepartmentIssueList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -55,7 +61,14 @@
     <div class="erppage-container">
         <div class="erppage-fieldset">
             <div class="erppage-grid8">
-                <div class="erppage-divfield">
+           <!-- <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label" style="font-size:12px; color:#007bff;">Form Type</label>
+                    <select class="erppage-input erppage-select" id="ddlFormType">
+                        <option value="">Select Form Type</option>
+                    </select>
+                </div>
+                -->
+                <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Doc Type</label>
                     <select class="erppage-input erppage-select" id="ddlDocType">
                         <option value="">Select Doc Type</option>
@@ -88,25 +101,26 @@
                     <label class="erppage-label">Slip No</label>
                     <input type="number" class="erppage-input" id="NumSlipNo" placeholder="Enter Slip No" maxlength="100">
                 </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Prod Ord No</label>
-                    <select class="erppage-input erppage-select" id="ddlProdOrdNo">
-                        <option value="">Select Prod Ord No</option>
-                    </select>
                 </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Do. No.</label>
-                    <select class="erppage-input erppage-select" id="ddlDoNo">
-                        <option value="">Select Do. No.</option>
-                    </select>
+                <div class="erppage-grid8">
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Prod Ord No</label>
+                        <select class="erppage-input erppage-select" id="ddlProdOrdNo">
+                            <option value="">Select Prod Ord No</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Do. No.</label>
+                        <select class="erppage-input erppage-select" id="ddlDoNo">
+                            <option value="">Select Do. No.</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield erppage-col-span-2">
+                        <label class="erppage-label">Remarks</label>
+                        <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 40px;" placeholder="Enter Remarks" maxlength="250"></textarea>
+                    </div>
                 </div>
-            </div>
-            <div class="erppage-grid8">
-                <div class="erppage-divfield erppage-col-span-2">
-                    <label class="erppage-label">Remarks</label>
-                    <textarea typeof="text" class="erppage-input" id="TxtRemarks" style="height: 45px;" placeholder="Enter Remarks" maxlength="250"></textarea>
-                </div>
-            </div>
+           
             <div class="erppage-internalaction">
                 <div class="dropdown erppagedropdown">
                     <button class="erppagedropdown-btn" type="button" id="copyFromDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -239,7 +253,7 @@
                             <col style="width: 87px;">         
 
                             <col style="width: 93px;">   
-                            <col style="width: 93px;">   
+                            <col class="hidden-col">   
                             <col style="width: 93px;">   
                             <col style="width: 93px;">   
                             <col style="width: 131px;">  
@@ -261,7 +275,7 @@
                                 <th>Nos</th>
                                 <th>Weight</th>                       
                                 <th>To Place</th>
-                                <th>From Place</th>          
+                                <th class="hidden-col">From Place</th>          
                                 <th>Cost Category</th>          
                                 <th>Cost Sub Category</th>          
                                 <th>Cost Center</th>                                  
