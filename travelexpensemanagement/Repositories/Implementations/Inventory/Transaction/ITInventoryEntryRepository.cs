@@ -17,7 +17,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly GlobalValidationdate _globalValidationdate;
         private readonly travelexpensemanagement.LogService.LogService _logService;
-
+         
         public ITInventoryEntryRepository(DataBaseConnection dbConnection, DbHelper dbHelper, GlobalVariableService globalVariableService, ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, travelexpensemanagement.LogService.LogService logService)
         {
             _dbHelper = dbHelper;
@@ -43,6 +43,20 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
 
                 try
                 {
+
+                    var validation = await ValidateDataAsync(model, con, transaction);
+
+                    if (!validation.IsValid)
+                    {
+                        await transaction.RollbackAsync();
+
+                        return new
+                        {
+                            success = false,
+                            message = validation.Message
+                        };
+                    }
+
                     bool isUpdate;
 
                     using (SqlCommand checkCmd = new SqlCommand(@"
@@ -65,8 +79,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
 
                     if (isUpdate)
                     {
-                        using (SqlCommand deleteCmd = new SqlCommand(
-                            "sp_ITInventoryEntry", con, transaction))
+                        using (SqlCommand deleteCmd = new SqlCommand("sp_ITInventoryEntry", con, transaction))
                         {
                             deleteCmd.CommandType = CommandType.StoredProcedure;
 
@@ -121,7 +134,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                             cmd.Parameters.AddWithValue("@WINDOWLIC_TYPE", (object?)model.WINDOWLIC_TYPE ?? DBNull.Value);
                             cmd.Parameters.AddWithValue("@OFFICELIC_TYPE", (object?)model.OFFICELIC_TYPE ?? DBNull.Value);
                             cmd.Parameters.AddWithValue("@REMARKS", (object?)model.REMARKS ?? DBNull.Value);
-
+                            
                             // =========================
                             // DEVICE
                             // =========================
@@ -154,22 +167,80 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
 
                     await transaction.CommitAsync();
 
-                    return new
-                    {
-                        success = true,
-                        message = isUpdate ? "Data updated successfully." : "Data saved successfully."
-                    };
+                    return new { success = true, message = isUpdate ? "Data updated successfully." : "Data saved successfully." };
                 }
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
 
-                    return new
-                    {
-                        success = false,
-                        message = ex.Message
-                    };
+                    return new { success = false, message = ex.Message};
                 }
+            }
+        }
+
+        private async Task<(bool IsValid, string Message)> ValidateDataAsync(ITInventoryEntryModel model, SqlConnection con,SqlTransaction transaction)
+        {
+            try
+            {
+                // ==============================
+                // Voucher No Validation
+                // ==============================
+                if (model.V_NO == null || model.V_NO <= 0)
+                {
+                    return (false, "Invalid Voucher No. Record not saved.");
+                }
+
+                // ==============================
+                // Device List Empty Validation
+                // ==============================
+                if (model.Devices == null || !model.Devices.Any())
+                {
+                    return (false, "Grid is empty.");
+                }
+
+                // ==============================
+                // Duplicate Asset Code in Grid
+                // ==============================
+                var duplicateAsset = model.Devices.Where(x => !string.IsNullOrWhiteSpace(x.ASSET_CODE)).GroupBy(x => x.ASSET_CODE.Trim(), StringComparer.OrdinalIgnoreCase).FirstOrDefault(g => g.Count() > 1);
+
+                if (duplicateAsset != null)
+                {
+                    return (false,$"Duplicate asset code found: {duplicateAsset.Key}");
+                }
+
+                // ==============================
+                // Asset Code Already Exists
+                // ==============================
+                foreach (var device in model.Devices)
+                {
+                    if (string.IsNullOrWhiteSpace(device.ASSET_CODE))
+                        continue;
+
+                    using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT TOP 1 V_NO
+                    FROM IT_INVENTORY
+                    WHERE V_NO <> @V_NO
+                      AND ASSET_CODE = @ASSET_CODE
+                      AND COMP_CODE = @COMP_CODE ", con, transaction))
+                    {
+                        cmd.Parameters.AddWithValue("@V_NO", model.V_NO);
+                        cmd.Parameters.AddWithValue("@ASSET_CODE",device.ASSET_CODE.Trim());
+                        cmd.Parameters.AddWithValue("@COMP_CODE",_globalVariableService.GetGlobalVariables().PubCompCode);
+
+                        var result = await cmd.ExecuteScalarAsync();
+
+                        if (result != null && result != DBNull.Value)
+                        {
+                            return (false,$"Asset code => '{device.ASSET_CODE}' already exists in VNo={result}.");
+                        }
+                    }
+                }
+
+                return (true, "");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
             }
         }
 

@@ -102,5 +102,58 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
             }
         }
 
+        public async Task<object> DeleteDataAsync(string docId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(docId))
+                {
+                    return new { success = false, message = "Document ID is required." };
+                }
+
+                var globalVariables = _globalVariableService.GetGlobalVariables();
+
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    await con.OpenAsync();
+
+                    using (SqlTransaction tran = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (SqlCommand cmd = new SqlCommand("sp_ITInventoryEntry", con, tran))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+
+                                cmd.Parameters.AddWithValue("@Action", "DeleteExisting");
+
+                                cmd.Parameters.AddWithValue("@YEAR_CODE", globalVariables.PubFYearCode);
+                                cmd.Parameters.AddWithValue("@COMP_CODE", globalVariables.PubCompCode);
+                                cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVariables.PubBranchCode);
+                                cmd.Parameters.AddWithValue("@DOC_ID", docId);
+
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            tran.Commit();
+
+                            return new { success = true, message = "Data deleted successfully." };
+                        }
+                        catch (Exception ex)
+                        {
+                            tran.Rollback();
+
+                            return new { success = false, message = ex.Message };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new { success = false, message = ex.Message };
+            }
+
+        }
+
     }
 }

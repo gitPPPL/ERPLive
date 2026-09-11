@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using System.Text.Json;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
@@ -35,6 +36,14 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
 
         public IActionResult Index()
         {
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+            ViewBag.DatabaseName = databaseName;
+            var globalVar = _globalVariableService.GetGlobalVariables();
+            ViewBag.GlobalVariables = globalVar;
             return View("~/Views/Inventory/Transaction/ITInventoryEntry/Index.cshtml");
         }
 
@@ -54,14 +63,13 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                 case "EmployeeName":
                     query = $@"Select code,ltrim(rtrim(CODE))+ space(10- LEN (ltrim(rtrim(CODE))))+'|'+SPACE(5)+CAST (NAME as varchar )'NAME' from EMP_MAST where COMP_CODE = {globalVariables.PubCompCode} order by name";
                     break;
-                
             }
 
             var dropdownList = _dropdownService.GetDropdownList(query);
 
             return Json(dropdownList);
         }
-
+        
         [HttpGet]
         public IActionResult GetDeviceList()
         {
@@ -92,6 +100,103 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     text = reader["NAME"],
                     shortName = reader["SHORTNAME"]
                 });
+            }
+
+            return Json(list);
+        }
+
+        [HttpGet]
+        public IActionResult GetUnitNameList()
+        {
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+
+            string query = $@"
+            Select Distinct UNIT_NAME from IT_INVENTORY Where  V_TYPE in ('ITIV') and isnull(UNIT_NAME,'')<>'' and Comp_Code= {globalVariables.PubCompCode} and 
+            Branch_code= {globalVariables.PubBranchCode} order by UNIT_NAME";
+
+            using var con = _dbConnection.GetErpConnection();
+            con.Open();
+
+            using var cmd = new SqlCommand(query, con);
+            using var reader = cmd.ExecuteReader();
+
+            var list = new List<string>();
+
+            while (reader.Read())
+            {
+                list.Add(reader["UNIT_NAME"].ToString());
+            }
+
+            return Json(list);
+        }
+
+        [HttpGet]
+        public IActionResult GetServerIpList()
+        {
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+            string query = $@"
+            Select Distinct Server_IP from IT_INVENTORY where V_TYPE in ('ITIV') and isnull(server_IP,'')<>'' and Comp_Code= {globalVariables.PubCompCode} and 
+            Branch_code= {globalVariables.PubBranchCode} order by Server_IP";
+
+            using var con = _dbConnection.GetErpConnection();
+            con.Open();
+
+            using var cmd = new SqlCommand(query, con);
+            using var reader = cmd.ExecuteReader();
+
+            var list = new List<string>();
+
+            while (reader.Read())
+            {
+                list.Add(reader["server_IP"].ToString());
+            }
+
+            return Json(list);
+        }
+
+        [HttpGet]
+        public IActionResult GetPurchaseList()
+        {
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+            string query = $@"
+            Select Distinct Purchase_From from IT_INVENTORY Where  V_TYPE in ('ITIV') and isnull(Purchase_From,'')<>'' and Comp_Code= {globalVariables.PubCompCode} and 
+            Branch_code= {globalVariables.PubBranchCode} order by Purchase_From";
+
+            using var con = _dbConnection.GetErpConnection();
+            con.Open();
+
+            using var cmd = new SqlCommand(query, con);
+            using var reader = cmd.ExecuteReader();
+
+            var list = new List<string>();
+
+            while (reader.Read())
+            {
+                list.Add(reader["Purchase_From"].ToString());
+            }
+
+            return Json(list);
+        }
+
+        [HttpGet]
+        public IActionResult GetDepartmentList()
+        {
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+            string query = $@"
+            Select Distinct DEPT from IT_INVENTORY Where  V_TYPE in ('ITIV') and isnull(DEPT,'')<>'' and Comp_Code= {globalVariables.PubCompCode} and 
+            Branch_code= {globalVariables.PubBranchCode} order by DEPT";
+
+            using var con = _dbConnection.GetErpConnection();
+            con.Open();
+
+            using var cmd = new SqlCommand(query, con);
+            using var reader = cmd.ExecuteReader();
+
+            var list = new List<string>();
+
+            while (reader.Read())
+            {
+                list.Add(reader["DEPT"].ToString());
             }
 
             return Json(list);
@@ -282,6 +387,17 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
         {
             var result = await _itInventoryEntryRepository.LoadEditDataAsync(docId);
             return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            var global = _globalVariableService.GetGlobalVariables();
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("IT_INVENTORY", vdate, vtype, vno);
+            return Ok(result);
         }
 
     }

@@ -10,7 +10,7 @@
         <span>IT Inventory List</span>
     </div>
     <div class="erppagelist-header-right">
-        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "ITInventoryEntry")'">
+        <button class="erppage-header-back" id="button_add" onclick="window.location.href='@Url.Action("Index", "ITInventoryEntry")'">
             <i class="fa fa-plus"></i>Add New
         </button>
     </div>
@@ -21,18 +21,11 @@
         <input type="text" id="searchBox" placeholder="Search Module..." />
     </div>
     <div class="erppagelist-actions">
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
-            <i class="fa fa-print"></i> Print
-        </button>
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="button_export" data-tooltip="Export to Excel">
             <i class="fa fa-file-excel"></i> Export
         </button>
         <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
             <i class="fa fa-envelope"></i> Mail
-        </button>
-        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
-                data-tooltip="Approve Records">
-            <i class="fa fa-check-circle"></i> Approved
         </button>
     </div>
 </div>
@@ -46,14 +39,14 @@
                 <col style="width: 118px;">   <!-- Ip Address -->
                 <col style="width: 75px;">   <!-- Category -->
                 <col style="width: 94px;">   <!-- Device Type -->
-                <col style="width: 107px;">   <!-- Employee Code -->
+                <col style="width: 116px;">   <!-- Employee Code -->
                 <col style="width: 126px;">  <!-- Employee Name -->
-                <col style="width: 80px;">   <!-- Asset Code -->
+                <col style="width: 97px;">   <!-- Asset Code -->
                 <col style="width: 143px;">   <!-- Device Name -->
                 <col style="width: 80px;">   <!-- Model -->
-                <col style="width: 65px;">   <!-- For Unit -->
+                <col style="width: 75px;">   <!-- For Unit -->
                 <col style="width: 80px;">   <!-- Location -->
-                <col style="width: 100px;">  <!-- Purchase Date -->
+                <col style="width: 109px;">  <!-- Purchase Date -->
                 <col style="width: 171px;">  <!-- Purchase By -->
                 <col style="width: 110px;">  <!-- Used By -->
                 <col style="width: 120px;">  <!-- Remarks -->
@@ -104,5 +97,6 @@
     </div>
 </div>
 
+<script src="~/common/delete.js"></script>
 <script src="~/common/pagination.js"></script>
 <script src="~/js/erpjs/inventory/transaction/itinventroyentrylistjs/itinventroyentrylist.js"></script>

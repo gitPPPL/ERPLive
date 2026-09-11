@@ -45,6 +45,26 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                 return Json(new {success = false, message = ex.Message});
             }
         }
-        
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteData(string docId)
+        {
+            try
+            {
+                var result = await _itInventoryEntryListRepository.DeleteDataAsync(docId);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
+
     }
 }

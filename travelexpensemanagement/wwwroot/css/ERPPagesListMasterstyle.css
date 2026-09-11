@@ -355,20 +355,22 @@
     position: sticky;
     top: 0;
     z-index: 30;
-    background: linear-gradient(135deg,#232323,#0f0f0f);
+    background: linear-gradient(135deg, #122f4d, #122f4d);
+    font-weight: 200;
 }
     /* HEADER */
-    .excel-table th {
-        position: sticky;
-        top: 0;
-        background: linear-gradient(135deg, #232323, #0f0f0f);
-        padding: 10px;
-        font-size: 11px;
-        text-align: left;
-        user-select: none;
-        color: #ffffff;
-        border-bottom: 2px solid #d1d5db;
-    }
+.excel-table th {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(135deg, #232323, #0f0f0f);
+    padding: 10px;
+    font-size: 12px;
+    text-align: left;
+    user-select: none;
+    letter-spacing: 0.8px;
+    color: #ffffff;
+    border-bottom: 2px solid #d1d5db;
+}
     /* CELLS */
     .excel-table td {
         font-size: 12px;
@@ -737,7 +739,7 @@ button:focus {
 /* Prevent layout breaking for unlimited columns */
 .erppagelist-container {
     -webkit-overflow-scrolling: touch;
-    padding: 8px;
+    padding: 8px 0px;
     background: #fff;
     border-radius: 8px;
 }
@@ -1244,3 +1246,6 @@ button:focus {
     width: 294px;
     z-index: 9999999999;
 }
+
+
+

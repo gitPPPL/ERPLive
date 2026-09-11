@@ -1,6 +1,7 @@
 ﻿@{
     ViewBag.Title = "IT Inventory Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVar = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
@@ -101,7 +102,7 @@
                         <div class="erppage-grid4">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Email Password</label>
-                                <input type="text" class="erppage-input" id="txtemailpassword" placeholder="Enter Email Password" />
+                                <input type="password" class="erppage-input" id="txtemailpassword" placeholder="Enter Email Password" />
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Window Lic. Type</label>
@@ -174,7 +175,7 @@
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Dataserver Password</label>
-                                <input type="text" class="erppage-input" id="txtdataserverpassword" placeholder="Enter Dataserver Password" />
+                                <input type="password" class="erppage-input" id="txtdataserverpassword" placeholder="Enter Dataserver Password" />
                             </div>
                         </div>
                         <div class="erppage-grid4">
@@ -184,7 +185,7 @@
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Cloud Password</label>
-                                <input type="text" class="erppage-input" id="txtCloudpassword" placeholder="Enter Cloud Password" />
+                                <input type="password" class="erppage-input" id="txtCloudpassword" placeholder="Enter Cloud Password" />
                             </div>
                         </div>
                     </fieldset>
@@ -255,7 +256,7 @@
                         <div class="erppage-grid2">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Unit Name</label>
-                                <select class="erppage-input erppage-select" id="ddlUnitname">
+                                <select class="erppage-input erppage-select" id="ddlUnitname1">
                                     <option value="">Select Unit Name</option>
                                 </select>
                             </div>
@@ -269,7 +270,7 @@
                         <div class="erppage-grid1">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Employee Name</label>
-                                <select class="erppage-input erppage-select" id="ddlEmployeename">
+                                <select class="erppage-input erppage-select" id="ddlEmployeename1">
                                     <option value="">Select Employee Name</option>
                                 </select>
                             </div>
@@ -279,11 +280,13 @@
                                 <label class="erppage-label">Asset Cat.</label>
                                 <select class="erppage-input erppage-select" id="ddlAssetCat">
                                     <option value="">Select Asset Cat.</option>
+                                    <option value="Regular">Regular</option>
+                                    <option value="Temporary">Temporary</option>
                                 </select>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Asset Type</label>
-                                <select class="erppage-input erppage-select" id="ddlAssetType">
+                                <select class="erppage-input erppage-select" id="ddlAssetType1">
                                     <option value="">Select Asset Type</option>
                                 </select>
                             </div>
@@ -299,6 +302,8 @@
                                 <label class="erppage-label">Warrantee Status</label>
                                 <select class="erppage-input erppage-select" id="ddlWarrantys">
                                     <option value="">Select Warrantee Status</option>
+                                    <option value="UnderWarranty">Under Warranty</option>
+                                    <option value="Expired">Expired</option>
                                 </select>
                             </div>
                         </div>
@@ -307,6 +312,8 @@
                                 <label class="erppage-label">Device Status</label>
                                 <select class="erppage-input erppage-select" id="ddlDevices">
                                     <option value="">Select Device Status</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Discarded">Discarded</option>
                                 </select>
                             </div>
                             <div class="erppage-divfield">
@@ -317,170 +324,71 @@
                             </div>
                         </div>
                         <div class="erppage-internalaction">
-                            <button type="button" id="btn_print" class="erppage-btn erppage-btn-common-print-disabled"><i class="fa fa-print"></i> Print</button>
+                            <button type="button" id="btn_print" class="erppage-btn erppage-btn-common-print-disabled" onclick="ITInventoryPrint()"><i class="fa fa-print"></i> Print</button>
                         </div>
                     </fieldset>
                    
                 </div>
             </div>
-            @* <fieldset class="erppagefieldset">
-                <legend class="erppagefieldset-legend">Device Information</legend>
-                <div class="erppage-grid6">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Asset Cat.</label>
-                        <select class="erppage-input erppage-select" id="ddlAssetCat1">
-                            <option value="">Select Asset Cat.</option>
-                            <option value="Regular">Regular</option>
-                            <option value="Temporary">Temporary</option>
-                        </select>
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Asset Type</label>
-                        <div class="erppage-inputgroup">
-                            <select class="erppage-input erppage-select" id="ddlAssetType1">
-                                <option value="">Select Asset Type</option>
-                            </select>
-                            <input type="text" class="erppage-input" id="txtassettype" placeholder="Enter Asset Type" />
-                        </div>
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Asset Code</label>
-                        <input type="text" class="erppage-input" id="txtassetcode" placeholder="Enter Asset Code" />
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Serial No.</label>
-                        <input type="text" class="erppage-input" id="txtserialno" placeholder="Enter Serial No." />
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Device Name</label>
-                        <input type="text" class="erppage-input" id="txtdevicename" placeholder="Enter Device Name" />
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Device Make</label>
-                        <input type="text" class="erppage-input" id="txtDeviceMake" placeholder="Enter Device Make" />
-                    </div>
-                </div>
-                <div class="erppage-grid6">
-                   
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Device Model</label>
-                        <input type="text" class="erppage-input" id="txtdevicemodel" placeholder="Enter Device Model" />
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Purchase Date</label>
-                        <input type="date" class="erppage-input" id="txtpurchasedate" />
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Purchase From</label>
-                        <input type="text" class="erppage-input" id="txtpurchasefrom" placeholder="Enter Purchase From" />
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Warranty Status</label>
-                        <select class="erppage-input erppage-select" id="ddlWarrantystatus">
-                            <option value="">Select Warranty Status</option>
-                            <option value="UnderWarrenty">Under Warrenty</option>
-                            <option value="Expired">Expired</option>
-                        </select>
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Device Status</label>
-                        <select class="erppage-input erppage-select" id="ddlDevicestatus">
-                            <option value="">Select Device Status</option>
-                            <option value="Active">Active</option>
-                            <option value="Discarded">Discarded</option>
-                        </select>
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Reason for Discarded</label>
-                        <textarea typeof="text" class="erppage-input" id="txtreasondiscarded" placeholder="Enter Reason for Discarded"></textarea>
-                    </div>
-                </div>
-               
-                <div class="erppage-grid6">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Issue Date</label>
-                        <input type="date" class="erppage-input" id="Dtissuedate" />
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Return Date</label>
-                        <input type="date" class="erppage-input" id="DtReturnDate" />
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Quantity</label>
-                        <input type="number" class="erppage-input" id="Numquantity" />
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Purpose</label>
-                        <textarea typeof="text" class="erppage-input" id="txtpurpose" placeholder="Enter Purpose"></textarea>
-                    </div> 
-                </div>
-                <div class="erppage-internalaction">
-                    <button type="button" class="erppage-btn erppage-btn-common-active" id="btn_add"><i class="fa fa-plus"></i>Add</button>
-                </div>
-            </fieldset> *@
 
-            <div class="erppage-fieldset">
-                <div class="erppage-container">
-                    <div class="erppage-tabs">
-                        <button class="erppage-tab active" data-tab="itemrecord">Device Information</button>
-                    </div>
-                    <!-- Item Record -->
-                    <div class="erppage-tab-content active" id="itemrecord">
-                        <div class="erppagelist-container">
-                            <div class="excel-wrapper fixed-grid-wrapper">
-                                <table id="tblDeviceInfromation" class="excel-table fixed-grid-table table-width resizable-table">
-                                    <colgroup>
-                                        <col class="hidden-col">
-                                        <col style="width: 149px;">
-                                        <col style="width: 154px;">
-                                        <col style="width:100px;">
-                                        <col style="width:100px;">
-                                        <col style="width:120px;">
-                                        <col style="width:130px;">
-                                        <col style="width:110px;">
-                                        <col style="width:110px;">
-                                        <col style="width: 123px;">
-                                        <col style="width:130px;">
-                                        <col style="width: 185px;">
-                                        <col style="width: 189px;">
-                                        <col style="width:180px;">
-                                        <col style="width: 129px;">
-                                        <col style="width: 126px;">
-                                        <col style="width:80px;">
-                                        <col style="width:150px;">
-                                        <col style="width:120px;">
-                                    </colgroup>
-                                    <thead>
-                                        <tr>
-                                            <th class="hidden-col">Code</th>
-                                            <th>Asset Cat.</th>
-                                            <th>Asset Type</th>
-                                            <th>Asset Srno</th>
-                                            <th>Asset Code</th>
-                                            <th>Serial No.</th>
-                                            <th>Device Name</th>
-                                            <th>Device Make</th>
-                                            <th>Device Model</th>
-                                            <th>Purchase Date</th>
-                                            <th>Purchase From</th>
-                                            <th>Warranty Status</th>
-                                            <th>Device Status</th>
-                                            <th>Reason</th>
-                                            <th>Issue Date</th>
-                                            <th>Return Date</th>
-                                            <th>Qty</th>
-                                            <th>Purpose</th>
-                                            <th class="action-col">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
+            <div class="erppage-tabs mt-2">
+                <button class="erppage-tab active" data-tab="itemrecord">Device Information</button>
+            </div>
+            <!-- Item Record -->
+            <div class="erppage-tab-content active" id="itemrecord">
+                <div class="erppagelist-container">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblDeviceInfromation" class="excel-table fixed-grid-table table-width resizable-table">
+                            <colgroup>
+                                <col class="hidden-col">
+                                <col style="width: 149px;">
+                                <col style="width: 154px;">
+                                <col style="width:100px;">
+                                <col style="width:100px;">
+                                <col style="width:120px;">
+                                <col style="width:130px;">
+                                <col style="width:110px;">
+                                <col style="width:110px;">
+                                <col style="width: 123px;">
+                                <col style="width:130px;">
+                                <col style="width: 185px;">
+                                <col style="width: 189px;">
+                                <col style="width:180px;">
+                                <col style="width: 129px;">
+                                <col style="width: 126px;">
+                                <col style="width:80px;">
+                                <col style="width:150px;">
+                                <col style="width:120px;">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="hidden-col">Code</th>
+                                    <th>Asset Cat.</th>
+                                    <th>Asset Type</th>
+                                    <th>Asset Srno</th>
+                                    <th>Asset Code</th>
+                                    <th>Serial No.</th>
+                                    <th>Device Name</th>
+                                    <th>Device Make</th>
+                                    <th>Device Model</th>
+                                    <th>Purchase Date</th>
+                                    <th>Purchase From</th>
+                                    <th>Warranty Status</th>
+                                    <th>Device Status</th>
+                                    <th>Reason</th>
+                                    <th>Issue Date</th>
+                                    <th>Return Date</th>
+                                    <th>Qty</th>
+                                    <th>Purpose</th>
+                                    <th class="action-col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
+               
             <div class="erppage-grid6">
                 <div class="erppage-divfield erppage-col-span-3">
                     <label class="erppage-label">Remarks</label>
@@ -501,3 +409,22 @@
 </div>
 
 <script src="~/js/erpjs/inventory/transaction/itinventoryentryjs/itinventoryentry.js"></script>
+<script>
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+
+    window.globalVariables = {
+        compCode: "@globalVar?.PubCompCode",
+        yearCode: "@globalVar?.PubFYearCode",
+        branchCode: "@globalVar?.PubBranchCode",
+
+        companyName: "@globalVar?.CompanyName",
+        add1: "@globalVar?.Address1",
+        add2: "@globalVar?.Address2"
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    }
+</script>

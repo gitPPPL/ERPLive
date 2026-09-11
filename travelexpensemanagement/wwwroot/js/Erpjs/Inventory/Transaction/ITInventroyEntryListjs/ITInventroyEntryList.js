@@ -1,10 +1,10 @@
 ﻿let importPaymentPagination;
-//var controllerName = window.location.pathname.split('/')[1];
+var controllerName = window.location.pathname.split('/')[1];
 $(document).ready(function () {
 
-	//checkPermission(controllerName, function () {
-	//	importPaymentPagination.load();
-	//});
+	checkPermission(controllerName, function () {
+		importPaymentPagination.load();
+	});
 
 	importPaymentPagination = Pagination.create({
 
@@ -161,7 +161,7 @@ function renderImportPaymentTable(data) {
 				</tr>
 
 		`);
-		//applyGridPermission();
+		applyGridPermission();
 	});
 
 }
@@ -189,4 +189,18 @@ function editITInventory(docId) {
 
 function viewITInventory(docId) {
 	window.location.href = '/ITInventoryEntry/Index?docId=' + encodeURIComponent(docId) + '&readOnly=true';
+}
+
+function deleteITInventroyEntry(docId) {
+
+	deleteRecord("ITInventoryList", docId, {
+		action: "DeleteData",
+		title: "Delete Store IT Inventory Entry?",
+		text: "Are you sure you want to delete this IT Inventory entry?",
+
+		successCallback: function () {
+			importPaymentPagination.load();
+		}
+	});
+
 }

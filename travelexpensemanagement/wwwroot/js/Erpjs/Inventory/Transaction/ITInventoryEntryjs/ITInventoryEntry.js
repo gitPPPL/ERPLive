@@ -127,8 +127,11 @@ async function wireEvent() {
 
         try {
 
+            //const response = await fetch(
+            //    `/ITInventoryEntry/GetNextAssetSrNo?assetType=${encodeURIComponent(assetTypeName)}`
+            //);
             const response = await fetch(
-                `/ITInventoryEntry/GetNextAssetSrNo?assetType=${encodeURIComponent(assetTypeName)}`
+                `/ITInventoryEntry/GetNextAssetSrNo?assetType=${encodeURIComponent(shortName)}`
             );
 
             if (!response.ok) {
@@ -144,9 +147,7 @@ async function wireEvent() {
                 row.find('.asset-srno').val('');
                 row.find('.asset-code').val('');
 
-                showToast(result.message || "Unable to generate Asset Serial Number.", {
-                    type: "error"
-                });
+                showToast(result.message || "Unable to generate Asset Serial Number.", {type: "error"});
 
                 return;
             }
@@ -175,6 +176,64 @@ async function wireEvent() {
             showToast("Error generating Asset Code.", {type: "error"});
         }
     });
+
+    $('#chkfromdate').on('change', function () {
+        if ($(this).is(':checked')) {
+            $('#Dtfromdate').val(getCurrentDate());
+        } else {
+            $('#Dtfromdate').val('');
+        }
+    });
+
+    $('#chktodate').on('change', function () {
+        if ($(this).is(':checked')) {
+            $('#Dttodate').val(getCurrentDate());
+        } else {
+            $('#Dttodate').val('');
+        }
+    });
+
+    $('#chkpurchaseFrom').on('change', function () {
+        if ($(this).is(':checked')) {
+            $('#DtpurchaseFrom').val(getCurrentDate());
+        } else {
+            $('#DtpurchaseFrom').val('');
+        }
+    });
+
+    $('#chkPurchaseTo').on('change', function () {
+        if ($(this).is(':checked')) {
+            $('#DtPurchaseTo').val(getCurrentDate());
+        } else {
+            $('#DtPurchaseTo').val('');
+        }
+    });
+
+    $('#chkissuedateFrom').on('change', function () {
+        if ($(this).is(':checked')) {
+            $('#DtissuedateFrom').val(getCurrentDate());
+        } else {
+            $('#DtissuedateFrom').val('');
+        }
+    });
+
+    $('#chkissuedateTo').on('change', function () {
+        if ($(this).is(':checked')) {
+            $('#DtissuedateTo').val(getCurrentDate());
+        } else {
+            $('#DtissuedateTo').val('');
+        }
+    });
+}
+
+function getCurrentDate() {
+    const today = new Date();
+
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd}`;
 }
 
 function SetCurrentDate() {
@@ -260,7 +319,6 @@ async function LoadEditData() {
 
         const tbody = $("#tblDeviceInfromation tbody");
 
-        // Existing rows remove
         tbody.empty();
 
         deviceList = devices;
@@ -274,11 +332,14 @@ async function LoadEditData() {
                 addNewRow();
 
                 const row = tbody.find("tr:last");
-
+                
                 await BindDeviceList(row);
-
+                const assetType = device.ASSET_TYPE ?? '';
                 row.find(".asset-cat").val(device.ASSET_CAT ?? '');
-                row.find(".asset-type").val(device.ASSET_TYPE ?? '');
+                row.find(".asset-type option").filter(function () {
+                    return String($(this).data("shortname")) === String(assetType);
+                }).prop("selected", true);
+
                 row.find(".asset-srno").val(device.ASSET_SRNO ?? '');
                 row.find(".asset-code").val(device.ASSET_CODE ?? '');
 
@@ -337,11 +398,20 @@ async function BindAllHeaderDropdown() {
 
         bindDropdown('ITInventoryEntry', 'AssetType', '#ddlAssetType1', 'Select Asset', null, null, false, null, false),
         bindDropdown('ITInventoryEntry', 'EmployeeName', '#ddlEmployeeName', 'Select Employee', null, null, false, null, true),
+        bindDropdown('ITInventoryEntry', 'EmployeeName', '#ddlEmployeename1', 'Select Employee', null, null, false, null, true),
+
+        BindUnitNameList(),
+        BindServerIpList(),
+        BindPurchaseList(),
+        BindDepartmentList()
 
     ]);
 }
 
 async function SaveData() {
+
+    const isValidDate = await checkValidDate();
+    if (!isValidDate) return;
 
     const header = {
 
@@ -418,6 +488,8 @@ async function SaveData() {
 
         if (result.success) {
             showToast(result.message || "Data Saved Successfully", { type: "success" });
+            isReadOnly = true;
+            setFormReadOnly();
         } else {
             showToast("Unable To Save Data: " + result.message, { type: "error" });
         }
@@ -425,6 +497,38 @@ async function SaveData() {
     } catch (error) {
         console.error("Save Error:", error);
         showToast("An Error Occurred While Saving Data: " + error, { type: "error" });
+    }
+}
+
+async function checkValidDate() {
+
+    const data = {
+        vdate: $("#DtDocDate").val(),
+        vtype: "ITIV",
+        vno: $("#NumDocno").val()
+    };
+
+    try {
+
+        const response = await fetch('/ITInventoryEntry/CheckValidDate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+
+        if (result.status === false) {
+            showToast(result.message, { type: "warning" });
+            return false;
+        }
+        return true;
+
+    } catch (error) {
+        console.error(error);
+        showToast("Date validation failed", { type: "error" });
+        return false;
     }
 }
 
@@ -523,8 +627,8 @@ async function addNewRow() {
 
              <td class="action-col">
                 <div class="action-wrap">
-                     <button class="act-btn add" title="Add Row"><i class="fa fa-plus"></i></button>
-                     <button class="act-btn delete"><i class="fa fa-trash"></i></button>
+                     <button class="act-btn add" title="Add Row"><i class="fa fa-plus-circle"></i></button>
+                     <button class="act-btn delete btn-delete"><i class="fa fa-trash"></i></button>
                 </div>
             </td>
 
@@ -585,7 +689,7 @@ function getDeviceListFromTable() {
             ASSET_CODE: row.find(".asset-code").val() || null,
             ASSET_SRNO: row.find(".asset-srno").val() || null,
             ASSET_CAT: row.find(".asset-cat").val() || null,
-            ASSET_TYPE: row.find(".asset-type").val() || null,
+            ASSET_TYPE: row.find(".asset-type option:selected").data("shortname") || null,
 
             SERIAL_NO: row.find(".serial-no").val() || null,
 
@@ -667,50 +771,400 @@ function setFormReadOnly() {
     $('#btn_save').prop('disabled', true).hide();
 }
 
+//================Print Section ==================
+
+async function BindUnitNameList() {
+
+    try {
+
+        const response = await fetch('/ITInventoryEntry/GetUnitNameList');
+
+        if (!response.ok) {
+            throw new Error("Failed to load Unit Name List");
+        }
+
+        const data = await response.json();
+
+        const ddl = $('#ddlUnitname1');
+
+        ddl.empty();
+        ddl.append('<option value="">Select Unit Name</option>');
+
+        data.forEach(item => {
+
+            ddl.append(`
+                <option value="${item}">
+                    ${item}
+                </option>
+            `);
+
+        });
+
+    } catch (error) {
+
+        console.error("Error loading Unit Name List:", error);
+
+    }
+}
+
+async function BindServerIpList() {
+
+    try {
+
+        const response = await fetch('/ITInventoryEntry/GetServerIpList');
+
+        if (!response.ok) {
+            throw new Error("Failed to load Unit Name List");
+        }
+
+        const data = await response.json();
+
+        const ddl = $('#ddlServerIP');
+
+        ddl.empty();
+        ddl.append('<option value="">Select Server Ip</option>');
+
+        data.forEach(item => {
+
+            ddl.append(`
+                <option value="${item}">
+                    ${item}
+                </option>
+            `);
+
+        });
+
+    } catch (error) {
+
+        console.error("Error loading ServerIp List:", error);
+
+    }
+}
+
+async function BindPurchaseList() {
+
+    try {
+
+        const response = await fetch('/ITInventoryEntry/GetPurchaseList');
+
+        if (!response.ok) {
+            throw new Error("Failed to load Purchase List");
+        }
+
+        const data = await response.json();
+
+        const ddl = $('#ddlPurchaseFrom');
+
+        ddl.empty();
+        ddl.append('<option value="">Select PurchaseFrom</option>');
+
+        data.forEach(item => {
+
+            ddl.append(`
+                <option value="${item}">
+                    ${item}
+                </option>
+            `);
+
+        });
+
+    } catch (error) {
+
+        console.error("Error loading Purchase List:", error);
+
+    }
+}
+
+async function BindDepartmentList() {
+
+    try {
+
+        const response = await fetch('/ITInventoryEntry/GetDepartmentList');
+
+        if (!response.ok) {
+            throw new Error("Failed to load Department List");
+        }
+
+        const data = await response.json();
+
+        const ddl = $('#ddlDepartmentp');
+
+        ddl.empty();
+        ddl.append('<option value="">Select Department</option>');
+
+        data.forEach(item => {
+
+            ddl.append(`
+                <option value="${item}">
+                    ${item}
+                </option>
+            `);
+
+        });
+
+    } catch (error) {
+
+        console.error("Error loading Department List:", error);
+
+    }
+}
+
+async function ITInventoryPrint() {
+
+    var reportName = "rptITInventory";
+
+    var vType = "ITIV";
+    var vNo = $('#NumDocno').val();
+    var rptName = $('#ddlDocType option:selected').text();
+
+    if (!vType || !vNo) {
+        showToast("V Type and V No are required.", { type: "error" });
+        return;
+    }
+
+    // Base Selection Formula
+    var SelForMul =
+        "{IT_INVENTORY.V_TYPE}='" + vType + "'" +
+        " AND {IT_INVENTORY.V_NO}=" + vNo +
+        " AND {IT_INVENTORY.COMP_CODE}=" + window.globalVariables.compCode +
+        " AND {IT_INVENTORY.YEAR_CODE}=" + window.globalVariables.yearCode +
+        " AND {IT_INVENTORY.BRANCH_CODE}=" + window.globalVariables.branchCode;
 
 
-//function setFormReadOnly() {
+    // =========================
+    // DATE FILTER
+    // =========================
 
-//    const page = $('#ITInventoryform');
-//    const printSection = $('#printReportSection');
+    if ($('#chkfromdate').is(':checked') &&
+        $('#chktodate').is(':checked')) {
 
-//    page.addClass('erppage-readonly');
+        var fromDate = $('#Dtfromdate').val();
+        var toDate = $('#Dttodate').val();
 
-//    page.find('input, textarea').prop('readonly', true);
-//    page.find('input[type="checkbox"], input[type="radio"]').prop('disabled', true);
-//    page.find('select').prop('disabled', true);
-//    page.find('select.select2-hidden-accessible').each(function () {
+        if (fromDate && toDate) {
 
-//        const select = $(this);
+            SelForMul +=
+                " AND {IT_INVENTORY.V_DATE} IN DATE(" +
+                fromDate +
+                ") TO DATE(" +
+                toDate +
+                ")";
 
-//        select.prop('disabled', true);
+        }
+    }
 
-//        select.next('.select2-container').addClass('select2-readonly');
-//    });
+    // =========================
+    // PURCHASE DATE FILTER
+    // =========================
 
-//    const table = $('#tblDeviceInfromation');
+    if ($('#chkpurchaseFrom').is(':checked') &&
+        $('#chkPurchaseTo').is(':checked')) {
 
-//    table.find('input').prop('readonly', true);
-//    table.find('textarea').prop('readonly', true);
-//    table.find('select').prop('disabled', true);
-//    table.find('.add, .delete').prop('disabled', true);
-  
-   
+        var purchaseFrom = $('#DtpurchaseFrom').val();
+        var purchaseTo = $('#DtPurchaseTo').val();
 
-//    page.find('input, textarea, select').not(printSection.find('input, textarea, select'))
-//        .each(function () {
+        if (purchaseFrom && purchaseTo) {
+            SelForMul +=" AND {IT_INVENTORY.PURCHASE_DATE} IN DATE(" + purchaseFrom +") TO DATE(" + purchaseTo +")";
+        }
+    }
 
-//            const element = $(this);
+    // =========================
+    // ISSUE DATE FILTER
+    // =========================
 
-//            if (element.is('select')) {
-//                element.prop('disabled', true);
-//            } else {
-//                element.prop('readonly', true);
-//            }
-//        });
-//    printSection.find('input[type="checkbox"], input[type="radio"]').prop('disabled', false);
-//    $('#btn_print').prop('disabled', false).show();
-//    $('#btn_save').prop('disabled', true).hide();
-//}
+    if ($('#chkissuedateFrom').is(':checked') &&
+        $('#chkissuedateTo').is(':checked')) {
+
+        var issueFrom = $('#DtissuedateFrom').val();
+        var issueTo = $('#DtissuedateTo').val();
+
+        if (issueFrom && issueTo) {
+
+            SelForMul +=" AND {IT_INVENTORY.ISSUE_DATE} IN DATE(" + issueFrom + ") TO DATE(" + issueTo + ")";
+
+        }
+    }
+
+    // =========================
+    // EMPLOYEE
+    // =========================
+
+    var empCode = $('#ddlEmployeename1').val();
+
+    if (empCode) {
+        SelForMul +=" AND {IT_INVENTORY.EMP_CODE}=" + empCode;
+    }
+
+    // =========================
+    // UNIT
+    // =========================
+
+    var unitName = $('#ddlUnitname1').val();
+
+    if (unitName) {
+        SelForMul +=" AND {IT_INVENTORY.UNIT_NAME}='" + unitName.replace(/'/g, "''") + "'";
+    }
+
+    // =========================
+    // SERVER IP
+    // =========================
+
+    var serverIP = $('#ddlServerIP').val();
+
+    if (serverIP) {
+        SelForMul +=" AND {IT_INVENTORY.SERVER_IP}='" + serverIP.replace(/'/g, "''") + "'";
+    }
+
+    // =========================
+    // DEVICE STATUS
+    // =========================
+
+    var deviceStatus = $('#ddlDevices').val();
+
+    if (deviceStatus) {
+        SelForMul +=" AND {IT_INVENTORY.DEVICE_STATUS}='" + deviceStatus.replace(/'/g, "''") + "'";
+    }
+
+    // =========================
+    // WARRANTY STATUS
+    // =========================
+
+    var warrantyStatus = $('#ddlWarrantys').val();
+
+    if (warrantyStatus) {
+        SelForMul +=" AND {IT_INVENTORY.WARRANTY_STATUS}='" + warrantyStatus.replace(/'/g, "''") + "'";
+    }
+
+    // =========================
+    // ASSET CATEGORY
+    // =========================
+
+    var assetCat = $('#ddlAssetCat').val();
+
+    if (assetCat) {
+        SelForMul +=" AND {IT_INVENTORY.ASSET_CAT}='" + assetCat.replace(/'/g, "''") + "'";
+    }
+
+
+    // =========================
+    // ASSET TYPE
+    // =========================
+
+    var assetType = $('#ddlAssetType1').val();
+
+    if (assetType) {
+        SelForMul +=" AND {IT_INVENTORY.ASSET_TYPE}='" + assetType.replace(/'/g, "''") + "'";
+    }
+
+    // =========================
+    // DEPARTMENT
+    // =========================
+
+    var department = $('#ddlDepartmentp').val();
+
+    if (department) {
+        SelForMul +=" AND {IT_INVENTORY.DEPT}='" + department.replace(/'/g, "''") +"'";
+    }
+
+    // =========================
+    // REPORT DATA
+    // =========================
+
+    var formulaFields = {
+
+        Reportname: reportName,
+
+        selectionFormula: SelForMul,
+
+        Database: window.database.db,
+
+        Parameters: {
+            RPTNAME: rptName,
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.add1,
+            comp_add2: window.globalVariables.add2
+        }
+    };
+
+
+    console.log("IT Inventory ReportData:", formulaFields);
+    console.log("Selection Formula:", SelForMul);
+
+
+    // =========================
+    // TIMESTAMP
+    // =========================
+
+    var now = new Date();
+
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+
+    var timestamp =
+        `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+
+    // =========================
+    // GENERATE REPORT
+    // =========================
+
+    $.ajax({
+
+        url: 'http://localhost:34089/Report/PendingQCReport', 
+        type: 'POST',
+        data: JSON.stringify(formulaFields),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function (response) {
+
+            var file = new Blob(
+                [response],
+                { type: 'application/pdf' }
+            );
+
+            var fileName =
+                `${reportName}_${timestamp}.pdf`;
+
+            var link =
+                document.createElement('a');
+
+            link.href =
+                URL.createObjectURL(file);
+
+            link.download =
+                fileName;
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+
+        },
+
+        error: function (xhr, status, error) {
+
+            console.error(
+                'Error generating report:',
+                error
+            );
+
+        }
+
+    });
+}
+
+
+
+
+
+
 
 
