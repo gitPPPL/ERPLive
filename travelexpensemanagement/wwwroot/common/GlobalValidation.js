@@ -445,3 +445,12 @@ function SetFYDate(inputId, loginDate) {
         }
     });
 }
+
+function limitMaxLength(input, maxLength) {
+    input.value = input.value.replace(/\D/g, '');
+    if (input.value.length > maxLength) {
+        input.value = input.value.substring(0, maxLength);
+    }
+}
+
+

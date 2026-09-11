@@ -1,6 +1,6 @@
 ﻿/* ===== HEADER UPGRADE ===== */
 .erppage-header {
-    background: linear-gradient(135deg, #2d7b46, #1C5E31);
+    background: linear-gradient(135deg, #122f4d, #0d142c);
     color: #fff;
     padding: 6px 10px;
     display: flex;
@@ -622,28 +622,30 @@
         cursor: pointer;
         color: #fff;
     }
-    .erppagefieldset {
-        width: 100%;
-        border: 1px solid #a2bee7;
-        border-left: 3px solid #2952cc;
-        border-radius: 8px;
-        padding: 6px;
-        background: #fafcff;
-        box-sizing: border-box;
-        margin-top: 10px;
-    }
+.erppagefieldset {
+    width: 100%;
+    border: 0.001em solid #122f4d40;
+    border-left: 3px solid #00458d;
+    border-radius: 8px;
+    padding: 6px;
+    background: #e7eeff61;
+    box-sizing: border-box;
+    margin-top: 10px;
+}
 
 .erppagefieldset-legend {
-    padding: 0 10px;
     font-size: 13px;
     font-weight: 600;
-    color: #2952cc;
+    color: #00458d;
     width: fit-content;
     display: block;
     box-shadow: 4px 3px;
-    border: 1px solid #2952cc7d;
+    border: 1px solid #00458d;
     margin: 0px;
-    background-color: #fff;
+    background-color: #ffffff;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    padding: 2px 8px;
 }
 /* Responsive */
 @media (max-width: 768px) {
@@ -669,6 +671,9 @@
 .erppage-header-title {
     font-size: 16px;
     font-weight: 600;
+    letter-spacing: 4px;
+    font-style: italic;
+    font-family: cursive;
 }
 .erppage-readonly input,
 .erppage-readonly textarea,
@@ -1027,12 +1032,12 @@
     }
 /* ===== SECTION (FIELDSET) ===== */
 .erppage-fieldset {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    background: #fff;
+    border: 1px solid #dfdfdf;
+    border-radius: 4px;
+    background: #f1f1f1;
     overflow: visible;
     margin-bottom: 6px;
-    padding: 8px 6px 8px 6px;
+    padding: 8px 12px 8px 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: border-color 0.3s ease;
 }
@@ -1638,8 +1643,8 @@
 }
 /* ===== LABEL ===== */
 .erppage-label {
-    font-size: 11px;
-    color: #121212;
+    font-size: 0.88em;
+    color: #1f2226;
     display: inline-block;
     margin: 0;
     font-weight: 600;
@@ -1649,13 +1654,13 @@
 /* ===== INPUT ===== */
 .erppage-input {
     width: 100%;
-    border: 1px solid #d1d5db;
+    border: 1px solid #b5b5b5;
     border-radius: 4px;
-    padding: 3px 8px;
+    padding: 4px 4px;
     transition: 0.2s;
     box-sizing: border-box;
-    font-size: 11px;
-    color: #121212;
+    font-size: 0.80em;
+    color: #403b3b;
     height: 23px;
 }
     .erppage-input:disabled {
@@ -2269,8 +2274,9 @@ input[type="number"] {
 }
 /* SAVE */
 .erppage-btn-save {
-    background: linear-gradient(135deg, #2f7d32, #1b5e20);
+    background: linear-gradient(135deg, #122f4d, #4680ff);
     color: #fff;
+    padding: 8px 16px;
 }
 
 /* CANCEL */

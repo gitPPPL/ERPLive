@@ -1,0 +1,551 @@
+﻿@{
+    ViewBag.Title = "Sales Proforma Invoice List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentMenu = ViewBag.CurrentMenu as string;
+}
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span class="erppage-header-title">Sales Proforma Invoice List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "SalesProformaInvoice")'">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search Module..." />
+    </div>
+    <div class="erppagelist-actions">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
+            <i class="fa fa-envelope"></i> Mail
+        </button>
+        <button class="erppagelist-btn erppagelist-btn-approve tooltip-btn"
+                data-tooltip="Approve Records">
+            <i class="fa fa-check-circle"></i> Approved
+        </button>
+    </div>
+</div>
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblSalesProformaInvoiceList" class="excel-table fixed-grid-table table-width resizable-table">
+            <colgroup>
+                <col style="width: 90px;">   <!-- Doc Name -->
+                <col style="width: 80px;">   <!-- Doc No. -->
+                <col style="width: 90px;">   <!-- Date -->
+                <col style="width: 130px;">  <!-- Bill Name -->
+                <col style="width: 150px;">  <!-- Bill Add1 -->
+                <col style="width: 150px;">  <!-- Bill Add2 -->
+                <col style="width: 150px;">  <!-- Bill Add3 -->
+                <col style="width: 100px;">  <!-- Bill City -->
+                <col style="width: 110px;">  <!-- Agent -->
+                <col style="width: 130px;">  <!-- Ship Name -->
+                <col style="width: 150px;">  <!-- Ship Add1 -->
+                <col style="width: 150px;">  <!-- Ship Add2 -->
+                <col style="width: 150px;">  <!-- Ship Add3 -->
+                <col style="width: 110px;">  <!-- State Name -->
+                <col style="width: 100px;">  <!-- Tax Name -->
+                <col style="width: 90px;">   <!-- ItemType -->
+                <col style="width: 90px;">   <!-- Wb No -->
+                <col style="width: 90px;">   <!-- Pack No -->
+                <col style="width: 100px;">  <!-- Amount -->
+                <col style="width: 90px;">   <!-- Pack Per -->
+                <col style="width: 110px;">  <!-- Pack Amount -->
+                <col style="width: 100px;">  <!-- Namount -->
+                <col style="width: 90px;">   <!-- Cgst Per -->
+                <col style="width: 110px;">  <!-- Cgst Amount -->
+                <col style="width: 90px;">   <!-- Sgst Per -->
+                <col style="width: 110px;">  <!-- Sgst Amount -->
+                <col style="width: 90px;">   <!-- Igst Per -->
+                <col style="width: 110px;">  <!-- Igst Amount -->
+                <col style="width: 90px;">   <!-- Ces Per -->
+                <col style="width: 110px;">  <!-- Ces Amount -->
+                <col style="width: 90px;">   <!-- Load Per -->
+                <col style="width: 110px;">  <!-- Load Amount -->
+                <col style="width: 90px;">   <!-- Load Ac -->
+                <col style="width: 110px;">  <!-- Wb Amount -->
+                <col style="width: 90px;">   <!-- Wb Ac -->
+                <col style="width: 90px;">   <!-- Total Nos -->
+                <col style="width: 120px;">  <!-- Freight Amount -->
+                <col style="width: 90px;">   <!-- Round Off -->
+                <col style="width: 110px;">  <!-- Total Net -->
+                <col style="width: 90px;">   <!-- Insu Per -->
+                <col style="width: 110px;">  <!-- Insu Amount -->
+                <col style="width: 90px;">   <!-- Tds Per -->
+                <col style="width: 90px;">   <!-- Load Rem -->
+                <col style="width: 90px;">   <!-- Wb Rem -->
+                <col style="width: 110px;">  <!-- Total Gross -->
+                <col style="width: 90px;">   <!-- Gr No -->
+                <col style="width: 90px;">   <!-- Gr Date -->
+                <col style="width: 110px;">  <!-- Vehicle No -->
+                <col style="width: 120px;">  <!-- Transport Code -->
+                <col style="width: 150px;">  <!-- Transport Name -->
+                <col style="width: 130px;">  <!-- Driver Name -->
+                <col style="width: 100px;">  <!-- Driver No -->
+                <col style="width: 120px;">  <!-- Waybill No -->
+                <col style="width: 200px;">  <!-- Remark -->
+                <col style="width: 110px;">  <!-- Freight To Pay -->
+                <col style="width: 110px;">  <!-- WB Quantity -->
+                <col style="width: 90px;">   <!-- Disc Per -->
+                <col style="width: 110px;">  <!-- Disc Amount -->
+                <col class="action-col"> <!-- Action -->
+            </colgroup>
+
+            <thead>
+                <tr>
+                    <th>Doc Name</th>
+                    <th>Doc No.</th>
+                    <th>Date</th>
+                    <th>Bill Name</th>
+                    <th>Bill Add1</th>
+                    <th>Bill Add2</th>
+                    <th>Bill Add3</th>
+                    <th>Bill City</th>
+                    <th>Agent</th>
+                    <th>Ship Name</th>
+                    <th>Ship Add1</th>
+                    <th>Ship Add2</th>
+                    <th>Ship Add3</th>
+                    <th>State Name</th>
+                    <th>Tax Name</th>
+                    <th>ItemType</th>
+                    <th>Wb No</th>
+                    <th>Pack No</th>
+                    <th>Amount</th>
+                    <th>Pack Per</th>
+                    <th>Pack Amount</th>
+                    <th>Namount</th>
+                    <th>Cgst Per</th>
+                    <th>Cgst Amount</th>
+                    <th>Sgst Per</th>
+                    <th>Sgst Amount</th>
+                    <th>Igst Per</th>
+                    <th>Igst Amount</th>
+                    <th>Ces Per</th>
+                    <th>Ces Amount</th>
+                    <th>Load Per</th>
+                    <th>Load Amount</th>
+                    <th>Load Ac</th>
+                    <th>Wb Amount</th>
+                    <th>Wb Ac</th>
+                    <th>Total Nos</th>
+                    <th>Freight Amount</th>
+                    <th>Round Off</th>
+                    <th>Total Net</th>
+                    <th>Insu Per</th>
+                    <th>Insu Amount</th>
+                    <th>Tds Per</th>
+                    <th>Load Rem</th>
+                    <th>Wb Rem</th>
+                    <th>Total Gross</th>
+                    <th>Gr No</th>
+                    <th>Gr Date</th>
+                    <th>Vehicle No</th>
+                    <th>Transport Code</th>
+                    <th>Transport Name</th>
+                    <th>Driver Name</th>
+                    <th>Driver No</th>
+                    <th>Waybill No</th>
+                    <th>Remark</th>
+                    <th>Freight To Pay</th>
+                    <th>WB Quantity</th>
+                    <th>Disc Per</th>
+                    <th>Disc Amount</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+
+
+
+
+    <!-- PAGINATION -->
+    <div class="erppagelist-pagination">
+
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+
+        <div class="pagination-center">
+            <button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+            <button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+        </div>
+
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- SCRIPT -->
+<script>
+
+    let currentPage = 1;
+    let pageSize = 10;
+    let totalCount = 0;
+    var controllerName = window.location.pathname.split('/')[1];
+
+    $(document).ready(function () {
+            checkPermission(controllerName, function () {
+              loadAllInward();
+            });
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadAllInward();
+        });
+
+        $('#button_export').on('click', function () {
+            var text = $('#searchBox').val();
+            window.location.href = '/InwardEntryList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+        });
+
+        $('#button_print').on('click', function () {
+            var text = $('#searchBox').val();
+            window.open('/InwardEntryList/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
+        });
+
+    });
+
+    // ================= LOAD DATA =================
+    function loadAllInward() {
+
+        $.ajax({
+            url: '/SalesProformaInvoiceList/GetList',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: $('#searchBox').val(),
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+
+                if (!res.success) {
+                    toastr.error("Failed to load data.");
+                    return;
+                }
+
+                const list = res.lists || [];
+                totalCount = res.totalCount || 0;
+
+                renderTable(list);
+                renderPagination();
+            },
+            error: function (xhr) {
+                toastr.error('Error loading list: ' + xhr.responseText);
+            }
+        });
+    }
+
+    // ================= TABLE =================
+    function renderTable(list) {
+
+        const tbody = $('#tblSalesProformaInvoiceList tbody');
+        tbody.empty();
+
+        if (!list || list.length === 0) {
+            tbody.append('<tr><td colspan="13" class="text-center text-muted">No list found.</td></tr>');
+            return;
+        }
+
+        $.each(list, function (index, item) {
+
+
+
+
+
+                       tbody.append(`
+                <tr>
+                            <td>${item.v_TYPE ?? ''}</td>
+                            <td>${item.v_NO ?? ''}</td>
+                            <td>${formatDate(item.v_DATE)}</td>
+                            <td>${item.bilL_NAME ?? ''}</td>
+                            <td>${item.bilL_ADD1 ?? ''}</td>
+                            <td>${item.bilL_ADD2 ?? ''}</td>
+                            <td>${item.bilL_ADD3 ?? ''}</td>
+                            <td>${item.bilL_CITYName ?? ''}</td>
+                            <td>${item.agenT_Name ?? ''}</td>
+                            <td>${item.shiP_NAME ?? ''}</td>
+                            <td>${item.shiP_ADD1 ?? ''}</td>
+                            <td>${item.shiP_ADD2 ?? ''}</td>
+                            <td>${item.shiP_ADD3 ?? ''}</td>
+                            <td>${item.statename ?? ''}</td>
+                            <td>${item.taX_Name ?? ''}</td>
+                            <td>${item.iteM_TYPE ?? ''}</td>
+                            <td>${item.wB_NO ?? ''}</td>
+                            <td>${item.pacK_NO ?? ''}</td>
+                            <td>${item.amount ?? ''}</td>
+                            <td>${item.pacK_PER ?? ''}</td>
+                            <td>${item.pacK_AMT ?? ''}</td>
+                            <td>${item.namount ?? ''}</td>
+                            <td>${item.cgsT_PER ?? ''}</td>
+                            <td>${item.cgsT_AMT ?? ''}</td>
+                            <td>${item.sgsT_PER ?? ''}</td>
+                            <td>${item.sgsT_AMT ?? ''}</td>
+                            <td>${item.igsT_PER ?? ''}</td>
+                            <td>${item.igsT_AMT ?? ''}</td>
+                            <td>${item.cesS_PER ?? ''}</td>
+                            <td>${item.cesS_AMT ?? ''}</td>
+                            <td>${item.loaD_PER ?? ''}</td>
+                            <td>${item.loaD_AMT ?? ''}</td>
+                            <td>${item.loaD_AC ?? ''}</td>
+                            <td>${item.wB_AMT ?? ''}</td>
+                            <td>${item.wB_AC ?? ''}</td>
+                            <td>${item.toT_NOS ?? ''}</td>
+                            <td>${item.frT_AMT ?? ''}</td>
+                            <td>${item.rounD_OFF ?? ''}</td>
+                            <td>${item.toT_NET ?? ''}</td>
+                            <td>${item.insU_PER ?? ''}</td>
+                            <td>${item.insU_AMT ?? ''}</td>
+                            <td>${item.tdS_PER ?? ''}</td>
+                            <td>${item.loaD_REM ?? ''}</td>
+                            <td>${item.wB_REM ?? ''}</td>
+                            <td>${item.toT_GROSS ?? ''}</td>
+                            <td>${item.gR_NO ?? ''}</td>
+                            <td>${formatDate(item.gR_DATE)}</td>
+                            <td>${item.vehiclE_NO ?? ''}</td>
+                            <td>${item.transporT_CODE ?? ''}</td>
+                            <td>${item.transporT_NAME ?? ''}</td>
+                            <td>${item.driveR_NAME ?? ''}</td>
+                            <td>${item.driveR_NO ?? ''}</td>
+                            <td>${item.waybilL_NO ?? ''}</td>
+                            <td>${item.remark ?? ''}</td>
+                            <td>${item.frT_TOPAY ?? ''}</td>
+                            <td>${item.wB_QTY ?? ''}</td>
+                            <td>${item.disC_PER ?? ''}</td>
+                            <td>${item.disC_AMT ?? ''}</td>
+
+                    <td class="action-col">
+                        <div class="action-wrap">
+                            <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}' ,'${item.v_DATE}')"><i class="fa fa-edit"></i></button>
+                            <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
+                            <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
+                            <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+
+                        </div>
+                    </td>
+                </tr>
+            `);
+
+
+
+
+
+
+
+            applyGridPermission();
+        });
+
+    }
+
+    // ================= PAGINATION =================
+    function renderPagination() {
+
+        const totalPages = Math.ceil(totalCount / pageSize) || 1;
+
+        let html = '';
+        let maxVisible = 5;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = startPage + maxVisible - 1;
+
+        if (endPage > totalPages) {
+            endPage = totalPages;
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+
+        if (startPage > 1) {
+            html += `<span class="page-number" onclick="goToPage(1)">1</span>`;
+            if (startPage > 2) html += `<span class="dots">...</span>`;
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<span class="page-number ${i === currentPage ? 'active' : ''}"
+                        onclick="goToPage(${i})">${i}</span>`;
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += `<span class="dots">...</span>`;
+            html += `<span class="page-number" onclick="goToPage(${totalPages})">${totalPages}</span>`;
+        }
+
+        $('#pageNumbers').html(html);
+
+        let start = (currentPage - 1) * pageSize + 1;
+        let end = Math.min(currentPage * pageSize, totalCount);
+
+        if (totalCount === 0) {
+            start = 0;
+            end = 0;
+        }
+
+        $('#pageInfoText').text(`Results: ${start} - ${end} of ${totalCount}`);
+
+        $('#prevBtn').prop('disabled', currentPage === 1);
+        $('#nextBtn').prop('disabled', currentPage === totalPages);
+    }
+
+    // ================= PAGINATION ACTIONS =================
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadAllInward();
+        }
+    }
+
+    function nextPage() {
+        const totalPages = Math.ceil(totalCount / pageSize);
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadAllInward();
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllInward();
+    }
+
+    function changeRowsPerPage() {
+        pageSize = parseInt($('#pageSizeSelect').val());
+        currentPage = 1;
+        loadAllInward();
+    }
+
+    // ================= UTIL =================
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '';
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    }
+
+    // ================= ACTIONS =================
+    function AddOrEditFunction(code, vtype , v_DATE) {
+        Cheackview(vtype,code ,v_DATE);
+
+    }
+
+    function viewMenuDetails(code, vtype) {
+        window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(code)}&vtype=${encodeURIComponent(vtype)}&mode=view`;
+    }
+
+    function Cheackview(v_type, v_no, vdate) {
+
+        $.ajax({
+            url: '/InwardEntryList/CheackEdit',
+            type: 'POST',
+            data: {
+                v_type: v_type,
+                v_no: v_no,
+                v_DATE: formatDate(vdate)
+            },
+            success: function (res) {
+                  console.log("res.status",res.status);
+                if (res.status== false )
+                {
+                    Swal.fire({
+                    title: 'Warning',
+                    text: res.message,
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                    });
+                    return ;
+                }
+                else{
+                   window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(v_no)}&vtype=${encodeURIComponent(v_type)}`;
+                }
+
+
+            },
+            error: function (xhr) {
+                alert("Error: " + xhr.responseText);
+            }
+        });
+    }
+
+
+    function deleteTemp(code, VType) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You want to delete this Inward Entry?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: '/InwardEntryList/Delete',
+                    type: 'POST',
+                    data: { code: code, VType: VType },
+                    success: function (res) {
+
+                        if (res.success) {
+                            toastr.success(res.message || "Deleted successfully");
+                            loadAllInward();
+                        } else {
+                            toastr.error(res.message || 'Failed to delete.');
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Error deleting record.');
+                    }
+                });
+            }
+        });
+    }
+
+    function showDocumentPopup(docCode) {
+
+        $.ajax({
+            url: '/InwardEntryList/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',
+            data: { docCode: docCode },
+            success: function (response) {
+                if (response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function () {
+                toastr.error("Error fetching document details.");
+            }
+        });
+    }
+
+</script>

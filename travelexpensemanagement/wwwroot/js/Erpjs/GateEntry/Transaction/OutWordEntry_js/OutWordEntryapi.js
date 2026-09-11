@@ -37,7 +37,6 @@ async function DDLstate() {
     list.forEach(it => ddl.append(`<option value="${it.value}">${it.text}</option>`));
 }
 
-
 async function DDLParty() {
     const res = await fetch("/OutwardEntry/DDlParty");
     const list = await res.json();
