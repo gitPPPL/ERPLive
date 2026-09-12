@@ -198,8 +198,6 @@
 
 </div>
 
-
-
 <!-- SCRIPT -->
 <script>
 
@@ -451,48 +449,11 @@
 
     // ================= ACTIONS =================
     function AddOrEditFunction(code, vtype , v_DATE) {
-        Cheackview(vtype,code ,v_DATE);
-
+        window.location.href = `/SalesProformaInvoice/Index?id=${encodeURIComponent(v_no)}&vtype=${encodeURIComponent(v_type)}`;
     }
-
     function viewMenuDetails(code, vtype) {
-        window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(code)}&vtype=${encodeURIComponent(vtype)}&mode=view`;
+        window.location.href = `/SalesProformaInvoice/Index?id=${encodeURIComponent(code)}&vtype=${encodeURIComponent(vtype)}&mode=view`;
     }
-
-    function Cheackview(v_type, v_no, vdate) {
-
-        $.ajax({
-            url: '/InwardEntryList/CheackEdit',
-            type: 'POST',
-            data: {
-                v_type: v_type,
-                v_no: v_no,
-                v_DATE: formatDate(vdate)
-            },
-            success: function (res) {
-                  console.log("res.status",res.status);
-                if (res.status== false )
-                {
-                    Swal.fire({
-                    title: 'Warning',
-                    text: res.message,
-                    icon: 'warning',
-                    confirmButtonText: 'OK'
-                    });
-                    return ;
-                }
-                else{
-                   window.location.href = `/InwardEntry/Index?id=${encodeURIComponent(v_no)}&vtype=${encodeURIComponent(v_type)}`;
-                }
-
-
-            },
-            error: function (xhr) {
-                alert("Error: " + xhr.responseText);
-            }
-        });
-    }
-
 
     function deleteTemp(code, VType) {
         Swal.fire({

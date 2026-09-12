@@ -98,7 +98,7 @@
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Address L1</label>
                         <div class="erppage-inputgroup">
-                            <textarea typeof="text" class="erppage-input erppage-width-93" id="txtaddressL1" style="height:25px;" placeholder="Enter Address"></textarea>
+                            <textarea typeof="text" class="erppage-input erppage-width-93" id="txtaddressL1" style="height:25px;" placeholder="Enter Address" readonly></textarea>
                             <select class="erppage-input erppage-select erppage-width-7" id="ddladdressl1">
                                 <option value=""></option>
                             </select>
@@ -106,15 +106,15 @@
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Address L2</label>
-                        <textarea typeof="text" class="erppage-input" id="txtaddressL2" style="height:35px;" placeholder="Enter Address"></textarea>
+                        <textarea typeof="text" class="erppage-input" id="txtaddressL2" style="height:35px;" placeholder="Enter Address" readonly></textarea>
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Address L3</label>
-                        <textarea typeof="text" class="erppage-input" id="txtaddressL3" style="height:35px;" placeholder="Enter Address"></textarea>
+                        <textarea typeof="text" class="erppage-input" id="txtaddressL3" style="height:35px;" placeholder="Enter Address" readonly></textarea>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Station</label>
-                          <select class="erppage-input erppage-select" id="ddlStationl">
+                          <select class="erppage-input erppage-select" id="ddlStationl" disabled>
                                 <option value=""></option>
                             </select>  
 
@@ -124,17 +124,17 @@
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Pincode</label>
-                        <input type="number" class="erppage-input" id="NumPincode">
+                        <input type="number" class="erppage-input" id="NumPincode" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Country</label>
-                        <select class="erppage-input erppage-select" id="ddlCountry">
+                        <select class="erppage-input erppage-select" id="ddlCountry" disabled>
                             <option value="">Select Country</option>
                         </select>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">GST</label>
-                        <input type="text" class="erppage-input" id="TxtGST">
+                        <input type="text" class="erppage-input" id="TxtGST" readonly>
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
                         <div class="erppage-checkbox-wrap">
@@ -163,7 +163,7 @@
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Address L1</label>
                         <div class="erppage-inputgroup">
-                            <textarea typeof="text" class="erppage-input erppage-width-93" id="txtaddressL1Sa" style="height:25px;" placeholder="Enter Address"></textarea>
+                            <textarea typeof="text" class="erppage-input erppage-width-93" id="txtaddressL1Sa" style="height:25px;" placeholder="Enter Address" readonly></textarea>
                             <select class="erppage-input erppage-select erppage-width-7" id="ddladdressl1Sa">
                                 <option value=""></option>
                             </select>
@@ -171,32 +171,32 @@
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Address L2</label>
-                        <textarea typeof="text" class="erppage-input" id="txtaddressL2Sa" style="height:35px;" placeholder="Enter Address"></textarea>
+                        <textarea typeof="text" class="erppage-input" id="txtaddressL2Sa" style="height:35px;" placeholder="Enter Address" readonly></textarea>
                     </div>
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Address L3</label>
-                        <textarea typeof="text" class="erppage-input" id="txtaddressL3Sa" style="height:35px;" placeholder="Enter Address"></textarea>
+                        <textarea typeof="text" class="erppage-input" id="txtaddressL3Sa" style="height:35px;" placeholder="Enter Address" readonly></textarea>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Station</label>
 
-                               <select class="erppage-input erppage-select" id="ddlStationSa">
+                               <select class="erppage-input erppage-select" id="ddlStationSa" disabled>
                                 <option value=""></option>
                             </select>                      
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Pincode</label>
-                        <input type="number" class="erppage-input" id="NumPincodeSa">
+                        <input type="number" class="erppage-input" id="NumPincodeSa" onreadystatechange="">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Country</label>
-                        <select class="erppage-input erppage-select" id="ddlCountrySa">
+                        <select class="erppage-input erppage-select" id="ddlCountrySa" disabled>
                             <option value="">Select Country</option>
                         </select>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">GST</label>
-                        <input type="text" class="erppage-input" id="TxtGSTSa">
+                        <input type="text" class="erppage-input" id="TxtGSTSa" readonly>
                     </div>
                 </div>
             </fieldset>
@@ -387,14 +387,14 @@
                         <label class="erppage-label">Packing</label>
                         <div class="erppage-inputgroup">
                             <input type="number" class="erppage-input erppage-width-30" id="NumPacking1" value="0">
-                            <input type="number" class="erppage-input erppage-width-70" id="NumPacking2" value="0">
+                            <input type="number" class="erppage-input erppage-width-70" id="NumPacking2" value="0" onreadystatechange="">
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Discount</label>
                         <div class="erppage-inputgroup">
                             <input type="number" class="erppage-input erppage-width-30" id="NumDiscount1" value="0">
-                            <input type="number" class="erppage-input erppage-width-70" id="NumDiscount2" value="0">
+                            <input type="number" class="erppage-input erppage-width-70" id="NumDiscount2" value="0" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
@@ -409,21 +409,21 @@
                         <label class="erppage-label">CGST</label>
                         <div class="erppage-inputgroup">
                             <input type="number" class="erppage-input erppage-width-30" id="NumCGST1" value="0" readonly>
-                            <input type="number" class="erppage-input erppage-width-70" id="NumCGST2" value="0">
+                            <input type="number" class="erppage-input erppage-width-70" id="NumCGST2" value="0" readonly >
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">SGST</label>
                         <div class="erppage-inputgroup">
                             <input type="number" class="erppage-input erppage-width-30" id="NumSGST1" value="0" readonly>
-                            <input type="number" class="erppage-input erppage-width-70" id="NumSGST2" value="0">
+                            <input type="number" class="erppage-input erppage-width-70" id="NumSGST2" value="0" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">IGST</label>
                         <div class="erppage-inputgroup">
                             <input type="number" class="erppage-input erppage-width-30" id="NumIGST1" value="0" readonly>
-                            <input type="number" class="erppage-input erppage-width-70" id="NumIGST2" value="0">
+                            <input type="number" class="erppage-input erppage-width-70" id="NumIGST2" value="0" readonly>
                         </div>
                     </div>
                 </div>
@@ -436,14 +436,14 @@
                         <label class="erppage-label">CESS</label>
                         <div class="erppage-inputgroup">
                             <input type="number" class="erppage-input erppage-width-30" id="NumCESS1" value="0" readonly>
-                            <input type="number" class="erppage-input erppage-width-70" id="NumCESS2" value="0">
+                            <input type="number" class="erppage-input erppage-width-70" id="NumCESS2" value="0" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">TCS</label>
                         <div class="erppage-inputgroup">
                             <input type="number" class="erppage-input erppage-width-30" id="NumTCS1" value="0" readonly>
-                            <input type="number" class="erppage-input erppage-width-70" id="NumTCS2" value="0">
+                            <input type="number" class="erppage-input erppage-width-70" id="NumTCS2" value="0" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">

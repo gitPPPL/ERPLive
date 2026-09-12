@@ -4,7 +4,9 @@ using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Models.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Sale.Transaction;
 
 namespace travelexpensemanagement.Controllers.Sales.Transaction
 {
@@ -19,10 +21,13 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
+        private readonly ISalesProformaInvoice _salesProformaInvoiceRepository;
+
+
 
         public SalesProformaInvoiceController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
           travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
-          ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
+          ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate ,ISalesProformaInvoice salesProformaInvoice )
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -30,6 +35,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
+            _salesProformaInvoiceRepository = salesProformaInvoice;
         }
         public IActionResult Index()
         {
@@ -287,14 +293,22 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
-        } 
+        }
 
+        [HttpPost]
+        public async Task<JsonResult> SavedData([FromBody] SalesProformaInvoice_Model request)
+        {
+            if (request?.Header == null)
+            {
+                return Json(new { success = false, status = "Error", message = "Input model is null" });
+            }
 
+            var action = string.Equals(request.Header.action, "INSERT", StringComparison.OrdinalIgnoreCase) ? "INSERT" : "UPDATE";
 
+            var result = await _salesProformaInvoiceRepository.SubmitRequest(request.Header, request.Details, action);
 
-
-
-
+            return Json(new { success = result.Status == "Success", status = result.Status, message = result.Message });
+        }
 
     }
 }

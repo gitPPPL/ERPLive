@@ -12,11 +12,13 @@ using travelexpensemanagement.Repositories.Implementations;
 using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Implementations.QualityControl;
+using travelexpensemanagement.Repositories.Implementations.Sale.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge;
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl;
+using travelexpensemanagement.Repositories.Interfaces.Sale.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge;
 using travelexpensemanagement.Services;
 
@@ -50,7 +52,7 @@ builder.Services.AddScoped<ITransitEntryRepository, TransitEntryRepository>();
 builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListRepository>();
 builder.Services.AddScoped<IInventoryDepartmentIssueRepository,  InventoryDepartmentIssueRepository>();
 builder.Services.AddScoped< IInventoryDepartmentIssueListRepository, InventoryDepartmentIssuelistRepository>();
-
+builder.Services.AddScoped<ISalesProformaInvoice , SalesProformaInvoice>();
 builder.Services.Configure<EncryptionSettings>(
 builder.Configuration.GetSection("EncryptionSettings"));
 builder.Services.AddScoped<EncryptionHelper>();

@@ -68,23 +68,31 @@
             <tbody></tbody>
         </table>
     </div>
+
+
+    <!-- PAGINATION -->
     <div class="erppagelist-pagination">
+
         <div class="pagination-left">
-            <select id="pageSizeSelect">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+
                 <option value="5">5</option>
                 <option value="10" selected>10</option>
                 <option value="20">20</option>
                 <option value="50">50</option>
             </select>
         </div>
+
         <div class="pagination-center">
-            <button class="page-nav" id="prevBtn">‹</button>
-            <div id="tablePagination" class="page-numbers"></div>
-            <button class="page-nav" id="nextBtn">›</button>
+            <button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+            <button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
         </div>
+
         <div class="pagination-right" id="pageInfoText">
             Results: 0 - 0 of 0
         </div>
+
     </div>
 </div>
 

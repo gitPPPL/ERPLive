@@ -253,12 +253,16 @@ async function cmbTaxType() {
         console.log("Tax Type data", data);
         TaxPercentageData = data;
         const ddl = $('#ddlTaxType');
+
         ddl.empty();
         ddl.append('<option value="">---Select Tax Type---</option>');
-        data.forEach(item => {
-            const option = `<option value="${item.code}">${item.name}</option>`;
+
+        data.forEach(item => { const option = `<option value="${item.code}">${item.name}</option>`;
             ddl.append(option);
         });
+
+        TaxTypeList = data.map(x => `<option value="${x.code}">${x.name}</option>` ).join('');
+
     } catch (error) {
         console.error("Error loading Party Name:", error);
     }
@@ -320,10 +324,24 @@ function selectedPartyData()
     $('#txtaddressL1').val(party.add1 || '');
     $('#txtaddressL2').val(party.add2 || '');
     $('#txtaddressL3').val(party.add3 || '');
-    $('#ddlStationSa').val(party.c_code || '');
+    $('#ddlStationl').val(party.c_code || '');
     $('#NumPincode').val(party.pincode || '');
     $('#ddlCountry').val(party.c_code || '');
     $('#TxtGST').val(party.gstin || '');
+
+
+    $('#ddlConsignee').val(party.code || '');
+    $('#txtaddressL1Sa').val(party.add1 || '');
+    $('#txtaddressL2Sa').val(party.add2 || '');
+    $('#txtaddressL3Sa').val(party.add3 || '');
+    $('#ddlStationSa').val(party.c_code || '');
+    $('#NumPincodeSa').val(party.pincode || '');
+    $('#ddlCountrySa').val(party.c_code || '');
+    $('#TxtGSTSa').val(party.gstin || '');
+
+
+
+
 
 }
 
@@ -363,7 +381,7 @@ function AddRow(data = {})
             <td>  <input type="text"   class="erppagetable-control TxtDisPer" value="${data.DisPer ?? ''}"  /> </td>
             <td>  <input type="number" class="erppagetable-control TxtDisAmount"  value="${data.Disamt ?? ''}" />   </td>
             <td>  <input type="number" class="erppagetable-control TxtFreight" value="${data.Freight ?? ''}"    />  </td>
-            <td>  <input type="number" class="erppagetable-control TxtTaxType" value="${data.TaxType ?? ''}"  /> </td>
+            <td>  <select class="erppagetable-control TxtTaxType"> <option value="">-- Select Tax Type  --</option>  ${TaxTypeList}  </select> </td>
             <td>  <input type="number" class="erppagetable-control TxtCgstper"  value="${data.CgstPer ?? ''}"   />   </td>
             <td>  <input type="number" class="erppagetable-control TxtCgstAmt" value="${data.CgstAmt ?? ''}"     />  </td>
             <td>  <input type="number" class="erppagetable-control TxtSgstPer" value="${data.SgstPer ?? ''}"   /> </td>
@@ -387,10 +405,154 @@ function AddRow(data = {})
 
 
     $row.find('.ddlProductName').val(data.Productcode ?? '');
+    $row.find('.TxtTaxType').val(data.TaxType ?? '');
 
+    // Calculate when values change
+    $row.find(
+        '.TxtNetQty, .TxtRate, .TxtPacKPer, .TxtDisPer, ' +
+        '.TxtCgstper, .TxtSgstPer, .TxtIGSTPer, .TxtCessPer'
+    ).on('input change', function () {
+        CalculateRow($row);
+    });
+
+
+    // Tax Type change
+    $row.find('.TxtTaxType').on('change', function () {
+
+        const selectedCode = $(this).val();
+
+        const selectedTax = TaxPercentageData.find(
+            x => String(x.code) === String(selectedCode)
+        );
+
+        console.log("Selected Tax Type:", selectedTax);
+
+        if (!selectedTax) {
+            $row.find('.TxtCgstper').val('0.00');
+            $row.find('.TxtSgstPer').val('0.00');
+            $row.find('.TxtIGSTPer').val('0.00');
+
+            CalculateRow($row);
+            return;
+        }
+
+        $row.find('.TxtCgstper').val(
+            Number(selectedTax.cgsT_PER || 0).toFixed(2)
+        );
+
+        $row.find('.TxtSgstPer').val(
+            Number(selectedTax.sgsT_PER || 0).toFixed(2)
+        );
+
+        $row.find('.TxtIGSTPer').val(
+            Number(selectedTax.igsT_PER || 0).toFixed(2)
+        );
+
+        // Recalculate after tax percentage changes
+        CalculateRow($row);
+    });
 
     // Load item details
     if (data.itemCode) {
         SetItemDetails($row);
     }
+}
+
+function CollectDetailRows() {
+
+    let details = [];
+
+    $('#tblSalesProformaInvoice tbody tr').each(function () {
+
+        let $row = $(this);
+
+        let detail = {
+
+            // Basic / Product
+            ROW_ID: $.trim($row.find('.ID').val()),
+            ITEM_CODE: parseInt($row.find('.ddlProductName').val()) || null,
+            ITEM_NAME: $.trim($row.find('.ddlProductName option:selected').text()),
+            PROD_DESC: $.trim($row.find('.txt_Productdiscr').val()),
+            HSN_CODE: $.trim($row.find('.HsnCode').val()),
+
+            // Quantity
+            NOS: parseInt($row.find('.TxtNos').val()) || null,
+            GROSS_QTY: parseFloat($row.find('.TxtGrossQty').val()) || 0,
+            QTY: parseFloat($row.find('.TxtNetQty').val()) || 0,
+
+            // Rate / Amount
+            RATE: parseFloat($row.find('.TxtRate').val()) || 0,
+            AMOUNT: parseFloat($row.find('.TxtAmount').val()) || 0,
+
+            // Packing
+            PACK_PER: parseFloat($row.find('.TxtPacKPer').val()) || 0,
+            PACK_AMT: parseFloat($row.find('.TxtPackAmount').val()) || 0,
+
+            // Discount
+            DISC_PER: parseFloat($row.find('.TxtDisPer').val()) || 0,
+            DISC_AMT: parseFloat($row.find('.TxtDisAmount').val()) || 0,
+
+            // Freight
+            FREIGHT_AMT: parseFloat($row.find('.TxtFreight').val()) || 0,
+            FRT_AMT: parseFloat($row.find('.TxtFreight').val()) || 0,
+
+            // Tax
+            TAX_CODE: parseInt($row.find('.TxtTaxType').val()) || null,
+
+            // CGST
+            CGST_PER: parseFloat($row.find('.TxtCgstper').val()) || 0,
+            CGST_AMT: parseFloat($row.find('.TxtCgstAmt').val()) || 0,
+
+            // SGST
+            SGST_PER: parseFloat($row.find('.TxtSgstPer').val()) || 0,
+            SGST_AMT: parseFloat($row.find('.TxtSgstamt').val()) || 0,
+
+            // IGST
+            IGST_PER: parseFloat($row.find('.TxtIGSTPer').val()) || 0,
+            IGST_AMT: parseFloat($row.find('.TxtIGSTamt').val()) || 0,
+
+            // CESS
+            CESS_PER: parseFloat($row.find('.TxtCessPer').val()) || 0,
+            CESS_AMT: parseFloat($row.find('.TxtCessamt').val()) || 0,
+
+            // Remark
+            REMARK: $.trim($row.find('.TxtRemark').val())
+        };
+
+        details.push(detail);
+    });
+
+    return details;
+}
+
+function CalculateRow($row) {
+    const netQty = parseFloat($row.find('.TxtNetQty').val()) || 0;
+    const rate = parseFloat($row.find('.TxtRate').val()) || 0;
+    const packPer = parseFloat($row.find('.TxtPacKPer').val()) || 0;
+    const disPer = parseFloat($row.find('.TxtDisPer').val()) || 0;
+    const amount = netQty * rate;
+    const packAmt = amount * packPer / 100;
+    const grossAmount = amount + packAmt;
+    const disAmt = grossAmount * disPer / 100;
+    const taxableAmount = grossAmount - disAmt;
+
+    const cgstPer = parseFloat($row.find('.TxtCgstper').val()) || 0;
+    const sgstPer = parseFloat($row.find('.TxtSgstPer').val()) || 0;
+    const igstPer = parseFloat($row.find('.TxtIGSTPer').val()) || 0;
+
+    const cgstAmt = taxableAmount * cgstPer / 100;
+    const sgstAmt =  taxableAmount * sgstPer / 100;
+    const igstAmt = taxableAmount * igstPer / 100;
+
+    $row.find('.TxtAmount').val(amount.toFixed(2));
+
+    $row.find('.TxtPackAmount').val(packAmt.toFixed(2));
+
+    $row.find('.TxtDisAmount') .val(disAmt.toFixed(2));
+
+    $row.find('.TxtCgstAmt')  .val(cgstAmt.toFixed(2));
+
+    $row.find('.TxtSgstamt') .val(sgstAmt.toFixed(2));
+
+    $row.find('.TxtIGSTamt') .val(igstAmt.toFixed(2));
 }

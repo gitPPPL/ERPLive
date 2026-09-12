@@ -37,7 +37,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             return View("~/Views/Sales/Transaction/SalesProformaInvoiceList/Index.cshtml");
         }
 
-
         [HttpGet]
         public IActionResult GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
@@ -148,6 +147,16 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             return Json(new { success = true, lists = headerList, totalCount });
         }
+
+
+
+
+
+
+
+
+
+
 
     }
 }
