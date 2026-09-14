@@ -11,6 +11,9 @@
         <div class="erppage-header-title">Sales Export Costing</div>
     </div>
     <div class="erppage-header-right">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print" onclick="ExportCostingReport()">
+            <i class="fa fa-print"></i> Print
+        </button>
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesExportCostingList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -23,11 +26,11 @@
             <div class="erppage-grid8">
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc No</label>
-                    <input type="number" class="erppage-input" id="NumDocNo">
+                    <input type="number" class="erppage-redinput" id="NumDocNo" disabled>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Doc Date</label>
-                    <input type="date" class="erppage-input" id="DtDocDate">
+                    <input type="date" class="erppage-redinput" id="DtDocDate">
                 </div>
                 <div class="erppage-divfield erppage-col-span-2">
                     <label class="erppage-label">Party Name</label>
@@ -51,65 +54,73 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label">Currency</label>
                     <select class="erppage-input erppage-select" id="ddlCurrency">
-                        <option value="EURO">EURO</option>
+                        @* <option value="EURO">EURO</option>
                         <option value="GBP">GBP</option>
                         <option value="USD">USD</option>
                         <option value="Yen">Yen</option>
-                        <option value="Yuan">Yuan</option>
+                        <option value="Yuan">Yuan</option> *@
                     </select>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Loading Qty</label>
-                    <input type="number" class="erppage-input" id="NumLoadingQty">
+                    <input type="number" class="erppage-input" id="NumLoadingQty" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Stuffing Qty</label>
-                    <input type="number" class="erppage-input" id="NumStuffingQty">
+                    <input type="number" class="erppage-input" id="NumStuffingQty" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">EPCG Amt</label>
-                    <input type="number" class="erppage-input" id="NumEPCGAmt">
+                    <input type="number" class="erppage-input" id="NumEPCGAmt" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Gross Less 1%</label>
-                    <input type="number" class="erppage-input" id="NumGrossLess">
+                    <input type="number" class="erppage-input" id="NumGrossLess" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Disc. Amt</label>
-                    <input type="number" class="erppage-input" id="NumDiscAmt">
+                    <input type="number" class="erppage-input" id="NumDiscAmt" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">RoadTape Amt</label>
-                    <input type="number" class="erppage-input" id="NumRoadTapeAmt">
+                    <input type="number" class="erppage-input" id="NumRoadTapeAmt" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Adv. Licence</label>
-                    <input type="number" class="erppage-input" id="NumAdvLicence">
+                    <input type="number" class="erppage-input" id="NumAdvLicence" oninput="SetMaxlength(this, 18, 2);">
                 </div>
 
                 <div class="erppage-divfield">
                     <label class="erppage-label">Costing Type</label>
-                    <select class="erppage-input erppage-select" id="ddlCostingType">
+                    <input type="number" class="erppage-input" id="ddlOceanInlandHaulageCost" oninput="SetMaxlength(this, 18, 2);">
+                    @* <select class="erppage-input erppage-select" id="ddlCostingType">
                         <option value="">Select Costing Type</option>
-                    </select>
+                    </select> *@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Ocean Inland Haulage Cost</label>
-                    <select class="erppage-input erppage-select" id="ddlOceanInlandHaulageCost">
-                        <option value="">Select Ocean Inland Haulage Cost</option>
+                    <select class="erppage-input erppage-select" id="ddlCostingType">
+                        @* <option value="">Select Ocean Inland Haulage Cost</option> *@
+                        <option value="FOR">FOR</option>
+                        <option value="FOR-TPT">FOR-TPT</option>
+                        <option value="ExWork">ExWork</option>
+                        <option value="CIF">CIF</option>
+                        <option value="FOB" selected>FOB</option>
+                        <option value="CFR">CFR</option>
+                        <option value="CPT">CPT</option>
                     </select>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Busy Season Charges</label>
-                    <input type="number" class="erppage-input" id="NumBusySeasonCharges">
+                    <input type="number" class="erppage-input" id="NumBusySeasonCharges" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">DDBK Amt</label>
-                    <input type="number" class="erppage-input" id="NumDDBKAmt">
+                    <input type="number" class="erppage-input" id="NumDDBKAmt" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Insurance Cost</label>
-                    <input type="number" class="erppage-input" id="NumInsuranceCost">
+                    <input type="number" class="erppage-input" id="NumInsuranceCost" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Sample Costing (Yes/No)</label>
@@ -121,25 +132,25 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Sample Costing Amt</label>
-                    <input type="number" class="erppage-input" id="NumSampleCostingAmt">
+                    <input type="number" class="erppage-input" id="NumSampleCostingAmt" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">CHA VGM</label>
-                    <input type="number" class="erppage-input" id="NumCHAVGM">
+                    <input type="number" class="erppage-input" id="NumCHAVGM" oninput="SetMaxlength(this, 18, 2);">
                 </div>
             </div>
             <div class="erppage-grid8">
                 <div class="erppage-divfield">
                     <label class="erppage-label">CHA CGM Cost</label>
-                    <input type="number" class="erppage-input" id="NumCHACGMCost">
+                    <input type="number" class="erppage-input" id="NumCHACGMCost" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Ocean ANS Charges</label>
-                    <input type="number" class="erppage-input" id="NumOceanANSCharges">
+                    <input type="number" class="erppage-input" id="NumOceanANSCharges" oninput="SetMaxlength(this, 18, 2);">
                 </div>
                 <div class="erppage-divfield erppage-col-span-4">
                     <label class="erppage-label">Remarks</label>
-                    <textarea typeof="text" class="erppage-input" id="txtremarks" style="height:50px;" placeholder="Enter Remarks"></textarea>
+                    <textarea typeof="text" class="erppage-input" id="txtremarks" style="height:50px;" placeholder="Enter Remarks" maxlength="200"></textarea>
                 </div>
             </div>
             <fieldset class="erppagefieldset">
@@ -147,149 +158,149 @@
                 <div class="erppage-grid8">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Product Value</label>
-                        <input type="text" class="erppage-input" id="txtProductValue" value="0">
+                        <input type="number" class="erppage-input" id="txtProductValue">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Ex. Rate for Freight</label>
-                        <input type="text" class="erppage-input" id="txtExRateFreight">
+                        <input type="number" class="erppage-input" id="txtExRateFreight" oninput="SetMaxlength(this, 10, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Ex. Rate for Rate</label>
-                        <input type="text" class="erppage-input" id="txtExRateRate">
+                        <input type="number" class="erppage-input" id="txtExRateRate" oninput="SetMaxlength(this, 10, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Ocean Freight (USD)</label>
                         <div class="erppage-inputgroup">
-                            <input type="text" class="erppage-input" id="txtOceanFreight">
-                            <input type="text" class="erppage-input" id="txtOceanFreightTotal" value="0">
+                            <input type="number" class="erppage-input" id="txtOceanFreight" oninput="SetMaxlength(this, 18, 2);">
+                            <input type="number" class="erppage-input" id="txtOceanFreightTotal" oninput="SetMaxlength(this, 18, 2);">
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Door Delivery (USD)</label>
                         <div class="erppage-inputgroup">
-                            <input type="text" class="erppage-input" id="txtDoorDelivery">
-                            <input type="text" class="erppage-input" id="txtDoorDeliveryTotal" value="0">
+                            <input type="number" class="erppage-input" id="txtDoorDelivery" oninput="SetMaxlength(this, 18, 2);">
+                            <input type="number" class="erppage-input" id="txtDoorDeliveryTotal" oninput="SetMaxlength(this, 18, 2);">
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Duty 28%</label>
-                        <input type="text" class="erppage-input" id="txtDuty28">
+                        <input type="number" class="erppage-input" id="txtDuty28" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Rail Freight</label>
-                        <input type="text" class="erppage-input" id="txtRailFreight">
+                        <input type="number" class="erppage-input" id="txtRailFreight" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Concer Handling Factory Stuffing</label>
-                        <input type="text" class="erppage-input" id="txtFactoryStuffing">
+                        <input type="number" class="erppage-input" id="txtFactoryStuffing" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">THC</label>
-                        <input type="text" class="erppage-input" id="txtTHC">
+                        <input type="number" class="erppage-input" id="txtTHC" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Seal Charges</label>
-                        <input type="text" class="erppage-input" id="txtSealCharges">
+                        <input type="number" class="erppage-input" id="txtSealCharges" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">BL Charges</label>
-                        <input type="text" class="erppage-input" id="txtBLCharges">
+                        <input type="number" class="erppage-input" id="txtBLCharges" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Clearing Charges</label>
-                        <input type="text" class="erppage-input" id="txtClearingCharges">
+                        <input type="number" class="erppage-input" id="txtClearingCharges" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Document Charges</label>
-                        <input type="text" class="erppage-input" id="txtDocumentCharges">
+                        <input type="number" class="erppage-input" id="txtDocumentCharges" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Transport Charges</label>
-                        <input type="text" class="erppage-input" id="txtTransportCharges">
+                        <input type="number" class="erppage-input" id="txtTransportCharges" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Total Cost</label>
-                        <input type="text" class="erppage-input" id="txtTotalCost" value="0">
+                        <input type="number" class="erppage-input" id="txtTotalCost">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Cost/Kg</label>
-                        <input type="text" class="erppage-input" id="txtCostKg" value="NaN">
+                        <input type="number" class="erppage-input" id="txtCostKg">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Cost/Kg (Ex-Plant)</label>
-                        <input type="text" class="erppage-input" id="txtCostKgExPlant">
+                        <input type="number" class="erppage-input" id="txtCostKgExPlant" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Total Cost/Kg</label>
-                        <input type="text" class="erppage-input" id="txtTotalCostKg" value="0">
+                        <input type="number" class="erppage-input" id="txtTotalCostKg">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Add : DBK @@ 1.2%</label>
-                        <input type="text" class="erppage-input" id="txtDBK" value="NaN">
+                        <input type="number" class="erppage-input" id="txtDBK" oninput="SetMaxlength(this, 10, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Less: MEIS/RODTEP Benefit 1.3%</label>
-                        <input type="text" class="erppage-input" id="txtMEISBenefit" value="NaN">
+                        <input type="number" class="erppage-input" id="txtMEISBenefit" oninput="SetMaxlength(this, 10, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Total Cost/Kg (Rs)</label>
-                        <input type="text" class="erppage-input" id="txtTotalCostKgRs" value="0">
+                        <input type="number" class="erppage-input" id="txtTotalCostKgRs">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Total Cost/MT (Rs)</label>
-                        <input type="text" class="erppage-input" id="txtTotalCostMTRs" value="0">
+                        <input type="number" class="erppage-input" id="txtTotalCostMTRs">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Cost/Kg (USD)</label>
-                        <input type="text" class="erppage-input" id="txtCostKgUSD" value="NaN">
+                        <input type="number" class="erppage-input" id="txtCostKgUSD">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Cost/MT (USD)</label>
-                        <input type="text" class="erppage-input" id="txtCostMTUSD" value="0">
+                        <input type="number" class="erppage-input" id="txtCostMTUSD" oninput="SetMaxlength(this);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Comm. Rate</label>
-                        <input type="text" class="erppage-input" id="txtCommRate">
+                        <input type="number" class="erppage-input" id="txtCommRate">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Total</label>
-                        <input type="text" class="erppage-input" id="txtTotal" value="0">
+                        <input type="number" class="erppage-input" id="txtTotal">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Our Offer Rate</label>
-                        <input type="text" class="erppage-input" id="txtOurOfferRate">
+                        <input type="number" class="erppage-input" id="txtOurOfferRate" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Ocean BL Fees</label>
-                        <input type="text" class="erppage-input" id="txtOceanBLFees">
+                        <input type="number" class="erppage-input" id="txtOceanBLFees" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Ocean Doc Fee Export</label>
-                        <input type="text" class="erppage-input" id="txtOceanDocFeeExport">
+                        <input type="number" class="erppage-input" id="txtOceanDocFeeExport" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">CHA Examination Cost</label>
-                        <input type="text" class="erppage-input" id="txtCHAExaminationCost">
+                        <input type="number" class="erppage-input" id="txtCHAExaminationCost" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">CHA CMC Cost</label>
-                        <input type="text" class="erppage-input" id="txtCHACMCCost">
+                        <input type="number" class="erppage-input" id="txtCHACMCCost" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">CHA Loading/Unloading Cost</label>
-                        <input type="text" class="erppage-input" id="txtCHALoadingUnloadingCost">
+                        <input type="number" class="erppage-input" id="txtCHALoadingUnloadingCost" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">CHA Agency Cost</label>
-                        <input type="text" class="erppage-input" id="txtCHAAgencyCost">
+                        <input type="number" class="erppage-input" id="txtCHAAgencyCost" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Banking Charges</label>
-                        <input type="text" class="erppage-input" id="txtBankingCharges">
+                        <input type="number" class="erppage-input" id="txtBankingCharges" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">CHA Nomination Cost</label>
-                        <input type="text" class="erppage-input" id="txtCHANominationCost">
+                        <input type="number" class="erppage-input" id="txtCHANominationCost" oninput="SetMaxlength(this, 18, 2);">
                     </div>
                 </div>
             </fieldset>
@@ -331,3 +342,6 @@
 
     </div>
 </div>
+
+
+<script src="~/js/erpjs/sales/transaction/salesexportcosting/salesexportcosting.js"></script>

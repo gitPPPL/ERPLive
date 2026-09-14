@@ -1,0 +1,886 @@
+﻿@{
+    ViewBag.Title = "Sales Credit Limit Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    /* =========================================================
+       ERP PAGE MAILER
+       ========================================================= */
+
+    .erppagemailer-modal-dialog {
+        max-width: 850px;
+        width: calc(100% - 30px);
+        margin: 1.75rem auto;
+    }
+
+    .erppagemailer-modal-content {
+        border: 0;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #f7f9fc;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.20);
+    }
+
+
+    /* =========================================================
+       HEADER
+       ========================================================= */
+
+    .erppagemailer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 22px;
+        background: linear-gradient( 135deg, #2563eb 0%, #1d4ed8 100% );
+        color: #fff;
+    }
+
+    .erppagemailer-header-left {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .erppagemailer-header-icon {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px;
+        background: rgba(255, 255, 255, 0.17);
+        font-size: 18px;
+    }
+
+    .erppagemailer-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    .erppagemailer-subtitle {
+        margin-top: 2px;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.78);
+    }
+
+    .erppagemailer-close {
+        width: 34px;
+        height: 34px;
+        border: 0;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .erppagemailer-close:hover {
+            background: rgba(255, 255, 255, 0.23);
+            transform: rotate(90deg);
+        }
+
+
+    /* =========================================================
+       BODY
+       ========================================================= */
+
+    .erppagemailer-body {
+        padding: 20px;
+        max-height: calc(100vh - 180px);
+        overflow-y: auto;
+    }
+
+    .erppagemailer-section {
+        padding: 17px;
+        margin-bottom: 15px;
+        background: #fff;
+        border: 1px solid #e5eaf1;
+        border-radius: 12px;
+    }
+
+        .erppagemailer-section:last-child {
+            margin-bottom: 0;
+        }
+
+    .erppagemailer-section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        color: #172033;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+        .erppagemailer-section-title i {
+            color: #2563eb;
+            font-size: 13px;
+        }
+
+
+    /* =========================================================
+       FORM FIELDS
+       ========================================================= */
+
+    .erppagemailer-field {
+        margin-bottom: 14px;
+    }
+
+        .erppagemailer-field:last-child {
+            margin-bottom: 0;
+        }
+
+    .erppagemailer-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #374151;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .erppagemailer-required {
+        color: #ef4444;
+    }
+
+    .erppagemailer-input-wrapper {
+        position: relative;
+    }
+
+    .erppagemailer-input-icon {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 13px;
+        pointer-events: none;
+    }
+
+    .erppagemailer-input {
+        width: 100%;
+        height: 40px;
+        padding: 8px 12px 8px 37px;
+        border: 1px solid #dbe2ea;
+        border-radius: 8px;
+        outline: none;
+        background: #fff;
+        color: #1e293b;
+        font-size: 12px;
+        transition: all 0.2s ease;
+    }
+
+        .erppagemailer-input::placeholder {
+            color: #a5afbd;
+        }
+
+        .erppagemailer-input:hover {
+            border-color: #c5ceda;
+        }
+
+        .erppagemailer-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
+        }
+
+    .erppagemailer-help {
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+       ATTACHMENT
+       ========================================================= */
+
+    .erppagemailer-attachment {
+        min-height: 58px;
+        padding: 8px 9px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 9px;
+        background: #f8fafc;
+    }
+
+    .erppagemailer-attachment-info {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        gap: 10px;
+    }
+
+    .erppagemailer-attachment-icon {
+        flex: 0 0 auto;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .erppagemailer-attachment-text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+        .erppagemailer-attachment-text span {
+            overflow: hidden;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 600;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .erppagemailer-attachment-text small {
+            margin-top: 2px;
+            color: #94a3b8;
+            font-size: 10px;
+        }
+
+    .erppagemailer-file-input {
+        display: none;
+    }
+
+    .erppagemailer-browse-btn {
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 8px 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid #dbe3ee;
+        border-radius: 7px;
+        background: #fff;
+        color: #334155;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .erppagemailer-browse-btn:hover {
+            border-color: #3b82f6;
+            color: #2563eb;
+            background: #eff6ff;
+        }
+
+
+    /* =========================================================
+       DATE FIELDS
+       ========================================================= */
+
+    .erppagemailer-date-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .erppagemailer-date-field {
+        min-width: 0;
+    }
+
+
+    /* =========================================================
+       GENERATE LEDGER
+       ========================================================= */
+
+    .erppagemailer-generate-btn {
+        width: 100%;
+        min-height: 64px;
+        margin-top: 15px;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        border: 1px solid #d9e5fb;
+        border-radius: 10px;
+        background: linear-gradient( 135deg, #f8fbff 0%, #eef5ff 100% );
+        color: #1e3a8a;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .erppagemailer-generate-btn:hover {
+            border-color: #93c5fd;
+            background: #eff6ff;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.08);
+        }
+
+    .erppagemailer-generate-icon {
+        width: 39px;
+        height: 39px;
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        background: #dbeafe;
+        color: #2563eb;
+        font-size: 16px;
+    }
+
+    .erppagemailer-generate-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .erppagemailer-generate-content strong {
+            color: #1e3a8a;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .erppagemailer-generate-content small {
+            margin-top: 3px;
+            color: #64748b;
+            font-size: 10px;
+        }
+
+    .erppagemailer-arrow {
+        margin-right: 3px;
+        color: #93a9c7;
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+       MAIL EDITOR
+       ========================================================= */
+
+    .erppagemailer-editor {
+        overflow: hidden;
+        border: 1px solid #dbe2ea;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    .erppagemailer-toolbar {
+        min-height: 38px;
+        padding: 5px 8px;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        border-bottom: 1px solid #e5eaf0;
+        background: #f8fafc;
+    }
+
+        .erppagemailer-toolbar button {
+            width: 29px;
+            height: 28px;
+            border: 0;
+            border-radius: 5px;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+            .erppagemailer-toolbar button:hover {
+                background: #e2e8f0;
+                color: #2563eb;
+            }
+
+    .erppagemailer-toolbar-divider {
+        width: 1px;
+        height: 18px;
+        margin: 0 5px;
+        background: #dbe2ea;
+    }
+
+    .erppagemailer-mail-body {
+        min-height: 180px;
+        max-height: 280px;
+        padding: 13px;
+        outline: none;
+        overflow-y: auto;
+        color: #334155;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+        .erppagemailer-mail-body:empty::before {
+            content: attr(data-placeholder);
+            color: #a5afbd;
+            pointer-events: none;
+        }
+
+        .erppagemailer-mail-body:focus {
+            box-shadow: inset 0 0 0 1px #3b82f6;
+        }
+
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+
+    .erppagemailer-footer {
+        padding: 14px 20px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 9px;
+        border-top: 1px solid #e5eaf1;
+        background: #fff;
+    }
+
+    .erppagemailer-cancel-btn,
+    .erppagemailer-send-btn {
+        height: 38px;
+        padding: 0 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .erppagemailer-cancel-btn {
+        border: 1px solid #dbe2ea;
+        background: #fff;
+        color: #64748b;
+    }
+
+        .erppagemailer-cancel-btn:hover {
+            background: #f8fafc;
+            color: #334155;
+        }
+
+    .erppagemailer-send-btn {
+        min-width: 110px;
+        border: 0;
+        background: linear-gradient( 135deg, #2563eb, #1d4ed8 );
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.20);
+    }
+
+        .erppagemailer-send-btn:hover {
+            background: linear-gradient( 135deg, #1d4ed8, #1e40af );
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.27);
+        }
+
+        .erppagemailer-send-btn:active {
+            transform: translateY(0);
+        }
+
+
+    /* =========================================================
+       TABLET
+       ========================================================= */
+
+    @@media (max-width: 768px) {
+        .erppagemailer-modal-dialog
+
+    {
+        width: calc(100% - 20px);
+        margin: 10px auto;
+    }
+
+    .erppagemailer-body {
+        padding: 14px;
+        max-height: calc(100vh - 150px);
+    }
+
+    .erppagemailer-section {
+        padding: 14px;
+    }
+
+    .erppagemailer-header {
+        padding: 15px 17px;
+    }
+
+    }
+
+
+    /* =========================================================
+       MOBILE
+       ========================================================= */
+
+    @@media (max-width: 576px) {
+        .erppagemailer-modal-dialog
+
+    {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+    }
+
+    .erppagemailer-modal-content {
+        min-height: 100vh;
+        border-radius: 0;
+    }
+
+    .erppagemailer-header {
+        padding: 14px;
+    }
+
+    .erppagemailer-header-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .erppagemailer-title {
+        font-size: 16px;
+    }
+
+    .erppagemailer-subtitle {
+        display: none;
+    }
+
+    .erppagemailer-body {
+        padding: 10px;
+        max-height: calc(100vh - 125px);
+    }
+
+    .erppagemailer-section {
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+    }
+
+    .erppagemailer-date-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .erppagemailer-attachment {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .erppagemailer-attachment-info {
+        width: 100%;
+    }
+
+    .erppagemailer-browse-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .erppagemailer-generate-btn {
+        min-height: 60px;
+    }
+
+    .erppagemailer-mail-body {
+        min-height: 160px;
+    }
+
+    .erppagemailer-footer {
+        padding: 10px;
+    }
+
+    .erppagemailer-cancel-btn,
+    .erppagemailer-send-btn {
+        flex: 1;
+    }
+
+    }
+
+
+    /* =========================================================
+       VERY SMALL SCREENS
+       ========================================================= */
+
+    @@media (max-width: 360px) {
+        .erppagemailer-header-left
+
+    {
+        gap: 9px;
+    }
+
+    .erppagemailer-section-title {
+        font-size: 12px;
+    }
+
+    .erppagemailer-input {
+        font-size: 11px;
+    }
+
+    .erppagemailer-generate-content small {
+        display: none;
+    }
+
+    .erppagemailer-toolbar {
+        overflow-x: auto;
+    }
+
+    }
+</style>
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-credit-card"></i>
+        </div>
+        <div class="erppage-header-title">Sales Credit Limit Entry</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button"
+                id="btn_Sendapproval"
+                style="display:none;" class="erppagebtn_sendapproval">
+            <i class="fa fa-share"></i>Send For Approval
+        </button>
+        <button type="button"
+                id="btn_Approved"
+                style="display:none;"
+                class="erppagebtn_approved">
+            Approved
+        </button>
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesCreditLimitList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="SalesCreditLimitform">
+    <input type="hidden" class="form-control" id="CODE" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo" disabled>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Party Name</label>
+                    <select class="erppage-input erppage-select" id="ddlPartyName">
+                        <option value="">Select Party Name</option>
+                    </select>
+                </div>
+                </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield erppage-col-span-2">
+                    <label class="erppage-label">Group Name</label>
+                    <input type="hidden" class="erppage-input" id="txtGroupCode">
+                    <input type="text" class="erppage-input" id="txtGroupName" disabled>
+                   @*  <select class="erppage-input erppage-select" id="ddlGroupName">
+                        <option value="">Select Group Name</option>
+                    </select> *@
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Approval Type</label>
+                    <select class="erppage-input erppage-select" id="ddlApprovalType">
+                        <option value="">Select Approval Type</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Refused">Refused</option>
+                        <option value="Not Reported">Not Reported</option>
+                        <option value="Group Company">Group Company</option>
+                        <option value="PSU Company">PSU Company</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Our Approval</label>
+                    <select class="erppage-input erppage-select" id="ddlOurApproval">
+                        <option value="">Select Our Approval</option>
+                        <option value="OverLimit-Accepted">OverLimit-Accepted</option>
+                        <option value="UnderLimit-Accepted">UnderLimit-Accepted</option>
+                        <option value="OwnRisk-Accepted">OwnRisk-Accepted</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Old Credit Limit Amount</label>
+                    <input type="number" class="erppage-input" id="NumOldCreditLimitAmount" disabled>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">New Credit Limit Amount</label>
+                    <input type="number" class="erppage-input" id="NumNewCreditLimitAmount" value="0">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Old Ins. CrLimit Days</label>
+                    <input type="number" class="erppage-input" id="NumOldInsCreditLimitDays" disabled>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">New Ins. CrLimit Days</label>
+                    <input type="number" class="erppage-input" id="NumNewInsCreditLimitDays" value="0">
+                </div>
+                </div>
+                <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Old Our CrLimit Days</label>
+                    <input type="number" class="erppage-input" id="NumOldOurCreditLimitDays" value="0">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">New Our CrLimit Days</label>
+                    <input type="number" class="erppage-input" id="NumNewOurCreditLimitDays" value="0">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Remarks</label>
+                    <textarea typeof="text" class="erppage-input" id="txtremarks" style="height:25px;" placeholder="Enter Remarks"></textarea>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">O/S Amount (Cr)</label>
+                    <input type="number" class="erppage-input" id="NumOSAmount" value="0">
+                </div>
+            </div>
+            <div class="erppage-internalaction">
+                <button type="button" class="erppage-btn erppage-btn-common-active-disabled"  data-bs-toggle="modal" data-bs-target="#createmailermatter" 
+                id="btnShowMail" style="display:none;">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Create Mailer Matter</span>
+                </button>
+            </div>
+
+        
+            <!-- Mailer Modal -->
+            <div class="modal fade" id="createmailermatter" tabindex="-1" aria-labelledby="erpMailerLabel" aria-hidden="true">
+                <div class="modal-dialog erppagemailer-modal-dialog">
+                    <div class="modal-content erppagemailer-modal-content">
+                        <div class="erppagemailer-header">
+                            <div class="erppagemailer-header-left">
+                                <div class="erppagemailer-header-icon">
+                                    <i class="fa fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <h5 class="erppagemailer-title" id="erpMailerLabel">Create Mail</h5>
+                                    <div class="erppagemailer-subtitle">
+                                        Compose and send your monthly ledger
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="erppagemailer-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="erppagemailer-body">
+                            <div class="erppagemailer-section">
+                                <div class="erppagemailer-section-title"><i class="fa fa-users"></i>Recipients</div>
+                                <div class="erppagemailer-field">
+                                    <label class="erppagemailer-label">To<span class="erppagemailer-required">*</span></label>
+                                    <div class="erppagemailer-input-wrapper">
+                                        <i class="fa fa-user erppagemailer-input-icon"></i>
+                                        <input type="email" id="erpMailerTo" class="erppagemailer-input" placeholder="Enter recipient email address">
+                                    </div>
+                                </div>
+                                <div class="erppagemailer-field">
+                                    <label class="erppagemailer-label">CC</label>
+                                    <div class="erppagemailer-input-wrapper">
+                                        <i class="fa fa-users erppagemailer-input-icon"></i>
+                                        <input type="text" id="erpMailerCC" class="erppagemailer-input" placeholder="Enter CC email addresses">
+                                    </div>
+                                    <div class="erppagemailer-help">Separate multiple email addresses with commas.</div>
+                                </div>
+                                <div class="erppagemailer-field">
+                                    <label class="erppagemailer-label">Attachment</label>
+                                    <div class="erppagemailer-attachment">
+                                        <div class="erppagemailer-attachment-info">
+                                            <div class="erppagemailer-attachment-icon">
+                                                <i class="fa fa-paperclip"></i>
+                                            </div>
+                                            <div class="erppagemailer-attachment-text">
+                                                <span id="erpMailerAttachmentName">No file attached</span>
+                                                <small>PDF, Excel, CSV or other supported files</small>
+                                            </div>
+                                        </div>
+                                        <label for="erpMailerAttachment" class="erppagemailer-browse-btn">
+                                            <i class="fa fa-folder-open"></i>Browse</label>
+                                        <input type="file" id="erpMailerAttachment" class="erppagemailer-file-input">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="erppagemailer-section">
+                                <div class="erppagemailer-section-title"><i class="fa fa-calendar"></i>Ledger Period</div>
+                                <div class="erppagemailer-date-row">
+                                    <div class="erppagemailer-date-field">
+                                        <label class="erppagemailer-label">From</label>
+                                        <div class="erppagemailer-input-wrapper">
+                                            <i class="fa fa-calendar-o erppagemailer-input-icon"></i>
+                                            <input type="date" id="erpMailerFromDate" class="erppagemailer-input">
+                                        </div>
+                                    </div>
+                                    <div class="erppagemailer-date-field">
+                                        <label class="erppagemailer-label">To</label>
+                                        <div class="erppagemailer-input-wrapper">
+                                            <i class="fa fa-calendar-o erppagemailer-input-icon"></i>
+                                            <input type="date" id="erpMailerToDate" class="erppagemailer-input">
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" id="erpGenerateLedger" class="erppagemailer-generate-btn">
+                                    <span class="erppagemailer-generate-icon"><i class="fa fa-file-excel"></i></span>
+                                    <span class="erppagemailer-generate-content">
+                                        <strong>Generate Monthly Ledger</strong>
+                                        <small>Generate the selected period as an attachment</small>
+                                    </span>
+                                    <i class="fa fa-chevron-right erppagemailer-arrow"></i>
+                                </button>
+                            </div>
+                            <div class="erppagemailer-section">
+                                <div class="erppagemailer-section-title"><i class="fa fa-pencil"></i>Mail Body</div>
+                                <div class="erppagemailer-editor">
+                                    <div class="erppagemailer-toolbar">
+                                        <button type="button" title="Bold" onclick="erpMailerFormat('bold')">
+                                            <i class="fa fa-bold"></i>
+                                        </button>
+                                        <button type="button" title="Italic" onclick="erpMailerFormat('italic')">
+                                            <i class="fa fa-italic"></i>
+                                        </button>
+                                        <button type="button" title="Underline" onclick="erpMailerFormat('underline')">
+                                            <i class="fa fa-underline"></i>
+                                        </button>
+                                        <span class="erppagemailer-toolbar-divider"></span>
+                                        <button type="button" title="Bullet List" onclick="erpMailerFormat('insertUnorderedList')">
+                                            <i class="fa fa-list-ul"></i>
+                                        </button>
+                                        <button type="button" title="Number List" onclick="erpMailerFormat('insertOrderedList')">
+                                            <i class="fa fa-list-ol"></i>
+                                        </button>
+                                        <span class="erppagemailer-toolbar-divider"></span>
+                                        <button type="button" title="Align Left" onclick="erpMailerFormat('justifyLeft')">
+                                            <i class="fa fa-align-left"></i>
+                                        </button>
+                                        <button type="button" title="Align Center" onclick="erpMailerFormat('justifyCenter')">
+                                            <i class="fa fa-align-center"></i>
+                                        </button>
+                                    </div>
+                                    <div id="erpMailerBody" class="erppagemailer-mail-body" contenteditable="true" data-placeholder="Write your email message here..."></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppagemailer-footer">
+                            <button type="button" class="erppagemailer-cancel-btn" data-bs-dismiss="modal">
+                                <i class="fa fa-times"></i>Cancel
+                            </button>
+                            <button type="button" id="erpSendMail" class="erppagemailer-send-btn">
+                                <i class="fa fa-paper-plane"></i>Send Mail
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="erppage-actions">
+            <button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+<script src="~/js/erpjs/sales/transaction/salescreditlimitentry/salescreditlimitentry.js"></script>

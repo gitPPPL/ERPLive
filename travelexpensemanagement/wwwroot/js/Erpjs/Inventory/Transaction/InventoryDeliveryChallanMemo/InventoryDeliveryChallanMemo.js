@@ -195,6 +195,19 @@ function wireEvents() {
         }
         const $row = $(this).closest('tr');
         $row.remove();
+        // Get the new last row
+        const $lastRow = $tbody.find('tr:last');
+
+        // Add the + button back to the new last row
+        if ($lastRow.length) {
+
+            // Avoid duplicate + button
+            if ($lastRow.find('.btn-add-action').length === 0) {
+                $lastRow.find('.action-wrap').append(`
+                <button type="button" class="act-btn add btn-add-action" title="Add Row"><i class="fa fa-plus-circle"></i></button>
+            `);
+            }
+        }
     });
     //---------- Add Row Button Click -----------
     $(document).on('click', '.btn-add-action', async function () {

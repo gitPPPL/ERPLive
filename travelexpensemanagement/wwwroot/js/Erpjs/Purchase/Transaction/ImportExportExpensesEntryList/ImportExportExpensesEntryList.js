@@ -85,6 +85,12 @@ $(document).ready(async function () {
     });
 });
 
+// Page Size Change
+function changeRowsPerPage() {
+    IEEEPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
+    IEEEPagination.load();
+}
+
 async function checkModificationAllowed(vDate, rowId, vType) {
     const isApprovalBody = await checkApprovalBody(vType);
     if (isApprovalBody) {

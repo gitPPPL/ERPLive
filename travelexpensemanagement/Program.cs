@@ -16,6 +16,7 @@ using travelexpensemanagement.Repositories.Implementations.Inventory.Transaction
 using travelexpensemanagement.Repositories.Implementations.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Master;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Sales.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Test;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
 
@@ -26,6 +27,7 @@ using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Sales.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Test;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 using travelexpensemanagement.Services;
@@ -101,6 +103,10 @@ builder.Services.AddScoped<IDeliveryChallanStoreRepository, DeliveryChallanStore
 builder.Services.AddScoped<IDeliveryChallanStoreListRepository, DeliveryChallanStoreListRepository>();
 builder.Services.AddScoped<IInventoryDeliveryChallanMemoRepository, InventoryDeliveryChallanMemoRepository>();
 builder.Services.AddScoped<IInventoryDeliveryChallanMemoListRepository, InventoryDeliveryChallanMemoListRepository>();
+builder.Services.AddScoped<ISalesExportCostingListRepository, SalesExportCostingListRepository>();
+builder.Services.AddScoped<ISalesExportCostingRepository, SalesExportCostingRepository>();
+builder.Services.AddScoped<ISalesCreditLimitListRepository, SalesCreditLimitListRepository>();
+builder.Services.AddScoped<ISalesCreditLimitEntryRepository, SalesCreditLimitEntryRepository>();
 
 // Gete Entry Transaction repositories
 

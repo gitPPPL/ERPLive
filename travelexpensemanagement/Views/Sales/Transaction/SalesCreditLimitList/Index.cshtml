@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Sales Export Costing List";
+    ViewBag.Title = "Sales Credit Limit List";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var currentMenu = ViewBag.CurrentMenu as string;
 }
@@ -7,10 +7,10 @@
 <div class="erppagelist-header">
     <div class="erppagelist-title">
         <i class="fa fa-list"></i>
-        <span>Sales Export Costing List</span>
+        <span>Sales credit Limit List</span>
     </div>
     <div class="erppagelist-header-right">
-        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "SalesExportCosting")'" id="button_add">
+        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "SalesCreditLimitEntry")'" id="button_add">
             <i class="fa fa-plus"></i>Add New
         </button>
     </div>
@@ -31,26 +31,26 @@
 </div>
 <div class="erppagelist-container">
     <div class="excel-wrapper fixed-grid-wrapper">
-        <table id="tblSalesExportCostingList" class="excel-table fixed-grid-table table-width resizable-table">
+        <table id="tblSalesCreditLimitList" class="excel-table fixed-grid-table table-width resizable-table">
             <colgroup>
-                <col style="width: 61px;">   
-                <col style="width: 75px;">   
-                <col style="width: 150px;">  
-                <col style="width: 100px;">  
-                <col style="width: 120px;">  
-                @* <col style="width: 150px;">   *@
-                @* <col style="width: 120px;">   *@
-                <col class="action-col"> 
+                <col style="width: 95px;">
+                <col style="width: 94px;">
+                <col style="width: 255px;">
+                <col style="width: 93px;">
+                <col style="width: 72px;">
+                <col style="width: 80px;">
+                <col style="width: 180px;">
+                <col class="action-col" style="width: 120px;">
             </colgroup>
             <thead>
                 <tr>
                     <th>Doc No</th>
                     <th>Doc Date</th>
                     <th>Party Name</th>
-                    <th>Delivery At</th>
-                    <th>Agent Name</th>
-                    @* <th>Item Name</th> *@
-                    @* <th>Product Value</th> *@
+                    <th>Credit Limit</th>
+                    <th>Cr Days</th>
+                    <th>Our CR Days</th>
+                    <th>Remarks</th>
                     <th class="action-col">Action</th>
                 </tr>
             </thead>
@@ -77,6 +77,7 @@
         </div>
     </div>
 </div>
+
 <script src="~/common/delete.js"></script>
 <script src="~/common/pagination.js"></script>
-<script src="~/js/erpjs/sales/transaction/salesexportcostinglist/salesexportcostinglist.js"></script>
+<script src="~/js/erpjs/sales/transaction/salescreditlimitlist/salescreditlimitlist.js"></script>

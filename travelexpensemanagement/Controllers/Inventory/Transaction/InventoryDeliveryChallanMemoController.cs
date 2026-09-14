@@ -52,7 +52,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                     break;
 
                 case "vendor":
-                    qry = @"SELECT CODE as value, NAME as text FROM SUBGROUP_MAST where COMP_CODE =1 and ACTIVE= 1 order by NAME";
+                    qry = $@"SELECT CODE as value, NAME as text FROM SUBGROUP_MAST where COMP_CODE ={gv.PubCompCode} and ACTIVE= 1 order by NAME";
                     break;
                 default:
                     return Json(new { success = false, message = "Invalid dropdown type." });

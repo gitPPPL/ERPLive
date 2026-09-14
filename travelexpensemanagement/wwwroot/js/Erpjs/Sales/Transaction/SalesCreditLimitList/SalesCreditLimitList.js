@@ -1,19 +1,20 @@
 ﻿let currentPage = 1;
 let pageSize = 10;
 var controllerName = window.location.pathname.split('/')[1];
-let DCMPagination;
+let SCLPagination;
 
+//Load
 $(document).ready(async function () {
     checkPermission(controllerName, function () {
-        DCMPagination.load();
+        SCLPagination.load();
     });
-    DCMPagination = Pagination.create({
+    SCLPagination = Pagination.create({
         pageSize: 10,
         paginationContainer: '#pageNumbers',
         infoContainer: '#pageInfoText',
         loader: function (params) {
             $.ajax({
-                url: '/InventoryDeliveryChallanMemoList/GetAllDeliveryMemoList',
+                url: '/SalesCreditLimitList/GetAllSalesCreditLimitList',
                 type: 'GET',
                 dataType: 'json',
                 data: {
@@ -22,7 +23,7 @@ $(document).ready(async function () {
                     pageSize: params.pageSize
                 },
                 success: function (res) {
-                    console.log("Delivery Challan Memo list : ", res);
+                    console.log("Sales Credit Limit : ", res);
                     params.callback({
                         data: res.data,
                         totalCount: res.totalCount
@@ -34,7 +35,7 @@ $(document).ready(async function () {
             });
         },
         render: function (docs) {
-            const tbody = $('#tblInventoryDeliveryChallanMemoList tbody');
+            const tbody = $('#tblSalesCreditLimitList tbody');
             tbody.empty();
             if (!docs.length) {
                 tbody.append(`<tr><td colspan="8" class="text-center text-muted">No list found.</td></tr>`);
@@ -46,16 +47,16 @@ $(document).ready(async function () {
 				<tr>
 							<td>${doc.v_NO || ''}</td>
 							<td>${formatDate(doc.v_DATE)}</td>
-							<td>${doc.emP_NAME || ''}</td>
-							<td>${doc.vendoR_NAME || ''}</td>
-							<td>${doc.transporT_NAME || ''}</td>
-							<td>${doc.through || ''}</td>
+							<td>${doc.partY_NAME || ''}</td>
+							<td>${doc.cR_LIMIT || ''}</td>
+							<td>${doc.cR_DAYS || ''}</td>
+							<td>${doc.ourcR_DAYS || ''}</td>
 							<td>${doc.remarks || ''}</td>
 							<td class="action-col">
 							  <div class="action-icons">
-								  <button class="act-btn edit btn-edit permission-edit" title="Edit" style="cursor:pointer;" title="Edit" onclick="checkModificationAllowed('${doc.v_DATE}', '${doc.v_NO}')"><i class="fa fa-edit"></i></button>
-								  <button class="act-btn view btn-view" title="View" style="cursor:pointer;" onclick="viewDeliveryChallanMemo('${doc.v_NO}')"><i class="fa fa-eye"></i></button>
-								  <button class="act-btn delete btn-delete  permission-delete" title="Delete" style="cursor:pointer;" onclick="deleteDeliveryChallanMemo('${doc.v_NO}')"><i class="fa fa-trash"></i></button>
+								  <button class="act-btn edit btn-edit permission-edit" title="Edit" style="cursor:pointer;" title="Edit" onclick="GetAppStatus('${doc.v_NO}')"><i class="fa fa-edit"></i></button>
+								  <button class="act-btn view btn-view" title="View" style="cursor:pointer;" onclick="viewSalesExportCosting('${doc.v_NO}')"><i class="fa fa-eye"></i></button>
+								  <button class="act-btn delete btn-delete  permission-delete" title="Delete" style="cursor:pointer;" onclick="deleteSalesExportCosting('${doc.v_NO}')"><i class="fa fa-trash"></i></button>
 								  <button class="act-btn document btn-document" title="document" style="cursor:pointer;" onclick="showDocumentPopup('${doc.v_NO}')"><i class="fa fa-file-alt"></i></button>
 							  </div>
 							</td>
@@ -67,46 +68,39 @@ $(document).ready(async function () {
         }
     });
     // First Load
-    DCMPagination.load();
+    SCLPagination.load();
     // Search
     $('#searchBox').keyup(function () {
-        DCMPagination.load();
+        SCLPagination.load();
     });
 });
 
 // Page Size Change
 function changeRowsPerPage() {
-    DCMPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
-    DCMPagination.load();
-}
-async function checkModificationAllowed(vDate, rowId) {
-    checkModificationDays({
-        controller: 'InventoryDeliveryChallanMemoList',
-        vDate: vDate,
-        rowId: rowId,
-        onAllowed: function (rowId) {
-            editDeliveryChallanMemo(rowId);
-        }
-    })
-
+    SCLPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
+    SCLPagination.load();
 }
 
-function editDeliveryChallanMemo(docCode) {
-    window.location.href = `/InventoryDeliveryChallanMemo/Index?id=${encodeURIComponent(docCode)}`;
+// Edit
+function editSalesExportCosting(docCode) {
+    window.location.href = `/SalesCreditLimitEntry/Index?id=${encodeURIComponent(docCode)}`;
 }
 
-function viewDeliveryChallanMemo(docCode) {
-    window.location.href = `/InventoryDeliveryChallanMemo/Index?id=${encodeURIComponent(docCode)}&readOnly=true`;
+//View
+function viewSalesExportCosting(docCode) {
+    window.location.href = `/SalesCreditLimitEntry/Index?id=${encodeURIComponent(docCode)}&readOnly=true`;
 }
 
-async function deleteDeliveryChallanMemo(docId) {
-    deleteRecordbytype("InventoryDeliveryChallanMemoList", docId, {
+//Delete
+async function deleteSalesExportCosting(docId) {
+    deleteRecordbytype("SalesCreditLimitList", docId, {
         action: "Delete",
-        text: "This will permanently delete the Delivery Challan Memo Details.",
-        successCallback: DCMPagination.load
+        text: "This will permanently delete the Sales Credit Limit Details.",
+        successCallback: SCLPagination.load
     });
 }
 
+//Format Date
 function formatDate(dateStr) {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -117,21 +111,22 @@ function formatDate(dateStr) {
     return `${year}-${month}-${day}`;
 }
 
+//Excel
 const btn = document.getElementById("button_export");
-
 if (btn) {
     btn.addEventListener("click", function (e) {
         e.preventDefault();
-        window.location.href = "/InventoryDeliveryChallanMemoList/ExportAllDocs";
+        window.location.href = "/SalesCreditLimitList/ExportAllDocs";
     });
 }
 
+//Document Details Pop Up
 function showDocumentPopup(docCode) {
     $.ajax({
-        url: '/InventoryDeliveryChallanMemoList/PBPEntryDetails',
+        url: '/SalesCreditLimitList/PBPEntryDetails',
         type: 'Get',
         dataType: 'json',
-        data: { vNo: docCode},
+        data: { vNo: docCode },
         success: function (response) {
             if (response.status) {
                 showDocumentPopupjQuery(response.data, docCode);
@@ -145,3 +140,20 @@ function showDocumentPopup(docCode) {
     });
 }
 
+async function GetAppStatus(vNo) {
+    const response = await fetch(`/SalesCreditLimitList/CheckApprovalStatus?vNo=${encodeURIComponent(vNo)}`, {
+        method: 'GET'
+    });
+
+    if (!response.ok) {
+        throw new Error(`Approval status check failed: ${response.status}`);
+    }
+
+    const data = await response.json(); // { isBlocked, message }
+    if (!data.isBlocked) {
+        editSalesExportCosting(vNo);
+    }
+    else {
+        showToast(data.message, { type: "warning" });
+    }
+}

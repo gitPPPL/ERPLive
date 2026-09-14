@@ -20,9 +20,9 @@ let db = "";
 let companyGSTIN = "";
 let companyPhone = "";
 let companyEmail = "";
+var controllerName = window.location.pathname.split('/')[1];
 
 $(document).ready(async function () {
-    var controllerName = window.location.pathname.split('/')[1];
     checkPermissionForEntryPage(controllerName, function () {
     });
     $('#ddlDocType').focus();
@@ -540,6 +540,19 @@ function bindGridEvents() {
         }
         const $row = $(this).closest('tr');
         $row.remove();
+        // Get the new last row
+        const $lastRow = $tbody.find('tr:last');
+
+        // Add the + button back to the new last row
+        if ($lastRow.length) {
+
+            // Avoid duplicate + button
+            if ($lastRow.find('.btn-add-action').length === 0) {
+                $lastRow.find('.action-wrap').append(`
+                <button type="button" class="act-btn add btn-add-action" title="Add Row"><i class="fa fa-plus-circle"></i></button>
+            `);
+            }
+        }
     });
 
     //---------- Add Row Button Click -----------

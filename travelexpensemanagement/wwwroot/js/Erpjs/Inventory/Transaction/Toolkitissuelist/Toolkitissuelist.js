@@ -73,6 +73,11 @@ $(document).ready(async function () {
     });
 });
 
+// Page Size Change
+function changeRowsPerPage() {
+    TIPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
+    TIPagination.load();
+}
 async function checkModificationAllowed(vDate, rowId, vType) {
     checkModificationDays({
         controller: 'ToolkitIssuelist',

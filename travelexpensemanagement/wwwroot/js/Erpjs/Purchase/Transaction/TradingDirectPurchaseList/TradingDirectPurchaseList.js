@@ -84,6 +84,11 @@ $(document).ready(async function () {
     });
 });
 
+// Page Size Change
+function changeRowsPerPage() {
+    PBPPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
+    PBPPagination.load();
+}
 async function checkModificationAllowed(vDate, rowId, vType) {
     const isApprovalBody = await checkApprovalBody(vType);
     if (isApprovalBody) {

@@ -1,36 +1,39 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Data;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.LogService;
-using travelexpensemanagement.Models.Inventory.Transaction;
-using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
+using travelexpensemanagement.Models.Sales.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Sales.Transaction;
 
-namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transaction
+namespace travelexpensemanagement.Repositories.Implementations.Sales.Transaction
 {
-    public class InventoryDeliveryChallanMemoListRepository : IInventoryDeliveryChallanMemoListRepository
+    public class SalesExportCostingListRepository : ISalesExportCostingListRepository
     {
         private readonly GlobalVariableService _globalVariableService;
         private readonly DataBaseConnection _dbConnection;
         private readonly LogService.LogService _logService;
-        public InventoryDeliveryChallanMemoListRepository(GlobalVariableService globalVariableService, DataBaseConnection dbConnection, LogService.LogService logService)
+        
+        public SalesExportCostingListRepository(GlobalVariableService globalVariableService, DataBaseConnection dbConnection, LogService.LogService logService)
         {
             _globalVariableService = globalVariableService;
             _dbConnection = dbConnection;
             _logService = logService;
         }
-        const string doctype = "GTMO";
-        public async Task<RepositoryResponseList<InventoryDeliveryChallanMemoModel>> GetAllDeliveryMemoList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
+        const string doctype = "EXPC";
+        
+        public RepositoryResponseList<SalesExportCostingListModel> GetAllSalesExportCostingList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
             var gv = _globalVariableService.GetGlobalVariables();
-            var data = new List<InventoryDeliveryChallanMemoModel>();
+            var data = new List<SalesExportCostingListModel>();
             int totalcount = 0;
             try
             {
                 using (var con = _dbConnection.GetErpConnection())
                 {
                     con.Open();
-                    using (SqlCommand cmd = new SqlCommand("sp_InventoryDeliveryChallanMemo", con))
+                    using (SqlCommand cmd = new SqlCommand("sp_SalesExportCosting", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "SELECT");
@@ -45,15 +48,13 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                         {
                             while (reader.Read())
                             {
-                                data.Add(new InventoryDeliveryChallanMemoModel
+                                data.Add(new SalesExportCostingListModel
                                 {
                                     V_NO = reader["V_NO"] == DBNull.Value ? null : Convert.ToInt32(reader["V_NO"]),
                                     V_DATE = reader["V_DATE"] == DBNull.Value ? null : Convert.ToDateTime(reader["V_DATE"]),
-                                    EMP_NAME = reader["EMP_NAME"]?.ToString(),
-                                    VENDOR_NAME = reader["VENDOR_NAME"]?.ToString(),
-                                    TRANSPORT_NAME = reader["TRANSPORT_NAME"]?.ToString(),
-                                    THROUGH = reader["THROUGH"]?.ToString(),
-                                    REMARKS = reader["REMARKS"]?.ToString()
+                                    PARTY_NAME = reader["PARTY_NAME"]?.ToString(),
+                                    DELIVERY_AT = reader["DELIVERY_AT"]?.ToString(),
+                                    AGENT_NAME = reader["AGENT_NAME"]?.ToString(),
                                 });
                             }
 
@@ -69,13 +70,14 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                 }
 
 
-                return new RepositoryResponseList<InventoryDeliveryChallanMemoModel> { status = true, data = data, totalCount = totalcount };
+                return new RepositoryResponseList<SalesExportCostingListModel> { status = true, data = data, totalCount = totalcount };
             }
             catch (Exception ex)
             {
-                return new RepositoryResponseList<InventoryDeliveryChallanMemoModel> { status = false, message = ex.Message };
+                return new RepositoryResponseList<SalesExportCostingListModel> { status = false, message = ex.Message };
             }
         }
+        
         public RepositoryResponse Delete(int vNo)
         {
             if (vNo <= 0)
@@ -92,7 +94,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                     {
                         try
                         {
-                            using (SqlCommand cmd = new SqlCommand("sp_InventoryDeliveryChallanMemo", con, tran))
+                            using (SqlCommand cmd = new SqlCommand("sp_SalesExportCosting", con, tran))
                             {
                                 cmd.CommandType = CommandType.StoredProcedure;
                                 cmd.Parameters.AddWithValue("@Action", "DELETE");
@@ -106,8 +108,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Inventory.Transac
                             }
                             tran.Commit();
                             //Log Service
-                            //_logService.InsertLog("GATE_MEMO1", "Delivery Challan Memo", "Transaction", "DELETE", doctype, vNo.ToString(), null);
-                            //_logService.InsertLog("GATE_MEMO2", "Delivery Challan Memo", "Transaction", "DELETE", doctype, vNo.ToString(), null);
+                            //_logService.InsertLog("COSTING_EXPORT1", "Sales Export Costing", "Transaction", "DELETE", doctype, vNo.ToString(), null);
+                            //_logService.InsertLog("COSTING_EXPORT2", "Sales Export Costing", "Transaction", "DELETE", doctype, vNo.ToString(), null);
                             return new RepositoryResponse { status = true, message = "Deleted successfully!" };
                         }
                         catch (Exception ex)

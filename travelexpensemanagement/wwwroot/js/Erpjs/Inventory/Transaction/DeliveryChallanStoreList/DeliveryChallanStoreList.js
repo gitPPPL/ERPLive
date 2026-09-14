@@ -73,6 +73,12 @@ $(document).ready(async function () {
     });
 });
 
+// Page Size Change
+function changeRowsPerPage() {
+    DCIPagination.setPageSize(parseInt($('#pageSizeSelect').val()));
+    DCIPagination.load();
+}
+
 async function edit(vDate, rowId, vType) {
     const isInApproval = await checkAppovStatus(rowId, vType);
 
