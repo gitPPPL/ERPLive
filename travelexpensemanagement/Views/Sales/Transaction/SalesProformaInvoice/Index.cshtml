@@ -5,8 +5,6 @@
     ViewBag.Title = "Sales Proforma Invoice";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-
-
     var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
     var databaseName = ViewBag.DatabaseName as string;
     var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0;
@@ -64,7 +62,7 @@
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Serial No</label>
-                    <input type="number" class="erppage-input" id="NumSerialNo">
+                    <input type="number" class="erppage-input" id="NumSerialNo" readonly>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Date</label>
@@ -86,9 +84,11 @@
                 </div>
             </div>
 
-            <fieldset class="erppagefieldset">
+            <div class="erppagesrow">
+            <div class="erppagescol-6">
+             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Party Details</legend>
-                <div class="erppage-grid8">
+                <div class="erppage-grid4">
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Party Name</label>
                         <select class="erppage-input erppage-select" id="ddlPartyName">
@@ -104,6 +104,8 @@
                             </select>
                         </div>
                     </div>
+                    </div>
+                     <div class="erppage-grid4">
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Address L2</label>
                         <textarea typeof="text" class="erppage-input" id="txtaddressL2" style="height:35px;" placeholder="Enter Address" readonly></textarea>
@@ -112,15 +114,13 @@
                         <label class="erppage-label">Address L3</label>
                         <textarea typeof="text" class="erppage-input" id="txtaddressL3" style="height:35px;" placeholder="Enter Address" readonly></textarea>
                     </div>
+                    </div>
+                     <div class="erppage-grid4">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Station</label>
                           <select class="erppage-input erppage-select" id="ddlStationl" disabled>
                                 <option value=""></option>
                             </select>  
-
-
-
-                     
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Pincode</label>
@@ -144,22 +144,26 @@
                     </div>
                 </div>
             </fieldset>
-
-            <fieldset class="erppagefieldset">
+            </div>
+            <div class="erppagescol-6">
+             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Consignee Details</legend>
-                <div class="erppage-grid8">
+                <div class="erppage-grid2">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Sales Through</label>
                         <select class="erppage-input erppage-select" id="ddlSalesThrough">
                             <option value="">Select Sales Through</option>
                         </select>
                     </div>
-                    <div class="erppage-divfield">
+                     </div>
+                     <div class="erppage-grid4">
+                    <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Consignee</label>
                         <select class="erppage-input erppage-select" id="ddlConsignee">
                             <option value="">Select Consignee</option>
                         </select>
                     </div>
+                    
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Address L1</label>
                         <div class="erppage-inputgroup">
@@ -169,14 +173,19 @@
                             </select>
                         </div>
                     </div>
+                     </div>
+                     <div class="erppage-grid4">
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Address L2</label>
                         <textarea typeof="text" class="erppage-input" id="txtaddressL2Sa" style="height:35px;" placeholder="Enter Address" readonly></textarea>
                     </div>
+                   
                     <div class="erppage-divfield erppage-col-span-2">
                         <label class="erppage-label">Address L3</label>
                         <textarea typeof="text" class="erppage-input" id="txtaddressL3Sa" style="height:35px;" placeholder="Enter Address" readonly></textarea>
                     </div>
+                     </div>
+                     <div class="erppage-grid4">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Station</label>
 
@@ -188,6 +197,7 @@
                         <label class="erppage-label">Pincode</label>
                         <input type="number" class="erppage-input" id="NumPincodeSa" onreadystatechange="">
                     </div>
+                    
                     <div class="erppage-divfield">
                         <label class="erppage-label">Country</label>
                         <select class="erppage-input erppage-select" id="ddlCountrySa" disabled>
@@ -200,16 +210,16 @@
                     </div>
                 </div>
             </fieldset>
+            </div>
+            </div>
+           
+
+           
 
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Other Details</legend>
                 <div class="erppage-grid8">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Tax Type</label>
-                        <select class="erppage-input erppage-select" id="ddlTaxType">
-                            <option value="">Select Tax Type</option>
-                        </select>
-                    </div>
+                  
                     <div class="erppage-divfield">
                         <label class="erppage-label">Prod Type</label>
                         <select class="erppage-input erppage-select" id="ddlProdType">
@@ -385,74 +395,56 @@
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Packing</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input erppage-width-30" id="NumPacking1" value="0">
-                            <input type="number" class="erppage-input erppage-width-70" id="NumPacking2" value="0" onreadystatechange="">
-                        </div>
+                            <input type="number" class="erppage-input" id="NumPacking2" value="0"  readonly >
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Discount</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input erppage-width-30" id="NumDiscount1" value="0">
-                            <input type="number" class="erppage-input erppage-width-70" id="NumDiscount2" value="0" readonly>
-                        </div>
+                            <input type="number" class="erppage-input" id="NumDiscount2" value="0" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Freight</label>
-                        <input type="number" class="erppage-input" id="NumFreight" value="0">
+                        <input type="number" class="erppage-input" id="NumFreight" value="0" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Sub Total</label>
-                        <input type="number" class="erppage-input" id="NumSubTotal" value="0">
+                        <input type="number" class="erppage-input" id="NumSubTotal" value="0" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">CGST</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input erppage-width-30" id="NumCGST1" value="0" readonly>
-                            <input type="number" class="erppage-input erppage-width-70" id="NumCGST2" value="0" readonly >
-                        </div>
+                        <input type="number" class="erppage-input" id="NumCGST2" value="0" readonly >
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">SGST</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input erppage-width-30" id="NumSGST1" value="0" readonly>
-                            <input type="number" class="erppage-input erppage-width-70" id="NumSGST2" value="0" readonly>
-                        </div>
+                            <input type="number" class="erppage-input" id="NumSGST2" value="0" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">IGST</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input erppage-width-30" id="NumIGST1" value="0" readonly>
-                            <input type="number" class="erppage-input erppage-width-70" id="NumIGST2" value="0" readonly>
-                        </div>
+                            <input type="number" class="erppage-input" id="NumIGST2" value="0" readonly>
                     </div>
                 </div>
                 <div class="erppage-grid8">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Total Nos</label>
-                        <input type="number" class="erppage-input" id="NumTotalNos" value="0">
+                        <input type="number" class="erppage-input" id="NumTotalNos" value="0" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">CESS</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input erppage-width-30" id="NumCESS1" value="0" readonly>
-                            <input type="number" class="erppage-input erppage-width-70" id="NumCESS2" value="0" readonly>
-                        </div>
+                            <input type="number" class="erppage-input" id="NumCESS2" value="0" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">TCS</label>
                         <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input erppage-width-30" id="NumTCS1" value="0" readonly>
+                            <input type="number" class="erppage-input erppage-width-30" id="NumTCS1" value="0" >
                             <input type="number" class="erppage-input erppage-width-70" id="NumTCS2" value="0" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Round Off</label>
-                        <input type="number" class="erppage-input" id="NumRoundOff" value="0">
+                        <input type="number" class="erppage-input" id="NumRoundOff" value="0" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Net Amount</label>
-                        <input type="number" class="erppage-input" id="NumNetAmount" value="0">
+                        <input type="number" class="erppage-input" id="NumNetAmount" value="0" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Doc. Status</label>
@@ -468,20 +460,23 @@
                     <div class="erppagescol-4">
                         <label class="erppage-label">Remarks</label>
                         <textarea id="txtRemarks" class="erppage-input" style="height:115px;"></textarea>
-                        <label class="erppage-checkbox mt-2">
-                            <input type="checkbox" id="chkHideFixRemarks">
-                            Hide Fix Remarks
-                        </label>
+                         <div class="erppage-divfield">
+                        <div class="erppage-checkbox-wrap">
+                            <input type="checkbox" id="chkHideFixRemarks" class="erppage-checkbox-input">
+                            <label class="erppage-checkbox-label">Hide Fix Remarks</label>
+                        </div>
+                    </div>
+                      
                     </div>
                     <div class="erppagescol-8">
                         <div class="erppage-grid6">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Gross Qty</label>
-                                <input type="number" class="erppage-input" id="NumGrossQty" value="0">
+                                <input type="number" class="erppage-input" id="NumGrossQty" value="0" readonly>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Net Qty</label>
-                                <input type="number" class="erppage-input" id="NumNetQty" value="0">
+                                <input type="number" class="erppage-input" id="NumNetQty" value="0" readonly>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Sold By</label>

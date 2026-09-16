@@ -217,7 +217,7 @@
 
 .erppagelogin-input {
     width: 100%;
-    padding: 6px 8px 6px 35px;
+    padding: 10px 8px 10px 35px;
     border-radius: 8px;
     border: 1px solid #B5C5AD;
     outline: none;
@@ -446,7 +446,7 @@
 }
 .erppagelogin-date-input {
     width: 100%;
-    height: 30px;
+    height: 38px;
     padding-left: 38px;
     padding-right: 15px;
     border-radius: 8px;

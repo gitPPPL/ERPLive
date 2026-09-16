@@ -11,10 +11,8 @@ public class SalesProformaInvoice_Header
     public int? AGENT_CODE { get; set; }
     public string? AGENT_Name { get; set; }
     public int? APPROVAL_USER { get; set; }
-
     public decimal? BANK_CODE { get; set; }
     public string? BILLOF_LADING { get; set; }
-
     public int? BILL_ADDRESSID { get; set; }
     public int? BILL_CITY { get; set; }
     public string? BILL_CITYName { get; set; }
@@ -26,7 +24,6 @@ public class SalesProformaInvoice_Header
     public string? BILL_ADD1 { get; set; }
     public string? BILL_ADD2 { get; set; }
     public string? BILL_ADD3 { get; set; }
-
     public decimal? CDISC_AMT { get; set; }
     public decimal? CDISC_PER { get; set; }
     public int? CAL_ONPCS { get; set; }
@@ -34,14 +31,12 @@ public class SalesProformaInvoice_Header
     public int? COND_MNTH { get; set; }
     public string? CONTAINER_SIZE { get; set; }
     public string? CURRENCY { get; set; }
-
     public decimal? CGST_AMT { get; set; }
     public decimal? CGST_PER { get; set; }
     public decimal? CESS_AMT { get; set; }
     public decimal? CESS_PER { get; set; }
     public string? COMM_RATE1 { get; set; }
     public string? COMM_RATE2 { get; set; }
-
     public string? DEFECTIVE_GOODS { get; set; }
     public string? DELIVERY_TERMS { get; set; }
     public string? DEL_SCH { get; set; }
@@ -50,7 +45,6 @@ public class SalesProformaInvoice_Header
     public string? DOC_ID { get; set; }
     public string? DRIVER_NO { get; set; }
     public string? DRIVER_NAME { get; set; }
-
     public decimal? EXRATE { get; set; }
     public string? EXPV_TYPE { get; set; }
     public int? EXPV_NO { get; set; }
@@ -60,7 +54,6 @@ public class SalesProformaInvoice_Header
     public string? EWAYBILL_JSON { get; set; }
     public string? EWAYBILL_DATE { get; set; }
     public string? EWAYBILL_VALIDDATE { get; set; }
-
     public decimal? FOB_VALUE { get; set; }
     public decimal? FOB_FRT { get; set; }
     public decimal? FOB_INSU { get; set; }
@@ -75,14 +68,12 @@ public class SalesProformaInvoice_Header
     public string? FRT_REMARK { get; set; }
     public decimal? FRT_TAXAMT { get; set; }
     public decimal? FRT_TAXPER { get; set; }
-
     public int? GATE_NO { get; set; }
     public string? GATE_TYPE { get; set; }
     public DateTime? GR_DATE { get; set; }
     public string? GR_NO { get; set; }
     public decimal? GST_RATE { get; set; }
     public string? GODOWN_CODE { get; set; }
-
     public string? IMPORT_CURRENCY { get; set; }
     public decimal? IGST_AMT { get; set; }
     public decimal? IGST_PER { get; set; }
@@ -96,7 +87,6 @@ public class SalesProformaInvoice_Header
     public string? ISSUE_TYPE { get; set; }
     public int? ISSUE_NO { get; set; }
     public string? ITEM_TYPE { get; set; }
-
     public decimal? LOAD_AMT { get; set; }
     public decimal? LOAD_PER { get; set; }
     public string? LOAD_REM { get; set; }
@@ -166,12 +156,10 @@ public class SalesProformaInvoice_Header
     public decimal? TOT_GROSS { get; set; }
     public decimal? TOT_NET { get; set; }
     public int? TOT_NOS { get; set; }
-
     public int? V_NO { get; set; }
     public DateTime? V_DATE { get; set; }
     public string? V_TYPE { get; set; }
     public string? VEHICLE_NO { get; set; }
-
     public decimal? WB_AMT { get; set; }
     public string? WB_AC { get; set; }
     public string? WB_REM { get; set; }
@@ -179,7 +167,6 @@ public class SalesProformaInvoice_Header
     public string? WB_TYPE { get; set; }
     public decimal? WB_QTY { get; set; }
     public string? WAYBILL_NO { get; set; }
-
     public string? BUYER_ORDNO { get; set; }
     public string? FINAL_DEST { get; set; }
     public string? FINAL_DEST_COUNTRY { get; set; }
@@ -190,84 +177,59 @@ public class SalesProformaInvoice_Header
     public string? SHIP_COUNTRYNAME { get; set; }
     public string? SHIP_CITYNAME { get; set; }
     public string? BILL_COUNTRYNAME { get; set; }
-
     public int SRNO { get; set; }
-
     public string? action { get; set; }
     public decimal INSU_AMT { get; internal set; }
     public decimal DISC_PER { get; internal set; }
     public decimal DISC_AMT { get; internal set; }
-
-
     public int? BILL_STATE { get; set; }
     public int? SHIP_STATE { get; set; }
     public int? SHIP_COUNTRY { get; set; }
-
-
-
-
-
 }
-
 public class SalesProformaInvoice_Detail
 {
     public decimal? AMOUNT { get; set; }
-
     public decimal? CDISC_AMT { get; set; }
     public decimal? CESS_AMT { get; set; }
     public decimal? CESS_PER { get; set; }
     public decimal? CGST_AMT { get; set; }
     public decimal? CGST_PER { get; set; }
-
     public int? DCN_NO { get; set; }
     public string? DCN_TYPE { get; set; }
     public int? DEPT_CODE { get; set; }
     public decimal? DISC_AMT { get; set; }
     public decimal? DISC_PER { get; set; }
-
     public decimal? FEXCH_USD { get; set; }
     public string? FINAL_LOCK { get; set; }
     public decimal? FOR_RATE { get; set; }
     public decimal? FREIGHT_AMT { get; set; }
     public decimal? FRT_AMT { get; set; }
-
     public decimal? GATE_INQTY { get; set; }
     public decimal? GATE_QTY { get; set; }
     public decimal? GROSS_QTY { get; set; }
-
     public string? HSN_CODE { get; set; }
-
     public decimal? IGST_AMT { get; set; }
     public decimal? IGST_PER { get; set; }
     public int? ITEM_CODE { get; set; }
     public string? ITEM_NAME { get; set; }
     public decimal? INSU_AMT { get; set; }
-
     public decimal? LAND_AMT { get; set; }
     public decimal? LAND_RATE { get; set; }
     public string? LOT_No { get; set; }
-
     public string? MIS_GROUP { get; set; }
-
     public int? NOS { get; set; }
-
     public int? ORD_NO { get; set; }
     public decimal? ORD_RATE { get; set; }
     public string? ORD_TYPE { get; set; }
-
     public decimal? PACK_AMT { get; set; }
     public int? PACK_NO { get; set; }
     public decimal? PACK_PER { get; set; }
     public string? PACK_TYPE { get; set; }
-
     public string? PROD_DESC { get; set; }
-
     public decimal? QTY { get; set; }
-
     public decimal? RATE { get; set; }
     public string? REMARK { get; set; }
     public string? ROW_ID { get; set; }
-
     public int? SAUDA_NO { get; set; }
     public decimal? SAUDA_RATE { get; set; }
     public string? SAUDA_TYPE { get; set; }
@@ -276,11 +238,8 @@ public class SalesProformaInvoice_Detail
     public int? SNO { get; set; }
     public int? SRNO { get; set; }
     public int? STATUS { get; set; }
-
     public int? TAX_CODE { get; set; }
-
     public string? UNIT_NAME { get; set; }
     public int? UNIT_CODE { get; set; }
-
     public decimal? WBQTY { get; set; }
 }

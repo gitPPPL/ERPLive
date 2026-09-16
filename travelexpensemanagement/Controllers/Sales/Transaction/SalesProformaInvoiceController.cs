@@ -11,8 +11,6 @@ using travelexpensemanagement.Repositories.Interfaces.Sale.Transaction;
 namespace travelexpensemanagement.Controllers.Sales.Transaction
 {
     [SessionAuthorize]
-
-
     public class SalesProformaInvoiceController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
@@ -22,8 +20,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
         private readonly ISalesProformaInvoice _salesProformaInvoiceRepository;
-
-
 
         public SalesProformaInvoiceController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
           travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
@@ -188,12 +184,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-        public JsonResult cmbAddress()
+        public JsonResult cmbAddress(int partycode)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = $@"select code , ADD1 From SUBGROUP_ADDRESS where COMP_CODE = {getdata.PubCompCode} ";
+                string query = $@"select code , ADD1 From SUBGROUP_ADDRESS where COMP_CODE = {getdata.PubCompCode} and CODE = {partycode}  ";
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
@@ -294,7 +290,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         [HttpPost]
         public async Task<JsonResult> SavedData([FromBody] SalesProformaInvoice_Model request)
         {
@@ -309,6 +304,5 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             return Json(new { success = result.Status == "Success", status = result.Status, message = result.Message });
         }
-
     }
 }

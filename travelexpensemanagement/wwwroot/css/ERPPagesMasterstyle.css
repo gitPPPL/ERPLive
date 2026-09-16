@@ -1,12 +1,14 @@
 ﻿/* ===== HEADER UPGRADE ===== */
 .erppage-header {
-    background: linear-gradient(135deg, #122f4d, #0d142c);
-    color: #fff;
+    border: 1px solid #11182714;
+    color: #111827;
     padding: 6px 10px;
-    display: flex;
-    align-items: center;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
 }
 .approval-status {
     display: inline-flex;
@@ -68,10 +70,10 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(255,255,255,0.15);
+    background: #1C5E31;
     color: #fff;
-    border: 1px solid rgba(255,255,255,0.25);
-    padding: 2px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 4px 12px;
     border-radius: 6px;
     font-size: 12px;
     cursor: pointer;
@@ -79,8 +81,9 @@
 }
 /* HOVER EFFECT */
     .erppage-header-back:hover {
-        background: rgba(255,255,255,0.25);
+        /*background: rgba(255,255,255,0.25);*/
         transform: translateY(-1px);
+        background: #326c05;
     }
 
     /* ICON SIZE */
@@ -533,10 +536,11 @@
     font-weight: 600;
 }
     .erppage-header-icon i {
-        background: rgba(255, 255, 255, 0.15);
-        padding: 6px 8px;
-        border-radius: 4px;
-        font-size: 12px;
+        background: #122f4d;
+        padding: 6px;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #fff;
     }
 /* BASE COPY BUTTON */
 .erppage-btn-copy {
@@ -624,11 +628,11 @@
     }
 .erppagefieldset {
     width: 100%;
-    border: 0.001em solid #122f4d40;
-    border-left: 3px solid #00458d;
+    border: 0.001em solid #122f4d1c;
+    border-left: 2px solid #374151;
     border-radius: 8px;
     padding: 6px;
-    background: #e7eeff61;
+    background: #e7eeff7d;
     box-sizing: border-box;
     margin-top: 10px;
 }
@@ -636,11 +640,11 @@
 .erppagefieldset-legend {
     font-size: 13px;
     font-weight: 600;
-    color: #00458d;
+    color: #374151;
     width: fit-content;
     display: block;
     box-shadow: 4px 3px;
-    border: 1px solid #00458d;
+    border: 1px solid #374151;
     margin: 0px;
     background-color: #ffffff;
     letter-spacing: 1px;
@@ -1034,7 +1038,7 @@
 .erppage-fieldset {
     border: 1px solid #dfdfdf;
     border-radius: 4px;
-    background: #f1f1f1;
+    background: #1c1c1c1f;
     overflow: visible;
     margin-bottom: 6px;
     padding: 8px 12px 8px 12px;
@@ -1492,7 +1496,39 @@
     align-items: center;
     gap: 6px;
 }
+.erppagecheckbox-field {
+    display: block;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+.erppagecheckbox-label {
+    margin: 0;
+    padding: 0;
+    font-size: 0.88em;
+    font-weight: 600;
+    color: #254572;
+    letter-spacing: 0.8px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.erppagecheckbox-input {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    padding: 0;
+    flex: 0 0 auto;
+    cursor: pointer;
+    accent-color: #2f7d32;
+}
 .erppage-label {
     width: 100%;
     flex-shrink: 0;
@@ -1642,26 +1678,31 @@
     width: 100%;
 }
 /* ===== LABEL ===== */
+.erppage-label::before{
+    border-left:#254571;
+    gap:2px;
+}
+
 .erppage-label {
-    font-size: 0.88em;
-    color: #1f2226;
+    font-size: 13px;
+    color: #254572;
     display: inline-block;
     margin: 0;
     font-weight: 600;
-    /*display: contents;*/
+    font-family: system-ui;
 }
 
 /* ===== INPUT ===== */
 .erppage-input {
     width: 100%;
-    border: 1px solid #b5b5b5;
+    border: 1px solid #D1D5DB;
     border-radius: 4px;
     padding: 4px 4px;
     transition: 0.2s;
     box-sizing: border-box;
     font-size: 0.80em;
-    color: #403b3b;
-    height: 23px;
+    color: #111827;
+    height: 26px;
 }
     .erppage-input:disabled {
         
@@ -1761,6 +1802,7 @@
     flex-direction: column;
     gap: 10px;
     width: 100%;
+    background-color: #ffffff;
 }
 
 .erppage-preview-box {
@@ -1941,7 +1983,7 @@ input[type="number"] {
 .erppage-tabs {
     display: flex;
     gap: 2px;
-    border-bottom: 2px solid #2f7d32;
+    border-bottom: 2px solid #00458d;
 }
 
 .erppage-tab {
@@ -1950,12 +1992,14 @@ input[type="number"] {
     background: #f3f4f6;
     cursor: pointer;
     border-radius: 6px 6px 0 0;
-    font-size: 12px;
+    font-size: 13px;
     transition: 0.2s;
+    letter-spacing: 1px;
+    font-family: cursive;
 }
 
     .erppage-tab.active {
-        background: linear-gradient(135deg, #2d7b46, #1C5E31);
+        background: linear-gradient(135deg, #02284e, #003c7c);
         color: #fff;
     }
 
@@ -1966,7 +2010,6 @@ input[type="number"] {
     .erppage-tab-content.active {
         display: block;
         background-color: #e9e9e9;
-        padding: 8px;
         border-radius: 0px 0px 8px 8px;
     }
 .erppage-accordion-header {
@@ -2608,3 +2651,50 @@ input[type="number"] {
             grid-column: span 1;
         }
 }
+
+
+.erppage-input::placeholder {
+    color: #999;
+    font-size: 10px;
+    opacity: 1;
+    text-transform:capitalize;
+}
+.erppage-select::placeholder {
+    color: #999;
+    font-size: 10px;
+    opacity: 1;
+    text-transform: capitalize;
+}
+
+.erppagelabel-title {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.erppagelabel-value {
+    width: 100%;
+    height: 32px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    color: #111827;
+    font-size: 13px;
+    font-weight: 700;
+    box-sizing: border-box;
+}
+
+.erppage-button-field {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+    .erppage-button-field .btn {
+        white-space: nowrap;
+    }

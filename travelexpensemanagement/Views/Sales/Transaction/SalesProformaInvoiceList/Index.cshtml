@@ -339,8 +339,8 @@
 
                     <td class="action-col">
                         <div class="action-wrap">
-                            <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.v_NO}','${item.vtypeCode}' ,'${item.v_DATE}')"><i class="fa fa-edit"></i></button>
-                            <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-eye"></i></button>
+                            <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.doC_ID}')"><i class="fa fa-edit"></i></button>
+                            <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.v_NO}')"><i class="fa fa-eye"></i></button>
                             <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
                             <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
 
@@ -448,11 +448,11 @@
     }
 
     // ================= ACTIONS =================
-    function AddOrEditFunction(code, vtype , v_DATE) {
-        window.location.href = `/SalesProformaInvoice/Index?id=${encodeURIComponent(v_no)}&vtype=${encodeURIComponent(v_type)}`;
+    function AddOrEditFunction(DOC_ID) {
+        window.location.href = `/SalesProformaInvoice/Index?id=${encodeURIComponent(DOC_ID)}`;
     }
-    function viewMenuDetails(code, vtype) {
-        window.location.href = `/SalesProformaInvoice/Index?id=${encodeURIComponent(code)}&vtype=${encodeURIComponent(vtype)}&mode=view`;
+    function viewMenuDetails(DOC_ID) {
+        window.location.href = `/SalesProformaInvoice/Index?id=${encodeURIComponent(DOC_ID)}&mode=view`;
     }
 
     function deleteTemp(code, VType) {
