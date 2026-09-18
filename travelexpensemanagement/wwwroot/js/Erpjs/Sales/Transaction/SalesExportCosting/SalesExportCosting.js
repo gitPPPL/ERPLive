@@ -113,8 +113,8 @@ function createRowHtml(data = {}) {
 
     return `
         <tr>
-            <td><input class="form-control form-control-sm item-code" type="number" value="${data.iteM_CODE || data.ITEM_CODE || ''}"/></td>
-            <td class="freeze-item"><select class="form-control form-control-sm item-name"></select></td>
+            <td><input class="form-control form-control-sm item-code" type="number" value="${data.iteM_CODE || data.ITEM_CODE || ''}" disabled/></td>
+            <td><select class="form-control form-control-sm item-name"></select></td>
 
             <td><input class="form-control form-control-sm rate" type="number" value="${data.rate || data.RATE || ''}"/></td>
             <td><input class="form-control form-control-sm qty" type="number" value="${data.QTY || data.qty || ''}"/></td>

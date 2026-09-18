@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using Microsoft.EntityFrameworkCore;
 using travelexpensemanagement.Models.Inventory.Transaction;
 
 namespace travelexpensemanagement.Data
@@ -10,33 +11,37 @@ namespace travelexpensemanagement.Data
         {
         }
 
-        //public DbSet<Department> Departments { get; set; } = null!;
-        //public DbSet<Employee> Employees { get; set; } = null!;
+        public DbSet<Employee> Employees { get; set; } = null!;
+        public DbSet<Department> Departments { get; set; } = null!;
 
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    base.OnModelCreating(modelBuilder);
-        //    modelBuilder.Entity<Department>()
-        //        .HasMany(d => d.Employees)
-        //        .WithOne(e => e.Department)
-        //        .HasForeignKey(e => e.DepartmentId)
-        //        .OnDelete(DeleteBehavior.SetNull);
-        //}
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Employee>().HasOne(e => e.Department).WithMany(d => d.Employees).HasForeignKey(e => e.DepartmentId);
+        }
+
     }
-    public class Person
+    public class Employee
     {
         public int Id { get; set; }
+
         public string Name { get; set; } = string.Empty;
 
-        public Passport? Passport { get; set; }
-    }
+        public string Email { get; set; } = string.Empty;
 
-    public class Passport
+        public decimal Salary { get; set; }
+
+        public int DepartmentId { get; set; }
+
+        public byte[] RowVersion { get; set; } = null!;
+
+        public Department Department { get; set; } = null!;
+    }
+    public class Department
     {
         public int Id { get; set; }
+
         public string Name { get; set; } = string.Empty;
 
-        public int PersonId { get; set; }
-        public Person Person { get; set; } = null!;
+        public List<Employee> Employees { get; set; } = new();
     }
 }

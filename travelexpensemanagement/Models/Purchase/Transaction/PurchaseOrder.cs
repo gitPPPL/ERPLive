@@ -76,6 +76,7 @@
         public string? PartyName { get; set; }
         public string? ShipName { get; set; }
         public int? Status { get; set; }
+        public decimal? ExWorkFrt { get; set; }
         public string ? SaveOrUpdate { get; set; }
         public List<Order2> ItemRecords { get; set; } 
         public List<PurchaseAttachment> Attachments { get; set; } 
@@ -90,7 +91,7 @@
         public int? ItemCode { get; set; }
         public int? MakeCode { get; set; }
         public int? NOS { get; set; }
-        public decimal? Qty { get; set; }
+        public decimal Qty { get; set; }
         public decimal? AdjQty { get; set; }
         public decimal? GateQty { get; set; }
         public string? UomName { get; set; }
@@ -169,6 +170,49 @@
         public List<Order2> Orders { get; set; }  // Use Order2
     }
 
+    public class PackingDetailModel
+    {
+        public int ITEM_CODE { get; set; }
+        public string? ITEM_NAME { get; set; }
+        public decimal NOS { get; set; }
+        public decimal QTY { get; set; }
+    }
+    public class GetSaudaRateRequest
+    {
+        public int SaudaNo { get; set; }
+        public int BillToCode { get; set; }
+        public int StationCode { get; set; }
+        public decimal Freight { get; set; }
+        public decimal TotalQty { get; set; }
+        public List<SaudaRateItemModel> Items { get; set; } = new();
+    }
 
+    public class SaudaRateItemModel
+    {
+        public int ItemCode { get; set; }
 
+        public decimal Rate { get; set; }
+
+        public int TaxCode { get; set; }
+        //public string TaxName { get; set; }
+
+        public decimal CGSTPer { get; set; }
+        public decimal SGSTPer { get; set; }
+        public decimal IGSTPer { get; set; }
+    }
+    public class CalculateAmtItemModel
+    {
+        public string ReportType { get; set; }
+        public decimal SaleRate { get; set; }
+        public decimal TaxableRate { get; set; }
+        public decimal NetWt { get; set; }
+        public string pubDefTonnageRate { get; set; }
+        public string pubDefWtCalconBales { get; set; }
+    }
+
+    public class ValidateDataModel
+    {
+        public int VNo { get; set; }
+        public List<int> ItemCodes { get; set; } = new();
+    }
 }
