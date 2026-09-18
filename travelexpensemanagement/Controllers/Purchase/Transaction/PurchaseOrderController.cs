@@ -2617,10 +2617,10 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
 
                 byte[] pdfBytes = ms.ToArray();
 
-                //string Mail = GetText("Select EMAIL from SUBGROUP_MAST WHERE CODE= " + PartyCode +
-                //                      " AND COMP_CODE= " + globalVaraible.PubCompCode);
+                string Mail = GetText("Select EMAIL from SUBGROUP_MAST WHERE CODE= " + PartyCode +
+                                      " AND COMP_CODE= " + globalVaraible.PubCompCode);
 
-                string Mail = "sg256001@gmail.com";
+                //string Mail = "sg256001@gmail.com";
 
                 if (Mail == "")
                 {

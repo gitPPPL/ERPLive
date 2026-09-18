@@ -1266,22 +1266,44 @@ namespace travelexpensemanagement.Common.Globalvariable
 
                 using (SqlConnection con1 = _dbConnection.GetErpConnection())
                 {
-                    string updateQuery = @" UPDATE " + Tablename + @"  SET MAILSEND = ISNULL(MAILSEND, 0) + 1
-                    WHERE V_TYPE = @vtype AND V_NO = @vno AND COMP_CODE = @comp AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+                    string checkColumnQuery = @"
+                        SELECT CASE 
+                        WHEN COL_LENGTH(@TableName, 'MAILSEND') IS NOT NULL THEN 1
+                        ELSE 0
+                        END";
 
-                    using (SqlCommand cmd1 = new SqlCommand(updateQuery, con1))
+                    using (SqlCommand checkCmd = new SqlCommand(checkColumnQuery, con1))
                     {
-                        cmd1.Parameters.AddWithValue("@comp", globalVaraible.PubCompCode);
-                        cmd1.Parameters.AddWithValue("@BRANCH_CODE", globalVaraible.PubBranchCode);
-                        cmd1.Parameters.AddWithValue("@YEAR_CODE", globalVaraible.PubFYearCode);
-                        cmd1.Parameters.AddWithValue("@vtype", vtype);
-                        cmd1.Parameters.AddWithValue("@vno", vno);
-           
+                        checkCmd.Parameters.AddWithValue("@TableName", Tablename);
+
                         con1.Open();
-                        int rowsAffected = cmd1.ExecuteNonQuery();                        
+
+                        int columnExists = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                        if (columnExists == 1)
+                        {
+                            string updateQuery = $@"
+                                UPDATE {Tablename}
+                                SET MAILSEND = ISNULL(MAILSEND, 0) + 1
+                                WHERE V_TYPE = @vtype
+                                AND V_NO = @vno
+                                AND COMP_CODE = @comp
+                                AND BRANCH_CODE = @BRANCH_CODE
+                                AND YEAR_CODE = @YEAR_CODE";
+
+                            using (SqlCommand cmd1 = new SqlCommand(updateQuery, con1))
+                            {
+                                cmd1.Parameters.AddWithValue("@comp", globalVaraible.PubCompCode);
+                                cmd1.Parameters.AddWithValue("@BRANCH_CODE", globalVaraible.PubBranchCode);
+                                cmd1.Parameters.AddWithValue("@YEAR_CODE", globalVaraible.PubFYearCode);
+                                cmd1.Parameters.AddWithValue("@vtype", vtype);
+                                cmd1.Parameters.AddWithValue("@vno", vno);
+
+                                int rowsAffected = cmd1.ExecuteNonQuery();
+                            }
+                        }
                     }
                 }
-
                 return new JsonResult(new { success = true, message = "Mail sent successfully" });
             }
             catch (Exception ex)

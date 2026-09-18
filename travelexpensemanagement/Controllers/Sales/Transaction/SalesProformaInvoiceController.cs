@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
@@ -33,9 +35,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             _moduleService = moduleService;
             _salesProformaInvoiceRepository = salesProformaInvoice;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var globalVariables = _globalVariableService.GetGlobalVariables();
+
+          
+
             string databaseName;
             using (var connection = _dbConnection.GetErpConnection())
             {
@@ -85,7 +90,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "select CODE, SHORTNAME from CURRENCY_MAST where ACTIVE=1";
+                string query = "select CODE, SHORTNAME from CURRENCY_MAST where ACTIVE=1 order by  SHORTNAME";
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
@@ -124,8 +129,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     LEFT JOIN CITY_MAST c  ON c.CODE = a.CITY_CODE
                     LEFT JOIN STATE_MAST s  ON s.CODE = c.STATE_CODE
                     LEFT JOIN Country_MAST e ON e.CODE = c.Country_CODE
-                    LEFT JOIN SUBGROUP_MAST d  ON d.CODE = a.AGENT_CODE
-                    AND d.NATURE = 'Broker' AND d.COMP_CODE = a.COMP_CODE  WHERE a.COMP_CODE = @CompCode  order by a.NAME  ";
+                    LEFT JOIN SUBGROUP_MAST d  ON d.CODE = a.AGENT_CODE AND d.NATURE = 'Broker' AND d.COMP_CODE = a.COMP_CODE  WHERE a.COMP_CODE = @CompCode  order by a.NAME  ";
 
                 var partyList = new List<object>();
 
@@ -164,12 +168,61 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(partyList);
             }
         }
+        [HttpGet]
+        public JsonResult GetAddressData(int  PartyCode , int  AddressId)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = @" SELECT  a.ADDRESS_ID, a.Add1, a.Add2, a.Add3, a.GSTIN,  a.City_Code,  d.Code AS CountryCode,
+                a.Pincode, s.Code AS SCode FROM Subgroup_Address a
+                LEFT JOIN STATE_MAST b   ON a.STATE_CODE = b.Code
+                LEFT JOIN CITY_MAST c  ON a.CITY_CODE = c.Code
+                LEFT JOIN STATE_MAST s  ON s.Code = c.State_code
+                LEFT JOIN Country_MAST d   ON c.Country_CODE = d.Code
+                WHERE   a.comp_code = @CompCode  AND a.Code = @PartyCode AND a.Address_Id = @AddressId; ";
+
+                var AddressDataList = new List<object>();
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@PartyCode", PartyCode);
+                    cmd.Parameters.AddWithValue("@AddressId", AddressId);
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            AddressDataList.Add(new
+                            {
+                                ADDRESS_ID = reader["ADDRESS_ID"],
+                                Add1 = reader["Add1"],
+                                Add2 = reader["Add2"],
+                                Add3 = reader["Add3"],
+                                GSTIN = reader["GSTIN"],
+                                City_Code = reader["City_Code"],
+                                CountryCode = reader["CountryCode"],
+                                Pincode = reader["Pincode"],
+                                SCode = reader["SCode"]                             
+                            
+                            });
+                        }
+                    }
+                }
+
+                return Json(AddressDataList);
+            }
+        }
         public JsonResult cmbCityName()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = $@"select CODE, NAME from CITY_MAST where ACTIVE = 1 ";
+                string query = $@"select CODE, NAME from CITY_MAST where ACTIVE = 1  order by NAME ";
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
@@ -179,7 +232,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = $@"select CODE, NAME from COUNTRY_MAST where ACTIVE = 1 ";
+                string query = $@"select CODE, NAME from COUNTRY_MAST where ACTIVE = 1  order by NAME ";
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
@@ -189,7 +242,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = $@"select code , ADD1 From SUBGROUP_ADDRESS where COMP_CODE = {getdata.PubCompCode} and CODE = {partycode}  ";
+                string query = $@"select ADDRESS_ID , ADD1 From SUBGROUP_ADDRESS where COMP_CODE = {getdata.PubCompCode} and CODE = {partycode}  ";
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
@@ -248,9 +301,9 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 string query = @" SELECT  a.CODE, LTRIM(RTRIM(a.SHORTNAME)) AS Shortname,  b.mgroup_type,  a.Packing_Wt,  a.HSN_CODE
-                        FROM ITEM_MAST a
-                        LEFT JOIN ITEM_MGROUP b  ON b.CODE = a.MGROUP_CODE  AND b.COMP_CODE = a.COMP_CODE
-                        WHERE a.Active = 1 AND a.comp_code = @CompCode; ";
+                FROM ITEM_MAST a
+                LEFT JOIN ITEM_MGROUP b  ON b.CODE = a.MGROUP_CODE  AND b.COMP_CODE = a.COMP_CODE
+                WHERE a.Active = 1 AND a.comp_code = @CompCode   order by a.SHORTNAME ; ";
 
                 var partyList = new List<object>();
 
@@ -304,5 +357,78 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             return Json(new { success = result.Status == "Success", status = result.Status, message = result.Message });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> SendMail(int PartyCode, int vno, string v_type, IFormFile file)
+        {
+            try
+            {
+                var globalVaraible = _globalVariableService.GetGlobalVariables();
+
+                if (file == null)
+                    return Json(new { success = false, message = "Report file missing" });
+
+                using var ms = new MemoryStream();
+                file.CopyTo(ms);
+
+                byte[] pdfBytes = ms.ToArray();
+
+                //string Mail = GetText("Select EMAIL from SUBGROUP_MAST WHERE CODE= " + PartyCode +
+                //                      " AND COMP_CODE= " + globalVaraible.PubCompCode);
+
+                string Mail = "sg256001@gmail.com";
+
+                if (Mail == "")
+                {
+                    return Json(new { success = false, message = "Email address is blank for the selected party." });
+                }
+
+                string compname = GetText("Select NAME from COMP_MAST WHERE CODE= " + globalVaraible.PubCompCode);
+
+                string mailBody = "Please find attached Proforma invoice(s) for product.<br><br><br>";
+                        mailBody += "<br><br>Regards,<br>"
+                         + compname + "<br>"
+                         + globalVaraible.Address1 + "<br>"
+                         + globalVaraible.Address2;
+
+                return await _globalValidationdate.GlobalSendMail(v_type, vno, Mail, mailBody, file, "sale1", "");
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public string GetText(string query)
+        {
+            try
+            {
+                using var con = _dbConnection.GetErpConnection();
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return reader[0].ToString();
+                            }
+                            else
+                            {
+                                return string.Empty;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetText() Error: " + ex.Message);
+                return string.Empty;
+            }
+        }
+
     }
 }

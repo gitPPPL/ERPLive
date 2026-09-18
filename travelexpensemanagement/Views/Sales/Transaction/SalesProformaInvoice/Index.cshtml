@@ -27,7 +27,9 @@
         GST = globalVariables.gstin,
         PAN = globalVariables.PAN,
         Phone = globalVariables.Phone,
-        Email = globalVariables.Email
+        Email = globalVariables.Email,
+        ICE = globalVariables.IEC,
+        website = globalVariables.Website
     }));
 
     window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
@@ -41,10 +43,18 @@
         </div>
         <div class="erppage-header-title">Sales Proforma Invoice</div>
     </div>
+
     <div class="erppage-header-right">
+        <button class="erppagelist-btn erppagelist-btn-action" id="button_mail"> <i class="fa fa-envelope" ></i> Mail </button>
+
+          <button type="button" class="erppage-btn erppage-btn-copy" id="button_print" onclick="TransitReport();">
+            <i class="fa-solid fa-print"></i> Print
+        </button>        
+
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesProformaInvoiceList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
+
     </div>
 </div>
 <div id="SalesProformaInvoiceform">
@@ -195,7 +205,7 @@
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Pincode</label>
-                        <input type="number" class="erppage-input" id="NumPincodeSa" onreadystatechange="">
+                        <input type="number" class="erppage-input" id="NumPincodeSa" onreadystatechange="" readonly>
                     </div>
                     
                     <div class="erppage-divfield">
@@ -338,6 +348,7 @@
                             <col style="width: 65px;">
                             <col style="width: 100px;">
                             <col style="width: 65px;">
+                            <col style="width: 65px;">
                             <col style="width: 100px;">
                             <col style="width: 90px;">
                             <col style="width: 85px;">
@@ -366,6 +377,7 @@
                                 <th>Amount</th>
                                 <th>Pack %</th>
                                 <th>Pack Amount</th>
+                                <th>Pack Weight</th>
                                 <th>Disc %</th>
                                 <th>Disc Amount</th>
                                 <th>Freight</th>

@@ -159,6 +159,7 @@ public class SalesProformaInvoice_Header
     public int? V_NO { get; set; }
     public DateTime? V_DATE { get; set; }
     public string? V_TYPE { get; set; }
+    public string? V_TYPEText { get; set; }
     public string? VEHICLE_NO { get; set; }
     public decimal? WB_AMT { get; set; }
     public string? WB_AC { get; set; }
@@ -182,6 +183,7 @@ public class SalesProformaInvoice_Header
     public decimal INSU_AMT { get; internal set; }
     public decimal DISC_PER { get; internal set; }
     public decimal DISC_AMT { get; internal set; }
+
     public int? BILL_STATE { get; set; }
     public int? SHIP_STATE { get; set; }
     public int? SHIP_COUNTRY { get; set; }
@@ -194,6 +196,7 @@ public class SalesProformaInvoice_Detail
     public decimal? CESS_PER { get; set; }
     public decimal? CGST_AMT { get; set; }
     public decimal? CGST_PER { get; set; }
+    public decimal PACKING_WT { get; internal set; }
     public int? DCN_NO { get; set; }
     public string? DCN_TYPE { get; set; }
     public int? DEPT_CODE { get; set; }

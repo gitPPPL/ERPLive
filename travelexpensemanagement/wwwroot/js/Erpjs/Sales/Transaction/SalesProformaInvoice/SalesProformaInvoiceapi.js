@@ -130,26 +130,39 @@ async function cmbCityName() {
     }
 }
 
-async function cmbAddress(partycode) {
+async function cmbPartyAddress(partycode) {
     try {
         const res = await fetch(`/SalesProformaInvoice/cmbAddress?partycode=${encodeURIComponent(partycode)}`);
-
         if (!res.ok) {
             throw new Error(`HTTP error! Status: ${res.status}`);
         }
-
         const data = await res.json();
-
         const ddl = $('#ddladdressl1');
+        ddl.empty();
+        data.forEach(item => { const option = `<option value="${item.value}">${item.text}</option>`;
+            ddl.append(option);
+        });
+
+    } catch (error) {
+        console.error("Error  Party Address:", error);
+    }
+}
+
+async function cmbConsigneeAddress(partycode) {
+    try {
+        const res = await fetch(`/SalesProformaInvoice/cmbAddress?partycode=${encodeURIComponent(partycode)}`);
+
+        if (!res.ok)
+        {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+
+        const data = await res.json();  
         const ddl1 = $('#ddladdressl1Sa');
 
-        ddl.empty();
         ddl1.empty();
 
-        data.forEach(item => {
-            const option = `<option value="${item.value}">${item.text}</option>`;
-
-            ddl.append(option);
+        data.forEach(item => {  const option = `<option value="${item.value}">${item.text}</option>`;
             ddl1.append(option);
         });
 
@@ -220,14 +233,13 @@ async function ddlPartyName() {
         const res = await fetch('/SalesProformaInvoice/cmbPartyName');
         const data = await res.json();
 
-
         console.log("data", data);
-
 
         partyData = data;
 
         const ddl = $('#ddlPartyName');
         const ddl1 = $('#ddlConsignee');
+
         ddl.empty();
         ddl1.empty();
 
@@ -236,8 +248,22 @@ async function ddlPartyName() {
 
         data.forEach(item => {
             const option = `<option value="${item.code}">${item.p_name}</option>`;
+
             ddl.append(option);
             ddl1.append(option);
+        });
+
+        // Initialize searchable dropdown
+        ddl.select2({
+            placeholder: "---Select Party Name---",
+            allowClear: true,
+            width: '100%'
+        });
+
+        ddl1.select2({
+            placeholder: "---Select Party Name---",
+            allowClear: true,
+            width: '100%'
         });
 
     } catch (error) {
@@ -328,8 +354,33 @@ function selectedPartyData()
     $('#ddlCountry').val(party.c_code || '');
     $('#TxtGST').val(party.gstin || '');
 
+    $('#ddlConsignee').val(party.code || '').trigger('change');
+    $('#txtaddressL1Sa').val(party.add1 || '');
+    $('#txtaddressL2Sa').val(party.add2 || '');
+    $('#txtaddressL3Sa').val(party.add3 || '');
+    $('#ddlStationSa').val(party.c_code || '');
+    $('#NumPincodeSa').val(party.pincode || '');
+    $('#ddlCountrySa').val(party.c_code || '');
+    $('#TxtGSTSa').val(party.gstin || '');
+}
+function selectedConsigneePartyData() {
+    const selectedCode = $('#ddlConsignee').val();
 
-    $('#ddlConsignee').val(party.code || '');
+    if (!selectedCode)
+    {
+        clearPartyFields();
+        return;
+    }
+
+    const party = partyData.find( x => String(x.code) === String(selectedCode) );
+
+    if (!party)
+    {
+        console.log("Party Data not found");
+        return;
+    }
+    console.log("Selected Party:", party);
+
     $('#txtaddressL1Sa').val(party.add1 || '');
     $('#txtaddressL2Sa').val(party.add2 || '');
     $('#txtaddressL3Sa').val(party.add3 || '');
@@ -354,7 +405,6 @@ async function cmbSoldBy() {
         console.error("Error loading  Sold By:", error);
     }
 }
-
 function AddRow(data = {})
 {
     let tbody = $('#tblSalesProformaInvoice tbody');
@@ -371,6 +421,7 @@ function AddRow(data = {})
             <td>  <input type="number" class="erppagetable-control TxtAmount" value="${data.Amount ?? ''}" readonly  />  </td>
             <td>  <input type="number" class="erppagetable-control TxtPacKPer" value="${data.PackPer ?? ''}"  />  </td>
             <td>  <input type="number" class="erppagetable-control TxtPackAmount" value="${data.PackAmt ?? ''}" readonly  />  </td>        
+            <td>  <input type="number" class="erppagetable-control TxtPackWeight" value="${data.PackWght ?? ''}" readonly  />  </td>        
             <td>  <input type="text"   class="erppagetable-control TxtDisPer" value="${data.DisPer ?? ''}"  /> </td>
             <td>  <input type="number" class="erppagetable-control TxtDisAmount"  value="${data.Disamt ?? ''}" readonly />   </td>
             <td>  <input type="number" class="erppagetable-control TxtFreight" value="${data.Freight ?? ''}"    />  </td>
@@ -399,24 +450,19 @@ function AddRow(data = {})
 
     $row.find('.ddlProductName').val(data.Productcode ?? '');
     $row.find('.TxtTaxType').val(data.TaxType ?? '');
-
     // Calculate when values change
     $row.find(
         '.TxtNetQty, .TxtRate, .TxtPacKPer, .TxtDisPer, ' +
-        '.TxtCgstper, .TxtSgstPer, .TxtIGSTPer, .TxtCessPer'
-    ).on('input change', function () {
+        '.TxtCgstper, .TxtSgstPer, .TxtIGSTPer,.TxtCessPer,.TxtFreight').on('input change', function () {
         CalculateRow($row);
     });
-
 
     // Tax Type change
     $row.find('.TxtTaxType').on('change', function () {
 
         const selectedCode = $(this).val();
 
-        const selectedTax = TaxPercentageData.find(
-            x => String(x.code) === String(selectedCode)
-        );
+        const selectedTax = TaxPercentageData.find( x => String(x.code) === String(selectedCode) );
 
         console.log("Selected Tax Type:", selectedTax);
 
@@ -429,19 +475,10 @@ function AddRow(data = {})
             return;
         }
 
-        $row.find('.TxtCgstper').val(
-            Number(selectedTax.cgsT_PER || 0).toFixed(2)
-        );
+        $row.find('.TxtCgstper').val( Number(selectedTax.cgsT_PER || 0).toFixed(2) );
+        $row.find('.TxtSgstPer').val( Number(selectedTax.sgsT_PER || 0).toFixed(2) );
+        $row.find('.TxtIGSTPer').val( Number(selectedTax.igsT_PER || 0).toFixed(2) );
 
-        $row.find('.TxtSgstPer').val(
-            Number(selectedTax.sgsT_PER || 0).toFixed(2)
-        );
-
-        $row.find('.TxtIGSTPer').val(
-            Number(selectedTax.igsT_PER || 0).toFixed(2)
-        );
-
-        // Recalculate after tax percentage changes
         CalculateRow($row);
     });
 
@@ -450,7 +487,6 @@ function AddRow(data = {})
         SetItemDetails($row);
     }
 }
-
 function CollectDetailRows() {
 
     let details = [];
@@ -517,27 +553,35 @@ function CollectDetailRows() {
 
     return details;
 }
-
 function CalculateRow($row) {
-
+    const chkcalPCS = $('#chkcalPCS').is(':checked');
+    let GQty = parseFloat($row.find('.TxtGrossQty').val()) || 0;
+    let nos = parseFloat($row.find('.TxtNos').val()) || 0;
     let netQty = parseFloat($row.find('.TxtNetQty').val()) || 0;
     let rate = parseFloat($row.find('.TxtRate').val()) || 0;
     let packPer = parseFloat($row.find('.TxtPacKPer').val()) || 0;
     let disPer = parseFloat($row.find('.TxtDisPer').val()) || 0;
     let freight = parseFloat($row.find('.TxtFreight').val()) || 0;
+    let PackWeight = parseFloat($row.find('.TxtPackWeight').val()) || 0;
+    let amount = 0;
 
-    // Amount = Net Qty × Rate
-    let amount = netQty * rate;
-    // Packing Amount = Amount × Packing %
+    if (chkcalPCS == true) {
+
+        if (PackWeight > 0) {
+            GQty = nos * PackWeight;
+        }
+        amount = GQty * rate;
+    }
+    else {
+        amount = netQty * rate;
+    }
+   
     let packAmt = amount * packPer / 100;
-    // Discount Amount = (Amount + Packing Amount) × Discount %
+
     let disAmt = (amount + packAmt) * disPer / 100;
 
     let taxableAmount = amount + packAmt - disAmt +  freight;
 
-    // =========================================================
-    // TAX CALCULATION
-    // =========================================================
     let cgstPer = parseFloat($row.find('.TxtCgstper').val()) || 0;
     let sgstPer = parseFloat($row.find('.TxtSgstPer').val()) || 0;
     let igstPer = parseFloat($row.find('.TxtIGSTPer').val()) || 0;
@@ -548,9 +592,6 @@ function CalculateRow($row) {
     let igstAmt = taxableAmount * igstPer / 100;
     let cessAmt = taxableAmount * cessPer / 100;
 
-    // =========================================================
-    // SET CURRENT ROW VALUES
-    // =========================================================
     $row.find('.TxtAmount').val(amount.toFixed(2));
     $row.find('.TxtPackAmount').val(packAmt.toFixed(2));
     $row.find('.TxtDisAmount').val(disAmt.toFixed(2));
@@ -559,10 +600,6 @@ function CalculateRow($row) {
     $row.find('.TxtSgstamt').val(sgstAmt.toFixed(2));
     $row.find('.TxtIGSTamt').val(igstAmt.toFixed(2));
     $row.find('.TxtCessamt').val(cessAmt.toFixed(2));
-
-    // =========================================================
-    // TOTAL OF ALL ROWS
-    // =========================================================
 
     let totalNos = 0;
     let totalGrossQty = 0;
@@ -673,13 +710,22 @@ async function LoadData() {
         let Header = res.data.header;
         let Details = res.data.details;
 
+        await Promise.all([
+        cmbPartyAddress(Header.bilL_CODE),
+        cmbConsigneeAddress(Header.shiP_CODE)
+        ]);
+
+
+
+        console.log("Header", Header);
+        console.log("Details", Details);
         $('#CODE').val(Header.doC_ID);
         $('#ddlInvType').val(Header.v_TYPE);
         $('#NumSerialNo').val(Header.v_NO);
         $('#DtDate').val(formatDate(Header.v_DATE));
         $('#ddlSupplyType').val(Header.supplY_TYPE);
         $('#ddlCurrency').val($('#ddlCurrency option').filter(function () { return $.trim($(this).text()) === $.trim(Header.imporT_CURRENCY); }).val()).trigger('change');
-        $('#ddlPartyName').val(Header.bilL_CODE);
+        $('#ddlPartyName').val(Header.bilL_CODE || '').trigger('change');
         $('#txtaddressL1').val(Header.bilL_ADD1);
         $('#txtaddressL2').val(Header.bilL_ADD2);
         $('#txtaddressL3').val(Header.bilL_ADD3);
@@ -688,7 +734,7 @@ async function LoadData() {
         $('#ddlCountry').val(Header.bilL_COUNTRY);
         $('#TxtGST').val(Header.bilL_GST);
         $('#ddlSalesThrough').val(Header.agenT_CODE);
-        $('#ddlConsignee').val(Header.shiP_CODE);
+        $('#ddlConsignee').val(Header.shiP_CODE || '').trigger('change');             
         $('#txtaddressL1Sa').val(Header.shiP_ADD1);
         $('#txtaddressL2Sa').val(Header.shiP_ADD2);
         $('#txtaddressL3Sa').val(Header.shiP_ADD3);
@@ -696,7 +742,6 @@ async function LoadData() {
         $('#NumPincodeSa').val(Header.shiP_PINCODE);
         $('#ddlCountrySa').val(Header.shiP_COUNTRY);
         $('#TxtGSTSa').val(Header.shiP_GST);
-
         $('#ddlProdType').val(Header.iteM_TYPE);
         $('#TxtARNNo').val(Header.gR_NO);
         $('#DtARNdate').val(formatDate(Header.gR_DATE));
@@ -755,6 +800,7 @@ async function LoadData() {
                     Amount: detail.amount ?? 0,
                     PackPer: detail.pacK_PER ?? 0,
                     PackAmt: detail.pacK_AMT ?? 0,
+                    PackWght: detail.packinG_WT ?? 0,
                     DisPer: detail.disC_PER ?? 0,
                     Disamt: detail.disC_AMT ?? 0,
                     Freight: detail.freighT_AMT ?? 0,
@@ -775,19 +821,11 @@ async function LoadData() {
         } else {
             AddRow();
         }
-
-
-
-
-
-
-
     }
     catch (error) {
         console.error("Error loading data:", error);
     }
 }
-
 function ValidateDetailTable() {
     let isValid = true;
     let firstInvalidRow = null;
@@ -872,7 +910,6 @@ function ValidateDetailTable() {
 
     return true;
 }
-
 function DeleteRow(button)
 {
     let row = $(button).closest('tr');
@@ -881,3 +918,304 @@ function DeleteRow(button)
     }
     row.remove();
 }
+
+async function AddressPartyData(PartyCode, AddressId) {
+    try {
+        const res = await $.ajax({
+            url: '/SalesProformaInvoice/GetAddressData',
+            type: 'GET',
+            data: {
+                PartyCode: PartyCode,
+                AddressId: AddressId
+            }
+        });
+
+        const data = res[0];
+
+        if (!data) {
+            console.log("No address data found");
+            return;
+        }
+
+        // Billing Address
+        $('#txtaddressL1').val(data.add1 || '');
+        $('#txtaddressL2').val(data.add2 || '');
+        $('#txtaddressL3').val(data.add3 || '');
+        $('#ddlStationl').val(data.city_Code || '');
+        $('#NumPincode').val(data.pincode || '');
+        $('#ddlCountry').val(data.countryCode || '');
+        $('#TxtGST').val(data.gstin || '');
+
+        // Shipping / Consignee Address
+        $('#txtaddressL1Sa').val(data.add1 || '');
+        $('#txtaddressL2Sa').val(data.add2 || '');
+        $('#txtaddressL3Sa').val(data.add3 || '');
+        $('#ddlStationSa').val(data.city_Code || '');
+        $('#NumPincodeSa').val(data.pincode || '');
+        $('#ddlCountrySa').val(data.countryCode || '');
+        $('#TxtGSTSa').val(data.gstin || '');
+
+        console.log("Address Data:", data);
+
+        return data;
+    }
+    catch (error) {
+        console.log("error", error);
+    }
+}
+
+async function AddressConsigneeData(PartyCode, AddressId) {
+    try {
+        const res = await $.ajax({
+            url: '/SalesProformaInvoice/GetAddressData',
+            type: 'GET',
+            data: {
+                PartyCode: PartyCode,
+                AddressId: AddressId
+            }
+        });
+
+
+        const data = res[0];
+
+        if (!data) {
+            console.log("No address data found");
+            return;
+        }
+        // Shipping / Consignee Address
+        $('#txtaddressL1Sa').val(data.add1 || '');
+        $('#txtaddressL2Sa').val(data.add2 || '');
+        $('#txtaddressL3Sa').val(data.add3 || '');
+        $('#ddlStationSa').val(data.city_Code || '');
+        $('#NumPincodeSa').val(data.pincode || '');
+        $('#ddlCountrySa').val(data.countryCode || '');
+        $('#TxtGSTSa').val(data.gstin || '');
+
+        console.log("res", res);
+        return res;
+    }
+    catch (error) {
+        console.log("error", error);
+    }
+}
+function TransitReport() {
+
+    if (!rowId) {
+        showToast(`Please save the data before printing the report.`, { type: "info" });
+        return;
+    }
+    var reportName = "";
+
+
+    console.log("globalVars", globalVars);
+
+
+
+    if (globalVars.CompCode == "7")
+    {
+      reportName   = "INVOICE_DEMOK";
+    }
+    else
+    {
+     reportName    = "INVOICE_DEMO";
+    }    
+
+    var v_no = $('#NumSerialNo').val();
+    var v_type = $('#ddlInvType').val();
+
+    var formula =
+        "{SALE1.V_TYPE} = '" + v_type + "'" +
+        " and {SALE1.V_NO} = " + v_no + "" +
+        " and {SALE1.COMP_CODE} = " + globalVars.CompCode + "" +
+        " and {SALE1.YEAR_CODE} = " + globalVars.FYearCode + "" +
+        " and {SALE1.BRANCH_CODE} = " + globalVars.BranchCode + "";
+
+    var payload = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: database,
+        Parameters: {
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",
+            comp_phone: globalVars.Phone || "",
+            GST: globalVars.GST || "",
+            IEC: globalVars.ICE || "",
+            PAN: globalVars.PAN || "",
+            Website: globalVars.website || "",
+            EMAIL: globalVars.Email || "",
+            RPTNAME: "PROFORMA INVOICE"
+        }
+    };
+
+
+    var now = new Date();
+    var timestamp =
+        String(now.getDate()).padStart(2, '0') +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getFullYear()).slice(-2) + "_" +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
+
+
+    $.ajax({
+        url: 'http://localhost:24085/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: { responseType: 'blob' },
+
+        success: function (response) {
+
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        error: function (xhr, status, error) {
+            if (xhr.status === 0) {
+                console.error("Cannot connect to API. Is the backend running?");
+            } else {
+                console.error('Error generating report:', xhr.status, xhr.statusText, error);
+                xhr.responseText && console.error('Response:', xhr.responseText);
+            }
+        }
+    });
+}
+
+
+
+async function SendMail() {
+    try {
+        const docId = $('#CODE').val();
+
+        if (!docId)
+        {
+            showToast("Please save the data before Send Mail.", { type: "info" });
+            return;
+        }
+
+        let PartyCode = $('#ddlPartyName').val();
+        const vno = parseInt($('#NumSerialNo').val()) || 0;
+        const v_type = $('#ddlInvType').val() || '';
+
+        // Confirmation
+        const result = await Swal.fire({
+            title: "Do you want to send mail?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            cancelButtonText: "No"
+        });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        // Step 1: Generate report
+        const report = await GetTransitReportFile();
+
+        if (!report || !report.file) {
+            toastr.error("Report generation failed.");
+            return;
+        }
+
+        // Step 2: Prepare FormData
+        let formData = new FormData();
+        formData.append("PartyCode", PartyCode);
+        formData.append("vno", vno);
+        formData.append("v_type", v_type);
+        formData.append("file", report.file, report.fileName);
+
+
+
+        // Step 3: Send mail
+        const mailRes = await $.ajax({
+            url: '/SalesProformaInvoice/SendMail',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false
+        });
+
+
+        if (mailRes.success == true) {
+            toastr.success(mailRes.message || "Mail sent successfully.");
+        }
+        else {
+            toastr.error(mailRes.message || "Failed to send mail.");
+        }
+        return mailRes;
+
+    } catch (error) {
+        console.error("Error:", error);
+        toastr.error("An error occurred while sending the mail.");
+    }
+}
+
+
+async function GetTransitReportFile() {
+
+    let reportName = "";
+
+    reportName = (globalVars.CompCode == 7) ? "INVOICE_DEMOK" : "INVOICE_DEMO";
+
+    var v_no = $('#NumSerialNo').val();
+    var v_type = $('#ddlInvType').val(); 
+
+
+    var formula =
+        "{SALE1.V_TYPE} = '" + v_type + "'" +
+        " and {SALE1.V_NO} = " + v_no + "" +
+        " and {SALE1.COMP_CODE} = " + globalVars.CompCode + "" +
+        " and {SALE1.YEAR_CODE} = " + globalVars.FYearCode + "" +
+        " and {SALE1.BRANCH_CODE} = " + globalVars.BranchCode + "";
+
+    var payload = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: database,
+        Parameters: {
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",
+            comp_phone: globalVars.Phone || "",
+            GST: globalVars.GST || "",
+            IEC: globalVars.ICE || "",
+            PAN: globalVars.PAN || "",
+            Website: globalVars.website || "",
+            EMAIL: globalVars.Email || "",
+            RPTNAME: "PROFORMA INVOICE"
+        }
+    };
+    // Generate report
+    const pdfBlob = await $.ajax({
+        url: 'http://localhost:24085/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: { responseType: 'blob' }
+    });
+
+    const file = new Blob([pdfBlob], { type: "application/pdf" });
+    const now = new Date();
+    const timestamp = String(now.getDate()).padStart(2, '0') +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getFullYear()).slice(-2) + "_" +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
+
+    const fileName = `SAUDA_PURCH_${v_no}_${timestamp}.pdf`;
+
+    return { file, fileName };
+}
+

@@ -88,7 +88,8 @@ namespace travelexpensemanagement.Common.Globalvariable
                             RegAdd1 = CompanyData.RegAdd1,
                             RegAdd2 = CompanyData.RegAdd2,
                             CINNO = CompanyData.CINNO,
-                            STATE_CODE = CompanyData.STATE_CODE,
+                            STATE_CODE = CompanyData.STATE_CODE,   
+                            IEC = CompanyData.IEC,  
                             // API
                             ip_address = "103.74.69.13",
                             client_id = "8a2017bb-6f67-4bf9-bc62-46bd802ed390",
@@ -107,7 +108,7 @@ namespace travelexpensemanagement.Common.Globalvariable
             var httpContext = _httpContextAccessor.HttpContext;
             var sessionComp = httpContext.Session.GetString("COMP_CODE");
 
-            string query = @"SELECT NAME, ADD1, ADD2, ADD3, GSTIN, PAN, PHONE, FAX, EMAIL, WEBSITE, EXCISE, SERVICETAX,
+            string query = @"SELECT IEC, NAME, ADD1, ADD2, ADD3, GSTIN, PAN, PHONE, FAX, EMAIL, WEBSITE, EXCISE, SERVICETAX,
             RegAdd1, RegAdd2, CINNO,STATE_CODE  FROM COMP_MAST WHERE CODE = @Code";
 
             using (SqlConnection con = _dbConnection.GetErpConnection())
@@ -127,24 +128,20 @@ namespace travelexpensemanagement.Common.Globalvariable
                             Address1 = reader["ADD1"]?.ToString(),
                             Address2 = reader["ADD2"]?.ToString(),
                             Address3 = reader["ADD3"]?.ToString(),
-
                             gstin = reader["GSTIN"]?.ToString(),
                             PAN = reader["PAN"]?.ToString(),
-
                             Phone = reader["PHONE"]?.ToString(),
                             Fax = reader["FAX"]?.ToString(),
-
                             Email = reader["EMAIL"]?.ToString(),
                             Website = reader["WEBSITE"]?.ToString(),
-
                             Excise = reader["EXCISE"]?.ToString(),
                             ServiceTax = reader["SERVICETAX"]?.ToString(),
-
                             RegAdd1 = reader["RegAdd1"]?.ToString(),
                             RegAdd2 = reader["RegAdd2"]?.ToString(),
-
                             CINNO = reader["CINNO"]?.ToString(),
-                            STATE_CODE = reader["STATE_CODE"]?.ToString()
+                            STATE_CODE = reader["STATE_CODE"]?.ToString(),
+                            IEC = reader["IEC"]?.ToString(),
+                            WEBSITE = reader["WEBSITE"]?.ToString()
                         };
                     }
                 }
@@ -152,11 +149,6 @@ namespace travelexpensemanagement.Common.Globalvariable
 
             return CompanyData;
         }
-
-
-
-
-
 
 
         public async Task<GlobalGeneralSettingModel> LoadGeneralSetting()

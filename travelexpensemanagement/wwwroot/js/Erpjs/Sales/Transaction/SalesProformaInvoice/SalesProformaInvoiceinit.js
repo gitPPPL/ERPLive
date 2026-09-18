@@ -40,9 +40,17 @@ $(document).ready(async function () {
     $('#ddlPartyName').on('change', function () {
         selectedPartyData();
         let partycode = $('#ddlPartyName').val();
-        cmbAddress(partycode);
+        cmbPartyAddress(partycode);
 
     });
+
+
+    $('#ddlConsignee').on('change', function () {
+        selectedConsigneePartyData();
+        let partycode = $('#ddlConsignee').val();
+        cmbConsigneeAddress(partycode);
+    });
+
 
     $("#chksameaboveaddress").change(function () {
         if ($(this).is(":checked"))
@@ -90,21 +98,18 @@ $(document).ready(async function () {
     $(document).on('change', '.ddlProductName', function () {
 
         let $row = $(this).closest('tr');
-
         let selectedCode = $(this).val();
-
         let selectedProduct = ProductDataList.find(x =>  String(x.code) === String(selectedCode));
-
         if (!selectedProduct)
         {
             $row.find('.HsnCode').val('');
             return;
         }
 
+        console.log("selectedProduct", selectedProduct);
         $row.find('.HsnCode').val(selectedProduct.hsN_CODE ?? '');
+        $row.find('.TxtPackWeight').val(selectedProduct.packing_Wt ?? '');
         $row.find('.ID').val(selectedCode ?? '');
-
-
     });
 
     $("#btn_save").click(function (e) {
@@ -115,13 +120,14 @@ $(document).ready(async function () {
         if (!validateRequiredField('#DtDate', 'Please select a Voucher Date.')) return;
         if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;      
 
-        const DOC_ID = $.trim($('#TxtCode').val());
+        const DOC_ID = $.trim($('#CODE').val());
         const V_TYPE = $.trim($('#ddlInvType').val());
         const V_NO = parseInt($.trim($('#NumSerialNo').val())) || 0;
         const V_DATE = formatDate($('#DtDate').val());
         const SUPPLY_TYPE = $.trim($('#ddlSupplyType').val());
         const IMPORT_CURRENCY = $.trim($('#ddlCurrency option:selected').text()) || "";
         const BILL_CODE = parseInt($.trim($('#ddlPartyName').val())) || 0;
+ 
         const BILL_NAME = $.trim($('#ddlPartyName option:selected').text()) || "";
         const BILL_ADDRESSID = parseInt($.trim($('#ddladdressl1').val())) || 0;
         const BILL_ADD1 = $.trim($('#txtaddressL1').val());
@@ -151,7 +157,14 @@ $(document).ready(async function () {
         const SHIP_GST = $.trim($('#TxtGSTSa').val());
         const ITEM_TYPE = $.trim($('#ddlProdType').val());
         const GR_NO = $.trim($('#TxtARNNo').val());
-        const GR_DATE = formatDate($('#DtARNdate').val());
+
+        let ARN_DATE = null;
+
+        if ($('#chkARNdate').is(':checked')) {
+            ARN_DATE = formatDate($('#DtARNdate').val());
+        }
+
+
         const VEHICLE_NO = $.trim($('#txtModeofTransport').val());
         const TRANSPORT_CODE = parseInt($.trim($('#ddlTransport').val())) || 0;
         const TRANSPORT_NAME = $.trim($('#ddlTransport option:selected').text()) || "";
@@ -239,7 +252,7 @@ $(document).ready(async function () {
             SHIP_GST: SHIP_GST,
             ITEM_TYPE: ITEM_TYPE,
             GR_NO: GR_NO,
-            GR_DATE: GR_DATE,
+            ARN_DATE: ARN_DATE,
             VEHICLE_NO: VEHICLE_NO,
             TRANSPORT_CODE: TRANSPORT_CODE,
             TRANSPORT_NAME: TRANSPORT_NAME,
@@ -296,14 +309,15 @@ $(document).ready(async function () {
             data: JSON.stringify(model),
             success: function (response)
             {
-               console.log("Response")
-                if (response.success) {
-                    toastr.success("Saved successfully!");
-                    setTimeout(() => { window.location.href = `/SalesProformaInvoice/Index?id=${DOC_ID}&mode=view`;  }, 1000);          
+                console.log("Response", response);
+                if (response.status == "Success") {
+                    toastr.success("Saved successfully!");   
+
+                    setTimeout(() => { window.location.href = `/SalesProformaInvoice/Index?id=${Header.DOC_ID}&mode=view`;  }, 1000);          
                 }
-                else if (response.Validation)
+                else if (response.status == "Validation")
                 {
-                    toastr.success("Saved successfully!");
+                    toastr.warning(response.message);
                 }
                 else {
                     toastr.error(response.message || "Save failed.");
@@ -335,19 +349,14 @@ $(document).ready(async function () {
         let tigst = parseFloat($('#NumIGST2').val()) || 0;
         let cess = parseFloat($('#NumCESS2').val()) || 0;
         let tcsper = parseFloat($('#NumTCS1').val()) || 0;
-
         // Taxable + GST + Cess
         let subTotalAmount = subtotal + tcgst + tsgst + tigst + cess;
-
         // TCS
         let tcsamount = subTotalAmount * tcsper * 0.01;
-
         // Net Amount before rounding
         let netamount = subTotalAmount + tcsamount;
-
         // Rounded Net Amount
         let roundedAmount = Math.round(netamount);
-
         // Round Off
         let roundoff = roundedAmount - netamount;
 
@@ -355,6 +364,32 @@ $(document).ready(async function () {
         $('#NumRoundOff').val(roundoff.toFixed(2));
         $('#NumNetAmount').val(roundedAmount.toFixed(2));
     });
+
+    $('#ddladdressl1').change(function () {
+        let PartyCode = $('#ddlPartyName').val();
+        let AddressId = $('#ddladdressl1').val();
+        AddressPartyData(PartyCode, AddressId);
+    });
+
+
+    $('#ddladdressl1Sa').change(function () {
+        let PartyCode = $('#ddlConsignee').val();
+        let AddressId = $('#ddladdressl1Sa').val();
+        AddressConsigneeData(PartyCode, AddressId);
+    });
+
+
+
+    $('#button_mail').on('click', async function () {
+        alert("hh")
+        await SendMail();
+
+    });
+
+
+
+
+
 
 
 });

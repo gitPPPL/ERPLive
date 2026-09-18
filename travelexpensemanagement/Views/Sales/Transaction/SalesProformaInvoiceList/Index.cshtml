@@ -21,10 +21,10 @@
         <input type="text" id="searchBox" placeholder="Search Module..." />
     </div>
     <div class="erppagelist-actions">
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print">
             <i class="fa fa-print"></i> Print
         </button>
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="button_export">
             <i class="fa fa-file-excel"></i> Export
         </button>
         <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail">
@@ -216,15 +216,18 @@
             loadAllInward();
         });
 
-        $('#button_export').on('click', function () {
+
+      $('#button_export').on('click', function () {
             var text = $('#searchBox').val();
-            window.location.href = '/InwardEntryList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+            window.location.href = '/SalesProformaInvoiceList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
         });
 
-        $('#button_print').on('click', function () {
-            var text = $('#searchBox').val();
-            window.open('/InwardEntryList/ExportToPdf?searchTerm=' + encodeURIComponent(text), '_blank');
+      $('#button_print').on('click', function () {
+            var searchTerm = $('#searchBox').val() || '';
+            var url = '/SalesProformaInvoiceList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
+            window.open(url, '_blank');
         });
+
 
     });
 
@@ -242,6 +245,10 @@
             },
             success: function (res) {
 
+             
+                console.log("Response from server:", res);                
+                
+                
                 if (!res.success) {
                     toastr.error("Failed to load data.");
                     return;
@@ -278,7 +285,7 @@
 
                        tbody.append(`
                 <tr>
-                            <td>${item.v_TYPE ?? ''}</td>
+                            <td>${item.v_TYPEText ?? ''}</td>
                             <td>${item.v_NO ?? ''}</td>
                             <td>${formatDate(item.v_DATE)}</td>
                             <td>${item.bilL_NAME ?? ''}</td>
@@ -341,7 +348,7 @@
                         <div class="action-wrap">
                             <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.doC_ID}')"><i class="fa fa-edit"></i></button>
                             <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.v_NO}')"><i class="fa fa-eye"></i></button>
-                            <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.vtypeCode}')"><i class="fa fa-trash"></i></button>
+                            <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
                             <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
 
                         </div>
@@ -469,14 +476,23 @@
             if (result.isConfirmed) {
 
                 $.ajax({
-                    url: '/InwardEntryList/Delete',
+                    url: '/SalesProformaInvoiceList/Delete',
                     type: 'POST',
                     data: { code: code, VType: VType },
                     success: function (res) {
 
+                        console.log("Deelete Res",res);
+                        
+                        if(res.validation == false)
+                        {
+                          toastr.warning(res.message );
+                          return;
+                        }
+                        
+                        
                         if (res.success) {
                             toastr.success(res.message || "Deleted successfully");
-                            loadAllInward();
+                           // loadAllInward();
                         } else {
                             toastr.error(res.message || 'Failed to delete.');
                         }
@@ -492,7 +508,7 @@
     function showDocumentPopup(docCode) {
 
         $.ajax({
-            url: '/InwardEntryList/DocDetailsCode',
+            url: '/SalesProformaInvoiceList/DocDetailsCode',
             type: 'POST',
             dataType: 'json',
             data: { docCode: docCode },

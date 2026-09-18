@@ -32,8 +32,10 @@
         public string? RegAdd1 { get; set; }
         public string? RegAdd2 { get; set; }
         public string? CINNO { get; set; }
-
         public string? STATE_CODE { get; set; }
+
+        public string? IEC { get; set; }
+        public string? WEBSITE { get; set; }
     }
     public class CompanyModel
     {
@@ -54,9 +56,8 @@
         public string? CINNO { get; set; }
         public string? STATE_CODE { get; set; }
 
-
-
-
+        public string? IEC { get; set; }
+        public string? WEBSITE { get; set; }
 
     }
     public class GlobalGeneralSettingModel
