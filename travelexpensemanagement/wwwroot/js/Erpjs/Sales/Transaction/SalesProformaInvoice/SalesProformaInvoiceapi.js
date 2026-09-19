@@ -331,11 +331,6 @@ function selectedPartyData()
 {
     const selectedCode = $('#ddlPartyName').val();
 
-    if (!selectedCode) {
-        clearPartyFields();
-        return;
-    }
-
     const party = partyData.find(
         x => String(x.code) === String(selectedCode)
     );
@@ -365,12 +360,6 @@ function selectedPartyData()
 }
 function selectedConsigneePartyData() {
     const selectedCode = $('#ddlConsignee').val();
-
-    if (!selectedCode)
-    {
-        clearPartyFields();
-        return;
-    }
 
     const party = partyData.find( x => String(x.code) === String(selectedCode) );
 

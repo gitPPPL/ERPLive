@@ -16,13 +16,11 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
     public class SalesProformaInvoiceListController : Controller
     {
-
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly GlobalValidationdate _globalValidationdate;
         private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-
 
         public SalesProformaInvoiceListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
        travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, GlobalValidationdate globalValidationdate, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService)
@@ -31,7 +29,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
             _moduleService = moduleService;
-
         }
 
         public IActionResult Index()
@@ -481,10 +478,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             public string? LID { get; set; }
         }
 
-
-
-
-
         [HttpGet]
         public async Task<IActionResult> ExportToExcel(string searchTerm = null)
         {
@@ -574,7 +567,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             }
         }
-
 
         [HttpGet]
         public async Task<IActionResult> ExportPdf(string searchTerm = null, string Sp_Name = "sp_SalesProformaInvoice", string Actionparameter = "ExportToExcel", string ReportName = "SalesProformaInvoice")

@@ -1186,7 +1186,6 @@ namespace travelexpensemanagement.Common.Globalvariable
             return stream.ToArray();
         }
 
-
         [HttpPost]
         public async Task<IActionResult> GlobalSendMail(string vtype, int vno, string toEmail, string body, IFormFile file,string Tablename = "" , string ccEmail = "")
         {

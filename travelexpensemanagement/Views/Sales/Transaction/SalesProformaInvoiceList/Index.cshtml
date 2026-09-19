@@ -198,7 +198,6 @@
 
 </div>
 
-<!-- SCRIPT -->
 <script>
 
     let currentPage = 1;
@@ -207,7 +206,7 @@
     var controllerName = window.location.pathname.split('/')[1];
 
     $(document).ready(function () {
-            checkPermission(controllerName, function () {
+        checkPermission(controllerName, function () {
               loadAllInward();
             });
 
@@ -216,18 +215,16 @@
             loadAllInward();
         });
 
-
-      $('#button_export').on('click', function () {
+        $('#button_export').on('click', function () {
             var text = $('#searchBox').val();
             window.location.href = '/SalesProformaInvoiceList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
         });
 
-      $('#button_print').on('click', function () {
+        $('#button_print').on('click', function () {
             var searchTerm = $('#searchBox').val() || '';
             var url = '/SalesProformaInvoiceList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
             window.open(url, '_blank');
         });
-
 
     });
 
@@ -458,6 +455,7 @@
     function AddOrEditFunction(DOC_ID) {
         window.location.href = `/SalesProformaInvoice/Index?id=${encodeURIComponent(DOC_ID)}`;
     }
+   
     function viewMenuDetails(DOC_ID) {
         window.location.href = `/SalesProformaInvoice/Index?id=${encodeURIComponent(DOC_ID)}&mode=view`;
     }
