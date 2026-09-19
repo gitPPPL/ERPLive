@@ -63,7 +63,7 @@ namespace travelexpensemanagement.Controllers.Inventory.Transaction
                 case "EmployeeName":
                     query = $@"Select code,ltrim(rtrim(CODE))+ space(10- LEN (ltrim(rtrim(CODE))))+'|'+SPACE(5)+CAST (NAME as varchar )'NAME' from EMP_MAST where COMP_CODE = {globalVariables.PubCompCode} order by name";
                     break;
-            }
+            } 
 
             var dropdownList = _dropdownService.GetDropdownList(query);
 

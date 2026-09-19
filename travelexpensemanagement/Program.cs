@@ -14,6 +14,7 @@ using travelexpensemanagement.Repositories.Implementations.Inventory.Transaction
 using travelexpensemanagement.Repositories.Implementations.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Master;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Sales.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
 
 // ADD THESE (Repository)
@@ -24,6 +25,7 @@ using travelexpensemanagement.Repositories.Interfaces.Inventroy.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Sales.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
 using travelexpensemanagement.Services;
 
@@ -83,6 +85,7 @@ builder.Services.AddScoped<IStoreInventoryTransferRepository, StoreInventoryTran
 builder.Services.AddScoped<IStoreInventoryTransferListRepository, StoreInventoryTransferListRepository>();
 builder.Services.AddScoped<IITInventoryEntryRepository, ITInventoryEntryRepository>();
 builder.Services.AddScoped<IITInventroyEntryListRepository, ITInventoryEntryListRepositroy>();
+builder.Services.AddScoped<ISaleSaudaEntryRepository, SaleSaudaEntryRepository>();
 
 
 // Gete Entry Transaction repositories

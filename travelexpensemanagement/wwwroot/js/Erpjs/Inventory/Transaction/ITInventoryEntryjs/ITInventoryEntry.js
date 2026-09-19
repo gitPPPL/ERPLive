@@ -127,9 +127,6 @@ async function wireEvent() {
 
         try {
 
-            //const response = await fetch(
-            //    `/ITInventoryEntry/GetNextAssetSrNo?assetType=${encodeURIComponent(assetTypeName)}`
-            //);
             const response = await fetch(
                 `/ITInventoryEntry/GetNextAssetSrNo?assetType=${encodeURIComponent(shortName)}`
             );

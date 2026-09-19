@@ -14,11 +14,7 @@ html, body {
     height: 100%;
 }
 
-body {
-    font-family: 'Montserrat', sans-serif;
-    background: linear-gradient(to bottom, #e9ecf3);
-    color: #000000;
-}
+
 
 button:focus:not(:focus-visible),
 input:focus:not(:focus-visible),

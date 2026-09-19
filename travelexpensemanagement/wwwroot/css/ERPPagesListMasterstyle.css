@@ -1,14 +1,15 @@
 ﻿
 /* HEADER */
 .erppagelist-header {
+    border: 1px solid #11182714;
+    color: #111827;
+    padding: 6px 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, #2d7b46, #1C5E31);
-    color: #fff;
-    padding: 6px 8px;
-    border-radius: 8px;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
 }
 /* Right section default behavior */
 .erppagelist-header-right {
@@ -26,10 +27,12 @@
 }
 
     .erppagelist-title i {
-        background: rgba(255, 255, 255, 0.15);
+        background: #122f4d;
         padding: 6px;
         border-radius: 6px;
         font-size: 13px;
+        color: #fff;
+        
     }
 
 .erppagesubfieldset {
@@ -207,7 +210,7 @@
     gap: 8px;
     background: #fff;
     border: 1px solid #cdcdcd;
-    padding: 4px 8px;
+    padding: 8px 12px;
     border-radius: 25px;
     width: 350px;
 }
@@ -352,11 +355,13 @@
     padding: 4px 6px;
 }
 .excel-table thead th {
+    background: #36496e;
+    color: #f1f1f1;
+    font-weight: 600;
+    border-bottom: 1px solid #CBD5E1;
     position: sticky;
     top: 0;
     z-index: 30;
-    background: linear-gradient(135deg, #122f4d, #122f4d);
-    font-weight: 200;
 }
     /* HEADER */
 .excel-table th {
