@@ -16,7 +16,7 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
         private readonly DataBaseConnection _dataBaseConnection;
         private readonly GlobalExcelExport _excel;
         public TransitEntryListController(ITransitEntryListRepository iTransitEntryListRepository, ModuleService.ModuleService moduleService, GlobalVariableService globalVariableService, GlobalValidationdate globalValidationdate
-            , DataBaseConnection dataBaseConnection, GlobalExcelExport excel)
+            ,DataBaseConnection dataBaseConnection, GlobalExcelExport excel)
         {
             _moduleService = moduleService;
             _iTransitEntryListRepository = iTransitEntryListRepository;

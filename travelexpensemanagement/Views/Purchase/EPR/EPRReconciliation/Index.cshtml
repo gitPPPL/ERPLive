@@ -1,0 +1,524 @@
+﻿@{
+    ViewBag.Title = "EPR Reconciliation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-exchange-alt"></i>
+        </div>
+        <div class="erppage-header-title">EPR Reconciliation</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "EPRReconciliationList")', readOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+<div id="EPRReconciliationForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+            <div class="erppage-grid6">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocType">
+                        <option value="">Select DOC Type</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc Date</label>
+                    <input type="date" class="erppage-input" id="DtDocDate">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Doc No</label>
+                    <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No">
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Ref No 1</label>
+                    <input type="number" class="erppage-input" id="NumRefNo1" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Ref No 2</label>
+                    <input type="number" class="erppage-input" id="NumRefNo2" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Total</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumTotal1" />
+                        <input type="number" class="erppage-input" id="NumTotal2" />
+                    </div>
+                </div>
+            </div>
+
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Filter By</legend>
+                <div class="erppage-grid6">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Bill Date From</label>
+                        <input type="date" class="erppage-input" id="DtBillDatefrom">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Bill Date To</label>
+                        <input type="date" class="erppage-input" id="DtBillDateto">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Party Name</label>
+                        <select class="erppage-input erppage-select" id="ddlPartyname">
+                            <option value="">Select Party Name</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Allot. Party</label>
+                        <select class="erppage-input erppage-select" id="ddlAllotparty">
+                            <option value="">Select Allot. Party</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">City</label>
+                        <select class="erppage-input erppage-select" id="ddlcity">
+                            <option value="">Select City</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">State</label>
+                        <select class="erppage-input erppage-select" id="ddlstate">
+                            <option value="">Select State</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="erppage-grid6">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ref 1</label>
+                        <select class="erppage-input erppage-select" id="ddlref1">
+                            <option value="">Select Ref 1</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ref 2</label>
+                        <select class="erppage-input erppage-select" id="ddlref2">
+                            <option value="">Select Ref2</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">&nbsp;</label>
+                        <div class="erppage-checkbox-wrap">
+                            <input type="checkbox" id="ChkIgnoreBillShip" class="erppage-checkbox-input">
+                            <label class="erppage-checkbox-label">Ignore Bill To Ship To</label>
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">HSN</label>
+                        <input type="text" class="erppage-input" id="TxtHSN" placeholder="Enter HSN">
+                    </div>
+                </div>
+                <div class="erppage-internalaction">
+                    <button type="button" id="btn_peplwaste" class="erppage-btn erppage-btn-common-disabled"><i class="fa fa-cubes"></i>PEPL Waste Sold Qty => <span id="btn_peplwastesoldqty"></span></button>
+                </div>
+            </fieldset>
+            <div class="erppage-internalaction mt-2">
+                <div class="erppage-radio-group">
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdbottle" name="PrintType" value="Bottle">
+                        <span>Bottle</span>
+                    </label>
+                    <label class="erppage-radio">
+                        <input type="radio" id="rdother" name="PrintType" value="Other">
+                        <span>Other</span>
+                    </label>
+                    <button type="button" id="btn_show" class="erppage-btn erppage-btn-common-active-disabled"><i class="fa fa-search"></i>Show</button>
+                    <button type="button" id="btn_purchaselist" class="erppage-btn erppage-btn-common-active-disabled"><i class="fa fa-list-alt"></i>Purchase List</button>
+                    <button type="button" id="btn_purchaselist2" class="erppage-btn erppage-btn-common-active-disabled"><i class="fa fa-file"></i>Purchase List 2</button>
+                    <button type="button" id="btn_pendingEPR" class="erppage-btn erppage-btn-common-pending-disabled"><i class="fa fa-clock"></i>Pending EPR</button>
+                    <button type="button" id="btn_allotedEPR" class="erppage-btn erppage-btn-common"><i class="fa fa-check-circle"></i>Alloted EPR</button>
+                </div>
+            </div>
+
+            <fieldset class="erppagefieldset">
+                <div class="erppage-dropdown-group">
+
+                    <label for="printType">Print Type:</label>
+                    <select class="erppage-input erppage-select" id="PrintType">
+                        <option value="">-- Select Print Type --</option>
+                        <option value="purchcity">Purchase (City)</option>
+                        <option value="purchstate">Purchase (State)</option>
+                        <option value="purchsupplier">Purchase (Supplier)</option>
+                        <option value="pendingeprcity">Pending EPR (City)</option>
+                        <option value="pendingeprstate">Pending EPR (State)</option>
+                        <option value="pendingeprsupplier">Pending EPR (Supplier)</option>
+                        <option value="allotedeprcity">Alloted EPR (City)</option>
+                        <option value="allotedeprstate">Alloted EPR (State)</option>
+                        <option value="allotedeprcustomer">Alloted EPR (Customer)</option>
+                        <option value="allotedstatecust">Alloted State/Cust</option>
+                    </select>
+
+                    <button type="button" id="btn_printlist" class="erppage-btn erppage-btn-common">
+                        <i class="fa fa-print"></i> Print List
+                    </button>
+
+                </div>
+            </fieldset>
+
+            <div class="erppage-internalaction mt-2">
+                <button type="button" id="btn_differencepurchaseweight" class="erppage-btn erppage-btn-common-active-disabled"><i class="fa fa-balance-scale"></i>Difference between WB and Purchase Weight</button>
+                <button type="button" id="btn_missingfirstdocument" class="erppage-btn erppage-btn-common-active-disabled"><i class="fa fa-file-text"></i>Missing First 5 document</button>
+            </div>
+            <fieldset class="erppage-fieldset">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblEPRReconciliation" class="excel-table fixed-grid-table width-table resizable-table">
+                        <colgroup>
+                            <col style="width:70px;">   
+                            <col style="width:180px;">  
+                            <col style="width:180px;">  
+                            <col style="width:220px;">  
+                            <col style="width:90px;">   
+                            <col style="width:90px;">   
+                            <col style="width:90px;">   
+                            <col style="width:120px;">  
+                            <col style="width:120px;">  
+                            <col style="width:120px;">  
+                            <col style="width:140px;">  
+                            <col style="width:180px;">  
+                            <col style="width:180px;">  
+                            <col style="width:120px;">  
+                            <col style="width:110px;">  
+                            <col style="width:120px;">  
+                            <col style="width:60px;">   
+                            <col style="width:120px;">  
+                            <col style="width:120px;">  
+                            <col style="width:120px;">  
+                            <col style="width:100px;">  
+                            <col style="width:120px;">  
+                            <col style="width:100px;">  
+                            <col style="width:100px;">  
+                            <col style="width:100px;">  
+                            <col style="width:100px;">  
+                            <col style="width:100px;">  
+                            <col style="width:120px;">  
+                            <col style="width:150px;">  
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th data-column="0">Vno <span class="sort-icon"></span></th>
+                                <th data-column="1">Bill From <span class="sort-icon"></span></th>
+                                <th data-column="2">Ship From <span class="sort-icon"></span></th>
+                                <th data-column="3">Item Name <span class="sort-icon"></span></th>
+                                <th data-column="4">Hsn <span class="sort-icon"></span></th>
+                                <th data-column="5">Recd Qty <span class="sort-icon"></span></th>
+                                <th data-column="6">Bill Qty <span class="sort-icon"></span></th>
+                                <th data-column="7">City <span class="sort-icon"></span></th>
+                                <th data-column="8">State <span class="sort-icon"></span></th>
+                                <th data-column="9">Ewb No <span class="sort-icon"></span></th>
+                                <th data-column="10">Bill Gstin <span class="sort-icon"></span></th>
+                                <th data-column="11">Alloted To Party <span class="sort-icon"></span></th>
+                                <th data-column="12">Remarks <span class="sort-icon"></span></th>
+                                <th data-column="13">Bill No <span class="sort-icon"></span></th>
+                                <th data-column="14">Bill Date <span class="sort-icon"></span></th>
+                                <th data-column="15">Truck No <span class="sort-icon"></span></th>
+                                <th data-column="16" class="text-center"><input type="checkbox" id="chkSelectAll" title="Select All" /></th>
+                                <th data-column="17">Comp Wb Copy <span class="sort-icon"></span></th>
+                                <th data-column="18">Party Wb Copy <span class="sort-icon"></span></th>
+                                <th data-column="19">Party Inv Copy <span class="sort-icon"></span></th>
+                                <th data-column="20">Gr Copy <span class="sort-icon"></span></th>
+                                <th data-column="21">Ewb Copy <span class="sort-icon"></span></th>
+                                <th data-column="22">Oth Copy1 <span class="sort-icon"></span></th>
+                                <th data-column="23">Oth Copy2 <span class="sort-icon"></span></th>
+                                <th data-column="24">Oth Copy3 <span class="sort-icon"></span></th>
+                                <th data-column="25">Oth Copy4 <span class="sort-icon"></span></th>
+                                <th data-column="26">Oth Copy5 <span class="sort-icon"></span></th>
+                                <th data-column="27">Disp State <span class="sort-icon"></span></th>
+                                <th data-column="28">Disp City <span class="sort-icon"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </fieldset>
+
+            <div class="erppage-actions">
+                <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/common/dropdown.js"></script>
+
+<script>
+    $(document).ready(function () {
+        setCurrentDate();
+        loadEPRDropdowns();
+        $('#ddlDocType').on('change', function () {
+            var vType = $(this).val();
+            if (!vType) {
+                $('#NumDocNo').val('');
+                return;
+            }
+            getNextDocNo(vType);
+        });
+        $('#btn_show').on('click', function () {
+            loadEPRList();
+        });
+        $('#btn_purchaselist').on('click', function () {
+            loadEPRReport('purchase');
+        });
+        $('#btn_purchaselist2').on('click', function () {
+            loadEPRReport('purchase2');
+        });
+        $('#btn_pendingEPR').on('click', function () {
+            loadEPRReport('pending');
+        });
+        $('#btn_allotedEPR').on('click', function () {
+            loadEPRReport('alloted');
+        });
+
+    });
+    function setCurrentDate() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        $('#DtDocDate').val(`${year}-${month}-${day}`);
+        $('#DtBillDatefrom').val(`${year}-${month}-${day}`);
+        $('#DtBillDateto').val(`${year}-${month}-${day}`);
+    }
+    function loadEPRDropdowns() {
+        bindDropdown('EPRReconciliation','doctype','#ddlDocType', 'Select DOC Type');
+        bindDropdown('EPRReconciliation','city','#ddlcity','Select City');
+        bindDropdown('EPRReconciliation','state','#ddlstate','Select State');
+        bindDropdown('EPRReconciliation','partyname','#ddlPartyname','Select Party Name');
+        bindDropdown('EPRReconciliation','allotparty','#ddlAllotparty','Select Allot. Party');
+        bindDropdown('EPRReconciliation','ref1','#ddlref1','Select Ref 1');
+        bindDropdown('EPRReconciliation','ref2','#ddlref2','Select Ref 2');
+    }
+    function getNextDocNo(vType) {
+        $.ajax({
+            url: '/EPRReconciliation/GetNextDocNo',
+            type: 'GET',
+            data: {
+                vType: vType
+            },
+            success: function (response) {
+                if (response.success === false) {
+                    console.error(response.message);
+                    $('#NumDocNo').val('');
+                    return;
+                }
+                console.log('getNo', response.nextVNo);
+                $('#NumDocNo').val(response.nextVNo);
+            },
+            error: function (xhr) {
+                console.error(
+                    'Error getting document number:',
+                    xhr.responseText
+                );
+                $('#NumDocNo').val('');
+            }
+        });
+    }
+    function loadEPRList() {
+        var request = {
+            fromDate: $('#DtBillDatefrom').val(),
+            toDate: $('#DtBillDateto').val(),
+            hsn: $('#txtHSN').val() || '',
+            partyCode: $('#ddlPartyname').val() || '',
+            cityCode: $('#ddlcity').val() || '',
+            stateCode: $('#ddlstate').val() || '',
+            docType: $('#ddlDocType').val() || '',
+            allotParty: $('#ddlAllotparty').val() || ''
+        };
+        console.log('kks', request)
+        // Show loading
+        $('#btn_show').prop('disabled', true);
+        $.ajax({
+            url: '/EPRReconciliation/GetEPRList',
+            type: 'GET',
+            data: request,
+            success: function (response) {
+                $('#btn_show').prop('disabled', false);
+                if (!response.success) {
+                    alert(response.message || 'Unable to load records.');
+                    return;
+                }
+                fillEPRGrid(response.data);
+            },
+            error: function (xhr) {
+                $('#btn_show').prop('disabled', false);
+                console.error(xhr.responseText);
+                alert('Error while loading EPR list.');
+            }
+        });
+    }
+    function fillEPRGrid(data) {
+        var tbody = $('#tblEPRReconciliation tbody');
+        tbody.empty();
+        if (!data || data.length === 0) {
+            tbody.append(
+                '<tr>' +
+                    '<td colspan="29" class="text-center">No records found</td>' +
+                '</tr>'
+            );
+            return;
+        }
+        $.each(data, function (index, row) {
+            var tr = $('<tr>');
+            tr.append($('<td>').text(row.vNo || ''));
+            tr.append($('<td>').text(row.billFrom || ''));
+            tr.append($('<td>').text(row.shipFrom || ''));
+            tr.append($('<td>').text(row.itemName || ''));
+            tr.append($('<td>').text(row.hsnCode || ''));
+            tr.append($('<td>').text(row.recdQty || ''));
+            tr.append($('<td>').text(row.billQty || ''));
+            tr.append($('<td>').text(row.city || ''));
+            tr.append($('<td>').text(row.state || ''));
+            tr.append($('<td>').text(row.waybillNo || ''));
+            tr.append($('<td>').text(row.billGst || ''));
+            tr.append($('<td>').text(row.allotedPartyName || ''));
+            // Remarks
+            tr.append(
+                $('<td>').append(
+                    $('<input>', {
+                        type: 'text',
+                        class: 'form-control form-control-sm remarks',
+                        value: row.remarks || ''
+                    })
+                )
+            );
+
+            tr.append($('<td>').text(row.billNo || ''));
+            tr.append($('<td>').text(row.billDate || ''));
+            tr.append($('<td>').text(row.truckNo || ''));
+
+            // Select checkbox
+            tr.append(
+                $('<td class="text-center">').append(
+                    $('<input>', {
+                        type: 'checkbox',
+                        class: 'row-select'
+                    })
+                )
+            );
+            // Documents
+            tr.append(createFileCell(row.compWbCopy));
+            tr.append(createFileCell(row.partyWbCopy));
+            tr.append(createFileCell(row.partyInvCopy));
+            tr.append(createFileCell(row.grCopy));
+            tr.append(createFileCell(row.ewbCopy));
+            tr.append(createFileCell(row.othCopy1));
+            tr.append(createFileCell(row.othCopy2));
+            tr.append(createFileCell(row.othCopy3));
+            tr.append(createFileCell(row.othCopy4));
+            tr.append(createFileCell(row.othCopy5));
+
+            tr.append($('<td>').text(row.dispState || ''));
+            tr.append($('<td>').text(row.dispCity || ''));
+            tbody.append(tr);
+        });
+        // Select All
+        $('#chkSelectAll').prop('checked', false);
+    }
+    function createFileCell(fileName) {
+        var td = $('<td>');
+        if (fileName) {
+            var link = $('<a>', {
+                href: '#',
+                text: fileName,
+                class: 'document-link'
+            });
+            td.append(link);
+        }
+        return td;
+    }
+
+    function loadEPRReport(reportType) {
+        var request = {
+            reportType: reportType,
+            fromDate: $('#DtBillDatefrom').val(),
+            toDate: $('#DtBillDateto').val(),
+            hsn: $('#txtHSN').val() || '',
+            partyCode: $('#ddlPartyname').val() || '',
+            cityCode: $('#ddlcity').val() || '',
+            stateCode: $('#ddlstate').val() || '',
+            allotParty: $('#ddlAllotparty').val() || '',
+            ref1: $('#ddlref1').val() || '',
+            ref2: $('#ddlref2').val() || '',
+            ignorePartyShip: $('#chkIgnore').is(':checked'),
+            itemType: $('input[name="itemType"]:checked').val() || ''
+        };
+        console.log("EPR Request:", request);
+        var button = null;
+        switch (reportType) {
+            case 'purchase':
+                button = $('#btn_purchaselist');
+                break;
+            case 'purchase2':
+                button = $('#btn_purchaselist2');
+                break;
+            case 'pending':
+                button = $('#btn_pendingEPR');
+                break;
+            case 'alloted':
+                button = $('#btn_allotedEPR');
+                break;
+        }
+        if (button) {
+            button.prop('disabled', true);
+        }
+        $.ajax({
+            url: '@Url.Action("GetEPRReportData", "EPRReconciliation")',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(request),
+            success: function (response) {
+                if (button) {
+                    button.prop('disabled', false);
+                }
+                console.log("Controller Response:", response);
+                if (!response.success) {
+                    toastr.error(response.message || 'No data found.');
+                    return;
+                }
+                var reportData = response.report;
+                console.log("Report Data:", reportData);
+                // External Crystal Report API
+                $.ajax({
+                    url: "http://localhost:34087/Report/PendingQCReport",
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(reportData),
+                    xhrFields: {
+                        responseType: "blob"
+                    },
+                    success: function (pdf) {
+                        var file = new Blob([pdf], {
+                            type: "application/pdf"
+                        });
+                        var url = window.URL.createObjectURL(file);
+                        window.open(url, "_blank");
+                        setTimeout(function () {
+                            window.URL.revokeObjectURL(url);
+                        }, 10000);
+                    },
+                    error: function (xhr) {
+                        console.error("Report API Error:", xhr);
+                        toastr.error("Unable to generate report.");
+                    }
+                });
+            },
+            error: function (xhr) {
+                if (button) {
+                    button.prop('disabled', false);
+                }
+                console.error("Controller Error:", xhr);
+                toastr.error(
+                    xhr.responseJSON?.message ||
+                    "Error occurred while generating report."
+                );
+            }
+        });
+    }
+
+</script>

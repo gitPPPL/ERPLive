@@ -2,6 +2,7 @@
     using travelexpensemanagement.Common.DbHelper;
     using travelexpensemanagement.Common.DropdownService;
     using travelexpensemanagement.Common.EncryptionHelper;
+    using travelexpensemanagement.Common.GlobalExcel;
     using travelexpensemanagement.Common.Globalvariable;
     using travelexpensemanagement.Dbconnection;
     using travelexpensemanagement.LogService;
@@ -64,6 +65,7 @@
     //Purchase
     builder.Services.AddScoped<IPurchaseReturnEntryRepository, PurchaseReturnEntryRepository>();
     builder.Services.AddScoped<IPendingSaudaOrderRepository, PendingSaudaOrderRepository>();
+    builder.Services.AddScoped<GlobalExcelExport, GlobalExcelExport>();
     //Purchase
 
     builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));

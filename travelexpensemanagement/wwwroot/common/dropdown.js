@@ -1,5 +1,4 @@
 function bindDropdown(controller, type, dropdownId, placeholder, selectedValue = null, callback = null, skipPlaceholder = false, extraData = null, useSelect2 = false) {
-
     let requestData = { type: type };
     if (extraData) {
         requestData.data = extraData;
@@ -9,19 +8,15 @@ function bindDropdown(controller, type, dropdownId, placeholder, selectedValue =
         type: 'GET',
         data: requestData,
         success: function (data) {
-
             const ddl = $(dropdownId);
             ddl.empty();
-
             if (!skipPlaceholder) {
                 ddl.append(`<option value="">${placeholder}</option>`);
             }
-
             // Fill data
             $.each(data, function (i, item) {
                 ddl.append(`<option value="${item.value}">${item.text}</option>`);
             });
-
             if (selectedValue) {
                 ddl.val(selectedValue);
             }
@@ -34,22 +29,17 @@ function bindDropdown(controller, type, dropdownId, placeholder, selectedValue =
                     placeholder: placeholder,
                     allowClear: true
                 });
-
                 ddl.on('select2:open', function () {
                     setTimeout(function () {
                         let searchBox = document.querySelector(
                             '.select2-container--open .select2-search__field'
                         );
-
                         if (searchBox) {
                             searchBox.focus();
                         }
                     }, 0);
                 });
-
-
             }
-
             if (typeof callback === "function") {
                 callback();
             }

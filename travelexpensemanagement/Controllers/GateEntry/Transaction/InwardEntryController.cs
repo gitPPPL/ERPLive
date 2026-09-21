@@ -220,12 +220,12 @@ namespace travelexpensemanagement.Controllers.GateEntry.Transaction
                     fappRemark = "Document Approved.";
                 }       
                               
-                if (action == "INSERT")
-                {
-                    var jsonResult = GetVNo(header.V_TYPE) as JsonResult;
-                    dynamic data = jsonResult.Value;
-                    header.V_NO = Convert.ToInt32(data.V_NO);
-                }                     
+                //if (action == "INSERT")
+                //{
+                //    var jsonResult = GetVNo(header.V_TYPE) as JsonResult;
+                //    dynamic data = jsonResult.Value;
+                //    header.V_NO = Convert.ToInt32(data.V_NO);
+                //}                     
                  
                 using (var cmd = new SqlCommand("sp_InwardEntry", conn))
                 {

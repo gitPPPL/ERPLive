@@ -92,10 +92,7 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                     " left join ITEM_GROUP b on a.GROUP_CODE=b.CODE and b.COMP_CODE=" + getdata.PubCompCode + " and b.SALE_GROUP in ('Flakes')" +
                     " where a.Active=1 and a.comp_code= " + getdata.PubCompCode + "  and a.SHORTNAME <> '' group by a.SHORTNAME,a.CODE order by a.SHORTNAME asc";
                 }
-                       
-
                 var DDLInspBylist = _dropdownService.GetDropdownList(query);
-
                 return Json(DDLInspBylist);
             }
 

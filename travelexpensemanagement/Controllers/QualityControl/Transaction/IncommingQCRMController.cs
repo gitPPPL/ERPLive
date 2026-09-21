@@ -1301,15 +1301,9 @@ namespace travelexpensemanagement.Controllers.QualityControl.Transaction
                                 command.Parameters.AddWithValue("@SAMPLE_RECDBY", DBNull.Value);
                                 command.Parameters.AddWithValue("@FROM_BALENO", DBNull.Value);
 
-                                command.Parameters.AddWithValue("@QC_INCHARGE",
-                                    string.IsNullOrEmpty(header.qcIncharge)
-                                        ? 0
-                                        : Convert.ToInt32(header.qcIncharge));
+                                command.Parameters.AddWithValue("@QC_INCHARGE", string.IsNullOrEmpty(header.qcIncharge) ? 0 : Convert.ToInt32(header.qcIncharge));
 
-                                command.Parameters.AddWithValue("@CHEMIST",
-                                    string.IsNullOrEmpty(header.chem)
-                                        ? 0
-                                        : Convert.ToInt32(header.chem));
+                                command.Parameters.AddWithValue("@CHEMIST", string.IsNullOrEmpty(header.chem) ? 0 : Convert.ToInt32(header.chem));
 
                                 command.Parameters.AddWithValue("@QC_INCHARGENAME", DBNull.Value);
                                 command.Parameters.AddWithValue("@CHEMISTNAME", DBNull.Value);
