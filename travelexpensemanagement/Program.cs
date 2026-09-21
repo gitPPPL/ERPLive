@@ -87,7 +87,8 @@ builder.Services.AddScoped<IDeliveryChallanStoreListRepository, DeliveryChallanS
 builder.Services.AddScoped<IInventoryDeliveryChallanMemoRepository, InventoryDeliveryChallanMemoRepository>();
 builder.Services.AddScoped<IInventoryDeliveryChallanMemoListRepository, InventoryDeliveryChallanMemoListRepository>();
 
-
+builder.Services.AddScoped<IInventoryDepartmentIssueRepository, InventoryDepartmentIssueRepository>();
+builder.Services.AddScoped<IInventoryDepartmentIssueListRepository, InventoryDepartmentIssuelistRepository>();
 
 //////
 
