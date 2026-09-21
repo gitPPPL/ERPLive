@@ -10,6 +10,7 @@
     using travelexpensemanagement.ModuleService;
     using travelexpensemanagement.Repositories.Implementations;
     using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction;
+    using travelexpensemanagement.Repositories.Implementations.Inventory.Transaction;
     using travelexpensemanagement.Repositories.Implementations.Purchase.Transaction;
     using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
 
@@ -17,6 +18,8 @@
     // ADD THESE (Repository)
     using travelexpensemanagement.Repositories.Interfaces;
     using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
+    using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
+    using travelexpensemanagement.Repositories.Interfaces.Inventroy.Transaction;
     using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
     using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
     using travelexpensemanagement.Services;
@@ -66,9 +69,34 @@
     builder.Services.AddScoped<IPurchaseReturnEntryRepository, PurchaseReturnEntryRepository>();
     builder.Services.AddScoped<IPendingSaudaOrderRepository, PendingSaudaOrderRepository>();
     builder.Services.AddScoped<GlobalExcelExport, GlobalExcelExport>();
-    //Purchase
+//Purchase
 
-    builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
+
+////  Inventry
+builder.Services.AddScoped<IInventoryConsumptionEntryRepository, InventoryConsumptionEntryRepository>();
+builder.Services.AddScoped<IInventroyConsumptionEntryListRepository, InventroyConsumptionEntryListRepository>();
+builder.Services.AddScoped<IStoreInventoryTransferRepository, StoreInventoryTransferRepository>();
+builder.Services.AddScoped<IStoreInventoryTransferListRepository, StoreInventoryTransferListRepository>();
+builder.Services.AddScoped<IITInventoryEntryRepository, ITInventoryEntryRepository>();
+builder.Services.AddScoped<IITInventroyEntryListRepository, ITInventoryEntryListRepositroy>();
+
+builder.Services.AddScoped<IToolkitIssueEntryRepository, ToolkitIssueEntryRepository>();
+builder.Services.AddScoped<IToolkitIssueListRepository, ToolkitIssueListRepository>();
+builder.Services.AddScoped<IDeliveryChallanStoreRepository, DeliveryChallanStoreRepository>();
+builder.Services.AddScoped<IDeliveryChallanStoreListRepository, DeliveryChallanStoreListRepository>();
+builder.Services.AddScoped<IInventoryDeliveryChallanMemoRepository, InventoryDeliveryChallanMemoRepository>();
+builder.Services.AddScoped<IInventoryDeliveryChallanMemoListRepository, InventoryDeliveryChallanMemoListRepository>();
+
+
+
+//////
+
+
+
+
+
+
+builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
     builder.Services.AddScoped<EncryptionHelper>();
 
     builder.Services.AddDistributedMemoryCache();
