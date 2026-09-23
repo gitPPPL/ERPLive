@@ -215,4 +215,16 @@
         public int VNo { get; set; }
         public List<int> ItemCodes { get; set; } = new();
     }
+
+    public class SalesOrderListModel
+    {
+        public string? DOC_ID { get; set; }
+        public int? V_NO { get; set; }
+        public string? V_TYPE { get; set; }
+        public string? SAUDA_NO { get; set; }
+        public DateTime? V_DATE { get; set; }
+        public string? PartyName { get; set; }
+        public string? DELIVERY_PERIOD { get; set; }
+        public string? DELIVERY_TO { get; set; }
+    }
 }

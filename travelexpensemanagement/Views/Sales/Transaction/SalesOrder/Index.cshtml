@@ -1,33 +1,6 @@
 ﻿@{
     ViewBag.Title = "Sales Order";
     Layout = "~/Views/Shared/_Layout.cshtml";
-
-    var logindate = Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
-    var currentMenu = ViewBag.CurrentMenu as string;
-    bool canAdd = false;
-    bool canEdit = false;
-    bool canDelete = false;
-    bool canPrint = false;
-    bool canExport = false;
-    bool canMail = false;
-    bool canApproval = false;
-    bool canDocDetail = false;
-
-    foreach (var permission in Model.UserMenuPermissions)
-    {
-        if (permission.MENU_NAME == ViewBag.CurrentMenu)
-        {
-            canAdd = Model.UserLevel == 1 || permission._ADD == 1;
-            canEdit = Model.UserLevel == 1 || permission._EDIT == 1;
-            canDelete = Model.UserLevel == 1 || permission._DELETE == 1;
-            canPrint = Model.UserLevel == 1 || permission._PRINT == 1;
-            canExport = Model.UserLevel == 1 || permission._EXPORT == 1;
-            canMail = Model.UserLevel == 1 || permission._MAIL == 1;
-            canApproval = Model.UserLevel == 1 || permission._APPROVAL == 1;
-            canDocDetail = Model.UserLevel == 1 || permission._DOCDETAIL == 1;
-            break;
-        }
-    }
 }
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
@@ -38,6 +11,20 @@
         <div class="erppage-header-title">Sales Order Entry</div>
     </div>
     <div class="erppage-header-right">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" id="button_print" onclick="SalesOrderReport()" data-tooltip="Print Report">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button type="button"
+                id="btn_Sendapproval"
+                style="display:none;" class="erppagebtn_sendapproval">
+            <i class="fa fa-share"></i>Send For Approval
+        </button>
+        <button type="button"
+                id="btn_Approved"
+                style="display:none;"
+                class="erppagebtn_approved">
+            Approved
+        </button>
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesOrderList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -83,10 +70,22 @@
                     <label class="erppage-label" for="DtDocDate">Doc Date</label>
                     <input type="date" class="erppage-input" id="DtDocDate">
                 </div>
+                @* <div class="erppage-divfield">
+                </div> *@
                 <div class="erppage-divfield">
+                    <label class="erppage-label">Sauda No</label>
+                    <div class="erppage-inputgroup">
+                        <select class="erppage-input erppage-select" id="ddlSaudaNo">
+                            <option>Select Sauda No.</option>
+                        </select>
+                        <button type="button" class="erppage-btn erppage-btn-common-print-disabled" onclick="getSaudaRate();" id="btnCalcRate">
+                            <i class="fa fa-calculator"></i> Calculate Rate
+                        </button>
+                    </div>
                 </div>
                 <div class="erppage-divfield erppage-button-field">
-                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" data-bs-toggle="modal" data-bs-target="#OrderAdjustmentModal">
+                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" data-bs-toggle="modal" data-bs-target="#OrderAdjustmentModal" id="btnOrderAdjustmentDetails"
+                    onclick="GetOrderAdjustment();">
                         Order Adjustment Detail
                     </button>
                 </div>
@@ -133,9 +132,9 @@
             <div class="erppagesrow">
                 <div class="erppagescol-6">
                     <fieldset class="erppagefieldset">
-                        <legend class="erppagefieldset-legend"><i class="fa fa-file-contract"></i> Sauda Details</legend>
+                        <legend class="erppagefieldset-legend"><i class="fa fa-file-contract"></i> Billing Details</legend>
                         <div class="erppage-grid2">
-                            <div class="erppage-divfield">
+                            @* <div class="erppage-divfield">
                                 <label class="erppage-label">Sauda No</label>
                                 <div class="erppage-inputgroup">
                                     <select class="erppage-input erppage-select" id="ddlSaudaNo">
@@ -145,7 +144,7 @@
                                         <i class="fa fa-calculator"></i> Calculate Rate
                                     </button>
                                 </div>
-                            </div>
+                            </div> *@
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Bill To</label>
                                 <select class="erppage-input erppage-select" id="ddlBillTo">
@@ -157,7 +156,7 @@
                             <div class="erppage-divfield erppage-col-span-2">
                                 <label class="erppage-label">Address L1</label>
                                 <div class="erppage-inputgroup">
-                                    <input type="text" class="erppage-input erppage-width-93" id="TxtAddressL1" placeholder="Enter Address L1" disabled>
+                                    <input type="text" class="erppage-input erppage-width-93" id="TxtAddressL1" placeholder="Enter Address L1" disabled maxlength="100">
                                     <select class="erppage-input erppage-select erppage-width-7" id="ddladdressL1">
                                         <option value="">Select address</option>
                                     </select>
@@ -165,14 +164,14 @@
                             </div>
                             <div class="erppage-divfield erppage-col-span-2">
                                 <label class="erppage-label">Address L2</label>
-                                <textarea class="erppage-input" id="TxtAddressL2" placeholder="Enter Address L2" disabled></textarea>
+                                <textarea class="erppage-input" id="TxtAddressL2" placeholder="Enter Address L2" disabled maxlength="100"></textarea>
                             </div>
 
                         </div>
                         <div class="erppage-grid4">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Address L3</label>
-                                <textarea class="erppage-input" id="TxtAddressL3" placeholder="Enter Address L3" disabled></textarea>
+                                <textarea class="erppage-input" id="TxtAddressL3" placeholder="Enter Address L3" disabled maxlength="100"></textarea>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">City</label>
@@ -182,25 +181,25 @@
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Pincode</label>
-                                <input type="number" class="erppage-input" id="NumPincode" disabled>
+                                <input type="number" class="erppage-input" id="NumPincode" disabled maxlength="10">
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">GST No.</label>
-                                <input type="text" class="erppage-input" id="TxtGSTNo" disabled>
+                                <input type="text" class="erppage-input" id="TxtGSTNo" disabled maxlength="15">
                             </div>
                         </div>
                         <div class="erppage-grid4">
                             <div class="erppage-divfield erppage-col-span-2">
                                 <label class="erppage-label">Mobile No.</label>
-                                <input type="text" class="erppage-input" id="NumMobile" disabled>
+                                <input type="text" class="erppage-input" id="NumMobile" disabled maxlength="50">
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label" for="TxtDelivery">Delivery To</label>
-                                <input type="text" class="erppage-input" id="TxtDelivery">
+                                <input type="text" class="erppage-input" id="TxtDelivery" maxlength="50">
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Delivery Period</label>
-                                <input type="text" class="erppage-input" id="TxtDeliveryPeriod">
+                                <input type="text" class="erppage-input" id="TxtDeliveryPeriod" maxlength="50">
                             </div>
                         </div>
 
@@ -234,7 +233,7 @@
                             <div class="erppage-divfield erppage-col-span-2">
                                 <label class="erppage-label">Address L1</label>
                                 <div class="erppage-inputgroup">
-                                    <input type="text" class="erppage-input erppage-width-93" id="TxtAddressShipL1" placeholder="Enter Address L1" disabled>
+                                    <input type="text" class="erppage-input erppage-width-93" id="TxtAddressShipL1" placeholder="Enter Address L1" disabled maxlength="100">
                                     <select class="erppage-input erppage-select erppage-width-7" id="ddlShipaddressL1">
                                         <option value="">Select address</option>
                                     </select>
@@ -242,13 +241,13 @@
                             </div>
                             <div class="erppage-divfield erppage-col-span-2">
                                 <label class="erppage-label">Address L2</label>
-                                <textarea class="erppage-input" id="TxtAddressShipL2" placeholder="Enter Address L2" disabled></textarea>
+                                <textarea class="erppage-input" id="TxtAddressShipL2" placeholder="Enter Address L2" disabled maxlength="100"></textarea>
                             </div>
                         </div>
                         <div class="erppage-grid4">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Address L3</label>
-                                <textarea class="erppage-input" id="TxtAddressShipL3" placeholder="Enter Address L3" disabled></textarea>
+                                <textarea class="erppage-input" id="TxtAddressShipL3" placeholder="Enter Address L3" disabled maxlength="100"></textarea>
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">City</label>
@@ -259,18 +258,18 @@
 
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Pincode</label>
-                                <input type="number" class="erppage-input" id="NumShipPincode" disabled>
+                                <input type="number" class="erppage-input" id="NumShipPincode" disabled maxlength="10">
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">GST</label>
-                                <input type="text" class="erppage-input" id="TxtShipGST" disabled>
+                                <input type="text" class="erppage-input" id="TxtShipGST" disabled maxlength="15">
                             </div>
                         </div>
                         <div class="erppage-grid4">
                             <div class="erppage-divfield erppage-col-span-2">
                                 <label class="erppage-label">Contact No.</label>
                                 <div class="erppage-inputgroup">
-                                    <input type="text" class="erppage-input" id="NumContactNo" placeholder="Enter Contact No">
+                                    <input type="text" class="erppage-input" id="NumContactNo" placeholder="Enter Contact No" maxlength="50">
                                     <button class="erppage-btn erppage-btn-common-print-disabled" type="button" id="btn_createdelivery" data-bs-toggle="modal" 
                                     data-bs-target="#CreateDeliveryModal">
                                         <i class="fa fa-plus"></i> Create Delivery Plan
@@ -294,65 +293,7 @@
 
             </div>
 
-
-
-            @* Modal Popup *@
-            <div class="modal fade" id="CreateDeliveryModal" tabindex="-1" aria-labelledby="CreateDeliveryLabel" aria-hidden="true">
-                <div class="modal-dialog small-modal erppagesmodal">
-                    <div class="modal-content erppagesmodal-content">
-                        <div class="erppagesmodal-header">
-                            <div class="erppagesmodal-header-left">
-                                <div class="erppagesmodal-header-icon">
-                                    <i class="fa fa-truck"></i>
-                                </div>
-                                <h5 class="erppagesmodal-title" id="CreateDeliveryLabel">Dispatch Delivery Planning</h5>
-                            </div>
-                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
-                                <i class="fa fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="erppagesmodal-body">
-
-                            <div class="erppage-grid4">
-                                <div class="erppage-divfield">
-                                    <label class="erppage-label">Doc No</label>
-                                    <input type="number" class="erppage-input" id="NumModalDocNo" />
-                                </div>
-                                <div class="erppage-divfield">
-                                    <label class="erppage-label">Doc Date</label>
-                                    <input type="date" class="erppage-input" id="DtModalDocDate" />
-                                </div>
-                            </div>
-
-                            <div class="erppagelist-container">
-                                <div class="excel-wrapper fixed-grid-wrapper">
-                                    <table id="tblCreateDeliveryModal" class="excel-table fixed-grid-table table-width resizable-table">
-                                        <thead class="table-head">
-                                            <tr>
-                                                <th>Item Code</th>
-                                                <th>Item Name</th>
-                                                <th>Del. Date</th>
-                                                <th>Quantity</th>
-                                                <th>Remarks</th>
-                                                <th class="hidden-col">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div class="erppagesrow">
-                                <div class="erppagescol-12">
-                                    <div class="erppagesmodal-action">
-                                        <button type="button" class="erppage-btn erppage-btn-common" id="btn_dispatchsave"><i class="fa fa-save"></i> Save</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!--There was delivery plan modal-->
             <div class="erppagesrow">
                 <div class="erppagescol-6">
                     <fieldset class="erppagefieldset">
@@ -406,11 +347,11 @@
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Cash Discount</label>
-                                <input type="number" class="erppage-input" id="NumCashDiscount" />
+                                <input type="number" class="erppage-input" id="NumCashDiscount" oninput="SetMaxlength(this, 18, 2);" />
                             </div>
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Freight</label>
-                                <input type="number" class="erppage-input" id="NumFreight" />
+                                <input type="number" class="erppage-input" id="NumFreight" oninput="SetMaxlength(this, 18, 2);" />
                             </div>
                         </div>
                         <div class="erppage-grid4">
@@ -433,7 +374,7 @@
                             <div class="erppage-divfield">
                                 <div class="erppage-checkbox-wrap">
                                     <input type="checkbox" id="ChkCalPCS" class="erppage-checkbox-input">
-                                    <label class="erppage-checkbox-label">Cal on PCS</label>
+                                    <label for="ChkCalPCS" class="erppage-checkbox-label">Cal on PCS</label>
                                 </div>
                             </div>
                         </div>
@@ -557,60 +498,60 @@
                 <div class="erppage-grid6">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Total Nos</label>
-                        <input type="number" class="erppage-input" id="NumTotalNos" />
+                        <input type="number" class="erppage-input" id="NumTotalNos" oninput="SetMaxlength(this, 15, 4);" disabled/>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Quantity</label>
-                        <input type="number" class="erppage-input" id="NumTotalQty" />
+                        <input type="number" class="erppage-input" id="NumTotalQty" oninput="SetMaxlength(this, 15, 4);" disabled/>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Amount</label>
-                        <input type="number" class="erppage-input" id="NumAmount" />
+                        <input type="number" class="erppage-input" id="NumAmount" oninput="SetMaxlength(this, 15, 4);" disabled/>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Packing Amount</label>
-                        <input type="number" class="erppage-input" id="NumPackingAmount" />
+                        <input type="number" class="erppage-input" id="NumPackingAmount" oninput="SetMaxlength(this, 15, 4);" />
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Disc Amount</label>
-                        <input type="number" class="erppage-input" id="NumDiscAmount" />
+                        <input type="number" class="erppage-input" id="NumDiscAmount" oninput="SetMaxlength(this, 15, 4);" />
                     </div>
                 </div>
                 <div class="erppage-grid8">
                     <div class="erppage-divfield">
                         <label class="erppage-label">CGST Amt</label>
-                        <input type="number" class="erppage-input" id="NumCGSTAmt" value="0.00" />
+                        <input type="number" class="erppage-input" id="NumCGSTAmt" value="0.00" oninput="SetMaxlength(this, 15, 4);" disabled/>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">SGST Amt</label>
-                        <input type="number" class="erppage-input" id="NumSGSTAmt" value="0.00" />
+                        <input type="number" class="erppage-input" id="NumSGSTAmt" value="0.00" oninput="SetMaxlength(this, 15, 4);" disabled/>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">IGST Amt</label>
-                        <input type="number" class="erppage-input" id="NumIGSTAmt" value="0.00" />
+                        <input type="number" class="erppage-input" id="NumIGSTAmt" value="0.00" oninput="SetMaxlength(this, 15, 4);" disabled/>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">VAT Amt</label>
-                        <input type="number" class="erppage-input" id="NumVATAmt" value="0.00" />
+                        <input type="number" class="erppage-input" id="NumVATAmt" value="0.00" oninput="SetMaxlength(this, 15, 4);" disabled/>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Cess Amt</label>
-                        <input type="number" class="erppage-input" id="NumCessAmt" value="0.00" />
+                        <input type="number" class="erppage-input" id="NumCessAmt" value="0.00" oninput="SetMaxlength(this, 18, 4);" disabled/>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">TCS</label>
                         <div style="display:flex; gap:2px; width:100%;">
-                            <input type="number" class="erppage-input" id="NumTCSRate" value="0.00" style="width:35%;" />
-                            <input type="number" class="erppage-input" id="NumTCSAmount" value="0.00" style="width:65%;" />
+                            <input type="number" class="erppage-input" id="NumTCSRate" value="0.00" style="width:35%;" oninput="SetMaxlength(this, 18, 4);" />
+                            <input type="number" class="erppage-input" id="NumTCSAmount" value="0.00" style="width:65%;" oninput="SetMaxlength(this, 18, 4);" disabled/>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Other Amt</label>
-                        <input type="number" class="erppage-input" id="NumOtherAmt" value="0.00" />
+                        <input type="number" class="erppage-input" id="NumOtherAmt" value="0.00" oninput="SetMaxlength(this, 15, 4);" />
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Net Amt</label>
-                        <input type="number" class="erppage-input" id="NumNetAmt" value="0.00" />
+                        <input type="number" class="erppage-input" id="NumNetAmt" value="0.00" oninput="SetMaxlength(this, 15, 4);" disabled/>
                     </div>
 
                 </div>
@@ -627,6 +568,65 @@
                 <i class="fa-solid fa-floppy-disk"></i>
                 <span>Save</span>
             </button>
+        </div>
+
+
+        @* Modal Popup *@
+        <div class="modal fade" id="CreateDeliveryModal" tabindex="-1" aria-labelledby="CreateDeliveryLabel" aria-hidden="true">
+            <div class="modal-dialog small-modal erppagesmodal">
+                <div class="modal-content erppagesmodal-content">
+                    <div class="erppagesmodal-header">
+                        <div class="erppagesmodal-header-left">
+                            <div class="erppagesmodal-header-icon">
+                                <i class="fa fa-truck"></i>
+                            </div>
+                            <h5 class="erppagesmodal-title" id="CreateDeliveryLabel">Dispatch Delivery Planning</h5>
+                        </div>
+                        <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="erppagesmodal-body">
+
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Doc No</label>
+                                <input type="number" class="erppage-input" id="NumModalDocNo" disabled/>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Doc Date</label>
+                                <input type="date" class="erppage-input" id="DtModalDocDate" disabled/>
+                            </div>
+                        </div>
+
+                        <div class="erppagelist-container">
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblCreateDeliveryModal" class="excel-table fixed-grid-table table-width resizable-table">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th>Item Code</th>
+                                            <th>Item Name</th>
+                                            <th>Del. Date</th>
+                                            <th>Quantity</th>
+                                            <th>Remarks</th>
+                                            <th class="action-col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="erppagesrow">
+                            <div class="erppagescol-12">
+                                <div class="erppagesmodal-action">
+                                    <button type="button" class="erppage-btn erppage-btn-common" id="btn_dispatchsave"><i class="fa fa-save"></i> Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

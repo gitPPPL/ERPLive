@@ -70,8 +70,10 @@ builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
 builder.Services.AddScoped<IVisitorListRepository, VisitorListRepository>();
 builder.Services.AddScoped<IMiscConsumptionRepository, MiscConsumptionEntryRepository>();
 builder.Services.AddScoped<IMiscConsumptionListRepository, MiscConsumptionListRepository>();
+
 builder.Services.AddScoped<IStoreWeighbridgeEntryRepository, StoreWeighbridgeEntryRepository>();
 builder.Services.AddScoped<IStoreWeighbridgeEntryListRepository, StoreWeighbridgeEntryListRepository>();
+
 builder.Services.AddScoped<IQCTemperatureEntryRepository, QCTemperatureEntryRepository>();
 builder.Services.AddScoped<IQCTemperatureEntryListRepository, QCTemperatureEntryListRepository>();
 builder.Services.AddScoped<ILaminationQCEntryRepository, LaminationQCEntryRepository>();
@@ -85,28 +87,35 @@ builder.Services.AddScoped<IQCGroupMasterListRepository, QCGroupMasterListReposi
 builder.Services.AddScoped<IQCGroupMasterRepository, QCGroupMasterRepository>();
 builder.Services.AddScoped<IParameterMasterListRepository, ParameterMasterListRepository>();
 builder.Services.AddScoped<IParameterMasterRepository, ParameterMasterRepository>();
+
+builder.Services.AddScoped<IApprovalService, ApprovalService>();
+builder.Services.AddScoped<GlobalExcelExport, GlobalExcelExport>();
+
 builder.Services.AddScoped<IPurchaseRequestListRepository, PurchaseRequestListRepository>();
 builder.Services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
-builder.Services.AddScoped<IApprovalService, ApprovalService>();
 builder.Services.AddScoped<IPurchaseBillPassEntryRepository, PurchaseBillPassEntryRepository>();
 builder.Services.AddScoped<IPurchaseBillPassEntryListRepository, PurchaseBillPassEntryListRepository>();
-builder.Services.AddScoped<GlobalExcelExport, GlobalExcelExport>();
 builder.Services.AddScoped<IPurchaseBillPassEntryDirectRepository, PurchaseBillPassEntryDirectRepository>();
 builder.Services.AddScoped<IPurchaseBillPassEntryDirectListRepository, PurchaseBillPassEntryDirectListRepository>();
 builder.Services.AddScoped<ITradingDirectPurchaseRepository, TradingDirectPurchaseRepository>();
 builder.Services.AddScoped<ITradingDirectPurchaseListRepository, TradingDirectPurchaseListRepository>();
 builder.Services.AddScoped<IImportExportExpensesEntryRepository, ImportExportExpensesEntryRepository>();
 builder.Services.AddScoped<IImportExportExpensesEntryListRepository, ImportExportExpensesEntryListRepository>();
+
 builder.Services.AddScoped<IToolkitIssueEntryRepository, ToolkitIssueEntryRepository>();
 builder.Services.AddScoped<IToolkitIssueListRepository, ToolkitIssueListRepository>();
 builder.Services.AddScoped<IDeliveryChallanStoreRepository, DeliveryChallanStoreRepository>();
 builder.Services.AddScoped<IDeliveryChallanStoreListRepository, DeliveryChallanStoreListRepository>();
 builder.Services.AddScoped<IInventoryDeliveryChallanMemoRepository, InventoryDeliveryChallanMemoRepository>();
 builder.Services.AddScoped<IInventoryDeliveryChallanMemoListRepository, InventoryDeliveryChallanMemoListRepository>();
+
 builder.Services.AddScoped<ISalesExportCostingListRepository, SalesExportCostingListRepository>();
 builder.Services.AddScoped<ISalesExportCostingRepository, SalesExportCostingRepository>();
 builder.Services.AddScoped<ISalesCreditLimitListRepository, SalesCreditLimitListRepository>();
 builder.Services.AddScoped<ISalesCreditLimitEntryRepository, SalesCreditLimitEntryRepository>();
+builder.Services.AddScoped<ISalesOrderListRepository, SalesOrderListRepository>();
+builder.Services.AddScoped<ISalesOrderRepository, SalesOrderRepository>();
+
 
 // Gete Entry Transaction repositories
 

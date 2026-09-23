@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using travelexpensemanagement.Controllers.Travelexpense;
-using travelexpensemanagement.Dbconnection;
-using Microsoft.Data.SqlClient;
-using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.GlobalExcel;
+using travelexpensemanagement.Common.Globalvariable;
+using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Repositories.Interfaces.Sales.Transaction;
 
 namespace travelexpensemanagement.Controllers.Sales.Transaction
 {
@@ -11,131 +11,41 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
     {
        
         private readonly DbHelper _dbHelper;
-        private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
-        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        public SalesOrderListController(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, ModuleService.ModuleService moduleService)
+        private readonly GlobalExcelExport _excel;
+        private readonly GlobalValidationdate _globalValidationdate;
+        private readonly ISalesOrderListRepository _repo;
+        public SalesOrderListController(DbHelper dbHelper, GlobalVariableService globalValue, GlobalExcelExport excel, 
+            GlobalValidationdate globalValidationdate, ISalesOrderListRepository repo)
         {
             _dbHelper = dbHelper;
-            _dbcontext = dbcontext;
             _globalValue = globalValue;
-            _moduleService = moduleService;
+            _excel = excel;
+            _globalValidationdate = globalValidationdate;
+            _repo = repo;
         }
         public IActionResult Index()
         {
-            ViewBag.CurrentMenu = "Sales Order";
-            var permissions = _moduleService.GetUserMenuPermissions();
-            var userLevel = _moduleService.GetUserLevel();
-
-            var model = new UserMenuPermissionsViewModel
-            {
-                UserMenuPermissions = permissions,
-                UserLevel = userLevel
-            };
-            return View("~/Views/Sales/Transaction/SalesOrderList/Index.cshtml", model);            
+            return View("~/Views/Sales/Transaction/SalesOrderList/Index.cshtml");            
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetSalesOrderList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
+        public IActionResult GetSalesOrderList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
-            try
+            var result = _repo.GetSalesOrderList(searchTerm, pageNumber, pageSize);
+            if(result.data == null)
             {
-                var UsersessionDt = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", UsersessionDt.PubCompCode },
-                    {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@V_TYPE", "SORD"},
-                    {"@Action", "SalesOrderList" }
-                };
-
-                var fullList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_PurchaseOrder]", parameter);
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    searchTerm = searchTerm.ToLower();
-                    fullList = fullList
-                        .Where(x =>
-                        {
-                            var dict = (IDictionary<string, object>)x;
-                            string[] searchableKeys = { "DOC_ID" };
-                            return searchableKeys.Any(key =>
-                                dict.ContainsKey(key) &&
-                                dict[key]?.ToString().ToLower().Contains(searchTerm) == true
-                            );
-                        })
-                        .ToList();
-                }
-
-                var totalCount = fullList.Count;
-                var pagedList = fullList
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                return Json(new { status = true, data = pagedList, totalCount });
+                return Json(new { status = result.status, message = result.message });
             }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
+            return Json(new { status = true, data = result.data, totalCount = result.totalCount });
+            
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DeleteSalesOrderEntry(string docid)
+        [HttpPost]
+        public async Task<IActionResult> DeleteSalesOrderEntry(int vNo, string docType)
         {
-            try
-            {
-                if (string.IsNullOrEmpty(docid))
-                {
-                    return Json(new { status = false, message = "Invalid ID" });
-                }
-
-                var userSession = _globalValue.GetGlobalVariables();
-                string VType = docid.Substring(0, 4);
-                string VNo = docid.Substring(4);
-
-                using (var con = _dbcontext.GetErpConnection())
-                {
-                    await con.OpenAsync();
-                    using (var transaction = con.BeginTransaction())
-                    {
-                        try
-                        {
-
-                            string[] deleteQueries = {
-                        "DELETE FROM ORDER1 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM ORDER2 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO",
-                        "DELETE FROM ORDER3 WHERE COMP_CODE = @COMP_CODE AND YEAR_CODE = @YEAR_CODE AND BRANCH_CODE = @BRANCH_CODE AND V_TYPE = @V_TYPE AND V_NO = @V_NO"
-                        };
-                            foreach (var query in deleteQueries)
-                            {
-                                using (var cmd = new SqlCommand(query, con, transaction))
-                                {
-                                    cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
-                                    cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-                                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-                                    cmd.Parameters.AddWithValue("@V_TYPE", VType);
-                                    cmd.Parameters.AddWithValue("@V_NO", VNo);
-                                    await cmd.ExecuteNonQueryAsync();
-                                }
-                            }
-
-                            transaction.Commit();
-                            return Json(new { status = true, data = "Data deleted successfully" });
-                        }
-                        catch (Exception ex)
-                        {
-                            transaction.Rollback();
-                            return Json(new { status = false, message = $"Delete failed: {ex.Message}" });
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { status = false, message = ex.Message });
-            }
+            var result = await _repo.DeleteSalesOrderEntry(vNo, docType);
+            return Json(new { status = result.status, message = result.message });
         }
 
         [HttpGet]
@@ -152,12 +62,11 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 {
                     {"@COMP_CODE", usersession.PubCompCode },
                     {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@V_TYPE", docid.Substring(0, 4) },
-                    {"@V_NO", docid.Substring(4) },
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
+                    {"@DOC_ID", $"SORD{docid}" },
                     {"@Action", "EntryDetail" }
                 };
-                var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_PurchaseOrder]", parameter);
+                var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_SalesOrder]", parameter);
                 return Json(new { status = true, data = entryDetailList });
             }
             catch (Exception ex)
@@ -167,170 +76,78 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExportAllDocs()
+        public IActionResult ExportAllDocs()
         {
-
             try
             {
-                var usersession = _globalValue.GetGlobalVariables();
-                var parameter = new Dictionary<string, object>
-                {
-                    {"@COMP_CODE", usersession.PubCompCode },
-                    {"@YEAR_CODE", usersession.PubFYearCode },
-                    {"@BRANCH_CODE", 1},
-                    {"@Action", "Excel" }
-                };
-                var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_PurchaseOrder]", parameter);
+                var gv = _globalValue.GetGlobalVariables();
 
-                return Json(new { status = true, data = dataList });
+                var parameters = new Dictionary<string, object>
+                {
+                    { "@YEAR_CODE", gv.PubFYearCode },
+                    { "@COMP_CODE", gv.PubCompCode },
+                    { "@BRANCH_CODE", gv.PubBranchCode },
+                    { "@V_TYPE", "SORD"},
+                    { "@Action", "Excel" }
+                };
+
+                var fileBytes = _excel.ExportToExcel("sp_SalesOrder", "Sales Order", parameters);
+
+                return File(
+                    fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"SalesOrder{DateTime.Now:ddMMyyyy}.xlsx"
+                );
             }
             catch (Exception ex)
             {
-                return Json(new { status = false, message = ex.Message });
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
         }
 
+        [HttpGet]
+        public IActionResult GetSalesEditStatus(string vType, int vNo)
+        {
+            var result = _repo.GetSalesEditStatus(vType, vNo);
+            if(result.data != null)
+            {
+                return Json(new { success = result.status, data = result.data });
+            }
+            return Json(new { success = result.status, message = result.message });
+        }
+        //===Check Modification Days==============
+        [HttpGet]
+        public JsonResult checkModificationDays(DateTime? vDate)
+        {
+            if (!vDate.HasValue)
+            {
+                return Json(new { success = false, message = "Doc Date is empty!!" });
+            }
+            var (allowed, message) = _globalValidationdate.CheckModificationDays(vDate.Value);
+            return Json(new { success = true, isAllowed = allowed, message = message });
+        }
 
+        [HttpGet]
+        public IActionResult CheckSaleInvoiceBeforeDelete(string vType, int vNo)
+        {
+            var result = _repo.CheckSaleInvoiceBeforeDelete(vType, vNo);
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetSalesOrderList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
-        //{
-        //    try
-        //    {
-        //        var UsersessionDt = _globalValue.GetGlobalVariables();
-        //        var parameter = new Dictionary<string, object>
-        //        {
-        //            {"@COMP_CODE", UsersessionDt.PubCompCode },
-        //            {"@YEAR_CODE", UsersessionDt.PubFYearCode },
-        //            {"@BRANCH_CODE", 1 },
-        //            {"@Action", "SalesOrderList" }
-        //        };
+            if (!result.status)
+                return Json(new { status = false, message = result.message });
 
-        //        var fullList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_SalesOrder]", parameter);
-        //        if (!string.IsNullOrEmpty(searchTerm))
-        //        {
-        //            searchTerm = searchTerm.ToLower();
-        //            fullList = fullList
-        //                .Where(x =>
-        //                {
-        //                    var dict = (IDictionary<string, object>)x;
-        //                    string[] searchableKeys = { "DOC_ID" };
-        //                    return searchableKeys.Any(key =>
-        //                        dict.ContainsKey(key) &&
-        //                        dict[key]?.ToString().ToLower().Contains(searchTerm) == true
-        //                    );
-        //                })
-        //                .ToList();
-        //        }
-        //        var totalCount = fullList.Count;
-        //        var pagedList = fullList
-        //            .Skip((pageNumber - 1) * pageSize)
-        //            .Take(pageSize)
-        //            .ToList();
+            dynamic data = result.data;
 
-        //        return Json(new { status = true, data = pagedList, totalCount });
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { status = false, message = ex.Message });
-        //    }
-        //}
-
-        //[HttpDelete]
-        //public async Task<IActionResult> DeleteSalesOrderEntry(string docid)
-        //{
-        //    try
-        //    {
-        //        if (string.IsNullOrEmpty(docid))
-        //        {
-        //            return Json(new { status = false, message = "Invalid ID" });
-        //        }
-        //        var userSession = _globalValue.GetGlobalVariables();
-        //        string VType = docid.Substring(0, 4);
-        //        string VNo = docid.Substring(4);
-        //        using (var con = _dbcontext.GetErpConnection())
-        //        {
-        //            try
-        //            {
-        //                string query = "DELETE FROM PAY_INTRIM WHERE COMP_CODE=@COMP_CODE AND YEAR_CODE=@YEAR_CODE AND BRANCH_CODE=@BRANCH_CODE AND V_NO=@V_NO AND V_TYPE=@V_TYPE";
-        //                using (var cmd = new SqlCommand(query, con))
-        //                {
-        //                    cmd.Parameters.AddWithValue("@COMP_CODE", userSession.PubCompCode);
-        //                    cmd.Parameters.AddWithValue("@YEAR_CODE", userSession.PubFYearCode);
-        //                    cmd.Parameters.AddWithValue("@BRANCH_CODE", 1);
-        //                    cmd.Parameters.AddWithValue("@V_NO", VNo);
-        //                    cmd.Parameters.AddWithValue("@V_TYPE", VType);
-        //                    await con.OpenAsync();
-        //                    await cmd.ExecuteNonQueryAsync();
-        //                }
-        //                return Json(new { status = true, data = "Data deleted successfully" });
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                return Json(new { status = false, message = $"Delete failed: {ex.Message}" });
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { status = false, message = ex.Message });
-        //    }
-        //}
-
-        //[HttpGet]
-        //public async Task<IActionResult> GetSalesOrderEntryDetails(string docid)
-        //{
-        //    try
-        //    {
-        //        var usersession = _globalValue.GetGlobalVariables();
-        //        if (string.IsNullOrEmpty(docid))
-        //        {
-        //            return Json(new { status = false, message = "Invalid ID" });
-        //        }
-        //        var vType = docid.Substring(0, 4);
-        //        var vNo = docid.Substring(4);
-        //        var parameter = new Dictionary<string, object>
-        //        {
-        //            {"@COMP_CODE", usersession.PubCompCode },
-        //            {"@YEAR_CODE", usersession.PubFYearCode},
-        //            {"@BRANCH_CODE", 1},
-        //            {"@V_NO", vNo},
-        //            {"@V_TYPE", vType},
-        //            {"@Action", "EntryDetail" }
-        //        };
-        //        var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_SalesOrder]", parameter);
-        //        return Json(new { status = true, data = entryDetailList });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { status = false, message = ex.Message });
-        //    }
-        //}
-
-        //[HttpGet]
-        //public async Task<IActionResult> ExportAllDocs()
-        //{
-        //    try
-        //    {
-        //        var usersession = _globalValue.GetGlobalVariables();
-        //        var parameter = new Dictionary<string, object>
-        //        {
-        //            {"@COMP_CODE", usersession.PubCompCode },
-        //            {"@YEAR_CODE", usersession.PubFYearCode},
-        //            {"@BRANCH_CODE", 1},
-        //            {"@Action", "Excel" }
-        //        };
-        //        var dataList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_SalesOrder]", parameter);
-        //        return Json(new { status = true, data = dataList });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { status = false, message = ex.Message });
-        //    }
-        //}
-
-
-
+            return Json(new
+            {
+                status = true,
+                exists = data?.exists ?? false,
+                billNo = data?.billNo,
+                billDate = data?.billDate
+            });
+        }
     }
 }
