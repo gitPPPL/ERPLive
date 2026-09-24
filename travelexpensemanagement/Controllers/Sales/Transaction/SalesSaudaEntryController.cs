@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using System.Text.Json;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
@@ -35,6 +36,14 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
         public IActionResult Index()
         {
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+            ViewBag.DatabaseName = databaseName;
+            var globalVar = _globalVariableService.GetGlobalVariables();
+            ViewBag.GlobalVariables = globalVar;
             return View("~/Views/Sales/Transaction/SalesSaudaEntry/Index.cshtml");
         }
 
@@ -43,6 +52,55 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         {
             string newV_NO = "00001";
             string vType = "SAUD";
+
+            try
+            {
+                var getdata = _globalVariableService.GetGlobalVariables();
+
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    string prefixYRQuery = @"SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = @YearCode";
+
+                    SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con);
+                    prefixCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
+
+                    string prefixYR = prefixCmd.ExecuteScalar()?.ToString() ?? "0000";
+
+                    string query = @"
+                    SELECT ISNULL(MAX(CAST(RIGHT(CAST(V_NO AS VARCHAR(20)), 5) AS INT)), 0) + 1 FROM SAUDA WHERE V_TYPE = @VType AND COMP_CODE = @CompCode AND BRANCH_CODE = @BranchCode AND YEAR_CODE = @YearCode";
+                    SqlCommand cmd = new SqlCommand(query, con);
+                    cmd.Parameters.AddWithValue("@VType", vType);
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
+
+                    int nextNo = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    newV_NO = prefixYR + nextNo.ToString("D5");
+                }
+
+                return Json(new
+                {
+                    v_NO = newV_NO,
+                    v_TYPE = vType
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GenerateVNoForDSAU()
+        {
+            string newV_NO = "00001";
+            string vType = "DSAU";
 
             try
             {
@@ -353,7 +411,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 hasMore = list.Count == pageSize
             });
         }
-
+        
         [HttpGet]
         public IActionResult GetPIList(string searchTerm = "")
         {
@@ -548,9 +606,65 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             return Json(result);
         }
+        
+        [HttpGet]
+        public IActionResult GetBalanceDispatch(int saudaNo, string saudaType)
+        {
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+
+            try
+            {
+                using var con = _dbConnection.GetErpConnection();
+                con.Open();
+
+                string query = @"
+                SELECT ISNULL(SUM(SALE2.QTY), 0)
+                FROM SALE2
+                LEFT JOIN SALE1
+                    ON SALE1.V_TYPE = SALE2.V_TYPE
+                    AND SALE1.V_NO = SALE2.V_NO
+                    AND SALE1.COMP_CODE = SALE2.COMP_CODE
+                    AND SALE1.BRANCH_CODE = SALE2.BRANCH_CODE
+                    AND SALE1.YEAR_CODE = SALE2.YEAR_CODE
+                WHERE SALE2.SAUDA_TYPE = @SAUDA_TYPE
+                    AND SALE2.SAUDA_NO = @SAUDA_NO
+                    AND SALE1.COMP_CODE = @COMP_CODE
+                    AND SALE1.BRANCH_CODE = @BRANCH_CODE
+                    AND SALE1.V_TYPE IN ('SAGT', 'SABS', 'SASI')
+                    AND SALE1.STATUS = 1";
+
+                decimal dispatchedQty = 0;
+
+                using (var cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@SAUDA_TYPE", saudaType);
+                    cmd.Parameters.AddWithValue("@SAUDA_NO", saudaNo);
+                    cmd.Parameters.AddWithValue("@COMP_CODE", globalVariables.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BRANCH_CODE", globalVariables.PubBranchCode);
+
+                    var result = cmd.ExecuteScalar();
+
+                    dispatchedQty = Convert.ToDecimal(result ?? 0);
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    dispatchedQty = dispatchedQty
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
 
         [HttpPost]
-        public async Task<IActionResult> SaveAndUpdateData([FromBody] SaleSaudaEntryModel model)
+        public async Task<IActionResult> SaveAndUpdateData([FromForm] SaleSaudaEntryModel model)
         {
             try
             {
@@ -567,6 +681,43 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             {
                 return Json(new { success = false, message = ex.Message });
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> LoadEditData(int vNo, string vType)
+        {
+            var result = await _saleSaudaEntryRepository.LoadEditDataAsync(vNo, vType);
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateSalesOrder([FromBody] int saudaVNo)
+        {
+            try
+            {
+                var result = await _saleSaudaEntryRepository.CreateSalesOrderAsync(saudaVNo);
+
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            var global = _globalVariableService.GetGlobalVariables();
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("SAUDA", vdate, vtype, vno);
+            return Ok(result);
         }
 
     }

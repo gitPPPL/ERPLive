@@ -46,6 +46,9 @@ builder.Services.AddScoped<IMasterDataService, MasterDataService>();
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 //Master page repositories
 // Gete Entry Transaction repositories
+
+builder.Services.AddScoped<IApprovalService, ApprovalService>();
+
 builder.Services.AddScoped<ICourierTrackingEntryRepository, CourierTrackingEntryRepository>();
 builder.Services.AddScoped<ICourierTrackingEntryListRepository, CourierTrackingEntryListRepository>();
 builder.Services.AddScoped<IVehicleInwardRepository, VehicleInwardRepository>();
@@ -86,6 +89,7 @@ builder.Services.AddScoped<IStoreInventoryTransferListRepository, StoreInventory
 builder.Services.AddScoped<IITInventoryEntryRepository, ITInventoryEntryRepository>();
 builder.Services.AddScoped<IITInventroyEntryListRepository, ITInventoryEntryListRepositroy>();
 builder.Services.AddScoped<ISaleSaudaEntryRepository, SaleSaudaEntryRepository>();
+builder.Services.AddScoped<ISaleSaudaEntryListRepository, SaleSaudaEntryListRepository>();
 
 
 // Gete Entry Transaction repositories

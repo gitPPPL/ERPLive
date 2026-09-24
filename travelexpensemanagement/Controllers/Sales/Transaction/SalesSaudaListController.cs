@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -46,6 +47,60 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
 
+        [HttpGet]
+        public async Task<JsonResult> ValidateEdit(int vNo, string vType)
+        {
+            try
+            {
+                var result = await _itSaleSaudaEntryEntryListRepository.ValidateEditAsync(vNo, vType);
+
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ValidateDelete(int vNo, string vType)
+        {
+            try
+            {
+                var result = await _itSaleSaudaEntryEntryListRepository.ValidateDeleteAsync(vNo, vType);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> DeleteData(int vNo, string vType)
+        {
+            try
+            {
+                var result = await _itSaleSaudaEntryEntryListRepository.DeleteDataAsync(vNo, vType);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
 
     }
 }

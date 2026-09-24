@@ -91,7 +91,6 @@
 
         public int? NOS { get; set; }
 
-
         public byte[]? IMG_FILE { get; set; }
         public string? FILE_NAME { get; set; }
         public string? FILE_TYPE { get; set; }
@@ -100,6 +99,8 @@
         public int? SRNO { get; set; }
 
         public IFormFile? Attachment { get; set; }
+
+        public string? DSAU_V_NO { get; set; }
 
     }
 }

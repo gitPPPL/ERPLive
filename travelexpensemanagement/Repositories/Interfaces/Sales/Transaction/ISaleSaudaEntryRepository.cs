@@ -7,5 +7,8 @@ namespace travelexpensemanagement.Repositories.Interfaces.Sales.Transaction
     {
         Task<object> SaveAndUpdateDataAsync(SaleSaudaEntryModel model);
 
+        Task<object> LoadEditDataAsync(int vNo, string vType);
+
+        Task<object> CreateSalesOrderAsync(int saudaVNo);
     }
 }

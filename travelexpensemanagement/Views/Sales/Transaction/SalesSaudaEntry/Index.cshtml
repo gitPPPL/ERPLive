@@ -1,6 +1,7 @@
 ﻿@{
     ViewBag.Title = "Sales Sauda Entry";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVar = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
@@ -11,6 +12,20 @@
         <div class="erppage-header-title">Sales Sauda Entry</div>
     </div>
     <div class="erppage-header-right">
+        <div class="erppage-internalaction">
+            <button type="button" id="btn_print" class="erppage-btn erppage-btn-common-print-disabled" onclick="SalesSaudaEntry()"><i class="fa fa-print"></i> Print</button>
+        </div>
+        <button type="button"
+                id="btn_Sendapproval"
+                style="display:none;" class="erppagebtn_sendapproval">
+            <i class="fa fa-share"></i>Send For Approval
+        </button>
+        <button type="button"
+                id="btn_Approved"
+                style="display:none;"
+                class="erppagebtn_approved">
+            Approved
+        </button>
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesSaudaList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -317,15 +332,84 @@
                     <label class="erppage-label">Attachment</label>
                     <div class="erppage-upload-wrap">
                         <input type="file" class="erppage-input" id="TxtAttachment" accept="image" />
-                        <div id="previewContainer" class="erppage-preview-box" style="display:none;">
-                            <img id="imgPreview" src="" alt="Preview" />
-                            <button type="button" id="btnRemoveImage" class="erppage-btn erppage-btn-remove">
-                                <i class="fa fa-trash"></i>
+                        <div id="previewContainer"
+                            style="display:none; align-items:center; gap:6px; height:40px; padding:4px 8px;">
+
+                            <span id="attachmentFileName"
+                                  style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            </span>
+
+                            <button type="button"
+                                    id="btnPreviewImage"
+                                    class="erppage-btn"
+                                    title="Preview"
+                                    style="width:34px; height:28px; padding:0; margin:0;">
+                                <i class="fa fa-eye"></i>
                             </button>
+
                         </div>
+                    </div>
+
+                    <div class="modal fade" id="imagePreviewModal" tabindex="-1"
+                         aria-hidden="true">
+
+                        <div class="modal-dialog erppagesmodal small-modal">
+
+                            <div class="modal-content erppagesmodal-content">
+
+                                <div class="erppagesmodal-header">
+
+                                    <div class="erppagesmodal-header-left">
+
+                                        <div class="erppagesmodal-header-icon">
+                                            <i class="fa fa-image"></i>
+                                        </div>
+
+                                        <h5 class="erppagesmodal-title">
+                                            Attachment Preview
+                                        </h5>
+
+                                    </div>
+
+                                    <button type="button"
+                                            class="erppagesmodal-close"
+                                            data-bs-dismiss="modal"
+                                            aria-label="Close">
+
+                                        <i class="fa fa-times"></i>
+
+                                    </button>
+
+                                </div>
+
+                                <div class="erppagesmodal-body text-center">
+
+                                    <img id="previewImage"
+                                         src=""
+                                         style="
+                                        width:100%;
+                                        height:75vh;
+                                        object-fit:contain;
+                                        display:none;" />
+
+                                    <iframe id="previewPdf"
+                                            style="
+                                            width:100%;
+                                            height:75vh;
+                                            border:none;
+                                            display:none;">
+                                    </iframe>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
                     </div>
                 </div>
             </div>
+
             <div class="erppage-grid4">
                 
                 <div class="erppage-divfield erppage-col-span-2">
@@ -349,7 +433,6 @@
                                     <col style="width: 80px;">
                                     <col style="width: 100px;">
                                     <col style="width: 150px;">
-                                    <col style="width: 90px;">
                                 </colgroup>
                                 <thead>
                                     <tr>
@@ -357,7 +440,6 @@
                                         <th>Quantity</th>
                                         <th>Date</th>
                                         <th>Party Name</th>
-                                        <th class="action-col">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -386,6 +468,9 @@
                                     <label class="erppage-label">Use Type</label>
                                     <select class="erppage-input erppage-select" id="ddlusetype">
                                         <option value="">Select Use Type</option>
+                                        <option value="FLIM">Film</option>
+                                        <option value="FIBER">Fiber</option>
+                                        <option value="NA">NA</option>
                                     </select>
                                 </div>
                             </div>
@@ -433,3 +518,29 @@
 
 <script src="~/common/dropdown.js"></script>
 <script src="~/js/erpjs/sales/transaction/salessaudaentryjs/salessaudaentry.js"></script>
+
+<script>
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+
+    window.globalVariables = {
+        compCode: "@globalVar?.PubCompCode",
+        yearCode: "@globalVar?.PubFYearCode",
+        branchCode: "@globalVar?.PubBranchCode",
+
+        companyName: "@globalVar?.CompanyName",
+        add1: "@globalVar?.Address1",
+        add2: "@globalVar?.Address2",
+
+        gstin: "@globalVar?.gstin",
+        pan: "@globalVar?.PAN",
+        website: "@globalVar?.Website",
+        email: "@globalVar?.Email",
+        phone: "@globalVar?.Phone"
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    };
+</script>
