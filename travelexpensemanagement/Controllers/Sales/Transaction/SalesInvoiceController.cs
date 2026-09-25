@@ -17,19 +17,19 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-
+        private readonly ISalesInVoice _salesInVoice;
 
         public SalesInvoiceController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
        travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
-       ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
+       ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, ISalesInVoice salesInVoice)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
-            _moduleService = moduleService;
-       
+            _moduleService = moduleService;    
+            _salesInVoice = salesInVoice;
         }
 
         public IActionResult Index()
@@ -45,7 +45,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             return View("~/Views/Sales/Transaction/SalesInvoice/Index.cshtml");
         }
-
 
         public JsonResult GetVNo(string Vtype, string Tablename = "SALE1")
         {
@@ -63,7 +62,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             return Json(new { V_NO = newV_NO });
         }
 
-
         public JsonResult DDlVType()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -74,14 +72,23 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
+        public JsonResult DDlTransPortMode()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select Code,Name from TRANSPORT_MODE where Name <> ''  order by Code ";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
 
         public JsonResult DDlDoNo()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "select V_TYPE,V_NO,Bill_Name,VEHICLE_NO,format(v_date,'dd/MM/yyyy') from DO1 where V_TYPE='DOGT' and isnull(Ref_no,0)=0 order by V_no";
+                string query = "select V_NO , V_TYPE,Bill_Name,VEHICLE_NO,format(v_date,'dd/MM/yyyy') from DO1 where V_TYPE='DOGT' and isnull(Ref_no,0)=0 order by V_no";
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
@@ -141,7 +148,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(partyList);
             }
         }
-
         public JsonResult cmbCityName()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -152,7 +158,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         public JsonResult cmbSalesThrough()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -258,30 +263,259 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     }
                }
 
-                    string query = $@"select V_TYPE,ltrim(rtrim(a.V_NO))'V_no' from {TableName} a where a.V_DATE=CONVERT(smalldatetime, {V_DATE}, 103) and a.V_TYPE in ({packtyp}) and a.COMP_CODE= {getdata.PubCompCode} and a.BRANCH_CODE= {getdata.PubBranchCode}
-                    and a.YEAR_CODE={getdata.PubFYearCode} and (a.PARTY_CODE={PARTY_CODE} or a.PARTY_CODE=(select main_code from SUBGROUP_MAST where COMP_CODE=a.COMP_CODE and 
-                    code=a.PARTY_CODE and ACTIVE=1 group by MAIN_CODE)){filtercnd} ";
+                string query = $@"select top 10  ltrim(rtrim(a.V_NO))'V_no',V_TYPE from {TableName} a  ";
+
+
+
+
+
+
+
+
+                //string query = $@"select V_TYPE,ltrim(rtrim(a.V_NO))'V_no' from {TableName} a 
+                //where a.V_DATE=CONVERT(smalldatetime, {V_DATE}, 103) and a.V_TYPE in ({packtyp}) and a.COMP_CODE= {getdata.PubCompCode} and a.BRANCH_CODE= {getdata.PubBranchCode}
+                //and a.YEAR_CODE={getdata.PubFYearCode} and (a.PARTY_CODE={PARTY_CODE} or a.PARTY_CODE=(select main_code from SUBGROUP_MAST where COMP_CODE=a.COMP_CODE and 
+                //code=a.PARTY_CODE and ACTIVE=1 group by MAIN_CODE)){filtercnd} ";
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
         }
-
 
         public JsonResult DDlSaudaNo()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
+
             using (SqlConnection con = _dbConnection.GetErpConnection())
-            {                    
-                string query = $@" select V_TYPE,ltrim(rtrim(V_NO))'V_no' ,Rate 'Rate',PARTY_CODE,isnull(DEFECTIVE_GOODS,0)DEFECTIVE_GOODS,isnull(OFFERNO,'')OFFERNO,b.name payterm from 
+            {
+                string query = $@" select ltrim(rtrim(V_NO))'V_no',V_TYPE ,Rate ,PARTY_CODE,isnull(DEFECTIVE_GOODS,0)DEFECTIVE_GOODS,isnull(OFFERNO,'')OFFERNO,b.name payterm from 
                 SAUDA a Left join Payterm_mast b on a.PAYTERM_CODE=b.code and a.comp_code=b.comp_code where V_TYPE='SAUD' and FAPROV_STATUS='Approved' and Status=1 and
                 a.COMP_CODE= {getdata.PubCompCode} and BRANCH_CODE={getdata.PubBranchCode} ";
+
+                var SaudaNolist = new List<object>();
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            SaudaNolist.Add(new
+                            {
+                                V_no = reader["V_no"],
+                                V_TYPE = reader["V_TYPE"],
+                                Rate = reader["Rate"],
+                                PARTY_CODE = reader["PARTY_CODE"],
+                                DEFECTIVE_GOODS = reader["DEFECTIVE_GOODS"],
+                                OFFERNO = reader["OFFERNO"],
+                                payterm = reader["payterm"]
+                        
+                            });
+                        }
+                    }
+                }
+
+                return Json(SaudaNolist);
+            }
+        }
+
+        public JsonResult cmbAddress(int partycode)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"select ADDRESS_ID , ADD1 From SUBGROUP_ADDRESS where COMP_CODE = {getdata.PubCompCode} and CODE = {partycode}  ";
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
         }
 
+        public JsonResult DDlIssueNo()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
 
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@" select ltrim(rtrim(V_NO))'V_no' , V_TYPE ,cast(TOT_NET as float) as TOT_NET ,cast(tot_Nos as int) as tot_Nos from 
+                SALE1 where V_type='SAJI' and COMP_CODE ={getdata.PubCompCode} and BRANCH_CODE ={getdata.PubBranchCode} and year_code={getdata.PubFYearCode} ";
 
+                var SaudaNolist = new List<object>();
 
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            SaudaNolist.Add(new
+                            {
+                                V_no = reader["V_no"],
+                                V_TYPE = reader["V_TYPE"],
+                                TOT_NET = reader["TOT_NET"],
+                                tot_Nos = reader["tot_Nos"]                
+
+                            });
+                        }
+                    }
+                }
+
+                return Json(SaudaNolist);
+            }
+        }
+
+        public JsonResult cmbGodown()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"Select Code,Name from GODOWN_MAST where comp_code= {getdata.PubCompCode} and Active=1 order by SNO";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+
+        public JsonResult cmbProdType()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"Select distinct  SALE_GROUP as no, SALE_GROUP from ITEM_GROUP where comp_code={getdata.PubCompCode}  and  SALE_GROUP <> ''  order by SALE_GROUP";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+        public JsonResult cmbWBNO()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"select ltrim(rtrim(V_NO))'V_no' , V_TYPE  from WB1 where V_TYPE ='KANT' AND COMP_CODE =1 and BRANCH_CODE =1 and YEAR_CODE =9  order by V_NO";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+
+        public JsonResult DDlDocStatus()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "Select Code,Name from DOCSTATUS_MAST where V_TYPE='Document' Order by CODE ";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+
+        public JsonResult DDlTransPort()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"select code,ltrim(rtrim(name))'Name',TDS_PER from TRANSPORT_MAST where Active=1 and comp_code = {getdata.PubCompCode}";
+
+                var SaudaNolist = new List<object>();
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            SaudaNolist.Add(new
+                            {
+                                code = reader["code"],
+                                Name = reader["Name"],
+                                TDS_PER = reader["TDS_PER"]
+                            });
+                        }
+                    }
+                }
+
+                return Json(SaudaNolist);
+            }
+        }
+
+        public JsonResult cmbProductName()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@" Select b.CODE , ltrim(rtrim(b.name)) 'itemname' from item_mast b where b.ACTIVE=1 and b.comp_code={getdata.PubCompCode } 
+                group by b.name ,b.CODE  order by b.name  ; ";
+
+                var partyList = new List<object>();
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            partyList.Add(new
+                            {
+                                CODE = reader["CODE"],
+                                itemname = reader["itemname"]
+                    
+                            });
+                        }
+                    }
+                }
+
+                return Json(partyList);
+            }
+        }
+
+        public JsonResult DDlLoadParty()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"Select Code,Name from SUBGROUP_MAST where comp_code= {getdata.PubCompCode} and active=1 order by Name";
+
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+        
+        public JsonResult DDlWBParty()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"Select Code,Name from SUBGROUP_MAST  where comp_code={getdata.PubCompCode}  order by Name";
+
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> SavedData([FromBody] SalesInvoiceModel request)
+        {
+            if (request?.Header == null)
+            {
+                return Json(new { success = false, status = "Error", message = "Input model is null" });
+            }
+
+            var action = string.Equals(request.Header.action, "INSERT", StringComparison.OrdinalIgnoreCase) ? "INSERT" : "UPDATE";
+
+            var result = await _salesInVoice.SubmitRequest(request.Header, request.Details, action);
+
+            return Json(new { success = result.Status == "Success", status = result.Status, message = result.Message });
+        }
     }
 }

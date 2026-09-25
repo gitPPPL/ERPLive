@@ -252,7 +252,7 @@ $(document).ready(async function () {
             SHIP_GST: SHIP_GST,
             ITEM_TYPE: ITEM_TYPE,
             GR_NO: GR_NO,
-            ARN_DATE: ARN_DATE,
+            GR_DATE : ARN_DATE,
             VEHICLE_NO: VEHICLE_NO,
             TRANSPORT_CODE: TRANSPORT_CODE,
             TRANSPORT_NAME: TRANSPORT_NAME,
@@ -340,7 +340,6 @@ $(document).ready(async function () {
         });
     });
 
-
     $('#NumTCS1').on('change input', function () {
 
         let subtotal = parseFloat($('#NumSubTotal').val()) || 0;
@@ -371,25 +370,16 @@ $(document).ready(async function () {
         AddressPartyData(PartyCode, AddressId);
     });
 
-
     $('#ddladdressl1Sa').change(function () {
         let PartyCode = $('#ddlConsignee').val();
         let AddressId = $('#ddladdressl1Sa').val();
         AddressConsigneeData(PartyCode, AddressId);
     });
 
-
-
     $('#button_mail').on('click', async function () {
         alert("hh")
         await SendMail();
 
     });
-
-
-
-
-
-
 
 });

@@ -17,16 +17,13 @@
 				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "SalesInvoice")'" type="submit" class="btn btn-add">
 					<i class="fa fa-plus"></i>Add
 				</button>
-				<button class="btn btn-print" onclick="printCityMasterReport()">
+                <button class="btn btn-print" id="button_print">
 					<i class="fa fa-print"></i> Print
 				</button>
-				<button class="btn btn-export">
+                <button class="btn btn-export" id="button_export">
 					<i class="fas fa-file-export"></i> Export
 				</button>
-				<button class="btn btn-mail">
-					<i class="fa fa-envelope"></i> Mail
-				</button>
-				
+			
 			</div>
 		</div>
 	</div>
@@ -100,171 +97,370 @@
 						<th>Disc Amount</th>
 						<th>Cdisc_Per</th>
 						<th>Cdisc Amount</th>
-						<th>Action</th>
+                        <th class="action-col">Action</th>
 					</tr>
 				</thead>
 				<tbody></tbody>
 			</table>
 		</div>
 		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
+        <div class="erppagelist-pagination">
+
+            <div class="pagination-left">
+                <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+
+            <div class="pagination-center">
+                <button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+                <div id="pageNumbers" class="page-numbers"></div>
+                <button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+            </div>
+
+            <div class="pagination-right" id="pageInfoText">
+                Results: 0 - 0 of 0
+            </div>
+
+        </div>
 	</div>
 
 
 
 </fieldset>
 
+
 <script>
 
+    let currentPage = 1;
+    let pageSize = 10;
+    let totalCount = 0;
+    var controllerName = window.location.pathname.split('/')[1];
+
+    $(document).ready(function () {
+        checkPermission(controllerName, function () {
+              loadAllInward();
+            });
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadAllInward();
+        });
+
+        $('#button_export').on('click', function () {
+            var text = $('#searchBox').val();
+            window.location.href = '/SalesInvoiceList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+        });
+
+        $('#button_print').on('click', function () {
+            var searchTerm = $('#searchBox').val() || '';
+            var url = '/SalesInvoiceList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
+            window.open(url, '_blank');
+        });
+
+    });
+
+    // ================= LOAD DATA =================
+    function loadAllInward() {
+
+        $.ajax({
+            url: '/SalesInvoiceList/GetList',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: $('#searchBox').val(),
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
 
 
-	let currentPage = 1;
-	let pageSize = 10;
+                console.log("Response from server:", res);
 
-	$(document).ready(function () {
-		loadDocumentStages();
 
-		$('#searchBox').on('keyup', function () {
-			currentPage = 1;
-			loadDocumentStages();
-		});
-	});
+                if (!res.success) {
+                    toastr.error("Failed to load data.");
+                    return;
+                }
 
-	//Load main grid...............
-	function loadDocumentStages() {
-		const searchTerm = $('#searchBox').val();
+                const list = res.lists || [];
+                totalCount = res.totalCount || 0;
 
-		$.ajax({
-			url: '/ApprovalStageMasterList/GetAllDocs',
-			type: 'GET',
-			dataType: 'json',
-			data: {
-				searchTerm,
-				pageNumber: currentPage,
-				pageSize: pageSize
-			},
-			success: function (res) {
-				console.log(res);
-				const docs = res.items || res.data || [];
-				const totalCount = res.totalCount || 0;
+                renderTable(list);
+                renderPagination();
+            },
+            error: function (xhr) {
+                toastr.error('Error loading list: ' + xhr.responseText);
+            }
+        });
+    }
 
-				const tbody = $('#tblApprovalStageMaster tbody');
-				tbody.empty();
+    // ================= TABLE =================
+    function renderTable(list) {
 
-				if (docs.length === 0) {
-					tbody.append(`<tr><td colspan="5" class="text-center text-muted">No records found.</td></tr>`);
-					renderPagination(0, pageSize, currentPage);
-					return;
-				}
+        const tbody = $('#tblSalesInvoiceList tbody');
+        tbody.empty();
 
-				docs.forEach(doc => {
-					tbody.append(`
-						<tr>
-							<td style="display:none;">${doc.code || doc.doC_CODE || ''}</td>
-							<td>${doc.doC_CODE || ''}</td>
-							<td>${doc.doC_NAME || ''}</td>
-							<td>${doc.useR_NO || '0'}</td>
-							<td>
-							  <div class="action-icons">
-							  <i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editDocStage('${doc.doC_CODE}')"></i>
-							  <i class="fa fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewDocStage('${doc.doC_CODE}')"></i>
-							  <i class="fa fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteDocStage('${doc.doC_CODE}')"></i>
-							  <i class="fa fa-file btn-document" data-bs-toggle="tooltip" data-bs-title="Document Details" onclick="showDocumentPopup('${doc.doC_CODE}')"></i>
-							  </div>
+        if (!list || list.length === 0) {
+            tbody.append('<tr><td colspan="13" class="text-center text-muted">No list found.</td></tr>');
+            return;
+        }
 
-							</td>
-						</tr>
-					`);
-				});
+        $.each(list, function (index, item) {
 
-				renderPagination(totalCount, pageSize, currentPage);
-			},
-			error: function (xhr) {
-				toastr.error('Error loading document stages: ' + (xhr.responseJSON?.message || xhr.statusText));
-			}
-		});
-	}
+            tbody.append(`
+                <tr>
+                            <td>${item.v_TYPE ?? ''}</td>
+                            <td>${item.v_TYPEText ?? ''}</td>
+                            <td>${item.v_NO ?? ''}</td>
+                            <td>${formatDate(item.v_DATE)}</td>                    
 
-	function renderPagination(total, pageSize, currentPage) {
-		const totalPages = Math.ceil(total / pageSize);
-		const pagination = $('#tablePagination');
-		pagination.empty();
+                            <td>${item.bilL_NAME ?? ''}</td>
+                            <td>${item.bilL_ADD1 ?? ''}</td>
+                            <td>${item.bilL_ADD2 ?? ''}</td>
+                            <td>${item.bilL_ADD3 ?? ''}</td>
+                            <td>${item.bilL_CITYName ?? ''}</td>
+                            <td>${item.agenT_Name ?? ''}</td>
 
-		if (totalPages <= 1) return;
+                            <td>${item.shiP_NAME ?? ''}</td>
+                            <td>${item.shiP_ADD1 ?? ''}</td>
+                            <td>${item.shiP_ADD2 ?? ''}</td>
+                            <td>${item.shiP_ADD3 ?? ''}</td>
+                            <td>${item.statename ?? ''}</td>
 
-		let html = '';
+                            <td>${item.taX_Name ?? ''}</td>
+                            <td>${item.traN_TYPE ?? ''}</td>
+                            <td>${item.supplY_TYPE ?? ''}</td>
+                            <td>${item.iteM_TYPE ?? ''}</td>
+                            <td>${item.wB_NO ?? ''}</td>
+                            <td>${item.pacK_NO ?? ''}</td>
+                            <td>${item.amount ?? ''}</td>
+                            <td>${item.pacK_PER ?? ''}</td>
+                            <td>${item.pacK_AMT ?? ''}</td>
+                            <td>${item.namount ?? ''}</td>
 
-		if (currentPage > 1) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-		}
+                            <td>${item.cgsT_PER ?? ''}</td>
+                            <td>${item.cgsT_AMT ?? ''}</td>
+                            <td>${item.sgsT_PER ?? ''}</td>
+                            <td>${item.sgsT_AMT ?? ''}</td>
+                            <td>${item.igsT_PER ?? ''}</td>
+                            <td>${item.igsT_AMT ?? ''}</td>
+                            <td>${item.cesS_PER ?? ''}</td>
+                            <td>${item.cesS_AMT ?? ''}</td>
 
-		const startPage = Math.max(1, currentPage - 2);
-		const endPage = Math.min(totalPages, currentPage + 2);
+                            <td>${item.loaD_PER ?? ''}</td>
+                            <td>${item.loaD_AMT ?? ''}</td>
+                            <td>${item.loaD_AC ?? ''}</td>
+                            <td>${item.wB_AMT ?? ''}</td>
+                            <td>${item.wB_AC ?? ''}</td>
+                            <td>${item.toT_NOS ?? ''}</td>
+                            <td>${item.frT_AMT ?? ''}</td>
+                            <td>${item.rounD_OFF ?? ''}</td>
 
-		for (let i = startPage; i <= endPage; i++) {
-			html += `
-				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-		}
 
-		if (currentPage < totalPages) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-		}
+                            <td>${item.toT_NET ?? ''}</td>
+                            <td>${item.insU_PER ?? ''}</td>
+                            <td>${item.insU_AMT ?? ''}</td>
+                            <td>${item.tdS_PER ?? ''}</td>
+                            <td>${item.tdS_AMT ?? ''}</td>
+                           
+                            
+                            <td>${item.loaD_REM ?? ''}</td>
+                            <td>${item.wB_REM ?? ''}</td>
+                            <td>${item.toT_GROSS ?? ''}</td>
+                            <td>${item.gR_NO ?? ''}</td>
+                            <td>${formatDate(item.gR_DATE)}</td>
+                            <td>${item.vehiclE_NO ?? ''}</td>
+                            <td>${item.transporT_CODE ?? ''}</td>
+                            <td>${item.transporT_NAME ?? ''}</td>
+                            <td>${item.driveR_NAME ?? ''}</td>
+                            <td>${item.driveR_NO ?? ''}</td>
+                            <td>${item.waybilL_NO ?? ''}</td>
+                            <td>${item.remark ?? ''}</td>
+                            <td>${item.frT_TOPAY ?? ''}</td>
+                            <td>${item.wB_QTY ?? ''}</td>
+                            <td>${item.disC_PER ?? ''}</td>
+                            <td>${item.disC_AMT ?? ''}</td>
+                            <td>${item.cdisC_PER ?? ''}</td>
+                            <td>${item.cdisC_AMT ?? ''}</td>
 
-		pagination.html(html);
-	}
+                    <td class="action-col">
+                        <div class="action-wrap">
+                            <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.doC_ID}')"><i class="fa fa-edit"></i></button>
+                            <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.v_NO}')"><i class="fa fa-eye"></i></button>
+                            <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
+                            <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
 
-	function goToPage(page) {
-		currentPage = page;
-		loadDocumentStages();
-	}
+                        </div>
+                    </td>
+                </tr>
+            `);
 
-	function editDocStage(docCode) {
-		window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}`;
-	}
+            applyGridPermission();
+        });
 
-	function viewDocStage(docCode) {
-		window.location.href = `/ApprovalStageMaster/Index?docCode=${encodeURIComponent(docCode)}&readOnly=true`;
-	}
+    }
 
-	function deleteDocStage(docCode) {
-		Swal.fire({
-			title: 'Are you sure?',
-			text: "You won't be able to revert this deletion!",
-			icon: 'warning',
-			showCancelButton: true,
-			confirmButtonColor: '#d33',
-			cancelButtonColor: '#3085d6',
-			confirmButtonText: 'Yes, delete it!'
-		}).then((result) => {
-			if (result.isConfirmed) {
-				$.ajax({
-					url: '/ApprovalStageMasterList/DeleteDocByCode',
-					type: 'POST',
-					data: { docCode: docCode },
-					success: function (response) {
-						if (response.success) {
-							toastr.success(response.message || "Record deleted successfully.");
-							loadDocumentStages();
-						} else {
-							toastr.warning("Delete failed.");
-						}
-					},
-					error: function () {
-						toastr.error("An error occurred while deleting.");
-					}
-				});
-			}
-		});
-	}
+    // ================= PAGINATION =================
+    function renderPagination() {
 
+        const totalPages = Math.ceil(totalCount / pageSize) || 1;
+
+        let html = '';
+        let maxVisible = 5;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = startPage + maxVisible - 1;
+
+        if (endPage > totalPages) {
+            endPage = totalPages;
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+
+        if (startPage > 1) {
+            html += `<span class="page-number" onclick="goToPage(1)">1</span>`;
+            if (startPage > 2) html += `<span class="dots">...</span>`;
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<span class="page-number ${i === currentPage ? 'active' : ''}"
+                        onclick="goToPage(${i})">${i}</span>`;
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += `<span class="dots">...</span>`;
+            html += `<span class="page-number" onclick="goToPage(${totalPages})">${totalPages}</span>`;
+        }
+
+        $('#pageNumbers').html(html);
+
+        let start = (currentPage - 1) * pageSize + 1;
+        let end = Math.min(currentPage * pageSize, totalCount);
+
+        if (totalCount === 0) {
+            start = 0;
+            end = 0;
+        }
+
+        $('#pageInfoText').text(`Results: ${start} - ${end} of ${totalCount}`);
+
+        $('#prevBtn').prop('disabled', currentPage === 1);
+        $('#nextBtn').prop('disabled', currentPage === totalPages);
+    }
+
+    // ================= PAGINATION ACTIONS =================
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadAllInward();
+        }
+    }
+
+    function nextPage() {
+        const totalPages = Math.ceil(totalCount / pageSize);
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadAllInward();
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllInward();
+    }
+
+    function changeRowsPerPage() {
+        pageSize = parseInt($('#pageSizeSelect').val());
+        currentPage = 1;
+        loadAllInward();
+    }
+
+    // ================= UTIL =================
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '';
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    }
+
+    // ================= ACTIONS =================
+    function AddOrEditFunction(DOC_ID) {
+        window.location.href = `/salesInvoice/Index?id=${encodeURIComponent(DOC_ID)}`;
+    }
+
+    function viewMenuDetails(DOC_ID) {
+        window.location.href = `/salesInvoice/Index?id=${encodeURIComponent(DOC_ID)}&mode=view`;
+    }
+
+    function deleteTemp(code, VType) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You want to delete this Inward Entry?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: '/SalesInvoiceList/Delete',
+                    type: 'POST',
+                    data: { code: code, VType: VType },
+                    success: function (res) {
+
+                        console.log("Deelete Res",res);
+
+                        if(res.validation == false)
+                        {
+                          toastr.warning(res.message );
+                          return;
+                        }
+
+
+                        if (res.success) {
+                            toastr.success(res.message || "Deleted successfully");
+                           // loadAllInward();
+                        } else {
+                            toastr.error(res.message || 'Failed to delete.');
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Error deleting record.');
+                    }
+                });
+            }
+        });
+    }
+
+    function showDocumentPopup(docCode) {
+
+        $.ajax({
+            url: '/SalesInvoiceList/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',
+            data: { docCode: docCode },
+            success: function (response) {
+                if (response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function () {
+                toastr.error("Error fetching document details.");
+            }
+        });
+    }
 
 </script>
-

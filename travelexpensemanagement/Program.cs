@@ -53,6 +53,7 @@ builder.Services.AddScoped<ITransitEntryListRepository, TransitEntryListReposito
 builder.Services.AddScoped<IInventoryDepartmentIssueRepository,  InventoryDepartmentIssueRepository>();
 builder.Services.AddScoped< IInventoryDepartmentIssueListRepository, InventoryDepartmentIssuelistRepository>();
 builder.Services.AddScoped<ISalesProformaInvoice , SalesProformaInvoice>();
+builder.Services.AddScoped<ISalesInVoice, SalesInVoice>();
 builder.Services.Configure<EncryptionSettings>(
 builder.Configuration.GetSection("EncryptionSettings"));
 builder.Services.AddScoped<EncryptionHelper>();
