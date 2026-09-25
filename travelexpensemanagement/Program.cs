@@ -90,6 +90,8 @@ builder.Services.AddScoped<IITInventoryEntryRepository, ITInventoryEntryReposito
 builder.Services.AddScoped<IITInventroyEntryListRepository, ITInventoryEntryListRepositroy>();
 builder.Services.AddScoped<ISaleSaudaEntryRepository, SaleSaudaEntryRepository>();
 builder.Services.AddScoped<ISaleSaudaEntryListRepository, SaleSaudaEntryListRepository>();
+builder.Services.AddScoped<IInsuranceCoverNoteRepository, InsuranceCoverNoteRepository>();
+builder.Services.AddScoped<IInsuranceCoverNoteListRepository, InsuranceCoverNoteListRepository>();
 
 
 // Gete Entry Transaction repositories

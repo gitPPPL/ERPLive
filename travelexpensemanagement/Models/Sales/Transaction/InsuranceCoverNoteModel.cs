@@ -1,6 +1,6 @@
 ﻿namespace travelexpensemanagement.Models.Sales.Transaction
 {
-    public class Sale3model
+    public class InsuranceCoverNoteModel
     {
         public string? DocId { get; set; }
         public int? InsuCode { get; set; }

@@ -6,7 +6,6 @@ const DBTableName = 'SAUDA';
                               
 $(document).ready(async function() {
 
-    await GetVNo();
     await BindAllHeaderDropdown();
     await BindCustomerAgentList();
     await BindItemList();
