@@ -836,7 +836,7 @@
                                     <div  class="erppage-filed"  >
                                 
                                   <label for="txtlictype" class="erppage-label" >Lic Type </label>
-                                    <select class="erppage-input erppage-select">
+                                    <select class="erppage-input erppage-select" id="ddllictype">
                                       <option value=""> Select Lic Type </option>                                      
                                         
                                     </select>
@@ -846,10 +846,15 @@
                                     <div  class="erppage-filed"  >
                                 
                                       <label for="ddl_licNo" class="erppage-label" >Lic No. </label>
-                                        <select class="erppage-input erppage-select" id="ddl_licNo">
+                                        <select class="erppage-input erppage-select" id="DDL_LicNo">
                                           <option value=""> Select Lic Type </option>                                      
                                         
                                         </select>
+
+
+
+
+
 
                                     </div>
 
@@ -866,13 +871,14 @@
 
 
                                 <div  class="erppage-field" >
-                                        <label for="txt_BankName" class="erppage-label"> Bank Name</label>
-                                        <input type="text"  class="erppage-input" id="txt_BankName" />                            
+                                        <label for="DDL_Bank" class="erppage-label"> Bank Name</label>
+
+                                         <select class="erppage-input erppage-select" id="DDL_Bank">
+                                          <option value=""> Select Bank Name </option>                                    
+                                        
+                                        </select>                                                                                         
                                 
-                                </div>
-
-
-                                     
+                                </div>                                     
 
                                 </div>
 
@@ -926,7 +932,7 @@
                         </div>
                         <h5 class="erppagesmodal-title" id="pendingchallanLabel">Copy From</h5>
                     </div>
-                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close" >
                         <i class="fa fa-times"></i>
                     </button>
                 </div>
@@ -941,7 +947,7 @@
                             <label class="erppage-checkbox-label">Append</label>
                         </div>
                         <div class="erppagelist-action">
-                            <button type="button" class="erppage-btn erppage-btn-common-active-disabled" data-bs-dismiss="modal">
+                            <button type="button" class="erppage-btn erppage-btn-common-active-disabled" data-bs-dismiss="modal" id="Btn_CopyData">
                                 <i class="fa fa-copy"></i>Copy
                             </button>
                         </div>
@@ -981,7 +987,9 @@
                                 </colgroup>
                                 <thead>
                                     <tr>
-                                        <th><input type="checkbox" /></th>
+                                    <th>
+                                    <input type="checkbox" id="chkSelectAllPending">
+                                    </th>
                                         <th>Document Id</th>
                                         <th>Voucher Type</th>
                                         <th>Voucher No</th>

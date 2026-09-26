@@ -46,15 +46,12 @@ $(document).ready(async function () {
         ]);
     });
 
-
     $('#ddlConsignee').on('change', async function ()
     {  
         selectedConsigneeData();
         let partycode = $('#ddlConsignee').val();
         cmbConsigneeAddress(partycode);       
     });
-
-
 
     $("#btn-save").click(function (e) {
         e.preventDefault();
@@ -234,7 +231,11 @@ $(document).ready(async function () {
         let TPT_DISTANCE = parseInt($.trim($('#NumDistance').val()), 10) || 0;
         let TPT_MODE = parseInt($.trim($('#ddlMode').val()), 10) || 0;
         let PAY_TERM = parseInt($.trim($('#ddlPaymentTerm').val()), 10) || 0;
-        let PAYMENT_TERM = $.trim($('#ddlPaymentTerm option:selected').text()) || "";
+
+        let PAYMENT_TERM = $.trim($('#ddlPaymentTerm').val()) || "";
+
+
+  
         let DELIVERY_TERMS = $.trim($('#TxtDeliveryTerm').val()) || "";
         let WAYBILL_NO = $.trim($('#txt_WayBillNo').val()) || "";
         let LOAD_AC =  $.trim($('#ddl_LoadParty').val()) || "";
@@ -258,8 +259,8 @@ $(document).ready(async function () {
         let SB_NO = $.trim($('#txxt_ShipBillNo').val()) || "";
         let SB_DATE = null;
 
-        if ($('#DtDocumentDate').val()) {
-            SB_DATE = formatDate($('#DtDocumentDate').val());
+        if ($('#dt_ShipDate').val()) {
+            SB_DATE = formatDate($('#dt_ShipDate').val());
         }
 
         let FOB_VALUE =   parseFloat($.trim($('#txxt_FobValue').val())) || 0;
@@ -274,8 +275,7 @@ $(document).ready(async function () {
         let LUT_DATE = null;
 
         if ($('#dt_LutDate').val()) {
-            LUT_DATE =
-                formatDate($('#dt_LutDate').val());
+            LUT_DATE = formatDate($('#dt_LutDate').val());
         }
 
         let INCOTERM = "";
@@ -284,7 +284,18 @@ $(document).ready(async function () {
         let LC_NO = $.trim($('#ddl_licNo').val()) || "";
         let action = (!rowId || rowId.trim() === '')  ? "INSERT" : "UPDATE";
         let STATUS = parseInt($.trim($('#ddlDocStatus').val()), 10) || 0;
+        let BANK_CODE = parseInt($.trim($('#DDL_Bank').val()), 10) || 0;
+
+
+        let LICENCE_TYPE = $.trim($('#ddllictype').val()) || "";
+        let LICENCE_NO = $.trim($('#DDL_LicNo').val()) || "";
+        let LICENCE_DATE = formatDate($('#txt_LicDT').val());
+
+
+
+
         const Header = {
+            BANK_CODE,
             DoType,
             Do_NO,
             DOC_ID,
@@ -406,7 +417,10 @@ $(document).ready(async function () {
             BILLOF_LADING,
             LC_NO,
             action,
-            STATUS
+            STATUS,
+            LICENCE_TYPE,
+            LICENCE_NO,
+            LICENCE_DATE
         };
 
         const model = {  Header: Header,
@@ -487,6 +501,204 @@ $(document).ready(async function () {
                 $("#btn-saves").prop("disabled", false);
             }
         });
+    });
+
+    $('#ddllictype').on('change', async function () {
+
+        let type = $(this).val();
+
+        await DDlLicNO(type);
+    });
+
+    $('#btn_pendingchallan').on('click', async function ()
+    {
+        await GetPendingDetails();
+    });
+
+    $('#chkSelectAllPending').on('change', function () {
+
+        let isChecked = $(this).prop('checked');
+
+        $('#tblpurchaseordermodal tbody .pending-row-check')
+            .prop('checked', isChecked);
+
+    });
+
+    $('#Btn_CopyData').on('click', function () {
+
+        let data = GetSelectedPendingRow();
+
+        if (data.length === 0) {
+            toastr.warning('Please select at least one row.');
+            return;
+        }
+
+        // Remove blank rows
+        $('#tblSalesInvoice tbody tr').each(function () {
+
+            let $row = $(this);
+
+            let itemCode = $.trim($row.find('.ID').val());
+            let productCode = $.trim($row.find('.ddlProductName').val());
+
+            if (!itemCode && !productCode) {
+                $row.remove();
+            }
+        });
+
+        let addedCount = 0;
+        let duplicateCount = 0;
+
+        // Add selected rows
+        data.forEach(function (row) {
+
+            if (!row || !row.Item_Code || !row.DOC_ID) {
+                return;
+            }
+
+            // Check duplicate
+            let exists = $('#tblSalesInvoice tbody tr').filter(function () {
+
+                return $(this).attr('data-doc-id') === String(row.DOC_ID) &&
+                    $(this).attr('data-sno') === String(row.SNO);
+
+            }).length > 0;
+
+            if (exists) {
+                duplicateCount++;
+                return;
+            }
+
+            AddRow({
+                ID: row.Item_Code,
+                Productcode: row.Item_Code,
+                nos: row.Nos ?? 0,
+                grossQty: row.Gross ?? 0,
+                NetQty: row.Qty ?? 0,
+                Rate: row.Rate ?? 0,
+                Amount: row.Amount ?? 0,
+                PackPer: row.PACK_Per ?? 0,
+                PackAmt: row.PACK_Amt ?? 0,
+                DisPer: row.Disc_Per ?? 0,
+                Disamt: row.Disc_Amt ?? 0,
+                CgstPer: row.CGST_Per ?? 0,
+                CgstAmt: row.CGST_Amt ?? 0,
+                SgstPer: row.SGST_Per ?? 0,
+                SgstAmt: row.SGST_Amt ?? 0,
+                IgstPer: row.IGST_Per ?? 0,
+                IgstAmt: row.IGST_Amt ?? 0,
+                Remark: row.Remark ?? '',
+                HsnCode: row.HSN_Code ?? '',
+                DocType: row.V_TYPE ?? '',
+                DocNo: row.V_NO ?? ''
+            });
+
+            $('#tblSalesInvoice tbody tr:last')
+                .attr('data-doc-id', row.DOC_ID)
+                .attr('data-sno', row.SNO);
+
+            addedCount++;
+        });
+
+        // Messages
+        if (addedCount > 0) {
+            toastr.success(addedCount + ' row(s) added successfully.');
+        }
+
+        if (duplicateCount > 0) {
+            toastr.warning(
+                duplicateCount + ' duplicate row(s) already exist and were not added.'
+            );
+        }
+
+    });
+
+
+    $('#ddlTaxType').on('change', function () {
+
+        const selectedCode = $(this).val();
+
+        const selectedTax = TaxPercentageData.find(
+            item => String(item.code) === String(selectedCode)
+        );
+
+        console.log("Selected Code:", selectedCode);
+        console.log("Selected Tax Data:", selectedTax);
+
+        if (!selectedTax) {
+            $('#tblSalesInvoice tbody tr').each(function () {
+
+                const $row = $(this);
+
+                $row.find('.TxtTaxType').val('');
+                $row.find('.TxtCgstper').val('0.00');
+                $row.find('.TxtSgstPer').val('0.00');
+                $row.find('.TxtIGSTPer').val('0.00');
+
+            });
+
+            return;
+        }
+
+        const CGST = Number(selectedTax.cgsT_PER || 0).toFixed(2);
+        const SGST = Number(selectedTax.sgsT_PER || 0).toFixed(2);
+        const IGST = Number(selectedTax.igsT_PER || 0).toFixed(2);
+
+        $('#tblSalesInvoice tbody tr').each(function () {
+
+            const $row = $(this);
+
+ 
+            $row.find('.TxtTaxType').val(selectedCode);
+
+     
+            $row.find('.TxtCgstper').val(CGST);
+            $row.find('.TxtSgstPer').val(SGST);
+            $row.find('.TxtIGSTPer').val(IGST);
+
+            // Recalculate row if required
+            if (typeof CalculateRow === 'function') {
+                CalculateRow($row);
+            }
+
+        });
+
+    });
+
+    $('#btn_OutAlloed').on('click', async function () {
+
+        try {
+            let vType = $.trim($('#ddlDocumentType').val()) || "";
+            let vNo = $.trim($('#NumInvoiceNo').val()) || "";
+
+            if (!vType || !vNo) {
+                toastr.warning("Please select V Type and enter V No.");
+                return;
+            }
+
+            const res = await $.ajax({
+                url: '/SalesInvoice/Outallowed',
+                type: 'POST',
+                data: {
+                    vType: vType,
+                    vNo: vNo
+                }
+            });
+
+            if (res.success) {
+                toastr.success(res.message);
+
+                $('#btn_OutAlloed').prop('disabled', true);
+
+            } else {
+                toastr.warning(res.message);
+            }
+
+        } catch (error) {
+            console.error("Out Allowed Error:", error);
+            toastr.error("Something went wrong.");
+        }
+
     });
 
 });

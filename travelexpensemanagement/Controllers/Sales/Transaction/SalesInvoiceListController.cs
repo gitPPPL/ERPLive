@@ -207,6 +207,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     DOC_ID = rdr["DOC_ID"]?.ToString(),
                                     GODOWN_CODE = rdr["GODOWN_CODE"]?.ToString(),                       
 
+                                    BANK_CODE = rdr["BANK_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["BANK_CODE"]) : 0,
                                     BILL_CODE = rdr["BILL_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["BILL_CODE"]) : 0,
                                     BILL_NAME = rdr["BILL_NAME"]?.ToString(),
                                     BILL_ADD1 = rdr["BILL_ADD1"]?.ToString(),
@@ -309,8 +310,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     SB_NO = rdr["SB_NO"]?.ToString(),
                                     SB_DATE = rdr["SB_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["SB_DATE"]) : DateTime.MinValue,
                                     LUT_DATE = rdr["LUT_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["LUT_DATE"]) : DateTime.MinValue,
-                                    LICENCE_DATE = rdr["LICENCE_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["LICENCE_DATE"]) : DateTime.MinValue,
-
+                                 
                                     PORT_CODE = rdr["PORT_CODE"]?.ToString(),
                                     FOB_VALUE = rdr["FOB_VALUE"] != DBNull.Value ? Convert.ToDecimal(rdr["FOB_VALUE"]) : 0,
                                     FOB_FRT = rdr["FOB_FRT"] != DBNull.Value ? Convert.ToDecimal(rdr["FOB_FRT"]) : 0,
@@ -326,6 +326,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     LC_NO = rdr["LC_NO"]?.ToString(),
                                     LICENCE_NO = rdr["LICENCE_NO"]?.ToString(),
                                     LICENCE_TYPE = rdr["LICENCE_TYPE"]?.ToString(),
+                                    LICENCE_DATE = rdr["LICENCE_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["LICENCE_DATE"]) : DateTime.MinValue,
                                     BILLOF_LADING = rdr["BILLOF_LADING"]?.ToString(),
                                     SHIPMENT_TYPE = rdr["SHIPMENT_TYPE"]?.ToString(),
                                     TRAN_TYPE = rdr["TRAN_TYPE"]?.ToString(),
@@ -617,6 +618,84 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             public string? LIP { get; set; }
             public string? LID { get; set; }
         }
+
+
+        [HttpPost]
+        public IActionResult GetPendingDataCode(int BillCode)
+        {
+            var GetGlobalCode = _globalVariableService.GetGlobalVariables();
+
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd = new SqlCommand("sp_SalesInvoice", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue("@Action", "PendingDetail");
+                        cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@BILL_CODE", BillCode);
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            var result = new List<Dictionary<string, object>>();
+
+                            while (reader.Read())
+                            {
+                                var row = new Dictionary<string, object>();
+
+                                row["DOC_ID"] = reader["DOC_ID"] == DBNull.Value ? null : reader["DOC_ID"];
+                                row["V_TYPE"] = reader["V_TYPE"] == DBNull.Value ? null : reader["V_TYPE"];
+                                row["V_NO"] = reader["V_NO"] == DBNull.Value ? null : reader["V_NO"];
+                                row["V_DATE"] = reader["V_DATE"] == DBNull.Value ? null : reader["V_DATE"];
+                                row["Item_Name"] = reader["Item_Name"] == DBNull.Value ? null : reader["Item_Name"];
+                                row["Item_Unit"] = reader["Item_Unit"] == DBNull.Value ? null : reader["Item_Unit"];
+                                row["HSN_Code"] = reader["HSN_Code"] == DBNull.Value  ? null : reader["HSN_Code"];
+                                row["Nos"] = reader["Nos"] == DBNull.Value ? null : reader["Nos"];
+                                row["Gross"] = reader["Gross"] == DBNull.Value ? null : reader["Gross"];
+                                row["Qty"] = reader["Qty"] == DBNull.Value  ? null : reader["Qty"];
+                                row["Rate"] = reader["Rate"] == DBNull.Value ? null : reader["Rate"];
+                                row["Amount"] = reader["Amount"] == DBNull.Value ? null : reader["Amount"];
+                                row["Disc_Per"] = reader["Disc_Per"] == DBNull.Value ? null : reader["Disc_Per"];
+                                row["Disc_Amt"] = reader["Disc_Amt"] == DBNull.Value ? null : reader["Disc_Amt"];
+                                row["CGST_Per"] = reader["CGST_Per"] == DBNull.Value ? null : reader["CGST_Per"];
+                                row["CGST_Amt"] = reader["CGST_Amt"] == DBNull.Value  ? null : reader["CGST_Amt"];
+                                row["SGST_Per"] = reader["SGST_Per"] == DBNull.Value ? null : reader["SGST_Per"];
+                                row["SGST_Amt"] = reader["SGST_Amt"] == DBNull.Value ? null : reader["SGST_Amt"];
+                                row["IGST_Per"] = reader["IGST_Per"] == DBNull.Value  ? null : reader["IGST_Per"];
+                                row["IGST_Amt"] = reader["IGST_Amt"] == DBNull.Value  ? null : reader["IGST_Amt"];
+                                row["PACK_Per"] = reader["PACK_Per"] == DBNull.Value ? null : reader["PACK_Per"];
+                                row["PACK_Amt"] = reader["PACK_Amt"] == DBNull.Value  ? null : reader["PACK_Amt"];
+                                row["Remark"] = reader["Remark"] == DBNull.Value ? null : reader["Remark"];
+                                row["Type"] = reader["Type"] == DBNull.Value ? null : reader["Type"];
+                                row["SNO"] = reader["SNO"] == DBNull.Value  ? null : reader["SNO"];
+                                row["Item_Code"] = reader["Item_Code"] == DBNull.Value ? null : reader["Item_Code"];
+
+                                result.Add(row);
+                            }
+
+                            return Json(new { success = true, data = result });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error fetching pending order details",
+                    error = ex.Message
+                });
+            }
+        }
+
+
+
 
 
     }

@@ -313,11 +313,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@BILLOF_LADING", header.BILLOF_LADING);
                         cmd.Parameters.AddWithValue("@Supply_type", header.SUPPLY_TYPE);
                         cmd.Parameters.AddWithValue("@LC_NO", header.LC_NO);
-                        //cmd.Parameters.AddWithValue("@LICENCE_NO", header.);
-                        //cmd.Parameters.AddWithValue("@LICENCE_TYPE", header.);
-                        //cmd.Parameters.AddWithValue("@LICENCE_DATE", header.);
+                        cmd.Parameters.AddWithValue("@LICENCE_NO", header.LICENCE_NO);
+                        cmd.Parameters.AddWithValue("@LICENCE_TYPE", header.LICENCE_TYPE);
+                        cmd.Parameters.AddWithValue("@LICENCE_DATE", header.LICENCE_DATE);
                         cmd.Parameters.AddWithValue("@SHIPMENT_TYPE", header.SHIPMENT_TYPE);
                         cmd.Parameters.AddWithValue("@TRAN_TYPE", header.TRAN_TYPE);
+                        cmd.Parameters.AddWithValue("@BANK_CODE", header.BANK_CODE);
                    
                         cmd.Parameters.AddWithValue("@CURRENCY", header.CURRENCY);
                     

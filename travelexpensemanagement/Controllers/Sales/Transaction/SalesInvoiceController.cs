@@ -72,6 +72,55 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
+        public JsonResult DDlCURRENCY_MAST()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = "select code , SHORTNAME from CURRENCY_MAST where active = 1 ";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+        public JsonResult DDlLicType()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"Select distinct LC_TYPE as no , LC_TYPE as name  from ADVLIC_MAST where Comp_code={getdata.PubCompCode} Order by LC_TYPE";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+
+
+
+
+
+        public JsonResult DDlLicNO(String TYPE)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"Select LC_NO,CONCAT(LC_NO,'  |  ',format(ISSUE_DATE,'dd/MM/yyyy'),'  |  ',format(EXPIRY_DATE,'dd/MM/yyyy'))LC
+                from ADVLIC_MAST where Comp_code={getdata.PubCompCode} and LC_TYPE='{TYPE}' Order by ISSUE_DATE";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+
+        public JsonResult DDLBank(String TYPE)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"select code,NAME from BANK_MAST where ACTIVE =1 ";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+
+
         public JsonResult DDlTransPortMode()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -82,7 +131,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
+        
         public JsonResult DDlDoNo()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -93,7 +142,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
 
         public JsonResult cmbPartyName()
         {
@@ -517,5 +565,105 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             return Json(new { success = result.Status == "Success", status = result.Status, message = result.Message });
         }
+
+        public JsonResult Outallowed(string vType, string vNo)
+        {
+            try
+            {
+                var getdata = _globalVariableService.GetGlobalVariables();
+
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    string refNo = $"{vType}{vNo.Trim()}";
+
+                    string dno = "";
+
+                    string query = @" SELECT CONCAT(V_Type, V_No)  FROM DO1 WHERE CONCAT(Ref_Type, Ref_No) = @RefNo  AND Comp_Code = @CompCode
+                    AND Branch_Code = @BranchCode AND Year_Code = @YearCode";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@RefNo", refNo);
+                        cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
+
+                        object result = cmd.ExecuteScalar();
+
+                        if (result != null && result != DBNull.Value)
+                        {
+                            dno = result.ToString()?.Trim() ?? "";
+                        }
+                    }
+
+                    if (string.IsNullOrWhiteSpace(dno) || dno.Length < 13)
+                    {
+                        return Json(new  { success = false, status = "INVALID_DO", message = "Invalid DO Number." });
+                    }
+
+                    string gateCheckQuery = @" SELECT COUNT(1)  FROM Gate1  WHERE CONCAT(Disp_Plan_type, Disp_Plan_No) = @DNo
+                        AND Comp_Code = @CompCode  AND Branch_Code = @BranchCode AND Year_Code = @YearCode";
+
+                    using (SqlCommand cmd = new SqlCommand(gateCheckQuery, con))
+                    {
+                        cmd.Parameters.AddWithValue("@DNo", dno);
+                        cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
+
+                        int count = Convert.ToInt32(cmd.ExecuteScalar());
+
+                        if (count == 0)
+                        {
+                            return Json(new { success = false, status = "INVALID_DO", message = "Invalid DO Number." });
+                        }
+                    }
+
+
+                    string activeCheckQuery = @"  SELECT COUNT(1)  FROM Gate1  WHERE CONCAT(Disp_Plan_type, Disp_Plan_No) = @DNo
+                        AND INOUT_ACTIVE = 'Yes'  AND Comp_Code = @CompCode  AND Branch_Code = @BranchCode AND Year_Code = @YearCode";
+
+                    using (SqlCommand cmd = new SqlCommand(activeCheckQuery, con))
+                    {
+                        cmd.Parameters.AddWithValue("@DNo", dno);
+                        cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
+
+                        int count = Convert.ToInt32(cmd.ExecuteScalar());
+
+                        if (count == 0)
+                        {
+                            return Json(new  {  success = false, status = "NOT_ACTIVE",  message = "DO Number not Active." });
+                        }
+                    }
+
+                    string updateQuery = @" UPDATE Gate1 SET OUT_ALLOWED = 'Yes', OUT_ALLOWEDBY = @UserId
+                        WHERE CONCAT(Disp_Plan_type, Disp_Plan_No) = @DNo  AND Comp_Code = @CompCode  AND Branch_Code = @BranchCode  AND Year_Code = @YearCode";
+
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, con))
+                    {
+                        cmd.Parameters.AddWithValue("@UserId", getdata.PubUserId);
+                        cmd.Parameters.AddWithValue("@DNo", dno);
+                        cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                        cmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
+                        cmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
+
+                        cmd.ExecuteNonQuery();
+                    }
+
+
+                    return Json(new { success = true, status = "SUCCESS",  message = "Out Allowed.", doNo = dno });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new {  success = false, status = "ERROR",  message = ex.Message  });
+            }
+        }
+
+
     }
 }

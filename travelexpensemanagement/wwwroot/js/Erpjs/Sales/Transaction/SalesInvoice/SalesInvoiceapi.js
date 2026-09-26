@@ -1,5 +1,4 @@
 ﻿
-
 async function LoadDropdown() {
     try {
         await Promise.all([
@@ -20,7 +19,10 @@ async function LoadDropdown() {
             cmbProductName(),
             DDlLoadParty(),
             DDlWBParty(),
-            DDlTransPortMode()
+            DDlTransPortMode(),
+            DDlCURRENCY_MAST(),
+            DDlLicType(),
+            DDLBank()
         ]);
     } catch (error) {
         console.log("Dropdown load failed:", error);
@@ -40,6 +42,37 @@ async function cmbV_type() {
         });
     } catch (error) {
         console.error("Error loading Doc Type:", error);
+    }
+}
+
+async function DDlCURRENCY_MAST() {
+    try {
+        const res = await fetch('/SalesInvoice/DDlCURRENCY_MAST');
+        const data = await res.json();
+        const ddl = $('#ddl_currency');
+        ddl.empty().append('<option value="">---Select CURRENCY---</option>');
+     
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading Doc Type:", error);
+    }
+}
+
+
+async function DDlLicType() {
+    try {
+        const res = await fetch('/SalesInvoice/DDlLicType');
+        const data = await res.json();
+        const ddl = $('#ddllictype');
+        ddl.empty().append('<option value="">---Select Lic Type ---</option>');
+     
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading Lic Type:", error);
     }
 }
 
@@ -205,7 +238,6 @@ async function ddlPartyName() {
         console.error("Error loading Party Name:", error);
     }
 }
-
 function selectedPartyData() {
     const selectedCode = $('#ddlPartyName').val();  
 
@@ -237,7 +269,6 @@ function selectedPartyData() {
     $('#NumSupplyPIN').val(party.pincode || '');
     $('#NumGSTNoL').val(party.gstin || '');
 }
-
 function selectedConsigneeData() {
     const selectedCode = $('#ddlConsignee').val();
 
@@ -260,7 +291,6 @@ function selectedConsigneeData() {
     $('#NumSupplyPIN').val(party.pincode || '');
     $('#NumGSTNoL').val(party.gstin || '');
 }
-
 
 async function cmbTaxType() {
     try {
@@ -293,7 +323,6 @@ async function GetVNo(Vtype, tableName) {
         $('#NumInvoiceNo').val(data.v_NO);
     }
 }
-
 
 function DeleteRow(button)
 {
@@ -502,7 +531,6 @@ async function DDlTransPort() {
     }
 }
 
-
 async function cmbProductName() {
     try {
         const res = await fetch('/SalesInvoice/cmbProductName');
@@ -528,7 +556,6 @@ async function cmbProductName() {
         throw error;
     }
 }
-
 
 async function DDlLoadParty() {
     try {
@@ -560,5 +587,33 @@ async function DDlWBParty() {
     }
 }
 
+async function DDlLicNO(TYPE) {
+    try {
+        const res = await fetch(`/SalesInvoice/DDlLicNO?TYPE=${encodeURIComponent(TYPE)}`);
+        const data = await res.json();
+        const ddl = $('#DDL_LicNo');
+         ddl.empty().append('<option value="">---Select WB Party Name---</option>');
+
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading WB Party Name:", error);
+    }
+}
 
 
+async function DDLBank() {
+    try {
+        const res = await fetch('/SalesInvoice/DDLBank');
+        const data = await res.json();
+        const ddl = $('#DDL_Bank');
+        ddl.empty().append('<option value="">---Select Bank Name---</option>');
+
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error Bank Name:", error);
+    }
+}
