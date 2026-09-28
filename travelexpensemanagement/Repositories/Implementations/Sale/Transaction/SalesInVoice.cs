@@ -62,6 +62,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
             try
             {
                 var GlobalData = _globalVariableService.GetGlobalVariables();
+                var GeneralSetting = await  _globalVariableService.LoadGeneralSetting();
+
                 using var conn = _dbConnection.GetErpConnection();
                 DataTable dt = new DataTable();
 
@@ -73,6 +75,11 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 Boolean isFinalApprovalBody = false;
                 Boolean isFinalApprovalBodyCS = false;
                 Boolean isFinalApprovalBodyLCS = false;
+
+                string issuevtype = "";
+
+                Boolean chkval = false;
+                Boolean WBReqCN = false;
 
 
 
@@ -121,7 +128,21 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     fappUserCode = GlobalData.PubUserId.ToString();
                 }
                
-                if(header.V_TYPE != "SAJI")
+
+                if(GlobalData.PubCompCode == "1"  && header.V_TYPE == "PSF")
+                {
+                    chkval = true;
+                }
+                else if ((GlobalData.PubCompCode == "2" || GlobalData.PubCompCode == "5"  &&  (header.V_TYPE == "Fabric"  ||  header.V_TYPE == "Sacks") ))
+                {
+                    chkval = true;
+                }
+                else if (GlobalData.PubCompCode == "4" && header.V_TYPE == "Finish")
+                {
+                    chkval = true;
+                }
+
+                if (header.V_TYPE != "SAJI")
                 {
 
                     decimal clbl = 0;
@@ -129,8 +150,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     decimal LastCrLimit = 0;
 
                     string query5 = $@"select isnull(sum(Amt),0) as Amt from ledger2 where CR_CODE= {header.BILL_CODE}  and COMP_CODE={GlobalData.PubCompCode} and concat(V_type,V_no)<> '{header.V_TYPE} {header.V_NO}'";
-                    clbl  -= Convert.ToDecimal(GetText(query5));
-                 
+                    clbl -= Convert.ToDecimal(GetText(query5));
+
                     string query6 = $@"select isnull( sum(Amt),0) as Amt  from ledger2 where DR_CODE= {header.BILL_CODE}  and COMP_CODE= {GlobalData.PubCompCode} and concat(V_type,V_no)<>'{header.V_TYPE}{header.V_NO}'";
                     clbl += Convert.ToDecimal(GetText(query6));
 
@@ -140,11 +161,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                     string Credit_type = GetText(query7);
 
-                    if(Credit_type == "Against LC" && header.LC_NO  == "")
+                    if (Credit_type == "Against LC" && header.LC_NO == "")
                     {
-                        return ("Validation", "LC Number Required. Otherwise invoice will not Approve.");
-                        fappstatus = "";
-                        fappRemark = "";
+                        return ("Validation", "LC Number Required. Otherwise invoice will not Approve."); fappstatus = ""; fappRemark = "";
                     }
                 }
 
@@ -174,6 +193,366 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         }
                     }
                 }
+
+                if (header.SUPPLY_TYPE == "EXPWOP" || header.SUPPLY_TYPE == "EXPWP")
+                {
+                    using (SqlConnection con = _dbConnection.GetErpConnection())
+                    {
+                        string sql = @"  SELECT COUNT(*) FROM Subgroup_Address  WHERE comp_code = @CompCode AND Code = @PartyCode AND ISNULL(Add1, '') <> ''";
+
+                        using (SqlCommand cmd = new SqlCommand(sql, con))
+                        {
+                            cmd.Parameters.AddWithValue("@CompCode", GlobalData.PubCompCode);
+                            cmd.Parameters.AddWithValue("@PartyCode", header.BILL_CODE);
+
+                            con.Open();
+
+                            int addctr = Convert.ToInt32(cmd.ExecuteScalar());
+
+                            if (addctr > 1)
+                            {
+                                return (
+                                    "Validation",
+                                    $"{header.BILL_NAME} has multiple address, and for Export Multiple Address not allowed in same Ledger. " +
+                                    "So, Please create Separate Party Ledger for each address."
+                                );
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (GlobalData.PubCompCode != "3" &&
+                        (header.V_TYPE == "SAGT" || header.V_TYPE == "SABS"))
+                    {
+                        using (SqlConnection con = _dbConnection.GetErpConnection())
+                        {
+                            con.Open();
+
+                            // Check party exists in CRLIMIT_MAST
+                            string checkPartySql = @" SELECT 1 FROM CRLIMIT_MAST  WHERE PARTY_CODE = @PartyCode  AND COMP_CODE = @CompCode";
+
+                            using (SqlCommand cmd = new SqlCommand(checkPartySql, con))
+                            {
+                                cmd.Parameters.AddWithValue("@PartyCode", header.BILL_CODE);
+                                cmd.Parameters.AddWithValue("@CompCode", GlobalData.PubCompCode);
+
+                                object partyExists = cmd.ExecuteScalar();
+
+                                if (partyExists == null)
+                                {
+                                    return ( "Validation", "Party not exist in CR Limit Master. Invoice can not generated." );
+                                }
+                            }
+
+                            // Previous Debit
+                            string debitSql = @"  SELECT ISNULL(SUM(AMT), 0) FROM LEDGER2  WHERE V_TYPE = @VType AND V_NO <> @VNo
+                                AND DR_CODE = @PartyCode AND Comp_Code = @CompCode";
+
+                            decimal pDrAmt;
+
+                            using (SqlCommand cmd = new SqlCommand(debitSql, con))
+                            {
+                                cmd.Parameters.AddWithValue("@VType", header.V_TYPE);
+                                cmd.Parameters.AddWithValue("@VNo", header.V_NO);
+                                cmd.Parameters.AddWithValue("@PartyCode", header.BILL_CODE);
+                                cmd.Parameters.AddWithValue("@CompCode", GlobalData.PubCompCode);
+
+                                pDrAmt = Convert.ToDecimal(cmd.ExecuteScalar());
+                            }
+
+                            // Previous Credit
+                            string creditSql = @"  SELECT ISNULL(SUM(AMT), 0)  FROM LEDGER2  WHERE CR_CODE = @PartyCode AND Comp_Code = @CompCode";
+
+                            decimal pCrAmt;
+
+                            using (SqlCommand cmd = new SqlCommand(creditSql, con))
+                            {
+                                cmd.Parameters.AddWithValue("@PartyCode", header.BILL_CODE);
+                                cmd.Parameters.AddWithValue("@CompCode", GlobalData.PubCompCode);
+
+                                pCrAmt = Convert.ToDecimal(cmd.ExecuteScalar());
+                            }
+
+                            // Total Debit including current invoice
+                            decimal totDrAmt = pDrAmt + Convert.ToDecimal(header.NAMOUNT ?? 0);
+
+                            // Balance Amount
+                            decimal balAmt = totDrAmt - pCrAmt;
+
+                            // Credit Limit
+                            string limitSql = @" SELECT ISNULL(CR_LIMIT, 0)  FROM CRLIMIT_MAST WHERE PARTY_CODE = @PartyCode  AND COMP_CODE = @CompCode";
+
+                            decimal crLimitAmt;
+
+                            using (SqlCommand cmd = new SqlCommand(limitSql, con))
+                            {
+                                cmd.Parameters.AddWithValue("@PartyCode", header.BILL_CODE);
+                                cmd.Parameters.AddWithValue("@CompCode", GlobalData.PubCompCode);
+
+                                crLimitAmt = Convert.ToDecimal(cmd.ExecuteScalar());
+                            }
+
+                            // Credit Limit <= 0
+                            if (crLimitAmt <= 0)
+                            {
+                                return ( "Validation", "Credit Limit is <=0. Invoice can not generated." );
+                            }
+
+                            // Credit Limit exceeded
+                            if (balAmt - crLimitAmt > 1)
+                            {
+                                return ( "Validation", "Total Sale Amount exceeds Credit Limit (Incl. this invoice). Invoice can not generated.");
+                            }
+                        }
+                    }
+                }
+
+
+
+                if (GeneralSetting.pubDefSOINSI == "Yes")
+                {
+                    if (details.Count > 0)
+                    {
+                        if (details[0].ITEM_NAME == null)
+                        {
+                            if (header.V_TYPE == "SAGT" && details[0].ORD_NO > 0)
+                            {
+                                // Delivery Order
+                                if (details[0].ORD_TYPE == "DOGT")
+                                {
+                                    string query = $@"
+                                        SELECT 1
+                                        FROM DO1
+                                        WHERE BILL_CODE = {header.BILL_CODE}
+                                        AND V_TYPE = '{details[0].ORD_TYPE}'
+                                        AND V_NO = {details[0].ORD_NO}
+                                        AND COMP_CODE = {GlobalData.PubCompCode}
+                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}";
+
+                                    if (!IsExist(query))
+                                    {
+                                        return (
+                                            "Validation",
+                                            "Party in Sale Invoice not mathced with Party in Delivery Order. Please check it."
+                                        );
+                                    }
+                                }
+                                // Sales Order
+                                else
+                                {
+                                    string query = $@"
+                                        SELECT 1
+                                        FROM ORDER1
+                                        WHERE PARTY_CODE = {header.BILL_CODE}
+                                        AND V_TYPE = '{details[0].ORD_TYPE}'
+                                        AND V_NO = {details[0].ORD_NO}
+                                        AND COMP_CODE = {GlobalData.PubCompCode}
+                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}";
+
+                                    if (!IsExist(query))
+                                    {
+                                        return (
+                                            "Validation",
+                                            "Party in Sale Invoice not mathced with Party in Sale Order. Please check it."
+                                        );
+                                    }
+                                }
+
+                                // Shipping Party validation
+                                string shipQuery = $@"
+                                    SELECT 1
+                                    FROM ORDER1
+                                    WHERE SHIP_CODE = {header.SHIP_CODE}
+                                    AND V_TYPE = '{details[0].ORD_TYPE}'
+                                    AND V_NO = {details[0].ORD_NO}
+                                    AND COMP_CODE = {GlobalData.PubCompCode}
+                                    AND BRANCH_CODE = {GlobalData.PubBranchCode}";
+
+                                if (!IsExist(shipQuery))
+                                {
+                                    // VB code only displays message here.
+                                    // It does NOT return False.
+                                    return (
+                                        "Validation",
+                                        "Shipping Party in Sale Invoice not mathced with Shipping Party in Sale Order. Please check it."
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                if (GeneralSetting.pubDefPACKINSI == "Yes")
+                {
+                    if (GlobalData.PubCompCode != "3" &&
+                        GlobalData.PubCompCode != "2" &&
+                        GlobalData.PubCompCode != "5")
+                    {
+                        if (header.PACK_NO > 0)
+                        {
+                            int pubRes1Int = Convert.ToInt32(GetText($@" SELECT V_NO FROM SALE1 WHERE PACK_TYPE = '{header.PACK_TYPE}' AND PACK_NO = {header.PACK_NO}
+                            AND ISNULL(Status, 0) <> 2
+                            AND COMP_CODE = {GlobalData.PubCompCode}
+                            AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                            AND YEAR_CODE = {GlobalData.PubFYearCode}
+                            AND DOC_ID <> '{header.DOC_ID}'"));
+
+                            if (pubRes1Int > 0)
+                            {
+                                return ( "Validation",  $"Packing Slip No. already Exist in Sale, Serial No. {pubRes1Int}");
+                            }
+                        }
+                    }
+                }
+
+
+                if (IsExist($@"  SELECT 1  FROM GATE2  WHERE V_TYPE = 'OUSL'  AND REF_TYPE = '{header.V_TYPE}' AND REF_NO = {header.V_NO}  AND COMP_CODE = {GlobalData.PubCompCode}  AND BRANCH_CODE = {GlobalData.PubBranchCode}"))
+                {  
+                    return (  "Validation",  "Gate Pass created, modification not allowed." );
+                }
+
+
+                    string discPerMaster = GetText($@"
+                    SELECT ISNULL(DISC_PER, 0)
+                    FROM SUBGROUP_MAST
+                    WHERE CODE = {header.BILL_CODE}
+                    AND COMP_CODE = {GlobalData.PubCompCode}");
+
+                    decimal masterDisc = decimal.TryParse(discPerMaster, out var masterValue) ? masterValue  : 0;
+                           
+
+                    if (header.DISC_PER != masterDisc)
+                    {
+                     return ( "Warning", $"Discount in master=>{masterDisc} % not matched with Discount in invoice=>{header.DISC_PER}%, Please check it.");
+                    }
+
+
+                if (details.Count > 0)
+                {
+                    for (int i = 0; i < details.Count; i++)
+                    {
+                        if (details[i].ITEM_CODE != null)
+                        {
+                            if (Convert.ToDecimal(details[i].DCN_NO) > 0)
+                            {
+                                string wbNoText = GetText($@" SELECT ISNULL(WB_NO, 0)
+                                FROM DC_NOTE2
+                                WHERE ITEM_CODE = {details[i].ITEM_CODE}
+                                AND V_TYPE = '{details[i].DCN_TYPE}'
+                                AND V_NO = {details[i].DCN_NO}
+                                AND COMP_CODE = {GlobalData.PubCompCode}
+                                AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                                decimal wbNo = 0;
+                                decimal.TryParse(wbNoText, out wbNo);
+
+                                decimal headerWbNo = header.WB_NO ?? 0;
+
+                                if (headerWbNo == 0 && wbNo == 0)
+                                {
+                                    WBReqCN = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                if (header.SUPPLY_TYPE == "EXPWOP" || header.SUPPLY_TYPE == "EXPWP" || header.SUPPLY_TYPE == "SEZWOP")
+                {
+                }
+                else
+                {
+                    if (GeneralSetting.pubDefWBINSI == "Yes")
+                    {
+                        if (header.PORT_CODE != "Other" &&  Convert.ToDecimal(header.TOT_GROSS) > 500 &&  header.V_TYPE == "SAGT")
+                        {
+                            if (WBReqCN == true)
+                            {
+                                // Weighbridge No. validation
+                                if ((header.WB_NO == 0))
+                                {
+                                    return ("Validation", "Weighbridge No. is required.");
+                                }
+
+                                // Truck No. validation
+                                if (header.VEHICLE_NO == "")
+                                {
+                                    return ("Validation", "Truck No. is required.");
+                                }
+
+                                // Get Party Code
+                                int pubRes1Int = Convert.ToInt32(GetText($@"
+                                SELECT PARTY_CODE
+                                FROM WB1
+                                WHERE V_TYPE = '{header.WB_TYPE}'
+                                AND V_NO = {header.WB_NO}
+                                AND COMP_CODE = {GlobalData.PubCompCode}
+                                AND BRANCH_CODE = {GlobalData.PubBranchCode}"));
+
+                                // Get Weighbridge Truck No.
+                                string pubRes1Str = GetText($@"
+                                SELECT VEHICLE_NO
+                                FROM WB1
+                                WHERE V_TYPE = '{header.WB_TYPE}'
+                                AND V_NO = {header.WB_NO}
+                                AND COMP_CODE = {GlobalData.PubCompCode}
+                                AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                                // Get Weighbridge Net Weight
+                                decimal pubRes1Dbl = Convert.ToDecimal(
+                                    GetText($@"
+                                        SELECT SUM(NET_WGT)
+                                        FROM WB2
+                                        WHERE V_TYPE = '{header.WB_TYPE}'
+                                        AND V_NO = {header.WB_NO}
+                                        AND COMP_CODE = {GlobalData.PubCompCode}
+                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}")
+                                );
+
+                                // Truck No. validation
+                                if (header.VEHICLE_NO?.Trim() != pubRes1Str.Trim())
+                                {
+                                    return (
+                                        "Validation",
+                                        $"Invoice Truck No. {header.VEHICLE_NO} not match with Weighbridge Truck No., Please Check Truck No. {pubRes1Str}"
+                                    );
+                                }
+
+                                // Waste quantity validation
+                                if (header.PORT_CODE == "Waste" &&
+                                    Convert.ToDecimal(header.TOT_NET) != pubRes1Dbl)
+                                {
+                                    return (
+                                        "Validation",
+                                        $"Invoice Quantity {Convert.ToDecimal(header.TOT_NET)} not match with Weighbridge Quantity, Please Check Quantity {pubRes1Dbl}"
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+
+                if(chkval == true)
+                {
+                    if(header.V_TYPE == "")
+                }
+
+
+
+
+
+
+
+
+
+
+
 
                 await conn.OpenAsync();
 
@@ -447,6 +826,43 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 return ("Error", ex.Message);
             }
         }
+
+
+
+
+
+
+
+        public bool IsExist(string query)
+        {
+            try
+            {
+                using var conn = _dbConnection.GetErpConnection();
+                using var cmd = new SqlCommand(query, conn);
+
+                conn.Open();
+
+                using var reader = cmd.ExecuteReader();
+
+                return reader.Read();
+            }
+            catch (Exception ex)
+            {        
+
+                return false;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
 
     }
 }

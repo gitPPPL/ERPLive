@@ -672,22 +672,10 @@ $(document).ready(async function () {
                 return;
             }
         }
+        
 
 
 
-
-        if (SUPPLY_TYPE == "EXPWOP" || SUPPLY_TYPE == "EXPWP")
-        {
-            $.ajax({
-                url: '/SalesInvoice/Multipleaddress',
-                type: 'GET',
-                data: { partycode: partyCode },
-                success: function (response) {
-                    if (response)
-                    {
-                        toastr.warning(response);
-                    }
-        }
 
         const Header = {
             AMOUNT: AMOUNT,
@@ -864,15 +852,9 @@ $(document).ready(async function () {
             LICENCE_DATE: LICENCE_DATE
         };
 
-        // =========================================================
-        // DETAILS
-        // =========================================================
+
 
         const Details = GetSalesInvoiceDetails();
-
-        // =========================================================
-        // FINAL MODEL
-        // =========================================================
 
         const model = {
             Header: Header,
