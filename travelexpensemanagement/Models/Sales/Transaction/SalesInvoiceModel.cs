@@ -213,7 +213,7 @@ public class SalesInvoiceModel_Detail
     public decimal? CESS_PER { get; set; }
     public decimal? CGST_AMT { get; set; }
     public decimal? CGST_PER { get; set; }
-    public decimal PACKING_WT { get;  set; }
+    public decimal? PACKING_WT { get;  set; }
     public int? DCN_NO { get; set; }
     public string? DCN_TYPE { get; set; }
     public int? DEPT_CODE { get; set; }
@@ -262,4 +262,20 @@ public class SalesInvoiceModel_Detail
     public string? UNIT_NAME { get; set; }
     public int? UNIT_CODE { get; set; }
     public decimal? WBQTY { get; set; }
+    public decimal? Sale_Rate { get; set; }
+    public decimal? Taxable_Rate { get; set; }
+    public decimal? Net_Wt { get; set; }
+
+    public decimal? Packing_nos { get; set; }
+
+
+    public string? REPORT_TYPE { get; set; }
+
+
+
+
+
+
+
+
 }

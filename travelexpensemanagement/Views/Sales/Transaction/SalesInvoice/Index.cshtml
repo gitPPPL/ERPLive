@@ -4,14 +4,29 @@
     ViewBag.Title = "Sales Invoice";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData
+                          ?? new Models.UserSessionData();
 
-    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
-    var databaseName = ViewBag.DatabaseName as string;
-    var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0;
-    var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
-    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+    var databaseName = ViewBag.DatabaseName as string ?? "";
+
+    var CompCode = int.TryParse(
+        globalVariables.PubCompCode,
+        out var parsedCompCode
+    ) ? parsedCompCode : 0;
+
+    var PubUserLevel = int.TryParse(
+        globalVariables.PubUserLevel,
+        out var parsedPubUserLevel
+    ) ? parsedPubUserLevel : 0;
+
+    var logindate = globalVariables.PubLoginDate is DateTime date
+        ? date.ToString("yyyy-MM-dd")
+        : "";
+
+    var LoadGeneralSetting = ViewBag.LoadGeneralSetting;
 
 }
+
 
 <script>
     window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
@@ -32,6 +47,15 @@
         ICE = globalVariables.IEC,
         website = globalVariables.Website
     }));
+
+
+        var LoadGeneralSetting = @Html.Raw(
+        JsonSerializer.Serialize(ViewBag.LoadGeneralSetting)
+    );
+
+
+
+
 
     window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
 </script>
@@ -300,7 +324,7 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label">Rate No</label>
                     <div class="input-icon-wrapper">
-                       <input type="number" class="erppage-input" id="txt_saudarate" placeholder="Enter Total Amount">
+                       <input type="number" class="erppage-input" id="txt_saudarate" placeholder="Enter Rate No">
                         <span class="input-icon">
                             <i class="fa fa-eye" data-bs-toggle="tooltip" data-bs-placement="top" title="View Credit Limit">
                             </i>
@@ -364,6 +388,19 @@
                             <col style="width: 110px;">
                             <col style="width: 110px;">
                             <col style="width: 110px;">
+                          
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+
+
+
+
+
                             <col class="action-col">
                         </colgroup>
 
@@ -380,6 +417,7 @@
                                 <th>Amount</th>
                                 <th>Pack %</th>
                                 <th>Pack Amount</th>
+                                <th>Pack Weight</th>
                                 <th>Disc %</th>
                                 <th>Disc Amount</th>
                                 <th>Tax Type</th>
@@ -407,6 +445,14 @@
                                 <th>Insu Amount</th>
                                 <th>CDisc Amount</th>
                                 <th>WB Quantity</th>
+
+                                <th> REPORT_TYPE</th>
+                                <th> Sale_Rate</th>
+                                <th> Taxable_Rate</th>
+                                <th> Net_Wt</th>
+                                <th> Packing_Wt</th>
+                                <th> Packing_nos</th>
+                      
                                 <th class="action-col">Action</th>
                             </tr>
                         </thead>
@@ -423,27 +469,27 @@
                 <div class="erppage-grid6">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Total Amount</label>
-                        <input type="number" class="erppage-input" id="NumOtherTotalAmount" placeholder="Enter Total Amount">
+                        <input type="number" class="erppage-input" id="NumOtherTotalAmount" placeholder="Enter Total Amount" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Packing</label>
                         <div class="input-divide">
                             <input type="number" class="erppage-input" id="NumOtherPacking1" placeholder="0.00" >
-                            <input type="number" class="erppage-input" id="NumOtherPacking2" placeholder="0.00" >
+                            <input type="number" class="erppage-input" id="NumOtherPacking2" placeholder="0.00" readonly >
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Discount</label>
                         <div class="input-divide">
                             <input type="number" class="erppage-input" id="NumOtherDiscount1" placeholder="0.00">
-                            <input type="number" class="erppage-input" id="NumOtherDiscount2" placeholder="0.00" >
+                            <input type="number" class="erppage-input" id="NumOtherDiscount2" placeholder="0.00" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Cash Discount</label>
                         <div class="input-divide">
                             <input type="number" class="erppage-input" id="NumOtherCashDiscount1" placeholder="0.00">
-                            <input type="number" class="erppage-input" id="NumOtherCashDiscount2" placeholder="0.00" >
+                            <input type="number" class="erppage-input" id="NumOtherCashDiscount2" placeholder="0.00"  readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
@@ -454,48 +500,48 @@
                         <label class="erppage-label">CGST</label>
                         <div class="input-divide">
                             <input type="number" class="erppage-input" id="NumOtherCGST1" placeholder="0.00">
-                            <input type="number" class="erppage-input" id="NumOtherCGST2" placeholder="0.00" >
+                            <input type="number" class="erppage-input" id="NumOtherCGST2" placeholder="0.00" readonly >
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">SGST</label>
                         <div class="input-divide">
                             <input type="number" class="erppage-input" id="NumOtherSGST1" placeholder="0.00">
-                            <input type="number" class="erppage-input" id="NumOtherSGST2" placeholder="0.00">
+                            <input type="number" class="erppage-input" id="NumOtherSGST2" placeholder="0.00" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">IGST</label>
                         <div class="input-divide">
                             <input type="number" class="erppage-input" id="NumOtherIGST1" placeholder="0.00">
-                            <input type="number" class="erppage-input" id="NumOtherIGST2" placeholder="0.00">
+                            <input type="number" class="erppage-input" id="NumOtherIGST2" placeholder="0.00" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Total Nos</label>
-                        <input type="number" class="erppage-input" id="NumOtherTotalNos" placeholder="Enter Total Nos">
+                        <input type="number" class="erppage-input" id="NumOtherTotalNos" placeholder="Enter Total Nos" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">CESS</label>
                         <div class="input-divide">
                             <input type="number" class="erppage-input" id="NumOtherCESS1" placeholder="0.00">
-                            <input type="number" class="erppage-input" id="NumOtherCESS2" placeholder="0.00">
+                            <input type="number" class="erppage-input" id="NumOtherCESS2" placeholder="0.00" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">TCS</label>
                         <div class="input-divide">
                             <input type="number" class="erppage-input" id="NumOtherTCS1" placeholder="0.00">
-                            <input type="number" class="erppage-input" id="NumOtherTCS2" placeholder="0.00">
+                            <input type="number" class="erppage-input" id="NumOtherTCS2" placeholder="0.00" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Round off</label>
-                        <input type="number" class="erppage-input" id="NumOtherRoundOff" placeholder="0.00">
+                        <input type="number" class="erppage-input" id="NumOtherRoundOff" placeholder="0.00" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Net Amount</label>
-                        <input type="number" class="erppage-input" id="NumOtherNetAmount" placeholder="Enter Net Amount">
+                        <input type="number" class="erppage-input" id="NumOtherNetAmount" placeholder="Enter Net Amount" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Doc Status</label>
@@ -507,16 +553,16 @@
 
                     <div class="erppage-divfield">
                         <label class="erppage-label">Gross Qty</label>
-                        <input type="number" class="erppage-input" id="NumGrossQty" placeholder="Enter Net Gross Qty">
+                        <input type="number" class="erppage-input" id="NumGrossQty" placeholder="Enter Net Gross Qty" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Net Qty</label>
-                        <input type="number" class="erppage-input" id="NumNetQty" placeholder="Enter Net Net Qty">
+                        <input type="number" class="erppage-input" id="NumNetQty" placeholder="Enter Net Net Qty" readonly> 
                     </div>
 
                     <div class="erppage-divfield">
                         <label class="erppage-label">WB Qty</label>
-                        <input type="number" class="erppage-input" id="NumWbQty" placeholder="Enter Net WB Qty">
+                        <input type="number" class="erppage-input" id="NumWbQty" placeholder="Enter Net WB Qty" readonly>
                     </div>
 
                     <div class="erppage-divfield">

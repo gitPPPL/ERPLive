@@ -426,7 +426,14 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     FREIGHT_AMT = rdr["FRT_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["FRT_AMT"]) : 0,
                                     INSU_AMT = rdr["INSU_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["INSU_AMT"]) : 0,
                                     CDISC_AMT = rdr["CDISC_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["CDISC_AMT"]) : 0,
-                                    WBQTY = rdr["WBQTY"] != DBNull.Value ? Convert.ToDecimal(rdr["WBQTY"]) : 0
+                                    WBQTY = rdr["WBQTY"] != DBNull.Value ? Convert.ToDecimal(rdr["WBQTY"]) : 0,
+                                    REPORT_TYPE = rdr["REPORT_TYPE"]?.ToString(),
+                                    Sale_Rate = rdr["Sale_Rate"] != DBNull.Value ? Convert.ToDecimal(rdr["Sale_Rate"]) : 0,
+                                    Taxable_Rate = rdr["Taxable_Rate"] != DBNull.Value ? Convert.ToDecimal(rdr["Taxable_Rate"]) : 0,
+                                    Net_Wt = rdr["Net_Wt"] != DBNull.Value ? Convert.ToDecimal(rdr["Net_Wt"]) : 0,
+                                    PACKING_WT = rdr["Packing_Wt"] != DBNull.Value ? Convert.ToDecimal(rdr["Packing_Wt"]) : 0,
+                                    Packing_nos = rdr["Packing_nos"] != DBNull.Value ? Convert.ToDecimal(rdr["Packing_nos"]) : 0,
+
                                 });
                             }
                         }
@@ -482,9 +489,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                  if (!string.IsNullOrEmpty(gateNo))
                     {
-                        return Json(new {
-                            success = false,
-                            message = $"This document exists in Gate Serial No: \"{gateNo}\" dated: \"{gateDate:dd-MM-yyyy}\"{Environment.NewLine}Delete the GatePass First.",
+                        return Json(new { success = false, message = $"This document exists in Gate Serial No: \"{gateNo}\" dated: \"{gateDate:dd-MM-yyyy}\"{Environment.NewLine}Delete the GatePass First.",
                             validation = false
                         });
                     }
@@ -507,15 +512,8 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                     if (!string.IsNullOrEmpty(v_no))
                     {
-                        return Json(new
-                        {
-                            success = false,
-                            message = $"This document exists in Ledger Serial No :{v_no} dated :{v_date}",
-                            validation = false
-                        });
+                        return Json(new { success = false,  message = $"This document exists in Ledger Serial No :{v_no} dated :{v_date}", validation = false });
                     }
-
-
 
                     using (SqlCommand cmd = new SqlCommand("sp_SalesInvoice", con))
                     {
@@ -693,10 +691,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 });
             }
         }
-
-
-
-
 
     }
 }

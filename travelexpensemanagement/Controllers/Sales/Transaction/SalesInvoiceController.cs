@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Drawing;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Text.Json;
+using System.Threading.Tasks;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -32,14 +35,21 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             _salesInVoice = salesInVoice;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var globalVariables = _globalVariableService.GetGlobalVariables();
+
+            var loadGeneralSetting = await _globalVariableService.LoadGeneralSetting();
+
+            ViewBag.LoadGeneralSetting = loadGeneralSetting;
+
             string databaseName;
+
             using (var connection = _dbConnection.GetErpConnection())
             {
                 databaseName = connection.Database;
             }
+
             ViewBag.GlobalVariables = globalVariables;
             ViewBag.DatabaseName = databaseName;
 
@@ -92,11 +102,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
-
-
-
-
+        
         public JsonResult DDlLicNO(String TYPE)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -119,8 +125,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
-
         public JsonResult DDlTransPortMode()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -664,6 +668,84 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
 
+        public JsonResult CalRate(int Itemcode)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                    string query = $@"select isnull(b.REPORT_TYPE,'')REPORT_TYPE,isnull(a.Sale_Rate,0)Sale_Rate,isnull(a.Taxable_Rate,0)Taxable_Rate,
+                    isnull(a.Net_Wt,0)Net_Wt,isnull(a.Packing_Wt,0)Packing_Wt,isnull(a.Packing_nos,0)Packing_nos from Item_mast a 
+                    left join ITEM_MGROUP b on a.MGROUP_CODE=b.code and a.comp_code=b.comp_code
+                    where a.comp_code={getdata.PubCompCode} and a.code={Itemcode} order by REPORT_TYPE";
+
+                var partyList = new List<object>();
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            partyList.Add(new
+                            {
+
+                                REPORT_TYPE = reader["REPORT_TYPE"],
+                                Sale_Rate = reader["Sale_Rate"],
+                                Taxable_Rate = reader["Taxable_Rate"],
+                                Net_Wt = reader["Net_Wt"],
+                                Packing_Wt = reader["Packing_Wt"],
+                                Packing_nos = reader["Packing_nos"]
+             
+                            });
+                        }
+                    }
+                }
+
+                return Json(partyList);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("SALE1", vdate, vtype, vno);
+            return Ok(result);
+        }
+
+        public JsonResult Multipleaddress(int partycode)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string sql = @" SELECT COUNT(*)   FROM Subgroup_Address WHERE comp_code = @CompCode   AND Code = @PartyCode";
+
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@PartyCode", partycode);
+
+                    con.Open();
+
+                    int addctr = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    if (addctr > 1)
+                    {
+                        return Json(new {  success = false,  multipleAddress = true, message = "This party has multiple addresses. For Export, multiple addresses are not allowed in the same Ledger."
+                        });
+                    }
+
+                    return Json(new { success = true,  multipleAddress = false, message = "" });
+                }
+            }
+        }
 
     }
 }
