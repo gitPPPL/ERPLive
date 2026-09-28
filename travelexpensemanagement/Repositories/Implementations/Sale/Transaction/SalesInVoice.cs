@@ -80,7 +80,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                 Boolean chkval = false;
                 Boolean WBReqCN = false;
-
+                Boolean checkIssueNo  = false;
+                string packtyp = "";
 
 
                 string qyery = $@"select 1 from DOC_APPROSTAGE where USER_CODE={GlobalData.PubUserId} and DOC_CODE='{header.V_TYPE}' and comp_code={GlobalData.PubCompCode}";
@@ -116,7 +117,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                 APPROV_USER = GetText(query4);
 
-
                 if(APPROV_USER == "FINAL")
                 {
                     isFinalApprovalBodyLCS = true;
@@ -128,7 +128,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     fappUserCode = GlobalData.PubUserId.ToString();
                 }
                
-
                 if(GlobalData.PubCompCode == "1"  && header.V_TYPE == "PSF")
                 {
                     chkval = true;
@@ -308,8 +307,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     }
                 }
 
-
-
                 if (GeneralSetting.pubDefSOINSI == "Yes")
                 {
                     if (details.Count > 0)
@@ -383,7 +380,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     }
                 }
 
-
                 if (GeneralSetting.pubDefPACKINSI == "Yes")
                 {
                     if (GlobalData.PubCompCode != "3" &&
@@ -407,27 +403,23 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     }
                 }
 
-
                 if (IsExist($@"  SELECT 1  FROM GATE2  WHERE V_TYPE = 'OUSL'  AND REF_TYPE = '{header.V_TYPE}' AND REF_NO = {header.V_NO}  AND COMP_CODE = {GlobalData.PubCompCode}  AND BRANCH_CODE = {GlobalData.PubBranchCode}"))
                 {  
                     return (  "Validation",  "Gate Pass created, modification not allowed." );
                 }
 
-
-                    string discPerMaster = GetText($@"
+                string discPerMaster = GetText($@"
                     SELECT ISNULL(DISC_PER, 0)
                     FROM SUBGROUP_MAST
                     WHERE CODE = {header.BILL_CODE}
                     AND COMP_CODE = {GlobalData.PubCompCode}");
 
-                    decimal masterDisc = decimal.TryParse(discPerMaster, out var masterValue) ? masterValue  : 0;
+                decimal masterDisc = decimal.TryParse(discPerMaster, out var masterValue) ? masterValue  : 0;
                            
-
-                    if (header.DISC_PER != masterDisc)
+                if (header.DISC_PER != masterDisc)
                     {
                      return ( "Warning", $"Discount in master=>{masterDisc} % not matched with Discount in invoice=>{header.DISC_PER}%, Please check it.");
                     }
-
 
                 if (details.Count > 0)
                 {
@@ -536,23 +528,353 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     }
                 }
 
-
-
                 if(chkval == true)
                 {
-                    if(header.V_TYPE == "")
+                    if(header.V_TYPE == "SAGT" && header.PACK_NO == null)
+                    {
+                        return ("Validation", $"Packing No. can not be Blank, Please Check it." );
+
+                    }
+
+                    if(header.V_TYPE == "SAGT" || header.V_TYPE == "SABS")
+                    {
+                        if(header.V_TYPE == "Flakes")
+                        {
+                            packtyp = "'SFIS','SFEI'";
+                        }
+                        else
+                        {
+                            packtyp = "'FPIS'";
+                        }
+
+                    }
+                    else if (header.V_TYPE == "SACH")
+                    {
+                        packtyp = Convert.ToString(header.PACK_NO);             
+                    }
+
+
+                    string packdate = GetText($@"
+                    SELECT FORMAT(V_DATE, 'dd/MM/yyyy')
+                    FROM PRODUCTION1
+                    WHERE V_NO = {header.PACK_NO}
+                    AND V_TYPE IN ({packtyp})
+                    AND COMP_CODE = {GlobalData.PubCompCode}
+                    AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                    if (!string.IsNullOrWhiteSpace(packdate))
+                    {
+                        if (header.V_DATE.HasValue &&
+                            header.V_DATE.Value.ToString("dd/MM/yyyy") != packdate)
+                        {
+                            return ("Validation", $"Packing Date " + packdate + " not matched with Invoice date, Please Check it.");
+
+                        }
+                    }
+
+
                 }
 
+                if(GeneralSetting.pubDefISSUEINSI == "Yes")
+                {
+                    if(header.ITEM_TYPE == "Store" || header.ITEM_TYPE == "Other" || header.ITEM_TYPE == "Scrap" || header.ITEM_TYPE == "SACH"  )
+                    {
+                        checkIssueNo = false;
+                    }
+                    else
+                    {
+                        if(GlobalData.PubCompCode == "1" ||GlobalData.PubCompCode == "3" ||GlobalData.PubCompCode == "7" ||GlobalData.PubCompCode == "8")
+                        {
+                            issuevtype = "RAID";
+                        }
+                        else
+                        {
+                            issuevtype = "RAIS";
+                        }
+                    }
+                }
 
+                if(header.V_TYPE == "SAJI" && GlobalData.PubCompCode == "3")
+                {
+                    if(GeneralSetting.pubDefPACKINSI == "Yes")
+                    {
+                        if(header.PACK_NO == 0)
+                        {
+                            if(checkIssueNo == true && header.ISSUE_TYPE == "")
+                            {
+                                return (
+                                       "Validation",
+                                       $"either Packing no. or Issue no. required."
+                                   );
+                            }
+                        }
+                    }
+                }
 
+                if (GeneralSetting.pubDefPACKINSI == "Yes")
+                {
+                    if (GlobalData.PubCompCode != "3")
+                    {
+                        if (chkval == true && !string.IsNullOrEmpty(header.PACK_TYPE))
+                        {
+                            string pslip = "";
+                            int ps = 0;
 
+                            for (int p = 0; p < details.Count; p++)
+                            {
+                                if (details[p].ITEM_CODE != null &&
+                                    ps != details[p].PACK_NO)
+                                {
+                                    ps = Convert.ToInt32(details[p].PACK_NO);
+                                    pslip += ps + ",";
+                                }
+                            }
 
+                            pslip = pslip.TrimEnd(',');
 
+                            if (!string.IsNullOrWhiteSpace(pslip))
+                            {
+                                string query = $@"
+                                    SELECT ITEM_CODE, TENACITY_CODE
+                                    FROM PRODUCTION2
+                                    WHERE V_TYPE = 'FPIS'
+                                    AND V_NO IN ({pslip})
+                                    AND COMP_CODE = {GlobalData.PubCompCode}
+                                    AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                                    AND YEAR_CODE = {GlobalData.PubFYearCode}
+                                    GROUP BY ITEM_CODE, TENACITY_CODE";
 
+                                using var cmd = new SqlCommand(query, conn);
 
+                                using var reader = cmd.ExecuteReader();
 
+                                while (reader.Read())
+                                {
+                                    int tenacityCode = Convert.ToInt32(reader["TENACITY_CODE"]);
 
+                                    string TType1 = GetText($@"
+                                        SELECT ISNULL(TENACITY_TYPE, '')
+                                        FROM TENACITY_MAST
+                                        WHERE CODE = {tenacityCode}
+                                        AND COMP_CODE = {GlobalData.PubCompCode}");
 
+                                        string TType2 = GetText($@"
+                                        SELECT ISNULL(TENACITY_TYPE, '')
+                                        FROM SUBGROUP_MAST
+                                        WHERE CODE = {header.BILL_CODE}
+                                        AND COMP_CODE = {GlobalData.PubCompCode}");
+
+                                    if (!string.IsNullOrWhiteSpace(TType1) &&
+                                        !string.IsNullOrWhiteSpace(TType2) &&
+                                        !TType1.Trim().Equals(
+                                            TType2.Trim(),
+                                            StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        return ( "Validation", $"Please check Tenacity Type in packing Slip is '{TType1}' and Party Master allow is '{TType2}'."  );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (GeneralSetting.pubDefPACKINSI == "Yes")
+                {
+                    if (GlobalData.PubCompCode == "1" ||
+                        GlobalData.PubCompCode == "7")
+                    {
+                        if (chkval == true && !string.IsNullOrEmpty(header.PACK_TYPE))
+                        {
+                            string pslip = "";
+                            int ps = 0;
+
+                            for (int p = 0; p < details.Count; p++)
+                            {
+                                if (details[p].ITEM_CODE != null &&
+                                    ps != details[p].PACK_NO)
+                                {
+                                    ps = Convert.ToInt32(details[p].PACK_NO);
+                                    pslip += ps + ",";
+                                }
+                            }
+
+                            pslip = pslip.TrimEnd(',');
+
+                            if (!string.IsNullOrWhiteSpace(pslip))
+                            {
+                                string query = $@"
+                                    SELECT DISTINCT CAL_ON
+                                    FROM PRODUCTION1
+                                    WHERE V_TYPE = '{header.PACK_TYPE}'
+                                    AND V_NO IN ({pslip})
+                                    AND COMP_CODE = {GlobalData.PubCompCode}
+                                    AND BRANCH_CODE = {GlobalData.PubBranchCode}";
+
+                                using var cmd = new SqlCommand(query, conn);
+
+                                // If conn is not already open
+                                if (conn.State != ConnectionState.Open)
+                                    conn.Open();
+
+                                using var reader = cmd.ExecuteReader();
+
+                                int count = 0;
+
+                                while (reader.Read())
+                                {
+                                    count++;
+
+                                    if (count > 1)
+                                        break;
+                                }
+
+                                if (count > 1)
+                                {
+                                    return (
+                                        "Validation",
+                                        "Please check Packing Slip, all related packing slip must have same Weighment Type either 'Gross' or 'Net'."
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(header.TRANSPORT_NAME) && !string.IsNullOrWhiteSpace(header.GR_NO))
+                {
+                    string currentDocId = $"{header.V_TYPE}{header.V_NO}";
+
+                    // Check Purchase
+                    string purdocid = GetText($@"
+                        SELECT TOP 1 CONCAT(V_TYPE, V_NO)
+                        FROM PURCHASE1
+                        WHERE CONCAT(V_TYPE, V_NO) <> '{currentDocId}'
+                        AND TRANSPORT_NAME = '{header.TRANSPORT_NAME.Trim()}'
+                        AND GR_NO = '{header.GR_NO.Trim()}'
+                        AND CONCAT(V_TYPE, V_NO) <> '{header.V_TYPE}{header.V_NO}'
+                        AND V_TYPE NOT IN
+                        (SELECT CODE
+                        FROM DOCTYPE_MAST
+                        WHERE DOCTYPE = 'MaterialReceipt')
+                        AND COMP_CODE = {GlobalData.PubCompCode}
+                        AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                        AND YEAR_CODE = {GlobalData.PubFYearCode}");
+
+                    if (!string.IsNullOrWhiteSpace(purdocid))
+                    {
+                        return ( "Warning",
+                        $"Transport Name '{header.TRANSPORT_NAME.Trim()}' with GRNo='{header.GR_NO.Trim()}' already exist in Purchase Bill/Direct Exps/JW/Imported Exps/Return No:{purdocid}" );
+                    }
+
+                    // Check Sale
+                    string saledocid = GetText($@"
+                        SELECT TOP 1 CONCAT(V_TYPE, V_NO)
+                        FROM SALE1
+                        WHERE ISNULL(Status, 0) <> 2
+                        AND CONCAT(V_TYPE, V_NO) <> '{currentDocId}'
+                        AND TRANSPORT_NAME = '{header.TRANSPORT_NAME.Trim()}'
+                        AND GR_NO = '{header.GR_NO.Trim()}'
+                        AND COMP_CODE = {GlobalData.PubCompCode}
+                        AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                        AND YEAR_CODE = {GlobalData.PubFYearCode}");
+
+                    if (!string.IsNullOrWhiteSpace(saledocid))
+                    {
+                        return ( "Warning",
+                            $"Transport Name '{header.TRANSPORT_NAME.Trim()}' with GRNo='{header.GR_NO.Trim()}' already exist in Sale/JW Issue/Sale Return invoice No:{saledocid}");
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(header.TRANSPORT_NAME) && header.TRANSPORT_NAME.Trim().ToUpper() != "SELF")
+                {
+                    string tptCode = GetText($@"
+                    SELECT PARTY_CODE
+                    FROM TRANSPORT_MAST
+                    WHERE CODE = {header.TRANSPORT_CODE}
+                    AND COMP_CODE = {GlobalData.PubCompCode}
+                    AND ACTIVE = 1");
+
+                    if (string.IsNullOrWhiteSpace(tptCode) || tptCode == "0")
+                    {
+                        return (
+                            "Validation",
+                            $"Party Name not Linked with Transport => {header.TRANSPORT_NAME}, Please update first."
+                        );
+                    }
+                            else if (!IsExist($@" SELECT 1 FROM SUBGROUP_MAST WHERE CODE = {tptCode}  AND COMP_CODE = {GlobalData.PubCompCode} AND ACTIVE = 1"))
+                    {
+                        return ( "Validation", $"Party not linked in Tranport Master OR not Active/Exist in BP Master which is Linked with Transport=>{header.TRANSPORT_NAME}" );
+                    }
+                }
+
+                if (GlobalData.PubCompCode != "8" && header.VEHICLE_NO.Length >= 4 && Convert.ToInt32(header.VEHICLE_NO.Substring(header.VEHICLE_NO.Length - 4)) >= 1)
+                {
+                    // Transport Quotation Approval validation
+                    string query = $@"
+                        SELECT 
+                        T1.BILL_CODE,
+                        T2.TRANSPORT_CODE,
+                        T2.TRUCK_NO,
+                        T2.OUR_RATE
+                        FROM TRANSPORT_QT1 T1
+                        INNER JOIN TRANSPORT_QT2 T2
+                        ON T1.COMP_CODE = T2.COMP_CODE
+                        AND T1.YEAR_CODE = T2.YEAR_CODE
+                        AND T1.BRANCH_CODE = T2.BRANCH_CODE
+                        AND T1.V_TYPE = T2.V_TYPE
+                        AND T1.V_NO = T2.V_NO
+                        WHERE T2.TRUCK_NO = '{header.VEHICLE_NO}'
+                        AND T2.TRANSPORT_CODE = {header.TRANSPORT_CODE}
+                        AND T2.V_DATE BETWEEN '{header.V_DATE.Value.AddDays(-2):yyyy-MM-dd}'
+                        AND '{header.V_DATE:yyyy-MM-dd}'
+                        AND T2.COMP_CODE = {GlobalData.PubCompCode}
+                        AND T2.YEAR_CODE = {GlobalData.PubFYearCode}";
+
+                    using (var cmd = new SqlCommand(query, conn))
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            decimal ourRate = Convert.ToDecimal(reader["OUR_RATE"] ?? 0);
+                            decimal freight = Convert.ToDecimal(header.FRT_AMT ?? 0);
+
+                            if (freight != ourRate)
+                            {
+                                // Warning only - same as original VB
+                                // Message:
+                                // The freight amount you have entered does not match...
+                            }
+                        }
+                        else
+                        {
+                            return (
+                                "Validation",
+                                "The transport name or truck number does not match in the Transport Quotation Approval entry. Alternatively, it appears that the quotation for this truck has not been approved. Kindly check and confirm."
+                            );
+                        }
+                    }
+
+                    // Vehicle Gate Inward validation
+                    string gateQuery = $@"
+                        SELECT 1
+                        FROM GATE1
+                        WHERE V_TYPE = 'TRGI'
+                        AND TRUCK_NO = '{header.VEHICLE_NO}'
+                        AND V_DATE BETWEEN '{header.V_DATE.Value.AddDays(-2):yyyy-MM-dd}'
+                        AND '{header.V_DATE.Value:yyyy-MM-dd}'
+                        AND COMP_CODE = {GlobalData.PubCompCode}";
+                    using (var cmd = new SqlCommand(gateQuery, conn))
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.Read())
+                        {
+                            if (GlobalData.PubUserLevel != "1")
+                            {
+                                return ( "Validation", "The truck number does not match in the Vehicle Gate Inward entry. Kindly check and confirm." );
+                            }
+                        }
+                    }
+                }
 
                 await conn.OpenAsync();
 
@@ -748,6 +1070,81 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         if (detail == null || detail.ITEM_CODE <= 0)
                             continue;
 
+
+
+
+                        string hsncode = GetText($@"select isnull(HSN_CODE,'') from ITEM_MAST 
+                        where code= {detail.ITEM_CODE} and Comp_code={GlobalData.PubCompCode} ");
+
+
+                        if(hsncode.Length < 6)
+                        {
+                            return ("Validation",  $"HSN Code must be 6 digit in Item Master of Item = {detail.ITEM_NAME} " );
+                        }
+
+                        if (hsncode.Length < 4)
+                        {
+                        if (hsncode.Length < 4)
+                            return ("Validation", $"Invalid HSN Code in Item mast of Item = {detail.ITEM_NAME} ");
+                        }
+
+                        if (GeneralSetting.pubDefSOINSI == "Yes")
+                        {
+                            if (header.V_TYPE == "SAGT" && detail.ORD_NO > 0)
+                            {
+                                if (detail.ORD_TYPE == "DOGT")
+                                {
+                                    bool itemExists = IsExist($@"
+                                        SELECT 1
+                                        FROM DO2
+                                        WHERE ITEM_CODE = {detail.ITEM_CODE}
+                                        AND V_TYPE = '{detail.ORD_TYPE}'
+                                        AND V_NO = {detail.ORD_NO}
+                                        AND COMP_CODE = {GlobalData.PubCompCode}
+                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                                    if (!itemExists)
+                                    {
+                                        return ("Validation",
+                                            $"Item Code : {detail.ITEM_CODE} not exist in Sale Order. Please check it.");
+                                    }
+                                }
+                                else
+                                {
+                                    bool itemExists = IsExist($@"
+                                        SELECT 1
+                                        FROM ORDER2
+                                        WHERE ITEM_CODE = {detail.ITEM_CODE}
+                                        AND V_TYPE = '{detail.ORD_TYPE}'
+                                        AND V_NO = {detail.ORD_NO}
+                                        AND COMP_CODE = {GlobalData.PubCompCode}
+                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                                    if (!itemExists)
+                                    {
+                                        return ("Validation", $"Item Code : {detail.ITEM_CODE} not exist in Sale Order. Please check it.");
+                                    }
+                                }
+                            }
+                        }
+
+
+                        decimal ordRate = 0;
+
+
+                        if(header.EXRATE > 0)
+                        {
+                            ordRate = Convert.ToDecimal(detail.FOR_RATE);
+                        }
+                        else
+                        {
+                            ordRate = Convert.ToDecimal(detail.RATE);
+                        }
+
+
+
+
+
                         using var cmd = new SqlCommand("sp_SalesInvoice", conn)
                         {
                             CommandType = CommandType.StoredProcedure
@@ -827,12 +1224,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
             }
         }
 
-
-
-
-
-
-
         public bool IsExist(string query)
         {
             try
@@ -852,17 +1243,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 return false;
             }
         }
-
-
-
-
-
-
-
-
-
-
-
 
     }
 }

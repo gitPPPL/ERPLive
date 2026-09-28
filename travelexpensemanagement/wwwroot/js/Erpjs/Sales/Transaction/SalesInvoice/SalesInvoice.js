@@ -170,6 +170,8 @@ function GetSalesInvoiceDetails() {
             GROSS_QTY: parseFloat($.trim($row.find('.TxtGrossQty').val())) || 0,
             QTY: parseFloat($.trim($row.find('.TxtNetQty').val())) || 0,
 
+            FOR_RATE: parseFloat($.trim($row.find('.TxtRateINUSD').val())) || 0,
+
             RATE: parseFloat($.trim($row.find('.TxtRate').val())) || 0,
             AMOUNT: parseFloat($.trim($row.find('.TxtAmount').val())) || 0,
 
@@ -380,7 +382,8 @@ async function LoadData() {
                     nos: item.nos ?? '',
                     grossQty: item.grosS_QTY ?? '',
                     NetQty: item.qty ?? '',
-                    Rate: item.rate ?? item.foR_RATE ?? '',
+                    RateINUSD: item.foR_RATE ?? item.foR_RATE ?? '',
+                    Rate: item.rate ?? item.rate ?? '',
                     Amount: item.amount ?? '',
                     PackPer: item.pacK_PER ?? '',
                     PackAmt: item.pacK_AMT ?? '',

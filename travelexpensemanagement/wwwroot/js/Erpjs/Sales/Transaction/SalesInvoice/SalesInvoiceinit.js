@@ -264,6 +264,10 @@ $(document).ready(async function () {
         if (!validateRequiredField('#DtDocumentDate', 'Please select a Voucher Date.')) return;
         if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;
         if (!validateRequiredField('#ddlFormType', 'Please select a Form Type.')) return;
+        if (!validateRequiredField('#TxtDriverName', 'Please Fill  Driver Name.')) return;
+        if (!validateRequiredField('#TxtDriverName', 'Please Fill  Driver Name.')) return;
+        if (!validateRequiredField('#NumDriverMob', 'Please Fill  Driver Mobile No.')) return;
+
 
         // =========================================================
         // HEADER
@@ -277,11 +281,10 @@ $(document).ready(async function () {
 
         const DoType = $.trim($('#ddlDONo option:selected').text()).split('-').pop().trim() || "";
         const Do_NO = $.trim($('#ddlDONo').val()) || "";
-
         const DOC_ID = $.trim($('#TxtCode').val()) || "";
         const V_TYPE = $.trim($('#ddlDocumentType').val()) || "";
+        const V_TYPEText = $.trim($('#ddlDocumentType option:selected').text()) || "";
         const V_NO = parseInt($.trim($('#NumInvoiceNo').val()), 10) || 0;
-
         let V_DATE = null;
         if ($.trim($('#DtDocumentDate').val())) {
             V_DATE = formatDate($('#DtDocumentDate').val());
@@ -290,61 +293,32 @@ $(document).ready(async function () {
         const BILL_NAME = $.trim($('#ddlPartyName option:selected').text()) || "";
         const BILL_CODE = parseInt($.trim($('#ddlPartyName').val()), 10) || 0;
         const BILL_ADDRESSID = parseInt($.trim($('#ddladdressL1').val()), 10) || 0;
-
         const BILL_ADD1 = $.trim($('#TxtAddressL1').val()) || "";
         const BILL_ADD2 = $.trim($('#TxtAddressL2').val()) || "";
         const BILL_ADD3 = $.trim($('#TxtAddressL3').val()) || "";
-
         const BILL_CITY = parseInt($.trim($('#ddlStation').val()), 10) || 0;
         const BILL_CITYName = $.trim($('#ddlStation option:selected').text()) || "";
         const BILL_PINCODE = $.trim($('#NumPincode').val()) || "";
         const BILL_GST = $.trim($('#NumGSTNoL').val()) || "";
-
         const AGENT_CODE = parseInt($.trim($('#ddlSalesThrough').val()), 10) || 0;
-        const AGENT_Name = AGENT_CODE
-            ? $.trim($('#ddlSalesThrough option:selected').text())
-            : "";
-
+        const AGENT_Name = AGENT_CODE  ? $.trim($('#ddlSalesThrough option:selected').text()) : "";
         const SUPPLY_TYPE = $.trim($('#ddlSupplyType').val()) || "";
-
         const SHIP_CODE = parseInt($.trim($('#ddlConsignee').val()), 10) || 0;
-        const SHIP_NAME = SHIP_CODE
-            ? $.trim($('#ddlConsignee option:selected').text())
-            : "";
-
+        const SHIP_NAME = SHIP_CODE ? $.trim($('#ddlConsignee option:selected').text()) : "";
         const SHIP_ADD1 = $.trim($('#TxtSupplyAddressL1').val()) || "";
         const SHIP_ADD2 = $.trim($('#TxtSupplyAddressL2').val()) || "";
         const SHIP_ADD3 = $.trim($('#TxtSupplyAddressL3').val()) || "";
+        const SHIP_ADDRESSID = parseInt($.trim($('#ddlsupplyaddressL1').val()), 10) || 0;
+        const SHIP_CITY = parseInt($.trim($('#ddlSupplyStation').val()), 10) || 0;
 
-        const SHIP_ADDRESSID =
-            parseInt($.trim($('#ddlsupplyaddressL1').val()), 10) || 0;
-
-        const SHIP_CITY =
-            parseInt($.trim($('#ddlSupplyStation').val()), 10) || 0;
-
-        const SHIP_CITYNAME = SHIP_CITY
-            ? $.trim($('#ddlSupplyStation option:selected').text())
-            : "";
-
+        const SHIP_CITYNAME = SHIP_CITY  ? $.trim($('#ddlSupplyStation option:selected').text()) : "";
         const SHIP_PINCODE = $.trim($('#NumSupplyPIN').val()) || "";
         const SHIP_GST = $.trim($('#NumGSTNo').val()) || "";
-
-        const FORM_CODE =
-            parseInt($.trim($('#ddlFormType').val()), 10) || 0;
-
-        const TRAN_TYPE =
-            $.trim($('#ddlTransactionType').val()) || "";
-
-        const TAX_CODE =
-            parseInt($.trim($('#ddlTaxType').val()), 10) || 0;
-
-        const PACK_NO =
-            parseInt($.trim($('#ddlPackNo').val()), 10) || 0;
-
-        const PACK_TYPE = PACK_NO
-            ? $.trim($('#ddlPackNo option:selected').text()).split('-').pop().trim()
-            : "";
-
+        const FORM_CODE = parseInt($.trim($('#ddlFormType').val()), 10) || 0;
+        const TRAN_TYPE = $.trim($('#ddlTransactionType').val()) || "";
+        const TAX_CODE = parseInt($.trim($('#ddlTaxType').val()), 10) || 0;
+        const PACK_NO = parseInt($.trim($('#ddlPackNo').val()), 10) || 0;
+        const PACK_TYPE = PACK_NO  ? $.trim($('#ddlPackNo option:selected').text()).split('-').pop().trim()  : "";
         const PACK_PER =
             parseFloat($.trim($('#NumOtherPacking1').val())) || 0;
 
@@ -469,133 +443,61 @@ $(document).ready(async function () {
             GR_DATE = formatDate($('#DtGRDate').val());
         }
 
-        const VEHICLE_NO =
-            $.trim($('#TxtTruckNo').val()) || "";
+        const VEHICLE_NO =  $.trim($('#TxtTruckNo').val()) || "";
+        const DRIVER_NAME = $.trim($('#TxtDriverName').val()) || "";
+        const DRIVER_NO =  $.trim($('#NumDriverMob').val()) || "";
+        const INSU_PER =  parseFloat($.trim($('#NumInsurance1').val())) || 0;
+        const INSU_AMT =  getDecimal($.trim($('#NumInsurance2').val())) || 0;
+        const INSU_DETAIL = $.trim($('#txt_InsuranceDe').val()) || "";
 
-        const DRIVER_NAME =
-            $.trim($('#TxtDriverName').val()) || "";
+        const TDS_PER = parseFloat($.trim($('#NumTDSFreight1').val())) || 0;
+        const TDS_AMT = getDecimal($.trim($('#NumTDSFreight2').val())) || 0;
+        const FRT_TAXPER = parseFloat($.trim($('#NumTaxFreight1').val())) || 0;
+        const FRT_TAXAMT = getDecimal($.trim($('#NumTaxFreight2').val())) || 0;
+        const FRT_AMT =  getDecimal($.trim($('#NumFreightAmount').val())) || 0;
+        const FRT_TOPAY = parseFloat($.trim($('#txt_ToPayFrt').val())) || 0;
+        const TPT_DISTANCE = parseInt($.trim($('#NumDistance').val()), 10) || 0;
+        const TPT_MODE =  parseInt($.trim($('#ddlMode').val()), 10) || 0;
+        const PAY_TERM =  parseInt($.trim($('#ddlPaymentTerm').val()), 10) || 0;
+        const PAYMENT_TERM = $.trim($('#ddlPaymentTerm option:selected').text()) || "";
+        const DELIVERY_TERMS = $.trim($('#TxtDeliveryTerm').val()) || "";
+        const WAYBILL_NO = $.trim($('#txt_WayBillNo').val()) || "";
+        const LOAD_AC =  $.trim($('#ddl_LoadParty').val()) || "";
+        const LOAD_PER =  parseFloat($.trim($('#txt_loadPer').val())) || 0;
+        const LOAD_AMT = getDecimal($.trim($('#txt_LoadAmt').val())) || 0;
+        const LOAD_REM =  $.trim($('#txt_ldRemark').val()) || "";
+        const NAMOUNT =  getDecimal($.trim($('#NumOtherNetAmount').val())) || 0;
+        const EXRATE =  parseFloat($.trim($('#txxt_ExRate').val())) || 0;
+        const CURRENCY = $.trim($('#ddl_currency').val()) || "";
+        const DEFECTIVE_GOODS = $('#ChkDefectiveGoods').is(':checked') ? "1" : "0";
 
-        const DRIVER_NO =
-            $.trim($('#NumDriverMob').val()) || "";
+        const CAL_ONPCS = $('#ChkPCS').is(':checked') ? 1 : 0;
 
-        const INSU_PER =
-            parseFloat($.trim($('#NumInsurance1').val())) || 0;
-
-        const INSU_AMT =
-            getDecimal($.trim($('#NumInsurance2').val())) || 0;
-
-        const INSU_DETAIL =
-            $.trim($('#txt_InsuranceDe').val()) || "";
-
-        const TDS_PER =
-            parseFloat($.trim($('#NumTDSFreight1').val())) || 0;
-
-        const TDS_AMT =
-            getDecimal($.trim($('#NumTDSFreight2').val())) || 0;
-
-        const FRT_TAXPER =
-            parseFloat($.trim($('#NumTaxFreight1').val())) || 0;
-
-        const FRT_TAXAMT =
-            getDecimal($.trim($('#NumTaxFreight2').val())) || 0;
-
-        const FRT_AMT =
-            getDecimal($.trim($('#NumFreightAmount').val())) || 0;
-
-        const FRT_TOPAY =
-            parseFloat($.trim($('#txt_ToPayFrt').val())) || 0;
-
-        const TPT_DISTANCE =
-            parseInt($.trim($('#NumDistance').val()), 10) || 0;
-
-        const TPT_MODE =
-            parseInt($.trim($('#ddlMode').val()), 10) || 0;
-
-        const PAY_TERM =
-            parseInt($.trim($('#ddlPaymentTerm').val()), 10) || 0;
-
-        const PAYMENT_TERM =
-            $.trim($('#ddlPaymentTerm option:selected').text()) || "";
-
-        const DELIVERY_TERMS =
-            $.trim($('#TxtDeliveryTerm').val()) || "";
-
-        const WAYBILL_NO =
-            $.trim($('#txt_WayBillNo').val()) || "";
-
-        const LOAD_AC =
-            $.trim($('#ddl_LoadParty').val()) || "";
-
-        const LOAD_PER =
-            parseFloat($.trim($('#txt_loadPer').val())) || 0;
-
-        const LOAD_AMT =
-            getDecimal($.trim($('#txt_LoadAmt').val())) || 0;
-
-        const LOAD_REM =
-            $.trim($('#txt_ldRemark').val()) || "";
-
-        const NAMOUNT =
-            getDecimal($.trim($('#NumOtherNetAmount').val())) || 0;
-
-        const EXRATE =
-            parseFloat($.trim($('#txxt_ExRate').val())) || 0;
-
-        const CURRENCY =
-            $.trim($('#ddl_currency').val()) || "";
-
-        const DEFECTIVE_GOODS =
-            $('#ChkDefectiveGoods').is(':checked') ? "1" : "0";
-
-        const CAL_ONPCS =
-            $('#ChkPCS').is(':checked') ? 1 : 0;
-
-        const PRINT_DETAIL =
-            $('#ChkDetail').is(':checked') ? "1" : "0";
-
+        const PRINT_DETAIL = $('#ChkDetail').is(':checked') ? "1" : "0";
         const BUYER_ORDNO = "";
 
-        const PLACE_RECEIPT =
-            $.trim($('#txt_receiptat').val()) || "";
-
-        const PORT_LOADING =
-            $.trim($('#txxt_pol').val()) || "";
-
-        const PORT_DISCHARGE =
-            $.trim($('#txxt_POD').val()) || "";
-
-        const PORT_CODE =
-            $.trim($('#txxt_PortCode').val()) || "";
-
-        const FINAL_DEST =
-            $.trim($('#txxt_finalDestination').val()) || "";
-
-        const FINAL_DEST_COUNTRY =
-            $.trim($('#txxt_FDCountry').val()) || "";
-
-        const SB_NO =
-            $.trim($('#txxt_ShipBillNo').val()) || "";
-
+        const PLACE_RECEIPT =  $.trim($('#txt_receiptat').val()) || "";
+        const PORT_LOADING =  $.trim($('#txxt_pol').val()) || "";
+        const PORT_DISCHARGE =  $.trim($('#txxt_POD').val()) || "";
+        const PORT_CODE =  $.trim($('#txxt_PortCode').val()) || "";
+        const FINAL_DEST = $.trim($('#txxt_finalDestination').val()) || "";
+        const FINAL_DEST_COUNTRY =  $.trim($('#txxt_FDCountry').val()) || "";
+        const SB_NO =  $.trim($('#txxt_ShipBillNo').val()) || "";
         let SB_DATE = null;
 
         if ($.trim($('#dt_ShipDate').val())) {
             SB_DATE = formatDate($('#dt_ShipDate').val());
         }
 
-        const FOB_VALUE =
-            parseFloat($.trim($('#txxt_FobValue').val())) || 0;
+        const FOB_VALUE =  parseFloat($.trim($('#txxt_FobValue').val())) || 0;
 
-        const FOB_FRT =
-            parseFloat($.trim($('#txt_FOBFRT').val())) || 0;
+        const FOB_FRT =  parseFloat($.trim($('#txt_FOBFRT').val())) || 0;
 
-        const FOB_INSU =
-            parseFloat($.trim($('#txxt_ForIssu').val())) || 0;
+        const FOB_INSU = parseFloat($.trim($('#txxt_ForIssu').val())) || 0;
 
-        const FOB_OTHER =
-            parseFloat($.trim($('#txxt_FobOther').val())) || 0;
+        const FOB_OTHER = parseFloat($.trim($('#txxt_FobOther').val())) || 0;
 
-        const LUT_NO =
-            $.trim($('#txt_LutNo').val()) || "";
+        const LUT_NO = $.trim($('#txt_LutNo').val()) || "";
 
         const LUT_DETAIL = "";
 
@@ -607,31 +509,25 @@ $(document).ready(async function () {
 
         const INCOTERM = "";
 
-        const BILLOF_LADING =
-            $.trim($('#txt_BillOfLanding').val()) || "";
+        const BILLOF_LADING =  $.trim($('#txt_BillOfLanding').val()) || "";
 
-        const LC_NO =
-            $.trim($('#ddl_licNo').val()) || "";
+        const LC_NO = $.trim($('#ddl_licNo').val()) || "";
 
-        const action =
-            (!rowId || rowId.trim() === "") ? "INSERT" : "UPDATE";
+        const action =  (!rowId || rowId.trim() === "") ? "INSERT" : "UPDATE";
 
-        const STATUS =
-            parseInt($.trim($('#ddlDocStatus').val()), 10) || 0;
+        const STATUS = parseInt($.trim($('#ddlDocStatus').val()), 10) || 0;
 
-        const BANK_CODE =
-            parseInt($.trim($('#DDL_Bank').val()), 10) || 0;
+        const BANK_CODE =  parseInt($.trim($('#DDL_Bank').val()), 10) || 0;
 
-        const LICENCE_TYPE =
-            $.trim($('#ddllictype').val()) || "";
+        const LICENCE_TYPE =  $.trim($('#ddllictype').val()) || "";
 
-        const LICENCE_NO =
-            $.trim($('#DDL_LicNo').val()) || "";
+        const LICENCE_NO = $.trim($('#DDL_LicNo').val()) || "";
 
         // IMPORTANT: empty string should become null for DateTime?
         let LICENCE_DATE = null;
 
-        if ($.trim($('#txt_LicDT').val())) {
+        if ($.trim($('#txt_LicDT').val()))
+        {
             LICENCE_DATE = formatDate($('#txt_LicDT').val());
         }
 
@@ -674,23 +570,49 @@ $(document).ready(async function () {
         }
         
 
+        if (V_TYPE == "SAGT" && (ITEM_TYPE == "Waste" || ITEM_TYPE == "Scrap"))
+        {
+            const result = await Swal.fire({
+                title: "Confirmation",
+                text: "TCS Percentage must be 2% for Scrap and Waste. Do you want to Continue ?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes",
+                cancelButtonText: "No"
+            });
+
+            if (!result.isConfirmed)
+            {             
+                return;
+            }
+        }
 
 
+        if (GR_NO !== "" && GR_DATE === "")
+        {
+
+            toastr.warning("GR Date is required with GR No.");          
+            return;
+        }
+    
+        if (FRT_AMT > 0) {
+            if (TRANSPORT_NAME == "") {
+                toastr.warning("Please select Transport.");
+                return;
+            }
+        }
 
         const Header = {
             AMOUNT: AMOUNT,
             AGENT_CODE: AGENT_CODE,
             AGENT_Name: AGENT_Name,
             BANK_CODE: BANK_CODE,
-
             DoType: DoType,
             Do_NO: Do_NO,
-
             DOC_ID: DOC_ID,
             V_TYPE: V_TYPE,
             V_NO: V_NO,
             V_DATE: V_DATE,
-
             BILL_NAME: BILL_NAME,
             BILL_CODE: BILL_CODE,
             BILL_ADDRESSID: BILL_ADDRESSID,
@@ -701,12 +623,9 @@ $(document).ready(async function () {
             BILL_CITYName: BILL_CITYName,
             BILL_PINCODE: BILL_PINCODE,
             BILL_GST: BILL_GST,
-
             AGENT_CODE: AGENT_CODE,
             AGENT_Name: AGENT_Name,
-
             SUPPLY_TYPE: SUPPLY_TYPE,
-
             SHIP_CODE: SHIP_CODE,
             SHIP_NAME: SHIP_NAME,
             SHIP_ADD1: SHIP_ADD1,
@@ -717,144 +636,106 @@ $(document).ready(async function () {
             SHIP_CITYNAME: SHIP_CITYNAME,
             SHIP_PINCODE: SHIP_PINCODE,
             SHIP_GST: SHIP_GST,
-
             FORM_CODE: FORM_CODE,
             TRAN_TYPE: TRAN_TYPE,
             TAX_CODE: TAX_CODE,
-
             PACK_NO: PACK_NO,
             PACK_TYPE: PACK_TYPE,
             PACK_PER: PACK_PER,
             PACK_AMT: PACK_AMT,
-
             SAUDA_NO: SAUDA_NO,
             SAUDA_TYPE: SAUDA_TYPE,
             SAUDA_RATE: SAUDA_RATE,
-
             ISSUE_NO: ISSUE_NO,
             ISSUE_TYPE: ISSUE_TYPE,
-
             GODOWN_CODE: GODOWN_CODE,
             ITEM_TYPE: ITEM_TYPE,
             REMARK: REMARK,
-
             WB_NO: WB_NO,
             WB_TYPE: WB_TYPE,
             WB_QTY: WB_QTY,
             WB_AMT: WB_AMT,
             WB_REM: WB_REM,
             WB_AC: WB_AC,
-
             DISC_PER: DISC_PER,
             DISC_AMT: DISC_AMT,
-
             CDISC_PER: CDISC_PER,
             CDISC_AMT: CDISC_AMT,
-
             CGST_PER: CGST_PER,
             CGST_AMT: CGST_AMT,
-
             SGST_PER: SGST_PER,
             SGST_AMT: SGST_AMT,
-
             IGST_PER: IGST_PER,
             IGST_AMT: IGST_AMT,
-
             CESS_PER: CESS_PER,
             CESS_AMT: CESS_AMT,
-
             TCS_PER: TCS_PER,
             TCS_AMT: TCS_AMT,
-
             ROUND_OFF: ROUND_OFF,
-
             TOT_NOS: TOT_NOS,
             TOT_GROSS: TOT_GROSS,
             TOT_NET: TOT_NET,
-
             TRANSPORT_CODE: TRANSPORT_CODE,
             TRANSPORT_NAME: TRANSPORT_NAME,
-
             GR_NO: GR_NO,
             GR_DATE: GR_DATE,
-
             VEHICLE_NO: VEHICLE_NO,
             DRIVER_NAME: DRIVER_NAME,
             DRIVER_NO: DRIVER_NO,
-
             INSU_PER: INSU_PER,
             INSU_AMT: INSU_AMT,
             INSU_DETAIL: INSU_DETAIL,
-
             TDS_PER: TDS_PER,
             TDS_AMT: TDS_AMT,
-
             FRT_TAXPER: FRT_TAXPER,
             FRT_TAXAMT: FRT_TAXAMT,
             FRT_AMT: FRT_AMT,
             FRT_TOPAY: FRT_TOPAY,
-
             TPT_DISTANCE: TPT_DISTANCE,
             TPT_MODE: TPT_MODE,
-
             PAY_TERM: PAY_TERM,
             PAYMENT_TERM: PAYMENT_TERM,
-
             DELIVERY_TERMS: DELIVERY_TERMS,
             WAYBILL_NO: WAYBILL_NO,
-
             LOAD_AC: LOAD_AC,
             LOAD_PER: LOAD_PER,
             LOAD_AMT: LOAD_AMT,
             LOAD_REM: LOAD_REM,
-
             NAMOUNT: NAMOUNT,
-
             EXRATE: EXRATE,
             CURRENCY: CURRENCY,
-
             DEFECTIVE_GOODS: DEFECTIVE_GOODS,
             CAL_ONPCS: CAL_ONPCS,
             PRINT_DETAIL: PRINT_DETAIL,
-
             BUYER_ORDNO: BUYER_ORDNO,
-
             PLACE_RECEIPT: PLACE_RECEIPT,
             PORT_LOADING: PORT_LOADING,
             PORT_DISCHARGE: PORT_DISCHARGE,
             PORT_CODE: PORT_CODE,
-
             FINAL_DEST: FINAL_DEST,
             FINAL_DEST_COUNTRY: FINAL_DEST_COUNTRY,
-
             SB_NO: SB_NO,
             SB_DATE: SB_DATE,
-
             FOB_VALUE: FOB_VALUE,
             FOB_FRT: FOB_FRT,
             FOB_INSU: FOB_INSU,
             FOB_OTHER: FOB_OTHER,
-
             LUT_NO: LUT_NO,
             LUT_DETAIL: LUT_DETAIL,
             LUT_DATE: LUT_DATE,
-
             INCOTERM: INCOTERM,
-
             BILLOF_LADING: BILLOF_LADING,
             LC_NO: LC_NO,
-
             action: action,
             STATUS: STATUS,
-
             LICENCE_TYPE: LICENCE_TYPE,
             LICENCE_NO: LICENCE_NO,
             LICENCE_DATE: LICENCE_DATE
         };
 
+         const Details = GetSalesInvoiceDetails();
 
 
-        const Details = GetSalesInvoiceDetails();
 
         const model = {
             Header: Header,
@@ -863,9 +744,7 @@ $(document).ready(async function () {
 
         console.log("FINAL MODEL:");
         console.log(JSON.stringify(model, null, 2));
-
         $("#btn-save").prop("disabled", true);
-
         $.ajax({
             url: '/SalesInvoice/SavedData',
             type: 'POST',
