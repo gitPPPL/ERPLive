@@ -18,6 +18,8 @@ $(document).ready(async function() {
     }
     else {
         await GetVNo();
+        $('#ddlSupplyFor').val('LOCAL').trigger('change');
+        $('#ddlBasicRateCurrency').val('1').trigger('change');
     }
 
     $('#btn_save').on('click', async function (e) {
@@ -26,12 +28,34 @@ $(document).ready(async function() {
         await SaveData();
 
     });
-         
+        
 });
 
 async function wireEvent() {
 
     SetCurrentDate();
+
+    HandleSupplyForChange();
+
+    // ================================
+    // SUPPLY FOR CHANGE
+    // ================================
+    $(document).on('change', '#ddlSupplyFor', function () {
+
+        HandleSupplyForChange();
+
+        if (!id) {
+            const supplyFor = $(this).val();
+
+            if (supplyFor === 'EXPORT') {
+                $('#ddlBasicRateCurrency').val('2').trigger('change');
+            }
+            else {
+                $('#ddlBasicRateCurrency').val('1').trigger('change');
+            }
+        }
+
+    });
 
     // ======================================================
     // CUSTOMER CHANGE → AUTOFILL DETAILS
@@ -145,8 +169,6 @@ async function wireEvent() {
 
             const data = await response.json();
 
-            console.log("PI Details:", data);
-
             $('#ddlCustomerName').val(data.billCode).trigger('change');
             $('#txtAddressLine1').val(data.add1 || '');
             $('#txtAddressLine2').val(data.add2 || '');
@@ -252,6 +274,52 @@ async function wireEvent() {
         }
     );
 
+    $(document).on('click', '#btn_export', function () {
+
+        if ($('#ddlSupplyFor').val() !== 'EXPORT') {
+            showToast('Please select Export supply.', { type: 'warning' });
+            return;
+        }
+
+        const refNo = $('#NumDocno').val();
+
+        if (!refNo) {
+            showToast('Sales Sauda No. not found.', { type: 'warning' });
+            return;
+        }
+
+        const exportData = {
+            refNo: refNo,
+            refType: 'SAUD',
+
+            customerCode: $('#ddlCustomerName').val(),
+            customerName: $('#ddlCustomerName option:selected').text(),
+
+            address1: $('#txtAddressLine1').val(),
+            address2: $('#txtAddressLine2').val(),
+            address3: $('#txtAddressLine3').val(),
+            contactNo: $('#txtContactNo').val(),
+
+            partyStation: $('#ddlCity option:selected').text(),
+
+            itemType: $('#txtItemType').val(),
+            weight: $('#NumTotalWeight').val(),
+            rate: $('#NumBasicRate').val(),
+            currency: $('#ddlBasicRateCurrency option:selected').text(),
+
+            freightTerm: $('#ddlFreightTerm').val(),
+            freightRate: $('#NumFreightRate').val()
+        };
+
+        // Save Sales Sauda data temporarily
+        sessionStorage.setItem('salesSaudaExportData',JSON.stringify(exportData));
+
+        // Open Export Details with reference
+        const url = `/ExportDetails/Index?refNo=${encodeURIComponent(refNo)}&refType=SAUD`;
+
+        window.open(url, '_blank');
+    });
+
 }
 
 function SetCurrentDate() {
@@ -303,8 +371,7 @@ async function GetVNo() {
         $('#NumDocno').val(data.v_NO);
 
         const docId = 'SAUD' + $('#NumDocno').val();
-        console.log("docId", docId);
-        
+       
     } catch (error) {
         console.error('Error generating VNo:', error);
     }
@@ -325,10 +392,6 @@ async function GetDSAUVNo() {
             showToast(data.error, { type: "error" });
             return null;
         }
-
-        console.log("DSAU VNo:", data.v_NO);
-        console.log("DSAU VType:", data.v_TYPE);
-
         return data.v_NO;
     }
     catch (error) {
@@ -350,7 +413,6 @@ async function BindCustomerAgentList() {
 
         const data = await response.json();
 
-        console.log("Customer Name", data);
 
         const ddl = $('#ddlCustomerName');
 
@@ -662,9 +724,6 @@ async function SaveData() {
             if (!dsauVNo) {
                 return;
             }
-
-            console.log("Generated DSAU VNo:", dsauVNo);
-            console.log("DSAU DOC_ID:", "DSAU" + dsauVNo);
         }
 
         const model = {
@@ -694,7 +753,7 @@ async function SaveData() {
             NOS: $('#NumNosPcs').val() || null,
 
             RATE: $('#NumBasicRate').val() || null,
-            CURRENCY: $('#ddlBasicRateCurrency').val() || null,
+            CURRENCY: $('#ddlBasicRateCurrency option:selected').text().trim() || null,
 
             DISC_PER: $('#NumTradeDiscPerKgs').val() || null,
             CDISC_PER: $('#NumCashDiscPercent').val() || null,
@@ -747,6 +806,10 @@ async function SaveData() {
 
         const formData = new FormData();
 
+        console.log("Selected Currency Value:", $('#ddlBasicRateCurrency').val());
+        console.log("Selected Currency Text:", $('#ddlBasicRateCurrency option:selected').text());
+        console.log("Model Currency:", model.CURRENCY);
+
         Object.keys(model).forEach(key => {
 
             if (model[key] !== null && model[key] !== undefined) {
@@ -765,8 +828,6 @@ async function SaveData() {
 
             formData.append('Attachment', imageFile);
 
-            console.log("Attachment:", imageFile.name);
-
         }
 
         const response = await fetch('/SalesSaudaEntry/SaveAndUpdateData', {
@@ -779,8 +840,6 @@ async function SaveData() {
         }
 
         const result = await response.json();
-
-        console.log("Save Response:", result);
 
         if (result.success) {
             showToast(result.message || "Data saved successfully.", { type: "success" });
@@ -819,7 +878,7 @@ async function LoadEditData() {
         const result = await response.json();
 
         console.log("Load Edit Data:", result);
-
+        console.log('Sales Sauda Currency:', result.data?.CURRENCY);
         if (!result.success) {
             showToast(result.message || "Data not found.", {type: "error"});
             return;
@@ -871,8 +930,19 @@ async function LoadEditData() {
 
         $('#NumBasicRate').val(data.RATE ?? '');
         
-        $('#ddlBasicRateCurrency').val(data.CURRENCY ?? '').trigger('change');
+        // $('#ddlBasicRateCurrency').val(data.CURRENCY ?? '').trigger('change');
 
+        const currencyValue = String(data.CURRENCY ?? '').trim();
+
+        const $currency = $('#ddlBasicRateCurrency');
+
+        const matchingOption = $currency.find('option').filter(function () {
+            return String(this.value).trim() === currencyValue ||
+                $(this).text().trim().toLowerCase() === currencyValue.toLowerCase();
+        }).first();
+
+        $currency.val(matchingOption.length ? matchingOption.val() : '').trigger('change');
+        
         $('#NumTradeDiscPerKgs').val(data.DISC_PER ?? '');
 
         $('#NumCashDiscPercent').val(data.CDISC_PER ?? '');
@@ -908,9 +978,14 @@ async function LoadEditData() {
         $('#ddlGRSApplicable').val(data.GRADE ?? '');
         $('#NumGRSRate').val(data.WASTE_PER ?? '');
 
+        //if (data.PINO) {
+        //    const piOption = new Option(data.PINO, data.PINO, true, true );
+        //    $('#ddlPINO').append(piOption).trigger('change');
+        //}
         if (data.PINO) {
-            const piOption = new Option(data.PINO, data.PINO, true, true );
-            $('#ddlPINO').append(piOption).trigger('change');
+            const piOption = new Option(data.PINO, data.PINO, true, true);
+
+            $('#ddlPINO').append(piOption).trigger('change.select2');
         }
 
         // ==========================================
@@ -940,8 +1015,7 @@ async function LoadEditData() {
 
                 $('#btnPreviewImage').data('file-url', fileUrl).data('file-type', fileType).show();
 
-                console.log("File Name:", fileName);
-                console.log("File Type:", fileType);
+               
             }
         }
 
@@ -1111,6 +1185,9 @@ function setFormReadOnly() {
 
     $('#btn_save').hide();
     $('#btnPreviewImage').prop('disabled', false);
+
+    HandleSupplyForChange();
+    
 }
 
 //===========================
@@ -1288,6 +1365,7 @@ $(document).on('click', '#btn_Sendapproval', function () {
     });
 
 });
+
 $(document).on('click', '#btn_Approved', function () {
     OpenApprovalModal({
         DocType: vtype,
@@ -1375,7 +1453,7 @@ async function SalesSaudaEntry() {
             PAN: "PAN : " + window.globalVariables.pan,
             website: "Website: " + window.globalVariables.website,
             email: "Email: " + window.globalVariables.email,
-            comp_phone: "Phone: " + window.globalVariables.compPhone
+            comp_phone: "Phone: " + window.globalVariables.phone
         }
     };
 
@@ -1418,17 +1496,13 @@ async function SalesSaudaEntry() {
                 { type: 'application/pdf' }
             );
 
-            var fileName =
-                `${reportName}_${timestamp}.pdf`;
+            var fileName = `${reportName}_${timestamp}.pdf`;
 
-            var link =
-                document.createElement('a');
+            var link = document.createElement('a');
 
-            link.href =
-                URL.createObjectURL(file);
+            link.href = URL.createObjectURL(file);
 
-            link.download =
-                fileName;
+            link.download = fileName;
 
             document.body.appendChild(link);
 
@@ -1448,4 +1522,131 @@ async function SalesSaudaEntry() {
         }
 
     });
+}
+
+async function ExportEntry() {
+
+    var reportName = "SAUDA_FORMAT2";
+
+    var refType = "SAUD";
+    var refNo = $('#NumDocno').val();
+    var rptName = "SALE SAUDA NOTE";
+
+    if (!refType || !refNo) {
+        showToast("Reference Type and Reference No are required.", { type: "error" });
+        return;
+    }
+
+    var SelForMul =
+        "{SAUDA_EXPORT.REF_TYPE}='" + refType + "'" +
+        " AND {SAUDA_EXPORT.REF_NO}=" + refNo +
+        " AND {SAUDA_EXPORT.COMP_CODE}=" + window.globalVariables.compCode +
+        " AND {SAUDA_EXPORT.YEAR_CODE}=" + window.globalVariables.yearCode +
+        " AND {SAUDA_EXPORT.BRANCH_CODE}=" + window.globalVariables.branchCode;
+
+    var formulaFields = {
+
+        Reportname: reportName,
+
+        selectionFormula: SelForMul,
+
+        Database: window.database.db,
+
+        Parameters: {
+
+            RPTNAME: rptName,
+
+            comp_name: window.globalVariables.companyName,
+            comp_add1: window.globalVariables.add1,
+            comp_add2: window.globalVariables.add2,
+
+            comp_GST: "GSTIN: " + window.globalVariables.gstin,
+            comp_PAN: "PAN : " + window.globalVariables.pan,
+            COMP_CIN: "CIN : " + window.globalVariables.cinNo,
+
+            comp_email: "Email: " + window.globalVariables.email,
+            comp_phone: "Phone: " + window.globalVariables.phone
+        }
+    };
+
+    console.log("Export Details Report Data:", formulaFields);
+    console.log("Selection Formula:", SelForMul);
+
+    var now = new Date();
+
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear()).slice(-2);
+
+    var hours = String(now.getHours()).padStart(2, '0');
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var seconds = String(now.getSeconds()).padStart(2, '0');
+
+    var timestamp =
+        `${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+    $.ajax({
+
+        url: 'http://localhost:34089/Report/PendingQCReport',
+        type: 'POST',
+
+        data: JSON.stringify(formulaFields),
+
+        contentType: "application/json",
+
+        xhrFields: {
+            responseType: 'blob'
+        },
+
+        success: function (response) {
+
+            var file = new Blob(
+                [response],
+                { type: 'application/pdf' }
+            );
+
+            var fileName =
+                `${reportName}_${timestamp}.pdf`;
+
+            var link = document.createElement('a');
+
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+
+            URL.revokeObjectURL(link.href);
+        },
+
+        error: function (xhr, status, error) {
+
+            console.error(
+                'Error generating export report:',
+                error
+            );
+
+            showToast(
+                "Error generating Export Details report.",
+                { type: "error" }
+            );
+        }
+    });
+}
+
+function HandleSupplyForChange() {
+
+    const supplyFor = $('#ddlSupplyFor').val();
+
+    if (supplyFor === 'EXPORT') {
+        $('#btn_export').show();
+        $('#btn_Exportprint').show();
+    }
+    else {
+        $('#btn_export').hide();
+        $('#btn_Exportprint').hide();
+    }
 }

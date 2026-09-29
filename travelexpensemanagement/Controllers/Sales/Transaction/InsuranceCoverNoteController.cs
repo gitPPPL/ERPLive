@@ -286,19 +286,11 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                 var itemName = cmd.ExecuteScalar()?.ToString() ?? "";
 
-                return Json(new
-                {
-                    success = true,
-                    itemName = itemName
-                });
+                return Json(new {success = true, itemName = itemName });
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
+                return Json(new {  success = false, message = ex.Message });
             }
         }
 

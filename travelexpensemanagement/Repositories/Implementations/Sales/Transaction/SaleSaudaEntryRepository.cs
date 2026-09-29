@@ -381,7 +381,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sales.Transaction
                             return ( false, "Please check the Freight Master. The freight master for this station/city has not been created yet. First, create the freight master for this station or city." );
                         }
                     }
-                }
+                }       
 
                 // ==========================================
                 // EXPORT VALIDATION
@@ -413,7 +413,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sales.Transaction
                       AND BRANCH_CODE = @BRANCH_CODE
                       AND YEAR_CODE = @YEAR_CODE", con))
                     {
-                        cmd.Parameters.AddWithValue( "@REF_TYPE",model.SAUDA_TYPE ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue( "@REF_TYPE", "SAUD" ?? (object)DBNull.Value);
 
                         cmd.Parameters.AddWithValue( "@REF_NO", model.V_NO.Value);
 

@@ -150,7 +150,7 @@ namespace travelexpensemanagement.Common.Globalvariable
 
             return CompanyData;
         }
-
+         
         public async Task<GlobalGeneralSettingModel> LoadGeneralSetting()
         {
             var httpContext = _httpContextAccessor.HttpContext;

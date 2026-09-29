@@ -92,6 +92,10 @@ builder.Services.AddScoped<ISaleSaudaEntryRepository, SaleSaudaEntryRepository>(
 builder.Services.AddScoped<ISaleSaudaEntryListRepository, SaleSaudaEntryListRepository>();
 builder.Services.AddScoped<IInsuranceCoverNoteRepository, InsuranceCoverNoteRepository>();
 builder.Services.AddScoped<IInsuranceCoverNoteListRepository, InsuranceCoverNoteListRepository>();
+builder.Services.AddScoped<IExportDetailsRepository, ExportDetailsRepository>();
+builder.Services.AddScoped<IDeliveryOrderRepository, DeliveryOrderRepository>();
+builder.Services.AddScoped<IDeliveryOrderListRepositroy, DeliveryOrderListRepository>();
+
 
 
 // Gete Entry Transaction repositories

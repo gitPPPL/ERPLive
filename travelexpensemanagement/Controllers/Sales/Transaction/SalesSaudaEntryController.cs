@@ -46,7 +46,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             ViewBag.GlobalVariables = globalVar;
             return View("~/Views/Sales/Transaction/SalesSaudaEntry/Index.cshtml");
         }
-
+        
         [HttpGet]
         public JsonResult GenerateVNo()
         {
@@ -171,7 +171,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     break;
 
                 case "CurrencyMast":
-                    query = $@"select code, ShortName  from CURRENCY_MAST ORDER BY code";
+                    query = $@"select shortName, ShortName  from CURRENCY_MAST ORDER BY code";
                     break;
 
                 case "CountryMast":
