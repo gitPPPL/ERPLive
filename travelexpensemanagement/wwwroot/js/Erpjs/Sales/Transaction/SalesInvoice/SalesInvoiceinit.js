@@ -9,17 +9,12 @@ const mode = urlParams.get('mode');
 const isReadOnly = (mode === 'view');
 var globalVars = window.globalVariables || {};
 var database = window.database || "";
-
 var LoadGeneralSetting = window.LoadGeneralSetting || {};
-
-
-
 let PubUserLevel = globalVars.UserLevel;
 let CompCode = globalVars.CompCode;
 let LoginDate = globalVars.LoginDate;
 var controllerName = window.location.pathname.split('/')[1];
 let partyData = [];
-
 let TaxTypeList = '';
 let TaxPercentageData = [];
 let ProductList = '';
@@ -319,8 +314,7 @@ $(document).ready(async function () {
         const TAX_CODE = parseInt($.trim($('#ddlTaxType').val()), 10) || 0;
         const PACK_NO = parseInt($.trim($('#ddlPackNo').val()), 10) || 0;
         const PACK_TYPE = PACK_NO  ? $.trim($('#ddlPackNo option:selected').text()).split('-').pop().trim()  : "";
-        const PACK_PER =
-            parseFloat($.trim($('#NumOtherPacking1').val())) || 0;
+        const PACK_PER = parseFloat($.trim($('#NumOtherPacking1').val())) || 0;
 
         const PACK_AMT =
             getDecimal($.trim($('#NumOtherPacking2').val())) || 0;

@@ -1,13 +1,18 @@
 ﻿using AngleSharp.Text;
 using DocumentFormat.OpenXml.Math;
+using DocumentFormat.OpenXml.Wordprocessing;
+using iText.Layout.Element;
 using Microsoft.Data.SqlClient;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using StackExchange.Redis;
 using System.Data;
+using System.Reflection.Metadata;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Inventory.Transaction;
+using travelexpensemanagement.Models.Sales.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Sale.Transaction;
 
 namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
@@ -221,8 +226,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 }
                 else
                 {
-                    if (GlobalData.PubCompCode != "3" &&
-                        (header.V_TYPE == "SAGT" || header.V_TYPE == "SABS"))
+                    if (GlobalData.PubCompCode != "3" && (header.V_TYPE == "SAGT" || header.V_TYPE == "SABS"))
                     {
                         using (SqlConnection con = _dbConnection.GetErpConnection())
                         {
@@ -245,7 +249,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                             }
 
                             // Previous Debit
-                            string debitSql = @"  SELECT ISNULL(SUM(AMT), 0) FROM LEDGER2  WHERE V_TYPE = @VType AND V_NO <> @VNo
+                                string debitSql = @"  SELECT ISNULL(SUM(AMT), 0) FROM LEDGER2  WHERE V_TYPE = @VType AND V_NO <> @VNo
                                 AND DR_CODE = @PartyCode AND Comp_Code = @CompCode";
 
                             decimal pDrAmt;
@@ -1038,8 +1042,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     await cmd.ExecuteNonQueryAsync();
                 }
 
-
-
                 if(header.Do_NO != "")
                 {
                     using (var cmd = new SqlCommand("sp_SalesInvoice", conn))
@@ -1062,16 +1064,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     }
                 }
                 
-
                 if (details != null && details.Count > 0)
                 {
                     foreach (var detail in details)
                     {
                         if (detail == null || detail.ITEM_CODE <= 0)
                             continue;
-
-
-
 
                         string hsncode = GetText($@"select isnull(HSN_CODE,'') from ITEM_MAST 
                         where code= {detail.ITEM_CODE} and Comp_code={GlobalData.PubCompCode} ");
@@ -1128,9 +1126,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                             }
                         }
 
-
                         decimal ordRate = 0;
-
 
                         if(header.EXRATE > 0)
                         {
@@ -1141,14 +1137,676 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                             ordRate = Convert.ToDecimal(detail.RATE);
                         }
 
+                        if (detail.ORD_TYPE == "DOGT")
+                        {
+                            bool rateExists = IsExist($@"
+                                SELECT 1
+                                FROM DO2
+                                WHERE ITEM_CODE = {detail.ITEM_CODE}
+                                AND RATE = {ordRate}
+                                AND V_TYPE = '{detail.ORD_TYPE}'
+                                AND V_NO = {detail.ORD_NO}
+                                AND COMP_CODE = {GlobalData.PubCompCode}
+                                AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                            if (!rateExists)
+                            {
+                                return ("Validation", $"RATE of Item: {detail.ITEM_NAME} not matched with Sale Order Item. Please check it.");
+                            }
+                        }
+                        else
+                        {
+                            bool rateExists = IsExist($@"
+                                SELECT 1
+                                FROM ORDER2
+                                WHERE ITEM_CODE = {detail.ITEM_CODE}
+                                AND RATE = {ordRate}
+                                AND V_TYPE = '{detail.ORD_TYPE}'
+                                AND V_NO = {detail.ORD_NO}
+                                AND COMP_CODE = {GlobalData.PubCompCode}
+                                AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                            if (!rateExists)
+                            {
+                                return ("Validation", $"RATE of Item: {detail.ITEM_NAME} not matched with Sale Order Item. Please check it.");
+                            }
+                        }
+
+                        if(header.V_TYPE != "SASI" && header.V_TYPE != "SAST")
+                        {
+                            string mgroup = GetText($@"Select SALE_GROUP from ITEM_MAST a LEFT JOIN item_group b ON a.GROUP_CODE=b.CODE and a.COMP_CODE=b.COMP_CODE 
+                            where a.CODE={detail.ITEM_CODE} and a.COMP_CODE={GlobalData.PubCompCode}");
+
+
+                            if(mgroup != header.V_TYPE)
+                            {
+                                return ("Validation", $"Item Name={detail.ITEM_NAME} (Group:{mgroup}), but you selected Product Type : {header.ITEM_TYPE} in header.");
+
+                            }                       
+
+                        }
+
+                        if(header.CAL_ONPCS == 0 && detail.QTY == 0)
+                        {
+                            return ("Validation", $"Quantity Should not be Blank of Item Name={detail.ITEM_NAME}");
+
+                        }
+
+
+                        if ((header.ITEM_TYPE == "Scrap" || header.ITEM_TYPE == "Store") && Convert.ToInt32(detail.ITEM_CODE) != 0)
+                        {
+                            decimal curStock = 0;
+
+                            // MaterialReceipt + JobReceived
+                            string stock1 = GetText($@"
+                                SELECT ISNULL(SUM(purchase2.recd_qty), 0)
+                                FROM purchase2
+                                LEFT JOIN doctype_mast
+                                ON doctype_mast.code = purchase2.v_type
+                                WHERE purchase2.comp_code = {GlobalData.PubCompCode}
+                                AND purchase2.branch_code = {GlobalData.PubBranchCode}
+                                AND purchase2.v_date <= '{header.V_DATE:yyyyMMdd}'
+                                AND item_code = {detail.ITEM_CODE}
+                                AND doctype_mast.doctype IN ('MaterialReceipt','JobReceived')");
+
+                            curStock += decimal.TryParse(stock1, out var s1) ? s1 : 0;
+
+
+                            // PurchaseReturn + JobIssue
+                            string stock2 = GetText($@"
+                                SELECT ISNULL(-SUM(purchase2.recd_qty), 0)
+                                FROM purchase2
+                                LEFT JOIN doctype_mast
+                                ON doctype_mast.code = purchase2.v_type
+                                WHERE purchase2.comp_code = {GlobalData.PubCompCode}
+                                AND purchase2.branch_code = {GlobalData.PubBranchCode}
+                                AND purchase2.v_date <= '{header.V_DATE:yyyyMMdd}'
+                                AND item_code = {detail.ITEM_CODE}
+                                AND doctype_mast.doctype IN ('PurchaseReturn','JobIssue')");
+
+                            curStock += decimal.TryParse(stock2, out var s2) ? s2 : 0;
+
+
+                            // PlantReturn + OpeningStock + ProductionReceived + AdjustmentReceived
+                            string stock3 = GetText($@"
+                                SELECT ISNULL(SUM(issue2.qty), 0)
+                                FROM issue2
+                                LEFT JOIN doctype_mast
+                                ON doctype_mast.code = issue2.v_type
+                                WHERE issue2.comp_code = {GlobalData.PubCompCode}
+                                AND issue2.branch_code = {GlobalData.PubBranchCode}
+                                AND issue2.v_date <= '{header.V_DATE:yyyyMMdd}'
+                                AND item_code = {detail.ITEM_CODE}
+                                AND doctype_mast.doctype IN
+                                ('PlantReturn','OpeningStock','ProductionReceived','AdjustmentReceived')");
+
+                            curStock += decimal.TryParse(stock3, out var s3) ? s3 : 0;
+
+
+                            // GoodsIssue + ProductionIssue + AdjustmentIssue + DispatchIssue + MoistureIssue
+                            // Exclude current voucher
+                            string stock4 = GetText($@"
+                                SELECT ISNULL(-SUM(Issue2.qty), 0)
+                                FROM Issue2
+                                LEFT JOIN doctype_mast
+                                ON doctype_mast.code = Issue2.v_type
+                                WHERE Issue2.comp_code = {GlobalData.PubCompCode}
+                                AND Issue2.branch_code = {GlobalData.PubBranchCode}
+                                AND Issue2.v_date <= '{header.V_DATE:yyyyMMdd}'
+                                AND item_code = {detail.ITEM_CODE}
+                                AND doctype_mast.doctype IN
+                                ('GoodsIssue','ProductionIssue','AdjustmentIssue','DispatchIssue','MoistureIssue')
+                                AND Issue2.v_no NOT IN ({header.V_NO})");
+
+                            curStock += decimal.TryParse(stock4, out var s4) ? s4 : 0;
+
+
+                            // SalesInvoice + JobIssue
+                            // Exclude current voucher
+                            string stock5 = GetText($@"
+                                SELECT ISNULL(-SUM(sale2.qty), 0)
+                                FROM sale2
+                                LEFT JOIN doctype_mast
+                                ON doctype_mast.code = sale2.v_type
+                                WHERE sale2.comp_code = {GlobalData.PubCompCode}
+                                AND sale2.branch_code = {GlobalData.PubBranchCode}
+                                AND sale2.v_date <= '{header.V_DATE:yyyyMMdd}'
+                                AND item_code = {detail.ITEM_CODE}
+                                AND doctype_mast.doctype IN ('SalesInvoice','JobIssue')
+                                AND status <> 2
+                                AND sale2.v_no NOT IN ({header.V_NO})");
+
+                            curStock += decimal.TryParse(stock5, out var s5) ? s5 : 0;
+
+
+                            // SalesReturn
+                            string stock6 = GetText($@"
+                                    SELECT ISNULL(SUM(sale2.qty), 0)
+                                    FROM sale2
+                                    LEFT JOIN doctype_mast
+                                    ON doctype_mast.code = sale2.v_type
+                                    WHERE sale2.comp_code = {GlobalData.PubCompCode}
+                                    AND sale2.branch_code = {GlobalData.PubBranchCode}
+                                    AND sale2.v_date <= '{header.V_DATE:yyyyMMdd}'
+                                    AND item_code = {detail.ITEM_CODE}
+                                    AND doctype_mast.doctype IN ('SalesReturn')");
+
+                            curStock += decimal.TryParse(stock6, out var s6) ? s6 : 0;
+
+
+                            // Round stock to 2 decimals
+                            curStock = Math.Round(curStock, 2);
+
+                            decimal issueQty = Convert.ToDecimal(detail.QTY ?? 0);
+
+                            if ((curStock - issueQty) < 0)
+                            {
+                                return ("Validation",
+                                    $"Current Stock = ({curStock}) is less than issue qty. Please check for item name {detail.ITEM_NAME} ({detail.ITEM_CODE})");
+                            }
+                        }
+
+                        string csgText = GetText($@"
+                        SELECT ISNULL(CGST_PER, 0)
+                        FROM ITEM_MAST
+                        WHERE Code = {detail.ITEM_CODE}
+                        AND COMP_CODE = {GlobalData.PubCompCode}");
+
+                        string igText = GetText($@"
+                        SELECT ISNULL(IGST_PER, 0)
+                        FROM ITEM_MAST
+                        WHERE Code = {detail.ITEM_CODE}
+                        AND COMP_CODE = {GlobalData.PubCompCode}");
+
+                        decimal csg = decimal.TryParse(csgText, out var csgValue) ? csgValue : 0;
+                        decimal ig = decimal.TryParse(igText, out var igValue) ? igValue : 0;
+
+                        if(detail.CGST_PER > 0)
+                        {
+                            if(detail.CGST_PER != csg)
+                            {
+                                return ("Validation", $"Tax Percentage of Item =>{detail.ITEM_NAME} not matched as per Item Master.");
+
+                            }
+                        }
+                        else if(detail.IGST_PER > 0)
+                        {
+                            if (detail.IGST_PER != ig)
+                            {
+                                return ("Validation", $"Tax Percentage of Item =>{detail.ITEM_NAME} not matched as per Item Master.");
+
+                            }
+                        }
+
+                        if(header.V_TYPE == "SAGT")
+                        {
+                            if(detail.ITEM_CODE > 0 )
+                            {
+                                if(detail.HSN_CODE == "")
+                                {
+                                    return ("Validation", $"Tax Percentage of Item =>{detail.ITEM_NAME} not matched as per Item Master.");
+
+                                }
+                            }
+
+                        }
+           
+                        string getWBYN = GetText($@"Select isnull(WB_YN,'') from GODOWN_MAST where comp_code={GlobalData.PubCompCode} and CODE={header.GODOWN_CODE}");
+
+                        if (getWBYN == "Yes")
+                        {
+                            if(GlobalData.PubCompCode == "1")
+                            {
+
+                                if (detail.ITEM_CODE != 0)
+                                {
+                                    if(detail.QTY != detail.WBQTY)
+                                    {
+                                        return ("Validation", $"Net Qty not Matched with WB Qty, Please Check it of =>{detail.ITEM_NAME}, Approval Required");
+
+                                    }
+                                }
+                            }
+
+
+                        }
+
+                        if(GeneralSetting.pubDefSOINSI == "Yes")
+                        {
+                            if(detail.ITEM_CODE > 0 &&  detail.PACK_NO > 0)
+                            {
+                                if(detail.ORD_NO == 0)
+                                {
+                                    return ("Validation", $"Order No. can not be Blank, Please Check it of =>{detail.ITEM_NAME}");
+
+                                }
+                            }
 
 
 
+                            if (detail.ITEM_CODE > 0 && detail.ORD_NO > 0)
+                            {
+                                if (detail.ORD_TYPE == "DOGT")
+                                {
+                                    // Delivery Order Approval
+                                    bool doApproved = IsExist($@"
+                                        SELECT 1
+                                        FROM DO1
+                                        WHERE V_TYPE = '{detail.ORD_TYPE}'
+                                        AND V_NO = {detail.ORD_NO}
+                                        AND FAPROV_STATUS = 'Approved'
+                                        AND COMP_CODE = {GlobalData.PubCompCode}
+                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                                    if (!doApproved)
+                                    {
+                                        return ("Validation",
+                                            $"Delivery Order No {detail.ORD_NO} not approved, Please Check it of = {detail.ITEM_NAME}");
+                                    }
+
+                                    // Delivery Order Billing Party Check
+                                    bool doPartyMatched = IsExist($@"
+                                        SELECT 1
+                                        FROM DO1
+                                        WHERE V_TYPE = '{detail.ORD_TYPE}'
+                                        AND V_NO = {detail.ORD_NO}
+                                        AND BILL_CODE = {header.BILL_CODE}
+                                        AND COMP_CODE = {GlobalData.PubCompCode}
+                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                                    if (!doPartyMatched)
+                                    {
+                                        return ("Validation",
+                                            $"Party in Delivery Order No. {detail.ORD_NO} not matched with Billing Party, Please Check it of = {detail.ITEM_NAME}");
+                                    }
+                                }
+                                else
+                                {
+                                    // Sale Order Approval
+                                    bool orderApproved = IsExist($@"
+                                    SELECT 1
+                                    FROM ORDER1
+                                    WHERE V_TYPE = 'SORD'
+                                    AND V_NO = {detail.ORD_NO}
+                                    AND FAPROV_STATUS = 'Approved'
+                                    AND COMP_CODE = {GlobalData.PubCompCode}
+                                    AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                                    if (!orderApproved)
+                                    {
+                                        return ("Validation",
+                                            $"Order No {detail.ORD_NO} not approved, Please Check it of = {detail.ITEM_NAME}");
+                                    }
+
+                                    // Sale Order Billing Party Check
+                                    bool orderPartyMatched = IsExist($@"
+                                        SELECT 1
+                                        FROM ORDER1
+                                        WHERE V_TYPE = '{detail.ORD_TYPE}'
+                                        AND V_NO = {detail.ORD_NO}
+                                        AND PARTY_CODE = {header.BILL_CODE}
+                                        AND COMP_CODE = {GlobalData.PubCompCode}
+                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                                    if (!orderPartyMatched)
+                                    {
+                                        return ("Validation",
+                                            $"Party in Order No. {detail.ORD_NO} not matched with Billing Party, Please Check it of = {detail.ITEM_NAME}");
+                                    }
+                                }
+                            }
+
+
+                        }
+
+                        if (GeneralSetting.pubDefSSINSI == "Yes")
+                        {
+                            if (detail.ITEM_CODE > 0 && detail.SAUDA_NO > 0)
+                            {
+                                // Sauda approval check
+                                bool saudaApproved = IsExist($@"
+                                    SELECT 1
+                                    FROM SAUDA
+                                    WHERE V_TYPE = 'SAUD'
+                                    AND V_NO = {detail.SAUDA_NO}
+                                    AND FAPROV_STATUS = 'Approved'
+                                    AND COMP_CODE = {GlobalData.PubCompCode}
+                                    AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+
+                                if (!saudaApproved)
+                                {
+                                    return ("Validation",
+                                        $"Sauda No {detail.SAUDA_NO} not approved, Please Check it of = {detail.ITEM_NAME}");
+                                }
+
+                                // Freight validation
+                                if (header.FRT_AMT > 0)
+                                {
+                                    bool freightAllowed = IsExist($@"
+                                        SELECT 1
+                                        FROM SAUDA
+                                        WHERE V_TYPE = 'SAUD'
+                                        AND V_NO = {detail.SAUDA_NO}
+                                        AND COMP_CODE = {GlobalData.PubCompCode}
+                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                                        AND FRT_TERM IN ('FOR', 'FOR-TPT')");
+
+                                    if (!freightAllowed)
+                                    {
+                                        return ("Validation",
+                                            $"Freight payable by customer in Sauda No {detail.SAUDA_NO}, so freight can not be charged.");
+                                    }
+                                }
+                            }
+                        }
+
+                        if(detail.ITEM_CODE != 0)
+                        {
+                            if(chkval == true && header.V_TYPE == "SAGT")
+                            {
+                                if (GeneralSetting.pubDefPACKINSI == "Yes")
+                                {
+                                    if (header.PACK_NO > 0)
+                                    {
+                                        int PubRes1Int = Convert.ToInt32(GetText($@"select v_no from sale2 where pack_type = '{header.PACK_TYPE}' and pack_no = {detail.PACK_NO} and isnull(Status, 0) <> 2 and ITEM_CODE = {detail.ITEM_CODE} and comp_code = {GlobalData.PubCompCode}
+                                        and branch_code= {GlobalData.PubCompCode} and year_code= {GlobalData.PubFYearCode} and v_type='{header.V_TYPE}' and  v_no <> '{header.V_TYPE}' "));
+
+
+                                        if (PubRes1Int > 0)
+                                        {
+                                            return ("Validation",
+                                            $"Packing Slip No. already Exist in Sale, Serial No.  {PubRes1Int}");
+
+                                        }
+
+                                        if (detail.PACK_NO > 0)
+                                        {
+
+                                            return ("Validation",
+                                            $"Packing No. can not be Blank, Please Check it of =  {detail.ITEM_NAME}");
+
+                                        }
+
+                                        packtyp = "";
+
+                                        if (header.V_TYPE == "SAGT" || header.V_TYPE == "SABS")
+                                        {
+
+                                            if (header.V_TYPE == "Flakes")
+                                            {
+                                                packtyp = "'SFIS','SFEI'";
+                                            }
+                                            else
+                                            {
+                                                packtyp = "'FPIS'";
+                                            }
+
+                                        }
+                                        else if (header.V_TYPE == "SACH")
+                                        {
+                                            packtyp = "'FGIS','FGRC'";
+                                        }
+
+                                        if (GlobalData.PubCompCode == "1" && (packtyp == "FPIS" || packtyp == "FGIS"))
+                                        {
+                                            string tenCatOrder = GetText($@"select TENACITY_CODE from ORDER2 where v_type='SORD' and v_no={detail.ORD_NO} and ITEM_CODE={detail.ITEM_CODE} and COMP_CODE={GlobalData.PubCompCode} and Branch_code={GlobalData.PubBranchCode}");
+                                            string tenCatPack = GetText($@"Select distinct TENACITY_CODE from PRODUCTION2 where v_type in ({packtyp}) and v_no={header.PACK_NO} and ITEM_CODE={detail.ITEM_CODE} and COMP_CODE={GlobalData.PubCompCode} and Branch_code={GlobalData.PubBranchCode}");
+
+                                            if (tenCatOrder != "" && tenCatPack != "")
+                                            {
+                                                if (tenCatOrder != tenCatPack)
+                                                {
+                                                    return ("Validation",
+                                                    $"Tenacity not matched in Sales Order and in Packing Slip, Please check it for Item =  {detail.ITEM_NAME}");
+                                                }
+                                            }
+                                        }
+
+                                        if (GlobalData.PubCompCode == "2" || GlobalData.PubCompCode == "4" || GlobalData.PubCompCode == "5")
+                                        {
+
+                                            decimal packQty = Convert.ToDecimal(GetText($@"SELECT sum(QTY) FROM PRODUCTION2 WHERE ITEM_CODE={detail.ITEM_CODE} and V_NO={detail.PACK_NO} and v_type in ({packtyp}) and COMP_CODE= {GlobalData.PubCompCode} and BRANCH_CODE={GlobalData.PubBranchCode}"));
+
+                                            if (packQty < detail.QTY)
+                                            {
+                                                return ("Validation",
+                                                $"Packing Qty is less than Sale Qty, Please check it for Item =  {detail.ITEM_NAME}");
+
+                                            }
+                                        }
+
+                                        else
+                                        {
+                                            decimal packQty = Convert.ToDecimal(GetText($@"SELECT sum(QTY) FROM PRODUCTION2 WHERE ITEM_CODE={detail.ITEM_CODE} and V_NO={detail.PACK_NO} and v_type in ({packtyp}) and COMP_CODE={GlobalData.PubCompCode} and BRANCH_CODE={GlobalData.PubBranchCode}"));
+
+                                            if(packQty != detail.QTY)
+                                            {
+                                                return ("Validation",
+                                                $"Packing Qty ({packQty}) and Invoice Qty ({detail.QTY}) not matched of Item {detail.ITEM_NAME}, Please Check it.");
+                                            }
+
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+
+
+
+                        if(header.V_TYPE == "SAJI"  || header.V_TYPE == "SASI")
+                        {
+                            
+                        }
+                        else
+                        {
+                            if(header.ISSUE_NO > 0 && checkIssueNo == true)
+                            {
+                                if (IsExist($@"
+                                    SELECT 1  FROM Issue2 WHERE V_TYPE = '{header.ISSUE_TYPE}' AND V_NO = {header.ISSUE_NO}
+                                    AND COMP_CODE = {GlobalData.PubCompCode}  AND BRANCH_CODE = {GlobalData.PubBranchCode}"))
+                                {
+                                    // Check whether Sale Item exists in Issue
+                                    if (IsExist($@"
+                                    SELECT 1 FROM Issue2 WHERE ITEM_CODE = {detail.ITEM_CODE} AND V_TYPE = '{header.ISSUE_TYPE}'
+                                    AND V_NO = {header.ISSUE_NO}  AND COMP_CODE = {GlobalData.PubCompCode} AND BRANCH_CODE = {GlobalData.PubBranchCode}"))
+                                    {
+                                        // Get Issue Quantity
+                                        decimal issueQty = Convert.ToDecimal(GetText($@"
+                                            SELECT ISNULL(SUM(QTY), 0) FROM Issue2  WHERE ITEM_CODE = {detail.ITEM_CODE}
+                                            AND LOT_NO = '{detail.LOT_No}'
+                                            AND V_TYPE = '{header.ISSUE_TYPE}'
+                                            AND V_NO = {header.ISSUE_NO}
+                                            AND COMP_CODE = {GlobalData.PubCompCode}
+                                            AND BRANCH_CODE = {GlobalData.PubBranchCode}"));
+
+                                        decimal saleQty = Convert.ToDecimal(detail.QTY ?? 0);
+
+                                        if (issueQty != saleQty)
+                                        {
+                                            return ("Validation",
+                                            $"Issue Qty not matched with Sale Qty of Item: ({detail.ITEM_CODE}) {detail.ITEM_NAME}, " +
+                                            $"Issue No: {header.ISSUE_NO} and LotNo = {detail.LOT_No}.");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        return ("Validation",
+                                        $"Sale Item and Issue Item not matched, please check for Item: ({detail.ITEM_CODE}) " +
+                                        $"{detail.ITEM_NAME}, Issue No: {header.ISSUE_NO}.");
+                                    }
+                                }
+                                else
+                                {
+                                    // Original VB had Return False commented out, so only warning/message.
+                                    // Do not return here if you want exactly the same behavior.
+                                }
+                            }
+                        }
+
+                        if (header.V_TYPE != "SASI" && header.V_TYPE != "SAST")
+                        {
+                            decimal stkqty = Convert.ToDecimal(GetText($@"
+                                SELECT ISNULL(QTY, 0)
+                                FROM tmpStockBalance
+                                WHERE ITEM_CODE = {detail.ITEM_CODE}
+                                AND COMP_CODE = {GlobalData.PubCompCode}"));
+
+                            if (action == "UPDATE")
+                            {
+                                decimal saleQty = Convert.ToDecimal(GetText($@"
+                                SELECT ISNULL(SUM(Qty), 0)
+                                FROM SALE2
+                                WHERE ITEM_CODE = {detail.ITEM_CODE}
+                                AND ISNULL(Status, 0) <> 2
+                                AND V_TYPE = '{header.V_TYPE}'
+                                AND V_NO = {header.V_NO}
+                                AND COMP_CODE = {GlobalData.PubCompCode}
+                                AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                                AND YEAR_CODE = {GlobalData.PubFYearCode}"));
+
+                                stkqty += saleQty;
+                            }
+
+
+                            if (stkqty <= 0)
+                            {
+                                return ("Validation",
+                                    $"Stock not available, Please Check it of = {detail.ITEM_NAME}");
+                            }
+                        }
+
+
+
+                        if(header.V_TYPE == "SAGT" && header.ITEM_TYPE != "Other")
+                        {
+                            if(GeneralSetting.pubDefSSINSI == "Yes")
+                            {
+                                if(detail.SAUDA_TYPE == "")
+                                {
+                                    return ("Validation",
+                                   $"Sauda Type can not be Blank, Please Check it of = {detail.ITEM_NAME}");
+                                }
+
+
+                                if(detail.SAUDA_NO == 0)
+                                {
+                                    return ("Validation",
+                                   $"Sauda No can not be Blank, Please Check it of = {detail.ITEM_NAME}");
+                                }
+
+                                if(detail.SAUDA_RATE == 0)
+                                {
+                                    return ("Validation",
+                                   $"Sauda Rate can not be Blank, Please Check it of = {detail.ITEM_NAME}");
+                                }
+
+                                decimal pubRes1Dbl = Convert.ToDecimal(GetText($@"
+                                    SELECT ISNULL(SUM(QTY), 0)
+                                    FROM SAUDA
+                                    WHERE V_TYPE = '{detail.SAUDA_TYPE}'
+                                    AND V_NO = {detail.SAUDA_NO}
+                                    AND COMP_CODE = {GlobalData.PubCompCode}
+                                    AND BRANCH_CODE = {GlobalData.PubBranchCode}"));
+
+                                    decimal pubRes2Dbl = Convert.ToDecimal(GetText($@"
+                                        SELECT ISNULL(SUM(QTY), 0)
+                                        FROM SALE2
+                                        WHERE SAUDA_TYPE = '{detail.SAUDA_TYPE}'
+                                        AND SAUDA_NO = {detail.SAUDA_NO}
+                                        AND ISNULL(Status, 0) <> 2
+                                        AND COMP_CODE = {GlobalData.PubCompCode}
+                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                                        AND V_TYPE = '{header.V_TYPE}'
+                                        AND V_NO <> {header.V_NO}"));
+
+                                pubRes2Dbl += Convert.ToDecimal(detail.QTY ?? 0);
+
+                                if (pubRes2Dbl > (pubRes1Dbl + 3000))
+                                {
+                                    decimal totalNet = Convert.ToDecimal(header.TOT_NET ?? 0);
+
+                                    return ("Validation",
+                                        $"Sauda Pending Quantity is = {pubRes1Dbl - pubRes2Dbl + totalNet:0.00}, " +
+                                        $"Your Invoice is = {totalNet:0.00}, Please Check it.");
+                                }
+                            }
+                        }
+
+
+
+                        if(GeneralSetting.pubDefSOINSI == "Yes")
+                        {
+                            if(detail.ORD_TYPE == "")
+                            {
+                                return ("Validation", $"Order Type can not be Blank, Please Check it of = {detail.ITEM_NAME}");
+                            }
+
+
+                            if(detail.ORD_NO == 0)
+                            {
+                                return ("Validation", $"Order No can not be Blank, Please Check it of = {detail.ITEM_NAME}");
+                            }
+
+                            if(detail.ORD_RATE == 0)
+                            {
+                                return ("Validation", $"Order Rate can not be Blank, Please Check it of = {detail.ITEM_NAME}");
+                            }
+
+
+                            decimal pubRes1Dbl = 0;
+                            decimal pubRes2Dbl = 0;
+
+                            if (detail.ORD_TYPE == "DOGT")
+                            {
+                                pubRes1Dbl = Convert.ToDecimal(GetText($@" SELECT ISNULL(SUM(QTY), 0) FROM DO2 WHERE V_TYPE = '{detail.ORD_TYPE}'
+                                    AND V_NO = {detail.ORD_NO} AND COMP_CODE = {GlobalData.PubCompCode}  AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                                    AND ITEM_CODE = {detail.ITEM_CODE}"));
+                            }
+                            else
+                            {
+                                pubRes1Dbl = Convert.ToDecimal(GetText($@"
+                                    SELECT ISNULL(SUM(QTY), 0)
+                                    FROM ORDER2
+                                    WHERE V_TYPE = '{detail.ORD_TYPE}'
+                                    AND V_NO = {detail.ORD_NO}
+                                    AND COMP_CODE = {GlobalData.PubCompCode}
+                                    AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                                    AND ITEM_CODE = {detail.ITEM_CODE}"));
+                            }
+
+                            pubRes2Dbl = Convert.ToDecimal(GetText($@"
+                                SELECT ISNULL(SUM(QTY), 0)
+                                FROM SALE2
+                                WHERE ORD_TYPE = '{detail.ORD_TYPE}'
+                                AND ORD_NO = {detail.ORD_NO}
+                                AND ISNULL(Status, 0) <> 2
+                                AND COMP_CODE = {GlobalData.PubCompCode}
+                                AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                                AND YEAR_CODE = {GlobalData.PubFYearCode}
+                                AND ITEM_CODE = {detail.ITEM_CODE}
+                                AND V_TYPE = '{header.V_TYPE}'
+                                AND V_NO <> {header.V_NO}"));
+
+                            decimal invoiceQty = Convert.ToDecimal(detail.qty ?? 0);
+
+                            pubRes2Dbl += invoiceQty;
+
+                            if (pubRes2Dbl > (pubRes1Dbl + 3000))
+                            {
+                                decimal pendingQty = pubRes1Dbl - pubRes2Dbl + invoiceQty;
+
+                                return ("Validation",
+                                    $"Order Pending Quantity is = {pendingQty:0.00} " +
+                                    $"and Your Invoice Qty is = {invoiceQty:0.00}, " +
+                                    $"Please Check it of Item Name {detail.ITEM_NAME}");
+                            }
+                        }
 
                         using var cmd = new SqlCommand("sp_SalesInvoice", conn)
-                        {
-                            CommandType = CommandType.StoredProcedure
-                        };
+                            {
+                                CommandType = CommandType.StoredProcedure
+                            };
 
                         cmd.Parameters.AddWithValue("@Action", action);
                         cmd.Parameters.AddWithValue("@SaveAction", "DETAILS");
@@ -1176,7 +1834,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@PACK_AMT", detail.PACK_AMT);
                         cmd.Parameters.AddWithValue("@DISC_PER", detail.DISC_PER);
                         cmd.Parameters.AddWithValue("@DISC_AMT", detail.DISC_AMT);
-
                         cmd.Parameters.AddWithValue("@CGST_PER", detail.CGST_PER);
                         cmd.Parameters.AddWithValue("@CGST_AMT", detail.CGST_AMT);
                         cmd.Parameters.AddWithValue("@SGST_PER", detail.SGST_PER);
@@ -1187,7 +1844,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@CESS_AMT", detail.CESS_AMT);
                         cmd.Parameters.AddWithValue("@REMARK", detail.REMARK);
                         cmd.Parameters.AddWithValue("@STATUS", detail.STATUS);
-
                         cmd.Parameters.AddWithValue("@PACK_NO", detail.PACK_NO);
                         cmd.Parameters.AddWithValue("@PACK_TYPE", detail.PACK_TYPE);
                         cmd.Parameters.AddWithValue("@lot_no", detail.LOT_No);
