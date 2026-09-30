@@ -438,7 +438,6 @@ async function LoadData() {
     }
 }
 
-
 async function GetPendingDetails() {
 
     let BillCode = $('#ddlPartyName').val();
@@ -469,8 +468,6 @@ async function GetPendingDetails() {
         $('#tblpurchaseordermodal tbody').empty();
     }
 }
-
-
 function ShowPendingDetails(data) {
 
     const $tbody = $('#tblpurchaseordermodal tbody');
@@ -604,7 +601,6 @@ function ShowPendingDetails(data) {
         $tbody.append(row);
     });
 }
-
 function GetSelectedPendingRow() {
 
     let selectedRows = [];
@@ -682,8 +678,6 @@ function GetSelectedPendingRow() {
 
     return selectedRows;
 }
-/////
-
 function getString(selector) {
     const value = $.trim($(selector).val() || "");
     return value === "" ? null : value;
@@ -1053,7 +1047,6 @@ function CalculateRow($row) {
     $('#NumTDS2') .val(tdsAmount.toFixed(2));
 }
 
-
 async function checkValidDate() {
     const data = {
         vdate: $("#DtDocumentDate").val(),
@@ -1084,3 +1077,241 @@ async function checkValidDate() {
     }
 } 
 
+async function GetTransitReportFile(citype, exportPrint, si = false, ci = false, lc = false) {
+    if (!rowId) {
+        showToast("Please save the data before printing the report.", {
+            type: "info"
+        });
+        throw new Error("No docId");
+    }
+
+    let reportName = "";
+    let RPTNAME = "";
+
+    const v_no = $('#NumInvoiceNo').val();
+    const v_type = $('#ddlDocumentType').val();
+    const FrtAmt = $('#NumFreightAmount').val();
+    const TdsAmt = $('#NumTDSFreight2').val();
+    const CGSTAmt = $('#NumCGSTAmount').val();
+    const SGSTAmt = $('#NumSGSTAmount').val();
+    const IGSTAMT = $('#NumIGSTAmount').val();
+    const godownNo = $('#ddlGodown').val();
+    const godownType = $('#ddlGodown option:selected').text().trim();
+    const PackType = $.trim($('#ddlPackNo option:selected').text()) .split('-') .pop() .trim() || "";
+
+    const $firstRow = $('#tblSalesInvoice tbody tr').eq(0);
+    const SaudaType = $.trim($firstRow.find('.TxtSaudaType').val() || "");
+    const SaudaNo = $.trim($firstRow.find('.TxtSaudaNo').val() || "");
+
+    const WithoutBag = $('#chk_PackSlipWithoutBag').is(':checked') ? 1 : 0;
+    const cbDetail = $('#ChkDetail').is(':checked') ? 1 : 0;
+    const cbWithSign = $('#chk_PrintWithSignature').is(':checked') ? 1 : 0;
+    const cbwithFreightFOB = $('#ch_report').is(':checked') ? 1 : 0;
+
+
+
+
+
+
+
+
+    let packNos = "";
+
+    $('#tblSalesInvoice tbody tr').each(function () {
+        const $row = $(this);
+
+        const itemName = $.trim($row.find('.ddlProductName').val() || "");
+        const packNo = $.trim($row.find('.TxtPackno').val() || "");
+        if (itemName !== "" && packNo !== "") {
+            packNos += packNo + ",";
+        }
+    });
+
+    // Remove last comma
+    packNos = packNos.replace(/,$/, "");
+
+    // ---------------------------------
+    // Get Sauda Details
+    // ---------------------------------
+  
+    const validation = await $.ajax({
+        url: '/SalesInvoice/PrintValidation',
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+
+        data: JSON.stringify({
+            V_TYPE: v_type,
+            V_NO: parseInt(v_no) || null,
+
+            FrtAmt: parseFloat(FrtAmt) || null,
+            TdsAmt: parseFloat(TdsAmt) || null,
+
+            CGSTAmt: parseFloat(CGSTAmt) || null,
+            SGSTAmt: parseFloat(SGSTAmt) || null,
+            IGSTAMT: parseFloat(IGSTAMT) || null,
+
+            PackType: PackType,
+            exportPrint: exportPrint,
+            packNos: packNos,
+
+            WithoutBag: WithoutBag,
+
+            ci: ci,
+            si: si,
+            lc: lc,
+
+            cbDetail: cbDetail,
+
+            SaudaType: SaudaType,
+            SaudaNo: parseInt(SaudaNo) || null,
+
+            godownNo: godownNo,
+            godownType: parseInt(godownType) || null
+        })
+    });
+
+    console.log("validation", validation);
+    console.log("reportname", validation.reportName);
+    console.log("reportname", validation.godownAdd);
+
+    reportName = validation.reportName;
+
+    pubFinalApprovedBy = validation.signatoryList || "";
+
+    if (v_type == "SAGT" || v_type == "SASI" || v_type == "SAST")
+    {
+        RPTNAME = "TAX INVOICE";
+    }
+    else if (v_type == "SACH")
+    {
+        RPTNAME = "TAX INVOICE";
+    }
+    else if (v_type == "SAJI")
+    {
+        RPTNAME = "DELIVERY CHALLAN (JOBWORK)";
+    }
+    else
+    {
+        RPTNAME = "BILL OF SUPPLY";
+    }
+
+    const formula =
+        " {SALE1.V_TYPE} = '" + v_type + "'" +
+        " and {SALE1.V_NO} = " + v_no +
+        " and {SALE1.COMP_CODE} = " + globalVars.CompCode +
+        " and {SALE1.YEAR_CODE} = " + globalVars.FYearCode +
+        " and {SALE1.BRANCH_CODE} = " + globalVars.BranchCode;
+
+    // ---------------------------------
+    // Report Payload
+    // ---------------------------------
+
+    let withSign = "";
+
+    if (cbWithSign == 1 && globalVars.CompCode == 1)
+    {
+        withSign = "1";
+    }
+
+
+
+
+    let withFreight = "";
+
+    if (cbwithFreightFOB == 1)
+    {
+        withFreight = "1";
+    }
+
+
+
+    const godownAdd = validation.godownAdd || "";
+
+    const godownAddText = godownAdd !== ""  ? "Ship From : " + godownAdd  : godownAdd;
+
+
+    const txtnet_amt = $('#NumOtherNetAmount').val();
+
+    const inWord = (  parseFloat(txtnet_amt) || 0,  "Rs.",  "PAISE" );
+  
+
+
+
+
+    const payload = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: database,
+
+        Parameters: {        
+            comp_name:  globalVars.CompanyName || "",
+            comp_add1:  globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",
+            comp_phone: "Mobile :" + (globalVars.Phone || ""),       
+            PAN: "PAN NO. :" + (globalVars.PAN || ""),
+            EMAIL: "Email :" + (globalVars.Email || ""),
+            Website: "Web :" + (globalVars.pubCompWebsite || ""),
+            GST: "GST NO. :" + (globalVars.GST || ""),    
+            withSign: withSign,
+            withFreight: withFreight,
+            godownAdd: godownAddText,
+            comp_name1: globalVars.CompCode != "3" && globalVars.CompCode != "8"  ? "An ISO 9001:2015 Certified Company" : "",
+            Comp_reg: globalVars.CompCode != "3" ? "Reg.Office :" + (globalVars.pubCompRegAdd1 || "") +  ", " +  (globalVars.pubCompRegAdd2 || "") + "  CIN :" +  (globalVars.pubCompCIN || "") : "",
+            INWORD: inWord,
+            INUSD: "",
+            challanRef: "",
+            RPTNAME: RPTNAME
+        }
+    };
+
+    // ---------------------------------
+    // Generate PDF
+    // ---------------------------------
+    const pdfBlob = await $.ajax({
+        url: 'http://localhost:24085/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: {
+            responseType: 'blob'
+        }
+    });
+
+    // ---------------------------------
+    // Create PDF File
+    // ---------------------------------
+    const file = new Blob(
+        [pdfBlob],
+        {
+            type: "application/pdf"
+        }
+    );
+
+    // ---------------------------------
+    // Timestamp
+    // ---------------------------------
+    const now = new Date();
+
+    const timestamp =
+        String(now.getDate()).padStart(2, '0') +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getFullYear()).slice(-2) +
+        "_" +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
+
+    // ---------------------------------
+    // File Name
+    // ---------------------------------
+    const fileName =
+        `SAUDA_PURCH_${v_no}_${timestamp}.pdf`;
+
+    // ---------------------------------
+    // Return File
+    // ---------------------------------
+    return {
+        file: file,
+        fileName: fileName
+    };
+}

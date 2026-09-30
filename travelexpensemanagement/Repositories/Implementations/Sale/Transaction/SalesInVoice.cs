@@ -884,6 +884,80 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                 string docId = string.IsNullOrWhiteSpace(header.DOC_ID) ? $"{header.V_TYPE}{header.V_NO}" : header.DOC_ID;
 
+                if (header.V_TYPE == "SAGT" &&  header.V_DATE.HasValue && header.V_DATE.Value >= new DateTime(2020, 10, 1))
+                {
+                    string panNo = GetText($@" SELECT LTRIM(RTRIM(ISNULL(PAN, ''))) FROM SUBGROUP_MAST WHERE COMP_CODE = {GlobalData.PubCompCode}  AND CODE = {header.BILL_CODE}");
+
+                    if (!string.IsNullOrWhiteSpace(panNo))
+                    {
+                        string tcsApply = GetText($@" SELECT ISNULL(TCS_APPLY, '')  FROM SUBGROUP_MAST  WHERE COMP_CODE = {GlobalData.PubCompCode} AND CODE = {header.BILL_CODE}");
+
+                        decimal tcsPer = Convert.ToDecimal(header.TCS_PER ?? 0);
+
+                        if (tcsApply == "Yes")
+                        {
+                            if (tcsPer == 0)
+                            {                         
+                                return ("Confirmation",
+                                $"Please Check, TCS applicable @ {GeneralSetting.pubBPTCSPer}% for {header.BILL_NAME}. Do you want to Continue ?");
+                            }
+                        }
+                        else
+                        {
+                            if (tcsPer > 0)
+                            {                             
+                                return ("Confirmation",
+                                $"Please Check, TCS not applicable for Party => {header.BILL_NAME}. Do you want to Continue ?");
+                            }
+                        }
+                    }
+                    else
+                    {                      
+                        decimal tcsPer = Convert.ToDecimal(header.TCS_PER ?? 0);
+                        if (tcsPer < 2)
+                        {
+                            return ("Confirmation",
+                            $"Please Check, PAN No. not found in Party Master of {header.BILL_NAME}.\n" +
+                            $"So, TCS applicable @ 2%. Do you want to Continue ?");
+                        }
+                    }
+                }
+
+                if(header.BILL_CODE > 0)
+
+                {
+                    string  StateCode = GetText(@$"select State_Code from CITY_MAST where code={header.BILL_CITY}");
+
+
+                    string StateType = "";
+
+                    if(GlobalData.STATE_CODE == StateCode)
+                    {
+                        StateType = "Local";
+                    }
+                    else
+                    {
+                        StateType = "Central/Other";
+                    }
+
+                    if (GlobalData.STATE_CODE == StateCode && header.IGST_AMT > 0)
+                    {
+                        return ( "Validation",  $"IGST Not applicable as per Party State type is {StateType}" );
+                    }
+                    else if (GlobalData.STATE_CODE != StateCode && (header.CGST_AMT + header.SGST_AMT) > 0)
+                    {
+                        return ("Validation", $"Both GST Tax Rate is not Applicable in One Sales Invoice (CGST+SGST & IGST)");
+
+                    }
+
+                    if(header.CGST_AMT != header.SGST_AMT)
+                    {
+                        return ("Validation", $"CGST & SGST Amount Should Be Same.");
+
+                    }
+
+                }
+
                 using (var cmd = new SqlCommand("sp_SalesInvoice", conn))
                 {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -1063,7 +1137,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         await cmd.ExecuteNonQueryAsync();
                     }
                 }
-                
+                                
                 if (details != null && details.Count > 0)
                 {
                     foreach (var detail in details)
@@ -1788,7 +1862,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                                 AND V_TYPE = '{header.V_TYPE}'
                                 AND V_NO <> {header.V_NO}"));
 
-                            decimal invoiceQty = Convert.ToDecimal(detail.qty ?? 0);
+                            decimal invoiceQty = Convert.ToDecimal(detail.QTY ?? 0);
 
                             pubRes2Dbl += invoiceQty;
 
@@ -1868,6 +1942,61 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@LIP", GlobalData.PubLocalId);
                         cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
                         await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                if (isFinalApprovalBody == true)
+                {
+                    if (fappstatus != "")
+                    {
+                        string checkQuery = @"
+                            SELECT 1
+                            FROM approval_status
+                            WHERE user_Code = @USER_CODE
+                            AND V_Type = @V_TYPE
+                            AND V_No = @V_NO
+                            AND COMP_CODE = @COMP_CODE
+                            AND Branch_Code = @BRANCH_CODE
+                            AND Year_Code = @YEAR_CODE";
+
+                        using (var cmd = new SqlCommand(checkQuery, conn))
+                        {
+                            cmd.Parameters.AddWithValue("@USER_CODE", GlobalData.PubUserId);
+                            cmd.Parameters.AddWithValue("@V_TYPE", (object?)header.V_TYPE ?? DBNull.Value);
+                            cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
+                            cmd.Parameters.AddWithValue("@COMP_CODE", GlobalData.PubCompCode);
+                            cmd.Parameters.AddWithValue("@BRANCH_CODE", GlobalData.PubBranchCode);
+                            cmd.Parameters.AddWithValue("@YEAR_CODE", GlobalData.PubFYearCode);
+
+                            var exists = await cmd.ExecuteScalarAsync();
+
+                            if (exists != null)
+                            {
+                                string updateQuery = @"
+                                    UPDATE approval_status
+                                    SET STATUS = 'CLOSE',
+                                    CLOSE_DATE = FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm'),
+                                    Approval_code = 8,
+                                    Approval_remark = 'Approved',
+                                    remarks = 'Document Approved'
+                                    WHERE V_Type = @V_TYPE
+                                    AND V_No = @V_NO
+                                    AND COMP_CODE = @COMP_CODE
+                                    AND Branch_Code = @BRANCH_CODE
+                                    AND Year_Code = @YEAR_CODE";
+
+                                using (var updateCmd = new SqlCommand(updateQuery, conn))
+                                {
+                                    updateCmd.Parameters.AddWithValue("@V_TYPE", (object?)header.V_TYPE ?? DBNull.Value);
+                                    updateCmd.Parameters.AddWithValue("@V_NO", header.V_NO);
+                                    updateCmd.Parameters.AddWithValue("@COMP_CODE", GlobalData.PubCompCode);
+                                    updateCmd.Parameters.AddWithValue("@BRANCH_CODE", GlobalData.PubBranchCode);
+                                    updateCmd.Parameters.AddWithValue("@YEAR_CODE", GlobalData.PubFYearCode);
+
+                                    await updateCmd.ExecuteNonQueryAsync();
+                                }
+                            }
+                        }
                     }
                 }
 

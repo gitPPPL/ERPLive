@@ -933,36 +933,149 @@
                     </div>
                 </div>
 
+                <div class="tab-content" id="PrintExportReport">
 
+                 <div class="accordion-header fw-bold py-2">
+        Print Export Report
+    </div>
 
-                <div class="erppage-tab-content" id="PrintExportReport">
-                    <div class="erppage-accordion-header">Print Export Report</div>
-                    <div class="erppage-accordion-body">
-                        <fieldset class="erppage-fieldset">
-                            <div class="erppage-section-header">Print Export Report</div>
-                            <div class="erppage-body">
-                                <div class="erppage-grid grid1">
+                 <div class="accordion-body">
 
+                    <fieldset class="border rounded p-3">
 
-                                    <div class="erppage-field">
-                                      
-                                        <input type="checkbox" class="erppage-input" id="ch_report">
+                        <legend class="float-none w-auto px-2 fs-6 fw-bold"> Print Export Report  </legend>
 
-                                        <label for="ch_report"  class="erppage-label">With Freight & FOB Value</label>
+                        <div class="container-fluid">
 
-                                    </div>
-                                                                
+                            <!-- Row 1 -->
+                            <div class="row g-2 mb-2">
+
+                                <div class="col-md-4">
+                                    <button type="button"
+                                            class="btn btn-primary w-100"
+                                            id="btn_ExportToInvoice">
+                                        <i class="fa fa-file-invoice me-2"></i>
+                                        Export To Invoice
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button"
+                                            class="btn btn-success w-100"
+                                            id="btn_ComInvoiceforParty">
+                                        <i class="fa fa-file-invoice-dollar me-2"></i>
+                                        Commercial Invoice For Party
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button"
+                                            class="btn btn-warning w-100"
+                                            id="btn_PackingSlipForParty">
+                                        <i class="fa fa-box-open me-2"></i>
+                                        Packing Slip For Party
+                                    </button>
                                 </div>
 
                             </div>
-                        </fieldset>
-                    </div>
+
+                            <!-- Row 2 -->
+                            <div class="row g-2 mb-2">
+
+                                <div class="col-md-4">
+                                    <button type="button"
+                                            class="btn btn-primary w-100"
+                                            id="btn_LCInvoice">
+                                        <i class="fa fa-file-invoice me-2"></i>
+                                        LC Invoice
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button"
+                                            class="btn btn-success w-100"
+                                            id="btn_ComInvoiceForBank">
+                                        <i class="fa fa-file-invoice-dollar me-2"></i>
+                                        Commercial Invoice For Bank
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button"
+                                            class="btn btn-warning w-100"
+                                            id="btn_PackingSlipForBank">
+                                        <i class="fa fa-box-open me-2"></i>
+                                        Packing Slip For Bank
+                                    </button>
+                                </div>
+
+                            </div>
+
+                            <!-- Row 3 -->
+                            <div class="row g-2 mb-3">
+
+                                <div class="col-md-4">
+                                    <button type="button"
+                                            class="btn btn-primary w-100"
+                                            id="btn_ShippingInstruction">
+                                        <i class="fa fa-ship me-2"></i>
+                                        Shipping Instruction
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button"
+                                            class="btn btn-success w-100"
+                                            id="btn_ComInvoiceForCustom">
+                                        <i class="fa fa-file-invoice-dollar me-2"></i>
+                                        Commercial Invoice For Custom
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button"
+                                            class="btn btn-warning w-100"
+                                            id="btn_PackingSlipForCustom">
+                                        <i class="fa fa-box-open me-2"></i>
+                                        Packing Slip For Custom
+                                    </button>
+                                </div>
+
+                            </div>
+                                              
+                          
+
+
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield erppage-col-span-2">
+                                    <div class="erppage-checkboxinside">
+                                        <div class="erppage-checkbox-wrap">
+                               
+                                            <input type="checkbox" id="ch_report" class="erppage-checkbox-input">
+                                            <label for="ch_report" class="erppage-checkbox-label"> With Freight &amp; FOB Value </label>
+                                        </div>
+                                        <div class="erppage-checkbox-wrap">
+                                           <input type="checkbox" id="chk_PackSlipWithoutBag" class="erppage-checkbox-input">
+                                    <label for="chk_PackSlipWithoutBag" class="erppage-checkbox-label"> Packing Slip Without Bag Wt </label>
+                                        </div>
+                                        <div class="erppage-checkbox-wrap">
+                                             <input type="checkbox"  id="chk_PrintWithSignature"  class="erppage-checkbox-input">
+                                    <label for="chk_PrintWithSignature" class="erppage-checkbox-label">  Print With Signature </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                      
+                            </div>
+                                                     
+
+                        </div>
+
+                    </fieldset>
+
                 </div>
 
-
-
-
-            </div>
+                </div>
 
         </div>
     </div>

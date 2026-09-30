@@ -315,135 +315,55 @@ $(document).ready(async function () {
         const PACK_NO = parseInt($.trim($('#ddlPackNo').val()), 10) || 0;
         const PACK_TYPE = PACK_NO  ? $.trim($('#ddlPackNo option:selected').text()).split('-').pop().trim()  : "";
         const PACK_PER = parseFloat($.trim($('#NumOtherPacking1').val())) || 0;
+        const PACK_AMT = getDecimal($.trim($('#NumOtherPacking2').val())) || 0;
+        const SAUDA_NO =   parseInt($.trim($('#ddlSaudaNo').val()), 10) || 0;
+        const SAUDA_TYPE = SAUDA_NO ? $.trim($('#ddlSaudaNo option:selected').text()).split('-').pop().trim() : "";
+        const SAUDA_RATE =  getDecimal($.trim($('#txt_saudarate').val())) || 0;
 
-        const PACK_AMT =
-            getDecimal($.trim($('#NumOtherPacking2').val())) || 0;
-
-        const SAUDA_NO =
-            parseInt($.trim($('#ddlSaudaNo').val()), 10) || 0;
-
-        const SAUDA_TYPE = SAUDA_NO
-            ? $.trim($('#ddlSaudaNo option:selected').text()).split('-').pop().trim()
-            : "";
-
-        const SAUDA_RATE =
-            getDecimal($.trim($('#txt_saudarate').val())) || 0;
-
-        const ISSUE_NO =
-            parseInt($.trim($('#ddlIssueNo').val()), 10) || 0;
-
-        const ISSUE_TYPE = ISSUE_NO
-            ? $.trim($('#ddlIssueNo option:selected').text()).split('-').pop().trim()
-            : "";
-
-        const GODOWN_CODE =
-            $.trim($('#ddlGodown').val()) || "";
-
-        const REMARK =
-            $.trim($('#TxtTransRemarks').val()) || "";
-
-        const ITEM_TYPE =
-            $.trim($('#ddlProductType').val()) || "";
-
-        const WB_NO =
-            parseInt($.trim($('#ddlWBNo').val()), 10) || 0;
-
-        const WB_TYPE = WB_NO
-            ? $.trim($('#ddlWBNo option:selected').text()).split('-').pop().trim()
-            : "";
-
-        const WB_QTY =
-            getDecimal($.trim($('#NumWbQty').val())) || 0;
-
-        const WB_AMT =
-            getDecimal($.trim($('#txt_WBamt').val())) || 0;
-
-        const WB_REM =
-            $.trim($('#txt_wbRemark').val()) || "";
-
-        const WB_AC =
-            $.trim($('#ddl_WBParty').val()) || "";
-
-        const AMOUNT =
-            getDecimal($.trim($('#NumOtherTotalAmount').val())) || 0;
-
-        const DISC_PER =
-            parseFloat($.trim($('#NumOtherDiscount1').val())) || 0;
-
-        const DISC_AMT =
-            getDecimal($.trim($('#NumOtherDiscount2').val())) || 0;
-
-        const CDISC_PER =
-            parseFloat($.trim($('#NumOtherCashDiscount1').val())) || 0;
-
-        const CDISC_AMT =
-            getDecimal($.trim($('#NumOtherCashDiscount2').val())) || 0;
-
-        const CGST_PER =
-            parseFloat($.trim($('#NumOtherCGST1').val())) || 0;
-
-        const CGST_AMT =
-            getDecimal($.trim($('#NumOtherCGST2').val())) || 0;
-
-        const SGST_PER =
-            parseFloat($.trim($('#NumOtherSGST1').val())) || 0;
-
-        const SGST_AMT =
-            getDecimal($.trim($('#NumOtherSGST2').val())) || 0;
-
-        const IGST_PER =
-            parseFloat($.trim($('#NumOtherIGST1').val())) || 0;
-
-        const IGST_AMT =
-            getDecimal($.trim($('#NumOtherIGST2').val())) || 0;
-
-        const CESS_PER =
-            parseFloat($.trim($('#NumOtherCESS1').val())) || 0;
-
-        const CESS_AMT =
-            getDecimal($.trim($('#NumOtherCESS2').val())) || 0;
-
-        const TCS_PER =
-            parseFloat($.trim($('#NumOtherTCS1').val())) || 0;
-
-        const TCS_AMT =
-            getDecimal($.trim($('#NumOtherTCS2').val())) || 0;
-
-        const ROUND_OFF =
-            getDecimal($.trim($('#NumOtherRoundOff').val())) || 0;
-
-        const TOT_NOS =
-            parseInt($.trim($('#NumOtherTotalNos').val()), 10) || 0;
-
-        const TOT_GROSS =
-            getDecimal($.trim($('#NumGrossQty').val())) || 0;
-
-        const TOT_NET =
-            getDecimal($.trim($('#NumNetQty').val())) || 0;
-
-        const TRANSPORT_CODE =
-            parseInt($.trim($('#ddlTransport').val()), 10) || 0;
-
-        const TRANSPORT_NAME = TRANSPORT_CODE
-            ? $.trim($('#ddlTransport option:selected').text())
-            : "";
-
-        const GR_NO =
-            $.trim($('#NumGRNo').val()) || "";
-
+        const ISSUE_NO = parseInt($.trim($('#ddlIssueNo').val()), 10) || 0;
+        const ISSUE_TYPE = ISSUE_NO  ? $.trim($('#ddlIssueNo option:selected').text()).split('-').pop().trim() : "";
+        const GODOWN_CODE = $.trim($('#ddlGodown').val()) || "";
+        const REMARK = $.trim($('#TxtTransRemarks').val()) || "";
+        const ITEM_TYPE =  $.trim($('#ddlProductType').val()) || "";
+        const WB_NO =  parseInt($.trim($('#ddlWBNo').val()), 10) || 0;
+        const WB_TYPE = WB_NO  ? $.trim($('#ddlWBNo option:selected').text()).split('-').pop().trim()  : "";
+        const WB_QTY =  getDecimal($.trim($('#NumWbQty').val())) || 0;
+        const WB_AMT =  getDecimal($.trim($('#txt_WBamt').val())) || 0;
+        const WB_REM = $.trim($('#txt_wbRemark').val()) || "";
+        const WB_AC = $.trim($('#ddl_WBParty').val()) || "";
+        const AMOUNT = getDecimal($.trim($('#NumOtherTotalAmount').val())) || 0;
+        const DISC_PER =  parseFloat($.trim($('#NumOtherDiscount1').val())) || 0;
+        const DISC_AMT = getDecimal($.trim($('#NumOtherDiscount2').val())) || 0;
+        const CDISC_PER =  parseFloat($.trim($('#NumOtherCashDiscount1').val())) || 0;
+        const CDISC_AMT =  getDecimal($.trim($('#NumOtherCashDiscount2').val())) || 0;
+        const CGST_PER =  parseFloat($.trim($('#NumOtherCGST1').val())) || 0;
+        const CGST_AMT = getDecimal($.trim($('#NumOtherCGST2').val())) || 0;
+        const SGST_PER = parseFloat($.trim($('#NumOtherSGST1').val())) || 0;
+        const SGST_AMT = getDecimal($.trim($('#NumOtherSGST2').val())) || 0;
+        const IGST_PER = parseFloat($.trim($('#NumOtherIGST1').val())) || 0;
+        const IGST_AMT = getDecimal($.trim($('#NumOtherIGST2').val())) || 0;
+        const CESS_PER = parseFloat($.trim($('#NumOtherCESS1').val())) || 0;
+        const CESS_AMT = getDecimal($.trim($('#NumOtherCESS2').val())) || 0;
+        const TCS_PER = parseFloat($.trim($('#NumOtherTCS1').val())) || 0;
+        const TCS_AMT = getDecimal($.trim($('#NumOtherTCS2').val())) || 0;
+        const ROUND_OFF = getDecimal($.trim($('#NumOtherRoundOff').val())) || 0;
+        const TOT_NOS = parseInt($.trim($('#NumOtherTotalNos').val()), 10) || 0;
+        const TOT_GROSS =  getDecimal($.trim($('#NumGrossQty').val())) || 0;
+        const TOT_NET = getDecimal($.trim($('#NumNetQty').val())) || 0;
+        const TRANSPORT_CODE =  parseInt($.trim($('#ddlTransport').val()), 10) || 0;
+        const TRANSPORT_NAME = TRANSPORT_CODE ? $.trim($('#ddlTransport option:selected').text()) : "";
+        const GR_NO =  $.trim($('#NumGRNo').val()) || "";
         let GR_DATE = null;
-
-        if ($('#chkGRDate').is(':checked') && $.trim($('#DtGRDate').val())) {
+        if ($('#chkGRDate').is(':checked') && $.trim($('#DtGRDate').val()))
+        {
             GR_DATE = formatDate($('#DtGRDate').val());
         }
-
         const VEHICLE_NO =  $.trim($('#TxtTruckNo').val()) || "";
         const DRIVER_NAME = $.trim($('#TxtDriverName').val()) || "";
         const DRIVER_NO =  $.trim($('#NumDriverMob').val()) || "";
         const INSU_PER =  parseFloat($.trim($('#NumInsurance1').val())) || 0;
         const INSU_AMT =  getDecimal($.trim($('#NumInsurance2').val())) || 0;
         const INSU_DETAIL = $.trim($('#txt_InsuranceDe').val()) || "";
-
         const TDS_PER = parseFloat($.trim($('#NumTDSFreight1').val())) || 0;
         const TDS_AMT = getDecimal($.trim($('#NumTDSFreight2').val())) || 0;
         const FRT_TAXPER = parseFloat($.trim($('#NumTaxFreight1').val())) || 0;
@@ -464,12 +384,9 @@ $(document).ready(async function () {
         const EXRATE =  parseFloat($.trim($('#txxt_ExRate').val())) || 0;
         const CURRENCY = $.trim($('#ddl_currency').val()) || "";
         const DEFECTIVE_GOODS = $('#ChkDefectiveGoods').is(':checked') ? "1" : "0";
-
         const CAL_ONPCS = $('#ChkPCS').is(':checked') ? 1 : 0;
-
         const PRINT_DETAIL = $('#ChkDetail').is(':checked') ? "1" : "0";
         const BUYER_ORDNO = "";
-
         const PLACE_RECEIPT =  $.trim($('#txt_receiptat').val()) || "";
         const PORT_LOADING =  $.trim($('#txxt_pol').val()) || "";
         const PORT_DISCHARGE =  $.trim($('#txxt_POD').val()) || "";
@@ -484,50 +401,32 @@ $(document).ready(async function () {
         }
 
         const FOB_VALUE =  parseFloat($.trim($('#txxt_FobValue').val())) || 0;
-
         const FOB_FRT =  parseFloat($.trim($('#txt_FOBFRT').val())) || 0;
-
         const FOB_INSU = parseFloat($.trim($('#txxt_ForIssu').val())) || 0;
-
         const FOB_OTHER = parseFloat($.trim($('#txxt_FobOther').val())) || 0;
-
         const LUT_NO = $.trim($('#txt_LutNo').val()) || "";
-
         const LUT_DETAIL = "";
-
         let LUT_DATE = null;
-
         if ($.trim($('#dt_LutDate').val())) {
             LUT_DATE = formatDate($('#dt_LutDate').val());
         }
 
         const INCOTERM = "";
-
         const BILLOF_LADING =  $.trim($('#txt_BillOfLanding').val()) || "";
-
         const LC_NO = $.trim($('#ddl_licNo').val()) || "";
-
         const action =  (!rowId || rowId.trim() === "") ? "INSERT" : "UPDATE";
-
         const STATUS = parseInt($.trim($('#ddlDocStatus').val()), 10) || 0;
-
         const BANK_CODE =  parseInt($.trim($('#DDL_Bank').val()), 10) || 0;
-
         const LICENCE_TYPE =  $.trim($('#ddllictype').val()) || "";
-
         const LICENCE_NO = $.trim($('#DDL_LicNo').val()) || "";
-
         // IMPORTANT: empty string should become null for DateTime?
         let LICENCE_DATE = null;
-
         if ($.trim($('#txt_LicDT').val()))
         {
             LICENCE_DATE = formatDate($('#txt_LicDT').val());
         }
+        // =========================================================
 
-        // =========================================================
-        // HEADER OBJECT
-        // =========================================================
 
         if (BILL_NAME !== SHIP_NAME && TRAN_TYPE === "Regular") {
 
@@ -589,12 +488,50 @@ $(document).ready(async function () {
             return;
         }
     
-        if (FRT_AMT > 0) {
-            if (TRANSPORT_NAME == "") {
-                toastr.warning("Please select Transport.");
-                return;
-            }
+        if (FRT_AMT > 0)
+        {       
+            if (!validateRequiredField('#ddlTransport', 'Please select Transport')) return;
         }
+
+        if (LOAD_AMT > 0 && LOAD_AC == "") {
+
+            toastr.warning("Please select Loading Party.");
+            $('#txt_LoadAmt').focus();
+            return;
+        }
+
+        if (WB_AMT > 0 && WB_AC == "") {
+            toastr.warning("Please select Weighbridge Party.");
+            $('#txt_WBamt').focus();      
+            return;
+        }
+
+        if (EXRATE > 0)
+        {
+            if (!validateRequiredField('#txxt_pol', 'Please enter POL.')) return;
+            if (!validateRequiredField('#txxt_ExRate', '"Please enter POD.')) return;
+            if (!validateRequiredField('#txt_receiptat', 'Please enter Place of receipt.')) return;
+            if (!validateRequiredField('#txxt_finalDestination', 'Please enter Final destination.')) return;
+            if (!validateRequiredField('#txxt_FDCountry', 'Please enter Final destination country.')) return;
+    
+        }
+
+
+        if (V_TYPE == "SAGT" || V_TYPE == "SAJI" || V_TYPE == "JBIS") {
+
+            if (!validateRequiredField('#NumDistance', 'Please enter approx. Distance.')) return;
+            if (!validateRequiredField('#ddlMode', 'Please select Mode of Transport.')) return;
+                      
+        }
+
+        if (!validateRequiredField('#ddlTaxType', 'Please select Valid Tax Type')) return;
+
+
+
+
+
+
+
 
         const Header = {
             AMOUNT: AMOUNT,
@@ -796,5 +733,14 @@ $(document).ready(async function () {
             }
         });
     });
+
+
+
+    $('#btn_ExportToInvoice').on('click', async function () {
+
+        await GetTransitReportFile("");
+
+    });
+
 
 });

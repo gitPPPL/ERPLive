@@ -1,6 +1,8 @@
 ﻿using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -744,6 +746,501 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                     return Json(new { success = true,  multipleAddress = false, message = "" });
                 }
+            }
+        }
+        [HttpPost]
+        public JsonResult PrintValidation([FromBody] PrintValidationRequest request)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+
+
+                if(request == null)
+                {
+                    return Json(new { success = false, message = "Request Showing Null", ReportName = "", godownAdd = "" });
+                }
+
+                // GST Tax Validation
+                string query = $@" SELECT 1 FROM Sale2 WHERE Tax_Code IN ( SELECT code FROM TAX_MAST WHERE TAX_TYPE = 'GST' AND T_TYPE NOT IN ('Import')
+                    ) AND CGST_AMT + SGST_AMT + IGST_AMT = 0 AND V_TYPE = '{request.V_TYPE}'  AND V_NO = {request.V_NO} AND Comp_code = {getdata.PubCompCode}
+                    AND Branch_code = {getdata.PubBranchCode} AND Year_Code = {getdata.PubFYearCode}";
+
+                if (IsExist(query))
+                {
+                    if (getdata.PubUserLevel != "1")
+                    {
+                        return Json(new { success = false, message = "ERROR! Please check Tax not calculated in Invoice." });
+                    }
+                }
+
+
+                if ((request.FrtAmt ?? 0) > 0 || (request.TdsAmt ?? 0) > 0)
+                {
+                    string ledgerQuery = $@"
+                        SELECT 1 FROM Ledger2 WHERE V_type = '{request.V_TYPE}' AND V_NO = {request.V_NO} AND COMP_CODE = {getdata.PubCompCode}
+                        AND BRANCH_CODE = {getdata.PubBranchCode} AND Year_Code = {getdata.PubFYearCode}";
+
+                    if (!IsExist(ledgerQuery))
+                    {
+                        return Json(new { success = false, message = $"Voucher not posted of VType:{request.V_TYPE} and VNo:{request.V_NO}. Warning! Draft Report will display." });
+                    }
+                }
+
+
+                if (request.V_TYPE != "SACH" && request.V_TYPE != "SAJI")
+                {
+                    string ledgerQuery = $@"  SELECT 1  FROM Ledger2  WHERE V_type = '{request.V_TYPE}'  AND V_NO = {request.V_NO}
+                    AND COMP_CODE = {getdata.PubCompCode}  AND BRANCH_CODE = {getdata.PubBranchCode}  AND Year_Code = {getdata.PubFYearCode}";
+
+                    if (!IsExist(ledgerQuery))
+                    {
+                        return Json(new { success = true, warning = true, message = $"Voucher not posted of VType:{request.V_TYPE} and VNo:{request.V_NO}. Warning! Draft Report will display." });
+                    }
+                }
+
+                // Export Detail Validation
+                if (request.V_TYPE == "SAGT" && (request.ExRate ?? 0) > 0)
+                {
+                    string exportQuery = $@"  SELECT CHA,  FORWARDER,  SHIPLINE,   ETAPOL_DATE,  ETAPOD_DATE,  FRT_ACTUAL  FROM SAUDA_EXPORT  WHERE V_type = 'SAGT'
+                    AND V_no = {request.V_NO} AND Comp_code = {getdata.PubCompCode}  AND Branch_code = {getdata.PubBranchCode}";
+
+                    using (SqlCommand cmd = new SqlCommand(exportQuery, con))
+                    {
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                decimal cha = reader["CHA"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["CHA"]);
+
+                                decimal forwarder = reader["FORWARDER"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["FORWARDER"]);
+
+                                decimal shipline = reader["SHIPLINE"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["SHIPLINE"]);
+
+                                bool etaPolEmpty = reader["ETAPOL_DATE"] == DBNull.Value || string.IsNullOrWhiteSpace(Convert.ToString(reader["ETAPOL_DATE"]));
+
+                                bool etaPodEmpty = reader["ETAPOD_DATE"] == DBNull.Value || string.IsNullOrWhiteSpace(Convert.ToString(reader["ETAPOD_DATE"]));
+
+                                if (cha == 0 && forwarder == 0 && shipline == 0 && etaPolEmpty && etaPodEmpty)
+                                {
+
+
+                                    return Json(new
+                                    {
+                                        success = true,
+                                        warning = true,
+                                        message = $"Please entry necessary fields in Export Detail " +
+                                        $"(like Actual Freight, CHA, Forwarder, Shipline, " +
+                                        $"ETA POL Date, ETA POD Date) of Invoice No:{request.V_NO}"
+                                    });
+
+                                }
+                            }
+                            else
+                            {
+
+                                return Json(new
+                                {
+                                    success = true,
+                                    warning = true,
+                                    message = $"Export Detail not feeded " +
+                                    $"(like Actual Freight, CHA, Forwarder, Shipline, " +
+                                    $"ETA POL Date, ETA POD Date) in Invoice No:{request.V_NO}"
+                                });
+
+                            }
+                        }
+                    }
+                }
+
+
+                string Sql = $@" DELETE FROM tempInvoice WHERE comp_code = {getdata.PubCompCode} AND Branch_code = {getdata.PubBranchCode}";
+
+                using (SqlCommand cmd = new SqlCommand(Sql, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+
+                string insertSql = $@"Insert into tempInvoice Select a.comp_code,a.Branch_code,a.V_type,a.v_no,1 ,'Original for Buyer',b.IRN,b.QR_IMAGE 
+                    from sale1 a left join QRImage_Path b on a.v_no=b.v_no and a.V_TYPE=b.V_TYPE and a.COMP_CODE=b.COMP_CODE and a.BRANCH_CODE=b.BRANCH_CODE 
+                    and a.YEAR_CODE=b.YEAR_CODE where a.comp_code={getdata.PubCompCode} and a.branch_code={getdata.PubBranchCode} and a.v_type='{request.V_TYPE}' and a.v_no= {request.V_NO}
+                    union all
+                    Select a.comp_code,a.Branch_code,a.V_type,a.v_no,2 ,'Duplicate for Transporter',b.IRN,b.QR_IMAGE from sale1 a
+                    left join QRImage_Path b on a.v_no=b.v_no and a.V_TYPE=b.V_TYPE and a.COMP_CODE=b.COMP_CODE and a.BRANCH_CODE=b.BRANCH_CODE and a.YEAR_CODE=b.YEAR_CODE
+                    where a.comp_code={getdata.PubCompCode}  and a.branch_code={getdata.PubBranchCode}  and a.v_type='{request.V_TYPE}' and a.v_no={request.V_NO}
+                    union all
+                    Select a.comp_code,a.Branch_code,a.V_type,a.v_no,3 ,'Triplicate for Office',b.IRN,b.QR_IMAGE from sale1 a 
+                    left join QRImage_Path b on a.v_no=b.v_no and a.V_TYPE=b.V_TYPE and a.COMP_CODE=b.COMP_CODE and a.BRANCH_CODE=b.BRANCH_CODE and 
+                    a.YEAR_CODE=b.YEAR_CODE where a.comp_code= {getdata.PubCompCode} and a.branch_code={getdata.PubBranchCode}  and a.v_type='{request.V_TYPE}' and a.v_no={request.V_NO} ";
+
+                using (SqlCommand cmd = new SqlCommand(insertSql, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+
+                if (request.V_TYPE != "SAJI")
+                {
+                    if ((request.CGSTAmt ?? 0) + (request.SGSTAmt ?? 0) + (request.IGSTAMT ?? 0) == 0)
+                    {
+
+                        int FYearcode = Convert.ToInt32(getdata.PubFYearCode);
+
+                        DateTime pubFYStartDate = Convert.ToDateTime(GetText($@"select START_DATE from dbo.YEAR_MAST where code={FYearcode}"));
+                        DateTime pubFYEndDate = Convert.ToDateTime(GetText($@"select END_DATE from dbo.YEAR_MAST where code={FYearcode}"));
+
+                        string query1 = @" SELECT LUT_NO, LUT_VALIDITY FROM LUT_MAST  WHERE Comp_code = @CompCode AND LUT_DATE >= @pubFYStartDate
+                                AND LUT_DATE < DATEADD(DAY, 1, @pubFYEndDate)";
+
+                        using (SqlCommand cmd = new SqlCommand(query1, con))
+                        {
+                            cmd.Parameters.Add("@CompCode", SqlDbType.Int).Value = getdata.PubCompCode;
+                            cmd.Parameters.Add("@pubFYStartDate", SqlDbType.SmallDateTime).Value = pubFYStartDate;
+                            cmd.Parameters.Add("@pubFYEndDate", SqlDbType.SmallDateTime).Value = pubFYEndDate;
+                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    request.LutNo = reader["LUT_NO"] == DBNull.Value ? 0 : Convert.ToInt32(reader["LUT_NO"]);
+
+                                    request.LutDate = reader["LUT_VALIDITY"] == DBNull.Value ? null :
+                                        DateOnly.FromDateTime(Convert.ToDateTime(reader["LUT_VALIDITY"]));
+                                }
+                            }
+                        }
+
+
+                        if (request.LutNo != 0 && request.LutDate.HasValue)
+                        {
+                            string UpdateQuery = $@"Update SALE1 Set LUT_NO= {request.LutNo}, LUT_DATE='{request.LutDate}' 
+                                     Where V_type='{request.V_TYPE}' and V_no={request.V_NO} and Comp_code={getdata.PubCompCode} and Branch_code={getdata.PubBranchCode} and Year_Code={getdata.PubFYearCode}";
+
+                            using (SqlCommand cmd = new SqlCommand(UpdateQuery, con))
+                            {
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                }
+
+
+
+                string truncatequery = "Truncate table tempContainerDetail";
+                using (SqlCommand cmd = new SqlCommand(truncatequery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+
+                if (request.exportPrint == true)
+                {
+                    string cqry = "";
+                    string dqry = "";
+
+                    string vewqry = "", tblname1 = "Production1", tblname2 = "Production2";
+
+                    if (request.WithoutBag == 1)
+                    {
+                        cqry = "sum(b.QTY)";
+                        dqry = "b.pack_Qty+b.tare_qty,b.QTY";
+                    }
+                    else
+                    {
+                        cqry = "sum(b.GROSS_QTY)";
+                        dqry = "b.pack_Qty,b.GROSS_QTY";
+                    }
+
+                    if (request.PackType == "SFIS" || request.PackType == "SFEI")
+                    {
+                        if (getdata.PubCompCode == "1")
+                        {
+                            tblname1 = "Prod_SFG1";
+                            tblname2 = "Prod_SFG2";
+                        }
+
+                        vewqry = @$" Insert into tempContainerDetail (COMP_CODE,SI_TYPE,SI_NO,V_TYPE,V_NO,CONTAINER_NO,GROSS_WT,NET_WT,NOS,LINESEAL_NO,CUSTOMSEAL_NO)
+                                Select a.COMP_CODE,'{request.V_TYPE}',{request.V_NO},a.V_type,a.V_no,CONTAINER_NO,iif(sum(b.pack_Qty)+sum(b.tare_Qty)>0,sum(b.GROSS_QTY+b.pack_qty),
+                                sum(b.GROSS_QTY)),{cqry},count(*),LINESEAL_NO,a.CUSTOMSEAL_NO from  {tblname1}  a left join  {tblname2} b on a.V_TYPE=b.V_TYPE
+                                and a.v_no=b.V_no and a.COMP_CODE=b.COMP_CODE 
+                                and a.BRANCH_CODE=b.BRANCH_CODE and a.YEAR_CODE=b.YEAR_CODE 
+                                where a.V_TYPE='{request.PackType}' and a.V_no in ({request.packNos}) and a.comp_code= {getdata.PubCompCode} and 
+                                a.Branch_code= {getdata.PubBranchCode}and a.Year_code={getdata.PubFYearCode} group by a.COMP_CODE,a.V_type,a.V_no,
+                                CONTAINER_NO,LINESEAL_NO,a.CUSTOMSEAL_NO order by CONTAINER_NO ";
+
+                        using (SqlCommand cmd = new SqlCommand(vewqry, con))
+                        {
+                            cmd.ExecuteNonQuery();
+                        }
+
+
+                    }
+                    else if (request.PackType == "FPIS")
+                    {
+                        vewqry = @$"Insert into tempContainerDetail (COMP_CODE,SI_TYPE,SI_NO,V_TYPE,V_NO,CONTAINER_NO,GROSS_WT,NET_WT,NOS,LINESEAL_NO,CUSTOMSEAL_NO)
+                                Select a.COMP_CODE,'{request.V_TYPE}',{request.V_NO},a.V_type,a.V_no,CONTAINER_NO,sum(b.GROSS_QTY),sum(b.QTY),count(*),
+                                LINESEAL_NO,a.CUSTOMSEAL_NO from {tblname1} a left join  {tblname2}  b on a.V_TYPE=b.V_TYPE and a.v_no=b.V_no and a.COMP_CODE=b.COMP_CODE 
+                                and a.BRANCH_CODE=b.BRANCH_CODE and a.YEAR_CODE=b.YEAR_CODE 
+                                where a.V_TYPE='FPIS' and a.V_no in ({request.packNos}) and a.comp_code={getdata.PubCompCode} and a.Branch_code={getdata.PubBranchCode} and
+                                a.Year_code={getdata.PubFYearCode} group by a.COMP_CODE,a.V_type,a.V_no,CONTAINER_NO,LINESEAL_NO,a.CUSTOMSEAL_NO order by CONTAINER_NO";
+
+                        using (SqlCommand cmd = new SqlCommand(vewqry, con))
+                        {
+                            cmd.ExecuteNonQuery();
+                        }
+
+                    }
+
+
+                    if (request.ci == true)
+                    {
+                        if (request.citype == "Bank")
+                        {
+                            request.ReportName = "INVOICE_EXPORTCOMMBank";
+                        }
+                        else if (request.citype == "Custom")
+                        {
+                            request.ReportName = "INVOICE_EXPORTCOMMCustom";
+                        }
+                        else
+                        {
+                            request.ReportName = "INVOICE_EXPORTCOMM";
+                        }
+                    }
+                    else if (request.si == true)
+                    {
+                        request.ReportName = "INVOICE_EXPORTSHIPINST";
+                    }
+                    else if (request.lc == true)
+                    {
+                        request.ReportName = "INVOICE_EXPORTLC";
+                    }
+                    else if (getdata.PubCompCode == "1")
+                    {
+                        request.ReportName = "INVOICE_EXPORTPPPL";
+                    }
+                    else if (request.V_TYPE == "SACH" || request.V_TYPE == "SAJI")
+                    {
+                        if (request.V_TYPE == "SAJI")
+                        {
+                            request.ReportName = "INVOICE_JobworkSale";
+                        }
+                        else
+                        {
+                            request.ReportName = "INVOICE_ChallanSale";
+                        }
+                    }
+                    else
+                    {
+                        if (getdata.PubCompCode == "2")
+                        {
+                            request.ReportName = "INVOICE_GST1PLPLQR_DETAIL";
+                        }
+                        else if (getdata.PubCompCode == "5")
+                        {
+                            request.ReportName = "INVOICE_GST1SALASARQR_DETAIL";
+                        }
+                        else if (getdata.PubCompCode == "4")
+                        {
+                            request.ReportName = "INVOICE_GST1PEPLQR_DETAIL";
+                        }
+                        else if (getdata.PubCompCode == "7")
+                        {
+                            if (request.cbDetail == 1)
+                            {
+                                request.ReportName = "INVOICE_GST1KQRNew";
+                            }
+                            else
+                            {
+                                request.ReportName = "INVOICE_GST1KQRNewSumm";
+                            }
+                        }
+                        else if (getdata.PubCompCode == "8")
+                        {
+                            request.ReportName = "INVOICE_GST1QR_SCTPL";
+                        }
+                        else
+                        {
+                            if (request.PackType == "Flakes" && request.cbDetail == 1)
+                            {
+                                request.ReportName = "INVOICE_GST1QRSumm";
+                            }
+                            else
+                            {
+                                request.ReportName = "INVOICE_GST1QR";
+                            }
+                        }
+                    }
+
+                }
+                else
+                {
+
+                    if(getdata.PubCompCode == "2")
+                    {
+                        request.ReportName = "INVOICE_GST1PLPLQR_DETAIL";
+                    }
+                    else if(getdata.PubCompCode == "5")
+                    {
+                        request.ReportName = "INVOICE_GST1SALASARQR_DETAIL";
+                    }
+                    else if(getdata.PubCompCode == "4")
+                    {
+                        request.ReportName = "INVOICE_GST1PEPLQR_DETAIL";
+                    }
+                    else if(getdata.PubCompCode == "7")
+                    {
+
+                        if(request.cbDetail == 1)
+                        {
+                            request.ReportName = "INVOICE_GST1KQRNew";
+
+                        }
+                        else
+                        {
+                            request.ReportName = "INVOICE_GST1KQRNewSumm";
+                        }
+                       
+                    }
+                    else if(getdata.PubCompCode == "8")
+                    {
+                        request.ReportName = "INVOICE_GST1QR_SCTPL";
+                    }
+                    else
+                    {
+                        if(request.V_TYPE == "Flakes" && request.cbDetail == 1)
+                        {
+                            request.ReportName = "INVOICE_GST1QRSumm";
+                        }
+                        else
+                        {
+                            request.ReportName = "INVOICE_GST1QR";
+                        }
+                    }
+
+                }
+
+                string pino = GetText(@$"Select isnull(pino,'') from SAUDA Where 
+                V_type='{request.V_TYPE}' and  V_no= {request.V_NO} and Comp_code= {getdata.PubCompCode} and Branch_code={getdata.PubBranchCode} ");
+
+
+                if(pino != "")
+                {
+                    string pidt = GetText(@$"Select format(V_DATE,'dd/MM/yyyy') From SALE1 Where Concat(V_type,V_no)= '{pino}' and Comp_code={getdata.PubCompCode}  and Branch_code={getdata.PubBranchCode}");
+
+                    string query1 = $@"Update SAUDA Set PIDATE='{pidt}' Where   V_type='{request.SaudaType}' and  V_no={request.SaudaNo} and Comp_code= {getdata.PubCompCode} and 
+                    Branch_code={getdata.PubBranchCode}";
+                    using (SqlCommand cmd = new SqlCommand(query1, con))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+
+                }
+
+
+
+                request.godownAdd = GetText(@$"Select isnull(COMP_NAME,'')+', '+ isnull(ADDRESS,'')+', '+ isnull(ADDRESS2,'') as adress from GODOWN_MAST where CODE= {request.godownNo} and COMP_CODE={getdata.PubCompCode}");
+
+
+
+
+                return Json(new { success = true, message = "Print validation successful.", ReportName = request.ReportName , godownAdd = request.godownAdd });
+            }
+        }
+
+
+
+                public class PrintValidationRequest
+                {
+                    public string? V_TYPE { get; set; }
+                    public int? V_NO { get; set; }
+                    public Decimal? FrtAmt { get; set; } 
+                    public Decimal? TdsAmt { get; set; } 
+                    public Decimal? ExRate { get; set; } 
+                    public Decimal? CGSTAmt { get; set; } 
+                    public Decimal? SGSTAmt { get; set; } 
+                    public Decimal? IGSTAMT { get; set; } 
+                    public int? LutNo { get; set; } 
+                    public DateOnly? LutDate { get; set; } 
+                    public  string? PackType { get; set; }
+                    public  string? packNos { get; set; }
+                    public  Boolean? exportPrint { get; set; }
+                    public  Boolean? ci { get; set; }
+                    public  Boolean? si { get; set; }
+                    public  Boolean? lc { get; set; }
+                    public  int? WithoutBag { get; set; }
+                    public  int? cbDetail { get; set; }
+
+                    public string? ReportName { get; set; }
+                    public string? citype { get; set; }
+
+                    public string? SaudaType { get; set; }
+                    public string? godownAdd { get; set; }
+                    public int? SaudaNo { get; set; }
+                              
+                    public string? godownNo{ get; set; }
+                    public int? godownType { get; set; }
+                              
+
+                }
+
+
+
+        public string GetText(string query)
+        {
+            try
+            {
+                using var con = _dbConnection.GetErpConnection();
+                {
+                    con.Open();
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return reader[0].ToString();
+                            }
+                            else
+                            {
+                                return string.Empty;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetText() Error: " + ex.Message);
+                return string.Empty;
+            }
+        }
+
+
+
+
+
+
+        public bool IsExist(string query)
+        {
+            try
+            {
+                using var conn = _dbConnection.GetErpConnection();
+                using var cmd = new SqlCommand(query, conn);
+
+                conn.Open();
+
+                using var reader = cmd.ExecuteReader();
+
+                return reader.Read();
+            }
+            catch (Exception ex)
+            {
+
+                return false;
             }
         }
 
