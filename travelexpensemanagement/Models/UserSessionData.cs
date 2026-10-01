@@ -36,6 +36,8 @@
 
         public string? IEC { get; set; }
         public string? WEBSITE { get; set; }
+
+
     }
     public class CompanyModel
     {

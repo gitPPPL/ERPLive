@@ -4,24 +4,20 @@
     ViewBag.Title = "Sales Invoice";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData
-                          ?? new Models.UserSessionData();
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
+
+
+    
+
+
 
     var databaseName = ViewBag.DatabaseName as string ?? "";
 
-    var CompCode = int.TryParse(
-        globalVariables.PubCompCode,
-        out var parsedCompCode
-    ) ? parsedCompCode : 0;
+    var CompCode = int.TryParse(  globalVariables.PubCompCode, out var parsedCompCode ) ? parsedCompCode : 0;
 
-    var PubUserLevel = int.TryParse(
-        globalVariables.PubUserLevel,
-        out var parsedPubUserLevel
-    ) ? parsedPubUserLevel : 0;
+    var PubUserLevel = int.TryParse( globalVariables.PubUserLevel, out var parsedPubUserLevel ) ? parsedPubUserLevel : 0;
 
-    var logindate = globalVariables.PubLoginDate is DateTime date
-        ? date.ToString("yyyy-MM-dd")
-        : "";
+    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
 
     var LoadGeneralSetting = ViewBag.LoadGeneralSetting;
 
@@ -45,12 +41,15 @@
         Phone = globalVariables.Phone,
         Email = globalVariables.Email,
         ICE = globalVariables.IEC,
-        website = globalVariables.Website
+        website = globalVariables.Website,
+        RegAdd1 = globalVariables.RegAdd1,
+        RegAdd2 = globalVariables.RegAdd2,
+        CINNO = globalVariables.CINNO
+
     }));
 
 
-        var LoadGeneralSetting = @Html.Raw(
-        JsonSerializer.Serialize(ViewBag.LoadGeneralSetting)
+        var LoadGeneralSetting = @Html.Raw( JsonSerializer.Serialize(ViewBag.LoadGeneralSetting)
     );
 
 

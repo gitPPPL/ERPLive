@@ -1,4 +1,5 @@
-﻿function AddRow(data = {}) {
+﻿
+function AddRow(data = {}) {
     let tbody = $('#tblSalesInvoice tbody');
     let newRow = `
         <tr class="no-border-input">
@@ -62,10 +63,7 @@
     $row.find('.ddlProductName').val(data.Productcode ?? '');
     $row.find('.TxtTaxType').val(data.TaxType ?? '');
 
-
-
-    $row.find(
-        '.TxtNos, .TxtGrossQty, .TxtNetQty, .TxtRate, ' +
+    $row.find('.TxtNos, .TxtGrossQty, .TxtNetQty, .TxtRate, ' +
         '.TxtPacKPer, .TxtDisPer, .TxtCgstper,.TxtSgstPer,.TxtIGSTPer,.TxtCessPer').on('input change', function () {
             CalculateRow($row);
         });
@@ -73,16 +71,11 @@
     $row.find('.TxtTaxType').on('change', function () {
 
         const selectedCode = $(this).val();
-
         const selectedTax = TaxPercentageData.find(x => String(x.code) === String(selectedCode));
-
-        console.log("Selected Tax Type:", selectedTax);
-
         if (!selectedTax) {
             $row.find('.TxtCgstper').val('0.00');
             $row.find('.TxtSgstPer').val('0.00');
             $row.find('.TxtIGSTPer').val('0.00');
-
             CalculateRow($row);
             return;
         }
@@ -90,12 +83,8 @@
         $row.find('.TxtCgstper').val(Number(selectedTax.cgsT_PER || 0).toFixed(2));
         $row.find('.TxtSgstPer').val(Number(selectedTax.sgsT_PER || 0).toFixed(2));
         $row.find('.TxtIGSTPer').val(Number(selectedTax.igsT_PER || 0).toFixed(2));
-
         CalculateRow($row);
     });
-
-
-
 
     $row.find('.ddlProductName').on('change', async function () {
 
@@ -148,77 +137,53 @@
 
     });
 
-    // Load item details
-    if (data.itemCode) {
-        SetItemDetails($row);
-    }
+
+   
 }
 function GetSalesInvoiceDetails() {
 
     const details = [];
 
     $('#tblSalesInvoice tbody tr').each(function () {
-
         const $row = $(this);
-
         const detail = {
             ITEM_CODE: parseInt($.trim($row.find('.ddlProductName').val()), 10) || 0,
             ITEM_NAME: $.trim($row.find('.ddlProductName option:selected').text()) || "",
-
             NOS: parseInt($.trim($row.find('.TxtNos').val()), 10) || 0,
-
             GROSS_QTY: parseFloat($.trim($row.find('.TxtGrossQty').val())) || 0,
             QTY: parseFloat($.trim($row.find('.TxtNetQty').val())) || 0,
-
             FOR_RATE: parseFloat($.trim($row.find('.TxtRateINUSD').val())) || 0,
-
             RATE: parseFloat($.trim($row.find('.TxtRate').val())) || 0,
             AMOUNT: parseFloat($.trim($row.find('.TxtAmount').val())) || 0,
-
             PACK_PER: parseFloat($.trim($row.find('.TxtPacKPer').val())) || 0,
             PACK_AMT: parseFloat($.trim($row.find('.TxtPackAmount').val())) || 0,
             PACKING_WT: parseFloat($.trim($row.find('.TxtPackWeight').val())) || 0,
-
             DISC_PER: parseFloat($.trim($row.find('.TxtDisPer').val())) || 0,
             DISC_AMT: parseFloat($.trim($row.find('.TxtDisAmount').val())) || 0,
-
             TAX_CODE: parseInt($.trim($row.find('.TxtTaxType').val()), 10) || 0,
-
             CGST_PER: parseFloat($.trim($row.find('.TxtCgstper').val())) || 0,
             CGST_AMT: parseFloat($.trim($row.find('.TxtCgstAmt').val())) || 0,
-
             SGST_PER: parseFloat($.trim($row.find('.TxtSgstPer').val())) || 0,
             SGST_AMT: parseFloat($.trim($row.find('.TxtSgstamt').val())) || 0,
-
             IGST_PER: parseFloat($.trim($row.find('.TxtIGSTPer').val())) || 0,
             IGST_AMT: parseFloat($.trim($row.find('.TxtIGSTamt').val())) || 0,
-
             CESS_PER: parseFloat($.trim($row.find('.TxtCessPer').val())) || 0,
             CESS_AMT: parseFloat($.trim($row.find('.TxtCessamt').val())) || 0,
-
             REMARK: $.trim($row.find('.TxtRemark').val()) || "",
-
             PACK_NO: parseInt($.trim($row.find('.TxtPackno').val()), 10) || 0,
-
             LOT_No: $.trim($row.find('.TxtLotNo').val()) || "",
-
             SAUDA_TYPE: $.trim($row.find('.TxtSaudaType').val()) || "",
             SAUDA_NO: parseInt($.trim($row.find('.TxtSaudaNo').val()), 10) || 0,
             SAUDA_RATE: parseFloat($.trim($row.find('.TxtSaudaRate').val())) || 0,
-
             ORD_TYPE: $.trim($row.find('.TxtOrderType').val()) || "",
             ORD_NO: parseInt($.trim($row.find('.TxtOrderNo').val()), 10) || 0,
             ORD_RATE: parseFloat($.trim($row.find('.TxtOrderRate').val())) || 0,
-
             DCN_TYPE: $.trim($row.find('.TxtDocType').val()) || "",
             DCN_NO: parseInt($.trim($row.find('.TxtDocNo').val()), 10) || 0,
-
             HSN_CODE: $.trim($row.find('.TxtHsnCode').val()) || "",
-
             FREIGHT_AMT: parseFloat($.trim($row.find('.TxtFreightAmount').val())) || 0,
             INSU_AMT: parseFloat($.trim($row.find('.TxtInsuAmount').val())) || 0,
             CDISC_AMT: parseFloat($.trim($row.find('.TxtCDiscAmount').val())) || 0,
-
             WBQTY: parseFloat($.trim($row.find('.TxtWBQuantity').val())) || 0
         };
 
@@ -251,8 +216,7 @@ async function LoadData() {
             cmbConsigneeAddress(Header?.shiP_CODE || ''),
             DDlLicNO(Header?.licencE_TYPE || '')
 
-        ]);
-      
+        ])
         // Header
 
         $('#TxtCode').val(Header.doC_ID);
@@ -1078,10 +1042,10 @@ async function checkValidDate() {
 } 
 
 async function GetTransitReportFile(citype, exportPrint, si = false, ci = false, lc = false) {
-    if (!rowId) {
-        showToast("Please save the data before printing the report.", {
-            type: "info"
-        });
+
+    if (!rowId)
+    {
+        showToast("Please save the data before printing the report.", { type: "info"  });
         throw new Error("No docId");
     }
 
@@ -1097,221 +1061,667 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
     const IGSTAMT = $('#NumIGSTAmount').val();
     const godownNo = $('#ddlGodown').val();
     const godownType = $('#ddlGodown option:selected').text().trim();
-    const PackType = $.trim($('#ddlPackNo option:selected').text()) .split('-') .pop() .trim() || "";
-
+    const PackType = $.trim($('#ddlPackNo option:selected').text()) .split('-')  .pop() .trim() || "";
     const $firstRow = $('#tblSalesInvoice tbody tr').eq(0);
     const SaudaType = $.trim($firstRow.find('.TxtSaudaType').val() || "");
     const SaudaNo = $.trim($firstRow.find('.TxtSaudaNo').val() || "");
-
-    const WithoutBag = $('#chk_PackSlipWithoutBag').is(':checked') ? 1 : 0;
+    const WithoutBag =  $('#chk_PackSlipWithoutBag').is(':checked') ? 1 : 0;
     const cbDetail = $('#ChkDetail').is(':checked') ? 1 : 0;
     const cbWithSign = $('#chk_PrintWithSignature').is(':checked') ? 1 : 0;
-    const cbwithFreightFOB = $('#ch_report').is(':checked') ? 1 : 0;
-
-
-
-
-
-
-
-
+    const cbwithFreightFOB =  $('#ch_report').is(':checked') ? 1 : 0;
     let packNos = "";
 
     $('#tblSalesInvoice tbody tr').each(function () {
+
         const $row = $(this);
 
         const itemName = $.trim($row.find('.ddlProductName').val() || "");
+
         const packNo = $.trim($row.find('.TxtPackno').val() || "");
-        if (itemName !== "" && packNo !== "") {
+
+        if (itemName !== "" && packNo !== "")
+        {
             packNos += packNo + ",";
         }
     });
 
-    // Remove last comma
     packNos = packNos.replace(/,$/, "");
 
-    // ---------------------------------
-    // Get Sauda Details
-    // ---------------------------------
-  
     const validation = await $.ajax({
         url: '/SalesInvoice/PrintValidation',
         type: 'POST',
         contentType: 'application/json; charset=utf-8',
-
         data: JSON.stringify({
             V_TYPE: v_type,
             V_NO: parseInt(v_no) || null,
-
             FrtAmt: parseFloat(FrtAmt) || null,
             TdsAmt: parseFloat(TdsAmt) || null,
-
             CGSTAmt: parseFloat(CGSTAmt) || null,
             SGSTAmt: parseFloat(SGSTAmt) || null,
             IGSTAMT: parseFloat(IGSTAMT) || null,
-
             PackType: PackType,
             exportPrint: exportPrint,
             packNos: packNos,
-
             WithoutBag: WithoutBag,
-
             ci: ci,
             si: si,
             lc: lc,
-
             cbDetail: cbDetail,
-
             SaudaType: SaudaType,
             SaudaNo: parseInt(SaudaNo) || null,
-
             godownNo: godownNo,
-            godownType: parseInt(godownType) || null
+            godownType: parseInt(godownType) || null,
+            citype: citype
         })
     });
 
-    console.log("validation", validation);
-    console.log("reportname", validation.reportName);
-    console.log("reportname", validation.godownAdd);
-
-    reportName = validation.reportName;
-
-    pubFinalApprovedBy = validation.signatoryList || "";
-
-    if (v_type == "SAGT" || v_type == "SASI" || v_type == "SAST")
-    {
-        RPTNAME = "TAX INVOICE";
+    if (validation.success == false) {
+        showToast(validation.message, { type: "warning" });
+        return;
     }
-    else if (v_type == "SACH")
+
+    console.log("globalVars:", globalVars);
+    console.log("validation:", validation);
+    reportName = validation.reportName || "";
+
+
+
+    if (exportPrint = True) 
     {
-        RPTNAME = "TAX INVOICE";
+
+        const containerDetailFormula =
+            "{tempContainerdetail.SI_TYPE} = '" + v_type + "'" +
+            " AND {tempContainerdetail.SI_NO} = " + (parseInt(v_no) || 0) +
+            " AND {tempContainerdetail.COMP_CODE} = " + globalVars.CompCode;
+
+
+
+
+
+
+
+
+
+
+        //Dim subSel As String = ""
+        //subSel = "{tempContainerdetail.SI_TYPE}='" & cmbvtype.SelectedValue & "'"
+        //subSel &= " AND {tempContainerdetail.SI_NO}=" & txtvno.Text
+        //subSel &= " AND {tempContainerdetail.COMP_CODE}=" & pubCompCode
+        //RPT.Subreports("rptContainerDetail.rpt").RecordSelectionFormula = subSel
+
+        //'RPT.Subreports("rptContainerDetail.rpt").RecordSelectionFormula = "{tempContainerdetail.SI_TYPE}='" & cmbvtype.SelectedValue & "'  and {tempContainerdetail.SI_NO}=" & txtvno.Text & " "
+        //'RPT.Subreports("rptContainerDetail.rpt").RecordSelectionFormula = "{tempContainerdetail.COMP_CODE}=" & pubCompCode
+
     }
-    else if (v_type == "SAJI")
+
+
+    let dft = "";
+
+    // Equivalent of:
+    // If Specialusercontrol.btnApproved.Visible = False Then
+    //     dft = " (DRAFT COPY)"
+    // End If
+
+    //if (typeof Specialusercontrol !== "undefined" && Specialusercontrol.btnApproved && Specialusercontrol.btnApproved.visible === false)
+    //{
+    //    dft = " (DRAFT COPY)";
+    //}
+
+
+    if (v_type === "SAGT" || v_type === "SASI" || v_type === "SAST")
     {
-        RPTNAME = "DELIVERY CHALLAN (JOBWORK)";
+        RPTNAME = "TAX INVOICE" + dft;
+    }
+    else if (v_type === "SACH")
+    {
+        RPTNAME = "DELIVERY CHALLAN" + dft;
+    }
+    else if (v_type === "SAJI")
+    {
+        RPTNAME = "DELIVERY CHALLAN (JOBWORK)" + dft;
     }
     else
     {
-        RPTNAME = "BILL OF SUPPLY";
+        RPTNAME = "BILL OF SUPPLY" + dft;
     }
 
-    const formula =
-        " {SALE1.V_TYPE} = '" + v_type + "'" +
-        " and {SALE1.V_NO} = " + v_no +
-        " and {SALE1.COMP_CODE} = " + globalVars.CompCode +
-        " and {SALE1.YEAR_CODE} = " + globalVars.FYearCode +
-        " and {SALE1.BRANCH_CODE} = " + globalVars.BranchCode;
+    const formula = "{SALE1.V_TYPE} = '" + v_type + "'" +
+        " AND {SALE1.V_NO} = " + (parseInt(v_no) || 0) +
+        " AND {SALE1.COMP_CODE} = " + globalVars.CompCode +
+        " AND {SALE1.YEAR_CODE} = " + globalVars.FYearCode +
+        " AND {SALE1.BRANCH_CODE} = " + globalVars.BranchCode;
 
-    // ---------------------------------
-    // Report Payload
-    // ---------------------------------
 
     let withSign = "";
 
-    if (cbWithSign == 1 && globalVars.CompCode == 1)
+    if (cbWithSign === 1 && String(globalVars.CompCode) === "1")
     {
         withSign = "1";
     }
 
-
-
-
     let withFreight = "";
 
-    if (cbwithFreightFOB == 1)
+    if (cbwithFreightFOB === 1)
     {
         withFreight = "1";
     }
 
-
-
     const godownAdd = validation.godownAdd || "";
 
-    const godownAddText = godownAdd !== ""  ? "Ship From : " + godownAdd  : godownAdd;
+    const godownAddText = "";
+
+    if (godownAddText != "")
+    {
+        godownAddText = godownAdd !== "" ? "Ship From : " + godownAdd : "";
+    }
+
+    const txtnet_amt = parseFloat($('#NumOtherNetAmount').val()) || 0;
+
+    const inWord = numberToWordsCurrency(  txtnet_amt, "Rs.",  "PAISE"  );
+
+    let INUSD = "";
+
+    const exRate = parseFloat($('#NumExRate').val()) || 0;
+
+    const currency =  $('#ddlCurrency option:selected').text().trim() || "Rs";
+
+    if (exRate > 0) {
+
+        let usdAmt = 0;
+
+        $('#tblSalesInvoice tbody tr').each(function ()
+        {
+            const $row = $(this);                 
+            const qty = $('#ChkPCS').is(':checked')  ? parseFloat($row.find('.TxtNos').val()) || 0 : parseFloat($row.find('.TxtNetQty').val()) || 0;
+            const rate =  parseFloat($row.find('.TxtRate').val()) || 0;
+            usdAmt += qty * rate;
+        });
+
+        usdAmt = Math.round(usdAmt * 1000) / 1000;
+
+        if (usdAmt > 0)
+        {
+            INUSD = numberToWordsCurrency( Math.round(usdAmt * 100) / 100, currency,  "CENT" );
+        }
+        else
+        {
+            INUSD = " .";
+        }
+    }
+
+    let challanRef = "";
+
+    if (String(globalVars.CompCode) === "1")
+    {
+        const challanNo = $.trim(validation.challanNo || "");
+
+        if (challanNo.length > 1)
+        {
+            challanRef = "Agst. Challan No.:" + challanNo;
+        }
+    }
+
+    let compName1 = "";
+
+    if (String(globalVars.CompCode) !== "3" && String(globalVars.CompCode) !== "8")
+    {
+        compName1 = "An ISO 9001:2015 Certified Company";
+    }
+
+    let compReg = "";
+
+    if (String(globalVars.CompCode) !== "3")
+    {
+        compReg = "Reg.Office :" + (globalVars.RegAdd1 || "") + ", " + (globalVars.RegAdd2 || "") + "  CIN :" + (globalVars.CINNO || "");
+    }
+
+    const payload = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: database,
+        Parameters: {
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",
+            comp_phone: "Mobile : " + (globalVars.Phone || ""),
+            PAN: "PAN NO.   : " + (globalVars.PAN || ""),
+            EMAIL: "Email   : " + (globalVars.Email || ""),
+            Website: "Web     : " + (globalVars.pubCompWebsite || ""),
+            GST: "GST NO.   : " + (globalVars.GST || "")
+        }
+    };
+
+    // Add parameter only if value exists
+    if (withSign !== "") {
+        payload.Parameters.withSign = withSign;
+    }
+
+    if (withFreight !== "") {
+        payload.Parameters.withFreight = withFreight;
+    }
+
+    if (godownAddText !== "") {
+        payload.Parameters.godownAdd = godownAddText;
+    }
+
+    if (compName1 !== "") {
+        payload.Parameters.comp_name1 = compName1;
+    }
+
+    if (compReg !== "") {
+        payload.Parameters.Comp_reg = compReg;
+    }
+
+    if (inWord !== "") {
+        payload.Parameters.INWORD = inWord;
+    }
+
+    if (INUSD !== "") {
+        payload.Parameters.INUSD = INUSD;
+    }
+
+    if (challanRef !== "") {
+        payload.Parameters.challanRef = challanRef;
+    }
+
+    if (RPTNAME !== "") {
+        payload.Parameters.RPTNAME = RPTNAME;
+    }
+
+    var now = new Date();
+    var timestamp =
+        String(now.getDate()).padStart(2, '0') +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getFullYear()).slice(-2) + "_" +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
 
 
-    const txtnet_amt = $('#NumOtherNetAmount').val();
+    $.ajax({
+        url: 'http://localhost:24085/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: { responseType: 'blob' },
 
-    const inWord = (  parseFloat(txtnet_amt) || 0,  "Rs.",  "PAISE" );
+        success: function (response) {
+
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        error: function (xhr, status, error) {
+            if (xhr.status === 0) {
+                console.error("Cannot connect to API. Is the backend running?");
+            } else {
+                console.error('Error generating report:', xhr.status, xhr.statusText, error);
+                xhr.responseText && console.error('Response:', xhr.responseText);
+            }
+        }
+    });
+}
+
+function numberToWordsCurrency(amount, currency = "Rs.", decimalName = "PAISE") {
+
+    amount = parseFloat(amount) || 0;
+
+    const ones = [
+        "",
+        "One",
+        "Two",
+        "Three",
+        "Four",
+        "Five",
+        "Six",
+        "Seven",
+        "Eight",
+        "Nine",
+        "Ten",
+        "Eleven",
+        "Twelve",
+        "Thirteen",
+        "Fourteen",
+        "Fifteen",
+        "Sixteen",
+        "Seventeen",
+        "Eighteen",
+        "Nineteen"
+    ];
+
+    const tens = [
+        "",
+        "",
+        "Twenty",
+        "Thirty",
+        "Forty",
+        "Fifty",
+        "Sixty",
+        "Seventy",
+        "Eighty",
+        "Ninety"
+    ];
+
+
+    function convertLessThanThousand(num) {
+
+        let result = "";
+
+        if (num >= 100) {
+
+            result += ones[Math.floor(num / 100)] + " Hundred ";
+
+            num %= 100;
+        }
+
+        if (num >= 20) {
+
+            result += tens[Math.floor(num / 10)];
+
+            if (num % 10 !== 0) {
+                result += " " + ones[num % 10];
+            }
+
+        }
+        else if (num > 0) {
+
+            result += ones[num];
+        }
+
+        return result.trim();
+    }
+
+
+    function convertIndianNumber(num) {
+
+        if (num === 0) {
+            return "Zero";
+        }
+
+        let result = "";
+
+        // Crore
+        if (num >= 10000000) {
+
+            const crore =
+                Math.floor(num / 10000000);
+
+            result +=
+                convertIndianNumber(crore) +
+                " Crore ";
+
+            num %= 10000000;
+        }
+
+
+        // Lakh
+        if (num >= 100000) {
+
+            const lakh =
+                Math.floor(num / 100000);
+
+            result +=
+                convertLessThanThousand(lakh) +
+                " Lakh ";
+
+            num %= 100000;
+        }
+
+
+        // Thousand
+        if (num >= 1000) {
+
+            const thousand =
+                Math.floor(num / 1000);
+
+            result +=
+                convertLessThanThousand(thousand) +
+                " Thousand ";
+
+            num %= 1000;
+        }
+
+
+        // Remaining
+        if (num > 0) {
+
+            result +=
+                convertLessThanThousand(num);
+        }
+
+        return result.trim();
+    }
+
+
+    // ---------------------------------------------------------
+    // Separate rupees and paise
+    // ---------------------------------------------------------
+
+    const rupees =
+        Math.floor(amount);
+
+    const paise =
+        Math.round((amount - rupees) * 100);
+
+
+    // ---------------------------------------------------------
+    // Currency prefix
+    // ---------------------------------------------------------
+
+    let currencyText = currency;
+
+    if (currency === "Rs." || currency === "Rs") {
+        currencyText = "Rupees";
+    }
+
+
+    // ---------------------------------------------------------
+    // Rupees
+    // ---------------------------------------------------------
+
+    let result =
+        currencyText + " " +
+        convertIndianNumber(rupees);
+
+
+    // ---------------------------------------------------------
+    // Paise
+    // ---------------------------------------------------------
+
+    if (paise > 0) {
+
+        result +=
+            " and " +
+            convertLessThanThousand(paise) +
+            " " +
+            decimalName;
+    }
+
+
+    // ---------------------------------------------------------
+    // Only
+    // ---------------------------------------------------------
+
+    result += " Only";
+
+
+    return result;
+}
+
+
+
+async function GetPackingSlipPrint(typ)
+{
+
+    if (!rowId) {
+        showToast("Please save the data before printing the report.", { type: "info" });
   
+    }
+
+    let reportName = "";
+    let RPTNAME = "";
+    const v_no = $('#NumInvoiceNo').val();
+    const v_type = $('#ddlDocumentType').val();
+    const V_Date = formatDate($('#DtDocumentDate').val());     
+    const PackType = $.trim($('#ddlPackNo option:selected').text()).split('-').pop().trim() || "";
+    const WithoutBag = $('#chk_PackSlipWithoutBag').is(':checked') ? 1 : 0;
+    const ProdType = $('#ddlProductType').val();
+    const $firstRow = $('#tblSalesInvoice tbody tr').eq(0);
+
+    let packNos = "";
+    let rowCount = 0;
+
+    $('#tblSalesInvoice tbody tr').each(function () {
+
+        const $row = $(this);
+
+        const itemName = $.trim($row.find('.ddlProductName').val() || "");
+
+        const packNo = $.trim($row.find('.TxtPackno').val() || "");
+
+        if (itemName !== "" && packNo !== "")
+        {
+            packNos += packNo + ",";
+        }
+
+        if (itemName !== "") {
+            rowCount++;
+        }
 
 
+    });
 
+    packNos = packNos.replace(/,$/, "");
+
+    const validation = await $.ajax({
+        url: '/SalesInvoice/GetPackingSlipPrintValidation',
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({
+            V_NO: parseInt(v_no) || null, 
+            V_TYPE: v_type,
+            V_Date: V_Date,
+            PackType: PackType,
+            WithoutBag: WithoutBag,
+            ProdType: ProdType     ,   
+            packNos: packNos,
+            rowscount: rowCount
+        })
+    });
+
+    if (validation.success == false)
+    {
+        showToast(validation.message, { type: "warning" });
+    }
+
+    if (typ == "Banmk")
+    {
+        reportName = "rptPackingSlipExportBank";
+    }
+    else if (typ == "Custom")
+    {
+        reportName = "rptPackingSlipExportCustom";
+    }
+    else
+    {
+        reportName = "rptPackingSlipExport";
+    }
+    
+    const formula =
+        "{SALE1.V_TYPE} = '" + v_type + "'" +
+        " AND {SALE1.V_NO} = " + (parseInt(v_no) || 0) +
+        " AND {SALE1.COMP_CODE} = " + globalVars.CompCode +
+        " AND {SALE1.BRANCH_CODE} = " + globalVars.BranchCode +
+        " AND {SALE1.YEAR_CODE} = " + globalVars.FYearCode;
+
+    const containerDetailFormula =
+        "{tempContainerdetail.SI_TYPE} = '" + v_type + "'" +
+        " AND {tempContainerdetail.SI_NO} = " + (parseInt(v_no) || 0) +
+        " AND {tempContainerdetail.COMP_CODE} = " + globalVars.CompCode;
+
+    // Packing Slip subreport formula
+    const packingSlipFormula =
+        "{tempExportPackingSlip.SI_TYPE} = '" + v_type + "'" +
+        " AND {tempExportPackingSlip.SI_NO} = " + (parseInt(v_no) || 0) +
+        " AND {tempExportPackingSlip.COMP_CODE} = " + globalVars.CompCode +
+        " AND {tempExportPackingSlip.BRANCH_CODE} = " + globalVars.BranchCode +
+        " AND {tempExportPackingSlip.YEAR_CODE} = " + globalVars.FYearCode;
 
     const payload = {
         Reportname: reportName,
         selectionFormula: formula,
         Database: database,
 
-        Parameters: {        
-            comp_name:  globalVars.CompanyName || "",
-            comp_add1:  globalVars.Address1 || "",
+        // Subreport selection formulas
+        SubreportFormulas: {
+            "rptContainerDetail.rpt": containerDetailFormula,
+            "rptPackingSlipExportDetail2.rpt": packingSlipFormula
+        },
+
+        // Crystal Report FormulaFields / Parameters
+        Parameters: {
+            RPTNAME: "PACKING LIST",
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
             comp_add2: globalVars.Address2 || "",
-            comp_phone: "Mobile :" + (globalVars.Phone || ""),       
-            PAN: "PAN NO. :" + (globalVars.PAN || ""),
-            EMAIL: "Email :" + (globalVars.Email || ""),
-            Website: "Web :" + (globalVars.pubCompWebsite || ""),
-            GST: "GST NO. :" + (globalVars.GST || ""),    
-            withSign: withSign,
-            withFreight: withFreight,
-            godownAdd: godownAddText,
-            comp_name1: globalVars.CompCode != "3" && globalVars.CompCode != "8"  ? "An ISO 9001:2015 Certified Company" : "",
-            Comp_reg: globalVars.CompCode != "3" ? "Reg.Office :" + (globalVars.pubCompRegAdd1 || "") +  ", " +  (globalVars.pubCompRegAdd2 || "") + "  CIN :" +  (globalVars.pubCompCIN || "") : "",
-            INWORD: inWord,
-            INUSD: "",
-            challanRef: "",
-            RPTNAME: RPTNAME
+            comp_phone: "Mobile : " + (globalVars.Phone || ""),
+            PAN: "PAN NO.   : " + (globalVars.PAN || ""),
+            GST: "GST NO.   : " + (globalVars.GST || ""),
+            EMAIL: "Email   : " + (globalVars.Email || ""),
+            Website: "Web   : " + (globalVars.pubCompWebsite || "")
         }
     };
+    
+    if (RPTNAME !== "")
+    {
+        payload.Parameters.RPTNAME = RPTNAME;
+    }
 
-    // ---------------------------------
-    // Generate PDF
-    // ---------------------------------
-    const pdfBlob = await $.ajax({
-        url: 'http://localhost:24085/Report/PendingQCReport',
-        type: 'POST',
-        data: JSON.stringify(payload),
-        contentType: "application/json",
-        xhrFields: {
-            responseType: 'blob'
-        }
-    });
-
-    // ---------------------------------
-    // Create PDF File
-    // ---------------------------------
-    const file = new Blob(
-        [pdfBlob],
-        {
-            type: "application/pdf"
-        }
-    );
-
-    // ---------------------------------
-    // Timestamp
-    // ---------------------------------
-    const now = new Date();
-
-    const timestamp =
+    var now = new Date();
+    var timestamp =
         String(now.getDate()).padStart(2, '0') +
         String(now.getMonth() + 1).padStart(2, '0') +
-        String(now.getFullYear()).slice(-2) +
-        "_" +
+        String(now.getFullYear()).slice(-2) + "_" +
         String(now.getHours()).padStart(2, '0') +
         String(now.getMinutes()).padStart(2, '0') +
         String(now.getSeconds()).padStart(2, '0');
 
-    // ---------------------------------
-    // File Name
-    // ---------------------------------
-    const fileName =
-        `SAUDA_PURCH_${v_no}_${timestamp}.pdf`;
+    $.ajax({
+        url: 'http://localhost:24085/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: { responseType: 'blob' },
 
-    // ---------------------------------
-    // Return File
-    // ---------------------------------
-    return {
-        file: file,
-        fileName: fileName
-    };
+        success: function (response) {
+
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+
+
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        error: function (xhr, status, error) {
+            if (xhr.status === 0) {
+                console.error("Cannot connect to API. Is the backend running?");
+            } else {
+                console.error('Error generating report:', xhr.status, xhr.statusText, error);
+                xhr.responseText && console.error('Response:', xhr.responseText);
+            }
+        }
+    });
 }

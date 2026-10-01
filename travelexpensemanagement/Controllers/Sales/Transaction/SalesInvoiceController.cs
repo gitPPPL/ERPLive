@@ -1150,13 +1150,14 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
 
-
-
-                public class PrintValidationRequest
+         public class PrintValidationRequest
                 {
                     public string? V_TYPE { get; set; }
-                    public int? V_NO { get; set; }
-                    public Decimal? FrtAmt { get; set; } 
+                    public int? V_NO { get; set; }              
+                    public DateTime? V_Date { get; set; }              
+                             
+            
+                     public Decimal? FrtAmt { get; set; } 
                     public Decimal? TdsAmt { get; set; } 
                     public Decimal? ExRate { get; set; } 
                     public Decimal? CGSTAmt { get; set; } 
@@ -1172,21 +1173,18 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     public  Boolean? lc { get; set; }
                     public  int? WithoutBag { get; set; }
                     public  int? cbDetail { get; set; }
-
                     public string? ReportName { get; set; }
                     public string? citype { get; set; }
-
                     public string? SaudaType { get; set; }
                     public string? godownAdd { get; set; }
-                    public int? SaudaNo { get; set; }
-                              
+                    public int? SaudaNo { get; set; }                              
                     public string? godownNo{ get; set; }
+                    public string? ProdType { get; set; }
                     public int? godownType { get; set; }
+                    public int? rowscount { get; set; }
                               
 
                 }
-
-
 
         public string GetText(string query)
         {
@@ -1219,11 +1217,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
 
-
-
-
-
-
         public bool IsExist(string query)
         {
             try
@@ -1244,5 +1237,173 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
 
+
+        [HttpPost]
+        public JsonResult GetPackingSlipPrintValidation([FromBody] PrintValidationRequest request)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            string sql = "";
+            string vtyp = "";
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+
+                if (request == null)
+                {
+                    return Json(new { success = false, message = "Request Showing Null", ReportName = "", godownAdd = "" });
+                }
+
+                string truncatequery = "Truncate table tempContainerDetail";
+                using (SqlCommand cmd = new SqlCommand(truncatequery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+
+                string cqry = "";
+                string dqry = "";
+                string tblname1 = "Production1";
+                string tblname2 = "Production2";
+
+                if(request.WithoutBag == 1)
+                {
+                    cqry = "Sum(b.QTY)";
+                    dqry = "isnull(b.pack_Qty,0) + isnull(b.Tare_Qty,0),b.Qty";
+                }
+                else
+                {
+                    cqry = "Sum(b.Gross_Qty)";
+                    dqry = "b.Pack_qty ,b.Gross_Qty";
+                }
+
+                if(request.PackType == "SFIS" || request.PackType == "SFEI")
+                {
+                    if(getdata.PubCompCode == "1")
+                    {
+                        tblname1 = "Prod_sfg1";
+                        tblname2 = "Prod_sfg2";
+                    }
+
+                       sql = @$"Insert into tempContainerDetail (COMP_CODE,SI_TYPE,SI_NO,V_TYPE,V_NO,CONTAINER_NO,GROSS_WT,NET_WT,NOS,LINESEAL_NO,CUSTOMSEAL_NO)
+                        Select a.COMP_CODE,'{request.V_TYPE}',{request.V_NO},a.V_type,a.V_no,CONTAINER_NO,iif(sum(b.pack_Qty)>0,sum(b.GROSS_QTY+b.pack_qty),
+                        sum(b.GROSS_QTY)), {cqry},count(*),LINESEAL_NO,a.CUSTOMSEAL_NO from {tblname1} a left join {tblname2} b on a.V_TYPE=b.V_TYPE and 
+                         a.v_no=b.V_no and a.COMP_CODE=b.COMP_CODE and a.BRANCH_CODE=b.BRANCH_CODE and a.YEAR_CODE=b.YEAR_CODE 
+                        where a.V_TYPE= '{request.PackType}' and a.V_no in ({request.packNos}) and a.comp_code={getdata.PubCompCode} 
+                        and a.Branch_code={getdata.PubBranchCode} and a.Year_code= {getdata.PubFYearCode} 
+                        group by a.COMP_CODE,a.V_type,a.V_no,CONTAINER_NO,LINESEAL_NO,a.CUSTOMSEAL_NO order by CONTAINER_NO";
+
+
+                        using (SqlCommand cmd = new SqlCommand(sql, con))
+                        {
+                            cmd.ExecuteNonQuery();
+                        }
+                  
+                }
+                else if( request.PackType == "FPIS")
+                {
+                    sql = @$" Insert into tempContainerDetail (COMP_CODE,SI_TYPE,SI_NO,V_TYPE,V_NO,CONTAINER_NO,GROSS_WT,NET_WT,NOS,LINESEAL_NO,CUSTOMSEAL_NO)
+                          Select a.COMP_CODE,'{request.V_TYPE}',{request.V_NO},a.V_type,a.V_no,CONTAINER_NO,sum(b.GROSS_QTY),sum(b.QTY),count(*),LINESEAL_NO,
+                          a.CUSTOMSEAL_NO from {tblname1} a left join {tblname2} b on a.V_TYPE=b.V_TYPE and a.v_no=b.V_no and a.COMP_CODE=b.COMP_CODE and
+                          a.BRANCH_CODE=b.BRANCH_CODE and a.YEAR_CODE=b.YEAR_CODE 
+                          where a.V_TYPE= '{request.PackType}' and a.V_no in ('{request.packNos}') and a.comp_code={getdata.PubCompCode} and a.Branch_code={getdata.PubBranchCode} 
+                          and a.Year_code={getdata.PubFYearCode} group by a.COMP_CODE,a.V_type,a.V_no,CONTAINER_NO,LINESEAL_NO,a.CUSTOMSEAL_NO order by CONTAINER_NO";
+
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                sql = "Delete from tempExportPackingSlip";
+
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+
+                if (request.ProdType == "Flakes")
+                {
+                    vtyp = "SFIS";
+                }
+                else if(request.ProdType == "PSF" || request.ProdType == "Finish" || request.ProdType == "Fabric" || request.ProdType == "Sacks")
+                {
+                    vtyp = "FPIS";
+                }
+                else if (request.ProdType == "Chips")
+                {
+                    vtyp = "SFEI";
+                }
+
+                if(request.rowscount > 0)
+                {
+                    int dataLength = 0;
+                    sql = @$" SELECT COUNT(DISTINCT V_NO) FROM {tblname2} WHERE V_TYPE = '{vtyp}'  AND V_NO IN ({request.packNos})  AND Comp_code = {getdata.PubCompCode} AND Branch_code = {getdata.PubBranchCode}";
+
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                         dataLength = Convert.ToInt32(cmd.ExecuteScalar());
+                    }
+                        if(dataLength > 0 )
+                        {
+
+                            sql = @$" Insert into tempExportPackingSlip(COMP_CODE,BRANCH_CODE,YEAR_CODE,SI_TYPE,SI_NO,SI_DATE,V_TYPE,V_NO,V_DATE,CONTAINER_NO,VEHICLE_NO,
+                            LINESEAL_NO,CUSTOMSEAL_NO,ITEM_CODE,ITEM_NAME,GROSS_QTY,TARE_QTY,NET_QTY) Select a.COMP_CODE,a.BRANCH_CODE,a.YEAR_CODE,
+                            '{request.V_TYPE}',{request.V_NO},'{request.V_Date}',a.V_TYPE,a.V_NO,a.V_DATE,a.CONTAINER_NO,a.VEHICLE_NO,a.LINESEAL_NO,CUSTOMSEAL_NO,ITEM_CODE,
+                            '',iif(b.pack_Qty>0,b.GROSS_QTY+b.pack_qty,b.GROSS_QTY),{dqry} from {tblname1}  a  Left join {tblname2} 
+                            b on a.V_TYPE=b.V_TYPE and a.V_NO=b.V_no and a.COMP_CODE=b.COMP_CODE and a.BRANCH_CODE=b.BRANCH_CODE and a.YEAR_CODE=b.YEAR_CODE where a.V_TYPE='{vtyp}'
+                            and a.v_no in ( {request.packNos} ) and a.Comp_code={getdata.PubCompCode} and a.Branch_code={getdata.PubBranchCode}";
+
+
+                            using (SqlCommand cmd = new SqlCommand(sql, con))
+                            {
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            sql = @$"update tempExportPackingSlip set ITEM_NAME=(iif(isnull(b.Print_name,'')<>'',b.Print_name,b.Name)),hsn_Code=b.hsn_Code from Item_mast b Where tempExportPackingSlip.Item_Code=b.code and tempExportPackingSlip.comp_Code=b.comp_Code";
+                            using (SqlCommand cmd = new SqlCommand(sql, con))
+                            {
+                                cmd.ExecuteNonQuery();
+                            }
+
+                        }
+      
+                    sql = "Select top 1* from tempExportPackingSlip";
+
+                    int dataLengthCount = 0;
+
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        dataLengthCount = Convert.ToInt32(cmd.ExecuteScalar());
+
+                        if(dataLengthCount > 0)
+                        {
+                            return Json(new { success = false, message = "Packing Slip Not Found"});
+                        }
+                    }
+                }
+                return Json(new { success = true, message = "Print validation successful." });
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
-}
+} 

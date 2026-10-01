@@ -108,7 +108,7 @@ namespace travelexpensemanagement.Common.Globalvariable
             var httpContext = _httpContextAccessor.HttpContext;
             var sessionComp = httpContext.Session.GetString("COMP_CODE");
 
-            string query = @"SELECT IEC, NAME, ADD1, ADD2, ADD3, GSTIN, PAN, PHONE, FAX, EMAIL, WEBSITE, EXCISE, SERVICETAX,
+            string query = @"SELECT REGADD1 ,REGADD2 , IEC, NAME, ADD1, ADD2, ADD3, GSTIN, PAN, PHONE, FAX, EMAIL, WEBSITE, EXCISE, SERVICETAX,
             RegAdd1, RegAdd2, CINNO,STATE_CODE  FROM COMP_MAST WHERE CODE = @Code";
 
             using (SqlConnection con = _dbConnection.GetErpConnection())

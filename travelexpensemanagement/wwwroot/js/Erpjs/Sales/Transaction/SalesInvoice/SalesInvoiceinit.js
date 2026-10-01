@@ -734,13 +734,58 @@ $(document).ready(async function () {
         });
     });
 
-
-
-    $('#btn_ExportToInvoice').on('click', async function () {
-
-        await GetTransitReportFile("");
-
+    // report
+    //async function GetTransitReportFile(citype, exportPrint, si = false, ci = false, lc = false)
+    $('#btn_ExportToInvoice').on('click', async function ()
+    {
+        await GetTransitReportFile("", true);
     });
 
+
+    $('#btn_ComInvoiceforParty').on('click', async function () {
+        await GetTransitReportFile("", true,false,true,false);
+    });
+      
+
+    $('#btn_LCInvoice').on('click', async function () {
+
+        let ExRate = $('#txxt_ExRate').val();
+        let LcNo = $('#DDL_LicNo').val();
+        if (ExRate > 0) {
+
+            if (LcNo == "")
+            {
+                toastr.warning("LC NO Is Blank ,Chek LC NO. in Transport Detail Tab.");
+                return;
+            }
+            await GetTransitReportFile("",true,false,false, true);
+        }
+    });
+
+
+    $('#btn_ComInvoiceForBank').on('click', async function () {
+        await GetTransitReportFile("Bank", true, false, true, false);
+    });
+
+
+    $('#btn_ShippingInstruction').on('click', async function () {
+        await GetTransitReportFile("", true, true, false, false);
+    });
+
+    $('#btn_ComInvoiceForCustom').on('click', async function () {
+        await GetTransitReportFile("Custom", true, false, true, false);
+    });
+
+    $('#btn_PackingSlipForParty').on('click', async function () {
+        await GetPackingSlipPrint("");
+    });
+
+    $('#btn_PackingSlipForBank').on('click', async function () {
+        await GetPackingSlipPrint("Bank");
+    });
+
+    $('#btn_PackingSlipForCustom').on('click', async function () {
+        await GetPackingSlipPrint("Custom");
+    });
 
 });
