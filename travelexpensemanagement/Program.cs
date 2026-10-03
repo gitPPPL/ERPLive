@@ -115,6 +115,8 @@ builder.Services.AddScoped<ISalesCreditLimitListRepository, SalesCreditLimitList
 builder.Services.AddScoped<ISalesCreditLimitEntryRepository, SalesCreditLimitEntryRepository>();
 builder.Services.AddScoped<ISalesOrderListRepository, SalesOrderListRepository>();
 builder.Services.AddScoped<ISalesOrderRepository, SalesOrderRepository>();
+builder.Services.AddScoped<ISalesReturnRepository, SalesReturnRepository>();
+builder.Services.AddScoped<ISalesReturnListRepository, SalesReturnListRepository>();
 
 
 // Gete Entry Transaction repositories

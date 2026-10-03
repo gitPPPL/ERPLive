@@ -46,6 +46,8 @@ let companyName = "";
 let add1 = "";
 let add2 = "";
 let db = "";
+var controllerName = window.location.pathname.split('/')[1];
+
 function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
@@ -53,6 +55,8 @@ function getQueryParam(param) {
 
 $(async function () {
     try {
+        checkPermissionForEntryPage(controllerName);
+
         getGlobalValues();
         $('#btn_createdelivery').prop('disabled', true).css({
             'pointer-events': 'none',
@@ -622,6 +626,13 @@ function bindAddressChange({ addressSelector, partySelector, add1Selector, add2S
                 //await loadDdl("city", citySelector);
                 bindDropdown("SalesOrder", "city", citySelector, '--Select city--', address.cityCode, null, false, null, false)
                 //$(citySelector).val(address.cityCode).trigger('change');
+
+                // Party address changed
+                if (isBillChange) {
+                    $('#ddlShipTo').val(code).trigger('change');
+                    await bindDropdown("SalesOrder", "address", '#ddlShipaddressL1', '', null, null, true, code, false);
+                    $('#ddlShipaddressL1').val(addressId).trigger('change');
+                }
             } catch (error) {
                 showToast('Error loading address', { type: "error" });
             }
@@ -762,7 +773,6 @@ function getOptionalDate(checkboxSelector, dateSelector) {
     return $(checkboxSelector).is(':checked') ? (parseNullableDate($(dateSelector).val()) || null) : null;
 }
 
-
 //==============Sauda Details===============
 async function fillISaudaBySaudaNo(datatable) {
     try {
@@ -840,7 +850,6 @@ async function showSaudasDetails(datas) {
     $('#TxtTenaCity').val(data.TENACITY_GRP);
 }
 
-
 //==============Issue Details===============
 async function LoadIssueData(issueNo) {
     try {
@@ -858,6 +867,7 @@ async function LoadIssueData(issueNo) {
         const $tbody = $('#tblSalesOrderEntryModal tbody');
         $tbody.empty();
         if (!issueList?.data?.length) {
+            addNewRowBelow();
             return;
         }
 
@@ -867,13 +877,13 @@ async function LoadIssueData(issueNo) {
         });
 
     } catch (error) {
+        addNewRowBelow();
         console.error('Error loading Sauda data:', error);
     }
     finally {
         isLoadByIssueNo = false;
     }
 }
-
 
 //==============Packing Details===============
 async function loadPackingDetail(packingNo) {

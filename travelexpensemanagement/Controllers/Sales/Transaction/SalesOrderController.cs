@@ -180,7 +180,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
             catch (Exception ex)
             {
-                return Json(new { status = true, message = "data load failed" });
+                return Json(new { status = false, message = "data load failed" });
             }
         }
 

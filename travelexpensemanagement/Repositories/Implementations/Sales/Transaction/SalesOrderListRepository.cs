@@ -2,6 +2,7 @@
 using System.Data;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Sales.Transaction;
 using static travelexpensemanagement.Models.Purchase.Transaction.PurchaseBillPassEntryModel;
@@ -12,10 +13,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Sales.Transaction
     {
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalValue;
-        public SalesOrderListRepository(DataBaseConnection dbcontext, GlobalVariableService globalValue)
+        private readonly LogService.LogService _logService;
+        public SalesOrderListRepository(DataBaseConnection dbcontext, GlobalVariableService globalValue, LogService.LogService logService)
         {
             _dbcontext = dbcontext;
             _globalValue = globalValue;
+            _logService = logService;
         }
         public RepositoryResponseList<SalesOrderListModel> GetSalesOrderList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
@@ -115,6 +118,10 @@ namespace travelexpensemanagement.Repositories.Implementations.Sales.Transaction
                             }
 
                             transaction.Commit();
+                            //_logService.InsertLog("ORDER1", "SALES ORDER", "Transaction", "Delete", docType, vNo.ToString(), null);
+                            //_logService.InsertLog("ORDER2", "SALES ORDER", "Transaction", "Delete", docType, vNo.ToString(), null);
+                            //_logService.InsertLog("ORDER_DELPLAN", "SALES ORDER", "Transaction", "Delete", docType, vNo.ToString(), null);
+
                             return new RepositoryResponse { status = true, message = "Data deleted successfully" };
                         }
                         catch (Exception ex)

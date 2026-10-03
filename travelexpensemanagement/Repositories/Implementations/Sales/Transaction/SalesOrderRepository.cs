@@ -3,6 +3,7 @@ using System.Data;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.LogService;
 using travelexpensemanagement.Models.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Sales.Transaction;
 
@@ -13,11 +14,13 @@ namespace travelexpensemanagement.Repositories.Implementations.Sales.Transaction
         private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbcontext;
         private readonly GlobalVariableService _globalVariableService;
-        public SalesOrderRepository(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue)
+        private readonly LogService.LogService _logService;
+        public SalesOrderRepository(DataBaseConnection dbcontext, DbHelper dbHelper, GlobalVariableService globalValue, LogService.LogService logService)
         {
             _dbHelper = dbHelper;
             _dbcontext = dbcontext;
             _globalVariableService = globalValue;
+            _logService = logService;
         }
 
         public async Task<RepositoryResponseData<object>> GetPartyAddress(int code, int addressId)
@@ -606,6 +609,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sales.Transaction
                 {
                     await con.OpenAsync();
                     var gv = _globalVariableService.GetGlobalVariables();
+                    var logAction = "";
 
                     var isApprovalBody = false;
                     var isFinalApprovalBody = false;
@@ -654,11 +658,13 @@ namespace travelexpensemanagement.Repositories.Implementations.Sales.Transaction
                                 {
                                     cmd.Parameters.AddWithValue("@Action", "HeaderInsert");
                                     cmd.Parameters.AddWithValue("@UUSER", gv.PubUserId ?? (object)DBNull.Value);
+                                    logAction = "Insert";
                                 }
                                 else
                                 {
                                     cmd.Parameters.AddWithValue("@Action", "Update");
                                     cmd.Parameters.AddWithValue("@EUSER", gv.PubUserId ?? (object)DBNull.Value);
+                                    logAction = "Update";
                                 }
 
                                 cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
@@ -848,6 +854,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Sales.Transaction
                             }
 
                             transaction.Commit();
+                            //_logService.InsertLog("ORDER1", "SALES ORDER", "Transaction", logAction, POmodel.VType, POmodel.VNo.ToString(), POmodel.VDate);
+                            //_logService.InsertLog("ORDER2", "SALES ORDER", "Transaction", logAction, POmodel.VType, POmodel.VNo.ToString(), POmodel.VDate);
+
                             return new RepositoryResponseData<object> { status = true, message = "Data saved/updated successfully.", data = new { isWarning = false } };
                         }
                         catch (Exception ex)

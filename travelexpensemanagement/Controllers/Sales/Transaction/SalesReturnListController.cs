@@ -1,82 +1,154 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
-using travelexpensemanagement.Common.DropdownService;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Repositories.Interfaces.Sales.Transaction;
 
 namespace travelexpensemanagement.Controllers.Sales.Transaction
 {
+    [SessionAuthorize]
     public class SalesReturnListController : Controller
     {
-        private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
-        private readonly DropdownService _dropdownService;
+        private readonly GlobalValidationdate _globalValidationdate;
         private readonly DbHelper _dbHelper;
-        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        private int? userLevel;
-        public SalesReturnListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-        DropdownService dropdownService, DbHelper dbHelper,
-        ModuleService.ModuleService moduleService)
+        private readonly GlobalExcelExport _excel;
+        private readonly ISalesReturnListRepository _repo;
+        public SalesReturnListController(GlobalVariableService globalVariableService, GlobalValidationdate globalValidationdate,
+            DbHelper dbHelper, GlobalExcelExport excel, ISalesReturnListRepository repo)
         {
-            _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
-            _dropdownService = dropdownService;
+            _globalValidationdate = globalValidationdate;
             _dbHelper = dbHelper;
-            _moduleService = moduleService;
+            _excel = excel;
+            _repo = repo;
         }
         public IActionResult Index()
         {
             return View("~/Views/Sales/Transaction/SalesReturnList/Index.cshtml");
         }
+
         [HttpGet]
-        public IActionResult GetAlldataList(string searchTerm, int pageNumber = 1, int pageSize = 10)
+        public IActionResult GetSalesReturnList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
-            var g = _globalVariableService.GetGlobalVariables();
-            DataSet ds = new DataSet();
-            int totalCount = 0;
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            using (SqlCommand cmd = new SqlCommand("sp_SalesReturn", con))
+            try
             {
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@COMP_CODE", g.PubCompCode);
-                cmd.Parameters.AddWithValue("@BRANCH_CODE", g.PubBranchCode);
-                cmd.Parameters.AddWithValue("@YEAR_CODE", g.PubFYearCode);
-                cmd.Parameters.AddWithValue("@Action", "SELECT");
-                cmd.Parameters.AddWithValue("@SearchTerm", string.IsNullOrWhiteSpace(searchTerm) ? (object)DBNull.Value : searchTerm);
-                cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
-                cmd.Parameters.AddWithValue("@PageSize", pageSize);
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(ds);
+                var result = _repo.GetSalesReturnList(searchTerm, pageNumber, pageSize);
+                return Json(new { status = result.status, data = result.data, totalCount = result.totalCount });
             }
-            var data = new List<Dictionary<string, object>>();
-
-            if (ds.Tables.Count > 0)
+            catch (Exception ex)
             {
-                foreach (DataRow row in ds.Tables[0].Rows)
-                {
-                    var dict = new Dictionary<string, object>();
-                    foreach (DataColumn col in ds.Tables[0].Columns)
-                    {
-                        dict[col.ColumnName] = row[col] == DBNull.Value ? "" : row[col].ToString();
-                    }
-                    data.Add(dict);
-                }
+                return Json(new { status = false, message = ex.Message });
             }
-            if (ds.Tables.Count > 1 && ds.Tables[1].Rows.Count > 0)
-            {
-                totalCount = Convert.ToInt32(ds.Tables[1].Rows[0][0]);
-            }
-            return Json(new
-            {
-                data,
-                totalCount
-            });
         }
 
+        [HttpGet]
+        public IActionResult GetSalesEditStatus(string vType, int vNo)
+        {
+            try
+            {
+                var result = _repo.GetSalesEditStatus(vType, vNo);
+                return Json(new { success = result.status, data = result.data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetSalesDeleteStatus(string vType, int vNo)
+        {
+            try
+            {
+                var result = _repo.GetSalesDeleteStatus(vType, vNo);
+                return Json(new { success = result.status, data = result.data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult DeleteSales(string vType, int vNo)
+        {
+            var result = _repo.DeleteSales(vType, vNo);
+            return Json(new { success = result.status, message = result.message });
+        }
+
+        [HttpGet]
+        public JsonResult checkModificationDays(DateTime? vDate)
+        {
+            if (!vDate.HasValue)
+            {
+                return Json(new { success = false, message = "Doc Date is empty!!" });
+            }
+            var (allowed, message) = _globalValidationdate.CheckModificationDays(vDate.Value);
+            return Json(new { success = true, isAllowed = allowed, message = message });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSalesEntryEntryDetails(int vNo, string vType)
+        {
+            try
+            {
+                var usersession = _globalVariableService.GetGlobalVariables();
+                if (string.IsNullOrEmpty(vType) || vNo <= 0)
+                {
+                    return Json(new { status = false, message = "Invalid ID" });
+                }
+                var parameter = new Dictionary<string, object>
+                {
+                    {"@COMP_CODE", usersession.PubCompCode },
+                    {"@YEAR_CODE", usersession.PubFYearCode },
+                    {"@BRANCH_CODE", usersession.PubBranchCode},
+                    {"@V_NO", vNo},
+                    {"@V_TYPE", vType},
+                    {"@Action", "EntryDetail" }
+                };
+                var entryDetailList = await _dbHelper.GetJsonFromProcedureAsync("[dbo].[sp_SalesReturn]", parameter);
+                return Json(new { status = true, data = entryDetailList });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { status = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ExportAllDocs()
+        {
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "@YEAR_CODE", gv.PubFYearCode },
+                    { "@COMP_CODE", gv.PubCompCode },
+                    { "@BRANCH_CODE", gv.PubBranchCode },
+                    { "@Action", "Excel" }
+                };
+
+                var fileBytes = _excel.ExportToExcel("sp_SalesReturn", "Sales Return", parameters);
+
+                return File(
+                    fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"SalesReturn{DateTime.Now:ddMMyyyy}.xlsx"
+                );
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

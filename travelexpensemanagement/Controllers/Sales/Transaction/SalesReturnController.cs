@@ -1,519 +1,483 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System.Data;
+using System.Text.Json;
+using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
+using travelexpensemanagement.Repositories.Interfaces.Sales.Transaction;
 
 namespace travelexpensemanagement.Controllers.Sales.Transaction
 {
+    [SessionAuthorize]
     public class SalesReturnController : Controller
     {
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DropdownService _dropdownService;
         private readonly DbHelper _dbHelper;
-        private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        private int? userLevel;
+        private readonly GlobalValidationdate _globalValidationdate;
+        private readonly ISalesReturnRepository _repo;
         public SalesReturnController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-        DropdownService dropdownService, DbHelper dbHelper,
-        ModuleService.ModuleService moduleService)
+        DropdownService dropdownService, DbHelper dbHelper, GlobalValidationdate globalValidationdate, ISalesReturnRepository repo)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
-            _moduleService = moduleService;
+            _globalValidationdate = globalValidationdate;
+            _repo = repo;
         }
         public IActionResult Index()
         {
             return View("~/Views/Sales/Transaction/SalesReturn/Index.cshtml");
         }
-        public IActionResult GetDocumentNo(string documentType)
+
+        public async Task<IActionResult> GetDropdown(string type, string data = "")
         {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            int documentNo = 0;
-            using (SqlConnection con = _dbConnection.GetErpConnection())
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            string qry = "";
+
+            switch (type.ToLower())
             {
-                string query = @" SELECT ISNULL(MAX(V_no), 0) + 1 AS documentNo FROM SALE1 WHERE V_TYPE = @VTYPE AND COMP_CODE = @COMP AND BRANCH_CODE = 1
-                AND YEAR_CODE = @YEAR";
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                case "doctype":
+                    qry = $@"Select Code as value, Name as text from DOCTYPE_MAST where DOCTYPE in ('SalesReturn','JobworkReceived') order by Name";
+                    break;
+
+                case "party":
+                    qry = $@"Select Code as value, Name as text from SUBGROUP_MAST where comp_code={gv.PubCompCode} and active=1 order by Name";
+                    break;
+
+                case "salethrough":
+                    qry = $@"select code as value, Name as text from SUBGROUP_MAST where NATURE like 'Broker' and active=1 and COMP_CODE ={gv.PubCompCode} 
+                            order by name";
+                    break;
+
+                case "tax":
+                    qry = $@"select a.code as value, a.name as text, a.CGST_PER,a.SGST_PER,a.IGST_PER,a.TDS_PER,a.TCS_PER,a.OTH_PER from TAX_MAST a 
+                            where a.ACTIVE = 1 order by name";
+                    break;
+
+                case "reference":
+                    qry = $@"SELECT DOC_ID AS value, V_NO AS text FROM SALE1 WHERE V_TYPE = 'SAGT' AND ISNULL(Status, 0) <> 2  AND COMP_CODE = {gv.PubCompCode}  
+                            AND BRANCH_CODE = {gv.PubBranchCode} AND Year_code >= 7 order by v_no";
+                    break;
+
+                case "gate":
+                    string gateVType = data.ToUpper() == "SAJR" ? "INJB" : "INSR";
+                    qry = $@"Select DOC_ID as value, V_NO as text from GATE1 where V_Type='{gateVType}' and comp_code={gv.PubCompCode} and Branch_Code={gv.PubBranchCode} and 
+                            Year_code>=4 order by V_TYpe,V_NO";
+                    break;
+
+                case "wb":
+                    qry = $@"select DOC_ID as value, ltrim(rtrim(V_NO)) as text from WB1 where V_TYPE ='KANT' AND COMP_CODE ={gv.PubCompCode} and BRANCH_CODE =
+                            {gv.PubBranchCode} and Year_code>=4 order by v_no";
+                    break;
+
+                case "sauda":
+                    qry = $@"SELECT DOC_ID AS value, V_NO AS text, Rate AS Rate, PARTY_CODE FROM SAUDA where V_TYPE='SAUD' 
+                            and FAPROV_STATUS='Approved' and COMP_CODE={gv.PubCompCode} and BRANCH_CODE={gv.PubBranchCode} order by v_no";
+                    break;
+
+                case "transport":
+                    qry = $@"Select CODE as value, Name as text, TDS_PER From TRANSPORT_MAST where comp_code={gv.PubCompCode} order by Name";
+                    break;
+
+                case "address":
+                    qry = $@"select address_id as value, add1 as text from SUBGROUP_ADDRESS where code={data} and COMP_CODE={gv.PubCompCode} order by ADDRESS_ID";
+                    break;
+
+                case "city":
+                    qry = $@"select CODE as value, NAME as text from CITY_MAST order by NAME";
+                    break;
+
+                case "formtype":
+                    qry = $@"Select Code as value, Name as text from FORM_MAST where comp_code = {gv.PubCompCode} order by Name";
+                    break;
+
+                case "prodtype":
+                    qry = $@"Select Distinct SALE_GROUP as value, SALE_GROUP as text from ITEM_GROUP where comp_code = {gv.PubCompCode} AND SALE_GROUP <> '' 
+                                order by SALE_GROUP";
+                    break;
+
+                default:
+                    return Json(new { success = false, message = "Invalid dropdown type." });
+            }
+
+            var result = await _dbHelper.GetJsonDataAsync(qry);
+            return Json(result);
+        }
+
+        //=========================================V_NO===============================
+        [HttpGet]
+        public JsonResult GetVNo(string vType)
+        {
+            var result = _globalValidationdate.GetVNo(vType, "SALE1");
+            return Json(new { status = true, V_NO = result });
+        }
+
+        [NonAction]
+        public async Task<IActionResult> ExecutePaginatedDropdown(string baseQuery, string orderByColumn, string searchTerm, int page, string searchFilterSql)
+        {
+            int pageSize = 30;
+            int offset = (page - 1) * pageSize;
+
+            // 1. Inject the search condition into the query if the user typed something
+            string customizedBaseQuery = baseQuery;
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                // Replace the placeholder {SEARCH_PLACEHOLDER} with the actual dynamic LIKE clauses
+                customizedBaseQuery = baseQuery.Replace("{SEARCH_PLACEHOLDER}", searchFilterSql);
+            }
+            else
+            {
+                // If no search term, clear out the placeholder safely
+                customizedBaseQuery = baseQuery.Replace("{SEARCH_PLACEHOLDER}", "");
+            }
+
+            // 2. Build the Total Count Query by wrapping your exact SQL
+            string countQuery = $@"SELECT COUNT(1) as TotalRecords  FROM ({customizedBaseQuery}) AS TempTable";
+
+            // 3. Build the Paginated Data Query
+            string dataQuery = $@"{customizedBaseQuery} ORDER BY {orderByColumn} OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY;";
+
+            // 4. Run both queries simultaneously
+            var dataListTask = _dbHelper.GetJsonDataAsync(dataQuery);
+            var totalCountTask = _dbHelper.GetJsonDataAsync(countQuery);
+
+            await Task.WhenAll(dataListTask, totalCountTask);
+
+            var countList = totalCountTask.Result;
+            int totalCount = 0;
+
+            if (countList != null && countList.Count > 0)
+            {
+                var firstRow = countList[0] as IDictionary<string, object>;
+                if (firstRow != null && firstRow.ContainsKey("TotalRecords"))
                 {
-                    cmd.Parameters.AddWithValue("@VTYPE", documentType); 
-                    cmd.Parameters.AddWithValue("@COMP", globalVar.PubCompCode);
-                    cmd.Parameters.AddWithValue("@YEAR", globalVar.PubFYearCode);
-                    con.Open();
-                    documentNo = Convert.ToInt32(cmd.ExecuteScalar());
-                    con.Close();
+                    totalCount = Convert.ToInt32(firstRow["TotalRecords"]);
                 }
             }
-            return Json(new { documentNo });
+
+            return Json(new { success = true, data = dataListTask.Result, totalCount = totalCount });
         }
-        public JsonResult GetddlDocumentType()
+
+        [HttpGet]
+        public async Task<IActionResult> GetItemList(string searchTerm = "", int page = 1)
         {
-            string query = $@" Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('SalesReturn') order by Name";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
+            var gv = _globalVariableService.GetGlobalVariables();
+
+            // 1. Define your base query with a {SEARCH_PLACEHOLDER} token
+            string baseQuery = $@"Select name as Text, CODE as Value, HSN_CODE from item_mast 
+                                where comp_code={gv.PubCompCode} and active = 1       
+                            {{SEARCH_PLACEHOLDER}}";
+
+            // 2. Define what the SQL engine should filter by when searching
+            string safeSearch = searchTerm.Replace("'", "''");
+            string searchFilterSql = $"AND (name LIKE '%{safeSearch}%')";
+
+            // 3. Hand it off to the automated execution block
+            return await ExecutePaginatedDropdown(
+                baseQuery: baseQuery,
+                orderByColumn: "name",
+                searchTerm: searchTerm,
+                page: page,
+                searchFilterSql: searchFilterSql
+            );
         }
-        public JsonResult GetddlPartyName()
+
+        [HttpGet]
+        public async Task<IActionResult> GetPartyAddress(int code, int addressId)
         {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@" Select Code,Name from SUBGROUP_MAST where comp_code={globalVar.PubCompCode} order by Name";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+                var PartyAddList = await _dbHelper.GetJsonDataAsync(
+                                    $@"select sg.ADD1 as add1, sg.ADD2 as add2, sg.ADD3 as add3, sg.PINCODE as pincode, sg.CITY_CODE as cityCode, sg.GSTIN as gstin,
+                                     sgm.MOBILE as mobile
+                                     from SUBGROUP_ADDRESS sg 
+                                     left join CITY_MAST cm on sg.CITY_CODE=cm.CODE  
+                                     left join SUBGROUP_MAST sgm on sg.CODE = sgm.CODE
+                                     where sg.COMP_CODE={gv.PubCompCode} and sg.code={code} and sg.ADDRESS_ID = {addressId} order by ADD1"
+                );
+                return Json(new { status = true, data = PartyAddList });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { status = false, message = "data load failed" });
+            }
         }
-        public JsonResult GetddlSaleThrough()
+
+        public JsonResult GetddlPackNo(string docType, int partyCode)
         {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@" select code, Name from SUBGROUP_MAST where NATURE like 'Broker' and COMP_CODE ={globalVar.PubCompCode}";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetddlConsignee()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@" SELECT a.CODE AS Code, a.NAME AS P_name, ISNULL(a.ADD1, '') AS Add1,ISNULL(a.ADD2, '') AS Add2,ISNULL(a.ADD3, '') AS Add3,
-            ISNULL(a.CITY_CODE, '') AS C_code,ISNULL(c.NAME, '') AS C_name,ISNULL(a.AGENT_CODE, '') AS agent_code,ISNULL(b.NAME, '') AS agent_name,a.GSTIN,
-            a.Pincode FROM SUBGROUP_MAST a LEFT JOIN CITY_MAST c ON c.CODE = a.CITY_CODE LEFT JOIN SUBGROUP_MAST b  ON b.CODE = a.AGENT_CODE AND b.COMP_CODE = a.COMP_CODE
-            WHERE a.COMP_CODE = {globalVar.PubCompCode};";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetddlTaxType()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@" select a.code,a.name,a.CGST_PER,a.SGST_PER,a.IGST_PER,a.TDS_PER,a.TCS_PER,a.OTH_PER from TAX_MAST a where a.ACTIVE = 1";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetddlReferenceNo()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"SELECT V_TYPE AS value, V_NO AS text FROM SALE1 WHERE V_TYPE = 'SAGT' AND ISNULL(Status, 0) <> 2  AND COMP_CODE = {globalVar.PubCompCode}  AND BRANCH_CODE = {globalVar.PubBranchCode}
-            AND Year_code >= {globalVar.PubFYearCode};";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetddlGateNo()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"Select V_Type as value,V_NO as text from GATE1 where V_Type='INSR' and comp_code={globalVar.PubCompCode} and Branch_Code={globalVar.PubBranchCode} and Year_code>=4 order by V_TYpe,V_NO";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetddlWBNo()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"Select Code,Name from SUBGROUP_MAST  where comp_code={globalVar.PubCompCode} order by Name";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetddlPackNo(string docType)
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
+            var gv = _globalVariableService.GetGlobalVariables();
             string vvtyp;
             if (docType == "SAJR")
             {
-                vvtyp = (globalVar.PubCompCode == "2" || globalVar.PubCompCode == "5") ? "FPJR" : "FFRC";
+                vvtyp = (gv.PubCompCode == "2" || gv.PubCompCode == "5") ? "FPJR" : "FFRC";
             }
             else
             {
                 vvtyp = "FPIS";
             }
-            string query = $@" SELECT V_TYPE AS value, V_NO AS text FROM PRODUCTION1 WHERE V_TYPE = '{vvtyp}'
-            AND COMP_CODE = {globalVar.PubCompCode}  AND BRANCH_CODE = {globalVar.PubBranchCode}";
-            var moduleList = _dropdownService.GetDropdownList(query);
+            string qry = $@"SELECT DOC_ID as value, LTRIM(RTRIM(A.V_NO)) as text FROM PRODUCTION1 A WHERE A.V_TYPE = '{vvtyp}' AND A.COMP_CODE = {gv.PubCompCode} AND 
+            A.BRANCH_CODE = {gv.PubBranchCode} AND A.YEAR_CODE = {gv.PubFYearCode} AND (A.PARTY_CODE = {partyCode} OR A.PARTY_CODE = (SELECT MAIN_CODE FROM SUBGROUP_MAST 
+            WHERE COMP_CODE = A.COMP_CODE AND CODE = A.PARTY_CODE AND ACTIVE = 1 GROUP BY MAIN_CODE)) ORDER BY A.V_NO";
+            var moduleList = _dropdownService.GetDropdownList(qry);
             return Json(moduleList);
         }
-        public JsonResult GetddlSaudaNo()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"SELECT V_TYPE AS value, V_NO AS text, Rate AS Rate, PARTY_CODE FROM SAUDA where V_TYPE='SAUD' 
-            and FAPROV_STATUS='Approved' and COMP_CODE={globalVar.PubCompCode} and BRANCH_CODE={globalVar.PubBranchCode}";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetProductName()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@" SELECT b.CODE AS Code, b.NAME AS Name, b.hsn_code AS HSN FROM item_mast b  WHERE b.ACTIVE = 1 AND b.comp_code = {globalVar.PubCompCode}";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetTaxTypeList()
-        {
-            string sql = @"Select Code as value, NAME as text From TAX_MAST";
-            var moduleList = _dropdownService.GetDropdownList(sql);
-            return Json(moduleList);
-        }
-        [HttpGet]
-        public JsonResult GetTaxTypeDetails(string code)
-        {
-            bool isNumeric = int.TryParse(code, out int codeValue);
-            string sql;
-            SqlCommand cmd;
 
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            {
-                if (isNumeric)
-                {
-                    sql = @" SELECT CODE, CGST_PER, SGST_PER, IGST_PER, TDS_PER, TCS_PER, VAT_PER, OTH_PER, OTH_PER2 FROM TAX_MAST WHERE CODE = @Code";
-                    cmd = new SqlCommand(sql, con);
-                    cmd.Parameters.AddWithValue("@Code", codeValue);
-                }
-                else
-                {
-                    sql = @" SELECT CODE, CGST_PER, SGST_PER, IGST_PER, TDS_PER, TCS_PER, VAT_PER, OTH_PER, OTH_PER2 FROM TAX_MAST WHERE NAME = @Name";
-                    cmd = new SqlCommand(sql, con);
-                    cmd.Parameters.AddWithValue("@Name", code);
-                }
-                con.Open();
-                using (var rdr = cmd.ExecuteReader())
-                {
-                    if (rdr.Read())
-                    {
-                        var result = new
-                        {
-                            Code = rdr["CODE"],
-                            CGST_PER = rdr["CGST_PER"],
-                            SGST_PER = rdr["SGST_PER"],
-                            IGST_PER = rdr["IGST_PER"],
-                            TDS_PER = rdr["TDS_PER"],
-                            TCS_PER = rdr["TCS_PER"],
-                            VAT_PER = rdr["VAT_PER"],
-                            OTH_PER = rdr["OTH_PER"],
-                            OTH_PER2 = rdr["OTH_PER2"]
-                        };
-                        return Json(result);
-                    }
-                    else
-                    {
-                        return Json(new { success = false, message = "No record found" });
-                    }
-                }
-            }
-        }
-        public JsonResult GetddlTransport()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@" Select CODE, Name From TRANSPORT_MAST where comp_code={globalVar.PubCompCode}";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetddlWBParty()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"Select Code,Name from SUBGROUP_MAST  where comp_code={globalVar.PubCompCode} order by Name";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
-        public JsonResult GetddlLoadParty()
-        {
-            var globalVar = _globalVariableService.GetGlobalVariables();
-            string query = $@"Select Code,Name from SUBGROUP_MAST where comp_code={globalVar.PubCompCode} order by Name";
-            var moduleList = _dropdownService.GetDropdownList(query);
-            return Json(moduleList);
-        }
         [HttpPost]
-        public async Task<IActionResult> GetReferenceDetails(string refValue, string refText)
+        public async Task<IActionResult> GetReferenceDetails(string refValue)
         {
-            var gv = _globalVariableService.GetGlobalVariables();
-
-            var headerList = new List<Dictionary<string, object>>();
-            var itemList = new List<Dictionary<string, object>>();
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            using (SqlCommand cmd = new SqlCommand("sp_GetSaleDetailsByReference", con))
+            var result = await _repo.GetReferenceDetails(refValue);
+            if (result.data == null)
             {
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add("@VType", SqlDbType.VarChar).Value = refValue;
-                cmd.Parameters.Add("@VNo", SqlDbType.VarChar).Value = refText;
-                cmd.Parameters.Add("@CompCode", SqlDbType.Int).Value = gv.PubCompCode;
-                cmd.Parameters.Add("@BranchCode", SqlDbType.Int).Value = gv.PubBranchCode;
-
-                await con.OpenAsync();
-
-                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                {
-                    // ===== HEADER =====
-                    while (await reader.ReadAsync())
-                    {
-                        var row = new Dictionary<string, object>();
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            row[reader.GetName(i)] =
-                                reader.IsDBNull(i) ? null : reader.GetValue(i);
-                        }
-                        headerList.Add(row);
-                    }
-
-                    // ===== ITEMS =====
-                    if (await reader.NextResultAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            var row = new Dictionary<string, object>();
-                            for (int i = 0; i < reader.FieldCount; i++)
-                            {
-                                row[reader.GetName(i)] =
-                                    reader.IsDBNull(i) ? null : reader.GetValue(i);
-                            }
-                            itemList.Add(row);
-                        }
-                    }
-                }
+                return Json(new { success = false, message = "Reference details not found." });
             }
+            dynamic data = result.data;
             return Json(new
             {
-                success = headerList.Count > 0,
-                header = headerList,
-                items = itemList
+                success = true,
+                header = data.header,
+                items = data.items
             });
         }
+
         [HttpPost]
         public IActionResult Save([FromBody] SalesReturn salesReturn)
         {
-            if (salesReturn == null || salesReturn.FormData == null)
-                return BadRequest("Invalid data received");
-            if (salesReturn.RowData == null || !salesReturn.RowData.Any())
-                return BadRequest("Row data is empty");
 
-            var g = _globalVariableService.GetGlobalVariables();
-            var f = salesReturn.FormData;
-            string DOC_ID = "";
-            if (f.ACTION == "INSERT")
-            {
-                 DOC_ID = Clean(f.DocumentType) + Clean(f.DocumentNo);
-            }
-            else
-            {
-                DOC_ID = f.DocumentNo;
-            }
+            if (salesReturn.FormData == null || salesReturn.RowData == null)
+                return Json(new { success = false, message = "Invalid request." });
+
             try
             {
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-                    con.Open();
-                    using (SqlTransaction tran = con.BeginTransaction())
-                    {
-                        try
-                        {
-                            // ================= HEADER =================
-                            using (SqlCommand cmd = new SqlCommand("sp_SalesReturn", con, tran))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-
-                                cmd.Parameters.Add("@DOC_ID", SqlDbType.VarChar, 30).Value = DOC_ID;
-                                cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = g.PubCompCode;
-                                cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = g.PubBranchCode;
-                                cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = g.PubFYearCode;
-
-                                cmd.Parameters.Add("@V_TYPE", SqlDbType.VarChar, 10).Value = Clean(f.DocumentType);
-                                cmd.Parameters.Add("@V_NO", SqlDbType.VarChar, 20).Value = Clean(f.DocumentNo);
-                                cmd.Parameters.Add("@V_DATE", SqlDbType.Date).Value = DateTime.TryParse(f.DocumentDate, out var vDate) ? vDate: DateTime.Now;
-
-                                // BILL
-                                cmd.Parameters.Add("@BILL_CODE", SqlDbType.VarChar, 20).Value = Clean("0");
-                                cmd.Parameters.Add("@BILL_NAME", SqlDbType.VarChar, 200).Value = Clean(f.PartyName);
-                                cmd.Parameters.Add("@BILL_ADD1", SqlDbType.VarChar, 200).Value = Clean(f.AddressL1);
-                                cmd.Parameters.Add("@BILL_ADD2", SqlDbType.VarChar, 200).Value = Clean(f.AddressL2);
-                                cmd.Parameters.Add("@BILL_ADD3", SqlDbType.VarChar, 200).Value = Clean(f.AddressL3);
-                                cmd.Parameters.Add("@BILL_CITY", SqlDbType.VarChar, 100).Value = "";
-                                cmd.Parameters.Add("@BILL_GST", SqlDbType.VarChar, 20).Value = "";
-                                cmd.Parameters.Add("@BILL_PINCODE", SqlDbType.VarChar, 10).Value = Clean(f.Pincode);
-
-                                // SHIP
-                                cmd.Parameters.Add("@SHIP_CODE", SqlDbType.VarChar, 20).Value = Clean(f.Consignee);
-                                cmd.Parameters.Add("@SHIP_NAME", SqlDbType.VarChar, 200).Value = Clean("");
-                                cmd.Parameters.Add("@SHIP_ADD1", SqlDbType.VarChar, 200).Value = Clean(f.TransactionAddressL1);
-                                cmd.Parameters.Add("@SHIP_ADD2", SqlDbType.VarChar, 200).Value = Clean(f.TransactionAddressL2);
-                                cmd.Parameters.Add("@SHIP_ADD3", SqlDbType.VarChar, 200).Value = Clean(f.TransactionAddressL3);
-                                cmd.Parameters.Add("@SHIP_CITY", SqlDbType.VarChar, 100).Value = "";
-                                cmd.Parameters.Add("@SHIP_GST", SqlDbType.VarChar, 20).Value = "";
-                                cmd.Parameters.Add("@SHIP_PINCODE", SqlDbType.VarChar, 10).Value = Clean(f.TransactionPIN);
-
-                                // TAX / PACK
-                                cmd.Parameters.Add("@TAX_CODE", SqlDbType.VarChar, 20).Value = Clean(f.TaxType);
-                                cmd.Parameters.Add("@PACK_TYPE", SqlDbType.VarChar, 50).Value = Clean(f.ProductionType);
-                                cmd.Parameters.Add("@PACK_NO", SqlDbType.Int).Value =
-                                    int.TryParse(f.PackNo, out var pno) ? pno : 0;
-
-                                // AMOUNT
-                                AddDecimal(cmd, "@AMOUNT", f.TotalAmount);
-
-                                // DEFAULT ZEROS
-                                AddZeroDecimals(cmd,
-                                    "@PACK_PER", "@PACK_AMT", "@CGST_PER", "@CGST_AMT",
-                                    "@SGST_PER", "@SGST_AMT", "@IGST_PER", "@IGST_AMT",
-                                    "@CESS_PER", "@CESS_AMT", "@LOAD_PER", "@LOAD_AMT",
-                                    "@WB_AMT", "@FRT_AMT", "@ROUND_OFF", "@INSU_PER",
-                                    "@INSU_AMT", "@TCS_PER", "@TCS_AMT", "@TDS_PER",
-                                    "@TDS_AMT", "@WB_QTY", "@DISC_PER", "@DISC_AMT",
-                                    "@FRT_TOPAY"
-                                );
-
-                                AddDecimal(cmd, "@NAMOUNT", f.TotalAmount);
-                                AddDecimal(cmd, "@TOT_GROSS", f.TotalAmount);
-                                AddDecimal(cmd, "@TOT_NET", f.TotalAmount);
-
-                                cmd.Parameters.Add("@UUSER", SqlDbType.VarChar, 50).Value = g.PubUserId;
-                                cmd.Parameters.Add("@WSID", SqlDbType.VarChar, 50).Value = g.PubWorkStationID;
-                                cmd.Parameters.Add("@LIP", SqlDbType.VarChar, 50).Value = g.PubLocalId;
-                                cmd.Parameters.Add("@LID", SqlDbType.VarChar, 50).Value = Environment.MachineName;
-                                cmd.Parameters.Add("@Action", SqlDbType.VarChar, 20).Value = f.ACTION == "INSERT" ? "Insert" : "Update";
-
-                                cmd.ExecuteNonQuery();
-                            }
-                            // ================= DETAILS =================
-
-                            string deleteQuery = @"DELETE FROM SALE2 WHERE V_NO = @V_NO AND V_TYPE = @V_TYPE AND YEAR_CODE = @YEAR_CODE AND COMP_CODE = @COMP_CODE 
-                            AND BRANCH_CODE = @BRANCH_CODE";
-
-                            using (SqlCommand cmdDelete = new SqlCommand(deleteQuery, con, tran))
-                            {
-                                cmdDelete.Parameters.Add("@V_NO", SqlDbType.VarChar, 20).Value = Clean(f.DocumentNo);
-                                cmdDelete.Parameters.Add("@V_TYPE", SqlDbType.VarChar, 10).Value = Clean(f.DocumentType);
-                                cmdDelete.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = g.PubFYearCode;
-                                cmdDelete.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = g.PubCompCode;
-                                cmdDelete.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = g.PubBranchCode;
-
-                                cmdDelete.ExecuteNonQuery();
-                            }
-
-                            foreach (var row in salesReturn.RowData)
-                            {
-                                using (SqlCommand cmd = new SqlCommand("sp_Sales2Return", con, tran))
-                                {
-                                    cmd.CommandType = CommandType.StoredProcedure;
-
-                                    cmd.Parameters.Add("@DOC_ID", SqlDbType.VarChar, 30).Value = DOC_ID;
-                                    cmd.Parameters.Add("@YEAR_CODE", SqlDbType.Int).Value = g.PubFYearCode;
-                                    cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = g.PubCompCode;
-                                    cmd.Parameters.Add("@BRANCH_CODE", SqlDbType.Int).Value = g.PubBranchCode;
-
-                                    cmd.Parameters.Add("@V_TYPE", SqlDbType.VarChar, 10).Value = Clean(f.DocumentType);
-                                    cmd.Parameters.Add("@V_NO", SqlDbType.VarChar, 20).Value = Clean(f.DocumentNo);
-                                    cmd.Parameters.Add("@V_DATE", SqlDbType.Date).Value = DateTime.Now;
-
-                                    cmd.Parameters.Add("@ITEM_CODE", SqlDbType.VarChar, 50).Value = Clean(row.Code);
-                                    cmd.Parameters.Add("@ITEM_NAME", SqlDbType.VarChar, 200).Value = Clean(row.ProductName);
-                                    cmd.Parameters.Add("@HSN_CODE", SqlDbType.VarChar, 20).Value = Clean(row.Hsn);
-
-                                    cmd.Parameters.Add("@NOS", SqlDbType.Int).Value = row.Nos ?? 0;
-
-                                    AddDecimal(cmd, "@GROSS_QTY", row.GrossQuantity);
-                                    AddDecimal(cmd, "@QTY", row.NetQuantity);
-                                    AddDecimal(cmd, "@RATE", row.Rate);
-                                    AddDecimal(cmd, "@AMOUNT", row.Amount);
-
-                                    AddDecimal(cmd, "@CGST_PER", row.CgstPer);
-                                    AddDecimal(cmd, "@CGST_AMT", row.CgstAmt);
-                                    AddDecimal(cmd, "@SGST_PER", row.SgstPer);
-                                    AddDecimal(cmd, "@SGST_AMT", row.SgstAmt);
-                                    AddDecimal(cmd, "@IGST_PER", row.IgstPer);
-                                    AddDecimal(cmd, "@IGST_AMT", row.IgstAmt);
-
-                                    cmd.Parameters.Add("@UserId", SqlDbType.VarChar, 50).Value = g.PubUserId;
-                                    cmd.Parameters.Add("@WSID", SqlDbType.VarChar, 50).Value = g.PubWorkStationID;
-                                    cmd.Parameters.Add("@LIP", SqlDbType.VarChar, 50).Value = g.PubLocalId;
-                                    cmd.Parameters.Add("@LID", SqlDbType.VarChar, 50).Value = Environment.MachineName;
-                                    cmd.Parameters.Add("@Action", SqlDbType.VarChar, 10).Value = "Insert";
-
-                                    cmd.ExecuteNonQuery();
-                                }
-                            }
-                            tran.Commit();
-                            return Ok(new
-                            {
-                                success = true,
-                                docId = DOC_ID,
-                                message = "Sales Return saved successfully"
-                            });
-                        }
-                        catch
-                        {
-                            tran.Rollback();
-                            throw;
-                        }
-                    }
-                }
+                var result = _repo.Save(salesReturn);
+                return Json(new { success = result.status, message = result.message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return Json(new { success = false, message = ex.Message });
             }
+
         }
-        [HttpPost]
-        public IActionResult GetID([FromBody] SalesReturnModel data)
+
+        [HttpGet]
+        public IActionResult GetID(int id, string vType)
         {
-            if (data == null)
-                return BadRequest("Invalid request data");
-
-            var g = _globalVariableService.GetGlobalVariables();
-            var headerList = new List<Dictionary<string, object>>();
-            var itemList = new List<Dictionary<string, object>>();
-
-            using (SqlConnection con = _dbConnection.GetErpConnection())
-            using (SqlCommand cmd = new SqlCommand("sp_GetSalesReturnByVoucher", con))
+            if (id <= 0 || string.IsNullOrWhiteSpace(vType))
             {
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@VoucherNo", data.VoucherNo ?? "");
-                cmd.Parameters.AddWithValue("@VType", data.vType ?? "");
-                cmd.Parameters.AddWithValue("@CompCode", g.PubCompCode);
-                cmd.Parameters.AddWithValue("@YearCode", g.PubFYearCode);
-                cmd.Parameters.AddWithValue("@BranchCode", g.PubBranchCode);
-
-                con.Open();
-
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                return Json(new { success = false, message = "Invalid ID or VType." });
+            }
+            try
+            {
+                var result = _repo.GetID(id, vType);
+                if (result.data == null)
                 {
-                    // HEADER
-                    while (reader.Read())
-                    {
-                        var row = new Dictionary<string, object>();
-                        for (int i = 0; i < reader.FieldCount; i++)
-                            row[reader.GetName(i)] = reader.IsDBNull(i) ? null : reader.GetValue(i);
-                        headerList.Add(row);
-                    }
-                    // ITEMS
-                    if (reader.NextResult())
-                    {
-                        while (reader.Read())
-                        {
-                            var row = new Dictionary<string, object>();
-                            for (int i = 0; i < reader.FieldCount; i++)
-                                row[reader.GetName(i)] = reader.IsDBNull(i) ? null : reader.GetValue(i);
-
-                            itemList.Add(row);
-                        }
-                    }
+                    return Json(new { success = false, message = "Sales return details not found." });
                 }
+                dynamic data = result.data;
+                return Json(new { success = true, Header = data.Header, Items = data.Items });
             }
-            return Ok(new
+            catch (Exception ex)
             {
-                Header = headerList,
-                Items = itemList
-            });
+                return Json(new { success = false, message = "An error occurred while retrieving sales return details." + ex.Message });
+            }
         }
 
-        private static string Clean(string? value)
+        [HttpGet]
+        public async Task<IActionResult> GetSaudaItemDetails(string saudaType, string saudaNo, int partyCode, string itemCodes)
         {
-            return string.IsNullOrWhiteSpace(value) ? "" : value.Trim();
+            try
+            {
+                var result = await _repo.GetSaudaItemDetails(saudaType, saudaNo, partyCode, itemCodes);
+                if (result.data == null)
+                {
+                    return Json(new { success = false, message = "Sauda details not found!" });
+                }
+                return Json(new { success = true, data = result.data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
-        private static void AddDecimal(SqlCommand cmd, string name, decimal? value)
+
+        [HttpGet]
+        public JsonResult GetWBWeight(string wbDocId)
         {
-            var p = cmd.Parameters.Add(name, SqlDbType.Decimal);
-            p.Precision = 18;
-            p.Scale = 2;
-            p.Value = value ?? 0;
+            try
+            {
+                var result = _repo.GetWBWeight(wbDocId);
+                return Json(new { success = true, data = result.data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
-        private static void AddZeroDecimals(SqlCommand cmd, params string[] names)
+
+        [HttpGet]
+        public JsonResult GetPackingData(string packType, int packNo, string vType, int vNo)
         {
-            foreach (var name in names)
-                AddDecimal(cmd, name, 0);
+            try
+            {
+                var result = _repo.GetPackingData(packType, packNo, vType, vNo);
+                if (result.data == null)
+                {
+                    return Json(new { success = false, message = "Packing details not found!" });
+                }
+                dynamic data = result.data;
+                return Json(new { success = true, exists = data.exists, data = data.data, existingVNo = data.existingVNo });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetGateData(string GateDocId)
+        {
+            try
+            {
+                var result = _repo.GetGateData(GateDocId);
+                if (result.data == null)
+                {
+                    return Json(new { success = false, message = "Gate details not found!" });
+                }
+                dynamic data = result.data;
+                return Json(new { success = true, party = data.party, items = data.items });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
+        {
+            DateTime vdate = data.GetProperty("vdate").GetDateTime();
+            string vtype = data.GetProperty("vtype").GetString();
+            string vno = data.GetProperty("vno").GetString();
+            var result = await _globalValidationdate.CheckValidDate("Sale1", vdate, vtype, vno);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> getGlobalValues()
+        {
+            try
+            {
+                var gv = _globalVariableService.GetGlobalVariables();
+                var gs = await _globalVariableService.LoadGeneralSetting();
+                using var erpCon = _dbConnection.GetErpConnection();
+
+                string databaseName;
+                using (var connection = _dbConnection.GetErpConnection())
+                {
+                    databaseName = connection.Database; // Get the database name
+                }
+
+                var response = new
+                {
+                    compCode = gv.PubCompCode,
+                    yearCode = gv.PubFYearCode,
+                    branchCode = gv.PubBranchCode,
+                    add1 = gv.Address1,
+                    add2 = gv.Address2,
+                    companyName = gv.CompanyName,
+                    db = databaseName,
+                    tcsper = gs.pubBPTCSPer,
+                    phone = gv.Phone,
+                    gst = gv.gstin,
+                    pan = gv.PAN,
+                    website = gv.Website,
+                    email = gv.Email,
+                    regadd1 = gv.RegAdd1,
+                    cin = gv.CINNO,
+                    regadd2 = gv.RegAdd2,
+                    userlevel = gv.PubUserLevel
+                };
+
+                return Json(new { success = true, data = response });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult ValidateData([FromBody] ValidateDataRequest model)
+        {
+            if (model == null)
+                return Json(new { success = false, message = "Invalid request data" });
+
+            try
+            {
+                var result = _repo.ValidateData(model);
+                return Json(new { success = result.status, message = result.message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CalculateSaudaRate(int partyCode, string itemCodes)
+        {
+            try
+            {
+                var result = await _repo.CalculateSaudaRate(partyCode, itemCodes);
+                if (result.data == null)
+                {
+                    return Json(new { success = false, message = "Sauda rate calculation failed." });
+                }
+                return Json(new { success = true, data = result.data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult PostSalesReturn(string vType, int vNo)
+        {
+            try
+            {
+                var result = _repo.PostSalesReturn(vType, vNo);
+                return Json(new { success = result.status, message = result.message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error while posting voucher." });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult SaveTransport([FromBody] SaveTransportRequest req)
+        {
+            try
+            {
+                if (req == null || string.IsNullOrWhiteSpace(req.VType) || req.VNo <= 0)
+                    return Json(new { success = false, message = "Invalid request." });
+
+                var result = _repo.SaveTransport(req);
+                return Json(new { success = result.status, message = result.message, warnings = result.data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error occurred while saving transport data." });
+            }
         }
     }
 }
