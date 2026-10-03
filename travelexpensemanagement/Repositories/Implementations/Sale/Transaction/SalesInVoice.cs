@@ -70,7 +70,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 var GeneralSetting = await  _globalVariableService.LoadGeneralSetting();
 
                 using var conn = _dbConnection.GetErpConnection();
-
+                await conn.OpenAsync();
 
                 DataTable dt = new DataTable();
 
@@ -718,9 +718,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                                 using var cmd = new SqlCommand(query, conn);
 
-                                // If conn is not already open
-                                if (conn.State != ConnectionState.Open)
-                                    conn.Open();
+                         
 
                                 using var reader = cmd.ExecuteReader();
 
@@ -879,9 +877,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
 
                     using (var cmd = new SqlCommand(gateQuery, conn))
-                    using (var reader = cmd.ExecuteReader())
+                    using (var reader1 = cmd.ExecuteReader())
                     {
-                        if (!reader.Read())
+                        if (!reader1.Read())
                         {
                             if (GlobalData.PubUserLevel != "1")
                             {
@@ -891,7 +889,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     }
                 }
 
-                await conn.OpenAsync();
+
 
                 string docId = string.IsNullOrWhiteSpace(header.DOC_ID) ? $"{header.V_TYPE}{header.V_NO}" : header.DOC_ID;
 
