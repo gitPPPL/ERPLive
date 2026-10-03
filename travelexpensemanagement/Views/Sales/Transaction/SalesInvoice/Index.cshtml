@@ -5,12 +5,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
-
-
-    
-
-
-
+   
     var databaseName = ViewBag.DatabaseName as string ?? "";
 
     var CompCode = int.TryParse(  globalVariables.PubCompCode, out var parsedCompCode ) ? parsedCompCode : 0;
@@ -67,7 +62,19 @@
         </div>
         <div class="erppage-header-title">Sales Invoice Entry</div>
     </div>
+
+
     <div class="erppage-header-right">
+
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail" id="button_mail">
+         <i class="fa fa-envelope"></i>Mail
+        </button>
+
+        <button type="button" id="btn_Sendapproval" style="display:none;" class="erppagebtn_sendapproval"> Send For Approval </button>
+
+        <button type="button"  id="btn_Approved" style="display:none;" class="erppagebtn_approved">  Approved </button>
+
+
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesInvoiceList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
@@ -386,20 +393,14 @@
                             <col style="width: 110px;">
                             <col style="width: 110px;">
                             <col style="width: 110px;">
-                            <col style="width: 110px;">
-                          
-                            <col style="width: 110px;">
-                            <col style="width: 110px;">
-                            <col style="width: 110px;">
-                            <col style="width: 110px;">
-                            <col style="width: 110px;">
-                            <col style="width: 110px;">
-                            <col style="width: 110px;">
-
-
-
-
-
+                            <col style="width: 110px;">                          
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
                             <col class="action-col">
                         </colgroup>
 
@@ -445,12 +446,12 @@
                                 <th>CDisc Amount</th>
                                 <th>WB Quantity</th>
 
-                                <th> REPORT_TYPE</th>
-                                <th> Sale_Rate</th>
-                                <th> Taxable_Rate</th>
-                                <th> Net_Wt</th>
-                                <th> Packing_Wt</th>
-                                <th> Packing_nos</th>
+                                <th class="hidden-col"> REPORT_TYPE</th>
+                                <th class="hidden-col"> Sale_Rate</th>
+                                <th class="hidden-col"> Taxable_Rate</th>
+                                <th class="hidden-col"> Net_Wt</th>
+                                <th class="hidden-col"> Packing_Wt</th>
+                                <th class="hidden-col"> Packing_nos</th>
                       
                                 <th class="action-col">Action</th>
                             </tr>
@@ -468,51 +469,51 @@
                 <div class="erppage-grid6">
                     <div class="erppage-divfield">
                         <label class="erppage-label">Total Amount</label>
-                        <input type="number" class="erppage-input" id="NumOtherTotalAmount" placeholder="Enter Total Amount" readonly>
+                        <input type="number" class="erppage-input" id="NumOtherTotalAmount" placeholder="Enter Total Amount" readonly oninput="LimitNumberLength(this, 12)">
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Packing</label>
                         <div class="input-divide">
-                            <input type="number" class="erppage-input" id="NumOtherPacking1" placeholder="0.00" >
+                            <input type="number" class="erppage-input" id="NumOtherPacking1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
                             <input type="number" class="erppage-input" id="NumOtherPacking2" placeholder="0.00" readonly >
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Discount</label>
                         <div class="input-divide">
-                            <input type="number" class="erppage-input" id="NumOtherDiscount1" placeholder="0.00">
+                            <input type="number" class="erppage-input" id="NumOtherDiscount1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
                             <input type="number" class="erppage-input" id="NumOtherDiscount2" placeholder="0.00" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Cash Discount</label>
                         <div class="input-divide">
-                            <input type="number" class="erppage-input" id="NumOtherCashDiscount1" placeholder="0.00">
+                            <input type="number" class="erppage-input" id="NumOtherCashDiscount1" placeholder="0.00"  oninput="LimitNumberLength(this, 12)">
                             <input type="number" class="erppage-input" id="NumOtherCashDiscount2" placeholder="0.00"  readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">Sub Total</label>
-                        <input type="number" class="erppage-input" id="NumOtherSubTotal" placeholder="Enter Sub Total">
+                        <input type="number" class="erppage-input" id="NumOtherSubTotal" placeholder="Enter Sub Total" readonly>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">CGST</label>
                         <div class="input-divide">
-                            <input type="number" class="erppage-input" id="NumOtherCGST1" placeholder="0.00">
+                            <input type="number" class="erppage-input" id="NumOtherCGST1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
                             <input type="number" class="erppage-input" id="NumOtherCGST2" placeholder="0.00" readonly >
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">SGST</label>
                         <div class="input-divide">
-                            <input type="number" class="erppage-input" id="NumOtherSGST1" placeholder="0.00">
+                            <input type="number" class="erppage-input" id="NumOtherSGST1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
                             <input type="number" class="erppage-input" id="NumOtherSGST2" placeholder="0.00" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">IGST</label>
                         <div class="input-divide">
-                            <input type="number" class="erppage-input" id="NumOtherIGST1" placeholder="0.00">
+                            <input type="number" class="erppage-input" id="NumOtherIGST1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
                             <input type="number" class="erppage-input" id="NumOtherIGST2" placeholder="0.00" readonly>
                         </div>
                     </div>
@@ -523,14 +524,14 @@
                     <div class="erppage-divfield">
                         <label class="erppage-label">CESS</label>
                         <div class="input-divide">
-                            <input type="number" class="erppage-input" id="NumOtherCESS1" placeholder="0.00">
+                            <input type="number" class="erppage-input" id="NumOtherCESS1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
                             <input type="number" class="erppage-input" id="NumOtherCESS2" placeholder="0.00" readonly>
                         </div>
                     </div>
                     <div class="erppage-divfield">
                         <label class="erppage-label">TCS</label>
                         <div class="input-divide">
-                            <input type="number" class="erppage-input" id="NumOtherTCS1" placeholder="0.00">
+                            <input type="number" class="erppage-input" id="NumOtherTCS1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
                             <input type="number" class="erppage-input" id="NumOtherTCS2" placeholder="0.00" readonly>
                         </div>
                     </div>
@@ -591,7 +592,7 @@
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">GR No</label>
-                                    <input type="number" class="erppage-input" id="NumGRNo" placeholder="Enter GR No">
+                                    <input type="number" class="erppage-input" id="NumGRNo" placeholder="Enter GR No"  oninput="LimitNumberLength(this, 50)">
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">GR Date</label>
@@ -602,44 +603,44 @@
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Truck No</label>
-                                    <input type="text" class="erppage-input" id="TxtTruckNo" placeholder="Enter Truck No">
+                                    <input type="text" class="erppage-input" id="TxtTruckNo" placeholder="Enter Truck No" maxlength="20">
                                 </div>
                                 <div class="erppage-divfield erppage-col-span-2">
                                     <label class="erppage-label">Driver Name</label>
-                                    <input type="text" class="erppage-input" id="TxtDriverName" placeholder="Enter Driver Name">
+                                    <input type="text" class="erppage-input" id="TxtDriverName" placeholder="Enter Driver Name" maxlength="50">
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Driver Mob.</label>
-                                    <input type="number" class="erppage-input" id="NumDriverMob" placeholder="Enter Mobile No">
+                                    <input type="number" class="erppage-input" id="NumDriverMob" placeholder="Enter Mobile No"  oninput="LimitNumberLength(this, 20)">
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Insurance %</label>
                                     <div class="input-divide">
-                                        <input type="number" class="erppage-input" id="NumInsurance1" placeholder="0.00">
-                                        <input type="number" class="erppage-input" id="NumInsurance2" placeholder="0.00">
+                                        <input type="number" class="erppage-input" id="NumInsurance1" placeholder="0.00"  oninput="LimitNumberLength(this, 10)">
+                                        <input type="number" class="erppage-input" id="NumInsurance2" placeholder="0.00"  oninput="LimitNumberLength(this, 12)">
                                     </div>
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">TDS on Freight %</label>
                                     <div class="input-divide">
-                                        <input type="number" class="erppage-input" id="NumTDSFreight1" placeholder="0.00">
-                                        <input type="number" class="erppage-input" id="NumTDSFreight2" placeholder="0.00">
+                                        <input type="number" class="erppage-input" id="NumTDSFreight1" placeholder="0.00"  oninput="LimitNumberLength(this, 10)">
+                                        <input type="number" class="erppage-input" id="NumTDSFreight2" placeholder="0.00"  oninput="LimitNumberLength(this, 10)">
                                     </div>
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Tax on Freight %</label>
                                     <div class="input-divide">
-                                        <input type="number" class="erppage-input" id="NumTaxFreight1" placeholder="0.00">
-                                        <input type="number" class="erppage-input" id="NumTaxFreight2" placeholder="0.00">
+                                        <input type="number" class="erppage-input" id="NumTaxFreight1" placeholder="0.00"  oninput="LimitNumberLength(this, 12)">
+                                        <input type="number" class="erppage-input" id="NumTaxFreight2" placeholder="0.00"  oninput="LimitNumberLength(this, 12)">
                                     </div>
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Freight Amount</label>
-                                    <input type="number" class="erppage-input" id="NumFreightAmount" placeholder="Enter Freight Amount">
+                                    <input type="number" class="erppage-input" id="NumFreightAmount" placeholder="Enter Freight Amount"  oninput="LimitNumberLength(this, 12)">
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Distance</label>
-                                    <input type="number" class="erppage-input" id="NumDistance" placeholder="Enter Distance">
+                                    <input type="number" class="erppage-input" id="NumDistance" placeholder="Enter Distance"  oninput="LimitNumberLength(this, 12)">
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Mode</label>
@@ -649,12 +650,12 @@
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Payment Term</label>
-                                    <input type="text" class="erppage-input" id="ddlPaymentTerm" placeholder="Enter Payment Term">
+                                    <input type="text" class="erppage-input" id="ddlPaymentTerm" placeholder="Enter Payment Term" maxlength="5">
                                                                     
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Delivery Term</label>
-                                    <textarea class="erppage-input" id="TxtDeliveryTerm" placeholder="Enter Delivery Term"></textarea>
+                                    <textarea class="erppage-input" id="TxtDeliveryTerm" placeholder="Enter Delivery Term" maxlength="500"></textarea>
                                 </div>
                             </div>
                         </fieldset>
@@ -673,7 +674,7 @@
 
                                     <div class="erppage-field">
                                         <label for="txtWayBillNo" class="erppage-label">Way Bill No</label>
-                                        <input type="text" class="erppage-input" id="txt_WayBillNo">
+                                        <input type="text" class="erppage-input" id="txt_WayBillNo" maxlength="20">
                                     </div>
 
                             
@@ -683,7 +684,7 @@
 
                                 <div class="erppage-field">
                                     <label for="txt_ToPayFrt" class="erppage-label">To Pay Frt</label>
-                                    <input type="number" class="erppage-input" id="txt_ToPayFrt">
+                                    <input type="number" class="erppage-input" id="txt_ToPayFrt"  oninput="LimitNumberLength(this, 16)">
                                 </div>
 
                                </div>
@@ -694,13 +695,13 @@
                                     <div class="erppage-field">
                                         <label for="txt_LoadAmt" class="erppage-label">Load Amt</label>
 
-                                        <input type="number" class="erppage-input" id="txt_loadPer">
-                                        <input type="number" class="erppage-input" id="txt_LoadAmt">
+                                        <input type="number" class="erppage-input" id="txt_loadPer"  oninput="LimitNumberLength(this, 16)">
+                                        <input type="number" class="erppage-input" id="txt_LoadAmt"  oninput="LimitNumberLength(this, 18)">
                                     </div>
 
                                     <div class="erppage-field">
                                         <label for="txt_Remark" class="erppage-label">Remark</label>
-                                        <input type="text" class="erppage-input" id="txt_ldRemark">
+                                        <input type="text" class="erppage-input" id="txt_ldRemark" maxlength="100">
                                     </div>
                                 </div>
 
@@ -720,15 +721,13 @@
                                   <div class="erppage-grid grid2 ">
 
                                     <div class="erppage-field">
-                                        <label for="txt_WBAmt" class="erppage-label">WB Amt</label>
-
-                                 
-                                        <input type="number" class="erppage-input" id="txt_WBamt">
+                                        <label for="txt_WBAmt" class="erppage-label">WB Amt</label>                                 
+                                        <input type="number" class="erppage-input" id="txt_WBamt"  oninput="LimitNumberLength(this, 12)">
                                     </div>
 
                                     <div class="erppage-field">
                                         <label for="txt_Remark" class="erppage-label">Remark</label>
-                                        <input type="text" class="erppage-input" id="txt_wbRemark">
+                                        <input type="text" class="erppage-input" id="txt_wbRemark" maxlength="100">
                                     </div>
                                 </div>
 
@@ -762,7 +761,7 @@
 
                                 <div class="erppage-field">
                                         <label for="txxt_ExRate" class="erppage-label">Ex Rate</label>
-                                        <input type="number" class="erppage-input" id="txxt_ExRate">
+                                        <input type="number" class="erppage-input" id="txxt_ExRate" oninput="LimitNumberLength(this, 12)">
                                         <select class="erppage-input erppage-select" id="ddl_currency">
                                          <option value=""> Select Currency </option>                                       
                                         
@@ -771,12 +770,12 @@
                             
                                 <div class="erppage-field">
                                         <label for="txxt_FobValue" class="erppage-label">FOB Value</label>
-                                        <input type="number" class="erppage-input" id="txxt_FobValue">
+                                        <input type="number" class="erppage-input" id="txxt_FobValue" oninput="LimitNumberLength(this, 12)">
                                 </div>   
 
                                 <div class="erppage-field">
                                         <label for="txt_FOBFRT" class="erppage-label">FOB Frt.</label>
-                                        <input type="number" class="erppage-input" id="txt_FOBFRT">
+                                        <input type="number" class="erppage-input" id="txt_FOBFRT" oninput="LimitNumberLength(this, 12)">
                                 </div>                                                    
 
                             </div>
@@ -785,18 +784,18 @@
 
                                     <div class="erppage-field">
                                             <label for="txxt_ForIssu" class="erppage-label">For Insu.</label>
-                                            <input type="number" class="erppage-input" id="txxt_ForIssu">
+                                            <input type="number" class="erppage-input" id="txxt_ForIssu" oninput="LimitNumberLength(this, 12)">
                                      
                                     </div>                     
                             
                                     <div class="erppage-field">
                                             <label for="txxt_FobOther" class="erppage-label">FOB Other</label>
-                                            <input type="number" class="erppage-input" id="txxt_FobOther">
+                                            <input type="number" class="erppage-input" id="txxt_FobOther" oninput="LimitNumberLength(this, 12)">
                                     </div>   
 
                                     <div class="erppage-field">
                                             <label for="txt_LutNo" class="erppage-label">Lut No.</label>
-                                            <input type="number" class="erppage-input" id="txt_LutNo">
+                                            <input type="number" class="erppage-input" id="txt_LutNo" oninput="LimitNumberLength(this, 12)">
                                     </div>                                                    
                             
                                 </div>
@@ -804,18 +803,18 @@
                                 <div class="erppage-grid grid-4">                
                                     <div class="erppage-field">
                                             <label for="txxt_pol" class="erppage-label">P.O.L</label>
-                                            <input type="number" class="erppage-input" id="txxt_pol">
+                                            <input type="number" class="erppage-input" id="txxt_pol" oninput="LimitNumberLength(this, 12)" >
                                      
                                     </div>                     
                             
                                     <div class="erppage-field">
                                             <label for="txxt_POD" class="erppage-label">P.O.D</label>
-                                            <input type="number" class="erppage-input" id="txxt_POD">
+                                            <input type="number" class="erppage-input" id="txxt_POD" oninput="LimitNumberLength(this, 12)">
                                     </div>   
 
                                     <div class="erppage-field">
                                             <label for="txt_receiptat" class="erppage-label">Receipt at</label>
-                                            <input type="number" class="erppage-input" id="txt_receiptat">
+                                            <input type="number" class="erppage-input" id="txt_receiptat" oninput="LimitNumberLength(this, 12)">
                                     </div>                                                    
     
                                     <div class="erppage-field">
@@ -832,19 +831,19 @@
 
                                     <div class="erppage-field">
                                             <label for="txxt_finalDestination" class="erppage-label">Final Destination</label>
-                                            <input type="number" class="erppage-input" id="txxt_finalDestination">
+                                            <input type="text" class="erppage-input" id="txxt_finalDestination" maxlength="50">
                                      
                                     </div>                     
                             
                                     <div class="erppage-field">
                                             <label for="txxt_FDCountry" class="erppage-label">F.D.Country </label>
-                                            <input type="number" class="erppage-input" id="txxt_FDCountry">
+                                            <input type="text" class="erppage-input" id="txxt_FDCountry" maxlength="50">
                                     </div>   
 
 
                                     <div class="erppage-field">
                                             <label for="txt_BillOfLanding" class="erppage-label">Bill OF Landing</label>
-                                            <input type="number" class="erppage-input" id="txt_BillOfLanding">
+                                            <input type="number" class="erppage-input" id="txt_BillOfLanding" maxlength="30">
                                     </div>                                                    
                                                          
 
@@ -863,13 +862,13 @@
                             
                                     <div class="erppage-field">
                                             <label for="txxt_PortCode" class="erppage-label">Port Code  </label>
-                                            <input type="number" class="erppage-input" id="txxt_PortCode">
+                                            <input type="text" class="erppage-input" id="txxt_PortCode" maxlength="20" >
                                     </div>   
 
 
                                     <div class="erppage-field">
                                             <label for="txt_InsuranceDe" class="erppage-label">Insurance Detail</label>
-                                            <input type="text" class="erppage-input" id="txt_InsuranceDe" />
+                                            <input type="text" class="erppage-input" id="txt_InsuranceDe" maxlength="100" />
                                     </div>                                                    
                                                          
 
@@ -892,14 +891,8 @@
                                 
                                       <label for="ddl_licNo" class="erppage-label" >Lic No. </label>
                                         <select class="erppage-input erppage-select" id="DDL_LicNo">
-                                          <option value=""> Select Lic Type </option>                                      
-                                        
+                                          <option value=""> Select Lic Type </option>                                    
                                         </select>
-
-
-
-
-
 
                                     </div>
 
@@ -934,9 +927,9 @@
 
                 <div class="tab-content" id="PrintExportReport">
 
-                 <div class="accordion-header fw-bold py-2">
-        Print Export Report
-    </div>
+                    <div class="accordion-header fw-bold py-2">
+                    Print Export Report
+                    </div>
 
                  <div class="accordion-body">
 
@@ -1186,16 +1179,6 @@
         </div>
     </div>
 
-
-
-
-
-
-
-
-
-
-
     <div class="row">
         <div class="col-md-3">
             <div class="btn-mt">
@@ -1212,7 +1195,7 @@
     </div>
 </div>
 
-
+<script src="~/js/erpjs/approvalservice/approvalservice.js"></script>
 <script src="~/js/erpjs/sales/transaction/salesinvoice/salesinvoice.js"></script>
 <script src="~/js/erpjs/sales/transaction/salesinvoice/salesinvoiceapi.js"></script>
 <script src="~/js/erpjs/sales/transaction/salesinvoice/salesinvoiceinit.js"></script>

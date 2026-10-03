@@ -103,8 +103,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
-        }
-        
+        }        
         public JsonResult DDlLicNO(String TYPE)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -116,7 +115,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         public JsonResult DDLBank(String TYPE)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -136,8 +134,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
-        }
-        
+        }        
         public JsonResult DDlDoNo()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -148,7 +145,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         public JsonResult cmbPartyName()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -232,7 +228,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         public JsonResult cmbTaxType()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -270,7 +265,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(partyList);
             }
         }
-
         public JsonResult DDlPackNo(string v_type , string v_typetext, DateOnly V_DATE , int PARTY_CODE)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -334,7 +328,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         public JsonResult DDlSaudaNo()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -374,7 +367,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(SaudaNolist);
             }
         }
-
         public JsonResult cmbAddress(int partycode)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -385,7 +377,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         public JsonResult DDlIssueNo()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -421,7 +412,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(SaudaNolist);
             }
         }
-
         public JsonResult cmbGodown()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -432,7 +422,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         public JsonResult cmbProdType()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -453,7 +442,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         public JsonResult DDlDocStatus()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -464,7 +452,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         public JsonResult DDlTransPort()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -497,7 +484,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(SaudaNolist);
             }
         }
-
         public JsonResult cmbProductName()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -532,7 +518,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(partyList);
             }
         }
-
         public JsonResult DDlLoadParty()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -543,8 +528,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
-        }
-        
+        }        
         public JsonResult DDlWBParty()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -556,7 +540,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         [HttpPost]
         public async Task<JsonResult> SavedData([FromBody] SalesInvoiceModel request)
         {
@@ -752,7 +735,10 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         public JsonResult PrintValidation([FromBody] PrintValidationRequest request)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
-
+            string message1 = "";
+            string message2 = "";
+            string message3 = "";
+            string message4 = "";
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
                 con.Open();
@@ -785,7 +771,10 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                     if (!IsExist(ledgerQuery))
                     {
-                        return Json(new { success = false, message = $"Voucher not posted of VType:{request.V_TYPE} and VNo:{request.V_NO}. Warning! Draft Report will display." });
+                        // return Json(new { success = false, message = $"Voucher not posted of VType:{request.V_TYPE} and VNo:{request.V_NO}. Warning! Draft Report will display." });
+
+                        message1 = $"Voucher not posted of VType:{request.V_TYPE} and VNo:{request.V_NO}. Warning! Draft Report will display.";
+
                     }
                 }
 
@@ -797,7 +786,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                     if (!IsExist(ledgerQuery))
                     {
-                        return Json(new { success = true, warning = true, message = $"Voucher not posted of VType:{request.V_TYPE} and VNo:{request.V_NO}. Warning! Draft Report will display." });
+                        //  return Json(new { success = true, warning = true, message = $"Voucher not posted of VType:{request.V_TYPE} and VNo:{request.V_NO}. Warning! Draft Report will display." });
+
+
+                        message2 = $"Voucher not posted of VType:{request.V_TYPE} and VNo:{request.V_NO}. Warning! Draft Report will display.";
+
+
                     }
                 }
 
@@ -827,28 +821,41 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 {
 
 
-                                    return Json(new
-                                    {
-                                        success = true,
-                                        warning = true,
-                                        message = $"Please entry necessary fields in Export Detail " +
+                                    //return Json(new
+                                    //{
+                                    //    success = true,
+                                    //    warning = true,
+                                    //    message = $"Please entry necessary fields in Export Detail " +
+                                    //    $"(like Actual Freight, CHA, Forwarder, Shipline, " +
+                                    //    $"ETA POL Date, ETA POD Date) of Invoice No:{request.V_NO}"
+                                    //});
+
+                                    message3 = $"Please entry necessary fields in Export Detail " +
                                         $"(like Actual Freight, CHA, Forwarder, Shipline, " +
-                                        $"ETA POL Date, ETA POD Date) of Invoice No:{request.V_NO}"
-                                    });
+                                        $"ETA POL Date, ETA POD Date) of Invoice No:{request.V_NO}";
+
+
+
 
                                 }
                             }
                             else
                             {
 
-                                return Json(new
-                                {
-                                    success = true,
-                                    warning = true,
-                                    message = $"Export Detail not feeded " +
+                                //return Json(new
+                                //{
+                                //    success = true,
+                                //    warning = true,
+                                //    message = $"Export Detail not feeded " +
+                                //    $"(like Actual Freight, CHA, Forwarder, Shipline, " +
+                                //    $"ETA POL Date, ETA POD Date) in Invoice No:{request.V_NO}"
+                                //});
+
+
+                                message4 = $"Export Detail not feeded " +
                                     $"(like Actual Freight, CHA, Forwarder, Shipline, " +
-                                    $"ETA POL Date, ETA POD Date) in Invoice No:{request.V_NO}"
-                                });
+                                    $"ETA POL Date, ETA POD Date) in Invoice No:{request.V_NO}";
+
 
                             }
                         }
@@ -1146,7 +1153,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
 
 
-                return Json(new { success = true, message = "Print validation successful.", ReportName = request.ReportName , godownAdd = request.godownAdd });
+                return Json(new { success = true, message = "Print validation successful.", ReportName = request.ReportName , godownAdd = request.godownAdd , message1 = message1,message2 = message2 ,
+                message3 = message3 , message4 = message4
+                
+                
+                
+                });
             }
         }
 
@@ -1236,7 +1248,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return false;
             }
         }
-
 
         [HttpPost]
         public JsonResult GetPackingSlipPrintValidation([FromBody] PrintValidationRequest request)
@@ -1385,25 +1396,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(new { success = true, message = "Print validation successful." });
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     }
 } 

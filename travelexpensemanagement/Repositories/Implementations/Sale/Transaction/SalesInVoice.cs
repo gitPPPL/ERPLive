@@ -70,6 +70,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 var GeneralSetting = await  _globalVariableService.LoadGeneralSetting();
 
                 using var conn = _dbConnection.GetErpConnection();
+
+
                 DataTable dt = new DataTable();
 
                 string fappstatus = "";
@@ -422,7 +424,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                            
                 if (header.DISC_PER != masterDisc)
                     {
-                     return ( "Warning", $"Discount in master=>{masterDisc} % not matched with Discount in invoice=>{header.DISC_PER}%, Please check it.");
+                     return ("Validation", $"Discount in master=>{masterDisc} % not matched with Discount in invoice=>{header.DISC_PER}%, Please check it.");
                     }
 
                 if (details.Count > 0)
@@ -834,7 +836,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         AND T2.COMP_CODE = {GlobalData.PubCompCode}
                         AND T2.YEAR_CODE = {GlobalData.PubFYearCode}";
 
+
+
+             
+
                     using (var cmd = new SqlCommand(query, conn))
+            
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
@@ -867,6 +874,10 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         AND V_DATE BETWEEN '{header.V_DATE.Value.AddDays(-2):yyyy-MM-dd}'
                         AND '{header.V_DATE.Value:yyyy-MM-dd}'
                         AND COMP_CODE = {GlobalData.PubCompCode}";
+
+
+
+
                     using (var cmd = new SqlCommand(gateQuery, conn))
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -1949,15 +1960,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 {
                     if (fappstatus != "")
                     {
-                        string checkQuery = @"
-                            SELECT 1
-                            FROM approval_status
-                            WHERE user_Code = @USER_CODE
-                            AND V_Type = @V_TYPE
-                            AND V_No = @V_NO
-                            AND COMP_CODE = @COMP_CODE
-                            AND Branch_Code = @BRANCH_CODE
-                            AND Year_Code = @YEAR_CODE";
+                        string checkQuery = @" SELECT 1  FROM approval_status  WHERE user_Code = @USER_CODE AND V_Type = @V_TYPE
+                            AND V_No = @V_NO AND COMP_CODE = @COMP_CODE  AND Branch_Code = @BRANCH_CODE  AND Year_Code = @YEAR_CODE";
 
                         using (var cmd = new SqlCommand(checkQuery, conn))
                         {
@@ -1973,16 +1977,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                             if (exists != null)
                             {
                                 string updateQuery = @"
-                                    UPDATE approval_status
-                                    SET STATUS = 'CLOSE',
-                                    CLOSE_DATE = FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm'),
-                                    Approval_code = 8,
-                                    Approval_remark = 'Approved',
-                                    remarks = 'Document Approved'
-                                    WHERE V_Type = @V_TYPE
-                                    AND V_No = @V_NO
-                                    AND COMP_CODE = @COMP_CODE
-                                    AND Branch_Code = @BRANCH_CODE
+                                    UPDATE approval_status SET STATUS = 'CLOSE',  CLOSE_DATE = FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm'),
+                                    Approval_code = 8, Approval_remark = 'Approved', remarks = 'Document Approved'
+                                    WHERE V_Type = @V_TYPE AND V_No = @V_NO AND COMP_CODE = @COMP_CODE  AND Branch_Code = @BRANCH_CODE
                                     AND Year_Code = @YEAR_CODE";
 
                                 using (var updateCmd = new SqlCommand(updateQuery, conn))

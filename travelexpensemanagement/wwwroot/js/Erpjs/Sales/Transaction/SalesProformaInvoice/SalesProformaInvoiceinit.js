@@ -29,6 +29,8 @@ $(document).ready(async function () {
     AddRow();
     if (rowId)
     {
+
+
        await LoadData();
     }
     else

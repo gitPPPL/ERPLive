@@ -2,7 +2,9 @@
 
 const urlParams = new URLSearchParams(window.location.search);
 const rowId = urlParams.get('id');
-const vtype = urlParams.get('VType');
+let vtype = "";
+let vNo = "";
+
 const $tbody = $("#tblSalesProformaInvoice tbody");
 const form = $('#SalesProformaInvoiceform');
 const mode = urlParams.get('mode');
@@ -25,16 +27,27 @@ $(document).ready(async function () {
     SetFYDate('DtDocumentDate', LoginDate);
     checkPermissionForEntryPage(controllerName);
     await LoadDropdown();
-
+          
     AddRow();
     if (rowId)
     {
         await LoadData();
+        vtype = $('#ddlDocumentType').val();
+        vNo = $('#NumInvoiceNo').val();
+        checkApprovalStatus(vtype, rowId, 'SALE1');
+
+        const $row = $('#tblSalesInvoice tbody tr').first();
+
+        if ($row.length) {
+            CalculateRow($row);
+        }
+
+
     }
     else
-    {
-        let selectedVType = $('#ddlDocumentType').val();
-        await GetVNo(selectedVType, "SALE1");
+    {     
+        vtype = $('#ddlDocumentType').val();
+        await GetVNo(vtype, "SALE1");
     }
 
     $('#ddlPartyName').on('change',async function () {
@@ -744,8 +757,7 @@ $(document).ready(async function () {
 
     $('#btn_ComInvoiceforParty').on('click', async function () {
         await GetTransitReportFile("", true,false,true,false);
-    });
-      
+    });      
 
     $('#btn_LCInvoice').on('click', async function () {
 
@@ -762,11 +774,9 @@ $(document).ready(async function () {
         }
     });
 
-
     $('#btn_ComInvoiceForBank').on('click', async function () {
         await GetTransitReportFile("Bank", true, false, true, false);
     });
-
 
     $('#btn_ShippingInstruction').on('click', async function () {
         await GetTransitReportFile("", true, true, false, false);
@@ -787,5 +797,101 @@ $(document).ready(async function () {
     $('#btn_PackingSlipForCustom').on('click', async function () {
         await GetPackingSlipPrint("Custom");
     });
+
+    $('#NumOtherPacking1').on('change', function ()
+    {
+        const packingPer = parseFloat($(this).val()) || 0;
+        if (packingPer > 0)
+        {
+            $('#tblSalesInvoice tbody tr').each(function ()
+            {
+                const $row = $(this);
+                const itemCode = $.trim($row.find('.ddlProductName').val() || '');
+                if (itemCode !== '')
+                {
+                    $row.find('.TxtPacKPer').val(packingPer);
+                    CalculateRow($row);
+                }
+            });
+        }
+    });
+
+    $('#NumOtherDiscount1').on('change', function () {
+        const DiscoutPer = parseFloat($(this).val()) || 0;
+        if (DiscoutPer > 0) {
+            $('#tblSalesInvoice tbody tr').each(function () {
+                const $row = $(this);
+                const itemCode = $.trim($row.find('.ddlProductName').val() || '');
+                if (itemCode !== '') {
+                    $row.find('.TxtDisPer').val(DiscoutPer);
+                    CalculateRow($row);
+                }
+            });
+        }
+    });
+
+    $('#NumOtherCESS1').on('change', function () {
+        const CessPer = parseFloat($(this).val()) || 0;
+        if (CessPer > 0) {
+            $('#tblSalesInvoice tbody tr').each(function () {
+                const $row = $(this);
+                const itemCode = $.trim($row.find('.ddlProductName').val() || '');
+                if (itemCode !== '')
+                {
+                    $row.find('.TxtCessPer').val(CessPer);
+                    CalculateRow($row);
+                }
+            });
+        }
+    });
+    
+    //kks
+
+    $(document).on('click', '#btn_Sendapproval', function () {
+        var FromName = window.location.pathname.split('/')[1];
+        let vNo = $('#NumInvoiceNo').val();
+        let vtype = $('#ddlDocumentType').val();
+
+
+        $.ajax({
+            url: '/Approval/CheckPendingUser',
+            type: 'POST',
+            data: {
+                vNo: vNo,
+                vType: vtype
+            },
+            success: function (response) {
+                console.log('Response:', response);
+                // Pending with another user
+                if (response.success === false) {
+                    showToast(`Pending With Another User (${response.userCode})`, { type: "warning" });
+                    return;
+                }
+                // Approval_Code = 5
+                if (response.approvalCode8 === true)
+                {
+                    OpenApprovalModal({ DocType: vtype, DocNo: vNo,  TableName: 'SALE1' });
+                    return;
+                }
+                // Approval_Code != 8
+                OpenSendForApprovalModal({
+                    DocType: vtype, DocNo: vNo, UserCode: null, UserName: null,
+                    DocDate: null, TableName: 'SALE1', FromName, FromName
+                });
+
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+                alert('Error while checking approval status.');
+            }
+        });
+
+    });
+
+    $(document).on('click', '#btn_Approved', function () {
+        OpenApprovalModal({ DocType: vtype, DocNo: vNo, TableName: 'SALE1' });
+    });
+
+    //kks
 
 });

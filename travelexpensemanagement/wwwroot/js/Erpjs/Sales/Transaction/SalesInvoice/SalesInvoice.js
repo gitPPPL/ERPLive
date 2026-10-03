@@ -11,19 +11,19 @@ function AddRow(data = {}) {
             <td>  <input type="number" class="erppagetable-control TxtRateINUSD" value="${data.RateINUSD ?? ''}"  />  </td>
             <td>  <input type="number" class="erppagetable-control TxtRate" value="${data.Rate ?? ''}"  />  </td>
             <td>  <input type="number" class="erppagetable-control TxtAmount" value="${data.Amount ?? ''}"  readonly  />  </td>
-            <td>  <input type="number" class="erppagetable-control TxtPacKPer" value="${data.PackPer ?? ''}" readonly />  </td>
+            <td>  <input type="number" class="erppagetable-control TxtPacKPer" value="${data.PackPer ?? ''}"  />  </td>
             <td>  <input type="number" class="erppagetable-control TxtPackAmount" value="${data.PackAmt ?? ''}" readonly  />  </td>        
             <td>  <input type="number" class="erppagetable-control TxtPackWeight" value="${data.PackWght ?? ''}"   />  </td>        
             <td>  <input type="number"   class="erppagetable-control TxtDisPer" value="${data.DisPer ?? ''}"  /> </td>
             <td>  <input type="number" class="erppagetable-control TxtDisAmount"  value="${data.Disamt ?? ''}"  readonly />   </td>
             <td>  <select class="erppagetable-control TxtTaxType"> <option value="">-- Select Tax Type  --</option>  ${TaxTypeList}  </select> </td>
-            <td>  <input type="number" class="erppagetable-control TxtCgstper"  value="${data.CgstPer ?? ''}"    />   </td>
+            <td>  <input type="number" class="erppagetable-control TxtCgstper"  value="${data.CgstPer ?? ''}"   readonly />   </td>
             <td>  <input type="number" class="erppagetable-control TxtCgstAmt" value="${data.CgstAmt ?? ''}"   readonly  />  </td>
-            <td>  <input type="number" class="erppagetable-control TxtSgstPer" value="${data.SgstPer ?? ''}"    /> </td>
+            <td>  <input type="number" class="erppagetable-control TxtSgstPer" value="${data.SgstPer ?? ''}"   readonly /> </td>
             <td>  <input type="number" class="erppagetable-control TxtSgstamt" value="${data.SgstAmt ?? ''}"   readonly /> </td>
-            <td>  <input type="number" class="erppagetable-control TxtIGSTPer" value="${data.IgstPer ?? ''}"    /> </td>
+            <td>  <input type="number" class="erppagetable-control TxtIGSTPer" value="${data.IgstPer ?? ''}"  readonly  /> </td>
             <td>  <input type="number" class="erppagetable-control TxtIGSTamt" value="${data.IgstAmt ?? ''}"  readonly /> </td>
-            <td>  <input type="number" class="erppagetable-control TxtCessPer" value="${data.CessPer ?? ''}"   /> </td>
+            <td>  <input type="number" class="erppagetable-control TxtCessPer" value="${data.CessPer ?? ''}"  readonly /> </td>
             <td>  <input type="number" class="erppagetable-control TxtCessamt" value="${data.CessAmt ?? ''}" readonly  /> </td>
             <td>  <input type="text" class="erppagetable-control TxtRemark" value="${data.Remark ?? ''}"   /> </td>
             <td>  <input type="text" class="erppagetable-control TxtPackno" value="${data.Packno ?? ''}"   /> </td>
@@ -42,12 +42,12 @@ function AddRow(data = {}) {
             <td>  <input type="number" class="erppagetable-control TxtCDiscAmount" value="${data.CDiscAmount ?? ''}"   /> </td>
             <td>  <input type="number" class="erppagetable-control TxtWBQuantity" value="${data.WBQuantity ?? ''}"   /> </td>
 
-            <td>  <input type="text" class="erppagetable-control TxtREPORT_TYPE" value="${data.REPORT_TYPE ?? ''}"   /> </td>
-            <td>  <input type="number" class="erppagetable-control TxtSale_Rate" value="${data.Sale_Rate ?? ''}"   /> </td>
-            <td>  <input type="number" class="erppagetable-control TxtTaxable_Rate" value="${data.Taxable_Rate ?? ''}"   /> </td>
-            <td>  <input type="number" class="erppagetable-control TxtNet_Wt" value="${data.Net_Wt ?? ''}"   /> </td>
-            <td>  <input type="number" class="erppagetable-control TxtPacking_Wt" value="${data.Packing_Wt ?? ''}"   /> </td>
-            <td>  <input type="number" class="erppagetable-control TxtPacking_nos" value="${data.Packing_nos ?? ''}"   /> </td>
+            <td class="hidden-col">  <input type="text" class="erppagetable-control TxtREPORT_TYPE" value="${data.REPORT_TYPE ?? ''}"   /> </td>
+            <td class="hidden-col">  <input type="number" class="erppagetable-control TxtSale_Rate" value="${data.Sale_Rate ?? ''}"   /> </td>
+            <td class="hidden-col">  <input type="number" class="erppagetable-control TxtTaxable_Rate" value="${data.Taxable_Rate ?? ''}"   /> </td>
+            <td class="hidden-col">  <input type="number" class="erppagetable-control TxtNet_Wt" value="${data.Net_Wt ?? ''}"   /> </td>
+            <td class="hidden-col">  <input type="number" class="erppagetable-control TxtPacking_Wt" value="${data.Packing_Wt ?? ''}"   /> </td>
+            <td class="hidden-col">  <input type="number" class="erppagetable-control TxtPacking_nos" value="${data.Packing_nos ?? ''}"   /> </td>
 
             <td class="action-col">
             <button type="button"  class="act-btn add"  onclick="AddRow()">   <i class="fa fa-plus-circle"></i> </button>
@@ -61,12 +61,13 @@ function AddRow(data = {}) {
     let $row = tbody.find('tr:last');
 
     $row.find('.ddlProductName').val(data.Productcode ?? '');
+
     $row.find('.TxtTaxType').val(data.TaxType ?? '');
 
     $row.find('.TxtNos, .TxtGrossQty, .TxtNetQty, .TxtRate, ' +
         '.TxtPacKPer, .TxtDisPer, .TxtCgstper,.TxtSgstPer,.TxtIGSTPer,.TxtCessPer').on('input change', function () {
-            CalculateRow($row);
-        });
+        CalculateRow($row);
+    });
 
     $row.find('.TxtTaxType').on('change', function () {
 
@@ -92,7 +93,8 @@ function AddRow(data = {}) {
 
         $row.find('.ID').val(ItemCode);
 
-        if (!ItemCode) {
+        if (!ItemCode)
+        {
             return;
         }
 
@@ -110,7 +112,6 @@ function AddRow(data = {}) {
             $row.find('.TxtNet_Wt').val(item.net_Wt);
             $row.find('.TxtPacking_Wt').val(item.packing_Wt);
             $row.find('.TxtPacking_nos').val(item.packing_nos);
-
         }
     });
 
@@ -136,10 +137,333 @@ function AddRow(data = {}) {
         $row.find('.TxtIGSTPer').val(Number(selectedTax.igsT_PER || 0).toFixed(2));
 
     });
+    
+    $row.find('.TxtNos').on('input', function () {
 
+        const $rows = $('#tblSalesInvoice tbody tr');
 
-   
+        // Only apply when there is more than 1 row
+        if ($rows.length <= 1) {
+            return;
+        }
+
+        const nos = $.trim($(this).val());
+
+        if (nos === '') {
+            return;
+        }
+
+        // Get previous row
+        const $previousRow = $row.prev('tr');
+
+        if ($previousRow.length === 0) {
+            return;
+        }
+
+        // Copy Tax Type
+        $row.find('.TxtTaxType')
+            .val($previousRow.find('.TxtTaxType').val());
+
+        // Copy Tax Percentages
+        $row.find('.TxtCgstper')
+            .val($previousRow.find('.TxtCgstper').val());
+
+        $row.find('.TxtSgstPer')
+            .val($previousRow.find('.TxtSgstPer').val());
+
+        $row.find('.TxtIGSTPer')
+            .val($previousRow.find('.TxtIGSTPer').val());
+
+        // Recalculate
+        CalculateRow($row);
+    });
+
 }
+
+
+function CalculateRow($row) {
+
+    const chkCalPCS = $('#ChkPCS').is(':checked');
+    const defTonnageRate = String(LoadGeneralSetting?.pubDefTonnageRate ?? '').toLowerCase();
+    const defWtCalconBales = String(LoadGeneralSetting?.pubDefWtCalconBales ?? '').toLowerCase();
+
+    const num = (selector, row = $row) => {
+        const value = parseFloat(row.find(selector).val());
+        return isNaN(value) ? 0 : value;
+    };
+
+    let nos = num('.TxtNos');
+    let grossQty = num('.TxtGrossQty');
+    let netQty = num('.TxtNetQty');
+    let rate = num('.TxtRate');
+    let packPer = num('.TxtPacKPer');
+    let disPer = num('.TxtDisPer');
+    let reportType = $.trim($row.find('.TxtREPORT_TYPE').val() || '');
+    let taxableRate = num('.TxtTaxable_Rate');
+    let netWt = num('.TxtNet_Wt');
+    let packingWt = num('.TxtPacking_Wt');
+    let packingNos = num('.TxtPacking_nos');
+
+    if (defTonnageRate === 'yes') {
+
+        if (netWt > 0) {
+
+            grossQty = nos * netWt;
+
+            $row.find('.TxtGrossQty').val(grossQty.toFixed(2));
+        }
+
+        if (packingNos > 0) {
+
+            netQty = nos * packingNos;
+
+            $row.find('.TxtNetQty').val(netQty.toFixed(2));
+        }
+    }
+
+    if (defWtCalconBales === 'yes') {
+
+        if (netWt > 0) {
+
+            grossQty = nos * netWt;
+
+            $row.find('.TxtGrossQty').val(grossQty.toFixed(2));
+        }
+
+
+        if (packingWt > 0) {
+
+            netQty = nos * packingWt;
+
+            $row.find('.TxtNetQty').val(netQty.toFixed(2));
+        }
+    }
+
+    grossQty = num('.TxtGrossQty');
+    netQty = num('.TxtNetQty');
+
+    let amount = 0;
+
+    if (!chkCalPCS) {
+
+        if (netQty > 0) {
+            if (defTonnageRate === 'yes') {
+                if (reportType === 'Hessian' || reportType === 'Sacking') {
+                    amount = (netQty * rate) / 100;
+                }
+
+                else if (reportType === 'Twine' && netWt > 0) {
+                    if (taxableRate > 0) {
+                        amount = (netQty * rate) / taxableRate;
+                    }
+                }
+
+                else {
+                    amount = netQty * rate;
+                }
+            }
+
+            else {
+                amount = netQty * rate;
+            }
+        }
+    }
+
+
+    else {
+
+        if (nos > 0) {
+            amount = grossQty * rate;
+        }
+    }
+
+    let packAmount = amount * packPer / 100;
+
+    let baseAmount = amount + packAmount;
+
+    let discountAmount = baseAmount * disPer / 100;
+
+    const cashDiscountPer = parseFloat($('#NumCashDiscountPer').val()) || 0;
+
+    let cashDiscountAmount = baseAmount * cashDiscountPer / 100;
+
+    let taxableAmount = amount + packAmount - discountAmount - cashDiscountAmount;
+
+    const taxOnInsurance = String(LoadGeneralSetting?.pubDefTaxonInsuInSI ?? '').toLowerCase() === 'yes';
+
+    const taxOnFreight = String(LoadGeneralSetting?.pubDefTaxonFrtInSI ?? '').toLowerCase() === 'yes';
+
+    const insurance = num('.TxtInsuAmount');
+
+    const freight = num('.TxtFreightAmount');
+
+
+    if (taxOnInsurance) {
+        taxableAmount += insurance;
+    }
+
+    if (taxOnFreight) {
+        taxableAmount += freight;
+    }
+
+    let cgstPer = num('.TxtCgstper');
+
+    let sgstPer = num('.TxtSgstPer');
+
+    let igstPer = num('.TxtIGSTPer');
+
+    let cessPer = num('.TxtCessPer');
+
+    let cgstAmount = taxableAmount * cgstPer / 100;
+
+    let sgstAmount = taxableAmount * sgstPer / 100;
+
+    let igstAmount = taxableAmount * igstPer / 100;
+
+    let cessAmount = taxableAmount * cessPer / 100;
+
+    $row.find('.TxtAmount').val(amount.toFixed(2));
+
+    $row.find('.TxtPackAmount').val(packAmount.toFixed(2));
+
+    $row.find('.TxtDisAmount').val(discountAmount.toFixed(2));
+
+    $row.find('.TxtCDiscAmount').val(cashDiscountAmount.toFixed(2));
+
+    $row.find('.TxtCgstAmt').val(cgstAmount.toFixed(2));
+
+    $row.find('.TxtSgstamt').val(sgstAmount.toFixed(2));
+
+    $row.find('.TxtIGSTamt').val(igstAmount.toFixed(2));
+
+    $row.find('.TxtCessamt').val(cessAmount.toFixed(2));
+
+    let totalNos = 0;
+    let totalGrossQty = 0;
+    let totalNetQty = 0;
+
+    let totalAmount = 0;
+    let totalPackAmount = 0;
+    let totalDiscount = 0;
+    let totalCashDiscount = 0;
+
+    let totalCGST = 0;
+    let totalSGST = 0;
+    let totalIGST = 0;
+    let totalCess = 0;
+
+
+    $('#tblSalesInvoice tbody tr').each(function () {
+
+        const $r = $(this);
+
+        if (!$r.find('.ddlProductName').val()) {
+            return;
+        }
+
+        totalNos += num('.TxtNos', $r);
+
+        totalGrossQty += num('.TxtGrossQty', $r);
+
+        totalNetQty += num('.TxtNetQty', $r);
+
+        totalAmount += num('.TxtAmount', $r);
+
+        totalPackAmount += num('.TxtPackAmount', $r);
+
+        totalDiscount += num('.TxtDisAmount', $r);
+
+        totalCashDiscount += num('.TxtCDiscAmount', $r);
+
+        totalCGST += num('.TxtCgstAmt', $r);
+
+        totalSGST += num('.TxtSgstamt', $r);
+
+        totalIGST += num('.TxtIGSTamt', $r);
+
+        totalCess += num('.TxtCessamt', $r);
+    });
+
+    let subtotal = totalAmount + totalPackAmount - totalDiscount - totalCashDiscount;
+
+    let totalBeforeTCS = subtotal + totalCGST + totalSGST + totalIGST + totalCess;
+
+    const insPer = parseFloat($('#NumInsurance1').val()) || 0;
+
+    let insuranceAmount = 0;
+
+    if (freight !== 0) {
+        if (taxOnInsurance) {
+            insuranceAmount = Math.ceil((subtotal + freight) * (insPer / 100000));
+        }
+        else {
+            insuranceAmount = Math.ceil(((parseFloat($('#NumNetAmount').val()) || 0) + freight) * (insPer / 100000));
+        }
+    }
+    else {
+        insuranceAmount = 0;
+    }
+
+    let billAmount = totalBeforeTCS;
+
+    const insuranceInBill = String(LoadGeneralSetting?.pubDefInsuInBillAmtInSI ?? '').toLowerCase() === 'yes';
+
+    const freightInBill = String(LoadGeneralSetting?.pubDefFrtInBillAmtInSI ?? '').toLowerCase() === 'yes';
+
+    if (insuranceInBill) {
+        billAmount += insuranceAmount;
+    }
+
+    if (freightInBill) {
+
+        billAmount += freight;
+    }
+
+    const tcsPer = parseFloat($('#NumTCS1').val()) || 0;
+
+
+    const tcsAmount = Math.ceil(billAmount * tcsPer * 0.01);
+
+    const netAmount = Math.round(billAmount + tcsAmount);
+
+    let roundOff = netAmount - (subtotal + totalCGST + totalSGST + totalIGST + totalCess + tcsAmount);
+
+    if (insuranceInBill) {
+        roundOff = netAmount - (subtotal + totalCGST + totalSGST + totalIGST + totalCess + tcsAmount + insuranceAmount);
+    }
+
+    if (freightInBill) {
+        roundOff = netAmount - (subtotal + totalCGST + totalSGST + totalIGST + totalCess + tcsAmount + freight);
+    }
+
+    if (insuranceInBill && freightInBill) {
+        roundOff = netAmount - (subtotal + totalCGST + totalSGST + totalIGST + totalCess + tcsAmount + insuranceAmount + freight);
+    }
+
+    const tdsPer = parseFloat($('#NumTDS1').val()) || 0;
+
+    const tdsAmount = Math.round(freight * (tdsPer / 100));
+
+    $('#NumOtherTotalAmount').val(totalAmount.toFixed(2));
+    $('#NumOtherPacking2').val(totalPackAmount.toFixed(2));
+    $('#NumOtherDiscount2').val(totalDiscount.toFixed(2));
+    $('#NumOtherCashDiscount2').val(totalCashDiscount.toFixed(2));
+    $('#NumOtherTotalNos').val(totalNos.toFixed(2));
+    $('#NumGrossQty').val(totalGrossQty.toFixed(2));
+    $('#NumNetQty').val(totalNetQty.toFixed(2));
+    $('#NumOtherSubTotal').val(subtotal.toFixed(2));
+    $('#NumOtherCGST2').val(totalCGST.toFixed(2));
+    $('#NumOtherSGST2').val(totalSGST.toFixed(2));
+    $('#NumOtherIGST2').val(totalIGST.toFixed(2));
+    $('#NumOtherCESS2').val(totalCess.toFixed(2));
+    $('#NumOtherTCS2').val(tcsAmount.toFixed(2));
+    $('#NumOtherRoundOff').val(roundOff.toFixed(2));
+    $('#NumOtherNetAmount').val(netAmount.toFixed(2));
+    $('#NumInsurance2').val(insuranceAmount.toFixed(2));
+    $('#NumTDS2').val(tdsAmount.toFixed(2));
+}
+
+
 function GetSalesInvoiceDetails() {
 
     const details = [];
@@ -577,38 +901,28 @@ function GetSelectedPendingRow() {
         let V_TYPE = $.trim($row.find('td:eq(2)').text());
         let V_NO = $.trim($row.find('td:eq(3)').text());
         let V_DATE = $.trim($row.find('td:eq(4)').text());
-
         let Item_Name = $.trim($row.find('td:eq(5)').text());
         let Item_Unit = $.trim($row.find('td:eq(6)').text());
         let HSN_Code = $.trim($row.find('td:eq(7)').text());
-
         let Nos = $.trim($row.find('td:eq(8)').text());
         let Gross = $.trim($row.find('td:eq(9)').text());
         let Qty = $.trim($row.find('td:eq(10)').text());
         let Rate = $.trim($row.find('td:eq(11)').text());
         let Amount = $.trim($row.find('td:eq(12)').text());
-
         let Disc_Per = $.trim($row.find('td:eq(13)').text());
         let Disc_Amt = $.trim($row.find('td:eq(14)').text());
-
         let CGST_Per = $.trim($row.find('td:eq(15)').text());
         let CGST_Amt = $.trim($row.find('td:eq(16)').text());
-
         let SGST_Per = $.trim($row.find('td:eq(17)').text());
         let SGST_Amt = $.trim($row.find('td:eq(18)').text());
-
         let IGST_Per = $.trim($row.find('td:eq(19)').text());
         let IGST_Amt = $.trim($row.find('td:eq(20)').text());
-
         let PACK_Per = $.trim($row.find('td:eq(21)').text());
         let PACK_Amt = $.trim($row.find('td:eq(22)').text());
-
         let Remark = $.trim($row.find('td:eq(23)').text());
         let Type = $.trim($row.find('td:eq(24)').text());
-
         let SNO = $.trim($row.find('td:eq(25)').text());
         let Item_Code = $.trim($row.find('td:eq(26)').text());
-
         selectedRows.push({
             DOC_ID,
             V_TYPE,
@@ -699,7 +1013,8 @@ async function GetCalRate(Itemcode) {
     }
 }
 
-function CalculateRow($row) {
+function CalculateRow($row)
+{
 
     const chkCalPCS = $('#ChkPCS').is(':checked');
     const defTonnageRate =  String(LoadGeneralSetting?.pubDefTonnageRate ?? '').toLowerCase();
@@ -764,32 +1079,30 @@ function CalculateRow($row) {
 
     if (!chkCalPCS) {
 
-        if (netQty > 0) {
-             
+        if (netQty > 0)
+        {             
             if (defTonnageRate === 'yes') {
                 if (reportType === 'Hessian' || reportType === 'Sacking')
                 {
-
                     amount = (netQty * rate) / 100;
                 }
 
                 else if (reportType === 'Twine' && netWt > 0)
                 {
-
-                    if (taxableRate > 0) {
-
+                    if (taxableRate > 0)
+                    {
                         amount = (netQty * rate) / taxableRate;
                     }
                 }
      
-                else {
-
+                else
+                {
                     amount = netQty * rate;
                 }
             }
 
-            else {
-
+            else
+            {
                 amount = netQty * rate;
             }
         }
@@ -798,8 +1111,8 @@ function CalculateRow($row) {
 
     else {
 
-        if (nos > 0) {
-
+        if (nos > 0)
+        {
             amount =  grossQty * rate;
         }
     }
@@ -825,13 +1138,13 @@ function CalculateRow($row) {
     const freight = num('.TxtFreightAmount');
 
 
-    if (taxOnInsurance) {
-
+    if (taxOnInsurance)
+    {
         taxableAmount += insurance;
     }
 
-    if (taxOnFreight) {
-
+    if (taxOnFreight)
+    {
         taxableAmount += freight;
     }
 
@@ -882,7 +1195,8 @@ function CalculateRow($row) {
     let totalCess = 0;
 
 
-    $('#tblSalesInvoice tbody tr').each(function () {
+    $('#tblSalesInvoice tbody tr').each(function ()
+    {
 
         const $r = $(this);
 
@@ -923,36 +1237,30 @@ function CalculateRow($row) {
 
     if (freight !== 0)
     {
-
-        if (taxOnInsurance) {
-
+        if (taxOnInsurance)
+        {
             insuranceAmount = Math.ceil(  (  subtotal + freight  ) *  (insPer / 100000) );
         }
-        else {
-
+        else
+        {
             insuranceAmount = Math.ceil( ( (parseFloat($('#NumNetAmount').val()) || 0) + freight ) * (insPer / 100000) );
         }
     }
     else
     {
-
         insuranceAmount = 0;
     }
 
     let billAmount = totalBeforeTCS;
 
-
     const insuranceInBill =  String( LoadGeneralSetting?.pubDefInsuInBillAmtInSI ?? '' ).toLowerCase() === 'yes';
 
-
     const freightInBill =  String( LoadGeneralSetting?.pubDefFrtInBillAmtInSI ?? ''  ).toLowerCase() === 'yes';
-
 
     if (insuranceInBill)
     {
         billAmount += insuranceAmount;
     }
-
 
     if (freightInBill) {
 
@@ -966,9 +1274,7 @@ function CalculateRow($row) {
 
     const netAmount = Math.round(billAmount + tcsAmount);
 
-
     let roundOff =  netAmount - ( subtotal + totalCGST + totalSGST +   totalIGST +  totalCess + tcsAmount );
-
 
     if (insuranceInBill)
     {
@@ -977,14 +1283,12 @@ function CalculateRow($row) {
 
     if (freightInBill)
     {
-
         roundOff =  netAmount -  (  subtotal +  totalCGST + totalSGST +  totalIGST +  totalCess +  tcsAmount +  freight  );
     }
 
     if (insuranceInBill && freightInBill)
 
     {
-
         roundOff = netAmount -  (  subtotal +  totalCGST + totalSGST + totalIGST + totalCess +  tcsAmount + insuranceAmount + freight );
     }
 
@@ -1043,9 +1347,10 @@ async function checkValidDate() {
 
 async function GetTransitReportFile(citype, exportPrint, si = false, ci = false, lc = false) {
 
-    if (!rowId)
-    {
-        showToast("Please save the data before printing the report.", { type: "info"  });
+    if (!rowId) {
+        showToast("Please save the data before printing the report.", {
+            type: "info"
+        });
         throw new Error("No docId");
     }
 
@@ -1061,37 +1366,50 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
     const IGSTAMT = $('#NumIGSTAmount').val();
     const godownNo = $('#ddlGodown').val();
     const godownType = $('#ddlGodown option:selected').text().trim();
-    const PackType = $.trim($('#ddlPackNo option:selected').text()) .split('-')  .pop() .trim() || "";
+    const PackType =  $.trim($('#ddlPackNo option:selected').text())  .split('-') .pop() .trim() || "";
+
     const $firstRow = $('#tblSalesInvoice tbody tr').eq(0);
     const SaudaType = $.trim($firstRow.find('.TxtSaudaType').val() || "");
     const SaudaNo = $.trim($firstRow.find('.TxtSaudaNo').val() || "");
-    const WithoutBag =  $('#chk_PackSlipWithoutBag').is(':checked') ? 1 : 0;
+    const WithoutBag = $('#chk_PackSlipWithoutBag').is(':checked') ? 1 : 0;
     const cbDetail = $('#ChkDetail').is(':checked') ? 1 : 0;
     const cbWithSign = $('#chk_PrintWithSignature').is(':checked') ? 1 : 0;
-    const cbwithFreightFOB =  $('#ch_report').is(':checked') ? 1 : 0;
+    const cbwithFreightFOB = $('#ch_report').is(':checked') ? 1 : 0;
+
+    // ---------------------------------------------------------
+    // Get Pack Nos
+    // ---------------------------------------------------------
+
     let packNos = "";
 
     $('#tblSalesInvoice tbody tr').each(function () {
 
         const $row = $(this);
 
-        const itemName = $.trim($row.find('.ddlProductName').val() || "");
+        const itemName =
+            $.trim($row.find('.ddlProductName').val() || "");
 
-        const packNo = $.trim($row.find('.TxtPackno').val() || "");
+        const packNo =
+            $.trim($row.find('.TxtPackno').val() || "");
 
-        if (itemName !== "" && packNo !== "")
-        {
+        if (itemName !== "" && packNo !== "") {
             packNos += packNo + ",";
         }
     });
 
     packNos = packNos.replace(/,$/, "");
 
+    // ---------------------------------------------------------
+    // Print Validation
+    // ---------------------------------------------------------
+
     const validation = await $.ajax({
         url: '/SalesInvoice/PrintValidation',
         type: 'POST',
         contentType: 'application/json; charset=utf-8',
+
         data: JSON.stringify({
+
             V_TYPE: v_type,
             V_NO: parseInt(v_no) || null,
             FrtAmt: parseFloat(FrtAmt) || null,
@@ -1115,57 +1433,71 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
         })
     });
 
-    if (validation.success == false) {
+
+    // ---------------------------------------------------------
+    // Validation Response
+    // ---------------------------------------------------------
+
+    if (validation.message1 != '')
+    {
+        showToast(validation.message1, { type: "warning" });
+        return;
+    }
+    if (validation.message2 != '')
+    {
+        showToast(validation.message2, { type: "warning" });
+        return;
+    }
+
+    if (validation.message3 != '')
+    {
+        showToast(validation.message3, { type: "warning" });
+        return;
+    }
+
+    if (validation.message4 != '')
+    {
+        showToast(validation.message4, { type: "warning" });
+        return;
+    }
+
+    if (validation.success == false)
+    {
         showToast(validation.message, { type: "warning" });
         return;
     }
 
     console.log("globalVars:", globalVars);
     console.log("validation:", validation);
+
     reportName = validation.reportName || "";
 
+    // ---------------------------------------------------------
+    // Container Detail Subreport Formula
+    // VB.NET Equivalent:
+    //
+    // Dim subSel As String = ""
+    // subSel = "{tempContainerdetail.SI_TYPE}='" & cmbvtype.SelectedValue & "'"
+    // subSel &= " AND {tempContainerdetail.SI_NO}=" & txtvno.Text
+    // subSel &= " AND {tempContainerdetail.COMP_CODE}=" & pubCompCode
+    //
+    // RPT.Subreports("rptContainerDetail.rpt").RecordSelectionFormula = subSel
+    // ---------------------------------------------------------
 
+    let containerDetailFormula = "";
 
-    if (exportPrint = True) 
+    if (exportPrint === true)
     {
-
-        const containerDetailFormula =
-            "{tempContainerdetail.SI_TYPE} = '" + v_type + "'" +
-            " AND {tempContainerdetail.SI_NO} = " + (parseInt(v_no) || 0) +
-            " AND {tempContainerdetail.COMP_CODE} = " + globalVars.CompCode;
-
-
-
-
-
-
-
-
-
-
-        //Dim subSel As String = ""
-        //subSel = "{tempContainerdetail.SI_TYPE}='" & cmbvtype.SelectedValue & "'"
-        //subSel &= " AND {tempContainerdetail.SI_NO}=" & txtvno.Text
-        //subSel &= " AND {tempContainerdetail.COMP_CODE}=" & pubCompCode
-        //RPT.Subreports("rptContainerDetail.rpt").RecordSelectionFormula = subSel
-
-        //'RPT.Subreports("rptContainerDetail.rpt").RecordSelectionFormula = "{tempContainerdetail.SI_TYPE}='" & cmbvtype.SelectedValue & "'  and {tempContainerdetail.SI_NO}=" & txtvno.Text & " "
-        //'RPT.Subreports("rptContainerDetail.rpt").RecordSelectionFormula = "{tempContainerdetail.COMP_CODE}=" & pubCompCode
-
+        containerDetailFormula = "{tempContainerdetail.SI_TYPE} = '" + v_type +  "'" + " AND {tempContainerdetail.SI_NO} = " + (parseInt(v_no) || 0) + " AND {tempContainerdetail.COMP_CODE} = " +
+        globalVars.CompCode;
     }
 
 
+    // ---------------------------------------------------------
+    // Report Name
+    // ---------------------------------------------------------
+
     let dft = "";
-
-    // Equivalent of:
-    // If Specialusercontrol.btnApproved.Visible = False Then
-    //     dft = " (DRAFT COPY)"
-    // End If
-
-    //if (typeof Specialusercontrol !== "undefined" && Specialusercontrol.btnApproved && Specialusercontrol.btnApproved.visible === false)
-    //{
-    //    dft = " (DRAFT COPY)";
-    //}
 
 
     if (v_type === "SAGT" || v_type === "SASI" || v_type === "SAST")
@@ -1176,195 +1508,469 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
     {
         RPTNAME = "DELIVERY CHALLAN" + dft;
     }
-    else if (v_type === "SAJI")
-    {
+    else if (v_type === "SAJI") {
+
         RPTNAME = "DELIVERY CHALLAN (JOBWORK)" + dft;
     }
-    else
-    {
+    else {
+
         RPTNAME = "BILL OF SUPPLY" + dft;
     }
 
-    const formula = "{SALE1.V_TYPE} = '" + v_type + "'" +
-        " AND {SALE1.V_NO} = " + (parseInt(v_no) || 0) +
-        " AND {SALE1.COMP_CODE} = " + globalVars.CompCode +
-        " AND {SALE1.YEAR_CODE} = " + globalVars.FYearCode +
-        " AND {SALE1.BRANCH_CODE} = " + globalVars.BranchCode;
 
+    // ---------------------------------------------------------
+    // Main Report Selection Formula
+    // ---------------------------------------------------------
+
+    const formula =  "{SALE1.V_TYPE} = '" +  v_type + "'" +
+        " AND {SALE1.V_NO} = " +
+        (parseInt(v_no) || 0) +
+        " AND {SALE1.COMP_CODE} = " +
+        globalVars.CompCode +
+        " AND {SALE1.YEAR_CODE} = " +
+        globalVars.FYearCode +
+        " AND {SALE1.BRANCH_CODE} = " +
+        globalVars.BranchCode;
+
+    // ---------------------------------------------------------
+    // With Signature
+    // ---------------------------------------------------------
 
     let withSign = "";
 
-    if (cbWithSign === 1 && String(globalVars.CompCode) === "1")
-    {
+    if ( cbWithSign === 1 && String(globalVars.CompCode) === "1" ) {
+
         withSign = "1";
     }
 
+
+    // ---------------------------------------------------------
+    // With Freight
+    // ---------------------------------------------------------
+
     let withFreight = "";
 
-    if (cbwithFreightFOB === 1)
-    {
+    if (cbwithFreightFOB === 1) {
+
         withFreight = "1";
     }
 
-    const godownAdd = validation.godownAdd || "";
 
-    const godownAddText = "";
+    // ---------------------------------------------------------
+    // Godown Address
+    // ---------------------------------------------------------
 
-    if (godownAddText != "")
+    const godownAdd =  validation.godownAdd || "";
+
+    let godownAddText = "";
+
+    if (godownAdd !== "")
     {
-        godownAddText = godownAdd !== "" ? "Ship From : " + godownAdd : "";
+        godownAddText = "Ship From : " + godownAdd;
     }
 
-    const txtnet_amt = parseFloat($('#NumOtherNetAmount').val()) || 0;
+    const txtnet_amt =  parseFloat( $('#NumOtherNetAmount').val() ) || 0;
 
-    const inWord = numberToWordsCurrency(  txtnet_amt, "Rs.",  "PAISE"  );
+
+    const inWord = numberToWordsCurrency(  txtnet_amt, "Rs.", "PAISE"  );
+
+
 
     let INUSD = "";
 
-    const exRate = parseFloat($('#NumExRate').val()) || 0;
+    const exRate =
+        parseFloat(
+            $('#NumExRate').val()
+        ) || 0;
 
-    const currency =  $('#ddlCurrency option:selected').text().trim() || "Rs";
+
+    const currency =
+        $('#ddlCurrency option:selected')
+            .text()
+            .trim() || "Rs";
+
 
     if (exRate > 0) {
 
         let usdAmt = 0;
 
+
         $('#tblSalesInvoice tbody tr').each(function ()
         {
-            const $row = $(this);                 
-            const qty = $('#ChkPCS').is(':checked')  ? parseFloat($row.find('.TxtNos').val()) || 0 : parseFloat($row.find('.TxtNetQty').val()) || 0;
-            const rate =  parseFloat($row.find('.TxtRate').val()) || 0;
+
+            const $row = $(this);
+            const qty = $('#ChkPCS').is(':checked') ? parseFloat(  $row.find('.TxtNos').val()  ) || 0  : parseFloat(  $row.find('.TxtNetQty').val()  ) || 0;
+            const rate =  parseFloat(  $row.find('.TxtRate').val() ) || 0;
             usdAmt += qty * rate;
         });
 
-        usdAmt = Math.round(usdAmt * 1000) / 1000;
 
-        if (usdAmt > 0)
-        {
-            INUSD = numberToWordsCurrency( Math.round(usdAmt * 100) / 100, currency,  "CENT" );
+        usdAmt =
+            Math.round(
+                usdAmt * 1000
+            ) / 1000;
+
+
+        if (usdAmt > 0) {
+
+            INUSD =
+                numberToWordsCurrency(
+                    Math.round(
+                        usdAmt * 100
+                    ) / 100,
+
+                    currency,
+
+                    "CENT"
+                );
+
         }
-        else
-        {
+        else {
+
             INUSD = " .";
         }
     }
 
+
+    // ---------------------------------------------------------
+    // Challan Reference
+    // ---------------------------------------------------------
+
     let challanRef = "";
 
-    if (String(globalVars.CompCode) === "1")
-    {
-        const challanNo = $.trim(validation.challanNo || "");
 
-        if (challanNo.length > 1)
-        {
-            challanRef = "Agst. Challan No.:" + challanNo;
+    if (String(globalVars.CompCode) === "1") {
+
+        const challanNo =
+            $.trim(
+                validation.challanNo || ""
+            );
+
+
+        if (challanNo.length > 1) {
+
+            challanRef =
+                "Agst. Challan No.:" +
+                challanNo;
         }
     }
+
+
+    // ---------------------------------------------------------
+    // Company Name 1
+    // ---------------------------------------------------------
 
     let compName1 = "";
 
-    if (String(globalVars.CompCode) !== "3" && String(globalVars.CompCode) !== "8")
-    {
-        compName1 = "An ISO 9001:2015 Certified Company";
+
+    if (
+        String(globalVars.CompCode) !== "3" &&
+        String(globalVars.CompCode) !== "8"
+    ) {
+
+        compName1 =
+            "An ISO 9001:2015 Certified Company";
     }
+
+
+    // ---------------------------------------------------------
+    // Company Registration
+    // ---------------------------------------------------------
 
     let compReg = "";
 
-    if (String(globalVars.CompCode) !== "3")
-    {
-        compReg = "Reg.Office :" + (globalVars.RegAdd1 || "") + ", " + (globalVars.RegAdd2 || "") + "  CIN :" + (globalVars.CINNO || "");
+
+    if (
+        String(globalVars.CompCode) !== "3"
+    ) {
+
+        compReg =
+            "Reg.Office :" +
+            (globalVars.RegAdd1 || "") +
+            ", " +
+            (globalVars.RegAdd2 || "") +
+            "  CIN :" +
+            (globalVars.CINNO || "");
     }
 
+
+    // =========================================================
+    // PAYLOAD
+    // =========================================================
+
     const payload = {
+
+        // Main Report
         Reportname: reportName,
+
+        // Main Report Record Selection Formula
         selectionFormula: formula,
+
+        // Database
         Database: database,
+
+
+        // -----------------------------------------------------
+        // Parameters
+        // -----------------------------------------------------
+
         Parameters: {
-            comp_name: globalVars.CompanyName || "",
-            comp_add1: globalVars.Address1 || "",
-            comp_add2: globalVars.Address2 || "",
-            comp_phone: "Mobile : " + (globalVars.Phone || ""),
-            PAN: "PAN NO.   : " + (globalVars.PAN || ""),
-            EMAIL: "Email   : " + (globalVars.Email || ""),
-            Website: "Web     : " + (globalVars.pubCompWebsite || ""),
-            GST: "GST NO.   : " + (globalVars.GST || "")
+
+            comp_name:
+                globalVars.CompanyName || "",
+
+            comp_add1:
+                globalVars.Address1 || "",
+
+            comp_add2:
+                globalVars.Address2 || "",
+
+            comp_phone:
+                "Mobile : " +
+                (globalVars.Phone || ""),
+
+            PAN:
+                "PAN NO.   : " +
+                (globalVars.PAN || ""),
+
+            EMAIL:
+                "Email   : " +
+                (globalVars.Email || ""),
+
+            Website:
+                "Web     : " +
+                (globalVars.pubCompWebsite || ""),
+
+            GST:
+                "GST NO.   : " +
+                (globalVars.GST || "")
+        },
+
+
+        // =====================================================
+        // SUBREPORT
+        // =====================================================
+
+        Subreports: {
+
+            "rptContainerDetail.rpt": {
+
+                RecordSelectionFormula:
+                    containerDetailFormula
+            }
         }
     };
 
-    // Add parameter only if value exists
+
+    // ---------------------------------------------------------
+    // Optional Parameters
+    // ---------------------------------------------------------
+
     if (withSign !== "") {
-        payload.Parameters.withSign = withSign;
+
+        payload.Parameters.withSign =
+            withSign;
     }
+
 
     if (withFreight !== "") {
-        payload.Parameters.withFreight = withFreight;
+
+        payload.Parameters.withFreight =
+            withFreight;
     }
+
 
     if (godownAddText !== "") {
-        payload.Parameters.godownAdd = godownAddText;
+
+        payload.Parameters.godownAdd =
+            godownAddText;
     }
+
 
     if (compName1 !== "") {
-        payload.Parameters.comp_name1 = compName1;
+
+        payload.Parameters.comp_name1 =
+            compName1;
     }
+
 
     if (compReg !== "") {
-        payload.Parameters.Comp_reg = compReg;
+
+        payload.Parameters.Comp_reg =
+            compReg;
     }
+
 
     if (inWord !== "") {
-        payload.Parameters.INWORD = inWord;
+
+        payload.Parameters.INWORD =
+            inWord;
     }
+
 
     if (INUSD !== "") {
-        payload.Parameters.INUSD = INUSD;
+
+        payload.Parameters.INUSD =
+            INUSD;
     }
+
 
     if (challanRef !== "") {
-        payload.Parameters.challanRef = challanRef;
+
+        payload.Parameters.challanRef =
+            challanRef;
     }
+
 
     if (RPTNAME !== "") {
-        payload.Parameters.RPTNAME = RPTNAME;
+
+        payload.Parameters.RPTNAME =
+            RPTNAME;
     }
 
-    var now = new Date();
-    var timestamp =
-        String(now.getDate()).padStart(2, '0') +
-        String(now.getMonth() + 1).padStart(2, '0') +
-        String(now.getFullYear()).slice(-2) + "_" +
-        String(now.getHours()).padStart(2, '0') +
-        String(now.getMinutes()).padStart(2, '0') +
-        String(now.getSeconds()).padStart(2, '0');
 
+    // ---------------------------------------------------------
+    // Debug
+    // ---------------------------------------------------------
+
+    console.log(
+        "Main Formula:",
+        formula
+    );
+
+    console.log(
+        "Container Detail Formula:",
+        containerDetailFormula
+    );
+
+    console.log(
+        "Final Payload:",
+        payload
+    );
+
+
+    // ---------------------------------------------------------
+    // Timestamp
+    // ---------------------------------------------------------
+
+    const now = new Date();
+
+    const timestamp =
+        String(now.getDate())
+            .padStart(2, '0') +
+
+        String(now.getMonth() + 1)
+            .padStart(2, '0') +
+
+        String(now.getFullYear())
+            .slice(-2) +
+
+        "_" +
+
+        String(now.getHours())
+            .padStart(2, '0') +
+
+        String(now.getMinutes())
+            .padStart(2, '0') +
+
+        String(now.getSeconds())
+            .padStart(2, '0');
+
+
+    // ---------------------------------------------------------
+    // Generate Report
+    // ---------------------------------------------------------
 
     $.ajax({
-        url: 'http://localhost:24085/Report/PendingQCReport',
+
+        url:
+            'http://localhost:24085/Report/PendingQCReport',
+
         type: 'POST',
-        data: JSON.stringify(payload),
-        contentType: "application/json",
-        xhrFields: { responseType: 'blob' },
+
+        data:
+            JSON.stringify(payload),
+
+        contentType:
+            "application/json",
+
+        xhrFields: {
+            responseType: 'blob'
+        },
+
 
         success: function (response) {
 
-            var file = new Blob([response], { type: 'application/pdf' });
-            var fileName = `${reportName}_${timestamp}.pdf`;
+            const file =
+                new Blob(
+                    [response],
+                    {
+                        type: 'application/pdf'
+                    }
+                );
 
 
-            var link = document.createElement('a');
-            link.href = URL.createObjectURL(file);
-            link.download = fileName;
-            document.body.appendChild(link);
+            const fileName =
+                `${reportName}_${timestamp}.pdf`;
+
+
+            const link =
+                document.createElement('a');
+
+
+            link.href =
+                URL.createObjectURL(file);
+
+
+            link.download =
+                fileName;
+
+
+            document.body.appendChild(
+                link
+            );
+
+
             link.click();
-            document.body.removeChild(link);
+
+
+            document.body.removeChild(
+                link
+            );
+
         },
 
-        error: function (xhr, status, error) {
+
+        error: function (
+            xhr,
+            status,
+            error
+        ) {
+
             if (xhr.status === 0) {
-                console.error("Cannot connect to API. Is the backend running?");
-            } else {
-                console.error('Error generating report:', xhr.status, xhr.statusText, error);
-                xhr.responseText && console.error('Response:', xhr.responseText);
+
+                console.error(
+                    "Cannot connect to API. Is the backend running?"
+                );
+
+            }
+            else {
+
+                console.error(
+                    'Error generating report:',
+                    xhr.status,
+                    xhr.statusText,
+                    error
+                );
+
+
+                if (xhr.responseText) {
+
+                    console.error(
+                        'Response:',
+                        xhr.responseText
+                    );
+                }
             }
         }
     });
@@ -1556,8 +2162,6 @@ function numberToWordsCurrency(amount, currency = "Rs.", decimalName = "PAISE") 
     return result;
 }
 
-
-
 async function GetPackingSlipPrint(typ)
 {
 
@@ -1724,4 +2328,12 @@ async function GetPackingSlipPrint(typ)
             }
         }
     });
+}
+function LimitNumberLength(input, maxLength)
+{
+    let value = input.value.toString();
+
+    if (value.length > maxLength) {
+        input.value = value.substring(0, maxLength);
+    }
 }
