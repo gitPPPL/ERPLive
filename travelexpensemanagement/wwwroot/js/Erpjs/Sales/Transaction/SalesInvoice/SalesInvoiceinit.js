@@ -36,11 +36,14 @@ $(document).ready(async function () {
         vNo = $('#NumInvoiceNo').val();
         checkApprovalStatus(vtype, rowId, 'SALE1');
 
-        const $row = $('#tblSalesInvoice tbody tr').first();
-
-        if ($row.length) {
-            CalculateRow($row);
-        }
+        $('#tblSalesInvoice tbody tr').each(function () {
+            const $row = $(this);
+            const itemCode = $.trim($row.find('.ddlProductName').val() || '');
+            if (itemCode !== '')
+            {          
+                CalculateRow($row);
+            }
+        });
 
 
     }
@@ -95,6 +98,8 @@ $(document).ready(async function () {
             toastr.warning('Please select at least one row.');
             return;
         }
+
+        console.log("selected row data", data);
 
         // Remove blank rows
         $('#tblSalesInvoice tbody tr').each(function () {
@@ -153,12 +158,16 @@ $(document).ready(async function () {
                 Remark: row.Remark ?? '',
                 HsnCode: row.HSN_Code ?? '',
                 DocType: row.V_TYPE ?? '',
-                DocNo: row.V_NO ?? ''
+                DocNo: row.V_NO ?? '',
+                REPORT_TYPE: row.REPORT_TYPE ?? '',
+                Sale_Rate: row.Sale_Rate ?? '',
+                Taxable_Rate: row.Taxable_Rate ?? '',
+                Net_Wt: row.Net_Wt ?? '',
+                Packing_Wt: row.Packing_Wt ?? '',
+                Packing_nos: row.Packing_nos ?? '',
             });
 
-            $('#tblSalesInvoice tbody tr:last')
-                .attr('data-doc-id', row.DOC_ID)
-                .attr('data-sno', row.SNO);
+            $('#tblSalesInvoice tbody tr:last') .attr('data-doc-id', row.DOC_ID) .attr('data-sno', row.SNO);
 
             addedCount++;
         });

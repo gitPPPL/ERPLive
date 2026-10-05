@@ -86,7 +86,6 @@ function AddRow(data = {}) {
         $row.find('.TxtIGSTPer').val(Number(selectedTax.igsT_PER || 0).toFixed(2));
         CalculateRow($row);
     });
-
     $row.find('.ddlProductName').on('change', async function () {
 
         const ItemCode = $(this).val();
@@ -114,72 +113,45 @@ function AddRow(data = {}) {
             $row.find('.TxtPacking_nos').val(item.packing_nos);
         }
     });
-
-    $row.find('.TxtTaxType').on('change', function () {
-
+    $row.find('.TxtTaxType').on('change', function ()
+    {
         const selectedCode = $(this).val();
-
         const selectedTax = TaxPercentageData.find(x => String(x.code) === String(selectedCode));
-
         console.log("Selected Tax Type:", selectedTax);
-
         if (!selectedTax) {
             $row.find('.TxtCgstper').val('0.00');
             $row.find('.TxtSgstPer').val('0.00');
-            $row.find('.TxtIGSTPer').val('0.00');
-
- 
+            $row.find('.TxtIGSTPer').val('0.00'); 
             return;
         }
-
         $row.find('.TxtCgstper').val(Number(selectedTax.cgsT_PER || 0).toFixed(2));
         $row.find('.TxtSgstPer').val(Number(selectedTax.sgsT_PER || 0).toFixed(2));
         $row.find('.TxtIGSTPer').val(Number(selectedTax.igsT_PER || 0).toFixed(2));
-
-    });
-    
+    });    
     $row.find('.TxtNos').on('input', function () {
-
         const $rows = $('#tblSalesInvoice tbody tr');
-
-        // Only apply when there is more than 1 row
-        if ($rows.length <= 1) {
+        if ($rows.length <= 1)
+        {
             return;
         }
-
         const nos = $.trim($(this).val());
-
-        if (nos === '') {
+        if (nos === '')
+        {
             return;
         }
-
-        // Get previous row
         const $previousRow = $row.prev('tr');
-
-        if ($previousRow.length === 0) {
+        if ($previousRow.length === 0)
+        {
             return;
         }
-
-        // Copy Tax Type
-        $row.find('.TxtTaxType')
-            .val($previousRow.find('.TxtTaxType').val());
-
-        // Copy Tax Percentages
-        $row.find('.TxtCgstper')
-            .val($previousRow.find('.TxtCgstper').val());
-
-        $row.find('.TxtSgstPer')
-            .val($previousRow.find('.TxtSgstPer').val());
-
-        $row.find('.TxtIGSTPer')
-            .val($previousRow.find('.TxtIGSTPer').val());
-
-        // Recalculate
+        $row.find('.TxtTaxType') .val($previousRow.find('.TxtTaxType').val());
+        $row.find('.TxtCgstper') .val($previousRow.find('.TxtCgstper').val());
+        $row.find('.TxtSgstPer')  .val($previousRow.find('.TxtSgstPer').val());
+        $row.find('.TxtIGSTPer') .val($previousRow.find('.TxtIGSTPer').val());
         CalculateRow($row);
     });
 
 }
-
 
 function CalculateRow($row) {
 
@@ -463,7 +435,6 @@ function CalculateRow($row) {
     $('#NumTDS2').val(tdsAmount.toFixed(2));
 }
 
-
 function GetSalesInvoiceDetails() {
 
     const details = [];
@@ -741,8 +712,7 @@ async function GetPendingDetails() {
         });
 
         console.log("Pending Details Response:", res);
-
-     
+            
 
             ShowPendingDetails(res.data);
 
@@ -774,114 +744,53 @@ function ShowPendingDetails(data) {
     }
 
     data.forEach((item, index) => {
-
         let V_DATE = '';
 
-        if (item.V_DATE) {
+        if (item.V_DATE)
+        {
             const date = new Date(item.V_DATE);
 
-            V_DATE =
-                String(date.getDate()).padStart(2, '0') + '/' +
-                String(date.getMonth() + 1).padStart(2, '0') + '/' +
-                date.getFullYear();
+            V_DATE = String(date.getDate()).padStart(2, '0') + '/' + String(date.getMonth() + 1).padStart(2, '0') + '/' + date.getFullYear();
         }
 
         const row = `
             <tr data-index="${index}">
 
                 <!-- Select -->
-                <td>
-                    <input type="checkbox"
-                           class="pending-row-check"
-                           data-index="${index}">
-                </td>
-
-                <!-- Document Id -->
+                <td>  <input type="checkbox" class="pending-row-check" data-index="${index}"> </td>
                 <td>${item.DOC_ID ?? ''}</td>
-
-                <!-- Voucher Type -->
                 <td>${item.V_TYPE ?? ''}</td>
-
-                <!-- Voucher No -->
                 <td>${item.V_NO ?? ''}</td>
-
-                <!-- Voucher Date -->
                 <td>${V_DATE}</td>
-
-                <!-- Item Name -->
                 <td>${item.Item_Name ?? ''}</td>
-
-                <!-- Item Unit -->
                 <td>${item.Item_Unit ?? ''}</td>
-
-                <!-- HSN Code -->
                 <td>${item.HSN_Code ?? ''}</td>
-
-                <!-- Nos -->
                 <td class="text-end">${item.Nos ?? 0}</td>
-
-                <!-- Gross -->
                 <td class="text-end">${item.Gross ?? 0}</td>
-
-                <!-- Quantity -->
                 <td class="text-end">${item.Qty ?? 0}</td>
-
-                <!-- Rate -->
                 <td class="text-end">${item.Rate ?? 0}</td>
-
-                <!-- Amount -->
                 <td class="text-end">${item.Amount ?? 0}</td>
-
-                <!-- Discount % -->
                 <td class="text-end">${item.Disc_Per ?? 0}</td>
-
-                <!-- Discount Amount -->
                 <td class="text-end">${item.Disc_Amt ?? 0}</td>
-
-                <!-- CGST % -->
                 <td class="text-end">${item.CGST_Per ?? 0}</td>
-
-                <!-- CGST Amount -->
                 <td class="text-end">${item.CGST_Amt ?? 0}</td>
-
-                <!-- SGST % -->
                 <td class="text-end">${item.SGST_Per ?? 0}</td>
-
-                <!-- SGST Amount -->
                 <td class="text-end">${item.SGST_Amt ?? 0}</td>
-
-                <!-- IGST % -->
                 <td class="text-end">${item.IGST_Per ?? 0}</td>
-
-                <!-- IGST Amount -->
                 <td class="text-end">${item.IGST_Amt ?? 0}</td>
-
-                <!-- Packing % -->
                 <td class="text-end">${item.PACK_Per ?? 0}</td>
-
-                <!-- Packing Amount -->
                 <td class="text-end">${item.PACK_Amt ?? 0}</td>
-
-                <!-- Remark -->
                 <td>${item.Remark ?? ''}</td>
-
-                <!-- Type -->
                 <td>${item.Type ?? ''}</td>
-
-                <!-- Serial No -->
                 <td class="text-end">${item.SNO ?? ''}</td>
-
-                <!-- Item Code -->
                 <td class="text-end">${item.Item_Code ?? ''}</td>
-
-                <!-- Action -->
-                <td class="hidden-col">
-                    <button type="button"
-                            class="btn btn-sm btn-primary pending-select-btn"
-                            data-index="${index}">
-                        Select
-                    </button>
-                </td>
+                 <td class="text-end">${item.REPORT_TYPE ?? ''}</td>
+                 <td class="text-end">${item.Sale_Rate ?? ''}</td>
+                 <td class="text-end">${item.Taxable_Rate ?? ''}</td>
+                 <td class="text-end">${item.Net_Wt ?? ''}</td>
+                 <td class="text-end">${item.Packing_Wt ?? ''}</td>
+                 <td class="text-end">${item.Packing_nos ?? ''}</td>
+                <td class="hidden-col"> <button type="button" class="btn btn-sm btn-primary pending-select-btn"  data-index="${index}">  Select </button>  </td>
 
             </tr>
         `;
@@ -923,6 +832,13 @@ function GetSelectedPendingRow() {
         let Type = $.trim($row.find('td:eq(24)').text());
         let SNO = $.trim($row.find('td:eq(25)').text());
         let Item_Code = $.trim($row.find('td:eq(26)').text());
+        let REPORT_TYPE = $.trim($row.find('td:eq(27)').text());
+        let Sale_Rate = $.trim($row.find('td:eq(27)').text());
+        let Taxable_Rate = $.trim($row.find('td:eq(28)').text());
+        let Net_Wt = $.trim($row.find('td:eq(29)').text());
+        let Packing_Wt = $.trim($row.find('td:eq(30)').text());
+        let Packing_nos = $.trim($row.find('td:eq(31)').text());
+
         selectedRows.push({
             DOC_ID,
             V_TYPE,
@@ -949,7 +865,13 @@ function GetSelectedPendingRow() {
             Remark,
             Type,
             SNO,
-            Item_Code
+            Item_Code,
+            REPORT_TYPE,
+            Sale_Rate,
+            Taxable_Rate,
+            Net_Wt,
+            Packing_Wt,
+            Packing_nos
         });
 
     });

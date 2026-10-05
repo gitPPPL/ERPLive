@@ -672,6 +672,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 row["Type"] = reader["Type"] == DBNull.Value ? null : reader["Type"];
                                 row["SNO"] = reader["SNO"] == DBNull.Value  ? null : reader["SNO"];
                                 row["Item_Code"] = reader["Item_Code"] == DBNull.Value ? null : reader["Item_Code"];
+                                row["REPORT_TYPE"] = reader["REPORT_TYPE"] == DBNull.Value ? null : reader["REPORT_TYPE"];
+                                row["Sale_Rate"] = reader["Sale_Rate"] == DBNull.Value ? null : reader["Sale_Rate"];
+                                row["Taxable_Rate"] = reader["Taxable_Rate"] == DBNull.Value ? null : reader["Taxable_Rate"];
+                                row["Net_Wt"] = reader["Net_Wt"] == DBNull.Value ? null : reader["Net_Wt"];
+                                row["Packing_Wt"] = reader["Packing_Wt"] == DBNull.Value ? null : reader["Packing_Wt"];
+                                row["Packing_nos"] = reader["Packing_nos"] == DBNull.Value ? null : reader["Packing_nos"];
 
                                 result.Add(row);
                             }
