@@ -77,24 +77,19 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 string fappstatus = "";
                 string fappRemark = "";
                 string fappUserCode = "";
-
                 Boolean isApprovalBody = false;
                 Boolean isFinalApprovalBody = false;
                 Boolean isFinalApprovalBodyCS = false;
                 Boolean isFinalApprovalBodyLCS = false;
-
                 string issuevtype = "";
-
                 Boolean chkval = false;
                 Boolean WBReqCN = false;
                 Boolean checkIssueNo  = false;
                 string packtyp = "";
 
-
                 string qyery = $@"select 1 from DOC_APPROSTAGE where USER_CODE={GlobalData.PubUserId} and DOC_CODE='{header.V_TYPE}' and comp_code={GlobalData.PubCompCode}";
 
                  string Approval = GetText(qyery);
-
 
                 if(Approval == "1")
                 {
@@ -105,7 +100,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                 string APPROV_USER = GetText(query2);
 
-
                 if(APPROV_USER == "FINAL")
                 {
                     isFinalApprovalBody = true;
@@ -113,14 +107,14 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                 string query3 = $@"select APPROV_USER from DOC_APPROSTAGE where FLAG_B='CS' and USER_CODE={GlobalData.PubUserId} and DOC_CODE='{header.V_TYPE}' and comp_code={GlobalData.PubCompCode} ";
 
-
                 APPROV_USER = GetText(query3);
 
                 if(APPROV_USER == "FINAL")
                 {
                     isFinalApprovalBodyCS = true;
                 }
-                string query4 = $@"select APPROV_USER from DOC_APPROSTAGE where FLAG_B='LCS' and USER_CODE={GlobalData.PubUserId} and DOC_CODE='{header.V_TYPE}' and comp_code={GlobalData.PubCompCode}";
+                string query4 = $@"select APPROV_USER from DOC_APPROSTAGE where FLAG_B='LCS' and USER_CODE={GlobalData.PubUserId} and DOC_CODE='{header.V_TYPE}'
+                and comp_code={GlobalData.PubCompCode}";
 
                 APPROV_USER = GetText(query4);
 
@@ -155,15 +149,17 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     decimal CrLimit = 0;
                     decimal LastCrLimit = 0;
 
-                    string query5 = $@"select isnull(sum(Amt),0) as Amt from ledger2 where CR_CODE= {header.BILL_CODE}  and COMP_CODE={GlobalData.PubCompCode} and concat(V_type,V_no)<> '{header.V_TYPE} {header.V_NO}'";
+                    string query5 = $@"select isnull(sum(Amt),0) as Amt from ledger2 where CR_CODE= {header.BILL_CODE}  and COMP_CODE={GlobalData.PubCompCode} and
+                    concat(V_type,V_no)<> '{header.V_TYPE} {header.V_NO}'";
                     clbl -= Convert.ToDecimal(GetText(query5));
 
-                    string query6 = $@"select isnull( sum(Amt),0) as Amt  from ledger2 where DR_CODE= {header.BILL_CODE}  and COMP_CODE= {GlobalData.PubCompCode} and concat(V_type,V_no)<>'{header.V_TYPE}{header.V_NO}'";
+                    string query6 = $@"select isnull( sum(Amt),0) as Amt  from ledger2 where DR_CODE= {header.BILL_CODE}  and COMP_CODE= {GlobalData.PubCompCode} and 
+                    concat(V_type,V_no)<>'{header.V_TYPE}{header.V_NO}'";
                     clbl += Convert.ToDecimal(GetText(query6));
 
 
                     string query7 = $@"select ISNULL(b.Credit_type,'')Credit_type from SUBGROUP_MAST a left join Payterm_mast b on a.Payterm_code=b.code and a.comp_code=b.comp_code
-                                    where a.CODE={header.BILL_CODE} and a.comp_Code={GlobalData.PubCompCode}";
+                    where a.CODE={header.BILL_CODE} and a.comp_Code={GlobalData.PubCompCode}";
 
                     string Credit_type = GetText(query7);
 
@@ -217,9 +213,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                             if (addctr > 1)
                             {
-                                return (
-                                    "Validation",
-                                    $"{header.BILL_NAME} has multiple address, and for Export Multiple Address not allowed in same Ledger. " +
+                                return ( "Validation", $"{header.BILL_NAME} has multiple address, and for Export Multiple Address not allowed in same Ledger. " +
                                     "So, Please create Separate Party Ledger for each address."
                                 );
                             }
@@ -267,7 +261,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                             }
 
                             // Previous Credit
-                            string creditSql = @"  SELECT ISNULL(SUM(AMT), 0)  FROM LEDGER2  WHERE CR_CODE = @PartyCode AND Comp_Code = @CompCode";
+                            string creditSql = @"SELECT ISNULL(SUM(AMT), 0) FROM LEDGER2  WHERE CR_CODE = @PartyCode AND Comp_Code = @CompCode";
 
                             decimal pCrAmt;
 
@@ -279,13 +273,10 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                                 pCrAmt = Convert.ToDecimal(cmd.ExecuteScalar());
                             }
 
-                            // Total Debit including current invoice
                             decimal totDrAmt = pDrAmt + Convert.ToDecimal(header.NAMOUNT ?? 0);
 
-                            // Balance Amount
                             decimal balAmt = totDrAmt - pCrAmt;
 
-                            // Credit Limit
                             string limitSql = @" SELECT ISNULL(CR_LIMIT, 0)  FROM CRLIMIT_MAST WHERE PARTY_CODE = @PartyCode  AND COMP_CODE = @CompCode";
 
                             decimal crLimitAmt;
@@ -297,14 +288,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                                 crLimitAmt = Convert.ToDecimal(cmd.ExecuteScalar());
                             }
-
-                            // Credit Limit <= 0
+                                 
                             if (crLimitAmt <= 0)
                             {
                                 return ( "Validation", "Credit Limit is <=0. Invoice can not generated." );
                             }
 
-                            // Credit Limit exceeded
                             if (balAmt - crLimitAmt > 1)
                             {
                                 return ( "Validation", "Total Sale Amount exceeds Credit Limit (Incl. this invoice). Invoice can not generated.");
@@ -321,65 +310,33 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         {
                             if (header.V_TYPE == "SAGT" && details[0].ORD_NO > 0)
                             {
-                                // Delivery Order
                                 if (details[0].ORD_TYPE == "DOGT")
                                 {
-                                    string query = $@"
-                                        SELECT 1
-                                        FROM DO1
-                                        WHERE BILL_CODE = {header.BILL_CODE}
-                                        AND V_TYPE = '{details[0].ORD_TYPE}'
-                                        AND V_NO = {details[0].ORD_NO}
-                                        AND COMP_CODE = {GlobalData.PubCompCode}
-                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}";
+                                    string query = $@" SELECT 1 FROM DO1 WHERE BILL_CODE = {header.BILL_CODE}  AND V_TYPE = '{details[0].ORD_TYPE}' AND V_NO = {details[0].ORD_NO}
+                                        AND COMP_CODE = {GlobalData.PubCompCode} AND BRANCH_CODE = {GlobalData.PubBranchCode}";
 
                                     if (!IsExist(query))
                                     {
-                                        return (
-                                            "Validation",
-                                            "Party in Sale Invoice not mathced with Party in Delivery Order. Please check it."
-                                        );
+                                        return (  "Validation", "Party in Sale Invoice not mathced with Party in Delivery Order. Please check it." );
                                     }
                                 }
-                                // Sales Order
+
                                 else
                                 {
-                                    string query = $@"
-                                        SELECT 1
-                                        FROM ORDER1
-                                        WHERE PARTY_CODE = {header.BILL_CODE}
-                                        AND V_TYPE = '{details[0].ORD_TYPE}'
-                                        AND V_NO = {details[0].ORD_NO}
-                                        AND COMP_CODE = {GlobalData.PubCompCode}
-                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}";
+                                    string query = $@" SELECT 1 FROM ORDER1 WHERE PARTY_CODE = {header.BILL_CODE} AND V_TYPE = '{details[0].ORD_TYPE}'
+                                        AND V_NO = {details[0].ORD_NO} AND COMP_CODE = {GlobalData.PubCompCode} AND BRANCH_CODE = {GlobalData.PubBranchCode}";
 
                                     if (!IsExist(query))
                                     {
-                                        return (
-                                            "Validation",
-                                            "Party in Sale Invoice not mathced with Party in Sale Order. Please check it."
-                                        );
+                                        return ( "Validation", "Party in Sale Invoice not mathced with Party in Sale Order. Please check it." );
                                     }
                                 }
-
-                                // Shipping Party validation
-                                string shipQuery = $@"
-                                    SELECT 1
-                                    FROM ORDER1
-                                    WHERE SHIP_CODE = {header.SHIP_CODE}
-                                    AND V_TYPE = '{details[0].ORD_TYPE}'
-                                    AND V_NO = {details[0].ORD_NO}
-                                    AND COMP_CODE = {GlobalData.PubCompCode}
-                                    AND BRANCH_CODE = {GlobalData.PubBranchCode}";
+                                string shipQuery = $@" SELECT 1 FROM ORDER1 WHERE SHIP_CODE = {header.SHIP_CODE} AND V_TYPE = '{details[0].ORD_TYPE}'
+                                    AND V_NO = {details[0].ORD_NO} AND COMP_CODE = {GlobalData.PubCompCode}  AND BRANCH_CODE = {GlobalData.PubBranchCode}";
 
                                 if (!IsExist(shipQuery))
                                 {
-                                    // VB code only displays message here.
-                                    // It does NOT return False.
-                                    return (
-                                        "Validation",
-                                        "Shipping Party in Sale Invoice not mathced with Shipping Party in Sale Order. Please check it."
-                                    );
+                                    return ( "Validation", "Shipping Party in Sale Invoice not mathced with Shipping Party in Sale Order. Please check it." );
                                 }
                             }
                         }
@@ -388,17 +345,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                 if (GeneralSetting.pubDefPACKINSI == "Yes")
                 {
-                    if (GlobalData.PubCompCode != "3" &&
-                        GlobalData.PubCompCode != "2" &&
-                        GlobalData.PubCompCode != "5")
+                    if (GlobalData.PubCompCode != "3" &&  GlobalData.PubCompCode != "2" &&  GlobalData.PubCompCode != "5")
                     {
                         if (header.PACK_NO > 0)
                         {
                             int pubRes1Int = Convert.ToInt32(GetText($@" SELECT V_NO FROM SALE1 WHERE PACK_TYPE = '{header.PACK_TYPE}' AND PACK_NO = {header.PACK_NO}
-                            AND ISNULL(Status, 0) <> 2
-                            AND COMP_CODE = {GlobalData.PubCompCode}
-                            AND BRANCH_CODE = {GlobalData.PubBranchCode}
-                            AND YEAR_CODE = {GlobalData.PubFYearCode}
+                            AND ISNULL(Status, 0) <> 2 AND COMP_CODE = {GlobalData.PubCompCode} AND BRANCH_CODE = {GlobalData.PubBranchCode}  AND YEAR_CODE = {GlobalData.PubFYearCode}
                             AND DOC_ID <> '{header.DOC_ID}'"));
 
                             if (pubRes1Int > 0)
@@ -409,23 +361,20 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     }
                 }
 
-                if (IsExist($@"  SELECT 1  FROM GATE2  WHERE V_TYPE = 'OUSL'  AND REF_TYPE = '{header.V_TYPE}' AND REF_NO = {header.V_NO}  AND COMP_CODE = {GlobalData.PubCompCode}  AND BRANCH_CODE = {GlobalData.PubBranchCode}"))
+                if (IsExist($@"  SELECT 1  FROM GATE2  WHERE V_TYPE = 'OUSL'  AND REF_TYPE = '{header.V_TYPE}' AND REF_NO = {header.V_NO}  AND COMP_CODE = {GlobalData.PubCompCode}
+                AND BRANCH_CODE = {GlobalData.PubBranchCode}"))
                 {  
                     return (  "Validation",  "Gate Pass created, modification not allowed." );
                 }
 
-                string discPerMaster = GetText($@"
-                    SELECT ISNULL(DISC_PER, 0)
-                    FROM SUBGROUP_MAST
-                    WHERE CODE = {header.BILL_CODE}
-                    AND COMP_CODE = {GlobalData.PubCompCode}");
+                string discPerMaster = GetText($@" SELECT ISNULL(DISC_PER, 0)  FROM SUBGROUP_MAST WHERE CODE = {header.BILL_CODE} AND COMP_CODE = {GlobalData.PubCompCode}");
 
                 decimal masterDisc = decimal.TryParse(discPerMaster, out var masterValue) ? masterValue  : 0;
                            
                 if (header.DISC_PER != masterDisc)
-                    {
-                     return ("Validation", $"Discount in master=>{masterDisc} % not matched with Discount in invoice=>{header.DISC_PER}%, Please check it.");
-                    }
+                {
+                    return ("Validation", $"Discount in master=>{masterDisc} % not matched with Discount in invoice=>{header.DISC_PER}%, Please check it.");
+                }
 
                 if (details.Count > 0)
                 {
@@ -435,12 +384,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         {
                             if (Convert.ToDecimal(details[i].DCN_NO) > 0)
                             {
-                                string wbNoText = GetText($@" SELECT ISNULL(WB_NO, 0)
-                                FROM DC_NOTE2
-                                WHERE ITEM_CODE = {details[i].ITEM_CODE}
-                                AND V_TYPE = '{details[i].DCN_TYPE}'
-                                AND V_NO = {details[i].DCN_NO}
-                                AND COMP_CODE = {GlobalData.PubCompCode}
+                                string wbNoText = GetText($@" SELECT ISNULL(WB_NO, 0)  FROM DC_NOTE2  WHERE ITEM_CODE = {details[i].ITEM_CODE}
+                                AND V_TYPE = '{details[i].DCN_TYPE}' AND V_NO = {details[i].DCN_NO}  AND COMP_CODE = {GlobalData.PubCompCode}
                                 AND BRANCH_CODE = {GlobalData.PubBranchCode}");
 
                                 decimal wbNo = 0;
@@ -457,7 +402,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         }
                     }
                 }
-
 
                 if (header.SUPPLY_TYPE == "EXPWOP" || header.SUPPLY_TYPE == "EXPWP" || header.SUPPLY_TYPE == "SEZWOP")
                 {
@@ -483,51 +427,30 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                                 }
 
                                 // Get Party Code
-                                int pubRes1Int = Convert.ToInt32(GetText($@"
-                                SELECT PARTY_CODE
-                                FROM WB1
-                                WHERE V_TYPE = '{header.WB_TYPE}'
-                                AND V_NO = {header.WB_NO}
-                                AND COMP_CODE = {GlobalData.PubCompCode}
-                                AND BRANCH_CODE = {GlobalData.PubBranchCode}"));
+                                int pubRes1Int = Convert.ToInt32(GetText($@"  SELECT PARTY_CODE FROM WB1  WHERE V_TYPE = '{header.WB_TYPE}'
+                                AND V_NO = {header.WB_NO} AND COMP_CODE = {GlobalData.PubCompCode}  AND BRANCH_CODE = {GlobalData.PubBranchCode}"));
 
                                 // Get Weighbridge Truck No.
-                                string pubRes1Str = GetText($@"
-                                SELECT VEHICLE_NO
-                                FROM WB1
-                                WHERE V_TYPE = '{header.WB_TYPE}'
-                                AND V_NO = {header.WB_NO}
-                                AND COMP_CODE = {GlobalData.PubCompCode}
-                                AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+                                string pubRes1Str = GetText($@" SELECT VEHICLE_NO FROM WB1 WHERE V_TYPE = '{header.WB_TYPE}' AND V_NO = {header.WB_NO}  AND 
+                                 COMP_CODE = {GlobalData.PubCompCode} AND BRANCH_CODE = {GlobalData.PubBranchCode}");
 
                                 // Get Weighbridge Net Weight
                                 decimal pubRes1Dbl = Convert.ToDecimal(
-                                    GetText($@"
-                                        SELECT SUM(NET_WGT)
-                                        FROM WB2
-                                        WHERE V_TYPE = '{header.WB_TYPE}'
-                                        AND V_NO = {header.WB_NO}
-                                        AND COMP_CODE = {GlobalData.PubCompCode}
-                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}")
+                                    GetText($@" SELECT SUM(NET_WGT) FROM WB2  WHERE V_TYPE = '{header.WB_TYPE}'  AND V_NO = {header.WB_NO} AND COMP_CODE = {GlobalData.PubCompCode}
+                                    AND BRANCH_CODE = {GlobalData.PubBranchCode}")
                                 );
 
                                 // Truck No. validation
                                 if (header.VEHICLE_NO?.Trim() != pubRes1Str.Trim())
                                 {
-                                    return (
-                                        "Validation",
-                                        $"Invoice Truck No. {header.VEHICLE_NO} not match with Weighbridge Truck No., Please Check Truck No. {pubRes1Str}"
-                                    );
+                                    return ( "Validation",  $"Invoice Truck No. {header.VEHICLE_NO} not match with Weighbridge Truck No., Please Check Truck No. {pubRes1Str}" );
                                 }
 
                                 // Waste quantity validation
                                 if (header.PORT_CODE == "Waste" &&
                                     Convert.ToDecimal(header.TOT_NET) != pubRes1Dbl)
                                 {
-                                    return (
-                                        "Validation",
-                                        $"Invoice Quantity {Convert.ToDecimal(header.TOT_NET)} not match with Weighbridge Quantity, Please Check Quantity {pubRes1Dbl}"
-                                    );
+                                    return ( "Validation", $"Invoice Quantity {Convert.ToDecimal(header.TOT_NET)} not match with Weighbridge Quantity, Please Check Quantity {pubRes1Dbl}" );
                                 }
                             }
                         }
@@ -539,7 +462,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     if(header.V_TYPE == "SAGT" && header.PACK_NO == null)
                     {
                         return ("Validation", $"Packing No. can not be Blank, Please Check it." );
-
                     }
 
                     if(header.V_TYPE == "SAGT" || header.V_TYPE == "SABS")
@@ -641,14 +563,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                             if (!string.IsNullOrWhiteSpace(pslip))
                             {
                                 string query = $@"
-                                    SELECT ITEM_CODE, TENACITY_CODE
-                                    FROM PRODUCTION2
-                                    WHERE V_TYPE = 'FPIS'
-                                    AND V_NO IN ({pslip})
-                                    AND COMP_CODE = {GlobalData.PubCompCode}
-                                    AND BRANCH_CODE = {GlobalData.PubBranchCode}
-                                    AND YEAR_CODE = {GlobalData.PubFYearCode}
-                                    GROUP BY ITEM_CODE, TENACITY_CODE";
+                                    SELECT ITEM_CODE, TENACITY_CODE FROM PRODUCTION2  WHERE V_TYPE = 'FPIS' AND V_NO IN ({pslip}) AND COMP_CODE = {GlobalData.PubCompCode}
+                                    AND BRANCH_CODE = {GlobalData.PubBranchCode} AND YEAR_CODE = {GlobalData.PubFYearCode} GROUP BY ITEM_CODE, TENACITY_CODE";
 
                                 using var cmd = new SqlCommand(query, conn);
 
@@ -659,16 +575,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                                     int tenacityCode = Convert.ToInt32(reader["TENACITY_CODE"]);
 
                                     string TType1 = GetText($@"
-                                        SELECT ISNULL(TENACITY_TYPE, '')
-                                        FROM TENACITY_MAST
-                                        WHERE CODE = {tenacityCode}
-                                        AND COMP_CODE = {GlobalData.PubCompCode}");
+                                        SELECT ISNULL(TENACITY_TYPE, '')  FROM TENACITY_MAST WHERE CODE = {tenacityCode} AND COMP_CODE = {GlobalData.PubCompCode}");
 
-                                        string TType2 = GetText($@"
-                                        SELECT ISNULL(TENACITY_TYPE, '')
-                                        FROM SUBGROUP_MAST
-                                        WHERE CODE = {header.BILL_CODE}
-                                        AND COMP_CODE = {GlobalData.PubCompCode}");
+                                        string TType2 = GetText($@"  SELECT ISNULL(TENACITY_TYPE, '') FROM SUBGROUP_MAST  WHERE CODE = {header.BILL_CODE}  AND COMP_CODE = {GlobalData.PubCompCode}");
 
                                     if (!string.IsNullOrWhiteSpace(TType1) &&
                                         !string.IsNullOrWhiteSpace(TType2) &&
@@ -709,16 +618,10 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                             if (!string.IsNullOrWhiteSpace(pslip))
                             {
                                 string query = $@"
-                                    SELECT DISTINCT CAL_ON
-                                    FROM PRODUCTION1
-                                    WHERE V_TYPE = '{header.PACK_TYPE}'
-                                    AND V_NO IN ({pslip})
-                                    AND COMP_CODE = {GlobalData.PubCompCode}
+                                    SELECT DISTINCT CAL_ON FROM PRODUCTION1  WHERE V_TYPE = '{header.PACK_TYPE}' AND V_NO IN ({pslip}) AND COMP_CODE = {GlobalData.PubCompCode}
                                     AND BRANCH_CODE = {GlobalData.PubBranchCode}";
 
-                                using var cmd = new SqlCommand(query, conn);
-
-                         
+                                using var cmd = new SqlCommand(query, conn);                         
 
                                 using var reader = cmd.ExecuteReader();
 
@@ -734,10 +637,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                                 if (count > 1)
                                 {
-                                    return (
-                                        "Validation",
-                                        "Please check Packing Slip, all related packing slip must have same Weighment Type either 'Gross' or 'Net'."
-                                    );
+                                    return ( "Validation",  "Please check Packing Slip, all related packing slip must have same Weighment Type either 'Gross' or 'Net'." );
                                 }
                             }
                         }
@@ -750,19 +650,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                     // Check Purchase
                     string purdocid = GetText($@"
-                        SELECT TOP 1 CONCAT(V_TYPE, V_NO)
-                        FROM PURCHASE1
-                        WHERE CONCAT(V_TYPE, V_NO) <> '{currentDocId}'
-                        AND TRANSPORT_NAME = '{header.TRANSPORT_NAME.Trim()}'
-                        AND GR_NO = '{header.GR_NO.Trim()}'
-                        AND CONCAT(V_TYPE, V_NO) <> '{header.V_TYPE}{header.V_NO}'
-                        AND V_TYPE NOT IN
-                        (SELECT CODE
-                        FROM DOCTYPE_MAST
-                        WHERE DOCTYPE = 'MaterialReceipt')
-                        AND COMP_CODE = {GlobalData.PubCompCode}
-                        AND BRANCH_CODE = {GlobalData.PubBranchCode}
-                        AND YEAR_CODE = {GlobalData.PubFYearCode}");
+                        SELECT TOP 1 CONCAT(V_TYPE, V_NO) FROM PURCHASE1  WHERE CONCAT(V_TYPE, V_NO) <> '{currentDocId}'  AND TRANSPORT_NAME = '{header.TRANSPORT_NAME.Trim()}'
+                        AND GR_NO = '{header.GR_NO.Trim()}'  AND CONCAT(V_TYPE, V_NO) <> '{header.V_TYPE}{header.V_NO}'   AND V_TYPE NOT IN  (SELECT CODE FROM DOCTYPE_MAST
+                        WHERE DOCTYPE = 'MaterialReceipt') AND COMP_CODE = {GlobalData.PubCompCode} AND BRANCH_CODE = {GlobalData.PubBranchCode}  AND YEAR_CODE = {GlobalData.PubFYearCode}");
 
                     if (!string.IsNullOrWhiteSpace(purdocid))
                     {
@@ -772,40 +662,25 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                     // Check Sale
                     string saledocid = GetText($@"
-                        SELECT TOP 1 CONCAT(V_TYPE, V_NO)
-                        FROM SALE1
-                        WHERE ISNULL(Status, 0) <> 2
-                        AND CONCAT(V_TYPE, V_NO) <> '{currentDocId}'
-                        AND TRANSPORT_NAME = '{header.TRANSPORT_NAME.Trim()}'
-                        AND GR_NO = '{header.GR_NO.Trim()}'
-                        AND COMP_CODE = {GlobalData.PubCompCode}
-                        AND BRANCH_CODE = {GlobalData.PubBranchCode}
-                        AND YEAR_CODE = {GlobalData.PubFYearCode}");
+                        SELECT TOP 1 CONCAT(V_TYPE, V_NO)  FROM SALE1 WHERE ISNULL(Status, 0) <> 2  AND CONCAT(V_TYPE, V_NO) <> '{currentDocId}'  AND TRANSPORT_NAME = '{header.TRANSPORT_NAME.Trim()}'
+                        AND GR_NO = '{header.GR_NO.Trim()}' AND COMP_CODE = {GlobalData.PubCompCode} AND BRANCH_CODE = {GlobalData.PubBranchCode}  AND YEAR_CODE = {GlobalData.PubFYearCode}");
 
                     if (!string.IsNullOrWhiteSpace(saledocid))
                     {
-                        return ( "Warning",
-                            $"Transport Name '{header.TRANSPORT_NAME.Trim()}' with GRNo='{header.GR_NO.Trim()}' already exist in Sale/JW Issue/Sale Return invoice No:{saledocid}");
+                        return ( "Warning", $"Transport Name '{header.TRANSPORT_NAME.Trim()}' with GRNo='{header.GR_NO.Trim()}' already exist in Sale/JW Issue/Sale Return invoice No:{saledocid}");
                     }
                 }
 
                 if (!string.IsNullOrWhiteSpace(header.TRANSPORT_NAME) && header.TRANSPORT_NAME.Trim().ToUpper() != "SELF")
                 {
                     string tptCode = GetText($@"
-                    SELECT PARTY_CODE
-                    FROM TRANSPORT_MAST
-                    WHERE CODE = {header.TRANSPORT_CODE}
-                    AND COMP_CODE = {GlobalData.PubCompCode}
-                    AND ACTIVE = 1");
+                    SELECT PARTY_CODE  FROM TRANSPORT_MAST  WHERE CODE = {header.TRANSPORT_CODE} AND COMP_CODE = {GlobalData.PubCompCode}   AND ACTIVE = 1");
 
                     if (string.IsNullOrWhiteSpace(tptCode) || tptCode == "0")
                     {
-                        return (
-                            "Validation",
-                            $"Party Name not Linked with Transport => {header.TRANSPORT_NAME}, Please update first."
-                        );
+                        return (  "Validation",  $"Party Name not Linked with Transport => {header.TRANSPORT_NAME}, Please update first." );
                     }
-                            else if (!IsExist($@" SELECT 1 FROM SUBGROUP_MAST WHERE CODE = {tptCode}  AND COMP_CODE = {GlobalData.PubCompCode} AND ACTIVE = 1"))
+                    else if (!IsExist($@" SELECT 1 FROM SUBGROUP_MAST WHERE CODE = {tptCode}  AND COMP_CODE = {GlobalData.PubCompCode} AND ACTIVE = 1"))
                     {
                         return ( "Validation", $"Party not linked in Tranport Master OR not Active/Exist in BP Master which is Linked with Transport=>{header.TRANSPORT_NAME}" );
                     }
@@ -814,29 +689,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 if (GlobalData.PubCompCode != "8" && header.VEHICLE_NO.Length >= 4 && Convert.ToInt32(header.VEHICLE_NO.Substring(header.VEHICLE_NO.Length - 4)) >= 1)
                 {
                     // Transport Quotation Approval validation
-                    string query = $@"
-                        SELECT 
-                        T1.BILL_CODE,
-                        T2.TRANSPORT_CODE,
-                        T2.TRUCK_NO,
-                        T2.OUR_RATE
-                        FROM TRANSPORT_QT1 T1
-                        INNER JOIN TRANSPORT_QT2 T2
-                        ON T1.COMP_CODE = T2.COMP_CODE
-                        AND T1.YEAR_CODE = T2.YEAR_CODE
-                        AND T1.BRANCH_CODE = T2.BRANCH_CODE
-                        AND T1.V_TYPE = T2.V_TYPE
-                        AND T1.V_NO = T2.V_NO
-                        WHERE T2.TRUCK_NO = '{header.VEHICLE_NO}'
-                        AND T2.TRANSPORT_CODE = {header.TRANSPORT_CODE}
-                        AND T2.V_DATE BETWEEN '{header.V_DATE.Value.AddDays(-2):yyyy-MM-dd}'
-                        AND '{header.V_DATE:yyyy-MM-dd}'
-                        AND T2.COMP_CODE = {GlobalData.PubCompCode}
+                    string query = $@" SELECT   T1.BILL_CODE,  T2.TRANSPORT_CODE,   T2.TRUCK_NO, T2.OUR_RATE  FROM TRANSPORT_QT1 T1
+                        INNER JOIN TRANSPORT_QT2 T2  ON T1.COMP_CODE = T2.COMP_CODE AND T1.YEAR_CODE = T2.YEAR_CODE  AND T1.BRANCH_CODE = T2.BRANCH_CODE
+                        AND T1.V_TYPE = T2.V_TYPE AND T1.V_NO = T2.V_NO  WHERE T2.TRUCK_NO = '{header.VEHICLE_NO}'  AND T2.TRANSPORT_CODE = {header.TRANSPORT_CODE}
+                        AND T2.V_DATE BETWEEN '{header.V_DATE.Value.AddDays(-2):yyyy-MM-dd}'  AND '{header.V_DATE:yyyy-MM-dd}'  AND T2.COMP_CODE = {GlobalData.PubCompCode}
                         AND T2.YEAR_CODE = {GlobalData.PubFYearCode}";
-
-
-
-             
+                                 
 
                     using (var cmd = new SqlCommand(query, conn))
             
@@ -856,40 +714,26 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         }
                         else
                         {
-                            return (
-                                "Validation",
-                                "The transport name or truck number does not match in the Transport Quotation Approval entry. Alternatively, it appears that the quotation for this truck has not been approved. Kindly check and confirm."
-                            );
+                            return ("Validation",  "The transport name or truck number does not match in the Transport Quotation Approval entry." +
+                                "  Alternatively, it appears that the quotation for this truck has not been approved. Kindly check and confirm."  );
                         }
                     }
 
                     // Vehicle Gate Inward validation
-                    string gateQuery = $@"
-                        SELECT 1
-                        FROM GATE1
-                        WHERE V_TYPE = 'TRGI'
-                        AND TRUCK_NO = '{header.VEHICLE_NO}'
-                        AND V_DATE BETWEEN '{header.V_DATE.Value.AddDays(-2):yyyy-MM-dd}'
-                        AND '{header.V_DATE.Value:yyyy-MM-dd}'
-                        AND COMP_CODE = {GlobalData.PubCompCode}";
+                    string gateQuery = $@" SELECT 1 FROM GATE1  WHERE V_TYPE = 'TRGI' AND TRUCK_NO = '{header.VEHICLE_NO}' AND V_DATE BETWEEN '{header.V_DATE.Value.AddDays(-2):yyyy-MM-dd}'
+                        AND '{header.V_DATE.Value:yyyy-MM-dd}' AND COMP_CODE = {GlobalData.PubCompCode}";
 
+                    string Dataexit = GetText(gateQuery);
 
-
-
-                    using (var cmd = new SqlCommand(gateQuery, conn))
-                    using (var reader1 = cmd.ExecuteReader())
+                    if(Dataexit != "")
                     {
-                        if (!reader1.Read())
+                        if (GlobalData.PubUserLevel != "1")
                         {
-                            if (GlobalData.PubUserLevel != "1")
-                            {
-                                return ( "Validation", "The truck number does not match in the Vehicle Gate Inward entry. Kindly check and confirm." );
-                            }
+                            return ("Validation", "The truck number does not match in the Vehicle Gate Inward entry. Kindly check and confirm.");
                         }
                     }
+                                    
                 }
-
-
 
                 string docId = string.IsNullOrWhiteSpace(header.DOC_ID) ? $"{header.V_TYPE}{header.V_NO}" : header.DOC_ID;
 
@@ -907,16 +751,14 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         {
                             if (tcsPer == 0)
                             {                         
-                                return ("Confirmation",
-                                $"Please Check, TCS applicable @ {GeneralSetting.pubBPTCSPer}% for {header.BILL_NAME}. Do you want to Continue ?");
+                                return ("Confirmation",  $"Please Check, TCS applicable @ {GeneralSetting.pubBPTCSPer}% for {header.BILL_NAME}. Do you want to Continue ?");
                             }
                         }
                         else
                         {
                             if (tcsPer > 0)
                             {                             
-                                return ("Confirmation",
-                                $"Please Check, TCS not applicable for Party => {header.BILL_NAME}. Do you want to Continue ?");
+                                return ("Confirmation", $"Please Check, TCS not applicable for Party => {header.BILL_NAME}. Do you want to Continue ?");
                             }
                         }
                     }
@@ -925,9 +767,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         decimal tcsPer = Convert.ToDecimal(header.TCS_PER ?? 0);
                         if (tcsPer < 2)
                         {
-                            return ("Confirmation",
-                            $"Please Check, PAN No. not found in Party Master of {header.BILL_NAME}.\n" +
-                            $"So, TCS applicable @ 2%. Do you want to Continue ?");
+                            return ("Confirmation",  $"Please Check, PAN No. not found in Party Master of {header.BILL_NAME}.\n" +  $"So, TCS applicable @ 2%. Do you want to Continue ?");
                         }
                     }
                 }
@@ -936,7 +776,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                 {
                     string  StateCode = GetText(@$"select State_Code from CITY_MAST where code={header.BILL_CITY}");
-
 
                     string StateType = "";
 
@@ -956,16 +795,15 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     else if (GlobalData.STATE_CODE != StateCode && (header.CGST_AMT + header.SGST_AMT) > 0)
                     {
                         return ("Validation", $"Both GST Tax Rate is not Applicable in One Sales Invoice (CGST+SGST & IGST)");
-
                     }
 
                     if(header.CGST_AMT != header.SGST_AMT)
                     {
                         return ("Validation", $"CGST & SGST Amount Should Be Same.");
-
                     }
 
                 }
+
 
                 using (var cmd = new SqlCommand("sp_SalesInvoice", conn))
                 {
@@ -979,7 +817,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@V_TYPE", (object?)header.V_TYPE ?? DBNull.Value);
                         cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
                         cmd.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE;
-
                         cmd.Parameters.AddWithValue("@GODOWN_CODE", header.GODOWN_CODE);
                         cmd.Parameters.AddWithValue("@BILL_CODE", header.BILL_CODE);
                         cmd.Parameters.AddWithValue("@BILL_NAME", header.BILL_NAME);
@@ -988,7 +825,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@BILL_ADD3", header.BILL_ADD3);
                         cmd.Parameters.AddWithValue("@BILL_CITY", header.BILL_CITY);
                         cmd.Parameters.AddWithValue("@BILL_CITYName", header.BILL_CITYName);
-
                         cmd.Parameters.AddWithValue("@BILL_STATE", header.BILL_STATE);
                         cmd.Parameters.AddWithValue("@BILL_STATENAME", header.BILL_STATENAME);
                         cmd.Parameters.AddWithValue("@BILL_COUNTRY", header.BILL_COUNTRY);
@@ -996,7 +832,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@BILL_GST", header.BILL_GST);
                         cmd.Parameters.AddWithValue("@BILL_PINCODE", header.BILL_PINCODE);
                         cmd.Parameters.AddWithValue("@INSUCR_DAYS", header.INSUCR_DAYS);
-
                         cmd.Parameters.AddWithValue("@SHIP_CODE", header.SHIP_CODE);
                         cmd.Parameters.AddWithValue("@SHIP_NAME", header.SHIP_NAME);
                         cmd.Parameters.AddWithValue("@SHIP_ADD1", header.SHIP_ADD1);
@@ -1009,8 +844,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@SHIP_CITYNAME", header.SHIP_CITYNAME);
                         cmd.Parameters.AddWithValue("@SHIP_STATENAME", header.SHIP_STATENAME);
                         cmd.Parameters.AddWithValue("@SHIP_COUNTRYNAME", header.SHIP_COUNTRYNAME);
-                        cmd.Parameters.AddWithValue("@SHIP_GST", header.SHIP_GST);
-                     
+                        cmd.Parameters.AddWithValue("@SHIP_GST", header.SHIP_GST);                     
                        cmd.Parameters.AddWithValue("@TAX_CODE", header.TAX_CODE);
                         cmd.Parameters.AddWithValue("@PACK_TYPE", header.PACK_TYPE);
                         cmd.Parameters.AddWithValue("@PACK_NO", header.PACK_NO);
@@ -1088,8 +922,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@SB_NO", header.SB_NO);
                         cmd.Parameters.AddWithValue("@SB_DATE", header.SB_DATE);
                         cmd.Parameters.AddWithValue("@PORT_CODE", header.PORT_CODE);
-                        cmd.Parameters.AddWithValue("@FOB_VALUE", header.FOB_VALUE);
-            
+                        cmd.Parameters.AddWithValue("@FOB_VALUE", header.FOB_VALUE);            
                         cmd.Parameters.AddWithValue("@FOB_FRT", header.FOB_FRT);
                         cmd.Parameters.AddWithValue("@FOB_INSU", header.FOB_INSU);
                         cmd.Parameters.AddWithValue("@FOB_OTHER", header.FOB_OTHER);
@@ -1106,14 +939,11 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@LICENCE_DATE", header.LICENCE_DATE);
                         cmd.Parameters.AddWithValue("@SHIPMENT_TYPE", header.SHIPMENT_TYPE);
                         cmd.Parameters.AddWithValue("@TRAN_TYPE", header.TRAN_TYPE);
-                        cmd.Parameters.AddWithValue("@BANK_CODE", header.BANK_CODE);
-                   
-                        cmd.Parameters.AddWithValue("@CURRENCY", header.CURRENCY);
-                    
+                        cmd.Parameters.AddWithValue("@BANK_CODE", header.BANK_CODE);                   
+                        cmd.Parameters.AddWithValue("@CURRENCY", header.CURRENCY);                    
                         cmd.Parameters.AddWithValue("@FAPROV_STATUS", fappstatus);
                         cmd.Parameters.AddWithValue("@FAPROV_REMARKS", fappRemark);
-                        cmd.Parameters.AddWithValue("@APPROVAL_USER", fappUserCode);
-         
+                        cmd.Parameters.AddWithValue("@APPROVAL_USER", fappUserCode);         
                         cmd.Parameters.AddWithValue("@STATUS", header.STATUS);
                         cmd.Parameters.AddWithValue("@UUSER", GlobalData.PubUserId);
                         cmd.Parameters.AddWithValue("@UDATE", DateTime.Now);
@@ -1176,30 +1006,19 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                                 if (detail.ORD_TYPE == "DOGT")
                                 {
                                     bool itemExists = IsExist($@"
-                                        SELECT 1
-                                        FROM DO2
-                                        WHERE ITEM_CODE = {detail.ITEM_CODE}
-                                        AND V_TYPE = '{detail.ORD_TYPE}'
-                                        AND V_NO = {detail.ORD_NO}
-                                        AND COMP_CODE = {GlobalData.PubCompCode}
-                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+                                        SELECT 1 FROM DO2  WHERE ITEM_CODE = {detail.ITEM_CODE}  AND V_TYPE = '{detail.ORD_TYPE}'
+                                        AND V_NO = {detail.ORD_NO} AND COMP_CODE = {GlobalData.PubCompCode}  AND BRANCH_CODE = {GlobalData.PubBranchCode}");
 
                                     if (!itemExists)
                                     {
-                                        return ("Validation",
-                                            $"Item Code : {detail.ITEM_CODE} not exist in Sale Order. Please check it.");
+                                        return ("Validation", $"Item Code : {detail.ITEM_CODE} not exist in Sale Order. Please check it.");
                                     }
                                 }
                                 else
                                 {
                                     bool itemExists = IsExist($@"
-                                        SELECT 1
-                                        FROM ORDER2
-                                        WHERE ITEM_CODE = {detail.ITEM_CODE}
-                                        AND V_TYPE = '{detail.ORD_TYPE}'
-                                        AND V_NO = {detail.ORD_NO}
-                                        AND COMP_CODE = {GlobalData.PubCompCode}
-                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+                                        SELECT 1  FROM ORDER2  WHERE ITEM_CODE = {detail.ITEM_CODE}  AND V_TYPE = '{detail.ORD_TYPE}' AND V_NO = {detail.ORD_NO}
+                                        AND COMP_CODE = {GlobalData.PubCompCode} AND BRANCH_CODE = {GlobalData.PubBranchCode}");
 
                                     if (!itemExists)
                                     {
@@ -1240,14 +1059,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         else
                         {
                             bool rateExists = IsExist($@"
-                                SELECT 1
-                                FROM ORDER2
-                                WHERE ITEM_CODE = {detail.ITEM_CODE}
-                                AND RATE = {ordRate}
-                                AND V_TYPE = '{detail.ORD_TYPE}'
-                                AND V_NO = {detail.ORD_NO}
-                                AND COMP_CODE = {GlobalData.PubCompCode}
-                                AND BRANCH_CODE = {GlobalData.PubBranchCode}");
+                                SELECT 1  FROM ORDER2 WHERE ITEM_CODE = {detail.ITEM_CODE}  AND RATE = {ordRate} AND V_TYPE = '{detail.ORD_TYPE}'
+                                AND V_NO = {detail.ORD_NO} AND COMP_CODE = {GlobalData.PubCompCode} AND BRANCH_CODE = {GlobalData.PubBranchCode}");
 
                             if (!rateExists)
                             {
@@ -1446,7 +1259,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                                     if(detail.QTY != detail.WBQTY)
                                     {
                                         return ("Validation", $"Net Qty not Matched with WB Qty, Please Check it of =>{detail.ITEM_NAME}, Approval Required");
-
                                     }
                                 }
                             }
@@ -1675,8 +1487,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                             }
                         }
 
-
-
                         if(header.V_TYPE == "SAJI"  || header.V_TYPE == "SASI")
                         {
                             
@@ -1685,8 +1495,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         {
                             if(header.ISSUE_NO > 0 && checkIssueNo == true)
                             {
-                                if (IsExist($@"
-                                    SELECT 1  FROM Issue2 WHERE V_TYPE = '{header.ISSUE_TYPE}' AND V_NO = {header.ISSUE_NO}
+                                if (IsExist($@"  SELECT 1  FROM Issue2 WHERE V_TYPE = '{header.ISSUE_TYPE}' AND V_NO = {header.ISSUE_NO}
                                     AND COMP_CODE = {GlobalData.PubCompCode}  AND BRANCH_CODE = {GlobalData.PubBranchCode}"))
                                 {
                                     // Check whether Sale Item exists in Issue
@@ -1696,11 +1505,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                                     {
                                         // Get Issue Quantity
                                         decimal issueQty = Convert.ToDecimal(GetText($@"
-                                            SELECT ISNULL(SUM(QTY), 0) FROM Issue2  WHERE ITEM_CODE = {detail.ITEM_CODE}
-                                            AND LOT_NO = '{detail.LOT_No}'
-                                            AND V_TYPE = '{header.ISSUE_TYPE}'
-                                            AND V_NO = {header.ISSUE_NO}
-                                            AND COMP_CODE = {GlobalData.PubCompCode}
+                                            SELECT ISNULL(SUM(QTY), 0) FROM Issue2  WHERE ITEM_CODE = {detail.ITEM_CODE} AND LOT_NO = '{detail.LOT_No}'
+                                            AND V_TYPE = '{header.ISSUE_TYPE}' AND V_NO = {header.ISSUE_NO} AND COMP_CODE = {GlobalData.PubCompCode}
                                             AND BRANCH_CODE = {GlobalData.PubBranchCode}"));
 
                                         decimal saleQty = Convert.ToDecimal(detail.QTY ?? 0);
@@ -1730,23 +1536,13 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         if (header.V_TYPE != "SASI" && header.V_TYPE != "SAST")
                         {
                             decimal stkqty = Convert.ToDecimal(GetText($@"
-                                SELECT ISNULL(QTY, 0)
-                                FROM tmpStockBalance
-                                WHERE ITEM_CODE = {detail.ITEM_CODE}
-                                AND COMP_CODE = {GlobalData.PubCompCode}"));
+                                SELECT ISNULL(QTY, 0) FROM tmpStockBalance WHERE ITEM_CODE = {detail.ITEM_CODE} AND COMP_CODE = {GlobalData.PubCompCode}"));
 
                             if (action == "UPDATE")
                             {
                                 decimal saleQty = Convert.ToDecimal(GetText($@"
-                                SELECT ISNULL(SUM(Qty), 0)
-                                FROM SALE2
-                                WHERE ITEM_CODE = {detail.ITEM_CODE}
-                                AND ISNULL(Status, 0) <> 2
-                                AND V_TYPE = '{header.V_TYPE}'
-                                AND V_NO = {header.V_NO}
-                                AND COMP_CODE = {GlobalData.PubCompCode}
-                                AND BRANCH_CODE = {GlobalData.PubBranchCode}
-                                AND YEAR_CODE = {GlobalData.PubFYearCode}"));
+                                SELECT ISNULL(SUM(Qty), 0) FROM SALE2 WHERE ITEM_CODE = {detail.ITEM_CODE} AND ISNULL(Status, 0) <> 2 AND V_TYPE = '{header.V_TYPE}'
+                                AND V_NO = {header.V_NO} AND COMP_CODE = {GlobalData.PubCompCode}   AND BRANCH_CODE = {GlobalData.PubBranchCode} AND YEAR_CODE = {GlobalData.PubFYearCode}"));
 
                                 stkqty += saleQty;
                             }
@@ -1754,8 +1550,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                             if (stkqty <= 0)
                             {
-                                return ("Validation",
-                                    $"Stock not available, Please Check it of = {detail.ITEM_NAME}");
+                                return ("Validation", $"Stock not available, Please Check it of = {detail.ITEM_NAME}");
                             }
                         }
 
@@ -1767,41 +1562,28 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                             {
                                 if(detail.SAUDA_TYPE == "")
                                 {
-                                    return ("Validation",
-                                   $"Sauda Type can not be Blank, Please Check it of = {detail.ITEM_NAME}");
+                                    return ("Validation", $"Sauda Type can not be Blank, Please Check it of = {detail.ITEM_NAME}");
                                 }
 
 
                                 if(detail.SAUDA_NO == 0)
                                 {
-                                    return ("Validation",
-                                   $"Sauda No can not be Blank, Please Check it of = {detail.ITEM_NAME}");
+                                    return ("Validation",  $"Sauda No can not be Blank, Please Check it of = {detail.ITEM_NAME}");
                                 }
 
                                 if(detail.SAUDA_RATE == 0)
                                 {
-                                    return ("Validation",
-                                   $"Sauda Rate can not be Blank, Please Check it of = {detail.ITEM_NAME}");
+                                    return ("Validation", $"Sauda Rate can not be Blank, Please Check it of = {detail.ITEM_NAME}");
                                 }
 
                                 decimal pubRes1Dbl = Convert.ToDecimal(GetText($@"
-                                    SELECT ISNULL(SUM(QTY), 0)
-                                    FROM SAUDA
-                                    WHERE V_TYPE = '{detail.SAUDA_TYPE}'
-                                    AND V_NO = {detail.SAUDA_NO}
-                                    AND COMP_CODE = {GlobalData.PubCompCode}
-                                    AND BRANCH_CODE = {GlobalData.PubBranchCode}"));
+                                    SELECT ISNULL(SUM(QTY), 0) FROM SAUDA WHERE V_TYPE = '{detail.SAUDA_TYPE}'
+                                    AND V_NO = {detail.SAUDA_NO} AND COMP_CODE = {GlobalData.PubCompCode} AND BRANCH_CODE = {GlobalData.PubBranchCode}"));
 
                                     decimal pubRes2Dbl = Convert.ToDecimal(GetText($@"
-                                        SELECT ISNULL(SUM(QTY), 0)
-                                        FROM SALE2
-                                        WHERE SAUDA_TYPE = '{detail.SAUDA_TYPE}'
-                                        AND SAUDA_NO = {detail.SAUDA_NO}
-                                        AND ISNULL(Status, 0) <> 2
-                                        AND COMP_CODE = {GlobalData.PubCompCode}
-                                        AND BRANCH_CODE = {GlobalData.PubBranchCode}
-                                        AND V_TYPE = '{header.V_TYPE}'
-                                        AND V_NO <> {header.V_NO}"));
+                                        SELECT ISNULL(SUM(QTY), 0) FROM SALE2 WHERE SAUDA_TYPE = '{detail.SAUDA_TYPE}'  AND SAUDA_NO = {detail.SAUDA_NO}
+                                        AND ISNULL(Status, 0) <> 2  AND COMP_CODE = {GlobalData.PubCompCode}  AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                                        AND V_TYPE = '{header.V_TYPE}'  AND V_NO <> {header.V_NO}"));
 
                                 pubRes2Dbl += Convert.ToDecimal(detail.QTY ?? 0);
 
@@ -1849,27 +1631,16 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                             else
                             {
                                 pubRes1Dbl = Convert.ToDecimal(GetText($@"
-                                    SELECT ISNULL(SUM(QTY), 0)
-                                    FROM ORDER2
-                                    WHERE V_TYPE = '{detail.ORD_TYPE}'
+                                    SELECT ISNULL(SUM(QTY), 0)  FROM ORDER2  WHERE V_TYPE = '{detail.ORD_TYPE}'
                                     AND V_NO = {detail.ORD_NO}
                                     AND COMP_CODE = {GlobalData.PubCompCode}
                                     AND BRANCH_CODE = {GlobalData.PubBranchCode}
                                     AND ITEM_CODE = {detail.ITEM_CODE}"));
                             }
 
-                            pubRes2Dbl = Convert.ToDecimal(GetText($@"
-                                SELECT ISNULL(SUM(QTY), 0)
-                                FROM SALE2
-                                WHERE ORD_TYPE = '{detail.ORD_TYPE}'
-                                AND ORD_NO = {detail.ORD_NO}
-                                AND ISNULL(Status, 0) <> 2
-                                AND COMP_CODE = {GlobalData.PubCompCode}
-                                AND BRANCH_CODE = {GlobalData.PubBranchCode}
-                                AND YEAR_CODE = {GlobalData.PubFYearCode}
-                                AND ITEM_CODE = {detail.ITEM_CODE}
-                                AND V_TYPE = '{header.V_TYPE}'
-                                AND V_NO <> {header.V_NO}"));
+                            pubRes2Dbl = Convert.ToDecimal(GetText($@" SELECT ISNULL(SUM(QTY), 0)  FROM SALE2  WHERE ORD_TYPE = '{detail.ORD_TYPE}'
+                                AND ORD_NO = {detail.ORD_NO}  AND ISNULL(Status, 0) <> 2   AND COMP_CODE = {GlobalData.PubCompCode}  AND BRANCH_CODE = {GlobalData.PubBranchCode}
+                                AND YEAR_CODE = {GlobalData.PubFYearCode} AND ITEM_CODE = {detail.ITEM_CODE} AND V_TYPE = '{header.V_TYPE}' AND V_NO <> {header.V_NO}"));
 
                             decimal invoiceQty = Convert.ToDecimal(detail.QTY ?? 0);
 
