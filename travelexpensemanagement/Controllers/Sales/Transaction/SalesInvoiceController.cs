@@ -1397,5 +1397,65 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
 
+
+
+        [HttpGet]
+        public JsonResult GetAddressData(int PartyCode, int AddressId)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = @" SELECT  a.ADDRESS_ID, a.Add1, a.Add2, a.Add3, a.GSTIN,  a.City_Code,  d.Code AS CountryCode,
+                a.Pincode, s.Code AS SCode FROM Subgroup_Address a
+                LEFT JOIN STATE_MAST b   ON a.STATE_CODE = b.Code
+                LEFT JOIN CITY_MAST c  ON a.CITY_CODE = c.Code
+                LEFT JOIN STATE_MAST s  ON s.Code = c.State_code
+                LEFT JOIN Country_MAST d   ON c.Country_CODE = d.Code
+                WHERE   a.comp_code = @CompCode  AND a.Code = @PartyCode AND a.Address_Id = @AddressId; ";
+
+                var AddressDataList = new List<object>();
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@PartyCode", PartyCode);
+                    cmd.Parameters.AddWithValue("@AddressId", AddressId);
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            AddressDataList.Add(new
+                            {
+                                ADDRESS_ID = reader["ADDRESS_ID"],
+                                Add1 = reader["Add1"],
+                                Add2 = reader["Add2"],
+                                Add3 = reader["Add3"],
+                                GSTIN = reader["GSTIN"],
+                                City_Code = reader["City_Code"],
+                                CountryCode = reader["CountryCode"],
+                                Pincode = reader["Pincode"],
+                                SCode = reader["SCode"]
+
+                            });
+                        }
+                    }
+                }
+
+                return Json(AddressDataList);
+            }
+        }
+
+
+
+
+
+
+
+
+
     }
 } 

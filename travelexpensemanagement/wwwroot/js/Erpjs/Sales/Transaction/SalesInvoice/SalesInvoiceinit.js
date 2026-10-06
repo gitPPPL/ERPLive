@@ -853,7 +853,28 @@ $(document).ready(async function () {
             });
         }
     });
-    
+
+
+
+    $('#ddladdressL1').change(function () {
+        let PartyCode = $('#ddlPartyName').val();
+        let AddressId = $('#ddladdressL1').val();
+        AddressPartyData(PartyCode, AddressId);
+    });
+
+    $('#ddlsupplyaddressL1').change(function () {
+        let PartyCode = $('#ddlConsignee').val();
+        let AddressId = $('#ddlsupplyaddressL1').val();
+        AddressConsigneeData(PartyCode, AddressId);
+    });
+
+
+
+
+
+
+
+
     //kks
 
     $(document).on('click', '#btn_Sendapproval', function () {

@@ -617,3 +617,84 @@ async function DDLBank() {
         console.error("Error Bank Name:", error);
     }
 }
+
+
+async function AddressPartyData(PartyCode, AddressId) {
+    try {
+        const res = await $.ajax({
+            url: '/SalesInvoice/GetAddressData',
+            type: 'GET',
+            data: {
+                PartyCode: PartyCode,
+                AddressId: AddressId
+            }
+        });
+
+        const data = res[0];
+
+        if (!data) {
+            console.log("No address data found");
+            return;
+        }
+
+        console.log("Address Data", data);
+
+
+        // Billing Address
+        $('#TxtAddressL1').val(data.add1 || '');
+        $('#TxtAddressL2').val(data.add2 || '');
+        $('#TxtAddressL3').val(data.add3 || '');
+        $('#ddlStation').val(data.city_Code || '');
+        $('#NumPincode').val(data.pincode || '');
+        $('#NumGSTNoL').val(data.gstin || '');
+
+        // Shipping / Consignee Address
+        $('#TxtSupplyAddressL1').val(data.add1 || '');
+        $('#TxtSupplyAddressL2').val(data.add2 || '');
+        $('#TxtSupplyAddressL3').val(data.add3 || '');
+        $('#ddlSupplyStation').val(data.city_Code || '');
+        $('#NumSupplyPIN').val(data.pincode || '');
+        $('#NumGSTNo').val(data.gstin || '');
+
+        console.log("Address Data:", data);
+
+        return data;
+    }
+    catch (error) {
+        console.log("error", error);
+    }
+}
+
+async function AddressConsigneeData(PartyCode, AddressId) {
+    try {
+        const res = await $.ajax({
+            url: '/SalesInvoice/GetAddressData',
+            type: 'GET',
+            data: {
+                PartyCode: PartyCode,
+                AddressId: AddressId
+            }
+        });
+
+
+        const data = res[0];
+
+        if (!data) {
+            console.log("No address data found");
+            return;
+        }
+        // Shipping / Consignee Address
+        $('#TxtSupplyAddressL1').val(data.add1 || '');
+        $('#TxtSupplyAddressL2').val(data.add2 || '');
+        $('#TxtSupplyAddressL3').val(data.add3 || '');
+        $('#ddlSupplyStation').val(data.city_Code || '');
+        $('#NumSupplyPIN').val(data.pincode || '');
+        $('#NumGSTNo').val(data.gstin || '');
+
+        console.log("res", res);
+        return res;
+    }
+    catch (error) {
+        console.log("error", error);
+    }
+}
