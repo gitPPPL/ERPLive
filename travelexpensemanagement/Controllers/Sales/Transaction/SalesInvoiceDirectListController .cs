@@ -7,9 +7,9 @@ using travelexpensemanagement.Dbconnection;
 
 namespace travelexpensemanagement.Controllers.Sales.Transaction
 {
-    public class SalesInvoiceListController : Controller
-    {
 
+    public class SalesInvoiceDirectListController : Controller
+    {
 
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
@@ -17,7 +17,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
-        public SalesInvoiceListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
+        public SalesInvoiceDirectListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
        travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, GlobalValidationdate globalValidationdate, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
@@ -28,9 +28,8 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
         public IActionResult Index()
         {
-            return View("~/Views/Sales/Transaction/SalesInvoiceList/Index.cshtml");
+            return View("~/Views/Sales/Transaction/SalesInvoiceDirectList/Index.cshtml");
         }
-
 
         [HttpGet]
         public IActionResult GetList(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
@@ -43,12 +42,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
 
             int totalCount = 0;
-            var headerList = new List<SalesInvoiceModel_Header>();
+            var headerList = new List<SalesInvoiceDirectModel_Header>();
 
             try
             {
                 using (var conn = _dbConnection.GetErpConnection())
-                using (var cmd = new SqlCommand("sp_SalesInvoice", conn))
+                using (var cmd = new SqlCommand("sp_SalesInvoiceDirect", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -66,7 +65,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     {
                         while (reader.Read())
                         {
-                            headerList.Add(new SalesInvoiceModel_Header
+                            headerList.Add(new SalesInvoiceDirectModel_Header
                             {
                                 DOC_ID = reader["DOC_ID"] != DBNull.Value ? reader["DOC_ID"].ToString() : string.Empty,
                                 V_TYPE = reader["V_TYPE"] != DBNull.Value ? reader["V_TYPE"].ToString() : string.Empty,
@@ -74,7 +73,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 V_NO = reader["V_NO"] != DBNull.Value ? Convert.ToInt32(reader["V_NO"]) : 0,
                                 TRANSPORT_CODE = reader["TRANSPORT_CODE"] != DBNull.Value ? Convert.ToInt32(reader["TRANSPORT_CODE"]) : 0,
                                 V_DATE = reader["V_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["V_DATE"]) : DateTime.MinValue,
-
                                 BILL_NAME = reader["BILL_NAME"] != DBNull.Value ? reader["BILL_NAME"].ToString() : string.Empty,
                                 BILL_ADD1 = reader["BILL_ADD1"] != DBNull.Value ? reader["BILL_ADD1"].ToString() : string.Empty,
                                 BILL_ADD2 = reader["BILL_ADD2"] != DBNull.Value ? reader["BILL_ADD2"].ToString() : string.Empty,
@@ -90,27 +88,18 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 TRAN_TYPE = reader["TRAN_TYPE"] != DBNull.Value ? reader["TRAN_TYPE"].ToString() : string.Empty,
                                 SUPPLY_TYPE = reader["SUPPLY_TYPE"] != DBNull.Value ? reader["SUPPLY_TYPE"].ToString() : string.Empty,
                                 ITEM_TYPE = reader["ITEM_TYPE"] != DBNull.Value ? reader["ITEM_TYPE"].ToString() : string.Empty,
-
-                                WB_NO = reader["WB_NO"] != DBNull.Value ? Convert.ToInt32(reader["WB_NO"]) : 0,
-                                PACK_NO = reader["PACK_NO"] != DBNull.Value ? Convert.ToInt32(reader["PACK_NO"]) : 0,
-
                                 AMOUNT = reader["AMOUNT"] != DBNull.Value ? Convert.ToDecimal(reader["AMOUNT"]) : 0,
                                 PACK_PER = reader["PACK_PER"] != DBNull.Value ? Convert.ToDecimal(reader["PACK_PER"]) : 0,
                                 PACK_AMT = reader["PACK_AMT"] != DBNull.Value ? Convert.ToDecimal(reader["PACK_AMT"]) : 0,
                                 NAMOUNT = reader["NAMOUNT"] != DBNull.Value ? Convert.ToDecimal(reader["NAMOUNT"]) : 0,
-
                                 CGST_PER = reader["CGST_PER"] != DBNull.Value ? Convert.ToDecimal(reader["CGST_PER"]) : 0,
                                 CGST_AMT = reader["CGST_AMT"] != DBNull.Value ? Convert.ToDecimal(reader["CGST_AMT"]) : 0,
-
                                 SGST_PER = reader["SGST_PER"] != DBNull.Value ? Convert.ToDecimal(reader["SGST_PER"]) : 0,
                                 SGST_AMT = reader["SGST_AMT"] != DBNull.Value ? Convert.ToDecimal(reader["SGST_AMT"]) : 0,
-
                                 IGST_PER = reader["IGST_PER"] != DBNull.Value ? Convert.ToDecimal(reader["IGST_PER"]) : 0,
                                 IGST_AMT = reader["IGST_AMT"] != DBNull.Value ? Convert.ToDecimal(reader["IGST_AMT"]) : 0,
-
                                 CESS_PER = reader["CESS_PER"] != DBNull.Value ? Convert.ToDecimal(reader["CESS_PER"]) : 0,
                                 CESS_AMT = reader["CESS_AMT"] != DBNull.Value ? Convert.ToDecimal(reader["CESS_AMT"]) : 0,
-
                                 LOAD_PER = reader["LOAD_PER"] != DBNull.Value ? Convert.ToDecimal(reader["LOAD_PER"]) : 0,
                                 LOAD_AMT = reader["LOAD_AMT"] != DBNull.Value ? Convert.ToDecimal(reader["LOAD_AMT"]) : 0,
                                 LOAD_AC = reader["LOAD_AC"] != DBNull.Value ? reader["LOAD_AC"].ToString() : string.Empty,
@@ -129,14 +118,13 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 TOT_GROSS = reader["TOT_GROSS"] != DBNull.Value ? Convert.ToDecimal(reader["TOT_GROSS"]) : 0,
                                 GR_NO = reader["GR_NO"] != DBNull.Value ? reader["GR_NO"].ToString() : string.Empty,
                                 GR_DATE = reader["GR_DATE"] != DBNull.Value ? Convert.ToDateTime(reader["GR_DATE"]) : DateTime.MinValue,
-                                VEHICLE_NO = reader["VEHICLE_NO"] != DBNull.Value ? reader["VEHICLE_NO"].ToString() : string.Empty,                        
+                                VEHICLE_NO = reader["VEHICLE_NO"] != DBNull.Value ? reader["VEHICLE_NO"].ToString() : string.Empty,
                                 TRANSPORT_NAME = reader["TRANSPORT_NAME"] != DBNull.Value ? reader["TRANSPORT_NAME"].ToString() : string.Empty,
                                 DRIVER_NAME = reader["DRIVER_NAME"] != DBNull.Value ? reader["DRIVER_NAME"].ToString() : string.Empty,
                                 DRIVER_NO = reader["DRIVER_NO"] != DBNull.Value ? reader["DRIVER_NO"].ToString() : string.Empty,
                                 EWAYBILL_NO = reader["EWAYBILL_NO"] != DBNull.Value ? reader["EWAYBILL_NO"].ToString() : string.Empty,
                                 REMARK = reader["REMARK"] != DBNull.Value ? reader["REMARK"].ToString() : string.Empty,
-                                FRT_TOPAY = reader["FRT_TOPAY"] != DBNull.Value ? Convert.ToDecimal(reader["FRT_TOPAY"]) : 0,
-                                WB_QTY = reader["WB_QTY"] != DBNull.Value ? Convert.ToDecimal(reader["WB_QTY"]) : 0,
+                                FRT_TOPAY = reader["FRT_TOPAY"] != DBNull.Value ? Convert.ToDecimal(reader["FRT_TOPAY"]) : 0,                            
                                 DISC_PER = reader["DISC_PER"] != DBNull.Value ? Convert.ToDecimal(reader["DISC_PER"]) : 0,
                                 DISC_AMT = reader["DISC_AMT"] != DBNull.Value ? Convert.ToDecimal(reader["DISC_AMT"]) : 0,
                                 CDISC_PER = reader["CDISC_PER"] != DBNull.Value ? Convert.ToDecimal(reader["CDISC_PER"]) : 0,
@@ -181,7 +169,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     con.Open();
 
                     #region Fetch Header Data
-                    using (SqlCommand cmd = new SqlCommand("sp_SalesInvoice", con))
+                    using (SqlCommand cmd = new SqlCommand("sp_SalesInvoiceDirect", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "SHOWDATA");
@@ -198,12 +186,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                             {
                                 wrapper.Header = new SalesInvoiceModel_Header
                                 {
-                               
-                                    V_TYPE = rdr["V_TYPE"]?.ToString(),                        
+
+                                    V_TYPE = rdr["V_TYPE"]?.ToString(),
                                     V_NO = rdr["V_no"] != DBNull.Value ? Convert.ToInt32(rdr["V_no"]) : 0,
                                     V_DATE = rdr["V_date"] != DBNull.Value ? Convert.ToDateTime(rdr["V_date"]) : DateTime.MinValue,
                                     DOC_ID = rdr["DOC_ID"]?.ToString(),
-                                    GODOWN_CODE = rdr["GODOWN_CODE"]?.ToString(),                       
+                                    GODOWN_CODE = rdr["GODOWN_CODE"]?.ToString(),
 
                                     BANK_CODE = rdr["BANK_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["BANK_CODE"]) : 0,
                                     BILL_CODE = rdr["BILL_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["BILL_CODE"]) : 0,
@@ -271,7 +259,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     WB_REM = rdr["WB_REM"]?.ToString(),
 
                                     TOT_GROSS = rdr["TOT_GROSS"] != DBNull.Value ? Convert.ToDecimal(rdr["TOT_GROSS"]) : 0,
-                               
+
                                     GR_NO = rdr["GR_NO"]?.ToString(),
                                     GR_DATE = rdr["GR_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["GR_DATE"]) : DateTime.MinValue,
                                     VEHICLE_NO = rdr["VEHICLE_NO"]?.ToString(),
@@ -308,7 +296,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     SB_NO = rdr["SB_NO"]?.ToString(),
                                     SB_DATE = rdr["SB_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["SB_DATE"]) : DateTime.MinValue,
                                     LUT_DATE = rdr["LUT_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["LUT_DATE"]) : DateTime.MinValue,
-                                 
+
                                     PORT_CODE = rdr["PORT_CODE"]?.ToString(),
                                     FOB_VALUE = rdr["FOB_VALUE"] != DBNull.Value ? Convert.ToDecimal(rdr["FOB_VALUE"]) : 0,
                                     FOB_FRT = rdr["FOB_FRT"] != DBNull.Value ? Convert.ToDecimal(rdr["FOB_FRT"]) : 0,
@@ -329,8 +317,8 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     SHIPMENT_TYPE = rdr["SHIPMENT_TYPE"]?.ToString(),
                                     TRAN_TYPE = rdr["TRAN_TYPE"]?.ToString(),
                                     CURRENCY = rdr["CURRENCY"]?.ToString(),
-                                    EWAYBILL_NO = rdr["EWAYBILL_NO"]?.ToString(),                
-                                 
+                                    EWAYBILL_NO = rdr["EWAYBILL_NO"]?.ToString(),
+
                                     EINVOICE_FLG = rdr["EINVOICE_FLG"] != DBNull.Value ? Convert.ToInt32(rdr["EINVOICE_FLG"]) : 0,
 
                                     STATUS = rdr["STATUS"] != DBNull.Value ? Convert.ToInt32(rdr["STATUS"]) : 0,
@@ -348,7 +336,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                     #region Fetch DO Data
 
-                    using (SqlCommand cmd = new SqlCommand("sp_SalesInvoice", con))
+                    using (SqlCommand cmd = new SqlCommand("sp_SalesInvoiceDirect", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
@@ -373,7 +361,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
 
                     #region Fetch Dispatch Data
-                    using (SqlCommand cmd4 = new SqlCommand("sp_SalesInvoice", con))
+                    using (SqlCommand cmd4 = new SqlCommand("sp_SalesInvoiceDirect", con))
                     {
                         cmd4.CommandType = CommandType.StoredProcedure;
                         cmd4.Parameters.AddWithValue("@Action", "SHOWDATA");
@@ -450,7 +438,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
         [HttpPost]
-        public JsonResult Delete(int code, string VType )
+        public JsonResult Delete(int code, string VType)
         {
             var getGlobalCode = _globalVariableService.GetGlobalVariables();
             try
@@ -484,9 +472,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                         }
                     }
 
-                 if (!string.IsNullOrEmpty(gateNo))
+                    if (!string.IsNullOrEmpty(gateNo))
                     {
-                        return Json(new { success = false, message = $"This document exists in Gate Serial No: \"{gateNo}\" dated: \"{gateDate:dd-MM-yyyy}\"{Environment.NewLine}Delete the GatePass First.",
+                        return Json(new
+                        {
+                            success = false,
+                            message = $"This document exists in Gate Serial No: \"{gateNo}\" dated: \"{gateDate:dd-MM-yyyy}\"{Environment.NewLine}Delete the GatePass First.",
                             validation = false
                         });
                     }
@@ -509,10 +500,10 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                     if (!string.IsNullOrEmpty(v_no))
                     {
-                        return Json(new { success = false,  message = $"This document exists in Ledger Serial No :{v_no} dated :{v_date}", validation = false });
+                        return Json(new { success = false, message = $"This document exists in Ledger Serial No :{v_no} dated :{v_date}", validation = false });
                     }
 
-                    using (SqlCommand cmd = new SqlCommand("sp_SalesInvoice", con))
+                    using (SqlCommand cmd = new SqlCommand("sp_SalesInvoiceDirect", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", "DELETE");
@@ -569,7 +560,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             using (SqlConnection conn = _dbConnection.GetErpConnection())
             {
-                using (SqlCommand cmd = new SqlCommand("sp_SalesInvoice", conn))
+                using (SqlCommand cmd = new SqlCommand("sp_SalesInvoiceDirect", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Action", "DocDetailID");
@@ -610,87 +601,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             public string? LIP { get; set; }
             public string? LID { get; set; }
         }
-        [HttpPost]
-        public IActionResult GetPendingDataCode(int BillCode)
-        {
-            var GetGlobalCode = _globalVariableService.GetGlobalVariables();
-
-            try
-            {
-                using (SqlConnection con = _dbConnection.GetErpConnection())
-                {
-                    con.Open();
-
-                    using (SqlCommand cmd = new SqlCommand("sp_SalesInvoice", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@Action", "PendingDetail");
-                        cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
-                        cmd.Parameters.AddWithValue("@BILL_CODE", BillCode);
-
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            var result = new List<Dictionary<string, object>>();
-
-                            while (reader.Read())
-                            {
-                                var row = new Dictionary<string, object>();
-
-                                row["DOC_ID"] = reader["DOC_ID"] == DBNull.Value ? null : reader["DOC_ID"];
-                                row["V_TYPE"] = reader["V_TYPE"] == DBNull.Value ? null : reader["V_TYPE"];
-                                row["V_NO"] = reader["V_NO"] == DBNull.Value ? null : reader["V_NO"];
-                                row["V_DATE"] = reader["V_DATE"] == DBNull.Value ? null : reader["V_DATE"];
-                                row["Item_Name"] = reader["Item_Name"] == DBNull.Value ? null : reader["Item_Name"];
-                                row["Item_Unit"] = reader["Item_Unit"] == DBNull.Value ? null : reader["Item_Unit"];
-                                row["HSN_Code"] = reader["HSN_Code"] == DBNull.Value  ? null : reader["HSN_Code"];
-                                row["Nos"] = reader["Nos"] == DBNull.Value ? null : reader["Nos"];
-                                row["Gross"] = reader["Gross"] == DBNull.Value ? null : reader["Gross"];
-                                row["Qty"] = reader["Qty"] == DBNull.Value  ? null : reader["Qty"];
-                                row["Rate"] = reader["Rate"] == DBNull.Value ? null : reader["Rate"];
-                                row["Amount"] = reader["Amount"] == DBNull.Value ? null : reader["Amount"];
-                                row["Disc_Per"] = reader["Disc_Per"] == DBNull.Value ? null : reader["Disc_Per"];
-                                row["Disc_Amt"] = reader["Disc_Amt"] == DBNull.Value ? null : reader["Disc_Amt"];
-                                row["CGST_Per"] = reader["CGST_Per"] == DBNull.Value ? null : reader["CGST_Per"];
-                                row["CGST_Amt"] = reader["CGST_Amt"] == DBNull.Value  ? null : reader["CGST_Amt"];
-                                row["SGST_Per"] = reader["SGST_Per"] == DBNull.Value ? null : reader["SGST_Per"];
-                                row["SGST_Amt"] = reader["SGST_Amt"] == DBNull.Value ? null : reader["SGST_Amt"];
-                                row["IGST_Per"] = reader["IGST_Per"] == DBNull.Value  ? null : reader["IGST_Per"];
-                                row["IGST_Amt"] = reader["IGST_Amt"] == DBNull.Value  ? null : reader["IGST_Amt"];
-                                row["PACK_Per"] = reader["PACK_Per"] == DBNull.Value ? null : reader["PACK_Per"];
-                                row["PACK_Amt"] = reader["PACK_Amt"] == DBNull.Value  ? null : reader["PACK_Amt"];
-                                row["Remark"] = reader["Remark"] == DBNull.Value ? null : reader["Remark"];
-                                row["Type"] = reader["Type"] == DBNull.Value ? null : reader["Type"];
-                                row["SNO"] = reader["SNO"] == DBNull.Value  ? null : reader["SNO"];
-                                row["Item_Code"] = reader["Item_Code"] == DBNull.Value ? null : reader["Item_Code"];
-                                row["REPORT_TYPE"] = reader["REPORT_TYPE"] == DBNull.Value ? null : reader["REPORT_TYPE"];
-                                row["Sale_Rate"] = reader["Sale_Rate"] == DBNull.Value ? null : reader["Sale_Rate"];
-                                row["Taxable_Rate"] = reader["Taxable_Rate"] == DBNull.Value ? null : reader["Taxable_Rate"];
-                                row["Net_Wt"] = reader["Net_Wt"] == DBNull.Value ? null : reader["Net_Wt"];
-                                row["Packing_Wt"] = reader["Packing_Wt"] == DBNull.Value ? null : reader["Packing_Wt"];
-                                row["Packing_nos"] = reader["Packing_nos"] == DBNull.Value ? null : reader["Packing_nos"];
-
-                                result.Add(row);
-                            }
-
-                            return Json(new { success = true, data = result });
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = "Error fetching pending order details",
-                    error = ex.Message
-                });
-            }
-        }
-
-
 
         [HttpGet]
         public async Task<IActionResult> ExportToExcel(string searchTerm = null)
@@ -702,7 +612,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             {
                 await conn.OpenAsync();
 
-                using (SqlCommand cmd = new SqlCommand("sp_SalesInvoice", conn))
+                using (SqlCommand cmd = new SqlCommand("sp_SalesInvoiceDirect", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@COMP_CODE", global.PubCompCode);
@@ -714,7 +624,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     using (var workbook = new ClosedXML.Excel.XLWorkbook())
                     {
-                        var ws = workbook.Worksheets.Add("SalesInvoice");
+                        var ws = workbook.Worksheets.Add("SalesInvoiceDirect");
 
                         // Header
                         for (int i = 0; i < reader.FieldCount; i++)
@@ -771,7 +681,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                             workbook.SaveAs(stream);
                             stream.Position = 0;
 
-                            return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "SalesInvoice.xlsx");
+                            return File( stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "SalesInvoiceDirect.xlsx");
                         }
                     }
                 }
@@ -780,19 +690,11 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExportPdf(string searchTerm = null, string Sp_Name = "sp_SalesInvoice", string Actionparameter = "ExportToExcel", string ReportName = "SalesInvoice")
+        public async Task<IActionResult> ExportPdf(string searchTerm = null, string Sp_Name = "sp_SalesInvoiceDirect", string Actionparameter = "ExportToExcel", string ReportName = "SalesInvoiceDirect")
         {
             byte[] pdfBytes = await _globalValidationdate.ExportToPdf(searchTerm, Sp_Name, Actionparameter, ReportName);
             string fileName = string.IsNullOrWhiteSpace(ReportName) ? "Report.pdf" : ReportName + ".pdf";
             return File(pdfBytes, "application/pdf", fileName);
         }
-
-
-
-
-
-
-
-
     }
 }

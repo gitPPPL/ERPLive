@@ -14,7 +14,7 @@
 		</div>
 		<div class="col-lg-6">
 			<div class="btn-rightalign">
-				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "SalesInvoice")'" type="submit" class="btn btn-add">
+                <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "SalesInvoiceDirect")'" type="submit" class="btn btn-add">
 					<i class="fa fa-plus"></i>Add
 				</button>
                 <button class="btn btn-print" id="button_print">
@@ -51,9 +51,7 @@
 						<th>Tax Name</th>
 						<th>Trantype</th>
 						<th>Suptype</th>
-						<th>Item Type</th>
-						<th>Wb No</th>
-						<th>Pack No</th>
+						<th>Item Type</th>			
 						<th>Amount</th>
 						<th>Pack Per</th>
 						<th>Pack Amount</th>
@@ -91,8 +89,7 @@
 						<th>Driver_No</th>
 						<th>Ewaybill_No</th>
 						<th>Remark</th>
-						<th>Freight Topay</th>
-						<th>Wb Quantity</th>
+						<th>Freight Topay</th>					
 						<th>Disc_Per</th>
 						<th>Disc Amount</th>
 						<th>Cdisc_Per</th>
@@ -141,9 +138,9 @@
     var controllerName = window.location.pathname.split('/')[1];
 
     $(document).ready(function () {
-        checkPermission(controllerName, function () {
+        //checkPermission(controllerName, function () {
               loadAllInward();
-            });
+            //});
 
         $('#searchBox').on('keyup', function () {
             currentPage = 1;
@@ -152,14 +149,18 @@
 
         $('#button_export').on('click', function () {
             var text = $('#searchBox').val();
-            window.location.href = '/SalesInvoiceList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+            window.location.href = '/SalesInvoiceDirectList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
         });
 
-        $('#button_print').on('click', function () {
+        $('#button_print').on('click', function () 
+        {
             var searchTerm = $('#searchBox').val() || '';
-            var url = '/SalesInvoiceList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
-            window.open(url, '_blank');
+            window.location.href = '/SalesInvoiceDirectList/ExportPdf?searchTerm=' + encodeURIComponent(searchTerm);
+
         });
+
+
+
 
     });
 
@@ -167,7 +168,7 @@
     function loadAllInward() {
 
         $.ajax({
-            url: '/SalesInvoiceList/GetList',
+            url: '/SalesInvoiceDirectList/GetList',
             type: 'GET',
             dataType: 'json',
             data: {
@@ -235,8 +236,7 @@
                             <td>${item.traN_TYPE ?? ''}</td>
                             <td>${item.supplY_TYPE ?? ''}</td>
                             <td>${item.iteM_TYPE ?? ''}</td>
-                            <td>${item.wB_NO ?? ''}</td>
-                            <td>${item.pacK_NO ?? ''}</td>
+
                             <td>${item.amount ?? ''}</td>
                             <td>${item.pacK_PER ?? ''}</td>
                             <td>${item.pacK_AMT ?? ''}</td>
@@ -265,8 +265,7 @@
                             <td>${item.insU_PER ?? ''}</td>
                             <td>${item.insU_AMT ?? ''}</td>
                             <td>${item.tdS_PER ?? ''}</td>
-                            <td>${item.tdS_AMT ?? ''}</td>
-                           
+                            <td>${item.tdS_AMT ?? ''}</td>                         
                             
                             <td>${item.loaD_REM ?? ''}</td>
                             <td>${item.wB_REM ?? ''}</td>
@@ -281,7 +280,6 @@
                             <td>${item.waybilL_NO ?? ''}</td>
                             <td>${item.remark ?? ''}</td>
                             <td>${item.frT_TOPAY ?? ''}</td>
-                            <td>${item.wB_QTY ?? ''}</td>
                             <td>${item.disC_PER ?? ''}</td>
                             <td>${item.disC_AMT ?? ''}</td>
                             <td>${item.cdisC_PER ?? ''}</td>
@@ -299,7 +297,7 @@
                 </tr>
             `);
 
-            applyGridPermission();
+            //applyGridPermission();
         });
 
     }
@@ -393,11 +391,11 @@
 
     // ================= ACTIONS =================
     function AddOrEditFunction(DOC_ID) {
-        window.location.href = `/salesInvoice/Index?id=${encodeURIComponent(DOC_ID)}`;
+        window.location.href = `/SalesInvoiceDirect/Index?id=${encodeURIComponent(DOC_ID)}`;
     }
 
     function viewMenuDetails(DOC_ID) {
-        window.location.href = `/salesInvoice/Index?id=${encodeURIComponent(DOC_ID)}&mode=view`;
+        window.location.href = `/SalesInvoiceDirect/Index?id=${encodeURIComponent(DOC_ID)}&mode=view`;
     }
 
     function deleteTemp(code, VType) {
@@ -414,7 +412,7 @@
             if (result.isConfirmed) {
 
                 $.ajax({
-                    url: '/SalesInvoiceList/Delete',
+                    url: '/SalesInvoiceDirectList/Delete',
                     type: 'POST',
                     data: { code: code, VType: VType },
                     success: function (res) {
@@ -446,7 +444,7 @@
     function showDocumentPopup(docCode) {
 
         $.ajax({
-            url: '/SalesInvoiceList/DocDetailsCode',
+            url: '/SalesInvoiceDirectList/DocDetailsCode',
             type: 'POST',
             dataType: 'json',
             data: { docCode: docCode },

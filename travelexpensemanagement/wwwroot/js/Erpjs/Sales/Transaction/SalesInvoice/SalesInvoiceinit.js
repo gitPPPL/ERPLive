@@ -282,14 +282,7 @@ $(document).ready(async function () {
         if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;
         if (!validateRequiredField('#ddlFormType', 'Please select a Form Type.')) return;
         if (!validateRequiredField('#TxtDriverName', 'Please Fill  Driver Name.')) return;
-        if (!validateRequiredField('#TxtDriverName', 'Please Fill  Driver Name.')) return;
         if (!validateRequiredField('#NumDriverMob', 'Please Fill  Driver Mobile No.')) return;
-
-
-        // =========================================================
-        // HEADER
-        // =========================================================
-
 
         const isValid = await checkValidDate();
         if (isValid === false) {
@@ -854,8 +847,6 @@ $(document).ready(async function () {
         }
     });
 
-
-
     $('#ddladdressL1').change(function () {
         let PartyCode = $('#ddlPartyName').val();
         let AddressId = $('#ddladdressL1').val();
@@ -867,6 +858,11 @@ $(document).ready(async function () {
         let AddressId = $('#ddlsupplyaddressL1').val();
         AddressConsigneeData(PartyCode, AddressId);
     });
+
+
+
+
+
 
 
 

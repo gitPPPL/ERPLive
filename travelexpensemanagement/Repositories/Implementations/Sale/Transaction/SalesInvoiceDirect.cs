@@ -1,30 +1,20 @@
-﻿using AngleSharp.Text;
-using DocumentFormat.OpenXml.Math;
-using DocumentFormat.OpenXml.Wordprocessing;
-using iText.Layout.Element;
-using Microsoft.Data.SqlClient;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using StackExchange.Redis;
+﻿using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Reflection.Metadata;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.Models.Inventory.Transaction;
-using travelexpensemanagement.Models.Sales.Transaction;
+
 using travelexpensemanagement.Repositories.Interfaces.Sale.Transaction;
 
 namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 {
-    public class SalesInVoice : ISalesInVoice
+    public class SalesInvoiceDirect : ISalesInvoiceDirect
     {
-
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;
         private readonly DropdownService _dropdownService;
 
-        public SalesInVoice(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DropdownService dropdownService)
+        public SalesInvoiceDirect(DataBaseConnection dbConnection, GlobalVariableService globalVariableService, DropdownService dropdownService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -62,7 +52,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
             }
         }
 
-        public async Task<(string Status, string Message)> validation(SalesInvoiceModel_Header header, List<SalesInvoiceModel_Detail> details, string action)
+        public async Task<(string Status, string Message)> validation(SalesInvoiceDirectModel_Header header, List<SalesInvoiceDirectModel_Detail> details, string action)
         {
             try
             {
@@ -1461,7 +1451,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
             }
         }
 
-        public async Task<(string Status, string Message)> SubmitRequest(SalesInvoiceModel_Header header, List<SalesInvoiceModel_Detail> details, string action)
+        public async Task<(string Status, string Message)> SubmitRequest(SalesInvoiceDirectModel_Header header, List<SalesInvoiceDirectModel_Detail> details, string action)
         {
             try
             {
@@ -1550,18 +1540,13 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@V_TYPE", (object?)header.V_TYPE ?? DBNull.Value);
                         cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
                         cmd.Parameters.Add("@V_DATE", SqlDbType.SmallDateTime).Value = header.V_DATE;
-                        cmd.Parameters.AddWithValue("@GODOWN_CODE", header.GODOWN_CODE);
+
                         cmd.Parameters.AddWithValue("@BILL_CODE", header.BILL_CODE);
                         cmd.Parameters.AddWithValue("@BILL_NAME", header.BILL_NAME);
                         cmd.Parameters.AddWithValue("@BILL_ADD1", header.BILL_ADD1);
                         cmd.Parameters.AddWithValue("@BILL_ADD2", header.BILL_ADD2);
                         cmd.Parameters.AddWithValue("@BILL_ADD3", header.BILL_ADD3);
                         cmd.Parameters.AddWithValue("@BILL_CITY", header.BILL_CITY);
-                        cmd.Parameters.AddWithValue("@BILL_CITYName", header.BILL_CITYName);
-                        cmd.Parameters.AddWithValue("@BILL_STATE", header.BILL_STATE);
-                        cmd.Parameters.AddWithValue("@BILL_STATENAME", header.BILL_STATENAME);
-                        cmd.Parameters.AddWithValue("@BILL_COUNTRY", header.BILL_COUNTRY);
-                        cmd.Parameters.AddWithValue("@BILL_COUNTRYNAME", header.BILL_COUNTRYNAME);
                         cmd.Parameters.AddWithValue("@BILL_GST", header.BILL_GST);
                         cmd.Parameters.AddWithValue("@BILL_PINCODE", header.BILL_PINCODE);
                         cmd.Parameters.AddWithValue("@INSUCR_DAYS", header.INSUCR_DAYS);
@@ -1571,19 +1556,11 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@SHIP_ADD2", header.SHIP_ADD2);
                         cmd.Parameters.AddWithValue("@SHIP_ADD3", header.SHIP_ADD3);
                         cmd.Parameters.AddWithValue("@SHIP_CITY", header.SHIP_CITY);
-                        cmd.Parameters.AddWithValue("@SHIP_STATE", header.SHIP_STATE);
-                        cmd.Parameters.AddWithValue("@SHIP_COUNTRY", header.SHIP_COUNTRY);
+                        cmd.Parameters.AddWithValue("@SHIP_GST", header.SHIP_GST);
                         cmd.Parameters.AddWithValue("@SHIP_PINCODE", header.SHIP_PINCODE);
-                        cmd.Parameters.AddWithValue("@SHIP_CITYNAME", header.SHIP_CITYNAME);
-                        cmd.Parameters.AddWithValue("@SHIP_STATENAME", header.SHIP_STATENAME);
-                        cmd.Parameters.AddWithValue("@SHIP_COUNTRYNAME", header.SHIP_COUNTRYNAME);
-                        cmd.Parameters.AddWithValue("@SHIP_GST", header.SHIP_GST);                     
-                       cmd.Parameters.AddWithValue("@TAX_CODE", header.TAX_CODE);
-                        cmd.Parameters.AddWithValue("@PACK_TYPE", header.PACK_TYPE);
-                        cmd.Parameters.AddWithValue("@PACK_NO", header.PACK_NO);
+
+                        cmd.Parameters.AddWithValue("@TAX_CODE", header.TAX_CODE);
                         cmd.Parameters.AddWithValue("@ITEM_TYPE", header.ITEM_TYPE);
-                        cmd.Parameters.AddWithValue("@WB_NO", header.WB_NO);
-                        cmd.Parameters.AddWithValue("@WB_TYPE", header.WB_TYPE);
                         cmd.Parameters.AddWithValue("@ISSUE_NO", header.ISSUE_NO);
                         cmd.Parameters.AddWithValue("@ISSUE_TYPE", header.ISSUE_TYPE);
                         cmd.Parameters.AddWithValue("@AMOUNT", header.AMOUNT);
@@ -1605,7 +1582,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@LOAD_REM", header.LOAD_REM);
                         cmd.Parameters.AddWithValue("@WB_AMT", header.WB_AMT);
                         cmd.Parameters.AddWithValue("@WB_AC", header.WB_AC);
-                        cmd.Parameters.AddWithValue("@PAYMENT_TERM", header.PAYMENT_TERM);
                         cmd.Parameters.AddWithValue("@TOT_NOS", header.TOT_NOS);
                         cmd.Parameters.AddWithValue("@FRT_AMT", header.FRT_AMT);
                         cmd.Parameters.AddWithValue("@ROUND_OFF", header.ROUND_OFF);
@@ -1620,7 +1596,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@TOT_GROSS", header.TOT_GROSS);
                         cmd.Parameters.AddWithValue("@TOT_NET", header.TOT_NET);
                         cmd.Parameters.AddWithValue("@GR_NO", header.GR_NO);
-                        cmd.Parameters.Add("@GR_DATE", SqlDbType.SmallDateTime).Value = header.GR_DATE;               
+                        cmd.Parameters.AddWithValue("@GR_DATE",
+                        (object?)header.GR_DATE ?? DBNull.Value);
                         cmd.Parameters.AddWithValue("@VEHICLE_NO", header.VEHICLE_NO);
                         cmd.Parameters.AddWithValue("@TRANSPORT_CODE", header.TRANSPORT_CODE);
                         cmd.Parameters.AddWithValue("@TRANSPORT_NAME", header.TRANSPORT_NAME);
@@ -1631,49 +1608,18 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@WAYBILL_NO", header.WAYBILL_NO);
                         cmd.Parameters.AddWithValue("@FRT_TOPAY", header.FRT_TOPAY);
                         cmd.Parameters.AddWithValue("@REMARK", header.REMARK);
-                        cmd.Parameters.AddWithValue("@WB_QTY", header.WB_QTY);
                         cmd.Parameters.AddWithValue("@disc_per", header.DISC_PER);
                         cmd.Parameters.AddWithValue("@disc_amt", header.DISC_AMT);
                         cmd.Parameters.AddWithValue("@cdisc_per", header.CDISC_PER);
-                        cmd.Parameters.AddWithValue("@CDISC_AMT", header.CDISC_AMT);
+                        cmd.Parameters.AddWithValue("@cdisc_amt", header.CDISC_AMT);
                         cmd.Parameters.AddWithValue("@AGENT_CODE", header.AGENT_CODE);
                         cmd.Parameters.AddWithValue("@FORM_CODE", header.FORM_CODE);
-                        cmd.Parameters.AddWithValue("@SAUDA_TYPE", header.SAUDA_TYPE);
-                        cmd.Parameters.AddWithValue("@SAUDA_NO", header.SAUDA_NO);
-                        cmd.Parameters.AddWithValue("@SAUDA_RATE", header.SAUDA_RATE);
-                        cmd.Parameters.AddWithValue("@DEFECTIVE_GOODS", header.DEFECTIVE_GOODS);
-                        cmd.Parameters.AddWithValue("@CAL_ONPCS", header.CAL_ONPCS);
-                        cmd.Parameters.AddWithValue("@PRINT_DETAIL", header.PRINT_DETAIL);
-                        cmd.Parameters.AddWithValue("@EXRATE", header.EXRATE);
-                        cmd.Parameters.AddWithValue("@BUYER_ORDNO", header.BUYER_ORDNO);
-                        cmd.Parameters.AddWithValue("@PLACE_RECEIPT", header.PLACE_RECEIPT);
-                        cmd.Parameters.AddWithValue("@PORT_LOADING", header.PORT_LOADING);
-                        cmd.Parameters.AddWithValue("@PORT_DISCHARGE", header.PORT_DISCHARGE);
-                        cmd.Parameters.AddWithValue("@FINAL_DEST", header.FINAL_DEST);
-                        cmd.Parameters.AddWithValue("@FINAL_DEST_COUNTRY", header.FINAL_DEST_COUNTRY);
                         cmd.Parameters.AddWithValue("@DELIVERY_TERMS", header.DELIVERY_TERMS);
-                        cmd.Parameters.AddWithValue("@SB_NO", header.SB_NO);
-                        cmd.Parameters.AddWithValue("@SB_DATE", header.SB_DATE);
-                        cmd.Parameters.AddWithValue("@PORT_CODE", header.PORT_CODE);
-                        cmd.Parameters.AddWithValue("@FOB_VALUE", header.FOB_VALUE);            
-                        cmd.Parameters.AddWithValue("@FOB_FRT", header.FOB_FRT);
-                        cmd.Parameters.AddWithValue("@FOB_INSU", header.FOB_INSU);
-                        cmd.Parameters.AddWithValue("@FOB_OTHER", header.FOB_OTHER);
-                        cmd.Parameters.AddWithValue("@LUT_DETAIL", header.LUT_DETAIL);
-                        cmd.Parameters.AddWithValue("@LUT_NO", header.LUT_NO);
-                        cmd.Parameters.AddWithValue("@LUT_DATE", header.LUT_DATE);
-                        cmd.Parameters.AddWithValue("@INSU_DETAIL", header.INSU_DETAIL);
-                        cmd.Parameters.AddWithValue("@INCOTERM", header.INCOTERM);
-                        cmd.Parameters.AddWithValue("@BILLOF_LADING", header.BILLOF_LADING);
                         cmd.Parameters.AddWithValue("@Supply_type", header.SUPPLY_TYPE);
                         cmd.Parameters.AddWithValue("@LC_NO", header.LC_NO);
-                        cmd.Parameters.AddWithValue("@LICENCE_NO", header.LICENCE_NO);
-                        cmd.Parameters.AddWithValue("@LICENCE_TYPE", header.LICENCE_TYPE);
-                        cmd.Parameters.AddWithValue("@LICENCE_DATE", header.LICENCE_DATE);
                         cmd.Parameters.AddWithValue("@SHIPMENT_TYPE", header.SHIPMENT_TYPE);
                         cmd.Parameters.AddWithValue("@TRAN_TYPE", header.TRAN_TYPE);
-                        cmd.Parameters.AddWithValue("@BANK_CODE", header.BANK_CODE);                   
-                        cmd.Parameters.AddWithValue("@CURRENCY", header.CURRENCY);                    
+                        cmd.Parameters.AddWithValue("@STATUS", header.STATUS);
                         cmd.Parameters.AddWithValue("@FAPROV_STATUS", fappstatus);
                         cmd.Parameters.AddWithValue("@FAPROV_REMARKS", fappRemark);
                         cmd.Parameters.AddWithValue("@APPROVAL_USER", fappUserCode);         
@@ -1687,29 +1633,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
                     await cmd.ExecuteNonQueryAsync();
                 }
-
-                if(header.Do_NO != "")
-                {
-                    using (var cmd = new SqlCommand("sp_SalesInvoice", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@Action", "DONO");
-
-                        cmd.Parameters.AddWithValue("@DOC_ID", docId);
-                        cmd.Parameters.AddWithValue("@COMP_CODE", GlobalData.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GlobalData.PubBranchCode);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", GlobalData.PubFYearCode);
-                        cmd.Parameters.AddWithValue("@V_TYPE", (object?)header.V_TYPE ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
-                        cmd.Parameters.AddWithValue("@DoType", (object?)header.DoType ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Do_NO", header.Do_NO);
-
-
-                        await cmd.ExecuteNonQueryAsync();
-                    }
-                }
-                                
+                                                
                 if (details != null && details.Count > 0)
                 {
                     foreach (var detail in details)
@@ -1759,8 +1683,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         cmd.Parameters.AddWithValue("@PACK_NO", detail.PACK_NO);
                         cmd.Parameters.AddWithValue("@PACK_TYPE", detail.PACK_TYPE);
                         cmd.Parameters.AddWithValue("@lot_no", detail.LOT_No);
-                        cmd.Parameters.AddWithValue("@SAUDA_TYPE", detail.SAUDA_TYPE);
-                        cmd.Parameters.AddWithValue("@SAUDA_NO", detail.SAUDA_NO);
+
+
                         cmd.Parameters.AddWithValue("@SAUDA_RATE", detail.SAUDA_RATE);
                         cmd.Parameters.AddWithValue("@ORD_TYPE", detail.ORD_TYPE);
                         cmd.Parameters.AddWithValue("@ORD_NO", detail.ORD_NO);                  
@@ -1852,6 +1776,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 return false;
             }
         }
-
+             
     }
 }

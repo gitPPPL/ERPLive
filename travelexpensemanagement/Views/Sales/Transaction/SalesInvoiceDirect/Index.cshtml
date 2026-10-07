@@ -60,7 +60,7 @@
         <div class="erppage-header-icon">
             <i class="fa fa-file-invoice-dollar"></i>
         </div>
-        <div class="erppage-header-title">Sales Invoice Entry</div>
+        <div class="erppage-header-title">Sales Invoice Entry Direct</div>
     </div>
 
 
@@ -75,7 +75,7 @@
         <button type="button"  id="btn_Approved" style="display:none;" class="erppagebtn_approved">  Approved </button>
 
 
-        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesInvoiceList")', isReadOnly)">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesInvoiceDirectList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
     </div>
@@ -557,13 +557,7 @@
                                         <input type="number" class="erppage-input" id="NumTDSFreight2" placeholder="0.00"  oninput="LimitNumberLength(this, 10)">
                                     </div>
                                 </div>
-                                <div class="erppage-divfield">
-                                    <label class="erppage-label">Tax on Freight %</label>
-                                    <div class="input-divide">
-                                        <input type="number" class="erppage-input" id="NumTaxFreight1" placeholder="0.00"  oninput="LimitNumberLength(this, 12)">
-                                        <input type="number" class="erppage-input" id="NumTaxFreight2" placeholder="0.00"  oninput="LimitNumberLength(this, 12)">
-                                    </div>
-                                </div>
+     
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Freight Amount</label>
                                     <input type="number" class="erppage-input" id="NumFreightAmount" placeholder="Enter Freight Amount"  oninput="LimitNumberLength(this, 12)">
@@ -580,7 +574,9 @@
                                 </div>
                                 <div class="erppage-divfield">
                                     <label class="erppage-label">Payment Term</label>
-                                    <input type="text" class="erppage-input" id="ddlPaymentTerm" placeholder="Enter Payment Term" maxlength="5">
+                                     <select class="erppage-input erppage-select" id="ddlPaymentTerm">
+                                        <option value="">Select Payment Term</option>
+                                    </select>                                                                  
                                                                     
                                 </div>
                                 <div class="erppage-divfield">

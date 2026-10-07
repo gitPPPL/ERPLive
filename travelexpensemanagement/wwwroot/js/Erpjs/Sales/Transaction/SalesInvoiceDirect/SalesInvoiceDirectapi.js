@@ -13,8 +13,10 @@ async function LoadDropdown()
             cmbCityName(),
             cmbSalesThrough(),
             cmbTaxType(),
-            cmbPurchaseNo()
-
+            cmbPurchaseNo(),
+            cmbPaymentTerm(),
+            cmbProductName(),
+            cmbTransportName()
         ]);
     } catch (error)
     {
@@ -232,7 +234,7 @@ function selectedConsigneeData() {
 
 async function cmbCityName() {
     try {
-        const res = await fetch('/SalesInvoice/cmbCityName');
+        const res = await fetch('/SalesInvoiceDirect/cmbCityName');
 
         if (!res.ok) {
             throw new Error(`HTTP error! Status: ${res.status}`);
@@ -315,7 +317,6 @@ async function cmbSalesThrough() {
     }
 }
 
-
 async function AddressPartyData(PartyCode, AddressId) {
     try {
         const res = await $.ajax({
@@ -396,7 +397,6 @@ async function AddressConsigneeData(PartyCode, AddressId) {
     }
 }
 
-
 async function cmbTaxType() {
     try {
         const res = await fetch('/SalesInvoiceDirect/cmbTaxType');
@@ -420,7 +420,6 @@ async function cmbTaxType() {
     }
 }
 
-
 async function cmbPurchaseNo() {
     try {
         const res = await fetch('/SalesInvoiceDirect/cmbPurchaseNo');
@@ -442,7 +441,6 @@ async function cmbPurchaseNo() {
         console.error("Error loading Purchase No:", error);
     }
 }
-
 
 async function cmbDocStatus() {
     try {
@@ -466,5 +464,72 @@ async function cmbDocStatus() {
     }
 }
 
+async function cmbPaymentTerm() {
+    try {
+        const res = await fetch('/SalesInvoiceDirect/cmbPaymentTerm');
+        if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+
+        const data = await res.json();
+        const ddl = $('#ddlPaymentTerm');
+        ddl.empty();
+        ddl.append('<option value="">--- Select Payment Term ---</option>');
+        data.forEach(item => {
+            const option = `<option value="${item.value}">${item.text}</option>`;
+            ddl.append(option);
+    
+        });
+
+    } catch (error) {
+        console.error("Error loading  Payment Term:", error);
+    }
+}
+
+async function cmbProductName() {
+    try {
+        const res = await fetch('/SalesInvoiceDirect/cmbProductName');
+
+        if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status} `);
+        }
+        const data = await res.json();
+        console.log("cmbProductName:", data);
+        if (!Array.isArray(data)) {
+            throw new Error("cmbProductName response is not an array");
+        }
+
+        ProductList = data.map(x =>
+            `<option value="${x.code}">${x.itemname}</option>`
+        ).join('');
 
 
+        return ProductList;
+
+    } catch (error) {
+        console.error("Error loading ItemName:", error);
+        throw error;
+    }
+}
+
+async function cmbTransportName() {
+    try {
+        const res = await fetch('/SalesInvoiceDirect/cmbTransportName');
+
+        if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        const data = await res.json();
+        const ddl = $('#ddlTransport');
+        ddl.empty();
+        ddl.append('<option value="">--- Select Transport ---</option>');
+        data.forEach(item => {
+            const option = `<option value="${item.value}">${item.text}</option>`;
+            ddl.append(option);
+    
+        });
+
+    } catch (error) {
+        console.error("Error loading City:", error);
+    }
+}

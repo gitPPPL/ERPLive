@@ -1397,8 +1397,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
 
-
-
         [HttpGet]
         public JsonResult GetAddressData(int PartyCode, int AddressId)
         {

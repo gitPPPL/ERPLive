@@ -187,6 +187,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
+
         [HttpGet]
         public JsonResult GetAddressData(int PartyCode, int AddressId)
         {
@@ -246,8 +247,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
-
+        
         public JsonResult cmbTaxType()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -285,8 +285,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(partyList);
             }
         }
-
-
         public JsonResult cmbPurchaseNo()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -307,9 +305,60 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
+        public JsonResult cmbPaymentTerm()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"Select CODE,NAME from PAYTERM_MAST where Comp_code={getdata.PubCompCode}  Order by name";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
+        public JsonResult cmbProductName()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
 
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"Select ltrim(rtrim(a.name)) as itemname ,a.CODE from item_mast a  
+                left join Item_Mgroup b on a.Mgroup_code=b.code and a.comp_code=b.comp_code where a.ACTIVE=1 and a.comp_code={getdata.PubCompCode}";
 
+                var partyList = new List<object>();
 
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            partyList.Add(new
+                            {
+                                CODE = reader["CODE"],
+                                itemname = reader["itemname"]
+
+                            });
+                        }
+                    }
+                }
+
+                return Json(partyList);
+            }
+        }
+        public JsonResult cmbTransportName()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                string query = $@"select code,ltrim(rtrim(name))'Name',TDS_PER from TRANSPORT_MAST where Active=1 and comp_code={getdata.PubCompCode}";
+                var data = _dropdownService.GetDropdownList(query);
+                return Json(data);
+            }
+        }
 
     }
 } 

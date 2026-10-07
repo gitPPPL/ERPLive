@@ -155,10 +155,11 @@
             window.location.href = '/SalesInvoiceList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
         });
 
-        $('#button_print').on('click', function () {
+        $('#button_print').on('click', function ()
+        {
             var searchTerm = $('#searchBox').val() || '';
-            var url = '/SalesInvoiceList/ExportPdf?searchTerm='  + encodeURIComponent(searchTerm);
-            window.open(url, '_blank');
+            window.location.href = '/SalesInvoiceList/ExportPdf?searchTerm=' + encodeURIComponent(searchTerm);
+
         });
 
     });
