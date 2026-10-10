@@ -1,0 +1,325 @@
+﻿@{
+    ViewBag.Title = "E-Invoice Utility";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+
+<!-- ================= PAGE HEADER ================= -->
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-file-invoice"></i>
+        </div>
+        <div class="erppage-header-title">E-Invoice Utility</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" id="button_exit">
+            <i class="fa-solid fa-right-from-bracket"></i>Exit
+        </button>
+    </div>
+</div>
+
+<div class="erppage-container">
+    <div class="erppage-fieldset">
+        <div id="EInvoiceForm">
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend" id="lblApiMode"><i class="fa fa-file-invoice"></i> <!--Live API/EInvoice--></legend>
+                <img id="imgQr" style="max-width:200px; display:none;" alt="QR Code" />
+                <!-- ================= ROW 1 : INVOICE ================= -->
+                <div class="erppage-grid6">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" for="ddlDocumentType">V Type</label>
+                        <select class="erppage-input erppage-select" id="ddlDocumentType">
+                            <option value="">--Select--</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" for="NumDocNo">V No</label>
+                        <input type="text" class="erppage-input" id="NumDocNo" placeholder="Enter V No" readonly/>
+                    </div>
+                    <!--<div class="erppage-divfield">
+                        <label class="erppage-label" aria-hidden="true">&nbsp;</label>
+                        <button type="button" class="erppage-btn erppage-btn-common" id="button_generate_einvoice">
+                            <i class="fa fa-gear"></i> Generate E-Invoice
+                        </button>
+                    </div>-->
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" aria-hidden="true">&nbsp;</label>
+                        <button type="button" class="erppage-btn erppage-btn-common" id="button_generate_einvoice">
+                            <i class="fa fa-gear"></i> Generate E-Invoice
+                        </button>
+                        @* <span id="lblEinvGenerated"
+                              style="display:block; margin-top:4px; font-weight:600; color:#28a745; font-size:small; white-space:nowrap;">
+                            E-Invoice Generated
+                        </span> *@
+                        <div id="lblEinvGenerated"
+                             style="display:none; margin-top:5px; font-weight:600; color:#28a745; font-size:small; white-space:nowrap;">
+                            E-Invoice Generated
+                        </div>
+
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" aria-hidden="true">&nbsp;</label>
+                        <div class="erppage-checkbox-wrap">
+                            <input type="checkbox" id="chkWithEwaybill" class="erppage-checkbox-input">
+                            <label for="chkWithEwaybill" class="erppage-checkbox-label">E-Waybill</label>
+                            <span>
+                                <label class="erppage-label" id="lblApproved"
+                                       style="font-weight:600; color:#28a745; font-size:medium; display:none;">Ewaybill</label>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" aria-hidden="true">&nbsp;</label>
+                        <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="button_generate_ewaybill">
+                            <i class="fa fa-gear"></i> Generate E-Waybill
+                        </button>
+                        <div id="lblEwbGenerated"
+                              style="display:none; margin-top:5px; font-weight:600; color:#28a745; font-size:small; white-space:nowrap;">
+                            E-Waybill Generated
+                        </div>
+                    </div>
+
+                    <div class="erppage-divfield" id="lblEinvCancelled"
+                         style="display:none;">
+                        <label class="erppage-label" aria-hidden="true">&nbsp;</label>
+                        <span>
+                            <label class="erppage-label erppagestatus-badge erppagestatus-inactive" id="lblApproved">E-Invoice Cancelled</label>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- ================= ROW 2 : JSON & STATUS ================= -->
+                <div class="erppage-subfieldset">
+                    <div class="erppage-body">
+                        <div class="erppagesrow">
+                            <!-- JSON / auth actions -->
+                            <div class="erppagescol-2">
+                                <div class="erppage-image-actions">
+                                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="button_authentication">
+                                        <i class="fa fa-key"></i> Authentication
+                                        <i class="fa fa-circle-check fa-lg erppagestatus-badge erppagestatus-active" id="icnAuthenticated"
+                                           style="visibility:hidden;"></i>
+                                    </button>
+                                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="button_create_json">
+                                        <i class="fa fa-file-code"></i> Create JSON
+                                    </button>
+                                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="button_create_ewb_json">
+                                        <i class="fa fa-file-code"></i> Create EWB JSON
+                                    </button>
+                                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="button_save_json">
+                                        <i class="fa fa-floppy-disk"></i> Save JSON
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- GST type + options -->
+                            <div class="erppagescol-3">
+                                <div class="erppage-grid1">
+                                    @* <div class="erppage-divfield">
+                                        <div class="erppage-radio-group">
+                                            <label class="erppage-radio" for="gstMaster">
+                                                <input type="radio" name="gstType" id="gstMaster" checked />
+                                                Master GST
+                                            </label>
+                                            <label class="erppage-radio" for="gstWhiteBook">
+                                                <input type="radio" name="gstType" id="gstWhiteBook" />
+                                                WhiteBook
+                                            </label>
+                                        </div>
+                                    </div> *@
+                                    <div class="erppage-divfield">
+                                        <div class="erppage-checkbox-wrap">
+                                            <input type="checkbox" id="chkAutoSaveJson" class="erppage-checkbox-input">
+                                            <label for="chkAutoSaveJson" class="erppage-checkbox-label">Auto Save Json</label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <div class="erppage-checkbox-wrap">
+                                            <input type="checkbox" id="chkCessNAddVal" class="erppage-checkbox-input">
+                                            <label for="chkCessNAddVal" class="erppage-checkbox-label">Cess NAddVal</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-image-actions">
+                                        <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="button_generate_irn" style="display:none;">
+                                            <i class="fa fa-fingerprint"></i> Gen. IRN
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Status -->
+                            <div class="erppagescol-2">
+                                <div class="erppage-grid1">
+                                    <span class="erppagestatus-badge erppagestatus-active" id="statusJson"
+                                          style="display:flex; align-items:center; justify-content:space-between;">
+                                        <span>JSON Created</span>
+                                        <i class="fa fa-circle-check fa-lg" id="icnJSONCreated" style="visibility:hidden;"></i>
+                                    </span>
+                                    <span class="erppagestatus-badge erppagestatus-active" id="statusIrn"
+                                          style="display:flex; align-items:center; justify-content:space-between;">
+                                        <span>IRN Generated</span>
+                                        <i class="fa fa-circle-check fa-lg" id="icnIRNGenerated" style="visibility:hidden;"></i>
+                                    </span>
+                                    <span class="erppagestatus-badge erppagestatus-active" id="statusQr"
+                                          style="display:flex; align-items:center; justify-content:space-between;">
+                                        <span>QR Code</span>
+                                        <i class="fa fa-circle-check fa-lg" id="icnQRCode" style="visibility:hidden;"></i>
+                                    </span>
+                                    <span class="erppagestatus-badge erppagestatus-active" id="statusEwaybill"
+                                          style="display:flex; align-items:center; justify-content:space-between;">
+                                        <span>E-Waybill</span>
+                                        <i class="fa fa-circle-check fa-lg" id="icnEWayBill" style="visibility:hidden;"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- OUTPUT -->
+                            <div class="erppagescol-5">
+                                <div class="erppage-grid1">
+                                    <div class="erppage-checkbox-wrap">
+                                        <input type="checkbox" id="chkEinv" class="erppage-checkbox-input">
+                                        <label for="chkEinv" class="erppage-checkbox-label">E-INV</label>
+                                        <input type="checkbox" id="chkEwb" class="erppage-checkbox-input">
+                                        <label for="chkEwb" class="erppage-checkbox-label">EWB</label>
+                                    </div>
+                                </div>
+
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <textarea class="erppage-input" id="txtEinvJson" style="height:90px;" disabled></textarea>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <textarea class="erppage-input" id="txtEwbJson" style="height:90px;"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="erppage-internalaction">
+                                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="button_signed_einvoice">
+                                        <i class="fa fa-pen-to-square"></i> Signed E-Invoice
+                                    </button>
+                                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="button_generate_qr">
+                                        <i class="fa fa-qrcode"></i> Generate QR
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="erppagesrow"></div>
+                        <!-- CANCEL & RETRIEVE -->
+                        <div class="erppage-grid4">
+                            <!-- E-Invoice -->
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="chkCancelEinvoice" class="erppage-checkbox-input">
+                                    <label for="chkCancelEinvoice" class="erppage-checkbox-label">Cancel E-Invoice</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield erppage-col-span-3" id="divCancelEinvoice" style="display:none;">
+                                <div class="erppage-inputgroup">
+                                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="button_retrieve_irn">
+                                        <i class="fa fa-download"></i> Retrieve IRN
+                                    </button>
+                                    <input type="text" class="erppage-input" id="txtIrn" placeholder="IRN" readonly/>
+                                    <button type="button" class="erppage-btn erppage-btn-danger" id="button_cancel_irn">
+                                        <i class="fa fa-ban"></i> Cancel IRN
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- E-Waybill -->
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="chkCancelEwaybill" class="erppage-checkbox-input">
+                                    <label for="chkCancelEwaybill" class="erppage-checkbox-label">Cancel E-Waybill</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield erppage-col-span-3" id="divCancelEwaybill" style="display:none;">
+                                <div class="erppage-inputgroup">
+                                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="button_retrieve_ewaybill">
+                                        <i class="fa fa-download"></i> Retrieve E-Waybill
+                                    </button>
+                                    <input type="text" class="erppage-input" id="txtEwaybillNo" placeholder="E-Waybill No." readonly/>
+                                    <button type="button" class="erppage-btn erppage-btn-danger" id="button_cancel_ewaybill">
+                                        <i class="fa fa-ban"></i> Cancel E-Waybill
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= INVOICE LIST ================= -->
+                <div class="erppagelist-container">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblEInvoice" class="excel-table fixed-grid-table table-width resizable-table">
+                            <colgroup>
+                                <col style="width: 30px;">
+                                <col style="width: 64px;">
+                                <col style="width: 85px;">
+                                <col style="width: 90px;">
+                                <col style="width: 83px;">
+                                <col style="width: 159px;">
+                                <col style="width: 132px;">
+                                <col style="width: 74px;">
+                                <col style="width: 167px;">
+                                <col style="width: 140px;">
+                                <col style="width: 74px;">
+                                <col style="width: 88px;">
+                                <col style="width: 88px;">
+                                <col style="width: 88px;">
+                                <col style="width: 70px;">
+                                <col style="width: 80px;">
+                            </colgroup>
+                            <thead class="table-head">
+                                <tr>
+                                    <th class="freeze-item"></th>
+                                    <th>V Type</th>
+                                    <th>V No</th>
+                                    <th>V Date</th>
+                                    <th align="right">Net Amt</th>
+                                    <th>Bill To</th>
+                                    <th>GSTIN</th>
+                                    <th>Pincode</th>
+                                    <th>Ship To</th>
+                                    <th>Ship GST</th>
+                                    <th>Pincode</th>
+                                    <th>Approval Status</th>
+                                    <th>E-Invoice</th>
+                                    <th>E-Waybill</th>
+                                    <th>Status</th>
+                                    <th>Tran Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!--<div class="erppagelist-pagination">
+                        <div class="pagination-left">
+                            <select id="pageSizeSelect">
+                                <option>10</option>
+                                <option>25</option>
+                                <option>50</option>
+                                <option>100</option>
+                            </select>
+                        </div>
+                        <div class="pagination-center">
+                            <button type="button" class="page-nav" disabled><i class="fa fa-angle-left"></i></button>
+                            <div class="page-numbers">
+                                <button type="button" class="active">1</button>
+                            </div>
+                            <button type="button" class="page-nav" disabled><i class="fa fa-angle-right"></i></button>
+                        </div>
+                        <div class="pagination-right" id="pageInfoText">
+                            Showing 1–1 of 1 records
+                        </div>
+                    </div>-->
+                </div>
+            </fieldset>
+
+        </div>
+    </div>
+</div>
+<script src="~/js/erpjs/sales/transaction/einvoiceutility/einvoiceutility.js"></script>

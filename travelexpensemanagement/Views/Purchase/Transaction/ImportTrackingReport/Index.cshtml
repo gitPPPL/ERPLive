@@ -1,0 +1,513 @@
+﻿@{
+    ViewBag.Title = "Import Tracking Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-ship"></i>
+        <span>Import Tracking Report</span>
+    </div>
+</div>
+<div class="erppage-fieldset">
+    <div class="erppage-container">
+        <fieldset class="erppagefieldset">
+            <div class="erppage-grid5">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Date From</label>
+                    <input type="date" class="erppage-input" id="DtDatefrom" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">To</label>
+                    <input type="date" class="erppage-input" id="Dtto" />
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Ship Type</label>
+                    <select class="erppage-input erppage-select" id="ddlshiptype">
+                        <option value="">Select Ship Type</option>
+                    </select>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Status</label>
+                    <select class="erppage-input erppage-select" id="ddlstatus">
+                        <option value="">Select Status</option>
+                    </select>
+                </div>
+            </div>
+            <div class="erppagelist-search-wrapper mt-2">
+                <i class="fa fa-search"></i>
+                <input type="text" id="searchBox" placeholder="Search By" />
+            </div>
+
+            <div class="erppage-internalaction mt-2">
+                <button type="button" id="btnviewdata" class="erppage-btn erppage-btn-common">
+                    <i class="fa fa-table"></i>
+                    <span>View Data</span>
+                </button>
+                <button type="button" class="erppage-btn erppage-btn-common-active-disabled" data-bs-toggle="modal" data-bs-target="#listdocumentsendModal">
+                    <i class="fa fa-paper-plane"></i>
+                    <span>List of Documents to be Send</span>
+                </button>
+            </div>
+        </fieldset>
+
+        <div class="erppagelist-container">
+            <div class="excel-wrapper fixed-grid-wrapper">
+                <table id="tblImportTrackingReport" class="excel-table fixed-grid-table table-width resizable-table">
+                    <colgroup>
+                        <col class="hidden-col">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:180px;">
+                        <col style="width:180px;">
+                        <col style="width:220px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:220px;">
+                        <col style="width:120px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:80px;">
+                        <col style="width:100px;">
+                        <col style="width:180px;">
+                        <col style="width:180px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:180px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:130px;">
+                        <col style="width:180px;">
+                        <col style="width:130px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:140px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:140px;">
+                        <col style="width:130px;">
+                        <col style="width:120px;">
+                        <col style="width:180px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:140px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:140px;">
+                        <col style="width:120px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:180px;">
+                        <col style="width:180px;">
+                        <col style="width:180px;">
+                        <col style="width:180px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:180px;">
+                        <col style="width:140px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:180px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:120px;">
+                        <col style="width:140px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:130px;">
+                        <col style="width:90px;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th class="hidden-col" data-column="0">Code <span class="sort-icon"></span></th>
+                            <th class="freeze-item" data-column="1">Sauda No <span class="sort-icon"></span></th>
+                            <th data-column="2">Sauda Date <span class="sort-icon"></span></th>
+                            <th data-column="3">Supplier Name <span class="sort-icon"></span></th>
+                            <th data-column="4">Item Name <span class="sort-icon"></span></th>
+                            <th data-column="5">Delivery Location <span class="sort-icon"></span></th>
+                            <th data-column="6">Country <span class="sort-icon"></span></th>
+                            <th data-column="7">Expected Loading <span class="sort-icon"></span></th>
+                            <th data-column="8">Payment Term <span class="sort-icon"></span></th>
+                            <th data-column="9">Frt Term <span class="sort-icon"></span></th>
+                            <th data-column="10">Del. Term <span class="sort-icon"></span></th>
+                            <th data-column="11">Remark <span class="sort-icon"></span></th>
+                            <th data-column="12">No of Container <span class="sort-icon"></span></th>
+                            <th data-column="13">Sauda Qty <span class="sort-icon"></span></th>
+                            <th data-column="14">Tracking Qty <span class="sort-icon"></span></th>
+                            <th data-column="15">MRN Qty <span class="sort-icon"></span></th>
+                            <th data-column="16">MRN No <span class="sort-icon"></span></th>
+                            <th data-column="17">MRN Date <span class="sort-icon"></span></th>
+                            <th data-column="18">Container No <span class="sort-icon"></span></th>
+                            <th data-column="19">Container Size <span class="sort-icon"></span></th>
+                            <th data-column="20">Inv No <span class="sort-icon"></span></th>
+                            <th data-column="21">Inv Date <span class="sort-icon"></span></th>
+                            <th data-column="22">Inv Amt <span class="sort-icon"></span></th>
+                            <th data-column="23">POD <span class="sort-icon"></span></th>
+                            <th data-column="24">POL <span class="sort-icon"></span></th>
+                            <th data-column="25">VSI Name <span class="sort-icon"></span></th>
+                            <th data-column="26">ICD Name <span class="sort-icon"></span></th>
+                            <th data-column="27">Free Days <span class="sort-icon"></span></th>
+                            <th data-column="28">ETD <span class="sort-icon"></span></th>
+                            <th data-column="29">ETA Port Date <span class="sort-icon"></span></th>
+                            <th data-column="30">Rail Date <span class="sort-icon"></span></th>
+                            <th data-column="31">ICD Reach Date <span class="sort-icon"></span></th>
+                            <th data-column="32">PI No. <span class="sort-icon"></span></th>
+                            <th data-column="33">Offer No. <span class="sort-icon"></span></th>
+                            <th data-column="34">CHA Name <span class="sort-icon"></span></th>
+                            <th data-column="35">Scan Doc. Verify Date <span class="sort-icon"></span></th>
+                            <th data-column="36">ETA Place <span class="sort-icon"></span></th>
+                            <th data-column="37">Doc. CHA Handover Date <span class="sort-icon"></span></th>
+                            <th data-column="38">BI No. <span class="sort-icon"></span></th>
+                            <th data-column="39">BI Date <span class="sort-icon"></span></th>
+                            <th data-column="40">BL Recd. Date <span class="sort-icon"></span></th>
+                            <th data-column="41">BL Handover Date to CHA <span class="sort-icon"></span></th>
+                            <th data-column="42">CHA Charge Detail <span class="sort-icon"></span></th>
+                            <th data-column="43">CheckList Approval Date <span class="sort-icon"></span></th>
+                            <th data-column="44">BOE No. <span class="sort-icon"></span></th>
+                            <th data-column="45">BOE Date <span class="sort-icon"></span></th>
+                            <th data-column="46">ETA BE Date <span class="sort-icon"></span></th>
+                            <th data-column="47">IGM Date <span class="sort-icon"></span></th>
+                            <th data-column="48">Sample Collected <span class="sort-icon"></span></th>
+                            <th data-column="49">Sample Collection Date <span class="sort-icon"></span></th>
+                            <th data-column="50">Test Report Date <span class="sort-icon"></span></th>
+                            <th data-column="51">Assessment Type <span class="sort-icon"></span></th>
+                            <th data-column="52">Assessment Date <span class="sort-icon"></span></th>
+                            <th data-column="53">Duty Amount <span class="sort-icon"></span></th>
+                            <th data-column="54">Duty Pay Date <span class="sort-icon"></span></th>
+                            <th data-column="55">Duty Pay Mode <span class="sort-icon"></span></th>
+                            <th data-column="56">Advance Licence No. <span class="sort-icon"></span></th>
+                            <th data-column="57">Doc. Handover Date to Bank <span class="sort-icon"></span></th>
+                            <th data-column="58">Shipping Line Pay Date <span class="sort-icon"></span></th>
+                            <th data-column="59">Shipping Line <span class="sort-icon"></span></th>
+                            <th data-column="60">Hollage Charge <span class="sort-icon"></span></th>
+                            <th data-column="61">DO Date <span class="sort-icon"></span></th>
+                            <th data-column="62">Security Amt <span class="sort-icon"></span></th>
+                            <th data-column="63">Refund Amt <span class="sort-icon"></span></th>
+                            <th data-column="64">Receipt Date <span class="sort-icon"></span></th>
+                            <th data-column="65">Tentative HO Date <span class="sort-icon"></span></th>
+                            <th data-column="66">Container HO Date <span class="sort-icon"></span></th>
+                            <th data-column="67">Adv. Payment Amount <span class="sort-icon"></span></th>
+                            <th data-column="68">Adv. Payment Reference <span class="sort-icon"></span></th>
+                            <th data-column="69">Adv. Payment Date <span class="sort-icon"></span></th>
+                            <th data-column="70">Bal. Payment Amount <span class="sort-icon"></span></th>
+                            <th data-column="71">Bal. Payment Reference <span class="sort-icon"></span></th>
+                            <th data-column="72">Bal. Payment Date <span class="sort-icon"></span></th>
+                            <th data-column="73">Diff. Days <span class="sort-icon"></span></th>
+                            <th data-column="74">Int. Rate <span class="sort-icon"></span></th>
+                            <th data-column="75">Other Charges <span class="sort-icon"></span></th>
+                            <th data-column="76">SBLC Avl. Amt. <span class="sort-icon"></span></th>
+                            <th data-column="77">Supplier <span class="sort-icon"></span></th>
+                            <th data-column="78">Agent <span class="sort-icon"></span></th>
+                            <th data-column="79">Bank <span class="sort-icon"></span></th>
+                            <th data-column="80">Shipping Line <span class="sort-icon"></span></th>
+                            <th data-column="81">SBLC No <span class="sort-icon"></span></th>
+                            <th data-column="82">SBLC ApplDate <span class="sort-icon"></span></th>
+                            <th data-column="83">SBLC PayDate <span class="sort-icon"></span></th>
+                            <th data-column="84">SBLC DueDate <span class="sort-icon"></span></th>
+                            <th data-column="85">SBLC DisbAmt <span class="sort-icon"></span></th>
+                            <th data-column="86">SBLC DisbDate <span class="sort-icon"></span></th>
+                            <th data-column="87">SBLC IntSOFR <span class="sort-icon"></span></th>
+                            <th data-column="88">DO ValidDate <span class="sort-icon"></span></th>
+                            <th data-column="89">Sec. Date <span class="sort-icon"></span></th>
+                            <th data-column="90">Refund RecdDate <span class="sort-icon"></span></th>
+                            <th data-column="91">Detention Amount <span class="sort-icon"></span></th>
+                            <th data-column="92">Detention Date <span class="sort-icon"></span></th>
+                            <th data-column="93">Detention Reason <span class="sort-icon"></span></th>
+                            <th data-column="94">Det. Reason App.By <span class="sort-icon"></span></th>
+                            <th data-column="95">Custom OOC Date <span class="sort-icon"></span></th>
+                            <th data-column="96">Factory Date <span class="sort-icon"></span></th>
+                            <th data-column="97">LC No <span class="sort-icon"></span></th>
+                            <th data-column="98">LC Date <span class="sort-icon"></span></th>
+                            <th data-column="99">LC Benef. <span class="sort-icon"></span></th>
+                            <th data-column="100">LC IssueBank <span class="sort-icon"></span></th>
+                            <th data-column="101">LC Expiry Date <span class="sort-icon"></span></th>
+                            <th data-column="102">LC Amt <span class="sort-icon"></span></th>
+                            <th data-column="103">Tent. HO Ret Date <span class="sort-icon"></span></th>
+                            <th data-column="104">Date of Movement <span class="sort-icon"></span></th>
+                            <th data-column="105">Tent. ContHO RetDate <span class="sort-icon"></span></th>
+                            <th data-column="106">Latest Shipment Date <span class="sort-icon"></span></th>
+                            <th data-column="107">Quality Claim Amt <span class="sort-icon"></span></th>
+                            <th data-column="108">BOE Submit Date <span class="sort-icon"></span></th>
+                            <th data-column="109">QCAmt <span class="sort-icon"></span></th>
+                            <th data-column="110">Enhance. Rate <span class="sort-icon"></span></th>
+                            <th data-column="111">Pass. Rate <span class="sort-icon"></span></th>
+                            <th data-column="112">Under Protest <span class="sort-icon"></span></th>
+                            <th data-column="113">CHA ChangeType <span class="sort-icon"></span></th>
+                            <th data-column="114">Concor Exps <span class="sort-icon"></span></th>
+                            <th data-column="115">CHA Amt <span class="sort-icon"></span></th>
+                            <th data-column="116">CFS Charges <span class="sort-icon"></span></th>
+                            <th data-column="117">CFS D-Stuffing Date <span class="sort-icon"></span></th>
+                            <th data-column="118">CFS Amt <span class="sort-icon"></span></th>
+                            <th data-column="119">CFS Payment Date <span class="sort-icon"></span></th>
+                            <th data-column="120">QC Amount Recd. <span class="sort-icon"></span></th>
+                            <th data-column="121">Actual Container HO Date <span class="sort-icon"></span></th>
+                            <th class="action-col" data-column="122">Action <span class="sort-icon"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="erppagelist-pagination">
+                <div class="pagination-left">
+                    <select id="pageSizeSelect">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+                <div class="pagination-center">
+                    <button class="page-nav" id="prevBtn">‹</button>
+                    <div id="tablePagination" class="page-numbers"></div>
+                    <button class="page-nav" id="nextBtn">›</button>
+                </div>
+                <div class="pagination-right" id="pageInfoText">
+                    Results: 0 - 0 of 0
+                </div>
+            </div>
+        </div>
+
+        <!--List Document Send-->
+        <div class="modal fade" id="listdocumentsendModal" tabindex="-1" aria-labelledby="listdocumentsendLabel" aria-hidden="true">
+            <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+                <div class="modal-content erppagesmodal-content">
+                    <div class="erppagesmodal-header">
+                        <div class="erppagesmodal-header-left">
+                            <div class="erppagesmodal-header-icon">
+                                <i class="fa fa-copy"></i>
+                            </div>
+                            <h5 class="erppagesmodal-title" id="listdocumentsendLabel">
+                                Document Send List
+                            </h5>
+                        </div>
+                        <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="erppagesmodal-body">
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Doc Type</label>
+                                <select class="erppage-input erppage-select" id="ddldoctype">
+                                    <option value="">Select Doc Type</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">V Type</label>
+                                <select class="erppage-input erppage-select" id="ddlvtype">
+                                    <option value="">Select V Type</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Search By</label>
+                                <div class="erppage-inputgroup">
+                                    <select class="erppage-input erppage-select erppage-width-30" id="ddlsearchby">
+                                        <option value="">Select Search By</option>
+                                    </select>
+                                    <input type="text" class="erppage-input erppage-width-70" id="txtsearchby" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">From Date</label>
+                                <input type="date" class="erppage-input" id="Dtfromdate" />
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">To Date</label>
+                                <input type="date" class="erppage-input" id="Dttodate" />
+                            </div>
+                        </div>
+                        <div class="erppages-row mt-2">
+                            <div class="erppage-radio-group">
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdonlypending" name="PrintType" value="OnlyPending">
+                                    <span>Only Pending</span>
+                                </label>
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdonlysend" name="PrintType" value="OnlySend">
+                                    <span>Only Send</span>
+                                </label>
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdonlyreceived" name="PrintType" value="OnlyReceived">
+                                    <span>Only Received</span>
+                                </label>
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdsendnotreceived" name="PrintType" value="SendNotReceived">
+                                    <span>Send but not Received</span>
+                                </label>
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdunprinted" name="PrintType" value="UnPrinted">
+                                    <span>Send and Received</span>
+                                </label>
+                                <label class="erppage-radio">
+                                    <input type="radio" id="rdAll" name="PrintType" value="All">
+                                    <span>All</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="ChkSelectAll" class="erppage-checkbox-input">
+                                    <label class="erppage-checkbox-label">Select All</label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Send To</label>
+                                <select class="erppage-input erppage-select" id="ddlsendto">
+                                    <option value="">Select Send To</option>
+                                </select>
+                            </div>
+                            <div class="erppages-internalaction">
+                                <button type="button" class="erppage-btn erppage-btn-common-disabled" id="btn_search"><i class="fa fa-search"></i> Search</button>
+                                <button type="button" class="erppage-btn erppage-btn-common-active-disabled" id="btn_send"><i class="fa fa-paper-plane"></i> Send</button>
+                            </div>
+                        </div>
+
+                        <div class="excel-wrapper fixed-grid-wrapper">
+                            <table id="tbldocumentsendlist" class="excel-table width-table fixed-grid-table resizable-table">
+                                <colgroup>
+                                    <col style="width:90px;">   
+                                    <col style="width:110px;">  
+                                    <col style="width:180px;">  
+                                    <col style="width:220px;">  
+                                    <col style="width:120px;">  
+                                    <col style="width:110px;">  
+                                    <col style="width:120px;">  
+                                    <col style="width:180px;">  
+                                    <col style="width:180px;">  
+                                    <col style="width:110px;">  
+                                    <col style="width:120px;">  
+                                    <col style="width:110px;">  
+                                    <col style="width:150px;">  
+                                    <col style="width:50px;">   
+                                    <col style="width:130px;">  
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th data-column="0">
+                                            Sauda No <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="1">
+                                            Sauda Date <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="2">
+                                            Sauda Party <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="3">
+                                            Expense Billing Party <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="4">
+                                            Bill No <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="5">
+                                            Bill Date <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="6">
+                                            Bill Amount <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="7">
+                                            Remarks <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="8">
+                                            Doc Send To <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="9">
+                                            Send Status <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="10">
+                                            Send Date <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="11">
+                                            Recd Status <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="12">
+                                            Recd Datetime <span class="sort-icon"></span>
+                                        </th>
+                                        <th data-column="13" class="text-center" style="width:40px;">
+                                            <input type="checkbox" id="chkSelectAll" />
+                                        </th>
+                                        <th data-column="14">
+                                            Send Document <span class="sort-icon"></span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
