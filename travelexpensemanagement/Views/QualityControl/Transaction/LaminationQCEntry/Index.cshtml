@@ -1,209 +1,201 @@
-﻿@{
-    ViewBag.Title = "Lamination QC Entry";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-
-
-    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
+@{
+ViewBag.Title = "Lamination QC Entry";
+Layout = "~/Views/Shared/_Layout.cshtml";
+var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData;
 }
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
-    <div class="erppage-header-left">
-        <div class="erppage-header-icon">
-            <i class="fa fa-check-circle"></i>
-        </div>
-        <div class="erppage-header-title">Lamination QC Entry</div>
-    </div>
+<div class="erppage-header-left">
+<div class="erppage-header-icon">
+<i class="fa fa-check-circle"></i>
+</div>
+<div class="erppage-header-title">Lamination QC Entry</div>
+</div>
 </div>
 <div id="LaminationQCEntryForm">
-    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
-    <div class="erppage-container">
-        <fieldset class="erppage-fieldset">
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Doc Date</label>
-                    <input type="date" class="erppage-input" id="DtDocDate">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Place</label>
-                    <select class="erppage-input erppage-select" id="ddlPlace">
-                        <option value="">Select Place</option>
-                    </select>
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Plant</label>
-                    <select class="erppage-input erppage-select" id="ddlPlant">
-                        <option value="">Select Plant</option>
-                    </select>
-                </div>
-            </div>
-            <div class="erppage-grid4">
-                <div class="erppage-radio-group">
-                    <label class="erppage-radio">
-                        <input type="radio" id="RDPendingQC" name="qcFilter" value="Pending" checked>
-                        <span>Pending QC</span>
-                    </label>
-                    <label class="erppage-radio">
-                        <input type="radio" id="RDAll" name="qcFilter" value="All">
-                        <span>All</span>
-                    </label>
-                </div>
-                <div class="erppagelist-actions">
-                    <button type="button" id="btn_show_data" class="erppage-btn erppage-btn-save">
-                        <i class="fa fa-eye"></i>
-                        <span>Show Data</span>
-                    </button>
-                    <button type="button" id="btn_update" class="erppage-btn erppage-btn-common">
-                        <i class="fa fa-refresh"></i>
-                        <span>Update</span>
-                    </button>
-                </div>
-
-            </div>
-            <fieldset class="erppage-subfieldset">
-                <legend>Print Details</legend>
-                <div class="erppage-subheader">Print Details</div>
-                <div class="erppage-grid4">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">From Date</label>
-                        <input type="date" class="erppage-input" id="dtFromDate">
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">To Date</label>
-                        <input type="date" class="erppage-input" id="dtToDate">
-
-                    </div>
-                    <button type="button" id="btn_print" class="erppage-btn erppage-btn-common">
-                        <i class="fa fa-print"></i>
-                        <span>Print</span>
-                    </button>
-                </div>
-            </fieldset>
-
-            <div class="erppagelist-container">
-                <div class="excel-wrapper fixed-grid-wrapper">
-                    <table id="tblLaminationQCEntry" class="excel-table fixed-grid-table resizable-table">
-                        <colgroup>
-                            <col style="display: none;"> <!-- Code -->
-                            <col style="width: 80px;">   <!-- V_NO -->
-                            <col style="width: 100px;">   <!-- Shift -->
-                            <col style="width: 100px;">  <!-- Lamination -->
-                            <col style="width: 120px;">  <!-- Supervisor -->
-                            <col style="width: 120px;">  <!-- Operator -->
-                            <col style="width: 150px;">  <!-- Item Name -->
-                            <col style="width: 80px;">   <!-- Meter -->
-                            @* ------------------------------------ *@
-                            <col style="width: 80px;">   <!-- Roll No -->
-                            <col style="width: 100px;">  <!-- NWarp Way -->
-                            <col style="width: 100px;">  <!-- Warp Way -->
-                            <col style="width: 100px;">  <!-- NWeft Way -->
-                            <col style="width: 100px;">  <!-- Weft Way -->
-                            <col style="width: 120px;">   <!-- Strength -->
-                            <col style="width: 120px;">   <!-- Status -->
-                            <col style="width: 100px;">  <!-- Elong Warp -->
-                            <col style="width: 100px;">  <!-- Elong Weft -->
-                            <col style="width: 150px;">  <!-- Remarks -->
-                            @* ------------------------------------ *@
-                            <col style="width: 80px;">   <!-- Net Wt. -->
-                            <col style="width: 100px;">  <!-- Fabric Size -->
-                            <col style="width: 100px;">  <!-- UnLam Gram. -->
-                            <col style="width: 80px;">   <!-- Coating -->
-                            <col style="width: 100px;">  <!-- Lam Gram. -->
-                            <col style="width: 100px;">  <!-- LAM GSM -->
-                            @* <col style="width: 80px;">   <!-- Roll No -->
-                            <col style="width: 100px;">  <!-- NWarp Way -->
-                            <col style="width: 100px;">  <!-- Warp Way -->
-                            <col style="width: 100px;">  <!-- NWeft Way -->
-                            <col style="width: 100px;">  <!-- Weft Way -->
-                            <col style="width: 120px;">   <!-- Strength -->
-                            <col style="width: 120px;">   <!-- Status -->
-                            <col style="width: 100px;">  <!-- Elong Warp -->
-                            <col style="width: 100px;">  <!-- Elong Weft -->
-                            <col style="width: 150px;">  <!-- Remarks --> *@
-                            <col style="width: 100px;">  <!-- SupCode -->
-                            <col style="width: 100px;">  <!-- OpeCode -->
-                        </colgroup>
-                        <thead>
-                            <tr>
-                                <th class="hidden-col">Code</th>
-                                <th>Doc NO</th>
-                                <th>Shift</th>
-                                <th>Lamination</th>
-                                <th>Supervisor</th>
-                                <th>Operator</th>
-                                <th>Item Name</th>
-                                <th>Meter</th>
-                                @* ---------------- *@
-                                <th>Roll No</th>
-                                <th>NWarp Way</th>
-                                <th>Warp Way</th>
-                                <th>NWeft Way</th>
-                                <th>Weft Way</th>
-                                <th>Strength</th>
-                                <th>Status</th>
-                                <th>Elong Warp</th>
-                                <th>Elong Weft</th>
-                                <th>Remarks</th>
-                                @* ---------------- *@
-                                <th>Net Wt.</th>
-                                <th>Fabric Size</th>
-                                <th>UnLam Gram.</th>
-                                <th>Coating</th>
-                                <th>Lam Gram.</th>
-                                <th>LAM GSM</th>
-                                @* <th>Roll No</th>
-                                <th>NWarp Way</th>
-                                <th>Warp Way</th>
-                                <th>NWeft Way</th>
-                                <th>Weft Way</th>
-                                <th>Strength</th>
-                                <th>Status</th>
-                                <th>Elong Warp</th>
-                                <th>Elong Weft</th>
-                                <th>Remarks</th> *@
-                                <th>SupCode</th>
-                                <th>OpeCode</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <div class="erppagelist-pagination">
-                    <div class="pagination-left">
-                        <select id="pageSizeSelect" onchange="changeRowsPerPage()">
-                            <option value="5">5</option>
-                            <option value="10" selected>10</option>
-                            <option value="20">20</option>
-                            <option value="50">50</option>
-                        </select>
-                    </div>
-                    <div class="pagination-center">
-                        <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
-                        <div id="pageNumbers" class="page-numbers"></div>
-
-                        <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
-                    </div>
-                    <div class="pagination-right" id="pageInfoText">
-                        Results: 0 - 0 of 0
-                    </div>
-                </div>
-            </div>
-        </fieldset>
-
-    </div>
+<input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+<div class="erppage-container">
+<fieldset class="erppage-fieldset">
+<div class="erppage-grid4">
+<div class="erppage-divfield">
+<label class="erppage-label">Doc Date</label>
+<input type="date" class="erppage-input" id="DtDocDate">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Place</label>
+<select class="erppage-input erppage-select" id="ddlPlace">
+<option value="">Select Place</option>
+</select>
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Plant</label>
+<select class="erppage-input erppage-select" id="ddlPlant">
+<option value="">Select Plant</option>
+</select>
+</div>
+</div>
+<div class="erppage-grid4">
+<div class="erppage-radio-group">
+<label class="erppage-radio">
+<input type="radio" id="RDPendingQC" name="qcFilter" value="Pending" checked>
+<span>Pending QC</span>
+</label>
+<label class="erppage-radio">
+<input type="radio" id="RDAll" name="qcFilter" value="All">
+<span>All</span>
+</label>
+</div>
+<div class="erppagelist-actions">
+<button type="button" id="btn_show_data" class="erppage-btn erppage-btn-save">
+<i class="fa fa-eye"></i>
+<span>Show Data</span>
+</button>
+<button type="button" id="btn_update" class="erppage-btn erppage-btn-common">
+<i class="fa fa-refresh"></i>
+<span>Update</span>
+</button>
+</div>
+</div>
+<fieldset class="erppage-subfieldset">
+<legend>Print Details</legend>
+<div class="erppage-subheader">Print Details</div>
+<div class="erppage-grid4">
+<div class="erppage-divfield">
+<label class="erppage-label">From Date</label>
+<input type="date" class="erppage-input" id="dtFromDate">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">To Date</label>
+<input type="date" class="erppage-input" id="dtToDate">
+</div>
+<button type="button" id="btn_print" class="erppage-btn erppage-btn-common">
+<i class="fa fa-print"></i>
+<span>Print</span>
+</button>
+</div>
+</fieldset>
+<div class="erppagelist-container">
+<div class="excel-wrapper fixed-grid-wrapper">
+<table id="tblLaminationQCEntry" class="excel-table fixed-grid-table resizable-table">
+<colgroup>
+<col style="display: none;"> <!-- Code -->
+<col style="width: 80px;">   <!-- V_NO -->
+<col style="width: 100px;">   <!-- Shift -->
+<col style="width: 100px;">  <!-- Lamination -->
+<col style="width: 120px;">  <!-- Supervisor -->
+<col style="width: 120px;">  <!-- Operator -->
+<col style="width: 150px;">  <!-- Item Name -->
+<col style="width: 80px;">   <!-- Meter -->
+@* ------------------------------------ *@
+<col style="width: 80px;">   <!-- Roll No -->
+<col style="width: 100px;">  <!-- NWarp Way -->
+<col style="width: 100px;">  <!-- Warp Way -->
+<col style="width: 100px;">  <!-- NWeft Way -->
+<col style="width: 100px;">  <!-- Weft Way -->
+<col style="width: 120px;">   <!-- Strength -->
+<col style="width: 120px;">   <!-- Status -->
+<col style="width: 100px;">  <!-- Elong Warp -->
+<col style="width: 100px;">  <!-- Elong Weft -->
+<col style="width: 150px;">  <!-- Remarks -->
+@* ------------------------------------ *@
+<col style="width: 80px;">   <!-- Net Wt. -->
+<col style="width: 100px;">  <!-- Fabric Size -->
+<col style="width: 100px;">  <!-- UnLam Gram. -->
+<col style="width: 80px;">   <!-- Coating -->
+<col style="width: 100px;">  <!-- Lam Gram. -->
+<col style="width: 100px;">  <!-- LAM GSM -->
+@* <col style="width: 80px;">   <!-- Roll No -->
+<col style="width: 100px;">  <!-- NWarp Way -->
+<col style="width: 100px;">  <!-- Warp Way -->
+<col style="width: 100px;">  <!-- NWeft Way -->
+<col style="width: 100px;">  <!-- Weft Way -->
+<col style="width: 120px;">   <!-- Strength -->
+<col style="width: 120px;">   <!-- Status -->
+<col style="width: 100px;">  <!-- Elong Warp -->
+<col style="width: 100px;">  <!-- Elong Weft -->
+<col style="width: 150px;">  <!-- Remarks --> *@
+<col style="width: 100px;">  <!-- SupCode -->
+<col style="width: 100px;">  <!-- OpeCode -->
+</colgroup>
+<thead>
+<tr>
+<th class="hidden-col">Code</th>
+<th>Doc NO</th>
+<th>Shift</th>
+<th>Lamination</th>
+<th>Supervisor</th>
+<th>Operator</th>
+<th>Item Name</th>
+<th>Meter</th>
+@* ---------------- *@
+<th>Roll No</th>
+<th>NWarp Way</th>
+<th>Warp Way</th>
+<th>NWeft Way</th>
+<th>Weft Way</th>
+<th>Strength</th>
+<th>Status</th>
+<th>Elong Warp</th>
+<th>Elong Weft</th>
+<th>Remarks</th>
+@* ---------------- *@
+<th>Net Wt.</th>
+<th>Fabric Size</th>
+<th>UnLam Gram.</th>
+<th>Coating</th>
+<th>Lam Gram.</th>
+<th>LAM GSM</th>
+@* <th>Roll No</th>
+<th>NWarp Way</th>
+<th>Warp Way</th>
+<th>NWeft Way</th>
+<th>Weft Way</th>
+<th>Strength</th>
+<th>Status</th>
+<th>Elong Warp</th>
+<th>Elong Weft</th>
+<th>Remarks</th> *@
+<th>SupCode</th>
+<th>OpeCode</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="erppagelist-pagination">
+<div class="pagination-left">
+<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+<option value="5">5</option>
+<option value="10" selected>10</option>
+<option value="20">20</option>
+<option value="50">50</option>
+</select>
+</div>
+<div class="pagination-center">
+<button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+<div id="pageNumbers" class="page-numbers"></div>
+<button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+</div>
+<div class="pagination-right" id="pageInfoText">
+Results: 0 - 0 of 0
+</div>
+</div>
+</div>
+</fieldset>
+</div>
 </div>
 <script src="~/js/GlobalFunction.js" asp-append-version="true"></script>
 <script src="~/js/erpjs/qualitycontrol/transaction/laminationqcentry/laminationqcentry.js"></script>
 <script>
-    window.globalVariables = {
-        compCode: "@globalVariables?.PubCompCode",
-        yearCode: "@globalVariables?.PubFYearCode",
-        branchCode: "@globalVariables?.PubBranchCode",
-        companyName: "@globalVariables?.CompanyName",
-        add1: "@globalVariables?.Address1",
-        add2: "@globalVariables?.Address2"
-    };
-    window.database = {
-        db: "@ViewBag.DatabaseName"
-    }
+window.globalVariables = {
+compCode: "@globalVariables?.PubCompCode",
+yearCode: "@globalVariables?.PubFYearCode",
+branchCode: "@globalVariables?.PubBranchCode",
+companyName: "@globalVariables?.CompanyName",
+add1: "@globalVariables?.Address1",
+add2: "@globalVariables?.Address2"
+};
+window.database = {
+db: "@ViewBag.DatabaseName"
+}
 </script>
-

@@ -1,146 +1,144 @@
-﻿@{
-    ViewBag.Title = "Tape And Fabric Master";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+@{
+ViewBag.Title = "Tape And Fabric Master";
+Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
-    <div class="erppage-header-left">
-        <div class="erppage-header-icon">
-            <i class="fa fa-tags"></i>
-        </div>
-        <div class="erppage-header-title">Tape And Fabric Master</div>
-    </div>
-    <div class="erppage-header-right">
-        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "TapeAndFabricMasterList")', readOnly)">
-            <i class="fa-solid fa-arrow-left"></i>Back to list
-        </button>
-    </div>
+<div class="erppage-header-left">
+<div class="erppage-header-icon">
+<i class="fa fa-tags"></i>
+</div>
+<div class="erppage-header-title">Tape And Fabric Master</div>
+</div>
+<div class="erppage-header-right">
+<button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "TapeAndFabricMasterList")', readOnly)">
+<i class="fa-solid fa-arrow-left"></i>Back to list
+</button>
+</div>
 </div>
 <div id="TapeFabricMasterForm">
-    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
-    <div class="erppage-container">
-        <fieldset class="erppage-fieldset">
-            <div class="erppage-grid3">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Name</label>
-                    <input type="text" class="erppage-redinput" id="TxtName" maxlength="50" placeholder="Enter Name">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Mesh Name</label>
-                    <select class="erppage-input erppage-required" id="ddlMeshName">
-                        <option value="">Select Mesh Name</option>
-                    </select>
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Denier</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumDenier" placeholder="Enter Denier">
-                </div>
-            </div>
-            <div class="erppage-grid3">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">PP/HD</label>
-                    <input type="text" class="erppage-redinput" id="TxtPPHD" maxlength="30" placeholder="Enter PP/HD">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Color</label>
-                    <select class="erppage-input erppage-required" id="ddlColor">
-                        <option value="">Select Color</option>
-                    </select>
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Width (MM.)</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumWidth" placeholder="Enter Width (MM.)">
-                </div>
-            </div>
-            <div class="erppage-grid3">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Std. Gram</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStdGram" placeholder="Enter Std. Gram">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Min. Gram</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumMinGram" placeholder="Enter Min. Gram">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Max. Gram</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumMaxGram" placeholder="Enter Max Gram">
-                </div>
-            </div>
-            <div class="erppage-grid3">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Std. GPD</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStdGPD" placeholder="Enter Std. GPD">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Min. GPD</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumMinGPD" placeholder="Enter Min. GPD">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Max. GPD</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumMaxGPD" placeholder="Enter Max. GPD">
-                </div>
-            </div>
-            <div class="erppage-grid3">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Std. Strength</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStdStrength" placeholder="Enter Std. Strength">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Min. Strength</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStrengthMin" placeholder="Enter Strength Min.">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Max. Strength</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStrengthMax" placeholder="Enter Strength Max.">
-                </div>
-            </div>
-            <div class="erppage-grid3">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Std. Elong(%)</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStdElong" placeholder="Enter Std. Elong(%)">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Min. Elong(%)</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumElongMin" placeholder="Enter Elong. Min (%)">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Max. Elong(%)</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumElongMax" placeholder="Enter Elong. Max(%)">
-                </div>
-            </div>
-            <div class="erppage-grid3">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Lam fab Str</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumLamFabStr" placeholder="Enter Lam Fab Str">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Unlam Fab Str</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumUnlamFabStr" placeholder="Enter Unlam Fab Str">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">GSM</label>
-                    <input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumGSM" placeholder="Enter GSM">
-                </div>
-                <div class="erppage-divfield erppage-col-span-3">
-                    <label class="erppage-label"></label>
-                    <div class="erppage-toggle-container">
-                        <span class="erppage-toggle-text active" id="statusText">Active</span>
-                        <label class="erppage-toggle">
-                            <input type="checkbox" id="DdActive" name="ACTIVE" checked value="1">
-                            <span class="erppage-toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </fieldset>
-        <div class="erppage-actions">
-            <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
-                <i class="fa-solid fa-floppy-disk"></i>
-                <span>Save</span>
-            </button>
-        </div>
-    </div>
+<input type="hidden" class="form-control" id="TxtCode" name="CODE">
+<div class="erppage-container">
+<fieldset class="erppage-fieldset">
+<div class="erppage-grid3">
+<div class="erppage-divfield">
+<label class="erppage-label">Name</label>
+<input type="text" class="erppage-redinput" id="TxtName" maxlength="50" placeholder="Enter Name">
 </div>
-
+<div class="erppage-divfield">
+<label class="erppage-label">Mesh Name</label>
+<select class="erppage-input erppage-required" id="ddlMeshName">
+<option value="">Select Mesh Name</option>
+</select>
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Denier</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumDenier" placeholder="Enter Denier">
+</div>
+</div>
+<div class="erppage-grid3">
+<div class="erppage-divfield">
+<label class="erppage-label">PP/HD</label>
+<input type="text" class="erppage-redinput" id="TxtPPHD" maxlength="30" placeholder="Enter PP/HD">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Color</label>
+<select class="erppage-input erppage-required" id="ddlColor">
+<option value="">Select Color</option>
+</select>
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Width (MM.)</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumWidth" placeholder="Enter Width (MM.)">
+</div>
+</div>
+<div class="erppage-grid3">
+<div class="erppage-divfield">
+<label class="erppage-label">Std. Gram</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStdGram" placeholder="Enter Std. Gram">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Min. Gram</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumMinGram" placeholder="Enter Min. Gram">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Max. Gram</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumMaxGram" placeholder="Enter Max Gram">
+</div>
+</div>
+<div class="erppage-grid3">
+<div class="erppage-divfield">
+<label class="erppage-label">Std. GPD</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStdGPD" placeholder="Enter Std. GPD">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Min. GPD</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumMinGPD" placeholder="Enter Min. GPD">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Max. GPD</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumMaxGPD" placeholder="Enter Max. GPD">
+</div>
+</div>
+<div class="erppage-grid3">
+<div class="erppage-divfield">
+<label class="erppage-label">Std. Strength</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStdStrength" placeholder="Enter Std. Strength">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Min. Strength</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStrengthMin" placeholder="Enter Strength Min.">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Max. Strength</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStrengthMax" placeholder="Enter Strength Max.">
+</div>
+</div>
+<div class="erppage-grid3">
+<div class="erppage-divfield">
+<label class="erppage-label">Std. Elong(%)</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumStdElong" placeholder="Enter Std. Elong(%)">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Min. Elong(%)</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumElongMin" placeholder="Enter Elong. Min (%)">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Max. Elong(%)</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumElongMax" placeholder="Enter Elong. Max(%)">
+</div>
+</div>
+<div class="erppage-grid3">
+<div class="erppage-divfield">
+<label class="erppage-label">Lam fab Str</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumLamFabStr" placeholder="Enter Lam Fab Str">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">Unlam Fab Str</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumUnlamFabStr" placeholder="Enter Unlam Fab Str">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">GSM</label>
+<input type="text" class="erppage-redinput" oninput="allowOnlyNumbers(this); SetMaxlength(this);" id="NumGSM" placeholder="Enter GSM">
+</div>
+<div class="erppage-divfield erppage-col-span-3">
+<label class="erppage-label"></label>
+<div class="erppage-toggle-container">
+<span class="erppage-toggle-text active" id="statusText">Active</span>
+<label class="erppage-toggle">
+<input type="checkbox" id="DdActive" name="ACTIVE" checked value="1">
+<span class="erppage-toggle-slider"></span>
+</label>
+</div>
+</div>
+</div>
+</fieldset>
+<div class="erppage-actions">
+<button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+<i class="fa-solid fa-floppy-disk"></i>
+<span>Save</span>
+</button>
+</div>
+</div>
+</div>
 <script src="~/js/erpjs/qualitycontrol/master/tapeandfabricmaster/tapeandfabricmaster.js"></script>

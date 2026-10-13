@@ -1,615 +1,514 @@
-﻿@{
-	ViewBag.Title = "Gate Entry Dashboard";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+@{
+ViewBag.Title = "Gate Entry Dashboard";
+Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gate Entry Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gate Entry Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
-    <div class="GateEntryDashboard-container">
-        <div class="GateEntryDashboard-header">
-            <div class="GateEntryDashboard-header-left">
-                <div class="GateEntryDashboard-header-icon">
-                    <i class="fa fa-truck-moving"></i>
-                </div>
-                <div>
-                    <div class="GateEntryDashboard-title">
-                        Gate Entry Dashboard
-                    </div>
-                    <div class="GateEntryDashboard-subtitle">
-                        Smart Monitoring & Analytics
-                    </div>
-                </div>
-            </div>
-            <!-- RIGHT SIDE BUTTON -->
-            <button class="GateEntryDashboard-header-export-btn">
-                <i class="fa fa-file-excel"></i>
-                <span>Export to Excel</span>
-            </button>
-        </div>
-        <div class="GateEntryDashboard-sales-header-advanced">
-            <div class="GateEntryDashboard-sales-top">
-                <div class="GateEntryDashboard-sales-icon">
-                    <i class="fa fa-right-left"></i>
-                </div>
-                <div>
-                    <div class="GateEntryDashboard-sales-title">Gate Activity</div>
-                    <div class="GateEntryDashboard-sales-sub">
-                        Live Vehicle Movement Status
-                    </div>
-                </div>
-            </div>
-            <div class="GateEntryDashboard-gate-filter">
-                <label for="gateFilter">Filter Gate Activity</label>
-                <select id="gateFilter">
-                    <option value="all">All</option>
-                    <option value="gateinwardRM">Gate Inward RM</option>
-                    <option value="gateinwardstore">Gate Inward Store</option>
-                </select>
-            </div>
-            <div class="GateEntryDashboard-date-filter">
-                <label for="dateRange">Select Date Range</label>
-                <div class="GateEntryDashboard-date-input-wrap">
-                    <i class="fa fa-calendar-days"></i>
-                    <input type="text" id="dateRange" placeholder="Select From & To Date" />
-                </div>
-                <button type="button" id="btnSearch">Search</button>
-            </div>
-
-        </div>
-
-        <div class="GateEntryDashboard-row">
-            @* <div class="GateEntryDashboard-left">
-                <div class="GateEntryDashboard-card-grid" id="dashboardCards"></div>
-            </div> *@
-
-            <div class="GateEntryDashboard-left">
-
-                <div class="GateEntryDashboard-card-grid" id="dashboardCards">
-                    <!-- Vehicle Card -->
-                    @* <div class="GateEntryDashboard-card vehicle-card"> *@
-                <div>
-                        <div class="vehicle-card-header">
-
-                            <div class="GateEntryDashboard-icon icon-green">
-                                <i class="fa fa-truck"></i>
-                            </div>
-
-                            <div class="vehicle-card-title">
-                                <h3>Vehicle</h3>
-                                <p>Live Gate Activity</p>
-                            </div>
-
-                        </div>
-
-                        <div class="vehicle-donut">
-                            <canvas id="vehicleChart"></canvas>
-                        </div>
-
-                        <div class="vehicle-card">
-                        
-                            <div class="vehicle-stats">
-                        
-                                <div class="stat">
-                                    <span>IN</span>
-                                   
-                                    <strong class="stat-click"
-                                            data-title="Vehicle"
-                                            data-label="IN"
-                                            style="color:#3b82f6; cursor:pointer;">
-                                        <span id="outCount">0</span>
-                                    </strong>
-
-
-
-                                </div>
-
-                                <div class="stat">
-                                    <span>OUT</span>
-                                    <strong class="stat-click"
-                                            data-title="Vehicle"
-                                            data-label="OUT"
-                                            style="color:#3b82f6; cursor:pointer;">
-                                        <span id="outCount">0</span>
-                                    </strong>
-                                </div>
-
-                                <div class="stat">
-                                    <span>PENDING</span>
-                                    <strong class="stat-click"
-                                            data-title="Vehicle"
-                                            data-label="PENDING"
-                                            style="color:#ef4444; cursor:pointer;">
-                                        <span id="pendingCount">0</span>
-                                    </strong>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- Party Own Material Card -->
-                    <div class="GateEntryDashboard-card vehicle-card">
-
-                        <div class="vehicle-card-header">
-
-                            <div class="GateEntryDashboard-icon icon-yellow">
-                                <i class="fa fa-box-open"></i>
-                            </div>
-
-                            <div class="vehicle-card-title">
-                                <h3>Party Own Material</h3>
-                                <p>Material Movement</p>
-                            </div>
-
-                        </div>
-
-                        <div class="vehicle-donut">
-                            <canvas id="materialChart"></canvas>
-                        </div>
-
-                        <div class="vehicle-stats">
-
-                            <div class="stat">
-                                <span>IN</span>
-                                <strong class="stat-click"
-                                        data-title="Party Own Material"
-                                        data-label="IN"
-                                        style="color:#22c55e; cursor:pointer;">
-                                    <span class="counter" data-target="60">60</span>
-                                </strong>
-                            </div>
-
-                            <div class="stat">
-                                <span>OUT</span>
-                                <strong class="stat-click"
-                                        data-title="Party Own Material"
-                                        data-label="OUT"
-                                        style="color:#3b82f6; cursor:pointer;">
-                                    <span class="counter" data-target="40">40</span>
-                                </strong>
-                            </div>
-
-                            <div class="stat">
-                                <span>PENDING</span>
-                                <strong class="stat-click"
-                                        data-title="Party Own Material"
-                                        data-label="PENDING"
-                                        style="color:#ef4444; cursor:pointer;">
-                                    <span class="counter" data-target="15">15</span>
-                                </strong>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- Visitor Entry Card -->
-                    <div class="GateEntryDashboard-card vehicle-card">
-
-                        <div class="vehicle-card-header">
-
-                            <div class="GateEntryDashboard-icon icon-pink">
-                                <i class="fa fa-user-check"></i>
-                            </div>
-
-                            <div class="vehicle-card-title">
-                                <h3>Visitor Entry</h3>
-                                <p>Visitor Activity</p>
-                            </div>
-
-                        </div>
-
-                        <div class="vehicle-donut">
-                            <canvas id="visitorChart"></canvas>
-                        </div>
-
-                        <div class="vehicle-stats">
-
-                            <div class="stat">
-                                <span>IN</span>
-                                <strong class="stat-click"
-                                        data-title="Visitor Entry"
-                                        data-label="IN"
-                                        style="color:#22c55e; cursor:pointer;">
-                                    <span class="counter" data-target="150">150</span>
-                                </strong>
-                            </div>
-
-                            <div class="stat">
-                                <span>OUT</span>
-                                <strong class="stat-click"
-                                        data-title="Visitor Entry"
-                                        data-label="OUT"
-                                        style="color:#3b82f6; cursor:pointer;">
-                                    <span class="counter" data-target="120">120</span>
-                                </strong>
-                            </div>
-
-                            <div class="stat">
-                                <span>PENDING</span>
-                                <strong class="stat-click"
-                                        data-title="Visitor Entry"
-                                        data-label="PENDING"
-                                        style="color:#ef4444; cursor:pointer;">
-                                    <span class="counter" data-target="30">30</span>
-                                </strong>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- Gate Inward RM -->
-                    <div class="GateEntryDashboard-card vehicle-card">
-
-                        <div class="vehicle-card-header">
-
-                            <div class="GateEntryDashboard-icon icon-green">
-                                <i class="fa fa-industry"></i>
-                            </div>
-
-                            <div class="vehicle-card-title">
-                                <h3>Gate Inward RM</h3>
-                                <p>Raw Material Status</p>
-                            </div>
-
-                        </div>
-
-                        <div class="vehicle-donut">
-                            <canvas id="rmChart"></canvas>
-                        </div>
-
-                        <div class="vehicle-stats">
-
-                            <div class="stat">
-                                <span>Approval</span>
-                                <strong style="color:#22c55e;">25</strong>
-                            </div>
-
-                            <div class="stat">
-                                <span>Pre QC</span>
-                                <strong style="color:#3b82f6;">18</strong>
-                            </div>
-
-                            <div class="stat">
-                                <span>WB</span>
-                                <strong style="color:#f59e0b;">12</strong>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- Gate Inward Store -->
-                    <div class="GateEntryDashboard-card vehicle-card">
-
-                        <div class="vehicle-card-header">
-
-                            <div class="GateEntryDashboard-icon icon-yellow">
-                                <i class="fa fa-warehouse"></i>
-                            </div>
-
-                            <div class="vehicle-card-title">
-                                <h3>Gate Inward Store</h3>
-                                <p>Store Material Status</p>
-                            </div>
-
-                        </div>
-
-                        <div class="vehicle-donut">
-                            <canvas id="storeChart"></canvas>
-                        </div>
-
-                        <div class="vehicle-stats">
-
-                            <div class="stat">
-                                <span>Approval</span>
-                                <strong style="color:#22c55e;">20</strong>
-                            </div>
-
-                            <div class="stat">
-                                <span>Pre QC</span>
-                                <strong style="color:#3b82f6;">14</strong>
-                            </div>
-
-                            <div class="stat">
-                                <span>WB</span>
-                                <strong style="color:#f59e0b;">10</strong>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- Vehicle RC -->
-                    <div class="GateEntryDashboard-card vehicle-card">
-
-                        <div class="vehicle-card-header">
-
-                            <div class="GateEntryDashboard-icon icon-pink">
-                                <i class="fa fa-id-card"></i>
-                            </div>
-
-                            <div class="vehicle-card-title">
-                                <h3>Vehicle RC</h3>
-                                <p>RC Verification</p>
-                            </div>
-
-                        </div>
-
-                        <div class="vehicle-donut">
-                            <canvas id="rcChart"></canvas>
-                        </div>
-
-                        <div class="vehicle-stats">
-
-                            <div class="stat">
-                                <span>Found</span>
-                                <strong style="color:#22c55e;">80</strong>
-                            </div>
-
-                            <div class="stat">
-                                <span>Not Found</span>
-                                <strong style="color:#ef4444;">20</strong>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-
-            <div class="GateEntryDashboard-right">
-                <div class="GateEntryDashboard-filter">
-                    <h4>Select Category</h4>
-                    <select id="categorySelect">
-                        <option value="vehicleChart">Gate Inward</option>
-                        <option value="materialChart">Gate Outward</option>
-                    </select>
-                    <div class="GateEntryDashboard-dropdown-chart">
-                        <canvas id="dropdownChart"></canvas>
-                    </div>
-                    <div class="GateEntryDashboard-filter-item kpi-today">
-                        <span>Today</span>
-                        <strong>120</strong>
-                    </div>
-
-                    <div class="GateEntryDashboard-filter-item kpi-yesterday">
-                        <span>Yesterday</span>
-                        <strong>95</strong>
-                    </div>
-                    <div class="GateEntryDashboard-filter-item kpi-monthly">
-                        <span>Monthly</span>
-                        <strong>400</strong>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="GateEntryDashboard-tat-header">
-            <h3>TAT Dashboard</h3>
-            <span class="tat-sub">Performance Overview</span>
-        </div>
-        <div class="GateEntryDashboard-tat-grid">
-            <div class="GateEntryDashboard-tat-card">
-                <div class="tat-left">
-                    <div class="tat-top">
-                        <div class="tat-icon"><i class="fa fa-truck"></i></div>
-                        <h4>Incoming with Validity Date</h4>
-                    </div>
-                    <div class="tat-value">18</div>
-                    <div class="tat-footer">
-                        <span class="tat-trend up">↑ 12%</span>
-                        <span class="tat-badge within">Within</span>
-                    </div>
-                </div>
-                <div class="tat-right">
-                    <canvas id="chart1"></canvas>
-                </div>
-            </div>
-            <div class="GateEntryDashboard-tat-card">
-                <div class="tat-left">
-                    <div class="tat-top">
-                        <div class="tat-icon"><i class="fa fa-calendar-times"></i></div>
-                        <h4>Incoming After Incoming Date</h4>
-                    </div>
-                    <div class="tat-value">10</div>
-                    <div class="tat-footer">
-                        <span class="tat-trend down">↓ 8%</span>
-                        <span class="tat-badge beyond">Beyond</span>
-                    </div>
-                </div>
-                <div class="tat-right">
-                    <canvas id="chart2"></canvas>
-                </div>
-            </div>
-            <div class="GateEntryDashboard-tat-card">
-                <div class="tat-left">
-                    <div class="tat-top">
-                        <div class="tat-icon"><i class="fa fa-check-circle"></i></div>
-                        <h4>WB Within TAT</h4>
-                    </div>
-                    <div class="tat-value">25</div>
-                    <div class="tat-footer">
-                        <span class="tat-trend up">↑ 15%</span>
-                        <span class="tat-badge within">Within</span>
-                    </div>
-                </div>
-                <div class="tat-right">
-                    <canvas id="chart3"></canvas>
-                </div>
-            </div>
-            <div class="GateEntryDashboard-tat-card">
-                <div class="tat-left">
-                    <div class="tat-top">
-                        <div class="tat-icon"><i class="fa fa-exclamation-triangle"></i></div>
-                        <h4>WB Beyond TAT</h4>
-                    </div>
-                    <div class="tat-value">8</div>
-                    <div class="tat-footer">
-                        <span class="tat-trend down">↓ 5%</span>
-                        <span class="tat-badge beyond">Beyond</span>
-                    </div>
-                </div>
-                <div class="tat-right">
-                    <canvas id="chart4"></canvas>
-                </div>
-            </div>
-            <div class="GateEntryDashboard-tat-card">
-                <div class="tat-left">
-                    <div class="tat-top">
-                        <div class="tat-icon"><i class="fa fa-vial"></i></div>
-                        <h4>PRE QC Within TAT</h4>
-                    </div>
-                    <div class="tat-value">14</div>
-                    <div class="tat-footer">
-                        <span class="tat-trend up">↑ 9%</span>
-                        <span class="tat-badge within">Within</span>
-                    </div>
-                </div>
-                <div class="tat-right">
-                    <canvas id="chart5"></canvas>
-                </div>
-            </div>
-            <div class="GateEntryDashboard-tat-card">
-                <div class="tat-left">
-                    <div class="tat-top">
-                        <div class="tat-icon"><i class="fa fa-times-circle"></i></div>
-                        <h4>PRE QC Beyond TAT</h4>
-                    </div>
-                    <div class="tat-value">6</div>
-                    <div class="tat-footer">
-                        <span class="tat-trend down">↓ 3%</span>
-                        <span class="tat-badge beyond">Beyond</span>
-                    </div>
-                </div>
-                <div class="tat-right">
-                    <canvas id="chart6"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<div class="GateEntryDashboard-container">
+<div class="GateEntryDashboard-header">
+<div class="GateEntryDashboard-header-left">
+<div class="GateEntryDashboard-header-icon">
+<i class="fa fa-truck-moving"></i>
+</div>
+<div>
+<div class="GateEntryDashboard-title">
+Gate Entry Dashboard
+</div>
+<div class="GateEntryDashboard-subtitle">
+Smart Monitoring & Analytics
+</div>
+</div>
+</div>
+<!-- RIGHT SIDE BUTTON -->
+<button class="GateEntryDashboard-header-export-btn">
+<i class="fa fa-file-excel"></i>
+<span>Export to Excel</span>
+</button>
+</div>
+<div class="GateEntryDashboard-sales-header-advanced">
+<div class="GateEntryDashboard-sales-top">
+<div class="GateEntryDashboard-sales-icon">
+<i class="fa fa-right-left"></i>
+</div>
+<div>
+<div class="GateEntryDashboard-sales-title">Gate Activity</div>
+<div class="GateEntryDashboard-sales-sub">
+Live Vehicle Movement Status
+</div>
+</div>
+</div>
+<div class="GateEntryDashboard-gate-filter">
+<label for="gateFilter">Filter Gate Activity</label>
+<select id="gateFilter">
+<option value="all">All</option>
+<option value="gateinwardRM">Gate Inward RM</option>
+<option value="gateinwardstore">Gate Inward Store</option>
+</select>
+</div>
+<div class="GateEntryDashboard-date-filter">
+<label for="dateRange">Select Date Range</label>
+<div class="GateEntryDashboard-date-input-wrap">
+<i class="fa fa-calendar-days"></i>
+<input type="text" id="dateRange" placeholder="Select From & To Date" />
+</div>
+<button type="button" id="btnSearch">Search</button>
+</div>
+</div>
+<div class="GateEntryDashboard-row">
+@* <div class="GateEntryDashboard-left">
+<div class="GateEntryDashboard-card-grid" id="dashboardCards"></div>
+</div> *@
+<div class="GateEntryDashboard-left">
+<div class="GateEntryDashboard-card-grid" id="dashboardCards">
+<!-- Vehicle Card -->
+@* <div class="GateEntryDashboard-card vehicle-card"> *@
+<div>
+<div class="vehicle-card-header">
+<div class="GateEntryDashboard-icon icon-green">
+<i class="fa fa-truck"></i>
+</div>
+<div class="vehicle-card-title">
+<h3>Vehicle</h3>
+<p>Live Gate Activity</p>
+</div>
+</div>
+<div class="vehicle-donut">
+<canvas id="vehicleChart"></canvas>
+</div>
+<div class="vehicle-card">
+<div class="vehicle-stats">
+<div class="stat">
+<span>IN</span>
+<strong class="stat-click"
+data-title="Vehicle"
+data-label="IN"
+style="color:#3b82f6; cursor:pointer;">
+<span id="outCount">0</span>
+</strong>
+</div>
+<div class="stat">
+<span>OUT</span>
+<strong class="stat-click"
+data-title="Vehicle"
+data-label="OUT"
+style="color:#3b82f6; cursor:pointer;">
+<span id="outCount">0</span>
+</strong>
+</div>
+<div class="stat">
+<span>PENDING</span>
+<strong class="stat-click"
+data-title="Vehicle"
+data-label="PENDING"
+style="color:#ef4444; cursor:pointer;">
+<span id="pendingCount">0</span>
+</strong>
+</div>
+</div>
+</div>
+</div>
+<!-- Party Own Material Card -->
+<div class="GateEntryDashboard-card vehicle-card">
+<div class="vehicle-card-header">
+<div class="GateEntryDashboard-icon icon-yellow">
+<i class="fa fa-box-open"></i>
+</div>
+<div class="vehicle-card-title">
+<h3>Party Own Material</h3>
+<p>Material Movement</p>
+</div>
+</div>
+<div class="vehicle-donut">
+<canvas id="materialChart"></canvas>
+</div>
+<div class="vehicle-stats">
+<div class="stat">
+<span>IN</span>
+<strong class="stat-click"
+data-title="Party Own Material"
+data-label="IN"
+style="color:#22c55e; cursor:pointer;">
+<span class="counter" data-target="60">60</span>
+</strong>
+</div>
+<div class="stat">
+<span>OUT</span>
+<strong class="stat-click"
+data-title="Party Own Material"
+data-label="OUT"
+style="color:#3b82f6; cursor:pointer;">
+<span class="counter" data-target="40">40</span>
+</strong>
+</div>
+<div class="stat">
+<span>PENDING</span>
+<strong class="stat-click"
+data-title="Party Own Material"
+data-label="PENDING"
+style="color:#ef4444; cursor:pointer;">
+<span class="counter" data-target="15">15</span>
+</strong>
+</div>
+</div>
+</div>
+<!-- Visitor Entry Card -->
+<div class="GateEntryDashboard-card vehicle-card">
+<div class="vehicle-card-header">
+<div class="GateEntryDashboard-icon icon-pink">
+<i class="fa fa-user-check"></i>
+</div>
+<div class="vehicle-card-title">
+<h3>Visitor Entry</h3>
+<p>Visitor Activity</p>
+</div>
+</div>
+<div class="vehicle-donut">
+<canvas id="visitorChart"></canvas>
+</div>
+<div class="vehicle-stats">
+<div class="stat">
+<span>IN</span>
+<strong class="stat-click"
+data-title="Visitor Entry"
+data-label="IN"
+style="color:#22c55e; cursor:pointer;">
+<span class="counter" data-target="150">150</span>
+</strong>
+</div>
+<div class="stat">
+<span>OUT</span>
+<strong class="stat-click"
+data-title="Visitor Entry"
+data-label="OUT"
+style="color:#3b82f6; cursor:pointer;">
+<span class="counter" data-target="120">120</span>
+</strong>
+</div>
+<div class="stat">
+<span>PENDING</span>
+<strong class="stat-click"
+data-title="Visitor Entry"
+data-label="PENDING"
+style="color:#ef4444; cursor:pointer;">
+<span class="counter" data-target="30">30</span>
+</strong>
+</div>
+</div>
+</div>
+<!-- Gate Inward RM -->
+<div class="GateEntryDashboard-card vehicle-card">
+<div class="vehicle-card-header">
+<div class="GateEntryDashboard-icon icon-green">
+<i class="fa fa-industry"></i>
+</div>
+<div class="vehicle-card-title">
+<h3>Gate Inward RM</h3>
+<p>Raw Material Status</p>
+</div>
+</div>
+<div class="vehicle-donut">
+<canvas id="rmChart"></canvas>
+</div>
+<div class="vehicle-stats">
+<div class="stat">
+<span>Approval</span>
+<strong style="color:#22c55e;">25</strong>
+</div>
+<div class="stat">
+<span>Pre QC</span>
+<strong style="color:#3b82f6;">18</strong>
+</div>
+<div class="stat">
+<span>WB</span>
+<strong style="color:#f59e0b;">12</strong>
+</div>
+</div>
+</div>
+<!-- Gate Inward Store -->
+<div class="GateEntryDashboard-card vehicle-card">
+<div class="vehicle-card-header">
+<div class="GateEntryDashboard-icon icon-yellow">
+<i class="fa fa-warehouse"></i>
+</div>
+<div class="vehicle-card-title">
+<h3>Gate Inward Store</h3>
+<p>Store Material Status</p>
+</div>
+</div>
+<div class="vehicle-donut">
+<canvas id="storeChart"></canvas>
+</div>
+<div class="vehicle-stats">
+<div class="stat">
+<span>Approval</span>
+<strong style="color:#22c55e;">20</strong>
+</div>
+<div class="stat">
+<span>Pre QC</span>
+<strong style="color:#3b82f6;">14</strong>
+</div>
+<div class="stat">
+<span>WB</span>
+<strong style="color:#f59e0b;">10</strong>
+</div>
+</div>
+</div>
+<!-- Vehicle RC -->
+<div class="GateEntryDashboard-card vehicle-card">
+<div class="vehicle-card-header">
+<div class="GateEntryDashboard-icon icon-pink">
+<i class="fa fa-id-card"></i>
+</div>
+<div class="vehicle-card-title">
+<h3>Vehicle RC</h3>
+<p>RC Verification</p>
+</div>
+</div>
+<div class="vehicle-donut">
+<canvas id="rcChart"></canvas>
+</div>
+<div class="vehicle-stats">
+<div class="stat">
+<span>Found</span>
+<strong style="color:#22c55e;">80</strong>
+</div>
+<div class="stat">
+<span>Not Found</span>
+<strong style="color:#ef4444;">20</strong>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="GateEntryDashboard-right">
+<div class="GateEntryDashboard-filter">
+<h4>Select Category</h4>
+<select id="categorySelect">
+<option value="vehicleChart">Gate Inward</option>
+<option value="materialChart">Gate Outward</option>
+</select>
+<div class="GateEntryDashboard-dropdown-chart">
+<canvas id="dropdownChart"></canvas>
+</div>
+<div class="GateEntryDashboard-filter-item kpi-today">
+<span>Today</span>
+<strong>120</strong>
+</div>
+<div class="GateEntryDashboard-filter-item kpi-yesterday">
+<span>Yesterday</span>
+<strong>95</strong>
+</div>
+<div class="GateEntryDashboard-filter-item kpi-monthly">
+<span>Monthly</span>
+<strong>400</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="GateEntryDashboard-tat-header">
+<h3>TAT Dashboard</h3>
+<span class="tat-sub">Performance Overview</span>
+</div>
+<div class="GateEntryDashboard-tat-grid">
+<div class="GateEntryDashboard-tat-card">
+<div class="tat-left">
+<div class="tat-top">
+<div class="tat-icon"><i class="fa fa-truck"></i></div>
+<h4>Incoming with Validity Date</h4>
+</div>
+<div class="tat-value">18</div>
+<div class="tat-footer">
+<span class="tat-trend up">↑ 12%</span>
+<span class="tat-badge within">Within</span>
+</div>
+</div>
+<div class="tat-right">
+<canvas id="chart1"></canvas>
+</div>
+</div>
+<div class="GateEntryDashboard-tat-card">
+<div class="tat-left">
+<div class="tat-top">
+<div class="tat-icon"><i class="fa fa-calendar-times"></i></div>
+<h4>Incoming After Incoming Date</h4>
+</div>
+<div class="tat-value">10</div>
+<div class="tat-footer">
+<span class="tat-trend down">↓ 8%</span>
+<span class="tat-badge beyond">Beyond</span>
+</div>
+</div>
+<div class="tat-right">
+<canvas id="chart2"></canvas>
+</div>
+</div>
+<div class="GateEntryDashboard-tat-card">
+<div class="tat-left">
+<div class="tat-top">
+<div class="tat-icon"><i class="fa fa-check-circle"></i></div>
+<h4>WB Within TAT</h4>
+</div>
+<div class="tat-value">25</div>
+<div class="tat-footer">
+<span class="tat-trend up">↑ 15%</span>
+<span class="tat-badge within">Within</span>
+</div>
+</div>
+<div class="tat-right">
+<canvas id="chart3"></canvas>
+</div>
+</div>
+<div class="GateEntryDashboard-tat-card">
+<div class="tat-left">
+<div class="tat-top">
+<div class="tat-icon"><i class="fa fa-exclamation-triangle"></i></div>
+<h4>WB Beyond TAT</h4>
+</div>
+<div class="tat-value">8</div>
+<div class="tat-footer">
+<span class="tat-trend down">↓ 5%</span>
+<span class="tat-badge beyond">Beyond</span>
+</div>
+</div>
+<div class="tat-right">
+<canvas id="chart4"></canvas>
+</div>
+</div>
+<div class="GateEntryDashboard-tat-card">
+<div class="tat-left">
+<div class="tat-top">
+<div class="tat-icon"><i class="fa fa-vial"></i></div>
+<h4>PRE QC Within TAT</h4>
+</div>
+<div class="tat-value">14</div>
+<div class="tat-footer">
+<span class="tat-trend up">↑ 9%</span>
+<span class="tat-badge within">Within</span>
+</div>
+</div>
+<div class="tat-right">
+<canvas id="chart5"></canvas>
+</div>
+</div>
+<div class="GateEntryDashboard-tat-card">
+<div class="tat-left">
+<div class="tat-top">
+<div class="tat-icon"><i class="fa fa-times-circle"></i></div>
+<h4>PRE QC Beyond TAT</h4>
+</div>
+<div class="tat-value">6</div>
+<div class="tat-footer">
+<span class="tat-trend down">↓ 3%</span>
+<span class="tat-badge beyond">Beyond</span>
+</div>
+</div>
+<div class="tat-right">
+<canvas id="chart6"></canvas>
+</div>
+</div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
 <script>
-    let vehicleChart;
-    // PAGE LOAD
-    $(document).ready(function () {
-    flatpickr("#dateRange", {
-        mode: "range",
-        dateFormat: "d M Y",
-        defaultDate: [new Date(), new Date()]
-    });
-
-        // TODAY DATE
-        let today = new Date();
-        let dd = String(today.getDate()).padStart(2, '0');
-        let mm = today.toLocaleString('default', { month: 'short' });
-        let yyyy = today.getFullYear();
-        let formattedDate = dd + ' ' + mm + ' ' + yyyy;
-        $("#dateRange").val(formattedDate + " to " + formattedDate);
-        getDashboardData(formattedDate, formattedDate);
-
-    });
-
-    // SEARCH BUTTON
-    $("#btnSearch").click(function () {
-        var dateRange = $("#dateRange").val();
-        var dates = dateRange.split(" to ");
-        var fromDate = dates[0];
-        var toDate = dates[1];
-        getDashboardData(fromDate, toDate);
-
-    });
-    // AJAX FUNCTION
-    function getDashboardData(fromDate, toDate) {
-        $.ajax({
-            url: '/GateEntryDashboard/GetData',
-            type: 'POST',
-            data: {
-                FromDate: fromDate,
-                ToDate: toDate
-            },
-            success: function (response) {
-                let inCount = response.inVehicleCount;
-                let outCount = response.outVehicleCount;
-                let pendingCount = response.pendingVehicleCount;
-                loadVehicleChart(inCount, outCount, pendingCount);
-            },
-            error: function (xhr) {
-                console.log(xhr.responseText);
-
-            }
-
-        });
-    }
-    // CHART FUNCTION
-    function loadVehicleChart(inCount, outCount, pendingCount) {
-        $("#inCount").text(inCount);
-        $("#outCount").text(outCount);
-        $("#pendingCount").text(pendingCount);
-        if (vehicleChart) {
-            vehicleChart.destroy();
-        }
-        const ctx = document.getElementById('vehicleChart').getContext('2d');
-        vehicleChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['IN', 'OUT', 'PENDING'],
-                datasets: [{
-                    data: [
-                        inCount,
-                        outCount,
-                        pendingCount
-                    ],
-                    backgroundColor: [
-                        '#22c55e',
-                        '#3b82f6',
-                        '#ef4444'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '68%',
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        });
-    }
-    $(document).on("click", ".stat-click", function () {
-        var title = $(this).data("title");
-        var label = $(this).data("label");
-        console.log("Clicked:", title, label);
-        alert(title + " - " + label);
-
-    });
+let vehicleChart;
+// PAGE LOAD
+$(document).ready(function () {
+flatpickr("#dateRange", {
+mode: "range",
+dateFormat: "d M Y",
+defaultDate: [new Date(), new Date()]
+});
+// TODAY DATE
+let today = new Date();
+let dd = String(today.getDate()).padStart(2, '0');
+let mm = today.toLocaleString('default', { month: 'short' });
+let yyyy = today.getFullYear();
+let formattedDate = dd + ' ' + mm + ' ' + yyyy;
+$("#dateRange").val(formattedDate + " to " + formattedDate);
+getDashboardData(formattedDate, formattedDate);
+});
+// SEARCH BUTTON
+$("#btnSearch").click(function () {
+var dateRange = $("#dateRange").val();
+var dates = dateRange.split(" to ");
+var fromDate = dates[0];
+var toDate = dates[1];
+getDashboardData(fromDate, toDate);
+});
+// AJAX FUNCTION
+function getDashboardData(fromDate, toDate) {
+$.ajax({
+url: '/GateEntryDashboard/GetData',
+type: 'POST',
+data: {
+FromDate: fromDate,
+ToDate: toDate
+},
+success: function (response) {
+let inCount = response.inVehicleCount;
+let outCount = response.outVehicleCount;
+let pendingCount = response.pendingVehicleCount;
+loadVehicleChart(inCount, outCount, pendingCount);
+},
+error: function (xhr) {
+console.log(xhr.responseText);
+}
+});
+}
+// CHART FUNCTION
+function loadVehicleChart(inCount, outCount, pendingCount) {
+$("#inCount").text(inCount);
+$("#outCount").text(outCount);
+$("#pendingCount").text(pendingCount);
+if (vehicleChart) {
+vehicleChart.destroy();
+}
+const ctx = document.getElementById('vehicleChart').getContext('2d');
+vehicleChart = new Chart(ctx, {
+type: 'doughnut',
+data: {
+labels: ['IN', 'OUT', 'PENDING'],
+datasets: [{
+data: [
+inCount,
+outCount,
+pendingCount
+],
+backgroundColor: [
+'#22c55e',
+'#3b82f6',
+'#ef4444'
+],
+borderWidth: 0
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+cutout: '68%',
+plugins: {
+legend: {
+display: false
+}
+}
+}
+});
+}
+$(document).on("click", ".stat-click", function () {
+var title = $(this).data("title");
+var label = $(this).data("label");
+console.log("Clicked:", title, label);
+alert(title + " - " + label);
+});
 </script>
-

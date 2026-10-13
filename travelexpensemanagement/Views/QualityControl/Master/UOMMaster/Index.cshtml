@@ -1,55 +1,52 @@
-﻿@{
-    ViewBag.Title = "UOM Master";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+@{
+ViewBag.Title = "UOM Master";
+Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
-    <div class="erppage-header-left">
-        <div class="erppage-header-icon">
-            <i class="fa fa-balance-scale"></i>
-        </div>
-        <div class="erppage-header-title">UOM Master</div>
-    </div>
-    <div class="erppage-header-right">
-        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "UOMMasterList")', isReadOnly)">
-            <i class="fa-solid fa-arrow-left"></i>Back to list
-        </button>
-    </div>
+<div class="erppage-header-left">
+<div class="erppage-header-icon">
+<i class="fa fa-balance-scale"></i>
+</div>
+<div class="erppage-header-title">UOM Master</div>
+</div>
+<div class="erppage-header-right">
+<button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "UOMMasterList")', isReadOnly)">
+<i class="fa-solid fa-arrow-left"></i>Back to list
+</button>
+</div>
 </div>
 <div id="UOMMasterForm">
-    <input type="hidden" class="form-control" id="CODE" name="CODE">
-    <div class="erppage-container">
-        <fieldset class="erppage-fieldset">
-            <div class="erppage-grid4">
-                <div class="erppage-divfield">
-                    <label class="erppage-label">QC Unit Name</label>
-                    <input type="text" class="erppage-redinput" id="TxtQCUnitName" placeholder="Enter QC Unit Name" maxlength="100">
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label">Short Name</label>
-                    <input type="text" class="erppage-input" id="TxtShortName" placeholder="Enter Short Name" maxlength="20">
-                </div>
-                <div class="erppage-divfield erppage-col-span-2">
-                    <label class="erppage-label"></label>
-                    <div class="erppage-toggle-container">
-                        <span class="erppage-toggle-text active" id="statusText">Active</span>
-                        <label class="erppage-toggle">
-                            <input type="checkbox" id="ACTIVE" checked>
-                            <span class="erppage-toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </fieldset>
-        <div class="erppage-actions">
-            <button id="btnSave" type="button" class="erppage-btn erppage-btn-save">
-                <i class="fa-solid fa-floppy-disk"></i>
-                <span>Save</span>
-            </button>
-        </div>
-    </div>
+<input type="hidden" class="form-control" id="CODE" name="CODE">
+<div class="erppage-container">
+<fieldset class="erppage-fieldset">
+<div class="erppage-grid4">
+<div class="erppage-divfield">
+<label class="erppage-label">QC Unit Name</label>
+<input type="text" class="erppage-redinput" id="TxtQCUnitName" placeholder="Enter QC Unit Name" maxlength="100">
 </div>
-
+<div class="erppage-divfield">
+<label class="erppage-label">Short Name</label>
+<input type="text" class="erppage-input" id="TxtShortName" placeholder="Enter Short Name" maxlength="20">
+</div>
+<div class="erppage-divfield erppage-col-span-2">
+<label class="erppage-label"></label>
+<div class="erppage-toggle-container">
+<span class="erppage-toggle-text active" id="statusText">Active</span>
+<label class="erppage-toggle">
+<input type="checkbox" id="ACTIVE" checked>
+<span class="erppage-toggle-slider"></span>
+</label>
+</div>
+</div>
+</div>
+</fieldset>
+<div class="erppage-actions">
+<button id="btnSave" type="button" class="erppage-btn erppage-btn-save">
+<i class="fa-solid fa-floppy-disk"></i>
+<span>Save</span>
+</button>
+</div>
+</div>
+</div>
 <script src="~/js/erpjs/qualitycontrol/master/uommaster/uommaster.js"></script>
-
-

@@ -1,176 +1,162 @@
-﻿@{
-    ViewBag.Title = "Sales Return List";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+@{
+ViewBag.Title = "Sales Return List";
+Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 <div id="erp-toast-container"></div>
-
 <div class="erppagelist-header">
-    <div class="erppagelist-title">
-        <i class="fa fa-list"></i>
-        <span>Sales Return List</span>
-    </div>
-    <div class="erppagelist-header-right">
-        <button class="erppage-header-back"
-                onclick="window.location.href='@Url.Action("Index", "SalesReturn")'"
-                id="button_add">
-            <i class="fa fa-plus"></i>Add New
-        </button>
-    </div>
+<div class="erppagelist-title">
+<i class="fa fa-list"></i>
+<span>Sales Return List</span>
 </div>
-
+<div class="erppagelist-header-right">
+<button class="erppage-header-back"
+onclick="window.location.href='@Url.Action("Index", "SalesReturn")'"
+id="button_add">
+<i class="fa fa-plus"></i>Add New
+</button>
+</div>
+</div>
 <div class="erppagelist-toolbar">
-    <div class="erppagelist-search-wrapper">
-        <i class="fa fa-search"></i>
-        <input type="text" id="searchBox" placeholder="Search Module..." />
-    </div>
-
-    <div class="erppagelist-actions">
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn"
-                data-tooltip="Print Report"
-                id="button_print">
-            <i class="fa fa-print"></i> Print
-        </button>
-
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn"
-                data-tooltip="Export to Excel"
-                id="button_export">
-            <i class="fa fa-file-excel"></i> Export
-        </button>
-
-        @* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn"
-                data-tooltip="Send Mail"
-                id="button_mail">
-            <i class="fa fa-envelope"></i> Mail
-        </button> *@
-
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn"
-                data-tooltip="Approve"
-                id="button_approved">
-            <i class="fa fa-check"></i> Approved
-        </button>
-    </div>
+<div class="erppagelist-search-wrapper">
+<i class="fa fa-search"></i>
+<input type="text" id="searchBox" placeholder="Search Module..." />
 </div>
-
+<div class="erppagelist-actions">
+<button class="erppagelist-btn erppagelist-btn-action tooltip-btn"
+data-tooltip="Print Report"
+id="button_print">
+<i class="fa fa-print"></i> Print
+</button>
+<button class="erppagelist-btn erppagelist-btn-action tooltip-btn"
+data-tooltip="Export to Excel"
+id="button_export">
+<i class="fa fa-file-excel"></i> Export
+</button>
+@* <button class="erppagelist-btn erppagelist-btn-action tooltip-btn"
+data-tooltip="Send Mail"
+id="button_mail">
+<i class="fa fa-envelope"></i> Mail
+</button> *@
+<button class="erppagelist-btn erppagelist-btn-action tooltip-btn"
+data-tooltip="Approve"
+id="button_approved">
+<i class="fa fa-check"></i> Approved
+</button>
+</div>
+</div>
 <div class="erppagelist-container">
-    <div class="excel-wrapper fixed-grid-wrapper">
-        <table id="tblSalesReturnList"
-               class="excel-table fixed-grid-table table-width resizable-table">
-            <colgroup>
-                <col style="display:none;">
-                <col style="width: 81px;">
-                <col style="width: 84px;">
-                <col style="width: 84px;">
-                <col style="width: 214px;">
-                <col style="width: 95px;">
-                <col style="width: 143px;">
-                <col style="width: 188px;">
-                <col style="width: 100px;">
-                <col style="width: 95px;">
-                <col style="width: 150px;">
-                <col style="width: 155px;">
-                <col class="action-col" style="width:120px;">
-            </colgroup>
-            <thead>
-                <tr>
-                    <th style="display:none;">Code</th>
-                    <th>Doc Type</th>
-                    <th>Doc No.</th>
-                    <th>Doc Date</th>
-                    <th>Bill Name</th>
-                    @* <th>Bill Address1</th>
-                    <th>Bill Address2</th>
-                    <th>Bill Address3</th> *@
-                    <th>Bill City</th>
-                    <th>Agent</th>
-                    <th>Ship Name</th>
-                    @* <th>Ship Address1</th>
-                    <th>Ship Address2</th>
-                    <th>Ship Address3</th> *@
-                    <th>Ship City</th>
-                    @* <th>Tax Name</th> *@
-                    @* <th>Item Type</th>
-                    <th>Wb No</th>
-                    <th>Pack No</th>
-                    <th>Amount</th>
-                    <th>Pack Per</th>
-                    <th>Pack Amount</th>
-                    <th>Amount</th>
-                    <th>Cgst Per</th>
-                    <th>Cgst Amount</th>
-                    <th>Sgst Per</th>
-                    <th>Sgst Amount</th>
-                    <th>Igst Per</th>
-                    <th>Igst Amount</th>
-                    <th>Cess Per</th>
-                    <th>Cess Amount</th>
-                    <th>Load Per</th>
-                    <th>Load Ac</th>
-                    <th>Load Amount</th>
-                    <th>Wb Amount</th>
-                    <th>Wb Ac</th>
-                    <th>Tot Nos</th>
-                    <th>Frt Amount</th>
-                    <th>Round Off</th>
-                    <th>Tot Net</th>
-                    <th>Insu Per</th>
-                    <th>Insu Amount</th>
-                    <th>Tds Per</th>
-                    <th>Tds Amount</th>
-                    <th>Load Rem</th>
-                    <th>Wb Rem</th>
-                    <th>Tot Gross</th>
-                    <th>Gr No</th>
-                    <th>Gr Date</th> *@
-                    <th>Vehicle No</th>
-                    @* <th>Transport Code</th> *@
-                    <th>Transport Name</th>
-                   @*  <th>Driver Name</th>
-                    <th>Driver No</th>
-                    <th>Waybill No</th> *@
-                    <th>Remark</th>
-                    @* <th>Frt Topay</th>
-                    <th>Wb Quantity</th>
-                    <th>Disc Per</th>
-                    <th>Disc Amount</th> *@
-                    <th class="action-col">Action</th>
-                </tr>
-            </thead>
-
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <div class="erppagelist-pagination">
-        <div class="pagination-left">
-            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
-                <option value="5">5</option>
-                <option value="10" selected>10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-            </select>
-        </div>
-
-        <div class="pagination-center">
-            <button onclick="Pagination.prev()"
-                    class="page-nav"
-                    id="prevBtn">
-                ‹
-            </button>
-
-            <div id="pageNumbers" class="page-numbers"></div>
-
-            <button onclick="Pagination.next()"
-                    class="page-nav"
-                    id="nextBtn">
-                ›
-            </button>
-        </div>
-
-        <div class="pagination-right" id="pageInfoText">
-            Results: 0 - 0 of 0
-        </div>
-    </div>
+<div class="excel-wrapper fixed-grid-wrapper">
+<table id="tblSalesReturnList"
+class="excel-table fixed-grid-table table-width resizable-table">
+<colgroup>
+<col style="display:none;">
+<col style="width: 81px;">
+<col style="width: 84px;">
+<col style="width: 84px;">
+<col style="width: 214px;">
+<col style="width: 95px;">
+<col style="width: 143px;">
+<col style="width: 188px;">
+<col style="width: 100px;">
+<col style="width: 95px;">
+<col style="width: 150px;">
+<col style="width: 155px;">
+<col class="action-col" style="width:120px;">
+</colgroup>
+<thead>
+<tr>
+<th style="display:none;">Code</th>
+<th>Doc Type</th>
+<th>Doc No.</th>
+<th>Doc Date</th>
+<th>Bill Name</th>
+@* <th>Bill Address1</th>
+<th>Bill Address2</th>
+<th>Bill Address3</th> *@
+<th>Bill City</th>
+<th>Agent</th>
+<th>Ship Name</th>
+@* <th>Ship Address1</th>
+<th>Ship Address2</th>
+<th>Ship Address3</th> *@
+<th>Ship City</th>
+@* <th>Tax Name</th> *@
+@* <th>Item Type</th>
+<th>Wb No</th>
+<th>Pack No</th>
+<th>Amount</th>
+<th>Pack Per</th>
+<th>Pack Amount</th>
+<th>Amount</th>
+<th>Cgst Per</th>
+<th>Cgst Amount</th>
+<th>Sgst Per</th>
+<th>Sgst Amount</th>
+<th>Igst Per</th>
+<th>Igst Amount</th>
+<th>Cess Per</th>
+<th>Cess Amount</th>
+<th>Load Per</th>
+<th>Load Ac</th>
+<th>Load Amount</th>
+<th>Wb Amount</th>
+<th>Wb Ac</th>
+<th>Tot Nos</th>
+<th>Frt Amount</th>
+<th>Round Off</th>
+<th>Tot Net</th>
+<th>Insu Per</th>
+<th>Insu Amount</th>
+<th>Tds Per</th>
+<th>Tds Amount</th>
+<th>Load Rem</th>
+<th>Wb Rem</th>
+<th>Tot Gross</th>
+<th>Gr No</th>
+<th>Gr Date</th> *@
+<th>Vehicle No</th>
+@* <th>Transport Code</th> *@
+<th>Transport Name</th>
+@*  <th>Driver Name</th>
+<th>Driver No</th>
+<th>Waybill No</th> *@
+<th>Remark</th>
+@* <th>Frt Topay</th>
+<th>Wb Quantity</th>
+<th>Disc Per</th>
+<th>Disc Amount</th> *@
+<th class="action-col">Action</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="erppagelist-pagination">
+<div class="pagination-left">
+<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+<option value="5">5</option>
+<option value="10" selected>10</option>
+<option value="20">20</option>
+<option value="50">50</option>
+</select>
+</div>
+<div class="pagination-center">
+<button onclick="Pagination.prev()"
+class="page-nav"
+id="prevBtn">
+‹
+</button>
+<div id="pageNumbers" class="page-numbers"></div>
+<button onclick="Pagination.next()"
+class="page-nav"
+id="nextBtn">
+›
+</button>
+</div>
+<div class="pagination-right" id="pageInfoText">
+Results: 0 - 0 of 0
+</div>
+</div>
 </div>
 <script src="~/common/delete.js"></script>
 <script src="~/common/pagination.js"></script>

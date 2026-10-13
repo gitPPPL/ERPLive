@@ -1,69 +1,67 @@
-﻿@{
-	ViewBag.Title = "Parameter Master";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+@{
+ViewBag.Title = "Parameter Master";
+Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
-	<div class="erppage-header-left">
-		<div class="erppage-header-icon">
-			<i class="fa fa-shield"></i>
-		</div>
-		<div class="erppage-header-title">Parameter Master</div>
-	</div>
-	<div class="erppage-header-right">
-
-		<button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "ParameterMasterList")', readOnly)">
-			<i class="fa-solid fa-arrow-left"></i>Back to list
-		</button>
-	</div>
+<div class="erppage-header-left">
+<div class="erppage-header-icon">
+<i class="fa fa-shield"></i>
+</div>
+<div class="erppage-header-title">Parameter Master</div>
+</div>
+<div class="erppage-header-right">
+<button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "ParameterMasterList")', readOnly)">
+<i class="fa-solid fa-arrow-left"></i>Back to list
+</button>
+</div>
 </div>
 <div id="QCParameterForm">
-	<input type="hidden" class="form-control" id="TxtCode" name="CODE">
-	<div class="erppage-container">
-		<fieldset class="erppage-fieldset">
-			<div class="erppage-grid4">
-				<div class="erppage-divfield">
-					<label class="erppage-label">QC Par Name</label>
-					<input type="text" class="erppage-redinput" id="TxtQCParameterName" maxlength="100" name="QCParameterName" placeholder="Enter QC Parameter Name">
-				</div>
-				<div class="erppage-divfield">
-					<label class="erppage-label">Short Name</label>
-					<input type="text" class="erppage-input" id="TxtShortName" maxlength="20" name="ShortName" placeholder="Enter Short Name">
-				</div>
-				<div class="erppage-divfield">
-					<label class="erppage-label">QC Unit</label>
-					<select class="erppage-input erppage-required" id="ddlQCUnit" name="QCUnit">
-						<option selected disabled>Select Unit Name</option>
-					</select>
-				</div>
-				<div class="erppage-divfield">
-					<label class="erppage-label"></label>
-					<div class="erppage-checkbox-wrap">
-						<input type="checkbox" id="ChkQuantity" class="erppage-checkbox-input" value="0">
-						<label class="erppage-checkbox-label">Quantity</label>
-					</div>
-				</div>
-			</div>
-			<div class="erppage-grid4">
-				<div class="erppage-divfield erppage-col-span-3">
-					<label class="erppage-label"></label>
-					<div class="erppage-toggle-container">
-						<span class="erppage-toggle-text active" id="statusText">Active</span>
-						<label class="erppage-toggle">
-							<input type="checkbox" id="DdActive" value="1" checked>
-							<span class="erppage-toggle-slider"></span>
-						</label>
-					</div>
-				</div>
-			</div>
-		</fieldset>
-		<div class="erppage-actions">
-			<button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
-				<i class="fa-solid fa-floppy-disk"></i>
-				<span>Save</span>
-			</button>
-		</div>
-	</div>
+<input type="hidden" class="form-control" id="TxtCode" name="CODE">
+<div class="erppage-container">
+<fieldset class="erppage-fieldset">
+<div class="erppage-grid4">
+<div class="erppage-divfield">
+<label class="erppage-label">QC Par Name</label>
+<input type="text" class="erppage-redinput" id="TxtQCParameterName" maxlength="100" name="QCParameterName" placeholder="Enter QC Parameter Name">
 </div>
-
+<div class="erppage-divfield">
+<label class="erppage-label">Short Name</label>
+<input type="text" class="erppage-input" id="TxtShortName" maxlength="20" name="ShortName" placeholder="Enter Short Name">
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label">QC Unit</label>
+<select class="erppage-input erppage-required" id="ddlQCUnit" name="QCUnit">
+<option selected disabled>Select Unit Name</option>
+</select>
+</div>
+<div class="erppage-divfield">
+<label class="erppage-label"></label>
+<div class="erppage-checkbox-wrap">
+<input type="checkbox" id="ChkQuantity" class="erppage-checkbox-input" value="0">
+<label class="erppage-checkbox-label">Quantity</label>
+</div>
+</div>
+</div>
+<div class="erppage-grid4">
+<div class="erppage-divfield erppage-col-span-3">
+<label class="erppage-label"></label>
+<div class="erppage-toggle-container">
+<span class="erppage-toggle-text active" id="statusText">Active</span>
+<label class="erppage-toggle">
+<input type="checkbox" id="DdActive" value="1" checked>
+<span class="erppage-toggle-slider"></span>
+</label>
+</div>
+</div>
+</div>
+</fieldset>
+<div class="erppage-actions">
+<button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+<i class="fa-solid fa-floppy-disk"></i>
+<span>Save</span>
+</button>
+</div>
+</div>
+</div>
 <script src="~/js/erpjs/qualitycontrol/master/parametermaster/parametermaster.js"></script>
