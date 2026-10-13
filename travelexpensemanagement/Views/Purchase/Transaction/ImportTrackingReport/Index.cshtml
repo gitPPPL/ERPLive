@@ -24,176 +24,195 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label">Ship Type</label>
                     <select class="erppage-input erppage-select" id="ddlshiptype">
-                        <option value="">Select Ship Type</option>
+                        <option value="IMPORT" selected>IMPORT</option>
                     </select>
                 </div>
                 <div class="erppage-divfield">
                     <label class="erppage-label">Status</label>
                     <select class="erppage-input erppage-select" id="ddlstatus">
-                        <option value="">Select Status</option>
+                        <option value="OPEN" selected>OPEN</option>
+                        <option value="CLOSE">CLOSE</option>
                     </select>
                 </div>
             </div>
-            <div class="erppagelist-search-wrapper mt-2">
-                <i class="fa fa-search"></i>
-                <input type="text" id="searchBox" placeholder="Search By" />
-            </div>
 
-            <div class="erppage-internalaction mt-2">
-                <button type="button" id="btnviewdata" class="erppage-btn erppage-btn-common">
-                    <i class="fa fa-table"></i>
-                    <span>View Data</span>
-                </button>
-                <button type="button" class="erppage-btn erppage-btn-common-active-disabled" data-bs-toggle="modal" data-bs-target="#listdocumentsendModal">
-                    <i class="fa fa-paper-plane"></i>
-                    <span>List of Documents to be Send</span>
-                </button>
+            <div class="erppage-grid5">
+                <div class="erppage-divfield">
+                    <label class="erppage-label" id="lblTotalCount"></label>
+                </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label" id="lblTotalUpdated"></label>
+                </div>
+            </div>
+            
+            <div class="erppage-grid3">
+                <div class="erppage-divfield">
+                    <div class="erppagelist-search-wrapper mt-2">
+                        <i class="fa fa-search"></i>
+                        <input type="text" id="searchBox" placeholder="Search By" />
+                    </div>
+                </div>
+
+                <div class="erppage-divfield"></div>
+
+                <div class="erppage-divfield">
+                    <div class="erppage-internalaction mt-2">
+                        <button type="button" id="btnviewdata" class="erppage-btn erppage-btn-common">
+                            <i class="fa fa-table"></i>
+                            <span>View Data</span>
+                        </button>
+                        <button type="button" class="erppage-btn erppage-btn-common-active-disabled" data-bs-toggle="modal" data-bs-target="#listdocumentsendModal">
+                            <i class="fa fa-paper-plane"></i>
+                            <span>List of Documents to be Send</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </fieldset>
 
         <div class="erppagelist-container">
             <div class="excel-wrapper fixed-grid-wrapper">
-                <table id="tblImportTrackingReport" class="excel-table fixed-grid-table table-width resizable-table">
+                <table id="tblImportTrackingReport" class="excel-table fixed-grid-table table-width resizable-table sortable-table">
                     <colgroup>
                         <col class="hidden-col">
-                        <col style="width:100px;">
-                        <col style="width:100px;">
-                        <col style="width:180px;">
-                        <col style="width:180px;">
-                        <col style="width:220px;">
+                        <col style="width: 111px;">
+                        <col style="width: 97px;">
+                        <col style="width: 166px;">
+                        <col style="width:153px;">
+                        <col style="width: 84px;">
+                        <col style="width: 78px;">
+                        <col style="width:120px;">
+                        <col style="width: 111px;">
+                        <col style="width: 81px;">
+                        <col style="width: 86px;">
+                        <col style="width: 75px;">
+                        <col style="width: 92px;">
+                        <col style="width: 94px;">
+                        <col style="width: 105px;">
+                        <col style="width: 80px;">
+                        <col style="width: 76px;">
+                        <col style="width: 88px;">
+                        <col style="width: 109px;">
+                        <col style="width: 119px;">
+                        <col style="width: 100px;">
+                        <col style="width: 95px;">
+                        <col style="width: 74px;">
+                        <col style="width: 55px;">
+                        <col style="width: 63px;">
+                        <col style="width: 113px;">
+                        <col style="width: 107px;">
+                        <col style="width: 89px;">
+                        <col style="width: 56px;">
+                        <col style="width: 80px;">
+                        <col style="width: 97px;">
+                        <col style="width: 93px;">
+                        <col style="width: 106px;">
+                        <col style="width: 81px;">
+                        <col style="width: 103px;">
+                        <col style="width:120px;">
+                        <col style="width: 92px;">
+                        <col style="width:120px;">
+                        <col style="width: 76px;">
+                        <col style="width: 76px;">
+                        <col style="width: 114px;">
+                        <col style="width: 92px;">
+                        <col style="width: 101px;">
+                        <col style="width:130px;">
+                        <col style="width: 80px;">
+                        <col style="width: 87px;">
+                        <col style="width: 104px;">
+                        <col style="width: 83px;">
+                        <col style="width: 83px;">
                         <col style="width:120px;">
                         <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:100px;">
-                        <col style="width:100px;">
-                        <col style="width:220px;">
-                        <col style="width:120px;">
-                        <col style="width:100px;">
-                        <col style="width:100px;">
-                        <col style="width:100px;">
-                        <col style="width:120px;">
+                        <col style="width: 103px;">
+                        <col style="width: 101px;">
+                        <col style="width: 91px;">
                         <col style="width:110px;">
                         <col style="width:120px;">
+                        <col style="width: 98px;">
+                        <col style="width: 215px;">
+                        <col style="width:120px;">
+                        <col style="width: 114px;">
+                        <col style="width:110px;">
+                        <col style="width: 76px;">
+                        <col style="width: 107px;">
+                        <col style="width: 100px;">
+                        <col style="width: 106px;">
                         <col style="width:120px;">
                         <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width: 113px;">
+                        <col style="width: 116px;">
+                        <col style="width: 116px;">
+                        <col style="width: 111px;">
+                        <col style="width: 114px;">
+                        <col style="width: 87px;">
+                        <col style="width: 79px;">
                         <col style="width:110px;">
+                        <col style="width:120px;">
+                        <col style="width: 100px;">
+                        <col style="width: 87px;">
+                        <col style="width: 82px;">
+                        <col style="width: 116px;">
+                        <col style="width: 82px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width: 86px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width: 139px;">
+                        <col style="width:140px;">
+                        <col style="width:120px;">
                         <col style="width:110px;">
+                        <col style="width: 68px;">
+                        <col style="width: 80px;">
+                        <col style="width: 87px;">
+                        <col style="width: 112px;">
+                        <col style="width:120px;">
+                        <col style="width: 81px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width: 68px;">
+                        <col style="width:100px;">
+                        <col style="width:100px;">
+                        <col style="width:120px;">
+                        <col style="width:140px;">
+                        <col style="width: 107px;">
+                        <col style="width: 81px;">
+                        <col style="width:110px;">
+                        <col style="width: 103px;">
+                        <col style="width: 84px;">
+                        <col style="width:120px;">
+                        <col style="width:120px;">
+                        <col style="width:130px;">
                         <col style="width:80px;">
-                        <col style="width:100px;">
-                        <col style="width:180px;">
-                        <col style="width:180px;">
-                        <col style="width:100px;">
-                        <col style="width:100px;">
-                        <col style="width:110px;">
-                        <col style="width:110px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:180px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:110px;">
-                        <col style="width:120px;">
-                        <col style="width:130px;">
-                        <col style="width:180px;">
-                        <col style="width:130px;">
-                        <col style="width:120px;">
-                        <col style="width:110px;">
-                        <col style="width:110px;">
-                        <col style="width:110px;">
-                        <col style="width:110px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:140px;">
-                        <col style="width:110px;">
-                        <col style="width:110px;">
-                        <col style="width:110px;">
-                        <col style="width:120px;">
-                        <col style="width:140px;">
-                        <col style="width:130px;">
-                        <col style="width:120px;">
-                        <col style="width:180px;">
-                        <col style="width:110px;">
-                        <col style="width:110px;">
-                        <col style="width:110px;">
-                        <col style="width:110px;">
-                        <col style="width:110px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:140px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:140px;">
-                        <col style="width:120px;">
-                        <col style="width:100px;">
-                        <col style="width:100px;">
-                        <col style="width:110px;">
-                        <col style="width:120px;">
-                        <col style="width:180px;">
-                        <col style="width:180px;">
-                        <col style="width:180px;">
-                        <col style="width:180px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:110px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:180px;">
-                        <col style="width:140px;">
-                        <col style="width:120px;">
-                        <col style="width:110px;">
-                        <col style="width:120px;">
-                        <col style="width:110px;">
-                        <col style="width:120px;">
-                        <col style="width:180px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:100px;">
-                        <col style="width:100px;">
-                        <col style="width:120px;">
-                        <col style="width:140px;">
-                        <col style="width:120px;">
-                        <col style="width:110px;">
-                        <col style="width:110px;">
-                        <col style="width:120px;">
-                        <col style="width:110px;">
-                        <col style="width:120px;">
-                        <col style="width:120px;">
-                        <col style="width:130px;">
-                        <col style="width:90px;">
                     </colgroup>
                     <thead>
                         <tr>
-                            <th class="hidden-col" data-column="0">Code <span class="sort-icon"></span></th>
-                            <th class="freeze-item" data-column="1">Sauda No <span class="sort-icon"></span></th>
-                            <th data-column="2">Sauda Date <span class="sort-icon"></span></th>
-                            <th data-column="3">Supplier Name <span class="sort-icon"></span></th>
-                            <th data-column="4">Item Name <span class="sort-icon"></span></th>
-                            <th data-column="5">Delivery Location <span class="sort-icon"></span></th>
+                            <th class="hidden-col" data-column="0" >Code <span class="sort-icon"></span></th>
+                            <th class="freeze-item" data-column="1" style="left:0px;width:111px;min-width:111px;max-width:111px;">Sauda No <span class="sort-icon"></span></th>
+                            <th class="freeze-item" data-column="2" style="left:111px;width:97px;min-width:97px;max-width:97px;">Sauda Date <span class="sort-icon"></span></th>
+                            <th class="freeze-item" data-column="3" style="left:208px;width:166px;min-width:166px;max-width:166px;">Supplier Name <span class="sort-icon"></span></th>
+                            <th class="freeze-item" data-column="4" style="left:374px;width:153px;min-width:153px;max-width:153px;">Item Name <span class="sort-icon"></span></th>
+                            <th class="freeze-item" data-column="5" style="left:527px;width:84px;min-width:84px;max-width:84px;">Del. Loc. <span class="sort-icon"></span></th>
                             <th data-column="6">Country <span class="sort-icon"></span></th>
                             <th data-column="7">Expected Loading <span class="sort-icon"></span></th>
-                            <th data-column="8">Payment Term <span class="sort-icon"></span></th>
+                            <th data-column="8">Pay. Term <span class="sort-icon"></span></th>
                             <th data-column="9">Frt Term <span class="sort-icon"></span></th>
                             <th data-column="10">Del. Term <span class="sort-icon"></span></th>
                             <th data-column="11">Remark <span class="sort-icon"></span></th>
-                            <th data-column="12">No of Container <span class="sort-icon"></span></th>
+                            <th data-column="12">No. of Container <span class="sort-icon"></span></th>
                             <th data-column="13">Sauda Qty <span class="sort-icon"></span></th>
                             <th data-column="14">Tracking Qty <span class="sort-icon"></span></th>
                             <th data-column="15">MRN Qty <span class="sort-icon"></span></th>
@@ -213,8 +232,8 @@
                             <th data-column="29">ETA Port Date <span class="sort-icon"></span></th>
                             <th data-column="30">Rail Date <span class="sort-icon"></span></th>
                             <th data-column="31">ICD Reach Date <span class="sort-icon"></span></th>
-                            <th data-column="32">PI No. <span class="sort-icon"></span></th>
-                            <th data-column="33">Offer No. <span class="sort-icon"></span></th>
+                            <th data-column="32">PI No <span class="sort-icon"></span></th>
+                            <th data-column="33">Offer No <span class="sort-icon"></span></th>
                             <th data-column="34">CHA Name <span class="sort-icon"></span></th>
                             <th data-column="35">Scan Doc. Verify Date <span class="sort-icon"></span></th>
                             <th data-column="36">ETA Place <span class="sort-icon"></span></th>
@@ -232,12 +251,12 @@
                             <th data-column="48">Sample Collected <span class="sort-icon"></span></th>
                             <th data-column="49">Sample Collection Date <span class="sort-icon"></span></th>
                             <th data-column="50">Test Report Date <span class="sort-icon"></span></th>
-                            <th data-column="51">Assessment Type <span class="sort-icon"></span></th>
-                            <th data-column="52">Assessment Date <span class="sort-icon"></span></th>
-                            <th data-column="53">Duty Amount <span class="sort-icon"></span></th>
+                            <th data-column="51">Assess. Type <span class="sort-icon"></span></th>
+                            <th data-column="52">Assess. Date <span class="sort-icon"></span></th>
+                            <th data-column="53">Duty Amt. <span class="sort-icon"></span></th>
                             <th data-column="54">Duty Pay Date <span class="sort-icon"></span></th>
                             <th data-column="55">Duty Pay Mode <span class="sort-icon"></span></th>
-                            <th data-column="56">Advance Licence No. <span class="sort-icon"></span></th>
+                            <th data-column="56">Adv. Lic. No. <span class="sort-icon"></span></th>
                             <th data-column="57">Doc. Handover Date to Bank <span class="sort-icon"></span></th>
                             <th data-column="58">Shipping Line Pay Date <span class="sort-icon"></span></th>
                             <th data-column="59">Shipping Line <span class="sort-icon"></span></th>
@@ -248,12 +267,12 @@
                             <th data-column="64">Receipt Date <span class="sort-icon"></span></th>
                             <th data-column="65">Tentative HO Date <span class="sort-icon"></span></th>
                             <th data-column="66">Container HO Date <span class="sort-icon"></span></th>
-                            <th data-column="67">Adv. Payment Amount <span class="sort-icon"></span></th>
-                            <th data-column="68">Adv. Payment Reference <span class="sort-icon"></span></th>
-                            <th data-column="69">Adv. Payment Date <span class="sort-icon"></span></th>
-                            <th data-column="70">Bal. Payment Amount <span class="sort-icon"></span></th>
-                            <th data-column="71">Bal. Payment Reference <span class="sort-icon"></span></th>
-                            <th data-column="72">Bal. Payment Date <span class="sort-icon"></span></th>
+                            <th data-column="67">Adv. Pay. Amt. <span class="sort-icon"></span></th>
+                            <th data-column="68">Adv. Pay. Ref. <span class="sort-icon"></span></th>
+                            <th data-column="69">Adv. Pay. Date <span class="sort-icon"></span></th>
+                            <th data-column="70">Bal. Pay. Amt. <span class="sort-icon"></span></th>
+                            <th data-column="71">Bal. Pay. Ref.  <span class="sort-icon"></span></th>
+                            <th data-column="72">Bal. Pay. Date <span class="sort-icon"></span></th>
                             <th data-column="73">Diff. Days <span class="sort-icon"></span></th>
                             <th data-column="74">Int. Rate <span class="sort-icon"></span></th>
                             <th data-column="75">Other Charges <span class="sort-icon"></span></th>
@@ -272,7 +291,7 @@
                             <th data-column="88">DO ValidDate <span class="sort-icon"></span></th>
                             <th data-column="89">Sec. Date <span class="sort-icon"></span></th>
                             <th data-column="90">Refund RecdDate <span class="sort-icon"></span></th>
-                            <th data-column="91">Detention Amount <span class="sort-icon"></span></th>
+                            <th data-column="91">Detention Amt. <span class="sort-icon"></span></th>
                             <th data-column="92">Detention Date <span class="sort-icon"></span></th>
                             <th data-column="93">Detention Reason <span class="sort-icon"></span></th>
                             <th data-column="94">Det. Reason App.By <span class="sort-icon"></span></th>
@@ -300,10 +319,10 @@
                             <th data-column="116">CFS Charges <span class="sort-icon"></span></th>
                             <th data-column="117">CFS D-Stuffing Date <span class="sort-icon"></span></th>
                             <th data-column="118">CFS Amt <span class="sort-icon"></span></th>
-                            <th data-column="119">CFS Payment Date <span class="sort-icon"></span></th>
-                            <th data-column="120">QC Amount Recd. <span class="sort-icon"></span></th>
+                            <th data-column="119">CFS Pay. Date <span class="sort-icon"></span></th>
+                            <th data-column="120">QC Amt. Recd. <span class="sort-icon"></span></th>
                             <th data-column="121">Actual Container HO Date <span class="sort-icon"></span></th>
-                            <th class="action-col" data-column="122">Action <span class="sort-icon"></span></th>
+                            <th class="action-col" data-column="122">Action</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -508,6 +527,4 @@
 
 </div>
 
-
-
-
+<script src="~/js/erpjs/purchase/transaction/importtrackingreport/importtrackingreport.js"></script>

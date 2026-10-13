@@ -1,0 +1,1013 @@
+﻿@{
+    ViewBag.Title = "Import Tracking Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-ship"></i>
+        </div>
+        <div class="erppage-header-title">Import Tracking</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "ImportTrackingList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+
+<div id="ImportTrackingForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+
+            <div class="erppage-tabs">
+                <button class="erppage-tab active" data-tab="generalinfo">General Info</button>
+                <button class="erppage-tab" data-tab="paymentinfo">Payment Related Info</button>
+                <button class="erppage-tab" data-tab="otherinfo">Other Information</button>
+                <button class="erppage-tab" data-tab="importexpenses">Import Expenses</button>
+            </div>
+
+            <!-- ================= GENERAL INFO ================= -->
+            <div class="erppage-tab-content active" id="generalinfo">
+                <div class="erppage-accordion-body">
+                    <div class="erppagesrow">
+                        <div class="erppagescol-6">
+                            <!-- Basic Information -->
+                            <fieldset class="erppagefieldset">
+                                <legend class="erppagefieldset-legend">Basic Information</legend>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Doc Type</label>
+                                        <select class="erppage-input erppage-select" id="ddlDocType">
+                                            <option value="">Select Doc Type</option>
+                                        </select>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Sauda No</label>
+                                        <input type="text" class="erppage-input" id="TxtSaudaNo" placeholder="Enter Sauda No" disabled>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Doc No</label>
+                                        <input type="number" class="erppage-input" id="NumDocNo" placeholder="Enter Doc No" disabled>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Sauda Date</label>
+                                        <input type="date" class="erppage-input" id="DtSaudaDate" disabled>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Doc Date</label>
+                                        <input type="date" class="erppage-input" id="DtDocDate">
+                                    </div>
+                                </div>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Supplier</label>
+                                        <select class="erppage-input erppage-select" id="ddlSupplier">
+                                            <option value="">Select Supplier</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Agent</label>
+                                        <select class="erppage-input erppage-select" id="ddlAgent">
+                                            <option value="">Select Agent</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Item Name</label>
+                                        <select class="erppage-input erppage-select" id="ddlItemName">
+                                            <option value="">Select Item</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Size Desp</label>
+                                        <input type="text" class="erppage-input" id="TxtSizeDesp" placeholder="Enter Size Description">
+                                    </div>
+                                </div>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Delivery At</label>
+                                        <select class="erppage-input erppage-select" id="ddlDeliveryAt">
+                                            <option value="">Select Delivery At</option>
+                                        </select>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Payment Terms</label>
+                                        <select class="erppage-input erppage-select" id="ddlPaymentTerms">
+                                            <option value="">Select Payment Terms</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Payment Bank</label>
+                                        <select class="erppage-input erppage-select" id="ddlPaymentBank">
+                                            <option value="">Select Payment Bank</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- Invoice Related Information -->
+                            <fieldset class="erppagefieldset">
+                                <legend class="erppagefieldset-legend">Invoice Related Information</legend>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Supplier Offer No</label>
+                                        <input type="text" class="erppage-input" id="TxtSupplierOfferNo" placeholder="Enter Supplier Offer No">
+                                    </div>
+                                </div>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Supplier PI No</label>
+                                        <div class="erppage-filepicker">
+                                            <input type="text" class="erppage-input" id="TxtSupplierPINo" placeholder="Enter PI No">
+                                            <label for="FileSupplierPI" class="erppage-filepicker-btn erppage-btn erppage-btn-common" title="Attach"><i class="fa fa-paperclip"></i></label>
+                                            <button type="button" class="erppage-filepicker-btn" title="View"><i class="fa fa-eye"></i></button>
+                                            <button type="button" class="erppage-filepicker-remove" title="Remove file"><i class="fa fa-times"></i></button>
+                                            <input type="file" id="FileSupplierPI" hidden>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">PI Dt</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtPIDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkPIDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Supplier Inv. No.</label>
+                                        <div class="erppage-filepicker">
+                                            <input type="text" class="erppage-input" id="TxtSupplierInvNo" placeholder="Enter Invoice No">
+                                            <label for="FileSupplierInv" class="erppage-filepicker-btn erppage-btn erppage-btn-common" title="Attach"><i class="fa fa-paperclip"></i></label>
+                                            <button type="button" class="erppage-filepicker-btn" title="View"><i class="fa fa-eye"></i></button>
+                                            <button type="button" class="erppage-filepicker-remove" title="Remove file"><i class="fa fa-times"></i></button>
+                                            <input type="file" id="FileSupplierInv" hidden>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Inv Dt</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtInvDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkInvDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Sup. Inv Value</label>
+                                        <div class="erppage-inputgroup">
+                                            <input type="number" class="erppage-input" id="NumSupInvValue" placeholder="Enter Value">
+                                            <select class="erppage-input erppage-select" id="ddlCurrency">
+                                                <option value="">Currency</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Exch. Rate</label>
+                                        <input type="number" class="erppage-input" id="NumExchRate" placeholder="Enter Exch. Rate">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Sup. Inv Value (INR)</label>
+                                        <input type="number" class="erppage-input" id="NumSupInvValueINR" placeholder="Value in INR" disabled>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Doc. Recd. &amp; Verify Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtDocRecdVerify">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkDocRecdVerify"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Doc. HO Date to Bank</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtDocHOToBank">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkDocHOToBank"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Doc. HO Date to CHA</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtDocHOToCHA">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkDocHOToCHA"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">CHA</label>
+                                        <select class="erppage-input erppage-select" id="ddlCHA">
+                                            <option value="">Select CHA</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <div class="erppagescol-6">
+                            <!-- BL Movement -->
+                            <fieldset class="erppagefieldset">
+                                <legend class="erppagefieldset-legend">BL Movement</legend>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Shipping Line</label>
+                                        <select class="erppage-input erppage-select" id="ddlShippingLine">
+                                            <option value="">Select Shipping Line</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">BL No.</label>
+                                        <div class="erppage-filepicker">
+                                            <input type="text" class="erppage-input" id="TxtBLNo" placeholder="Enter BL No">
+                                            <label for="FileBL" class="erppage-filepicker-btn erppage-btn erppage-btn-common" title="Attach"><i class="fa fa-paperclip"></i></label>
+                                            <button type="button" class="erppage-filepicker-btn" title="View"><i class="fa fa-eye"></i></button>
+                                            <button type="button" class="erppage-filepicker-remove" title="Remove file"><i class="fa fa-times"></i></button>
+                                            <input type="file" id="FileBL" hidden>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">BL Dt.</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtBLDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkBLDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">VSL Name</label>
+                                        <input type="text" class="erppage-input" id="TxtVSLName" placeholder="Enter Vessel Name">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Free Days</label>
+                                        <input type="number" class="erppage-input" id="NumFreeDays" placeholder="Enter Free Days">
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Country of Origin</label>
+                                        <select class="erppage-input erppage-select" id="ddlCountryOfOrigin">
+                                            <option value="">Select Country of Origin</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">POL</label>
+                                        <select class="erppage-input erppage-select" id="ddlPOL">
+                                            <option value="">Select POL</option>
+                                        </select>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">POD</label>
+                                        <select class="erppage-input erppage-select" id="ddlPOD">
+                                            <option value="">Select POD</option>
+                                        </select>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">ETD Dt</label>
+                                        <input type="date" class="erppage-input" id="DtETDDate">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">ETA Dt</label>
+                                        <input type="date" class="erppage-input" id="DtETADate">
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Rail Dt</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtRailDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkRailDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">ICD Dt</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtICDDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkICDDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Mov. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtMovDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkMovDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Tent. Cont. HO Ret. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtTentContHORetDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkTentContHORetDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">MRN Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtMRNDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkMRNDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Actual Cont. HO Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtActualContHODate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkActualContHODate"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- Bills of Entry Related -->
+                            <fieldset class="erppagefieldset">
+                                <legend class="erppagefieldset-legend">Bills of Entry Related</legend>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Custom OOC Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtCustomOOCDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkCustomOOCDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">BE No</label>
+                                        <div class="erppage-filepicker">
+                                            <input type="text" class="erppage-input" id="TxtBENo" placeholder="Enter BE No">
+                                            <label for="FileBE" class="erppage-filepicker-btn erppage-btn erppage-btn-common" title="Attach"><i class="fa fa-paperclip"></i></label>
+                                            <button type="button" class="erppage-filepicker-btn" title="View"><i class="fa fa-eye"></i></button>
+                                            <button type="button" class="erppage-filepicker-remove" title="Remove file"><i class="fa fa-times"></i></button>
+                                            <input type="file" id="FileBE" hidden>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">BOE Submit Date to Bank</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtBOESubmitDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkBOESubmitDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">BE Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtBEDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkBEDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Checklist Approval &amp; Verify Dt</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtChecklistApprovalDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkChecklistApprovalDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Sample Collected?</label>
+                                        <select class="erppage-input erppage-select" id="ddlSampleCollected">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Sample Test Report Dt</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtSampleTestReportDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkSampleTestReportDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Sample Coll. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtSampleCollDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkSampleCollDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Test Memo No.</label>
+                                        <input type="text" class="erppage-input" id="TxtTestMemoNo" placeholder="Enter Test Memo No">
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Test Memo Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtTestMemoDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkTestMemoDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Assessment Type</label>
+                                        <select class="erppage-input erppage-select" id="ddlAssessmentType">
+                                            <option value="">Select Assessment Type</option>
+                                        </select>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Ass. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtAssDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkAssDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Passing Rate</label>
+                                        <input type="number" class="erppage-input" id="NumPassingRate" placeholder="Enter Passing Rate">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Under Protest</label>
+                                        <select class="erppage-input erppage-select" id="ddlUnderProtest">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Advance Lic. No.</label>
+                                        <input type="text" class="erppage-input" id="TxtAdvanceLicNo" placeholder="Enter Advance Lic. No">
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAYMENT RELATED INFO ================= -->
+            <div class="erppage-tab-content" id="paymentinfo">
+                <div class="erppage-accordion-body">
+                    <div class="erppagesrow">
+                        <div class="erppagescol-6">
+                            <!-- Duty Related -->
+                            <fieldset class="erppagefieldset">
+                                <legend class="erppagefieldset-legend">Duty Related</legend>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Access. Value</label>
+                                        <input type="number" class="erppage-input" id="NumAccessValue" placeholder="Enter Access. Value">
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Duty Payment Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtDutyPaymentDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkDutyPaymentDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">BCD</label>
+                                        <input type="number" class="erppage-input" id="NumBCD" placeholder="Enter BCD">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Duty Payment Mode</label>
+                                        <select class="erppage-input erppage-select" id="ddlDutyPaymentMode">
+                                            <option value="">Select Duty Payment Mode</option>
+                                        </select>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">SWS</label>
+                                        <input type="number" class="erppage-input" id="NumSWS" placeholder="Enter SWS">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">IGST</label>
+                                        <input type="number" class="erppage-input" id="NumIGST" placeholder="Enter IGST">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Total Duty Amt</label>
+                                        <input type="number" class="erppage-input" id="NumTotalDutyAmt" placeholder="Total Duty Amt" disabled>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- Shipping Line Related -->
+                            <fieldset class="erppagefieldset">
+                                <legend class="erppagefieldset-legend">Shipping Line Related</legend>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Shipping Line Charges</label>
+                                        <input type="number" class="erppage-input" id="NumShippingLineCharges" placeholder="Enter Charges">
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Ship.Line Pay. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtShipLinePayDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkShipLinePayDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Security Amt</label>
+                                        <input type="number" class="erppage-input" id="NumSecurityAmt" placeholder="Enter Security Amt">
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Sec. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtSecDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkSecDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Detention Amt</label>
+                                        <input type="number" class="erppage-input" id="NumDetentionAmt" placeholder="Enter Detention Amt">
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Detn. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtDetnDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkDetnDate"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Detn. Reason</label>
+                                        <input type="text" class="erppage-input" id="TxtDetnReason" placeholder="Enter Detention Reason">
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Reason App. by</label>
+                                        <input type="text" class="erppage-input" id="TxtReasonAppBy" placeholder="Enter Approved By">
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">CHA Charge Details</label>
+                                        <input type="text" class="erppage-input" id="TxtCHAChargeDetails" placeholder="Enter CHA Charge Details">
+                                    </div>
+                                </div>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Int. Rate</label>
+                                        <input type="number" class="erppage-input" id="NumIntRate" placeholder="Enter Int. Rate">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">CHA Charge Type</label>
+                                        <select class="erppage-input erppage-select" id="ddlCHAChargeType">
+                                            <option value="">Select CHA Charge Type</option>
+                                        </select>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">CONCOR Exps</label>
+                                        <input type="number" class="erppage-input" id="NumCONCORExps" placeholder="Enter CONCOR Exps">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">CHA Amt</label>
+                                        <input type="number" class="erppage-input" id="NumCHAAmt" placeholder="Enter CHA Amt">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">CFS Charges</label>
+                                        <select class="erppage-input erppage-select" id="ddlCFSCharges">
+                                            <option value="">Select CFS Charges</option>
+                                        </select>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">CFS DStuff Dt.</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtCFSDStuffDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkCFSDStuffDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">CFS Amt</label>
+                                        <input type="number" class="erppage-input" id="NumCFSAmt" placeholder="Enter CFS Amt">
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">CFS Pay. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtCFSPayDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkCFSPayDate"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <div class="erppagescol-6">
+                            <!-- Supplier Payment Related -->
+                            <fieldset class="erppagefieldset">
+                                <legend class="erppagefieldset-legend">Supplier Payment Related</legend>
+                                <div class="erppage-radio-group">
+                                    <label class="erppage-radio"><input type="radio" name="RdoPaymentMode" id="RdoDirect" value="Direct" checked> Direct</label>
+                                    <label class="erppage-radio"><input type="radio" name="RdoPaymentMode" id="RdoLC" value="LC"> LC</label>
+                                    <label class="erppage-radio"><input type="radio" name="RdoPaymentMode" id="RdoSBLC" value="SBLC"> SBLC</label>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Bank Name</label>
+                                        <select class="erppage-input erppage-select" id="ddlBankName">
+                                            <option value="">Select Bank Name</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Payment Amt</label>
+                                        <input type="number" class="erppage-input" id="NumPaymentAmt" placeholder="Enter Payment Amt">
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Payment Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtPaymentDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkPaymentDate"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">Payment RefNo</label>
+                                        <div class="erppage-filepicker">
+                                            <input type="text" class="erppage-input" id="TxtPaymentRefNo" placeholder="Enter Payment RefNo">
+                                            <label for="FilePaymentRef" class="erppage-filepicker-btn erppage-btn erppage-btn-common" title="Attach"><i class="fa fa-paperclip"></i></label>
+                                            <button type="button" class="erppage-filepicker-btn" title="View"><i class="fa fa-eye"></i></button>
+                                            <button type="button" class="erppage-filepicker-remove" title="Remove file"><i class="fa fa-times"></i></button>
+                                            <input type="file" id="FilePaymentRef" hidden>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- LC Payment -->
+                            <fieldset class="erppagefieldset" id="fsLCPayment">
+                                <legend class="erppagefieldset-legend">LC Payment</legend>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">LC No.</label>
+                                        <div class="erppage-filepicker">
+                                            <input type="text" class="erppage-input" id="TxtLCNo" placeholder="Enter LC No">
+                                            <label for="FileLC" class="erppage-filepicker-btn erppage-btn erppage-btn-common" title="Attach"><i class="fa fa-paperclip"></i></label>
+                                            <button type="button" class="erppage-filepicker-btn" title="View"><i class="fa fa-eye"></i></button>
+                                            <button type="button" class="erppage-filepicker-remove" title="Remove file"><i class="fa fa-times"></i></button>
+                                            <input type="file" id="FileLC" hidden>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">LC Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtLCDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkLCDate"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">LC Benificiary</label>
+                                        <select class="erppage-input erppage-select" id="ddlLCBeneficiary">
+                                            <option value="">Select LC Benificiary</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid1">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">LC Issue Bank</label>
+                                        <select class="erppage-input erppage-select" id="ddlLCIssueBank">
+                                            <option value="">Select LC Issue Bank</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">LC Exp. Dt.</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtLCExpDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkLCExpDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">LC Amt</label>
+                                        <input type="number" class="erppage-input" id="NumLCAmt" placeholder="Enter LC Amt">
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">BL Recd. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtBLRecdDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkBLRecdDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">LC Original Doc Receipt in Bank</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtLCOrigDocReceiptBank">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkLCOrigDocReceiptBank"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">BL Handover to CHA</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtBLHandoverCHA">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkBLHandoverCHA"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">Accepted Doc Receipt in Factory</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtAcceptedDocReceiptFactory">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkAcceptedDocReceiptFactory"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- SBLC Payment -->
+                            <fieldset class="erppagefieldset" id="fsSBLCPayment">
+                                <legend class="erppagefieldset-legend">SBLC Payment</legend>
+                                <div class="erppage-grid2">
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">SBLC No.</label>
+                                        <div class="erppage-filepicker">
+                                            <input type="text" class="erppage-input" id="TxtSBLCNo" placeholder="Enter SBLC No">
+                                            <label for="FileSBLC" class="erppage-filepicker-btn erppage-btn erppage-btn-common" title="Attach"><i class="fa fa-paperclip"></i></label>
+                                            <button type="button" class="erppage-filepicker-btn" title="View"><i class="fa fa-eye"></i></button>
+                                            <button type="button" class="erppage-filepicker-remove" title="Remove file"><i class="fa fa-times"></i></button>
+                                            <input type="file" id="FileSBLC" hidden>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">SBLC Pay. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtSBLCPayDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkSBLCPayDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">SBLC Appl. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtSBLCApplDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkSBLCApplDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">SBLC Diff. days</label>
+                                        <input type="number" class="erppage-input" id="NumSBLCDiffDays" placeholder="Diff. days" disabled>
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">SBLC Due Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtSBLCDueDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkSBLCDueDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">SBLC Avl. Amt</label>
+                                        <input type="number" class="erppage-input" id="NumSBLCAvlAmt" placeholder="Enter SBLC Avl. Amt">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">SBLC Disb. Amt</label>
+                                        <input type="number" class="erppage-input" id="NumSBLCDisbAmt" placeholder="Enter SBLC Disb. Amt">
+                                    </div>
+                                    <div class="erppage-divfield erppage-datefield">
+                                        <label class="erppage-label">SBLC Disb. Date</label>
+                                        <div class="erppage-datebox">
+                                            <input type="date" class="erppage-input erppage-dateinput" id="DtSBLCDisbDate">
+                                            <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkSBLCDisbDate"></label>
+                                        </div>
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">SBLC Oth. ch.</label>
+                                        <input type="number" class="erppage-input" id="NumSBLCOthCh" placeholder="Enter SBLC Oth. ch.">
+                                    </div>
+                                    <div class="erppage-divfield">
+                                        <label class="erppage-label">SBLC Int Rate/Sofr</label>
+                                        <input type="number" class="erppage-input" id="NumSBLCIntRate" placeholder="Enter Int Rate/Sofr">
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= OTHER INFORMATION ================= -->
+            <div class="erppage-tab-content" id="otherinfo">
+                <div class="erppage-accordion-body">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Other Related Information</legend>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Refund Amt</label>
+                                <input type="number" class="erppage-input" id="NumRefundAmt" placeholder="Enter Refund Amt">
+                            </div>
+                            <div class="erppage-divfield erppage-datefield">
+                                <label class="erppage-label">Refd. Recd Date</label>
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtRefdRecdDate">
+                                    <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkRefdRecdDate"></label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Expected Loading</label>
+                                <input type="number" class="erppage-input" id="NumExpectedLoading" placeholder="Enter Expected Loading">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">QC Amt</label>
+                                <input type="number" class="erppage-input" id="NumQCAmt" placeholder="Enter QC Amt">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Qlty. Claim (if any)</label>
+                                <input type="number" class="erppage-input" id="NumQltyClaim" placeholder="Enter Qlty. Claim">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">QC Amt Recd.</label>
+                                <select class="erppage-input erppage-select" id="ddlQCAmtRecd">
+                                    <option value="">Select</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield erppage-datefield">
+                                <label class="erppage-label">Tent. HO Date</label>
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtTentHODate">
+                                    <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkTentHODate"></label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield erppage-datefield">
+                                <label class="erppage-label">Latest Ship. Dt.</label>
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtLatestShipDate">
+                                    <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkLatestShipDate"></label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield erppage-datefield">
+                                <label class="erppage-label">Tentative Fact. Arr. Dt</label>
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtTentFactArrDate">
+                                    <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkTentFactArrDate"></label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield erppage-datefield">
+                                <label class="erppage-label">IGM Date</label>
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtIGMDate">
+                                    <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkIGMDate"></label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield erppage-datefield">
+                                <label class="erppage-label">ETA BE Dt</label>
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtETABEDate">
+                                    <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkETABEDate"></label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Enhance Rate</label>
+                                <select class="erppage-input erppage-select" id="ddlEnhanceRate">
+                                    <option value="">Select</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield erppage-datefield">
+                                <label class="erppage-label">DO Dt</label>
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtDODate">
+                                    <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkDODate"></label>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield erppage-datefield">
+                                <label class="erppage-label">DO Valid. Dt</label>
+                                <div class="erppage-datebox">
+                                    <input type="date" class="erppage-input erppage-dateinput" id="DtDOValidDate">
+                                    <label class="erppage-checkbox-inside"><input type="checkbox" class="erppage-checkbox-input" id="chkDOValidDate"></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Remarks</label>
+                                <textarea class="erppage-input" id="TxtRemarks" rows="1" placeholder="Enter Remarks"></textarea>
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Other Attachment1</label>
+                                <div class="erppage-filepicker">
+                                    <input type="text" class="erppage-input erppage-filepicker-name" id="TxtOtherAttachment1" placeholder="No file selected" readonly>
+                                    <label for="FileOtherAttachment1" class="erppage-filepicker-btn erppage-btn erppage-btn-common"><i class="fa fa-paperclip"></i> Browse</label>
+                                    <button type="button" class="erppage-filepicker-btn" title="View"><i class="fa fa-eye"></i></button>
+                                    <button type="button" class="erppage-filepicker-remove" title="Remove file"><i class="fa fa-times"></i></button>
+                                    <input type="file" id="FileOtherAttachment1" hidden>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Other Attachment2</label>
+                                <div class="erppage-filepicker">
+                                    <input type="text" class="erppage-input erppage-filepicker-name" id="TxtOtherAttachment2" placeholder="No file selected" readonly>
+                                    <label for="FileOtherAttachment2" class="erppage-filepicker-btn erppage-btn erppage-btn-common"><i class="fa fa-paperclip"></i> Browse</label>
+                                    <button type="button" class="erppage-filepicker-btn" title="View"><i class="fa fa-eye"></i></button>
+                                    <button type="button" class="erppage-filepicker-remove" title="Remove file"><i class="fa fa-times"></i></button>
+                                    <input type="file" id="FileOtherAttachment2" hidden>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+            <!-- ================= IMPORT EXPENSES ================= -->
+            <div class="erppage-tab-content" id="importexpenses">
+                <div class="erppage-accordion-body">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Import Expenses</legend>
+                        <div class="excel-wrapper fixed-grid-wrapper">
+                            <table id="tblImportExpenses" class="excel-table fixed-grid-table width-table resizable-table">
+                                <colgroup>
+                                    <col style="width:160px;">
+                                    <col style="width:220px;">
+                                    <col style="width:130px;">
+                                    <col style="width:130px;">
+                                    <col style="width:120px;">
+                                    <col style="width:200px;">
+                                    <col style="width:200px;">
+                                    <col style="width:150px;">
+                                    <col style="width:130px;">
+                                    <col style="width:150px;">
+                                    <col style="width:120px;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>Expenses Type</th>
+                                        <th>Supplier Name</th>
+                                        <th>Invoice No.</th>
+                                        <th>Invoice Date</th>
+                                        <th>Invoice Amt</th>
+                                        <th>Remarks</th>
+                                        <th>Reason</th>
+                                        <th>Approved By</th>
+                                        <th>Payment Date</th>
+                                        <th>Payment Refno</th>
+                                        <th class="action-col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="btn-add-row-last mt-2">
+                            <button type="button" class="erppage-btn erppage-btn-add" id="btnAddExpenseRow">
+                                <i class="fa fa-plus"></i>
+                                <span>Add New Row</span>
+                            </button>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+            <!-- ================= CONTAINER DETAILS (common to all tabs) ================= -->
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Container Details</legend>
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblContainerDetails" class="excel-table fixed-grid-table width-table resizable-table">
+                        <colgroup>
+                            <col style="width:180px;">
+                            <col style="width:130px;">
+                            <col style="width:150px;">
+                            <col style="width:150px;">
+                            <col style="width:250px;">
+                            <col style="width:130px;">
+                            <col style="width:120px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Container No</th>
+                                <th>Gross Wt.</th>
+                                <th>No. Of Packages</th>
+                                <th>Container Size</th>
+                                <th>Transport Name</th>
+                                <th>Freight</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="btn-add-row-last mt-2">
+                    <button type="button" class="erppage-btn erppage-btn-add" id="btnAddContainerRow">
+                        <i class="fa fa-plus"></i>
+                        <span>Add New Row</span>
+                    </button>
+                </div>
+            </fieldset>
+
+        </div>
+    </div>
+
+    <div class="erppage-actions">
+        <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    // Remove-file buttons: clear the file input (and file name box where present) of the same picker
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.erppage-filepicker').forEach(function (picker) {
+            var file = picker.querySelector('input[type=file]');
+            var nameBox = picker.querySelector('.erppage-filepicker-name');
+            var remove = picker.querySelector('.erppage-filepicker-remove');
+            if (nameBox) {
+                file.addEventListener('change', function () {
+                    nameBox.value = this.files.length ? this.files[0].name : '';
+                });
+            }
+            remove.addEventListener('click', function () {
+                file.value = '';
+                if (nameBox) nameBox.value = '';
+            });
+        });
+    });
+</script>

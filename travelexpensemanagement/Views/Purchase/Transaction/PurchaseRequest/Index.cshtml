@@ -57,9 +57,6 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label">Status</label>
                     <select class="erppage-input erppage-required" id="ddlStatus">
-                        @* <option value="1">Open</option>
-                        <option value="2">Cancel</option>
-                        <option value="3">Close</option> *@
                     </select>
                 </div>
             </div>
@@ -112,10 +109,6 @@
                             </li>
                         </ul>
                     </div>
-                   @*  <button id="btn-closeprocess" type="button" class="erppage-btn erppage-btn-copy">
-                        <i class="fa fa-lock"></i>
-                        <span>Close Process</span>
-                    </button> *@
                     <button id="btn-monthlyrequirement" type="button" class="erppage-btn erppage-btn-copy" onclick="LoadMonthlyRequirementData()">
                         <i class="fa fa-calendar"></i><span>Monthly Requirement</span>
                     </button>
@@ -201,18 +194,6 @@
                                 <th data-column="7">
                                     Approval Remarks <span class="sort-icon"></span>
                                 </th>
-                                @* <th data-column="8">
-                                    Std Req <span class="sort-icon"></span>
-                                </th>
-                                <th data-column="9">
-                                    Current Stock <span class="sort-icon"></span>
-                                </th>
-                                <th data-column="10" id="item-avgConsumption">
-                                    Avg Consumption <span class="sort-icon"></span>
-                                </th>
-                                <th data-column="11">
-                                    Pending PO Qty <span class="sort-icon"></span>
-                                </th> *@
                                 <th data-column="12" id="item-OpenReqQty">
                                     Open Req Qty <span class="sort-icon"></span>
                                 </th>
@@ -313,7 +294,7 @@
         </div>
     </div>
 </div>
-@* Modal Popup *@
+<!-- Modal Popup -->
 <div class="modal fade" id="purchasequotationModal" tabindex="-1" aria-labelledby="purchasequotationLabel" aria-hidden="true">
     <div class="modal-dialog erppagesmodal medium-modal">
         <div class="modal-content erppagesmodal-content">
@@ -405,7 +386,7 @@
     </div>
 </div>
 
-@* Last 10 Purchase Request Modal *@
+<!-- Last 10 Purchase Request Modal -->
 <div class="modal fade" id="lastTenPurchaseRequestModal" tabindex="-1" aria-labelledby="lastTenPurchaseRequestLabel" aria-hidden="true">
     <div class="modal-dialog erppagesmodal medium-modal">
         <div class="modal-content erppagesmodal-content">
@@ -474,7 +455,7 @@
     </div>
 </div>
 
-@* Last 10 Consumption History Modal *@
+<!-- Last 10 Consumption History Modal -->
 <div class="modal fade" id="lastTenConsumptionModal" tabindex="-1" aria-labelledby="lastTenConsumptionLabel" aria-hidden="true">
     <div class="modal-dialog erppagesmodal medium-modal">
         <div class="modal-content erppagesmodal-content">
@@ -547,7 +528,7 @@
     </div>
 </div>
 
-@* Last 10 Purchase History Modal *@
+<!-- Last 10 Purchase History Modal -->
 <div class="modal fade" id="lastTenPurchaseHistoryModal" tabindex="-1" aria-labelledby="lastTenPurchaseHistoryLabel" aria-hidden="true">
     <div class="modal-dialog erppagesmodal medium-modal">
         <div class="modal-content erppagesmodal-content">
@@ -632,7 +613,7 @@
     </div>
 </div>
 
-@* Last 10 Order History Modal *@
+<!-- Last 10 Order History Modal -->
 <div class="modal fade" id="lastTenOrderHistoryModal" tabindex="-1" aria-labelledby="lastTenOrderHistoryLabel" aria-hidden="true">
     <div class="modal-dialog erppagesmodal medium-modal">
         <div class="modal-content erppagesmodal-content">
@@ -717,7 +698,7 @@
     </div>
 </div>
 
-@* Purchase Quotation History Modal *@
+<!-- Purchase Quotation History Modal -->
 <div class="modal fade" id="purchaseQuotationHistoryModal" tabindex="-1" aria-labelledby="purchaseQuotationHistoryLabel" aria-hidden="true">
     <div class="modal-dialog erppagesmodal medium-modal">
         <div class="modal-content erppagesmodal-content">
@@ -747,26 +728,26 @@
                            class="excel-table fixed-grid-table resizable-table">
 
                         <colgroup>
-                            <col style="width:100px;">   @* Item Code *@
-                            <col style="width:100px;">   @* V No *@
-                            <col style="width:120px;">   @* Date *@
-                            <col style="width:220px;">   @* Supplier *@
-                            <col style="width:220px;">   @* Item Name *@
-                            <col style="width:150px;">   @* Make *@
-                            <col style="width:100px;">   @* Unit *@
-                            <col style="width:100px;">   @* Group No *@
-                            <col style="width:100px;">   @* Qty *@
-                            <col style="width:100px;">   @* Rate *@
-                            <col style="width:100px;">   @* Freight *@
-                            <col style="width:100px;">   @* CGST *@
-                            <col style="width:100px;">   @* SGST *@
-                            <col style="width:100px;">   @* IGST *@
-                            <col style="width:100px;">   @* Pack *@
-                            <col style="width:100px;">   @* Disc *@
-                            <col style="width:120px;">   @* Oth Exps *@
-                            <col style="width:120px;">   @* LD Rate *@
-                            <col style="width:250px;">   @* Remarks *@
-                            <col style="width:100px;">   @* Status *@
+                            <col style="width:100px;">   
+                            <col style="width:100px;">   
+                            <col style="width:120px;">   
+                            <col style="width:220px;">   
+                            <col style="width:220px;">   
+                            <col style="width:150px;">   
+                            <col style="width:100px;">   
+                            <col style="width:100px;">   
+                            <col style="width:100px;">   
+                            <col style="width:100px;">   
+                            <col style="width:100px;">   
+                            <col style="width:100px;">   
+                            <col style="width:100px;">   
+                            <col style="width:100px;">   
+                            <col style="width:100px;">   
+                            <col style="width:100px;">   
+                            <col style="width:120px;">   
+                            <col style="width:120px;">   
+                            <col style="width:250px;">   
+                            <col style="width:100px;">   
                         </colgroup>
 
                         <thead>
@@ -806,7 +787,7 @@
     </div>
 </div>
 
-@* Image Preview Modal *@
+<!-- Image Preview Modal -->
 <div class="modal fade" id="imagePreviewModal" tabindex="-1"
      aria-hidden="true">
 

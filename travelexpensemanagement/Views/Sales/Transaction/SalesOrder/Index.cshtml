@@ -34,32 +34,6 @@
     <div class="erppage-fieldset">
 
         <div id="SalesOrderForm">
-            @*  <div class="row">
-                <div class="offset-md-4 col-md-8">
-                    <div class="button-right">
-                        
-                            <button class="btn btn-print">
-                                <i class="fa fa-print"></i> Print
-                            </button>
-                       
-                            <button class="btn btn-export">
-                                <i class="fas fa-file-export"></i> Export
-                            </button>
-                        
-                            <button class="btn btn-mail">
-                                <i class="fa fa-envelope"></i> Mail
-                            </button>
-                       
-                            <button class="btn btn-send" type="button" onclick="popupModal()">
-                                <i class="fa fa-paper-plane"></i> Approval Send
-                            </button>
-                        
-                        <button class="btn btn-approved">
-                            <i class="fa fa-check"></i> Approved
-                        </button>
-                    </div>
-                </div>
-            </div> *@
             <input type="hidden" class="form-control" id="TxtDocId">
             <div class="erppage-grid4">
                 <div class="erppage-divfield">
@@ -70,8 +44,6 @@
                     <label class="erppage-label" for="DtDocDate">Doc Date</label>
                     <input type="date" class="erppage-input" id="DtDocDate">
                 </div>
-                @* <div class="erppage-divfield">
-                </div> *@
                 <div class="erppage-divfield">
                     <label class="erppage-label">Sauda No</label>
                     <div class="erppage-inputgroup">
@@ -90,7 +62,7 @@
                     </button>
                 </div>
             </div>
-            @* Modal Popup *@
+            <!-- Modal Popup -->
             <div class="modal fade" id="OrderAdjustmentModal" tabindex="-1" aria-labelledby="OrderAdjustmentLabel" aria-hidden="true">
                 <div class="modal-dialog small-modal erppagesmodal">
                     <div class="modal-content erppagesmodal-content">
@@ -134,17 +106,6 @@
                     <fieldset class="erppagefieldset">
                         <legend class="erppagefieldset-legend"><i class="fa fa-file-contract"></i> Billing Details</legend>
                         <div class="erppage-grid2">
-                            @* <div class="erppage-divfield">
-                                <label class="erppage-label">Sauda No</label>
-                                <div class="erppage-inputgroup">
-                                    <select class="erppage-input erppage-select" id="ddlSaudaNo">
-                                        <option>Select Sauda No.</option>
-                                    </select>
-                                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" onclick="getSaudaRate();" id="btnCalcRate">
-                                        <i class="fa fa-calculator"></i> Calculate Rate
-                                    </button>
-                                </div>
-                            </div> *@
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Bill To</label>
                                 <select class="erppage-redinput erppage-required" id="ddlBillTo">
@@ -385,7 +346,7 @@
 
 
 
-            @* Modal Popup *@
+            <!-- Modal Popup -->
             <div class="modal fade" id="linkedorderModal" tabindex="-1" aria-labelledby="linkedorderLabel" aria-hidden="true">
                 <div class="modal-dialog small-modal erppagesmodal">
                     <div class="modal-content erppagesmodal-content">
@@ -571,7 +532,7 @@
         </div>
 
 
-        @* Modal Popup *@
+        <!-- Modal Popup -->
         <div class="modal fade" id="CreateDeliveryModal" tabindex="-1" aria-labelledby="CreateDeliveryLabel" aria-hidden="true">
             <div class="modal-dialog small-modal erppagesmodal">
                 <div class="modal-content erppagesmodal-content">

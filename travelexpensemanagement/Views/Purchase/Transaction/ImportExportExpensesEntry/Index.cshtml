@@ -80,9 +80,6 @@
                         <div class="erppage-grid1">
                             <div class="erppage-divfield">
                                 <label class="erppage-label">Add Line1</label>
-                                @* <select class="erppage-input erppage-select" id="TxtAdd1PD" disabled>
-                                    <option value="">Select Billing Address</option>
-                                </select> *@
                                 <input type="text" class="erppage-input" id="TxtAdd1PD" placeholder="Enter Address Line 1" disabled>
                             </div>
                         </div>
@@ -235,7 +232,6 @@
                     <div class="erppage-divfield">
                         <label class="erppage-label">Input Type</label>
                         <select class="erppage-input erppage-select" id="ddlInputType">
-                            @* <option value="">Select Input Type</option> *@
                             <option value="GST Input">GST Input</option>
                             <option value="GST NA">GST NA</option>
                             <option value="Import">Import</option>
@@ -246,7 +242,6 @@
                     <div class="erppage-divfield">
                         <label class="erppage-label">Exps Type</label>
                         <select class="erppage-input erppage-select" id="ddlExpsType">
-                            @* <option value="">Select Exps Type</option> *@
                             <option value="Custom Duty">Custom Duty</option>
                             <option value="Shipping Line">Shipping Line</option>
                             <option value="Container">Container</option>
@@ -291,9 +286,6 @@
                 <div class="erppage-divfield">
                     <label class="erppage-label">Status</label>
                     <select class="erppage-input erppage-select" id="ddlStatus" disabled>
-                        @* <option value="open" selected>Open</option>
-                        <option value="closed">Closed</option>
-                        <option value="pending">Pending</option> *@
                     </select>
                 </div>
                 <label id="lblE_invoice_suppl"
@@ -328,18 +320,6 @@
                     <i class="fa fa-clock"></i>
                     <span>Import Invoice List</span>
                 </button>
-                @* <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" onclick="PendingMRNBPReport()">
-                    <i class="fa fa-file-text"></i>
-                    <span>Pending MRN for Bill Passing</span>
-                </button> *@
-                @* <button type="button" class="erppage-btn erppage-btn-common-disabled" onclick="RMImportReport()">
-                    <i class="fa fa-ship"></i>
-                    <span>RM Import Bill</span>
-                </button> *@
-                @* <button type="button" class="erppage-btn erppage-btn-common" data-bs-toggle="modal" data-bs-target="#calculateCrDrModal">
-                    <i class="fa fa-calculator"></i>
-                    <span>Calculate CrDr</span>
-                </button> *@
             </div>
             <fieldset class="erppagefieldset">
                 <legend class="erppagefieldset-legend">Item Total</legend>
@@ -413,7 +393,6 @@
                     </div>
                 </div>
                 <fieldset class="erppagesubfieldset">
-                    @* <legend class="erppagefieldset-legend">TDS &amp; Bank Details</legend> *@
                     <div class="erppage-grid3">
                         <div class="erppage-divfield">
                             <label class="erppage-label">TDS A/c</label>
@@ -442,12 +421,6 @@
                             <input type="text" class="erppage-input" id="TxtPartyUsd" placeholder="Enter USD Amount">
                         </div>
                         <div class="erppage-divfield erppage-col-span-2 erppage-internalaction">
-                            @* <div class="erppage-divfield">
-                                <button type="button" class="erppage-btn erppage-btn-common-active-disabled" id="btnAdvanceTDS" data-bs-toggle="modal" data-bs-target="#advancetdsModal" onclick="onAdvanceTDSClick()">
-                                    <i class="fa fa-sitemap"></i>
-                                    <span>Advance TDS</span>
-                                </button>
-                            </div> *@
                             <div class="erppage-divfield">
                                 <button type="button" id="btnTDSCalc" class="erppage-btn erppage-btn-common-active-disabled" data-bs-toggle="modal" data-bs-target="#tdscalculationModal">
                                     <i class="fa fa-tasks"></i>
@@ -472,7 +445,6 @@
                     <button class="erppage-tab" data-tab="logisticdetails">Logistic Details</button>
                     <button class="erppage-tab" data-tab="crdrnote">Cr/Dr Note</button>
                     <button class="erppage-tab" data-tab="attachment">Attachment</button>
-                    @* <button class="erppage-tab" data-tab="epr">EPR</button> *@
                 </div>
                 <!-- Item Record -->
                 <div class="erppage-tab-content active" id="itemrecord">
@@ -488,8 +460,6 @@
                                         <col style="width:80px;">
                                         <col style="width:90px;">
                                         <col style="width:90px;">
-                                        @* <col style="width:100px;">
-                                        <col style="width:100px;"> *@
                                         <col style="width:100px;">
                                         <col style="width:120px;">
                                         <col style="width:90px;">
@@ -516,23 +486,8 @@
                                         <col style="width:180px;">
                                         <col style="width:100px;">
                                         <col style="width:100px;">
-                                        @* <col style="width:100px;">
-                                        <col style="width:100px;"> *@
                                         <col style="width:100px;">
                                         <col style="width:120px;">
-                                        @* <col style="width:120px;">
-                                        <col style="width:120px;">
-                                        <col style="width:120px;">
-                                        <col style="width:120px;">
-                                        <col style="width:120px;">
-                                        <col style="width:120px;">
-                                        <col style="width:120px;">
-                                        <col style="width:120px;">
-                                        <col style="width:140px;">
-                                        <col style="width:140px;">
-                                        <col style="width:140px;">
-                                        <col style="width:140px;">
-                                        <col style="width:140px;">*@
                                         <col style="width:90px;"> 
                                     </colgroup>
                                     <thead>
@@ -544,8 +499,6 @@
                                             <th>Nos</th>
                                             <th>Rec Qty</th>
                                             <th>Bill Qty</th>
-                                            @* <th>USD Rate</th>
-                                            <th>Ex Rate</th> *@
                                             <th>Rate</th>
                                             <th>Amount</th>
                                             <th>RCM Y/N</th>
@@ -572,23 +525,8 @@
                                             <th>Remarks</th>
                                             <th>LD Rate</th>
                                             <th>LD Amount</th>
-                                            @* <th>PO LDRate</th>
-                                            <th>PO Rate</th> *@
                                             <th>PO Type</th>
                                             <th>PO No</th>
-                                            @* <th>Kanta Type</th>
-                                            <th>Kanta No</th>
-                                            <th>Req Type</th>
-                                            <th>Req No</th>
-                                            <th>Ref Type</th>
-                                            <th>Ref No</th>
-                                            <th>Dr Note Amount</th>
-                                            <th>Cr Note Amount</th>
-                                            <th>Qlt Diff DrAmount</th>
-                                            <th>Rate Diff DrAmount</th>
-                                            <th>QC Diff DrAmount</th>
-                                            <th>Qty Diff DrAmount</th>
-                                            <th>Other DrAmount</th> *@
                                             <th class="action-col">Action</th>
                                         </tr>
                                     </thead>
@@ -862,9 +800,6 @@
                                 <label class="erppage-label">Payment</label>
                                 <select class="erppage-input erppage-select" id="ddlPayment">
                                     <option value="NA">NA</option>
-                                    @* <option value="Cash">Cash</option>
-                                    <option value="Bank">Bank</option>
-                                    <option value="Credit">Credit</option> *@
                                     <option value="Hold">Hold</option>
                                 </select>
                             </div>
@@ -893,10 +828,6 @@
                                     <i class="fa fa-file-text-o"></i>
                                     <span>Cr Note Print</span>
                                 </button>
-                                @* <button type="button" class="erppage-btn erppage-btn-common-active" id="BtnPurchaseSlip" onclick="PurchaseSlipReport()">
-                                    <i class="fa fa-file-text-o"></i>
-                                    <span>Purchase Slip</span>
-                                </button> *@
                             </div>
 
                         </div>
@@ -1193,8 +1124,6 @@
                                         <col style="width:220px;">
                                         <col style="width:140px;">
                                         <col style="width:120px;">
-                                        @* <col style="width:250px;"> *@
-                                        @* <col style="width:120px;"> *@
                                         <col class="hidden-col">
                                     </colgroup>
                                     <thead>
@@ -1211,8 +1140,6 @@
                                             <th>Remarks</th>
                                             <th>Created By</th>
                                             <th>Created Date</th>
-                                            @* <th>Party Name</th> *@
-                                            @* <th>Bill Amount</th> *@
                                             <th class="hidden-col">Action</th>
                                         </tr>
                                     </thead>
@@ -1348,26 +1275,19 @@
                                             <th>Adjusted Amt</th>
                                             <th>Bal. Adj. Amt</th>
                                             <th>Cr. Act</th>
-                                            @* <th class="hidden-col">Action</th> *@
-                                            @* <th>Action</th> *@
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mt-2">
-                                @* <div class="btn-add-row-last">
-                                    <i class="fa fa-plus btn-add-row" title="Add Row">
-                                        <span>Add New Row</span>
-                                    </i>
-                                </div> *@
                                 <div class="custom-pagination" id="tablePagination"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            @* Image Preview Modal *@
+            <!-- Image Preview Modal -->
             <div class="modal fade" id="imagePreviewModal" tabindex="-1"
                  aria-hidden="true">
 
@@ -1428,7 +1348,7 @@
         </div>
     </div>
 </div>
-@* =====================Attachment================= *@
+<!-- =====================Attachment================= -->
 <script>
     const fileInput = document.getElementById('fileInput');
     const browseBtn = document.getElementById('browseBtn');
