@@ -1,5 +1,4 @@
-﻿
-function AddRow(data = {}) {
+﻿function AddRow(data = {}) {
     let tbody = $('#tblSalesInvoice tbody');
     let newRow = `
         <tr class="no-border-input">
@@ -152,7 +151,6 @@ function AddRow(data = {}) {
     });
 
 }
-
 function CalculateRow($row) {
 
     const chkCalPCS = $('#ChkPCS').is(':checked');
@@ -434,7 +432,6 @@ function CalculateRow($row) {
     $('#NumInsurance2').val(insuranceAmount.toFixed(2));
     $('#NumTDS2').val(tdsAmount.toFixed(2));
 }
-
 function GetSalesInvoiceDetails() {
 
     const details = [];
@@ -882,7 +879,6 @@ function getString(selector) {
     const value = $.trim($(selector).val() || "");
     return value === "" ? null : value;
 }
-
 function getInt(selector) {
     const value = $.trim($(selector).val() || "");
 
@@ -894,7 +890,6 @@ function getInt(selector) {
 
     return Number.isNaN(number) ? null : number;
 }
-
 function getDecimal(selector) {
     const value = $.trim($(selector).val() || "");
 
@@ -933,308 +928,6 @@ async function GetCalRate(Itemcode) {
         console.log("GetCalRate Error:", error);
         return null;
     }
-}
-
-function CalculateRow($row)
-{
-
-    const chkCalPCS = $('#ChkPCS').is(':checked');
-    const defTonnageRate =  String(LoadGeneralSetting?.pubDefTonnageRate ?? '').toLowerCase();
-    const defWtCalconBales = String(LoadGeneralSetting?.pubDefWtCalconBales ?? '').toLowerCase();
-
-    const num = (selector, row = $row) => {
-        const value = parseFloat(row.find(selector).val());
-        return isNaN(value) ? 0 : value;
-    };
-
-    let nos = num('.TxtNos');
-    let grossQty = num('.TxtGrossQty');
-    let netQty = num('.TxtNetQty');
-    let rate = num('.TxtRate');
-    let packPer = num('.TxtPacKPer');
-    let disPer = num('.TxtDisPer');
-    let reportType = $.trim($row.find('.TxtREPORT_TYPE').val() || '');
-    let taxableRate = num('.TxtTaxable_Rate');
-    let netWt = num('.TxtNet_Wt');
-    let packingWt = num('.TxtPacking_Wt');
-    let packingNos = num('.TxtPacking_nos');
-
-    if (defTonnageRate === 'yes') {
-
-        if (netWt > 0) {
-
-            grossQty = nos * netWt;
-
-            $row.find('.TxtGrossQty') .val(grossQty.toFixed(2));
-        }
-
-        if (packingNos > 0) {
-
-            netQty =  nos * packingNos;
-
-            $row.find('.TxtNetQty') .val(netQty.toFixed(2));
-        }
-    }
-
-    if (defWtCalconBales === 'yes') {
-
-        if (netWt > 0) {
-
-            grossQty = nos * netWt;
-
-            $row.find('.TxtGrossQty') .val(grossQty.toFixed(2));
-        }
-
-
-        if (packingWt > 0) {
-
-            netQty = nos * packingWt;
-
-            $row.find('.TxtNetQty') .val(netQty.toFixed(2));
-        }
-    }
-
-    grossQty = num('.TxtGrossQty');
-    netQty = num('.TxtNetQty');
-
-    let amount = 0;
-
-    if (!chkCalPCS) {
-
-        if (netQty > 0)
-        {             
-            if (defTonnageRate === 'yes') {
-                if (reportType === 'Hessian' || reportType === 'Sacking')
-                {
-                    amount = (netQty * rate) / 100;
-                }
-
-                else if (reportType === 'Twine' && netWt > 0)
-                {
-                    if (taxableRate > 0)
-                    {
-                        amount = (netQty * rate) / taxableRate;
-                    }
-                }
-     
-                else
-                {
-                    amount = netQty * rate;
-                }
-            }
-
-            else
-            {
-                amount = netQty * rate;
-            }
-        }
-    }
-
-
-    else {
-
-        if (nos > 0)
-        {
-            amount =  grossQty * rate;
-        }
-    }
-
-    let packAmount = amount * packPer / 100;
-
-    let baseAmount = amount + packAmount;
-
-    let discountAmount = baseAmount * disPer / 100;
-
-    const cashDiscountPer = parseFloat($('#NumCashDiscountPer').val()) || 0;
-
-    let cashDiscountAmount =  baseAmount *  cashDiscountPer /  100;
-
-    let taxableAmount =  amount +   packAmount - discountAmount - cashDiscountAmount;
-
-    const taxOnInsurance = String( LoadGeneralSetting?.pubDefTaxonInsuInSI ?? '' ).toLowerCase() === 'yes';
-
-    const taxOnFreight = String( LoadGeneralSetting?.pubDefTaxonFrtInSI ?? ''  ).toLowerCase() === 'yes';
-
-    const insurance =  num('.TxtInsuAmount');
-
-    const freight = num('.TxtFreightAmount');
-
-
-    if (taxOnInsurance)
-    {
-        taxableAmount += insurance;
-    }
-
-    if (taxOnFreight)
-    {
-        taxableAmount += freight;
-    }
-
-    let cgstPer =  num('.TxtCgstper');
-
-    let sgstPer = num('.TxtSgstPer');
-
-    let igstPer = num('.TxtIGSTPer');
-
-    let cessPer = num('.TxtCessPer');
-
-    let cgstAmount = taxableAmount * cgstPer / 100;
-
-    let sgstAmount =  taxableAmount * sgstPer / 100;
-
-    let igstAmount =  taxableAmount * igstPer / 100;
-
-    let cessAmount =  taxableAmount * cessPer / 100;
-
-    $row.find('.TxtAmount') .val(amount.toFixed(2));
-
-    $row.find('.TxtPackAmount') .val(packAmount.toFixed(2));
-
-    $row.find('.TxtDisAmount') .val(discountAmount.toFixed(2));
-
-    $row.find('.TxtCDiscAmount') .val(cashDiscountAmount.toFixed(2));
-
-    $row.find('.TxtCgstAmt') .val(cgstAmount.toFixed(2));
-
-    $row.find('.TxtSgstamt') .val(sgstAmount.toFixed(2));
-
-    $row.find('.TxtIGSTamt') .val(igstAmount.toFixed(2));
-
-    $row.find('.TxtCessamt') .val(cessAmount.toFixed(2));
-
-    let totalNos = 0;
-    let totalGrossQty = 0;
-    let totalNetQty = 0;
-
-    let totalAmount = 0;
-    let totalPackAmount = 0;
-    let totalDiscount = 0;
-    let totalCashDiscount = 0;
-
-    let totalCGST = 0;
-    let totalSGST = 0;
-    let totalIGST = 0;
-    let totalCess = 0;
-
-
-    $('#tblSalesInvoice tbody tr').each(function ()
-    {
-
-        const $r = $(this);
-
-        if (!$r.find('.ddlProductName').val()) {
-            return;
-        }
-
-        totalNos += num('.TxtNos', $r);
-
-        totalGrossQty +=  num('.TxtGrossQty', $r);
-
-        totalNetQty +=  num('.TxtNetQty', $r);
-
-        totalAmount += num('.TxtAmount', $r);
-
-        totalPackAmount +=  num('.TxtPackAmount', $r);
-
-        totalDiscount += num('.TxtDisAmount', $r);
-
-        totalCashDiscount +=  num('.TxtCDiscAmount', $r);
-
-        totalCGST += num('.TxtCgstAmt', $r);
-
-        totalSGST += num('.TxtSgstamt', $r);
-
-        totalIGST +=  num('.TxtIGSTamt', $r);
-
-        totalCess +=  num('.TxtCessamt', $r);
-    });
-
-    let subtotal =  totalAmount +  totalPackAmount -   totalDiscount - totalCashDiscount;
-
-    let totalBeforeTCS = subtotal + totalCGST + totalSGST +  totalIGST +  totalCess;
-
-    const insPer = parseFloat($('#NumInsurance1').val()) || 0;
-
-    let insuranceAmount = 0;
-
-    if (freight !== 0)
-    {
-        if (taxOnInsurance)
-        {
-            insuranceAmount = Math.ceil(  (  subtotal + freight  ) *  (insPer / 100000) );
-        }
-        else
-        {
-            insuranceAmount = Math.ceil( ( (parseFloat($('#NumNetAmount').val()) || 0) + freight ) * (insPer / 100000) );
-        }
-    }
-    else
-    {
-        insuranceAmount = 0;
-    }
-
-    let billAmount = totalBeforeTCS;
-
-    const insuranceInBill =  String( LoadGeneralSetting?.pubDefInsuInBillAmtInSI ?? '' ).toLowerCase() === 'yes';
-
-    const freightInBill =  String( LoadGeneralSetting?.pubDefFrtInBillAmtInSI ?? ''  ).toLowerCase() === 'yes';
-
-    if (insuranceInBill)
-    {
-        billAmount += insuranceAmount;
-    }
-
-    if (freightInBill) {
-
-        billAmount +=  freight;
-    }
-
-    const tcsPer = parseFloat($('#NumTCS1').val()) || 0;
-
-
-    const tcsAmount = Math.ceil(  billAmount * tcsPer * 0.01  );
-
-    const netAmount = Math.round(billAmount + tcsAmount);
-
-    let roundOff =  netAmount - ( subtotal + totalCGST + totalSGST +   totalIGST +  totalCess + tcsAmount );
-
-    if (insuranceInBill)
-    {
-        roundOff = netAmount -  (  subtotal + totalCGST +  totalSGST +  totalIGST +  totalCess +  tcsAmount +  insuranceAmount );
-    }
-
-    if (freightInBill)
-    {
-        roundOff =  netAmount -  (  subtotal +  totalCGST + totalSGST +  totalIGST +  totalCess +  tcsAmount +  freight  );
-    }
-
-    if (insuranceInBill && freightInBill)
-
-    {
-        roundOff = netAmount -  (  subtotal +  totalCGST + totalSGST + totalIGST + totalCess +  tcsAmount + insuranceAmount + freight );
-    }
-
-    const tdsPer = parseFloat($('#NumTDS1').val()) || 0;
-
-    const tdsAmount = Math.round( freight * (tdsPer / 100)  );
-
-    $('#NumOtherTotalAmount')  .val(totalAmount.toFixed(2));
-    $('#NumOtherPacking2')  .val(totalPackAmount.toFixed(2));
-    $('#NumOtherDiscount2') .val(totalDiscount.toFixed(2));
-    $('#NumOtherCashDiscount2') .val(totalCashDiscount.toFixed(2));
-    $('#NumOtherTotalNos') .val(totalNos.toFixed(2));
-    $('#NumGrossQty') .val(totalGrossQty.toFixed(2));
-    $('#NumNetQty') .val(totalNetQty.toFixed(2));
-    $('#NumOtherSubTotal') .val(subtotal.toFixed(2));
-    $('#NumOtherCGST2') .val(totalCGST.toFixed(2));
-    $('#NumOtherSGST2')  .val(totalSGST.toFixed(2));
-    $('#NumOtherIGST2') .val(totalIGST.toFixed(2));
-    $('#NumOtherCESS2') .val(totalCess.toFixed(2));
-    $('#NumOtherTCS2')  .val(tcsAmount.toFixed(2));
-    $('#NumOtherRoundOff')  .val(roundOff.toFixed(2));
-    $('#NumOtherNetAmount')  .val(netAmount.toFixed(2));   
-    $('#NumInsurance2') .val(insuranceAmount.toFixed(2));
-    $('#NumTDS2') .val(tdsAmount.toFixed(2));
 }
 
 async function checkValidDate() {
@@ -1897,7 +1590,6 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
         }
     });
 }
-
 function numberToWordsCurrency(amount, currency = "Rs.", decimalName = "PAISE") {
 
     amount = parseFloat(amount) || 0;

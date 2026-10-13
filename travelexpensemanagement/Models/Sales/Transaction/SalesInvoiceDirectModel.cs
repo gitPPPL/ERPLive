@@ -187,23 +187,14 @@ public class SalesInvoiceDirectModel_Header
     public int? BILL_STATE { get; set; }
     public int? SHIP_STATE { get; set; }
     public int? SHIP_COUNTRY { get; set; }    
-
     public  string? DoType { get; set; }
     public  string? Do_NO { get; set; }
-
-
 
     public string? LICENCE_NO { get; set; }
     public string? LICENCE_TYPE { get; set; }
 
     public  DateTime? LICENCE_DATE { get; set; }
     
-
-
-
-
-
-
 }
 public class SalesInvoiceDirectModel_Detail
 {
@@ -267,15 +258,5 @@ public class SalesInvoiceDirectModel_Detail
     public decimal? Net_Wt { get; set; }
 
     public decimal? Packing_nos { get; set; }
-
-
     public string? REPORT_TYPE { get; set; }
-
-
-
-
-
-
-
-
 }

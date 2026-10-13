@@ -275,12 +275,7 @@
         }
 
         $.each(list, function (index, item) {
-
-
-
-
-
-                       tbody.append(`
+            tbody.append(`
                 <tr>
                             <td>${item.v_TYPEText ?? ''}</td>
                             <td>${item.v_NO ?? ''}</td>
@@ -352,13 +347,6 @@
                     </td>
                 </tr>
             `);
-
-
-
-
-
-
-
             applyGridPermission();
         });
 
@@ -463,7 +451,7 @@
     function deleteTemp(code, VType) {
         Swal.fire({
             title: "Are you sure?",
-            text: "You want to delete this Inward Entry?",
+            text: "You want to delete this Sales Proforma Invoice?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",

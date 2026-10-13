@@ -1,11 +1,10 @@
 ﻿@{
     ViewBag.Title = "Sales Invoice Direct List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
-
 }
 
 <fieldset>
-	<legend class="legend-field">Sales Invoice List</legend>
+    <legend class="legend-field">Sales Invoice Entry Direct List</legend>
 	<div class="row">
 		<div class="col-lg-6">
 			<div class="input-group shadow-sm rounded-pill overflow-hidden">
@@ -22,8 +21,7 @@
 				</button>
                 <button class="btn btn-export" id="button_export">
 					<i class="fas fa-file-export"></i> Export
-				</button>
-			
+				</button>			
 			</div>
 		</div>
 	</div>
@@ -125,10 +123,7 @@
         </div>
 	</div>
 
-
-
 </fieldset>
-
 
 <script>
 
@@ -138,9 +133,9 @@
     var controllerName = window.location.pathname.split('/')[1];
 
     $(document).ready(function () {
-        //checkPermission(controllerName, function () {
+       checkPermission(controllerName, function () {
               loadAllInward();
-            //});
+       });
 
         $('#searchBox').on('keyup', function () {
             currentPage = 1;
@@ -156,11 +151,7 @@
         {
             var searchTerm = $('#searchBox').val() || '';
             window.location.href = '/SalesInvoiceDirectList/ExportPdf?searchTerm=' + encodeURIComponent(searchTerm);
-
         });
-
-
-
 
     });
 
@@ -176,13 +167,10 @@
                 pageNumber: currentPage,
                 pageSize: pageSize
             },
-            success: function (res) {
-
-
-                console.log("Response from server:", res);
-
-
-                if (!res.success) {
+            success: function (res) 
+            {
+                if (!res.success) 
+                {
                     toastr.error("Failed to load data.");
                     return;
                 }
@@ -193,7 +181,8 @@
                 renderTable(list);
                 renderPagination();
             },
-            error: function (xhr) {
+            error: function (xhr) 
+            {
                 toastr.error('Error loading list: ' + xhr.responseText);
             }
         });
@@ -288,7 +277,7 @@
                     <td class="action-col">
                         <div class="action-wrap">
                             <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.doC_ID}')"><i class="fa fa-edit"></i></button>
-                            <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.v_NO}')"><i class="fa fa-eye"></i></button>
+                            <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.doC_ID}')"><i class="fa fa-eye"></i></button>
                             <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
                             <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
 
@@ -401,7 +390,7 @@
     function deleteTemp(code, VType) {
         Swal.fire({
             title: "Are you sure?",
-            text: "You want to delete this Inward Entry?",
+            text: "You want to delete this Sales Invoice Direct?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -428,7 +417,7 @@
 
                         if (res.success) {
                             toastr.success(res.message || "Deleted successfully");
-                           // loadAllInward();
+                            loadAllInward();
                         } else {
                             toastr.error(res.message || 'Failed to delete.');
                         }

@@ -462,3 +462,191 @@ function formatDate(dateStr) {
         String(d.getMonth() + 1).padStart(2, '0') + '-' +
         String(d.getDate()).padStart(2, '0');
 }
+
+
+
+function numberToWordsCurrency(amount, currency = "Rs.", decimalName = "PAISE") {
+
+    amount = parseFloat(amount) || 0;
+
+    const ones = [
+        "",
+        "One",
+        "Two",
+        "Three",
+        "Four",
+        "Five",
+        "Six",
+        "Seven",
+        "Eight",
+        "Nine",
+        "Ten",
+        "Eleven",
+        "Twelve",
+        "Thirteen",
+        "Fourteen",
+        "Fifteen",
+        "Sixteen",
+        "Seventeen",
+        "Eighteen",
+        "Nineteen"
+    ];
+
+    const tens = [
+        "",
+        "",
+        "Twenty",
+        "Thirty",
+        "Forty",
+        "Fifty",
+        "Sixty",
+        "Seventy",
+        "Eighty",
+        "Ninety"
+    ];
+
+
+    function convertLessThanThousand(num) {
+
+        let result = "";
+
+        if (num >= 100) {
+
+            result += ones[Math.floor(num / 100)] + " Hundred ";
+
+            num %= 100;
+        }
+
+        if (num >= 20) {
+
+            result += tens[Math.floor(num / 10)];
+
+            if (num % 10 !== 0) {
+                result += " " + ones[num % 10];
+            }
+
+        }
+        else if (num > 0) {
+
+            result += ones[num];
+        }
+
+        return result.trim();
+    }
+
+
+    function convertIndianNumber(num) {
+
+        if (num === 0) {
+            return "Zero";
+        }
+
+        let result = "";
+
+        // Crore
+        if (num >= 10000000) {
+
+            const crore =
+                Math.floor(num / 10000000);
+
+            result +=
+                convertIndianNumber(crore) +
+                " Crore ";
+
+            num %= 10000000;
+        }
+
+
+        // Lakh
+        if (num >= 100000) {
+
+            const lakh =
+                Math.floor(num / 100000);
+
+            result +=
+                convertLessThanThousand(lakh) +
+                " Lakh ";
+
+            num %= 100000;
+        }
+
+
+        // Thousand
+        if (num >= 1000) {
+
+            const thousand =
+                Math.floor(num / 1000);
+
+            result +=
+                convertLessThanThousand(thousand) +
+                " Thousand ";
+
+            num %= 1000;
+        }
+
+
+        // Remaining
+        if (num > 0) {
+
+            result +=
+                convertLessThanThousand(num);
+        }
+
+        return result.trim();
+    }
+
+
+    // ---------------------------------------------------------
+    // Separate rupees and paise
+    // ---------------------------------------------------------
+
+    const rupees =
+        Math.floor(amount);
+
+    const paise =
+        Math.round((amount - rupees) * 100);
+
+
+    // ---------------------------------------------------------
+    // Currency prefix
+    // ---------------------------------------------------------
+
+    let currencyText = currency;
+
+    if (currency === "Rs." || currency === "Rs") {
+        currencyText = "Rupees";
+    }
+
+
+    // ---------------------------------------------------------
+    // Rupees
+    // ---------------------------------------------------------
+
+    let result =
+        currencyText + " " +
+        convertIndianNumber(rupees);
+
+
+    // ---------------------------------------------------------
+    // Paise
+    // ---------------------------------------------------------
+
+    if (paise > 0) {
+
+        result +=
+            " and " +
+            convertLessThanThousand(paise) +
+            " " +
+            decimalName;
+    }
+
+
+    // ---------------------------------------------------------
+    // Only
+    // ---------------------------------------------------------
+
+    result += " Only";
+
+
+    return result;
+}

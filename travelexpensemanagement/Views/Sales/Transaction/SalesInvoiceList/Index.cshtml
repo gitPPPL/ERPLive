@@ -134,12 +134,10 @@
 
 
 <script>
-
     let currentPage = 1;
     let pageSize = 10;
     let totalCount = 0;
     var controllerName = window.location.pathname.split('/')[1];
-
     $(document).ready(function () {
         checkPermission(controllerName, function () {
               loadAllInward();
@@ -159,14 +157,11 @@
         {
             var searchTerm = $('#searchBox').val() || '';
             window.location.href = '/SalesInvoiceList/ExportPdf?searchTerm=' + encodeURIComponent(searchTerm);
-
         });
 
     });
-
     // ================= LOAD DATA =================
     function loadAllInward() {
-
         $.ajax({
             url: '/SalesInvoiceList/GetList',
             type: 'GET',
@@ -177,16 +172,11 @@
                 pageSize: pageSize
             },
             success: function (res) {
-
-
                 console.log("Response from server:", res);
-
-
                 if (!res.success) {
                     toastr.error("Failed to load data.");
                     return;
                 }
-
                 const list = res.lists || [];
                 totalCount = res.totalCount || 0;
 
@@ -198,7 +188,6 @@
             }
         });
     }
-
     // ================= TABLE =================
     function renderTable(list) {
 
@@ -217,7 +206,7 @@
                             <td>${item.v_TYPE ?? ''}</td>
                             <td>${item.v_TYPEText ?? ''}</td>
                             <td>${item.v_NO ?? ''}</td>
-                            <td>${formatDate(item.v_DATE)}</td>                    
+                            <td>${formatDate(item.v_DATE)}</td>                  
 
                             <td>${item.bilL_NAME ?? ''}</td>
                             <td>${item.bilL_ADD1 ?? ''}</td>
@@ -261,13 +250,11 @@
                             <td>${item.frT_AMT ?? ''}</td>
                             <td>${item.rounD_OFF ?? ''}</td>
 
-
                             <td>${item.toT_NET ?? ''}</td>
                             <td>${item.insU_PER ?? ''}</td>
                             <td>${item.insU_AMT ?? ''}</td>
                             <td>${item.tdS_PER ?? ''}</td>
-                            <td>${item.tdS_AMT ?? ''}</td>
-                           
+                            <td>${item.tdS_AMT ?? ''}</td>                        
                             
                             <td>${item.loaD_REM ?? ''}</td>
                             <td>${item.wB_REM ?? ''}</td>
@@ -291,7 +278,7 @@
                     <td class="action-col">
                         <div class="action-wrap">
                             <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.doC_ID}')"><i class="fa fa-edit"></i></button>
-                            <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.v_NO}')"><i class="fa fa-eye"></i></button>
+                            <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.doC_ID}')"><i class="fa fa-eye"></i></button>
                             <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
                             <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
 
@@ -304,7 +291,6 @@
         });
 
     }
-
     // ================= PAGINATION =================
     function renderPagination() {
 
@@ -351,7 +337,6 @@
         $('#prevBtn').prop('disabled', currentPage === 1);
         $('#nextBtn').prop('disabled', currentPage === totalPages);
     }
-
     // ================= PAGINATION ACTIONS =================
     function prevPage() {
         if (currentPage > 1) {
@@ -379,7 +364,6 @@
         loadAllInward();
     }
 
-    // ================= UTIL =================
     function formatDate(dateStr) {
         if (!dateStr) return '';
         const d = new Date(dateStr);
@@ -392,7 +376,6 @@
         return `${day}-${month}-${year}`;
     }
 
-    // ================= ACTIONS =================
     function AddOrEditFunction(DOC_ID) {
         window.location.href = `/salesInvoice/Index?id=${encodeURIComponent(DOC_ID)}`;
     }
@@ -401,10 +384,11 @@
         window.location.href = `/salesInvoice/Index?id=${encodeURIComponent(DOC_ID)}&mode=view`;
     }
 
-    function deleteTemp(code, VType) {
+    function deleteTemp(code, VType) 
+    {
         Swal.fire({
             title: "Are you sure?",
-            text: "You want to delete this Inward Entry?",
+            text: "You want to delete this Sales Invoice ?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -427,16 +411,16 @@
                           toastr.warning(res.message );
                           return;
                         }
-
-
-                        if (res.success) {
+                        if (res.success) 
+                        {
                             toastr.success(res.message || "Deleted successfully");
-                           // loadAllInward();
+                            loadAllInward();
                         } else {
                             toastr.error(res.message || 'Failed to delete.');
                         }
                     },
-                    error: function () {
+                    error: function ()
+                    {
                         toastr.error('Error deleting record.');
                     }
                 });

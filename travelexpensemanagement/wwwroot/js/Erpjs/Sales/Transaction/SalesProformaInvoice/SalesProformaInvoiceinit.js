@@ -379,7 +379,6 @@ $(document).ready(async function () {
     });
 
     $('#button_mail').on('click', async function () {
-        alert("hh")
         await SendMail();
 
     });

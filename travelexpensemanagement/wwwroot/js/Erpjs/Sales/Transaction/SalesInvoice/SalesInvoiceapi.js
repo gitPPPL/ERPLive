@@ -698,3 +698,11 @@ async function AddressConsigneeData(PartyCode, AddressId) {
         console.log("error", error);
     }
 }
+
+function SetFormReadOnly(isReadOnly = true)
+{
+    $('#SalesInvoiceForm') .find('input, textarea') .prop('readonly', isReadOnly);
+    $('#SalesInvoiceForm') .find('select, input[type="checkbox"], input[type="radio"]') .prop('disabled', isReadOnly);
+    $('#SalesInvoiceForm') .find('button') .not('#btn-save') .prop('disabled', isReadOnly);
+    $('#btn-save').prop('disabled', isReadOnly);
+}

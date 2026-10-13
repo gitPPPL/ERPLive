@@ -996,9 +996,6 @@ function TransitReport() {
     var reportName = "";
 
 
-    console.log("globalVars", globalVars);
-
-
 
     if (globalVars.CompCode == "7")
     {
@@ -1084,7 +1081,7 @@ function TransitReport() {
 
 async function SendMail() {
     try {
-        const docId = $('#CODE').val();
+        const docId = $('#TxtCode').val();
 
         if (!docId)
         {

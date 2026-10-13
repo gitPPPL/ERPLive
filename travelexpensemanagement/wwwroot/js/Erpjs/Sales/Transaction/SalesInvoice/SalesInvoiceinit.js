@@ -36,6 +36,7 @@ $(document).ready(async function () {
         vNo = $('#NumInvoiceNo').val();
         checkApprovalStatus(vtype, rowId, 'SALE1');
 
+
         $('#tblSalesInvoice tbody tr').each(function () {
             const $row = $(this);
             const itemCode = $.trim($row.find('.ddlProductName').val() || '');
@@ -45,6 +46,10 @@ $(document).ready(async function () {
             }
         });
 
+        if (mode == 'view')
+        {
+            SetFormReadOnly();
+        }
 
     }
     else
@@ -81,34 +86,25 @@ $(document).ready(async function () {
         await GetPendingDetails();
     });
 
-    $('#chkSelectAllPending').on('change', function () {
-
+    $('#chkSelectAllPending').on('change', function ()
+    {
         let isChecked = $(this).prop('checked');
-
-        $('#tblpurchaseordermodal tbody .pending-row-check')
-            .prop('checked', isChecked);
-
+        $('#tblpurchaseordermodal tbody .pending-row-check').prop('checked', isChecked);
     });
 
-    $('#Btn_CopyData').on('click', function () {
-
+    $('#Btn_CopyData').on('click', function ()
+    {
         let data = GetSelectedPendingRow();
-
         if (data.length === 0) {
             toastr.warning('Please select at least one row.');
             return;
         }
-
         console.log("selected row data", data);
-
         // Remove blank rows
         $('#tblSalesInvoice tbody tr').each(function () {
-
             let $row = $(this);
-
             let itemCode = $.trim($row.find('.ID').val());
             let productCode = $.trim($row.find('.ddlProductName').val());
-
             if (!itemCode && !productCode) {
                 $row.remove();
             }
