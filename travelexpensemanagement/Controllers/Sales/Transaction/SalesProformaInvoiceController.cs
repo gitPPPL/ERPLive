@@ -37,7 +37,11 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         }
         public async Task<IActionResult> Index()
         {
-            var globalVariables = _globalVariableService.GetGlobalVariables();         
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+
+            var loadGeneralSetting = await _globalVariableService.LoadGeneralSetting();
+
+            ViewBag.LoadGeneralSetting = loadGeneralSetting;
 
             string databaseName;
             using (var connection = _dbConnection.GetErpConnection())

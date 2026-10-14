@@ -7,11 +7,27 @@
   </PropertyGroup>-->
 
 <!--khushahal-->
+	<!--<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>-->
+
+	
+	
+	
+	
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+
+		<Features>$(Features);experimental-data-section-string-literals</Features>
 	</PropertyGroup>
+	
+	
+	
+	
 	
 <!--local server-->
 

@@ -13,22 +13,20 @@ using travelexpensemanagement.Repositories.Implementations.GateEntry.Transaction
 using travelexpensemanagement.Repositories.Implementations.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Implementations.QualityControl;
 using travelexpensemanagement.Repositories.Implementations.Sale.Transaction;
-
+using travelexpensemanagement.Repositories.Implementations.Sales.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge;
 using travelexpensemanagement.Repositories.Interfaces;
 using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl;
 using travelexpensemanagement.Repositories.Interfaces.Sale.Transaction;
-
+using travelexpensemanagement.Repositories.Interfaces.Sales.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge;
 using travelexpensemanagement.Services;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 builder.Services.AddControllersWithViews();
-
 builder.Services.AddScoped<DataBaseConnection>();
 builder.Services.AddScoped<GlobalValidationdate>();
 builder.Services.AddScoped<DbHelper>();
@@ -36,11 +34,8 @@ builder.Services.AddScoped<DropdownService>();
 builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<ErrorLoggerService>();
 builder.Services.AddScoped<IMasterDataService, MasterDataService>();
-
 //  Repository Registration (IMPORTANT)
-
 builder.Services.AddScoped< travelexpensemanagement.Repositories.Interfaces.IApprovalService, travelexpensemanagement.Repositories.Implementations.ApprovalService>();
-
 builder.Services.AddScoped<IAssetRepository, AssetRepository>();
 builder.Services.AddScoped<IOutwardEntryRepository, OutwardEntryRepository>();
 builder.Services.AddScoped<IOutwardEntryListRepository, OutwardEntryListRepository>();
@@ -56,12 +51,8 @@ builder.Services.AddScoped<IInventoryDepartmentIssueRepository,  InventoryDepart
 builder.Services.AddScoped< IInventoryDepartmentIssueListRepository, InventoryDepartmentIssuelistRepository>();
 builder.Services.AddScoped<ISalesProformaInvoice , SalesProformaInvoice>();
 builder.Services.AddScoped<ISalesInVoice, SalesInVoice>();
-
 builder.Services.AddScoped<ISalesInvoiceDirect, SalesInvoiceDirect>();
-
-
-
-
+builder.Services.AddScoped<IExportDetailsRepository, ExportDetailsRepository>();
 builder.Services.Configure<EncryptionSettings>(
 builder.Configuration.GetSection("EncryptionSettings"));
 builder.Services.AddScoped<EncryptionHelper>();

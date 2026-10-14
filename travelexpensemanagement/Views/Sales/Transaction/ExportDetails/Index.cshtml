@@ -1,0 +1,442 @@
+﻿@{
+    ViewBag.Title = "Export Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="erp-toast-container"></div>
+
+<!-- PAGE HEADER -->
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-file-invoice"></i>
+        </div>
+        <div class="erppage-header-title">Export Sales Entry</div>
+    </div>
+
+    <div class="erppage-header-right">
+        <div class="erppage-internalaction">
+            <button type="button" class="erppage-header-back" id="btnDelete">
+                <i class="fa-solid fa-trash"></i> Delete
+            </button>
+        </div>
+       
+    </div>
+</div>
+
+<div id="ExportSalesForm">
+
+    <input type="hidden"class="form-control" id="CODE" name="CODE">
+
+    <div class="erppage-container">
+
+        <div class="erppage-fieldset">
+
+            <div class="erppagesrow">
+
+                <div class="erppage-grid4">
+
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc No</label>
+                        <input type="number" class="erppage-input" id="txtVNo" placeholder="Enter Doc No" readonly>
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ref. No.</label>
+                        <input type="text" class="erppage-input" id="txtRefNo" placeholder="Enter Ref. No." readonly>
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ref. Type</label>
+                        <input type="text" class="erppage-input" id="txtRefType" readonly>
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Ex Rate</label>
+                        <input type="number" class="erppage-input" id="txtFreightRate" >
+                    </div>
+
+                </div>
+
+                <div class="erppagescol-6">
+
+                    <fieldset class="erppagefieldset">
+
+                        <legend class="erppagefieldset-legend"> Export / Customer Information  </legend>
+
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Customer Name</label>
+                                <input type="text" class="erppage-input" id="txtCustomerName" readonly>
+                            </div>
+                        </div >
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Address Line 1 </label>
+                                <input type="text" class="erppage-input" id="txtAddress1" readonly>
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Address Line 2 </label>
+                                <input type="text" class="erppage-input" id="txtAddress2" readonly>
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Address Line 3 </label>
+                                <input type="text" class="erppage-input" id="txtAddress3" readonly>
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Contact No</label>
+                                <input type="text" class="erppage-input" id="txtContactNo" readonly>
+                            </div>
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">  Party Station </label>
+                                <input type="text" class="erppage-input" id="txtPartyStation" readonly>
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Item Type </label>
+                                <input type="text" class="erppage-input" id="txtItemType" readonly>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Weight </label>
+                                <input type="number" class="erppage-input" id="txtWeight" readonly>
+                            </div>
+                        </div>
+
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Rate </label>
+                                <input type="number" class="erppage-input" id="txtRate" readonly>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Currency </label>
+                                <input type="text" class="erppage-input" id="txtCurrency" readonly>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Freight Term </label>
+                                <input type="text" class="erppage-input" id="txtFreightTerm" readonly>
+                            </div>
+                        </div>
+
+                        <legend class="erppage-label"> Nature and Kind of Packing </legend>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <textarea class="erppage-input" id="txtPacking" placeholder="Enter Nature and Kind of Packing" style="height:40px;"></textarea>
+                            </div>
+                        </div>
+
+                    </fieldset>
+
+                    <!-- ================================================= -->
+                    <!-- BANK INFORMATION -->
+                    <!-- ================================================= -->
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend"> Bank Information </legend>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Bank Name </label>
+                                <select class="erppage-input erppage-select" id="ddlBankName">
+                                    <option value=""> Select Bank Name  </option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">  Branch </label>
+                                <input type="text" class="erppage-input" id="txtBranch" placeholder="Enter Branch">
+                            </div>
+                        </div>
+
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Account Number  </label>
+                                <input type="text" class="erppage-input" id="txtAccountNumber" placeholder="Enter Account Number">
+                            </div>
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">  Bank IFSC Code </label>
+                                <input type="text" class="erppage-input" id="txtBankIFSC" placeholder="Enter IFSC Code">
+                            </div>
+                        </div>
+
+                        <div class="erppage-grid2">
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Bank AD Code </label>
+                                <input type="text" class="erppage-input" id="txtBankADCode" placeholder="Enter AD Code">
+                            </div>
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Bank Swift Code </label>
+                                <input type="text" class="erppage-input" id="txtBankSwiftCode" placeholder="Enter Swift Code">
+                            </div>
+
+                        </div>
+
+                    </fieldset>
+
+                </div>
+
+                <!-- ===================================================== -->
+                <!-- SHIPMENT INFROMATION
+                <!-- ===================================================== -->
+
+                <div class="erppagescol-6">
+
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">  Shipment Information  </legend>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Port of Loading  </label>
+                                <select class="erppage-input erppage-select" id="txtPOL">
+                                    <option value="">Select PortOf loading</option>
+                                </select>
+                            </div>
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Port of Discharge </label>
+                                <select class="erppage-input erppage-select" id="txtPOD">
+                                    <option value="">Select Port Discharge</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Final Port of Discharge </label>
+                                <select class="erppage-input erppage-select" id="txtFPOD">
+                                    <option value="">Select Final PortOfD</option>
+                                </select>
+                            </div>
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Final Country</label>
+                                <select class="erppage-input erppage-select" id="ddlFinalCountry">
+                                    <option value=""> Select Final Country </option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> BL Type of Sales </label>
+                                <select class="erppage-input erppage-select" id="ddlBLType">
+                                    <option value=""> Select BL Type</option>
+                                    <option value="RFSBL">RFS BL</option>
+                                    <option value="ORIGINALBL">ORIGINAL BL</option>
+                                    <option value="ORIGINALBL">ORIGINAL BL</option>
+                                    <option value="OBLPrintAtDestination">OBL Print At Destination</option>
+                                    <option value="OCEANBL">OCEAN BL</option>
+                                    <option value="ORIGINALLR">ORIGINAL LR</option>
+                                    <option value="SEAWAYSBL">SEAWAYS BL</option>
+                                    <option value="TELAX/SURENDER BL">TELAX/SURENDER BL</option>
+                                </select>
+                            </div>
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Custom Clearance Port </label>
+                                <select class="erppage-input erppage-select" id="txtSeaPort">
+                                    <option value=""> Select Clearence port</option>
+                                </select>
+                                
+                            </div>
+
+                        </div>
+
+                        <!-- NOTIFY -->
+                        <div class="erppage-grid2">
+
+                            <div class="erppage-divfield"> <label class="erppage-label"> Notify 1 </label>
+                                <select class="erppage-input erppage-select"  id="ddlNotify1">
+                                    <option value="">Select Notify 1</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Notify 2 </label>
+                                <select class="erppage-input erppage-select" id="ddlNotify2">
+                                    <option value=""> Select Notify 2  </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- COMMISSION AGENT -->
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Commission Agent </label>
+                                <select class="erppage-input erppage-select" id="ddlCommissionAgent">
+                                    <option value=""> Select Commission Agent </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- LC NUMBER / DATE -->
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> LC Number</label>
+                                <input type="text" class="erppage-input" id="txtLCNumber" placeholder="Enter LC Number">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> LC Date </label>
+                                <input type="date" class="erppage-input" id="dtLCDate">
+                            </div>
+                        </div>
+
+                        <!-- FREIGHT / INSURANCE -->
+                        <div class="erppage-grid2">
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Ocean Freight (USD) </label>
+                                <input type="number" step="0.01" class="erppage-input" id="txtOceanFreight" placeholder="0.00">
+                            </div>
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label"> Insurance (USD)  </label>
+                                <input type="number" step="0.01" class="erppage-input" id="txtInsurance" placeholder="0.00">
+                            </div>
+
+                        </div>
+
+                        <!-- COMMISSION -->
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Commission (USD)</label>
+                                <input type="number" step="0.01" class="erppage-input"  id="txtCommission" placeholder="0.00">
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">  </label>
+                                <input type="number"  class="erppage-input" id="txt1Commission">
+                            </div>
+                        </div>
+                    </fieldset>
+                   
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppage-label"> Technical Specification <span style="font-size:11px;">  (Attachment Required) </span>  </legend>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <textarea class="erppage-input" id="txtTechnicalSpecification" placeholder="Enter Technical Specification" style="height:40px;"></textarea>
+                            </div>
+                        </div>
+                        <div class="erppage-divfield erppage-col-span-2">
+                            <label class="erppage-label">Attachment</label>
+                            <div class="erppage-upload-wrap">
+                                <input type="file" class="erppage-input" id="TxtAttachment" accept="image" />
+                                <div id="previewContainer" style="display:none; align-items:center; gap:6px; height:40px; padding:4px 8px;">
+
+                                    <span id="attachmentFileName"
+                                          style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    </span>
+
+                                    <button type="button"
+                                            id="btnPreviewImage"
+                                            class="act-btn view btn-view"
+                                            title="Preview"
+                                            style="width:34px; height:28px; padding:0; margin:0;">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+
+                                    <button type="button"
+                                            id="btnDeleteAttachment"
+                                            class="act-btn delete btn-delete"
+                                            title="Delete"
+                                            style="width:34px; height:28px; padding:0; margin:0;">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="imagePreviewModal" tabindex="-1"
+                                 aria-hidden="true">
+
+                                <div class="modal-dialog erppagesmodal small-modal">
+
+                                    <div class="modal-content erppagesmodal-content">
+
+                                        <div class="erppagesmodal-header">
+
+                                            <div class="erppagesmodal-header-left">
+
+                                                <div class="erppagesmodal-header-icon">
+                                                    <i class="fa fa-image"></i>
+                                                </div>
+
+                                                <h5 class="erppagesmodal-title">
+                                                    Attachment Preview
+                                                </h5>
+
+                                            </div>
+
+                                            <button type="button"
+                                                    class="erppagesmodal-close"
+                                                    data-bs-dismiss="modal"
+                                                    aria-label="Close">
+
+                                                <i class="fa fa-times"></i>
+
+                                            </button>
+
+                                        </div>
+
+                                        <div class="erppagesmodal-body text-center">
+
+                                            <img id="previewImage"
+                                                 src=""
+                                                 style="
+                                            width:100%;
+                                            height:75vh;
+                                            object-fit:contain;
+                                            display:none;" />
+
+                                            <iframe id="previewPdf"
+                                                    style="
+                                            width:100%;
+                                            height:75vh;
+                                            border:none;
+                                            display:none;">
+                                            </iframe>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <legend class="erppage-label"> Special Instruction </legend>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <textarea class="erppage-input" id="txtSpecialInstruction" placeholder="Enter Special Instruction" style="height:50px;"></textarea>
+                            </div>
+
+                        </div>
+
+                    </fieldset>
+
+                </div>
+
+            </div>
+
+            <div class="erppage-actions">
+
+                <button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save</span>
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="~/js/erpjs/sales/transaction/exportdetailsjs/exportdetails.js"></script>

@@ -10,6 +10,10 @@
     var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0;
     var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
     var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+
+
+      var LoadGeneralSetting = ViewBag.LoadGeneralSetting;
+
 }
 
 <script>
@@ -29,8 +33,13 @@
         Phone = globalVariables.Phone,
         Email = globalVariables.Email,
         ICE = globalVariables.IEC,
-        website = globalVariables.Website
+        website = globalVariables.Website,
+        CINNO = globalVariables.CINNO
     }));
+
+          var LoadGeneralSetting = @Html.Raw( JsonSerializer.Serialize(ViewBag.LoadGeneralSetting)
+    );
+
 
     window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
 </script>
@@ -54,6 +63,13 @@
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesProformaInvoiceList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
+
+        <input type="checkbox" id="chkDraft" class="erppage-checkbox-input">
+        <label class="erppage-checkbox-label">Draft</label>
+
+        <button type="button" class="erppage-btn erppage-btn-copy" id="btnExportDetail_Report" onclick="ExportDetailReport();">
+            <i class="fa-solid fa-print"></i> Export Print
+        </button>                      
 
     </div>
 </div>
@@ -92,6 +108,9 @@
                         <option value="">Select Currency</option>
                     </select>
                 </div>
+
+             
+
             </div>
 
             <div class="erppagesrow">
@@ -327,6 +346,15 @@
                             <label class="erppage-checkbox-label">Cal on PCS</label>
                         </div>
                     </div>
+                      <div class="erppage-divfield">
+                        <div class="erppage-checkbox-wrap">
+                            <input type="checkbox" id="chkHideRemark" class="erppage-checkbox-input">
+                            <label class="erppage-checkbox-label">Hide Remark</label>
+                        </div>
+                    </div>
+
+
+
                 </div>
             </fieldset>
 
@@ -531,15 +559,8 @@
                             </div>
                         </div>
 
-
                     </div>
                 </div>
-
-
-
-
-
-
 
             </fieldset>
         </div>
@@ -548,6 +569,10 @@
             <button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
                 <i class="fa-solid fa-floppy-disk"></i>
                 <span>Save</span>
+            </button>
+            <button id="btn_export" type="submit" class="erppage-btn">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Export Detail</span>
             </button>
         </div>
 

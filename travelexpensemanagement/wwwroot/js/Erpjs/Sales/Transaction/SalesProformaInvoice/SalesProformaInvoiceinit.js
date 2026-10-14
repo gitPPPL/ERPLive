@@ -380,7 +380,69 @@ $(document).ready(async function () {
 
     $('#button_mail').on('click', async function () {
         await SendMail();
-
     });
+
+    $(document).on('click', '#btn_export', function () {
+
+        if ($('#ddlSupplyType').val() !== 'EXPORT') {
+            showToast('Please select Export supply.', { type: 'warning' });
+            return;
+        }
+
+        const refNo = $('#NumSerialNo').val();
+        const refType = $('#ddlInvType').val();
+
+        if (!refNo) {
+            showToast('Sales Sauda No. not found.', { type: 'warning' });
+            return;
+        }
+
+
+        let rate = 0;
+
+        let $row = $('#tblSalesProformaInvoice tbody tr').filter(function () {
+            return $(this).find('.ddlProductName').val() != null &&
+                $(this).find('.ddlProductName').val() !== '';
+        }).first();
+
+        if ($row.length > 0) {
+            rate = Number($row.find('.TxtRate').val()) || 0;
+        }
+
+        console.log(rate);
+
+
+
+        const exportData = {
+            refNo: refNo,
+            refType: refType,
+
+            customerCode: $('#ddlPartyName').val(),
+            customerName: $('#ddlPartyName option:selected').text(),
+
+            address1: $('#txtaddressL1').val(),
+            address2: $('#txtaddressL2').val(),
+            address3: $('#txtaddressL3').val(),
+            partyStation: $('#ddlStationl option:selected').text(),
+
+            itemType: $('#ddlProdType').val(),
+            weight: $('#NumNetQty').val(),                
+
+            rate: rate ,
+            currency: $('#txtCurrency option:selected').text(),
+
+            freightTerm: "",
+            freightRate: $('#NumFreight').val()
+        };
+
+        // Save Sales Sauda data temporarily
+        sessionStorage.setItem('salesSaudaExportData', JSON.stringify(exportData));
+
+        // Open Export Details with reference
+        const url = `/ExportDetails/Index?refNo=${encodeURIComponent(refNo)}&refType=SAUD`;
+
+        window.open(url, '_blank');
+    });
+
 
 });

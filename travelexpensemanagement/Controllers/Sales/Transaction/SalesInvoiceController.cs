@@ -36,7 +36,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             _moduleService = moduleService;    
             _salesInVoice = salesInVoice;
         }
-
         public async Task<IActionResult> Index()
         {
             var globalVariables = _globalVariableService.GetGlobalVariables();
@@ -57,7 +56,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             return View("~/Views/Sales/Transaction/SalesInvoice/Index.cshtml");
         }
-
         public JsonResult GetVNo(string Vtype, string Tablename = "SALE1")
         {
             string newV_NO = "00000";
@@ -73,7 +71,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             return Json(new { V_NO = newV_NO });
         }
-
         public JsonResult DDlVType()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -652,7 +649,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(new {  success = false, status = "ERROR",  message = ex.Message  });
             }
         }
-
         public JsonResult CalRate(int Itemcode)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -693,7 +689,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(partyList);
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> CheckValidDate([FromBody] JsonElement data)
         {
@@ -703,7 +698,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             var result = await _globalValidationdate.CheckValidDate("SALE1", vdate, vtype, vno);
             return Ok(result);
         }
-
         public JsonResult Multipleaddress(int partycode)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -1446,14 +1440,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(AddressDataList);
             }
         }
-
-
-
-
-
-
-
-
 
     }
 } 
