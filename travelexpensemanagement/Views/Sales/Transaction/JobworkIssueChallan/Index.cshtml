@@ -30,39 +30,19 @@
     }
 
 }
+
 <fieldset>
     <legend class="legend-field">Jobwork Issue Challan</legend>
     <form id="JobworkIssueChallanForm">
         <div class="row">
             <div class="offset-md-4 col-md-8">
                 <div class="button-right mb-2">
-                    @if (canPrint)
-                    {
-                        <button class="btn btn-print">
-                            <i class="fa fa-print"></i> Print
-                        </button>
-                    }
-                    @if (canExport)
-                    {
-                        <button class="btn btn-export">
-                            <i class="fas fa-file-export"></i> Export
-                        </button>
-                    }
-                    @if(canMail)
-                    {
-                    <button class="btn btn-mail">
-                        <i class="fa fa-envelope"></i> Mail
-                    </button>
-                    }
-                    @if (canApproval)
-                    {
-                        <button class="btn btn-send">
-                            <i class="fa fa-paper-plane"></i> Approval Send
-                        </button>
-                    }
-                    <button class="btn btn-approved">
-                        <i class="fa fa-check"></i> Approved
-                    </button>
+      
+                    <button class="btn btn-print"> <i class="fa fa-print"></i> Print </button>           
+                    <button class="btn btn-export">  <i class="fas fa-file-export"></i> Export </button>   
+                    <button class="btn btn-mail"> <i class="fa fa-envelope"></i> Mail </button>                 
+                    <button class="btn btn-send"> <i class="fa fa-paper-plane"></i> Approval Send  </button>
+                    <button class="btn btn-approved"> <i class="fa fa-check"></i> Approved </button>
                 </div>
             </div>
         </div>
@@ -1099,7 +1079,6 @@
     </form>
 </fieldset>
 
-<script src="~/js/GlobalValidation.js" asp-append-version="true"></script>
 
 <script>
 

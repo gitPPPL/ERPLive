@@ -1390,7 +1390,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(new { success = true, message = "Print validation successful." });
             }
         }
-
         [HttpGet]
         public JsonResult GetAddressData(int PartyCode, int AddressId)
         {
@@ -1440,6 +1439,5 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(AddressDataList);
             }
         }
-
     }
 } 
