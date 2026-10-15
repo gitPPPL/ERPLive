@@ -244,7 +244,7 @@ $(document).ready(async function () {
             }
 
             const res = await $.ajax({
-                url: '/SalesInvoice/Outallowed',
+                url: '/JobworkIssueChallan/Outallowed',
                 type: 'POST',
                 data: {
                     vType: vType,
@@ -338,7 +338,7 @@ $(document).ready(async function () {
         const WB_NO =  parseInt($.trim($('#ddlWBNo').val()), 10) || 0;
         const WB_TYPE = WB_NO  ? $.trim($('#ddlWBNo option:selected').text()).split('-').pop().trim()  : "";
         const WB_QTY =  getDecimal($.trim($('#NumWbQty').val())) || 0;
-        const WB_AMT =  getDecimal($.trim($('#txt_WBamt').val())) || 0;
+        const WB_AMT =  $.trim($('#txt_WBamt').val()) || 0;
         const WB_REM = $.trim($('#txt_wbRemark').val()) || "";
         const WB_AC = $.trim($('#ddl_WBParty').val()) || "";
         const AMOUNT = getDecimal($.trim($('#NumOtherTotalAmount').val())) || 0;
@@ -388,7 +388,7 @@ $(document).ready(async function () {
         const WAYBILL_NO = $.trim($('#txt_WayBillNo').val()) || "";
         const LOAD_AC =  $.trim($('#ddl_LoadParty').val()) || "";
         const LOAD_PER =  parseFloat($.trim($('#txt_loadPer').val())) || 0;
-        const LOAD_AMT = getDecimal($.trim($('#txt_LoadAmt').val())) || 0;
+        const LOAD_AMT = $.trim($('#txt_LoadAmt').val()) || 0;
         const LOAD_REM =  $.trim($('#txt_ldRemark').val()) || "";
         const NAMOUNT =  getDecimal($.trim($('#NumOtherNetAmount').val())) || 0;
         const EXRATE =  parseFloat($.trim($('#txxt_ExRate').val())) || 0;
@@ -530,18 +530,9 @@ $(document).ready(async function () {
         if (V_TYPE == "SAGT" || V_TYPE == "SAJI" || V_TYPE == "JBIS") {
 
             if (!validateRequiredField('#NumDistance', 'Please enter approx. Distance.')) return;
-            if (!validateRequiredField('#ddlMode', 'Please select Mode of Transport.')) return;
-                      
+            if (!validateRequiredField('#ddlMode', 'Please select Mode of Transport.')) return;                      
         }
-
         if (!validateRequiredField('#ddlTaxType', 'Please select Valid Tax Type')) return;
-
-
-
-
-
-
-
 
         const Header = {
             AMOUNT: AMOUNT,
@@ -676,8 +667,6 @@ $(document).ready(async function () {
 
          const Details = GetSalesInvoiceDetails();
 
-
-
         const model = {
             Header: Header,
             Details: Details
@@ -687,7 +676,7 @@ $(document).ready(async function () {
         console.log(JSON.stringify(model, null, 2));
         $("#btn-save").prop("disabled", true);
         $.ajax({
-            url: '/SalesInvoice/SavedData',
+            url: '/JobworkIssueChallan/SavedData',
             type: 'POST',
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
@@ -703,7 +692,7 @@ $(document).ready(async function () {
 
                     setTimeout(function () {
                         window.location.href =
-                            `/salesInvoice/Index?id=${Header.DOC_ID}&mode=view`;
+                            `/JobworkIssueChallan/Index?id=${Header.DOC_ID}&mode=view`;
                     }, 1000);
                 }
                 else if (response.status === "Validation") {
@@ -855,6 +844,12 @@ $(document).ready(async function () {
     });
 
 
+    $('#btn_EsignPrint').on('click', async function () {
+
+
+
+
+    });
 
 
 

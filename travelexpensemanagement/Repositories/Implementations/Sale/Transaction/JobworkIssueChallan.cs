@@ -1465,13 +1465,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
         {
             try
             {
+                //var validationResult = await validation(header, details, action);
 
-                var validationResult = await validation(header, details, action);
-
-                if (validationResult.Status != "Success")
-                {
-                    return (validationResult.Status, validationResult.Message);
-                }
+                //if (validationResult.Status != "Success")
+                //{
+                //    return (validationResult.Status, validationResult.Message);
+                //}
 
                 var GlobalData = _globalVariableService.GetGlobalVariables();
                 var GeneralSetting = await  _globalVariableService.LoadGeneralSetting();
@@ -1494,7 +1493,9 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 Boolean checkIssueNo  = false;
                 string packtyp = "";
 
-                string qyery = $@"select 1 from DOC_APPROSTAGE where USER_CODE={GlobalData.PubUserId} and DOC_CODE='{header.V_TYPE}' and comp_code={GlobalData.PubCompCode}";
+                string qyery = $@"select 1 from DOC_APPROSTAGE 
+                where USER_CODE = { GlobalData.PubUserId } and DOC_CODE = '{header.V_TYPE}'
+                and comp_code = { GlobalData.PubCompCode }";
 
                  string Approval = GetText(qyery);
 
@@ -1503,7 +1504,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     isApprovalBody = true;
                 }
 
-                string query2 = $@"select APPROV_USER from DOC_APPROSTAGE where USER_CODE={GlobalData.PubUserId}   and DOC_CODE='{header.V_TYPE}' and comp_code={GlobalData.PubCompCode}";
+                string query2 = $@"select APPROV_USER from DOC_APPROSTAGE where USER_CODE={GlobalData.PubUserId} and DOC_CODE='{header.V_TYPE}' 
+                and comp_code={GlobalData.PubCompCode}";
 
                 string APPROV_USER = GetText(query2);
 
@@ -1512,7 +1514,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                     isFinalApprovalBody = true;
                 }
 
-                string query3 = $@"select APPROV_USER from DOC_APPROSTAGE where FLAG_B='CS' and USER_CODE={GlobalData.PubUserId} and DOC_CODE='{header.V_TYPE}' and comp_code={GlobalData.PubCompCode} ";
+                string query3 = $@"select APPROV_USER from DOC_APPROSTAGE where FLAG_B='CS' and USER_CODE={GlobalData.PubUserId} and 
+                DOC_CODE='{header.V_TYPE}' and comp_code={GlobalData.PubCompCode} ";
 
                 APPROV_USER = GetText(query3);
 
@@ -1520,8 +1523,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 {
                     isFinalApprovalBodyCS = true;
                 }
-                string query4 = $@"select APPROV_USER from DOC_APPROSTAGE where FLAG_B='LCS' and USER_CODE={GlobalData.PubUserId} and DOC_CODE='{header.V_TYPE}'
-                and comp_code={GlobalData.PubCompCode}";
+                string query4 = $@"select APPROV_USER from DOC_APPROSTAGE where FLAG_B='LCS' and USER_CODE={GlobalData.PubUserId} 
+                and DOC_CODE='{header.V_TYPE}' and comp_code={GlobalData.PubCompCode}";
 
                 APPROV_USER = GetText(query4);
 
@@ -1529,6 +1532,8 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                 {
                     isFinalApprovalBodyLCS = true;
                 }
+
+
                 if (isFinalApprovalBody = true)
                 {
                     fappstatus = "Approved";
@@ -1538,7 +1543,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                   
                 string docId = string.IsNullOrWhiteSpace(header.DOC_ID) ? $"{header.V_TYPE}{header.V_NO}" : header.DOC_ID;
 
-                using (var cmd = new SqlCommand("sp_SalesInvoice", conn))
+                using (var cmd = new SqlCommand("sp_JobworkIssueChallan", conn))
                 {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Action", action);
@@ -1690,7 +1695,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                 if(header.Do_NO != "")
                 {
-                    using (var cmd = new SqlCommand("sp_SalesInvoice", conn))
+                    using (var cmd = new SqlCommand("sp_JobworkIssueChallan", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
@@ -1717,7 +1722,7 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                         if (detail == null || detail.ITEM_CODE <= 0)
                             continue;               
 
-                        using var cmd = new SqlCommand("sp_SalesInvoice", conn)
+                        using var cmd = new SqlCommand("sp_JobworkIssueChallan", conn)
                         {
                         CommandType = CommandType.StoredProcedure
                         };

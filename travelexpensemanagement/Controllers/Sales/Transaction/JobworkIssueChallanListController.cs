@@ -18,14 +18,14 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
         public JobworkIssueChallanListController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-        travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, GlobalValidationdate globalValidationdate, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService)
+        travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, GlobalValidationdate globalValidationdate,
+        travelexpensemanagement.Common.DbHelper.DbHelper dbHelper, ModuleService.ModuleService moduleService)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
             _globalValidationdate = globalValidationdate;
             _moduleService = moduleService;
         }
-
 
         public IActionResult Index()
         {                  

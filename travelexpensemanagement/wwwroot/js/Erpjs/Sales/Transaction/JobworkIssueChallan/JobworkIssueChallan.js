@@ -174,37 +174,32 @@ function CalculateRow($row) {
     let packingWt = num('.TxtPacking_Wt');
     let packingNos = num('.TxtPacking_nos');
 
-    if (defTonnageRate === 'yes') {
-
-        if (netWt > 0) {
-
+    if (defTonnageRate === 'yes')
+    {
+        if (netWt > 0)
+        {
             grossQty = nos * netWt;
-
             $row.find('.TxtGrossQty').val(grossQty.toFixed(2));
         }
 
-        if (packingNos > 0) {
-
+        if (packingNos > 0)
+        {
             netQty = nos * packingNos;
-
             $row.find('.TxtNetQty').val(netQty.toFixed(2));
         }
     }
 
-    if (defWtCalconBales === 'yes') {
-
-        if (netWt > 0) {
-
+    if (defWtCalconBales === 'yes')
+    {
+        if (netWt > 0)
+        {
             grossQty = nos * netWt;
-
             $row.find('.TxtGrossQty').val(grossQty.toFixed(2));
         }
 
-
-        if (packingWt > 0) {
-
+        if (packingWt > 0)
+        {
             netQty = nos * packingWt;
-
             $row.find('.TxtNetQty').val(netQty.toFixed(2));
         }
     }
@@ -214,35 +209,41 @@ function CalculateRow($row) {
 
     let amount = 0;
 
-    if (!chkCalPCS) {
-
-        if (netQty > 0) {
-            if (defTonnageRate === 'yes') {
-                if (reportType === 'Hessian' || reportType === 'Sacking') {
+    if (!chkCalPCS)
+    {
+        if (netQty > 0)
+        {
+            if (defTonnageRate === 'yes')
+            {
+                if (reportType === 'Hessian' || reportType === 'Sacking')
+                {
                     amount = (netQty * rate) / 100;
                 }
 
-                else if (reportType === 'Twine' && netWt > 0) {
-                    if (taxableRate > 0) {
+                else if (reportType === 'Twine' && netWt > 0)
+                {
+                    if (taxableRate > 0)
+                    {
                         amount = (netQty * rate) / taxableRate;
                     }
                 }
 
-                else {
+                else
+                {
                     amount = netQty * rate;
                 }
             }
 
-            else {
+            else
+            {
                 amount = netQty * rate;
             }
         }
     }
-
-
-    else {
-
-        if (nos > 0) {
+    else
+    {
+        if (nos > 0)
+        {
             amount = grossQty * rate;
         }
     }
@@ -723,10 +724,9 @@ async function GetPendingDetails() {
         $('#tblpurchaseordermodal tbody').empty();
     }
 }
-function ShowPendingDetails(data) {
-
+function ShowPendingDetails(data)
+{
     const $tbody = $('#tblpurchaseordermodal tbody');
-
     $tbody.empty();
 
     if (!Array.isArray(data) || data.length === 0) {
@@ -901,7 +901,6 @@ function getDecimal(selector) {
 
     return Number.isNaN(number) ? null : number;
 }
-
 function getDate(selector) {
     const value = $.trim($(selector).val() || "");
 
@@ -1777,7 +1776,8 @@ function numberToWordsCurrency(amount, currency = "Rs.", decimalName = "PAISE") 
 async function GetPackingSlipPrint(typ)
 {
 
-    if (!rowId) {
+    if (!rowId)
+    {
         showToast("Please save the data before printing the report.", { type: "info" });
   
     }
@@ -1949,3 +1949,197 @@ function LimitNumberLength(input, maxLength)
         input.value = value.substring(0, maxLength);
     }
 }
+
+
+
+async function TransitReport() {
+    if (!rowId) {
+        showToast(`Please save the data before printing the report.`, { type: "info" });
+        return;
+    }
+
+    let V_NO = $('#NumInvoiceNo').val();
+    let V_TYPE = $('#ddlDocumentType').val();
+
+    const netAmount = parseFloat($('#NumOtherNetAmount').val()) || 0;
+    var reportName = "";
+    var exportPrint = false;
+    var RPTNAME = "";
+
+    const validation = await $.ajax({
+        url: '/JobworkIssueChallan/PrintEsingValidation',
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({
+            V_NO: parseInt(V_NO) || null,
+            V_TYPE: V_TYPE,
+            V_Date: V_Date
+        })
+    });
+
+    if (validation.success == "false")
+    {
+        toastr.warning(validation.message);
+    }
+    console.log("validation", validation);
+
+
+    if (exportPrint == false) {
+        if (globalVars.CompCode == "2" || globalVars.CompCode == "5") {
+            if (V_TYPE == "SAJI") {
+                reportName = "INVOICE_JobworkSale";
+            }
+            else if (globalVars.CompCode == "5") {
+                reportName = "INVOICE_GST1SALASARQR_DETAIL";
+            }
+            else {
+                reportName = "INVOICE_GST1PLPLQR_DETAIL";
+            }
+        }
+        else if (globalVars.CompCode == "4") {
+            if (V_TYPE == "SACH" || V_TYPE == "SAJI") {
+                if (V_TYPE == "SAJI") {
+                    reportName = "INVOICE_JobworkSale";
+                }
+                else {
+                    reportName = "INVOICE_ChallanPEPL";
+                }
+            }
+
+            else if (globalVars.CompCode > "4") {
+                reportName = "INVOICE_GST1PEPLQR_DETAIL";
+            }
+
+            else {
+                reportName = "INVOICE_GST1PEPL";
+            }
+        }
+
+        else {
+            if (V_TYPE == "SACH" || V_TYPE == "SAJI") {
+                if (V_TYPE == "SAJI") {
+                    reportName = "INVOICE_JobworkSale";
+                }
+                else {
+                    reportName = "INVOICE_ChallanSale";
+                }
+
+            }
+            else if (globalVars.CompCode == "3") {
+                const date = new Date(V_Date);
+
+                if (date > new Date(2022, 9, 5)) {
+                    reportName = "INVOICE_GST1QR";
+                } else {
+                    reportName = "INVOICE_GST1";
+                }
+            }
+
+            else if (globalVars.CompCode == "7") {
+                if (globalVars.CompCode > "4") {
+                }
+                else {
+                    reportName = "INVOICE_GST1KQR";
+                }
+            }
+            else if (globalVars.CompCode == "8") {
+                if (globalVars.FYearCode >= "6") {
+
+                    if (V_TYPE == "SATD") {
+                        reportName = "INVOICEQR_SCTPL_SASI";
+                    }
+                    else {
+                        reportName = "INVOICE_GST1QR_SCTPL";
+                    }
+                }
+            }
+
+            else {
+                reportName = "INVOICE_GST1QR";
+            }
+        }
+    }
+
+    if (V_TYPE == "SAGT" || V_TYPE == "SATD" || V_TYPE == "SAST") {
+        RPTNAME = "TAX INVOICE";
+    }
+
+    var formula =
+        "{SALE1.V_TYPE} = '" + V_TYPE + "'" +
+        " and {SALE1.V_NO} = " + V_NO + "" +
+        " and {SALE1.COMP_CODE} = " + globalVars.CompCode + "" +
+        " and {SALE1.YEAR_CODE} = " + globalVars.FYearCode + "" +
+        " and {SALE1.BRANCH_CODE} = " + globalVars.BranchCode + "";
+
+    var payload = {
+        Reportname: reportName,
+        selectionFormula: formula,
+        Database: database,
+        Parameters: {
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",
+            comp_phone: "Mobile : " + (globalVars.Phone || ""),
+            PAN: "PAN NO.   : " + (globalVars.PAN || ""),
+            EMAIL: "Email   : " + (globalVars.Email || ""),
+            Website: "Web     : " + (globalVars.website || ""),
+            GST: "GST NO.   : " + (globalVars.GST || ""),
+            RPTNAME: RPTNAME
+        }
+    };
+
+    if (globalVars.CompCode != "3") {
+
+        if (globalVars.CompCode != "8") {
+            payload.Parameters.comp_name1 = "An ISO 9001:2015 Certified Company";
+        }
+
+        payload.Parameters.Comp_reg = "Reg.Office :" + (globalVars.RegAdd1 || "") + ", " + (globalVars.RegAdd2 || "") + "  CIN :" + (globalVars.CINNO || "");
+    }
+
+
+    const INWORD = numberToWordsCurrency(netAmount, "Rs.", "PAISE");
+
+    payload.Parameters.INWORD = INWORD;
+
+    var now = new Date();
+    var timestamp =
+        String(now.getDate()).padStart(2, '0') +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getFullYear()).slice(-2) + "_" +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
+
+    $.ajax({
+        url: 'http://localhost:24085/Report/PendingQCReport',
+        type: 'POST',
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: { responseType: 'blob' },
+
+        success: function (response) {
+            var file = new Blob([response], { type: 'application/pdf' });
+            var fileName = `${reportName}_${timestamp}.pdf`;
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        error: function (xhr, status, error) {
+            if (xhr.status === 0) {
+                console.error("Cannot connect to API. Is the backend running?");
+            } else {
+                console.error('Error generating report:', xhr.status, xhr.statusText, error);
+                xhr.responseText && console.error('Response:', xhr.responseText);
+            }
+        }
+    });
+}
+
+
+
+

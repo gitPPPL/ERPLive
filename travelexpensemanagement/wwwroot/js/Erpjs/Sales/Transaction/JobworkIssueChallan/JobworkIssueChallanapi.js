@@ -60,7 +60,6 @@ async function DDlCURRENCY_MAST() {
     }
 }
 
-
 async function DDlLicType() {
     try {
         const res = await fetch('/JobworkIssueChallan/DDlLicType');
@@ -501,7 +500,6 @@ async function DDlDocStatus() {
         const res = await fetch('/JobworkIssueChallan/DDlDocStatus');
         const data = await res.json();
         const ddl = $('#ddlDocStatus');
-        // ddl.empty().append('<option value="">---Select Party Name---</option>');
         ddl.empty();
         data.forEach(item => {
             ddl.append(`<option value="${item.value}">${item.text}</option>`);
@@ -601,7 +599,6 @@ async function DDlLicNO(TYPE) {
     }
 }
 
-
 async function DDLBank() {
     try {
         const res = await fetch('/JobworkIssueChallan/DDLBank');
@@ -616,7 +613,6 @@ async function DDLBank() {
         console.error("Error Bank Name:", error);
     }
 }
-
 
 async function AddressPartyData(PartyCode, AddressId) {
     try {
@@ -697,7 +693,6 @@ async function AddressConsigneeData(PartyCode, AddressId) {
         console.log("error", error);
     }
 }
-
 function SetFormReadOnly(isReadOnly = true)
 {
     $('#SalesInvoiceForm') .find('input, textarea') .prop('readonly', isReadOnly);

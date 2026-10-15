@@ -82,7 +82,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
-
         public JsonResult DDlCURRENCY_MAST()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -557,9 +556,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     con.Open();
 
                     string refNo = $"{vType}{vNo.Trim()}";
-
                     string dno = "";
-
                     string query = @" SELECT CONCAT(V_Type, V_No)  FROM DO1 WHERE CONCAT(Ref_Type, Ref_No) = @RefNo  AND Comp_Code = @CompCode
                     AND Branch_Code = @BranchCode AND Year_Code = @YearCode";
 
@@ -569,9 +566,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                         cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
                         cmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
                         cmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
-
                         object result = cmd.ExecuteScalar();
-
                         if (result != null && result != DBNull.Value)
                         {
                             dno = result.ToString()?.Trim() ?? "";
@@ -1447,5 +1442,61 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         }
 
 
+
+
+
+
+        [HttpPost]
+        public JsonResult PrintEsingValidation([FromBody] PrintValidationRequest request)
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+                con.Open();
+
+                // Delete existing records for the current company and branch
+                string sql = @" DELETE FROM tempInvoice WHERE comp_code = @CompCode AND Branch_code = @BranchCode";
+
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
+                    cmd.ExecuteNonQuery();
+                }
+
+                // Insert invoice details into tempInvoice
+                    string sql1 = @" INSERT INTO tempInvoice SELECT a.comp_code,  a.Branch_code, a.V_type, a.v_no,  1,
+                    'Triplicate for Office', b.IRN,  b.QR_IMAGE FROM sale1 a  LEFT JOIN QRImage_Path b ON a.v_no = b.v_no
+                    AND a.V_TYPE = b.V_TYPE AND a.COMP_CODE = b.COMP_CODE AND a.BRANCH_CODE = b.BRANCH_CODE AND a.YEAR_CODE = b.YEAR_CODE
+                    WHERE a.comp_code = @CompCode AND a.branch_code = @BranchCode AND a.YEAR_CODE = @YearCode AND a.v_type = @VType AND a.v_no = @VNo";
+
+                using (SqlCommand cmd = new SqlCommand(sql1, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompCode", getdata.PubCompCode);
+                    cmd.Parameters.AddWithValue("@BranchCode", getdata.PubBranchCode);
+                    cmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
+                    cmd.Parameters.AddWithValue("@VType", request.V_TYPE);
+                    cmd.Parameters.AddWithValue("@VNo", request.V_NO);
+                    cmd.ExecuteNonQuery();
+                }
+
+                // Get Godown Code
+                string sql2 = @$" SELECT Godown_code FROM Sale1 WHERE V_Type = {request.V_TYPE}  AND V_No = {request.V_NO}
+                AND Comp_Code = {getdata.PubCompCode} AND Branch_Code = {getdata.PubBranchCode} AND Year_Code = {getdata.PubFYearCode}";
+
+                int gwdn = Convert.ToInt16(GetText(sql2));
+
+                string sql3 = @$"Select isnull(ADDRESS,'') as  ADDRESS from GODOWN_MAST where CODE={gwdn} and COMP_CODE={getdata.PubCompCode}";
+
+                string ADDRESS = GetText(sql3);
+
+                decimal netamt = Convert.ToDecimal(GetText(@$"Select NAMOUNT from SALE1 where V_TYPE='{request.V_TYPE}' and V_NO={request.V_NO} and 
+                COMP_CODE={getdata.PubCompCode} and BRANCH_CODE={getdata.PubBranchCode} and YEAR_CODE={getdata.PubFYearCode}"));
+
+                return Json(new {  success = true, message = "Print validation successful.", gwdn = gwdn , ADDRESS = ADDRESS , netamt = netamt });
+           
+            }
+        }
     }
 }

@@ -650,24 +650,24 @@ async function TransitReport()
     var exportPrint = false;
     var RPTNAME = "";
 
-    //const validation = await $.ajax({
-    //    url: '/SalesInvoiceDirect/PrintValidation',
-    //    type: 'POST',
-    //    contentType: 'application/json; charset=utf-8',
-    //    data: JSON.stringify({
-    //        V_NO: parseInt(V_NO) || null,
-    //        V_TYPE: V_TYPE,
-    //        V_Date: V_Date,
-    //        FrtAmt: FrtAmt,
-    //        TdsAmt: TdsAmt
-    //    })
-    //});
+    const validation = await $.ajax({
+        url: '/SalesInvoiceDirect/PrintValidation',
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({
+            V_NO: parseInt(V_NO) || null,
+            V_TYPE: V_TYPE,
+            V_Date: V_Date,
+            FrtAmt: FrtAmt,
+            TdsAmt: TdsAmt
+        })
+    });
 
-    //if (validation.success == "false")
-    //{
-    //    toastr.warning(validation.message);
-    //}
-    //console.log("validation", validation);
+    if (validation.success == "false")
+    {
+        toastr.warning(validation.message);
+    }
+    console.log("validation", validation);
           
 
     if (exportPrint == false)
@@ -937,39 +937,43 @@ async function GetTransitReportFile() {
     var exportPrint = false;
     var RPTNAME = "";
 
-    //const validation = await $.ajax({
-    //    url: '/SalesInvoiceDirect/PrintValidation',
-    //    type: 'POST',
-    //    contentType: 'application/json; charset=utf-8',
-    //    data: JSON.stringify({
-    //        V_NO: parseInt(V_NO) || null,
-    //        V_TYPE: V_TYPE,
-    //        V_Date: V_Date,
-    //        FrtAmt: FrtAmt,
-    //        TdsAmt: TdsAmt
-    //    })
-    //});
+    const validation = await $.ajax({
+        url: '/SalesInvoiceDirect/PrintValidation',
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({
+            V_NO: parseInt(V_NO) || null,
+            V_TYPE: V_TYPE,
+            V_Date: V_Date,
+            FrtAmt: FrtAmt,
+            TdsAmt: TdsAmt
+        })
+    });
 
-    //if (validation.success == "false")
-    //{
-    //    toastr.warning(validation.message);
-    //}
-    //console.log("validation", validation);
+    if (validation.success == "false")
+    {
+        toastr.warning(validation.message);
+    }
+    console.log("validation", validation);
 
 
     if (exportPrint == false) {
-        if (globalVars.CompCode == "2" || globalVars.CompCode == "5") {
-            if (V_TYPE == "SAJI") {
+        if (globalVars.CompCode == "2" || globalVars.CompCode == "5")
+        {
+            if (V_TYPE == "SAJI")
+            {
                 reportName = "INVOICE_JobworkSale";
             }
-            else if (globalVars.CompCode == "5") {
+            else if (globalVars.CompCode == "5")
+            {
                 reportName = "INVOICE_GST1SALASARQR_DETAIL";
             }
             else {
                 reportName = "INVOICE_GST1PLPLQR_DETAIL";
             }
         }
-        else if (globalVars.CompCode == "4") {
+        else if (globalVars.CompCode == "4")
+        {
             if (V_TYPE == "SACH" || V_TYPE == "SAJI") {
                 if (V_TYPE == "SAJI") {
                     reportName = "INVOICE_JobworkSale";
@@ -979,37 +983,48 @@ async function GetTransitReportFile() {
                 }
             }
 
-            else if (globalVars.CompCode > "4") {
+            else if (globalVars.CompCode > "4")
+            {
                 reportName = "INVOICE_GST1PEPLQR_DETAIL";
             }
 
-            else {
+            else
+            {
                 reportName = "INVOICE_GST1PEPL";
             }
         }
 
-        else {
-            if (V_TYPE == "SACH" || V_TYPE == "SAJI") {
-                if (V_TYPE == "SAJI") {
+        else
+        {
+            if (V_TYPE == "SACH" || V_TYPE == "SAJI")
+            {
+                if (V_TYPE == "SAJI")
+                {
                     reportName = "INVOICE_JobworkSale";
                 }
-                else {
+                else
+                {
                     reportName = "INVOICE_ChallanSale";
                 }
 
             }
-            else if (globalVars.CompCode == "3") {
+            else if (globalVars.CompCode == "3")
+            {
                 const date = new Date(V_Date);
 
-                if (date > new Date(2022, 9, 5)) {
+                if (date > new Date(2022, 9, 5))
+                {
                     reportName = "INVOICE_GST1QR";
-                } else {
+                } else
+                {
                     reportName = "INVOICE_GST1";
                 }
             }
 
-            else if (globalVars.CompCode == "7") {
-                if (globalVars.CompCode > "4") {
+            else if (globalVars.CompCode == "7")
+            {
+                if (globalVars.CompCode > "4")
+                {
                 }
                 else {
                     reportName = "INVOICE_GST1KQR";

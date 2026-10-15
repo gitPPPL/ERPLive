@@ -339,7 +339,7 @@ $(document).ready(async function () {
         const WB_NO =  parseInt($.trim($('#ddlWBNo').val()), 10) || 0;
         const WB_TYPE = WB_NO  ? $.trim($('#ddlWBNo option:selected').text()).split('-').pop().trim()  : "";
         const WB_QTY =  getDecimal($.trim($('#NumWbQty').val())) || 0;
-        const WB_AMT =  getDecimal($.trim($('#txt_WBamt').val())) || 0;
+        const WB_AMT =  $.trim($('#txt_WBamt').val()) || 0;
         const WB_REM = $.trim($('#txt_wbRemark').val()) || "";
         const WB_AC = $.trim($('#ddl_WBParty').val()) || "";
         const AMOUNT = getDecimal($.trim($('#NumOtherTotalAmount').val())) || 0;
@@ -389,7 +389,7 @@ $(document).ready(async function () {
         const WAYBILL_NO = $.trim($('#txt_WayBillNo').val()) || "";
         const LOAD_AC =  $.trim($('#ddl_LoadParty').val()) || "";
         const LOAD_PER =  parseFloat($.trim($('#txt_loadPer').val())) || 0;
-        const LOAD_AMT = getDecimal($.trim($('#txt_LoadAmt').val())) || 0;
+        const LOAD_AMT = $.trim($('#txt_LoadAmt').val()) || 0;
         const LOAD_REM =  $.trim($('#txt_ldRemark').val()) || "";
         const NAMOUNT =  getDecimal($.trim($('#NumOtherNetAmount').val())) || 0;
         const EXRATE =  parseFloat($.trim($('#txxt_ExRate').val())) || 0;

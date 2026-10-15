@@ -62,16 +62,26 @@
     </div>
 
 
-    <div class="erppage-header-right">
+    <div class="erppage-header-right">   
+
 
         <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail" id="button_mail">
          <i class="fa fa-envelope"></i>Mail
         </button>
         <button type="button" id="btn_Sendapproval" style="display:none;" class="erppagebtn_sendapproval"> Send For Approval </button>
         <button type="button"  id="btn_Approved" style="display:none;" class="erppagebtn_approved">  Approved </button>
-        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesInvoiceList")', isReadOnly)">
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "JobworkIssueChallanList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
+
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn"  id="btn_EsignPrint">
+         <i class="fa fa-envelope"></i>E-sign Print
+        </button>
+
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn"  id="btn_EWayBill">
+         <i class="fa fa-envelope"></i>E-Way Bill
+        </button>
+
     </div>
 </div>
 
@@ -920,7 +930,7 @@
                     </div>
                 </div>
 
-                <div class="tab-content" id="PrintExportReport">
+                <div class="erppage-tab-content" id="PrintExportReport">
 
                 <div class="accordion-header fw-bold py-2"> Print Export Report </div>
 
@@ -931,7 +941,6 @@
                         <legend class="float-none w-auto px-2 fs-6 fw-bold"> Print Export Report  </legend>
 
                         <div class="container-fluid">
-
                             <!-- Row 1 -->
                             <div class="row g-2 mb-2">
 
@@ -953,7 +962,6 @@
                                 </div>
 
                             </div>
-
                             <!-- Row 2 -->
                             <div class="row g-2 mb-2">
 
@@ -976,7 +984,6 @@
                                 </div>
 
                             </div>
-
                             <!-- Row 3 -->
                             <div class="row g-2 mb-3">
 
@@ -999,15 +1006,11 @@
                                 </div>
 
                             </div>
-                                              
-                          
-
-
+          
                             <div class="erppage-grid3">
                                 <div class="erppage-divfield erppage-col-span-2">
                                     <div class="erppage-checkboxinside">
-                                        <div class="erppage-checkbox-wrap">
-                               
+                                        <div class="erppage-checkbox-wrap">                               
                                             <input type="checkbox" id="ch_report" class="erppage-checkbox-input">
                                             <label for="ch_report" class="erppage-checkbox-label"> With Freight &amp; FOB Value </label>
                                         </div>
@@ -1023,8 +1026,7 @@
 
                                 </div>
                       
-                            </div>
-                                                     
+                            </div>                                                     
 
                         </div>
 
