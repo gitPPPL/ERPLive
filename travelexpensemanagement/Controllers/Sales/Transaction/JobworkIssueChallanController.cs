@@ -28,11 +28,11 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         private readonly DropdownService _dropdownService;
         private readonly travelexpensemanagement.Common.DbHelper.DbHelper _dbHelper;
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
-        private readonly ISalesInVoice _salesInVoice;
+        private readonly IJobworkIssueChallan _JobworkIssueChallan;
 
         public JobworkIssueChallanController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
        travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
-       ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, ISalesInVoice salesInVoice)
+       ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, IJobworkIssueChallan JobworkIssueChallan)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -40,7 +40,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
             _moduleService = moduleService;
-            _salesInVoice = salesInVoice;
+            _JobworkIssueChallan = JobworkIssueChallan;
         }
         public async Task<IActionResult> Index()
         {
@@ -77,11 +77,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = "Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('SalesInvoice','SaleChallan') order by Name ";
+                string query = "Select Code,Name from DOCTYPE_MAST where DOCTYPE in ('JobworkIssue') and Code<>'SASI' order by Name ";
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
         }
+
         public JsonResult DDlCURRENCY_MAST()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -309,19 +310,11 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     }
                 }
 
-                string query = $@"select top 10  ltrim(rtrim(a.V_NO))'V_no',V_TYPE from {TableName} a  ";
-
-
-
-
-
-
-
-
-                //string query = $@"select V_TYPE,ltrim(rtrim(a.V_NO))'V_no' from {TableName} a 
-                //where a.V_DATE=CONVERT(smalldatetime, {V_DATE}, 103) and a.V_TYPE in ({packtyp}) and a.COMP_CODE= {getdata.PubCompCode} and a.BRANCH_CODE= {getdata.PubBranchCode}
-                //and a.YEAR_CODE={getdata.PubFYearCode} and (a.PARTY_CODE={PARTY_CODE} or a.PARTY_CODE=(select main_code from SUBGROUP_MAST where COMP_CODE=a.COMP_CODE and 
-                //code=a.PARTY_CODE and ACTIVE=1 group by MAIN_CODE)){filtercnd} ";
+               // string query = $@"select top 10  ltrim(rtrim(a.V_NO))'V_no',V_TYPE from {TableName} a  ";
+                string query = $@"select V_TYPE,ltrim(rtrim(a.V_NO))'V_no' from {TableName} a 
+                where a.V_DATE=CONVERT(smalldatetime, {V_DATE}, 103) and a.V_TYPE in ({packtyp}) and a.COMP_CODE= {getdata.PubCompCode} and a.BRANCH_CODE= {getdata.PubBranchCode}
+                and a.YEAR_CODE={getdata.PubFYearCode} and (a.PARTY_CODE={PARTY_CODE} or a.PARTY_CODE=(select main_code from SUBGROUP_MAST where COMP_CODE=a.COMP_CODE and 
+                code=a.PARTY_CODE and ACTIVE=1 group by MAIN_CODE)){filtercnd} ";
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
@@ -539,7 +532,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
         [HttpPost]
-        public async Task<JsonResult> SavedData([FromBody] SalesInvoiceModel request)
+        public async Task<JsonResult> SavedData([FromBody] JobworkIssueChallanModel request)
         {
             if (request?.Header == null)
             {
@@ -548,7 +541,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             var action = string.Equals(request.Header.action, "INSERT", StringComparison.OrdinalIgnoreCase) ? "INSERT" : "UPDATE";
 
-            var result = await _salesInVoice.SubmitRequest(request.Header, request.Details, action);
+            var result = await _JobworkIssueChallan.SubmitRequest(request.Header, request.Details, action);
 
             return Json(new { success = result.Status == "Success", status = result.Status, message = result.Message });
         }

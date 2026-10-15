@@ -962,11 +962,9 @@ async function checkValidDate() {
 
 async function GetTransitReportFile(citype, exportPrint, si = false, ci = false, lc = false) {
 
-    if (!rowId) {
-        showToast("Please save the data before printing the report.", {
-            type: "info"
-        });
-        throw new Error("No docId");
+    if (!rowId)
+    {
+        showToast("Please save the data before printing the report.", { type: "info" });
     }
 
     let reportName = "";

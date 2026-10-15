@@ -1,9 +1,56 @@
-﻿@{
-    ViewBag.Title = "Jobwork Issue Challan";
+﻿@using System.Text.Json
+
+@{
+    ViewBag.Title = "job work issue challan";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var logindate= Convert.ToDateTime(TempData["LoginDate"]).ToString("yyyy-MM-dd");
-    var currentMenu = ViewBag.CurrentMenu as string;
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
+   
+    var databaseName = ViewBag.DatabaseName as string ?? "";
+
+    var CompCode = int.TryParse(  globalVariables.PubCompCode, out var parsedCompCode ) ? parsedCompCode : 0;
+
+    var PubUserLevel = int.TryParse( globalVariables.PubUserLevel, out var parsedPubUserLevel ) ? parsedPubUserLevel : 0;
+
+    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+
+    var LoadGeneralSetting = ViewBag.LoadGeneralSetting;
+
 }
+
+<script>
+    window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
+        CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
+        UserId = globalVariables.PubUserId,
+        UserName = globalVariables.PubUserName,
+        UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
+        FYearCode = globalVariables.PubFYearCode,
+        BranchCode = globalVariables.PubBranchCode,
+        LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
+        CompanyName = globalVariables.CompanyName,
+        Address1 = globalVariables.Address1,
+        Address2 = globalVariables.Address2,
+        GST = globalVariables.gstin,
+        PAN = globalVariables.PAN,
+        Phone = globalVariables.Phone,
+        Email = globalVariables.Email,
+        ICE = globalVariables.IEC,
+        website = globalVariables.Website,
+        RegAdd1 = globalVariables.RegAdd1,
+        RegAdd2 = globalVariables.RegAdd2,
+        CINNO = globalVariables.CINNO
+
+    }));
+
+        var LoadGeneralSetting = @Html.Raw( JsonSerializer.Serialize(ViewBag.LoadGeneralSetting)
+    );
+
+
+
+
+
+    window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
+</script>
 
 <div id="erp-toast-container"></div>
 <div class="erppage-header">
@@ -11,988 +58,1126 @@
         <div class="erppage-header-icon">
             <i class="fa fa-file-invoice-dollar"></i>
         </div>
-        <div class="erppage-header-title">Jobwork Issue Challan</div>
+        <div class="erppage-header-title">job work issue challan</div>
     </div>
+
+
     <div class="erppage-header-right">
 
         <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail" id="button_mail">
-            <i class="fa fa-envelope"></i>Mail
+         <i class="fa fa-envelope"></i>Mail
         </button>
         <button type="button" id="btn_Sendapproval" style="display:none;" class="erppagebtn_sendapproval"> Send For Approval </button>
-        <button type="button" id="btn_Approved" style="display:none;" class="erppagebtn_approved">  Approved </button>
+        <button type="button"  id="btn_Approved" style="display:none;" class="erppagebtn_approved">  Approved </button>
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesInvoiceList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
-            
     </div>
 </div>
 
-<div id="JobworkIssueChallanForm">
-    <input type="hidden" class="form-control" id="TxtDocId" name="CODE">
+<div id="SalesInvoiceForm">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
     <div class="erppage-container">
-        <fieldset class="erppage-fieldset">
-            <legend class="erppagefieldset-legend">Document Details</legend>
-
-            <div class=erppage-grid4>
-                <div class="erppage-divfield">                    
-                        <label class="erppage-label" for="ddlDocType">Document Type</label>
-                        <select class="erppage-input erppage-select" id="ddlDocType">
-                            <option value="">Select Document Type</option>
-                        </select>               
+        <div class="erppage-fieldset">
+            <div class="erppage-grid4">
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document Type</label>
+                    <select class="erppage-input erppage-select" id="ddlDocumentType">
+                        <option value="">Select Document Type</option>
+                    </select>
                 </div>
-
-                <div class="erppage-divfield">                   
-                        <label class="erppage-label" for="txtDocNo">Document No </label>
-                        <input type="number" class="erppage-input" id="txtDocNo" readonly>                   
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Invoice No</label>
+                    <input type="number" class="erppage-input" id="NumInvoiceNo" placeholder="Enter Invoice No" readonly>
                 </div>
-                <div class="erppage-divfield">                  
-                        <label class="erppage-label" for="dtDocDate">Document Date </label>
-                        <input type="date" class="erppage-input" id="dtDocDate">                    
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Document Date</label>
+                    <input type="date" class="erppage-input" id="DtDocumentDate">
                 </div>
-                <div class="erppage-divfield">                  
-                        <label class="erppage-label" for="ddlDONo">DO No</label>
-                        <select class="erppage-input erppage-select" id="ddlDONo">
-                            <option value="">Select DO No</option>
-                        </select>                   
+                <div class="erppage-divfield">
+                    <label class="erppage-label">DO No</label>
+                    <select class="erppage-input erppage-select" id="ddlDONo">
+                        <option value="">Select DO No</option>
+                    </select>
                 </div>
             </div>
 
 
             <div class="erppage-grid4">
                 <div class="erppage-divfield">
-                    <label class="erppage-label" for="ddlPartyName">Party Name </label>
-                    <select class="erppage-input erppage-select" id="ddlPartyName">
-                            <option value="">Select Party Name</option>
-                        </select>             
-                </div>
-
-                <div class="erppage-divfield">                  
-                        <label class="erppage-label" for="TxtAddressL1">Address L1</label>
-                        <div class="input-divide">
-                            <input type="text" class="erppage-input" id="TxtAddressL1" placeholder="Enter Address L1" readonly>
-                            <div class="select-wrapper">
-                                <select id="ddladdressL1">
-                                    <option value="">Select address</option>
-                                </select>
-                            </div>
-                        </div>                   
-                </div>
-
-                <div class="erppage-divfield">              
-                        <label class="erppage-label" for="TxtAddressL2">Address L2</label>
-                        <textarea typeof="text" class="erppage-input" id="TxtAddressL2" placeholder="Enter Address L2" readonly></textarea>     
+                    <label class="erppage-label">Party Name</label>
+                    <select class="erppage-input erppage-select" id="ddlPartyName" >
+                        <option value="">Select Party Name</option>
+                    </select>
                 </div>
                 <div class="erppage-divfield">
-                        <label class="erppage-label" for="TxtAddressL3">Address L3</label>
-                        <textarea typeof="text" class="erppage-input" id="TxtAddressL3" placeholder="Enter Address L3" readonly></textarea>
-                </div>
-            </div>
-
-
-            <div class="erppage-grid3">
-                <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumPartyGSTNo">GST No</label>
-                        <input type="text" class="erppage-input" id="NumPartyGSTNo" placeholder="Enter GST No" readonly>  
-                </div>
-                <div class="erppage-divfield">
-                        <label class="erppage-label" for="ddlStation">Station</label>
-                        <select class="erppage-input erppage-select" id="ddlStation" disabled>
-                            <option value="">Select Station</option>
-                        </select>
-                </div>
-                <div class="erppage-divfield">                  
-                        <label class="erppage-label" for="NumPincode">Pincode</label>
-                        <input type="number" class="erppage-input" id="NumPincode" readonly />       
-                </div>
-            </div>
-
-        </fieldset>
-        <fieldset class="erppage-fieldset">
-            <legend class="erppagefieldset-legend">Supply Details</legend>
-            <div class="erppage-grid3">
-                <div class="erppage-divfield">    
-                        <label class="erppage-label" for="ddlSalesThrough">Sales Through </label>
-                        <select class="erppage-input erppage-select" id="ddlSalesThrough">
-                            <option value="">Select Sales Through</option>
-                        </select> 
-                </div>
-                <div class="erppage-divfield">
-
-                        <label class="erppage-label" for="ddlSupplyType">Supply Type </label>
-                        <select class="erppage-input erppage-select" id="ddlSupplyType">
-                            <option value="">Select Supply Type</option>
-                            <option value="B2B">B2B</option>
-                            <option value="B2C">B2C</option>
-                            <option value="SEZWP">SEZWP</option>
-                            <option value="SEZWOP">SEZWOP</option>
-                            <option value="EXPWOP">EXPWOP</option>
-                            <option value="DEXP">DEXP</option>
-                        </select>
-
-                </div>
-                <div class="erppage-divfield">  
-                        <label class="erppage-label" for="ddlConsignee">Consignee </label>
-                        <select class="erppage-input erppage-select" id="ddlConsignee">
-                            <option value="">Select Consignee</option>
-                        </select>    
-                </div>
-            </div>
-
-            <div class="erppage-grid3">
-                <div class="erppage-divfield">              
-                        <label class="erppage-label" for="TxtSupplyAddressL1">Address L1</label>
-                        <div class="input-divide">
-                            <input type="text" class="erppage-input" id="TxtSupplyAddressL1" placeholder="Enter Address L1" readonly>
-                            <div class="select-wrapper">
-                                <select id="ddlsupplyaddressL1">
-                                    <option value="">Select address</option>
-                                </select>
-                            </div>
+                    <label class="erppage-label">Address L1</label>
+                    <div class="input-divide">
+                        <input type="text" class="erppage-input" id="TxtAddressL1" placeholder="Enter Address L1" readonly>
+                        <div class="select-wrapper">
+                            <select id="ddladdressL1">
+                                <option value="">Select address</option>
+                            </select>
                         </div>
-                 
+                    </div>
                 </div>
-
                 <div class="erppage-divfield">
-              
-                        <label class="erppage-label" for="TxtSupplyAddressL2">Address L2</label>
-                        <textarea typeof="text" class="erppage-input" id="TxtSupplyAddressL2" placeholder="Enter Address L2" readonly></textarea>
-
+                    <label class="erppage-label">Address L2</label>
+                    <textarea class="erppage-input" id="TxtAddressL2" placeholder="Enter Address L2" readonly></textarea>
                 </div>
-
                 <div class="erppage-divfield">
-                 
-                        <label class="erppage-label" for="TxtSupplyAddressL3">Address L3</label>
-                        <textarea typeof="text" class="erppage-input" id="TxtSupplyAddressL3" placeholder="Enter Address L3" readonly></textarea>
-               
+                    <label class="erppage-label">Address L3</label>
+                    <textarea class="erppage-input" id="TxtAddressL3" placeholder="Enter Address L3" readonly></textarea>
                 </div>
-
- 
             </div>
-
-
-            <div class="erppage-grid2">
-
+            <div class="erppage-grid4">
                 <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumGSTNoSupply">GST No</label>
-                    <input type="text" class="erppage-input" id="NumGSTNoSupply" placeholder="Enter GST No" readonly>
+                    <label class="erppage-label">GST No</label>
+                    <input type="number" class="erppage-input" id="NumGSTNoL" placeholder="Enter GST No" readonly>
                 </div>
-
                 <div class="erppage-divfield">
-                    <label class="erppage-label" for="ddlSupplyStation">Station</label>
-                    <select class="erppage-input erppage-select" id="ddlSupplyStation" disabled>
+                    <label class="erppage-label">Station</label>
+                    <select class="erppage-input erppage-select" id="ddlStation" disabled>
                         <option value="">Select Station</option>
                     </select>
-                </div>           
-            </div>
-
-            <div class="erppage-grid3">
+                </div>
                 <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumSupplyPIN">PIN</label>
-                        <input type="number" class="erppage-input" id="NumSupplyPIN" readonly />
-                </div>
-                <div class="erppage-divfield">           
-                        <label class="erppage-label" for="ddlFormType">Form Type </label>
-                        <select class="erppage-input erppage-select" id="ddlFormType">
-                            <option value="">Select Form Type</option>
-                        </select>                   
-                </div>
-
-                <div class="erppage-divfield">  
-                        <label class="erppage-label" for="ddlJobType">Job Type </label>
-                        <select class="erppage-input erppage-select" id="ddlJobType">
-                            <option value="">Select Job Type</option>
-                            <option>OUR</option>
-                            <option>OUTSIDER</option>
-                        </select>                   
+                    <label class="erppage-label">Pincode</label>
+                    <input type="number" class="erppage-input" id="NumPincode" readonly>
                 </div>
             </div>
-        </fieldset>
 
+            <div class="erppagesrow">
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Supply Detail</legend>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Sales Through</label>
+                                <select class="erppage-input erppage-select" id="ddlSalesThrough">
+                                    <option value="">Select Sales Through</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Supply Type</label>
+                                <select class="erppage-input erppage-select" id="ddlSupplyType">
+                                    <option value="">Select Supply Type</option>
+                                    <option value="B2B">B2B</option>
+                                    <option value="B2C">B2C</option>
+                                    <option value="SEZWP">SEZWP</option>
+                                    <option value="SEZWOP">SEZWOP</option>
+                                    <option value="EXPWP">EXPWP</option>
+                                    <option value="EXPWOP">EXPWOP</option>
+                                    <option value="DEXP">DEXP</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Consignee</label>
+                                <select class="erppage-input erppage-select" id="ddlConsignee" >
+                                    <option value="">Select Consignee</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Address L1</label>
+                                <div class="input-divide">
+                                    <input type="text" class="erppage-input" id="TxtSupplyAddressL1" placeholder="Enter Address L1" readonly>
+                                    <div class="select-wrapper">
+                                        <select id="ddlsupplyaddressL1">
+                                            <option value="">Select address</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Address L2</label>
+                                <textarea class="erppage-input" id="TxtSupplyAddressL2" placeholder="Enter Address L2" readonly></textarea>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Address L3</label>
+                                <textarea class="erppage-input" id="TxtSupplyAddressL3" placeholder="Enter Address L3" readonly></textarea>
+                            </div>
+                        </div>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">GST No</label>
+                                <input type="number" class="erppage-input" id="NumGSTNo" placeholder="Enter GST No" readonly>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Station</label>
 
-        <fieldset class="erppage-fieldset">
-            <legend class="erppagefieldset-legend">Transaction Detail</legend>
+                                <select class="erppage-input erppage-select" id="ddlSupplyStation" disabled>
+                                <option value="">Select Station</option>
+                                </select>
+
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">PIN</label>
+                                <input type="number" class="erppage-input" id="NumSupplyPIN" readonly>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Form Type</label>
+                                <select class="erppage-input erppage-select" id="ddlFormType">
+                                    <option value="">Select Form Type</option>
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Transaction Detail</legend>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Transaction Type</label>
+                                <select class="erppage-input erppage-select" id="ddlTransactionType">
+                                    <option value="">Select Transaction Type</option>
+                                    <option value="Regular">Regular</option>
+                                    <option value="Bill To - Ship To">Bill To - Ship To</option>
+                                    <option value="Bill From">Bill From</option>
+                                    <option value="Combination of both">Combination of both</option>               
+
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Tax Type</label>
+                                <select class="erppage-input erppage-select" id="ddlTaxType">
+                                    <option value="">Select Tax Type</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Pack No</label>
+                                <select class="erppage-input erppage-select" id="ddlPackNo">
+                                    <option value="">Select Pack No</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Sauda No</label>
+                                <div class="input-icon-wrapper">
+                                    <select class="erppage-input erppage-select" id="ddlSaudaNo">
+                                        <option value="">Select Sauda No</option>
+                                    </select>
+                                    <span class="input-icon">
+                                        <i class="fa fa-calculator"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Issue No</label>
+                                <select class="erppage-input erppage-select" id="ddlIssueNo">
+                                    <option value="">Select Issue No</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Godown</label>
+                                <select class="erppage-input erppage-select" id="ddlGodown">
+                                    <option value="">Select Godown</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Remarks</label>
+                                <textarea class="erppage-input" id="TxtTransRemarks" placeholder="Enter Remarks"></textarea>
+                            </div>
+
+                        </div>
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <div class="erppage-checkboxinside">
+                                    <div class="erppage-checkbox-wrap">
+                                        <input type="checkbox" id="ChkDefectiveGoods" class="erppage-checkbox-input">
+                                        <label class="erppage-checkbox-label">Defective Goods</label>
+                                    </div>
+                                    <div class="erppage-checkbox-wrap">
+                                        <input type="checkbox" id="ChkPCS" class="erppage-checkbox-input">
+                                        <label class="erppage-checkbox-label">PCS</label>
+                                    </div>
+                                    <div class="erppage-checkbox-wrap">
+                                        <input type="checkbox" id="ChkDetail" class="erppage-checkbox-input">
+                                        <label class="erppage-checkbox-label">Detail</label>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="erppage-divfield">
+                                <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" id="btn_pendingchallan" data-bs-toggle="modal" data-bs-target="#pendingchallanModal"><i class="fa fa-clock"></i>Pending Challan</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
             <div class="erppage-grid4">
-                <div class="erppage-divfield">                  
-                        <label class="erppage-label" for="ddlTransactionType">Transaction Type</label>
-                        <select class="erppage-input erppage-select" id="ddlTransactionType">
-                            <option value="">Select Transaction Type</option>
-                            <option>Regular</option>
-                            <option>Bill to-Ship to</option>
-                            <option>Bill From</option>
-                            <option>Combination of both</option>
-                        </select>                 
-                </div>
-
-                <div class="erppage-divfield">               
-                        <label class="erppage-label" for="ddlTaxType">Tax Type</label>
-                        <select class="erppage-input erppage-select" id="ddlTaxType">
-                            <option value="">Select Tax Type</option>
-                        </select>    
-                </div>
                 <div class="erppage-divfield">
-                        <label class="erppage-label" for="ddlPackNo">Pack No</label>
-                        <select class="erppage-input erppage-select" id="ddlPackNo">
-                            <option value="">Select Pack No</option>
-                        </select>                 
-                </div>
-                <div class="erppage-divfield">              
-                        <label class="erppage-label" for="ddlSaudaNo">Sauda No</label>
-                        <div class="input-icon-wrapper">
-                            <select class="erppage-input erppage-select" id="ddlSaudaNo">
-                                <option value="">Select Sauda No</option>
-                            </select>
-                            <span class="input-icon"><i class="fa fa-calculator"></i></span>
-                        </div>           
-                </div>
-            </div>
-
-
-            <div class="erppage-grid4 align-items-end">
-
-                <!-- Issue No -->
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="ddlIssueNo">Issue No</label>
-                    <select class="erppage-input erppage-select" id="ddlIssueNo">
-                        <option value="">Select Issue No</option>
+                    <label class="erppage-label">Prod Type</label>
+                    <select class="erppage-input erppage-select" id="ddlProductType">
+                        <option value="">Select Product Type</option>
                     </select>
                 </div>
 
-                <!-- Godown -->
                 <div class="erppage-divfield">
-                    <label class="erppage-label" for="ddlGodown">Godown</label>
-                    <select class="erppage-input erppage-select" id="ddlGodown">
-                        <option value="">- Select -</option>
+                    <label class="erppage-label">WB No</label>
+                    <select class="erppage-input erppage-select" id="ddlWBNo">
+                        <option value="">Select WB No</option>
                     </select>
                 </div>
-
-                <!-- Checkboxes -->
                 <div class="erppage-divfield">
-                    <div class="d-flex align-items-center flex-wrap gap-3 checkbox-options">
-
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="checkbox" id="ChkDefectiveGoods" value="1">
-                            <label class="checkbox-label mb-0" for="ChkDefectiveGoods">
-                                Defective Goods
-                            </label>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="checkbox" id="ChkPCS" value="1">
-                            <label class="checkbox-label mb-0" for="ChkPCS">
-                                PCS
-                            </label>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="checkbox" id="ChkDetail" value="1">
-                            <label class="checkbox-label mb-0" for="ChkDetail">
-                                Detail
-                            </label>
-                        </div>
-
+                    <label class="erppage-label">Rate No</label>
+                    <div class="input-icon-wrapper">
+                       <input type="number" class="erppage-input" id="txt_saudarate" placeholder="Enter Rate No">
+                        <span class="input-icon">
+                            <i class="fa fa-eye" data-bs-toggle="tooltip" data-bs-placement="top" title="View Credit Limit">
+                            </i>
+                        </span>
+                        <span class="input-icon">
+                            <i class="fa fa-pen-to-square" data-bs-toggle="tooltip" data-bs-placement="top" title="Update Credit Limit">
+                            </i>
+                        </span>
                     </div>
                 </div>
-
-                <!-- Pending Challan -->
-                <div class="erppage-divfield d-flex align-items-end">
-                    <button type="button"
-                            class="btn btn-danger"
-                            id="btn_pendingchallan"
-                            data-bs-toggle="modal"
-                            data-bs-target="#pendingchallanModal">
-                        Pending Challan
-                    </button>
-                </div>
-
-            </div>
-            
-
-            <div class="erppage-grid">
-                <div class="erppage-divfield">      
-                        <label class="erppage-label" for="TxtTransRemarks">Remarks</label>
-                        <textarea typeof="text" class="erppage-input" id="TxtTransRemarks" placeholder="Enter Remarks"></textarea>
-                </div>
-            </div>
-
-        </fieldset>
-        @* Modal Popup *@
-        <div class="modal fade" id="pendingchallanModal" tabindex="-1" aria-labelledby="pendingchallanLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content draggable-modal">
-                    <div class="popup-header">
-                        <h5 class="popup-title" id="pendingchallanLabel">Copy From</h5>
-                        <i class="fa fa-times" data-bs-dismiss="modal" style="cursor: pointer;" aria-label="Close"></i>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                                    <input type="text" id="searchBoxpc" class="form-control border-0" placeholder="Search Module..." aria-label="Search term" />
-                                </div>
-                            </div>
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                    <div class="form-row">
-                                        <input type="checkbox" id="chkAppendPCModal">
-                                        <label class="checkbox-label" for="chkAppendPCModal">Append</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="btn-rightalign">
-                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="fa fa-copy"></i>Copy</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="table-responsive">
-                                <table id="tblpurchaseordermodal" class="table-width">
-                                    <thead class="table-head">
-                                        <tr>
-                                            <th><input type="checkbox" /></th>
-                                            <th>Document Id</th>
-                                            <th>Voucher Type</th>
-                                            <th>Voucher No</th>
-                                            <th>Voucher Date</th>
-                                            <th>Item Name</th>
-                                            <th>Item Unit</th>
-                                            <th>Hsn Code</th>
-                                            <th>Nos</th>
-                                            <th>Gross</th>
-                                            <th>Quantity</th>
-                                            <th>Rate</th>
-                                            <th>Amount</th>
-                                            <th>Disc_Per</th>
-                                            <th>Disc_Amt</th>
-                                            <th>Cgst_Per</th>
-                                            <th>Cgst Amount</th>
-                                            <th>Sgst_Per</th>
-                                            <th>Sgst Amount</th>
-                                            <th>Igst_Per</th>
-                                            <th>Igst Amount</th>
-                                            <th>Pack_Per</th>
-                                            <th>Pack Amount</th>
-                                            <th>Remark</th>
-                                            <th>Type</th>
-                                            <th>Serial No</th>
-                                            <th>Item Code</th>
-                                            <th style="display:none;">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <fieldset class="erppage-fieldset">
-
-            <div class="erppage-grid">
-                <div class="erppage-divfield">   
-                        <label class="erppage-label" for="ddlProductType">Product Type</label>
-                        <select class="erppage-input erppage-select" id="ddlProductType">
-                            <option value="">Select Product Type</option>
-                            <option value="">Chips</option>
-                            <option value="">Flakes</option>
-                            <option value="">MFibre</option>
-                            <option value="">Other</option>
-                            <option value="">PSF</option>
-                            <option value="">Raw</option>
-                            <option value="">Scrap</option>
-                            <option value="">SFG</option>
-                            <option value="">Store</option>
-                            <option value="">Waste</option>
-                        </select>        
-                </div>
-
                 <div class="erppage-divfield">
+                    <label class="erppage-label">Inco Term</label>
+                    <select class="erppage-input erppage-select" id="ddlIncoTerm">
+                        <option value="">Select Inco Term</option>
+                    </select>
+                </div>
+            </div>
 
-                        <label class="erppage-label" for="ddlWBNo">WB No</label>
-                        <select class="erppage-input erppage-select" id="ddlWBNo">
-                            <option value="">Select WB No</option>
+            <div class="erppagelist-container">
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblSalesInvoice"
+                           class="excel-table fixed-grid-table table-width resizable-table">
+
+                        <colgroup>
+                            <col class="hidden-col">
+                            <col style="width: 70px;">
+                            <col style="width: 180px;">
+                            <col style="width: 75px;">
+                            <col style="width: 120px;">
+                            <col style="width: 120px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+                            <col style="width: 85px;">
+                            <col style="width: 110px;">
+                            <col style="width: 80px;">
+                            <col style="width: 110px;">
+                            <col style="width: 100px;">
+                            <col style="width: 80px;">
+                            <col style="width: 110px;">
+                            <col style="width: 80px;">
+                            <col style="width: 110px;">
+                            <col style="width: 80px;">
+                            <col style="width: 110px;">
+                            <col style="width: 80px;">
+                            <col style="width: 110px;">
+                            <col style="width: 180px;">
+                            <col style="width: 90px;">
+                            <col style="width: 90px;">
+                            <col style="width: 110px;">
+                            <col style="width: 100px;">
+                            <col style="width: 110px;">
+                            <col style="width: 100px;">
+                            <col style="width: 100px;">
+                            <col style="width: 110px;">
+                            <col style="width: 100px;">
+                            <col style="width: 100px;">
+                            <col style="width: 100px;">
+                            <col style="width: 120px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">
+                            <col style="width: 110px;">                          
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="hidden-col" style="width: 110px;">
+                            <col class="action-col">
+                        </colgroup>
+
+                        <thead>
+                            <tr>
+                                <th class="hidden-col">Code</th>
+                                <th>ID</th>
+                                <th>Product name</th>
+                                <th>Nos</th>
+                                <th>Gross Quantity</th>
+                                <th>Net Quantity</th>
+                                <th>Rate (in USD)</th>
+                                <th>Rate (in Rs)</th>
+                                <th>Amount</th>
+                                <th>Pack %</th>
+                                <th>Pack Amount</th>
+                                <th>Pack Weight</th>
+                                <th>Disc %</th>
+                                <th>Disc Amount</th>
+                                <th>Tax Type</th>
+                                <th>CGST %</th>
+                                <th>CGST Amount</th>
+                                <th>SGST %</th>
+                                <th>SGST Amount</th>
+                                <th>IGST %</th>
+                                <th>IGST Amount</th>
+                                <th>CESS %</th>
+                                <th>CESS Amount</th>
+                                <th>Remark</th>
+                                <th>Pack No</th>
+                                <th>Lot No</th>
+                                <th>Sauda Type</th>
+                                <th>Sauda No</th>
+                                <th>Sauda Rate</th>
+                                <th>Order No</th>
+                                <th>Order Type</th>
+                                <th>Order Rate</th>
+                                <th>DCN Type</th>
+                                <th>DCN No</th>
+                                <th>HSN</th>
+                                <th>Freight Amount</th>
+                                <th>Insu Amount</th>
+                                <th>CDisc Amount</th>
+                                <th>WB Quantity</th>
+
+                                <th class="hidden-col"> REPORT_TYPE</th>
+                                <th class="hidden-col"> Sale_Rate</th>
+                                <th class="hidden-col"> Taxable_Rate</th>
+                                <th class="hidden-col"> Net_Wt</th>
+                                <th class="hidden-col"> Packing_Wt</th>
+                                <th class="hidden-col"> Packing_nos</th>
+                      
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+
+            </div>
+
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Total</legend>
+                <div class="erppage-grid6">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Total Amount</label>
+                        <input type="number" class="erppage-input" id="NumOtherTotalAmount" placeholder="Enter Total Amount" readonly oninput="LimitNumberLength(this, 12)">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Packing</label>
+                        <div class="input-divide">
+                            <input type="number" class="erppage-input" id="NumOtherPacking1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
+                            <input type="number" class="erppage-input" id="NumOtherPacking2" placeholder="0.00" readonly >
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Discount</label>
+                        <div class="input-divide">
+                            <input type="number" class="erppage-input" id="NumOtherDiscount1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
+                            <input type="number" class="erppage-input" id="NumOtherDiscount2" placeholder="0.00" readonly>
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Cash Discount</label>
+                        <div class="input-divide">
+                            <input type="number" class="erppage-input" id="NumOtherCashDiscount1" placeholder="0.00"  oninput="LimitNumberLength(this, 12)">
+                            <input type="number" class="erppage-input" id="NumOtherCashDiscount2" placeholder="0.00"  readonly>
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Sub Total</label>
+                        <input type="number" class="erppage-input" id="NumOtherSubTotal" placeholder="Enter Sub Total" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CGST</label>
+                        <div class="input-divide">
+                            <input type="number" class="erppage-input" id="NumOtherCGST1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
+                            <input type="number" class="erppage-input" id="NumOtherCGST2" placeholder="0.00" readonly >
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">SGST</label>
+                        <div class="input-divide">
+                            <input type="number" class="erppage-input" id="NumOtherSGST1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
+                            <input type="number" class="erppage-input" id="NumOtherSGST2" placeholder="0.00" readonly>
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">IGST</label>
+                        <div class="input-divide">
+                            <input type="number" class="erppage-input" id="NumOtherIGST1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
+                            <input type="number" class="erppage-input" id="NumOtherIGST2" placeholder="0.00" readonly>
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Total Nos</label>
+                        <input type="number" class="erppage-input" id="NumOtherTotalNos" placeholder="Enter Total Nos" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">CESS</label>
+                        <div class="input-divide">
+                            <input type="number" class="erppage-input" id="NumOtherCESS1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
+                            <input type="number" class="erppage-input" id="NumOtherCESS2" placeholder="0.00" readonly>
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">TCS</label>
+                        <div class="input-divide">
+                            <input type="number" class="erppage-input" id="NumOtherTCS1" placeholder="0.00" oninput="LimitNumberLength(this, 12)">
+                            <input type="number" class="erppage-input" id="NumOtherTCS2" placeholder="0.00" readonly>
+                        </div>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Round off</label>
+                        <input type="number" class="erppage-input" id="NumOtherRoundOff" placeholder="0.00" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Net Amount</label>
+                        <input type="number" class="erppage-input" id="NumOtherNetAmount" placeholder="Enter Net Amount" readonly>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc Status</label>
+                        <select class="erppage-input erppage-select" id="ddlDocStatus">
+                            <option value="">Select Doc Status</option>
                         </select>
-  
-                </div>
-
-                <div class="erppage-divfield">
-                    
-                        <label class="erppage-label" for="NumRate">Rate</label>
-                        <input type="number" class="erppage-input" id="NumRate" />
-                   
-                </div>
-
-                <div class="erppage-divfield">
-                    
-                        <label class="erppage-label" for="ddlIncoTerm">Freight Term</label>
-                        <select class="erppage-input erppage-select" id="ddlIncoTerm">
-                            <option value="">Select Inco Term</option>
-                            <option>FOR</option>
-                            <option>ExWork</option>
-                            <option>CIF</option>
-                            <option>FOB</option>
-                            <option>CFR</option>
-                            <option>CPT</option>
-                        </select>
-                   
-                </div>
-
-                <div class="erppage-divfield">
-                        <label class="erppage-label" for="ddlNatureJW">Nature of JW</label>
-                        <select class="erppage-input erppage-select" id="ddlNatureJW">
-                            <option value="">Select Nature of JW</option>
-                        </select>              
-                </div>
-            </div>
-        </fieldset>
-
-        <div class="card">
-            <div class="table-responsive">
-                <table id="tblJobworkIssueChallan" class="table-width">
-                    <thead class="table-head">
-                        <tr>
-                            <th>ID</th>
-                            <th>Product name</th>
-                            <th>Nos</th>
-                            <th>Gross Quantity</th>
-                            <th>Net Quantity</th>
-                            <th>Rate (in USD)</th>
-                            <th>Rate (in Rs)</th>
-                            <th>Amount</th>
-                            <th>Pack %</th>
-                            <th>Pack Amount</th>
-                            <th>Disc %</th>
-                            <th>Disc Amount</th>
-                            <th>Tax Type</th>
-                            <th>CGST %</th>
-                            <th>CGST Amount</th>
-                            <th>SGST %</th>
-                            <th>SGST Amount</th>
-                            <th>IGST %</th>
-                            <th>IGST Amount</th>
-                            <th>CESS %</th>
-                            <th>CESS Amount</th>
-                            <th>Remark</th>
-                            <th>Pack No</th>
-                            <th>Lot No</th>
-                            <th>Sauda Type</th>
-                            <th>Sauda No</th>
-                            <th>Sauda Rate</th>
-                            <th>Order No</th>
-                            <th>Order Type</th>
-                            <th>Order Rate</th>
-                            <th>DCN Type</th>
-                            <th>DCN No</th>
-                            <th>HSN</th>
-                            <th>Freight Amount</th>
-                            <th>Insu Amount</th>
-                            <th>CDisc Amount</th>
-                            <th>WB Quantity</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <!-- Pagination container -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="btn-add-row-last">
-                        <i class="fa fa-plus btn-add-row" title="Add Row"><span>Add New Row</span></i>
                     </div>
-                    <div class="pagination-end">
-                        <div class="custom-pagination" id="tablePagination"></div>
+
+
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Gross Qty</label>
+                        <input type="number" class="erppage-input" id="NumGrossQty" placeholder="Enter Net Gross Qty" readonly>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <fieldset class="erppage-fieldset">
-
-            <div class="erppage-grid">
-
-                <div class="erppage-divfield">       
-                        <label class="erppage-label" for="NumOtherTotalAmount">Total Amount</label>
-                        <input type="number" class="erppage-input" id="NumOtherTotalAmount" />   
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherPacking">Packing</label>
-                    <div class="input-divide">
-                        <input type="number" class="erppage-input" id="NumOtherPacking1" />
-                        <input type="number" class="erppage-input" id="NumOtherPacking2" />
-                    </div>                  
-
-                </div>
-
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherDiscount">Discount</label>
-                    <div class="input-divide">
-                        <input type="number" class="erppage-input" id="NumOtherDiscount1" />
-                        <input type="number" class="erppage-input" id="NumOtherDiscount2" />
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Net Qty</label>
+                        <input type="number" class="erppage-input" id="NumNetQty" placeholder="Enter Net Net Qty" readonly> 
                     </div>
-                </div>            
 
-            </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">WB Qty</label>
+                        <input type="number" class="erppage-input" id="NumWbQty" placeholder="Enter Net WB Qty" readonly>
+                    </div>
 
-
-            <div class="erppage-grid">
-
-                <div class="erppage-divfield">
-
-                    <label class="erppage-label" for="NumOtherCashDiscount">Cash Discount</label>
-                    <div class="input-divide">
-                        <input type="number" class="erppage-input" id="NumOtherCashDiscount1" />
-                        <input type="number" class="erppage-input" id="NumOtherCashDiscount2" />
+                    <div class="erppage-divfield">
+                        <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" id="btn_OutAlloed" ><i class="fa fa-clock"></i>OUT Allowed</button>
                     </div>
 
                 </div>
+            </fieldset>
 
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherSubTotal">Sub Total</label>
-                    <input type="number" class="erppage-input" id="NumOtherSubTotal" />
-
+            <div class="erppage-container">
+                <div class="erppage-tabs">
+                    <button class="erppage-tab active" data-tab="transportdetails">Transport Details</button>
+                    <button class="erppage-tab" data-tab="waybillloadingdetail">Waybill/Loading Details</button>
+                    <button class="erppage-tab" data-tab="ExportDetail">Export Detail</button>
+                    <button class="erppage-tab" data-tab="PrintExportReport">Print Export Report</button>
                 </div>
-
-            </div>
-
-            <div class="erppage-grid">
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherCGST">CGST</label>
-                    <div class="input-divide">
-                        <input type="number" class="erppage-input" id="NumOtherCGST1" />
-                        <input type="number" class="erppage-input" id="NumOtherCGST2" />
-                    </div>
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherSGST">SGST</label>
-                    <div class="input-divide">
-                        <input type="number" class="erppage-input" id="NumOtherSGST1" />
-                        <input type="number" class="erppage-input" id="NumOtherSGST2" />
-                    </div>
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherIGST">IGST</label>
-                    <div class="input-divide">
-                        <input type="number" class="erppage-input" id="NumOtherIGST1" />
-                        <input type="number" class="erppage-input" id="NumOtherIGST2" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="erppage-grid">
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherTotalNos">Total Nos</label>
-                    <input type="number" class="erppage-input" id="NumOtherTotalNos" />
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherCESS">CESS</label>
-                    <div class="input-divide">
-                        <input type="number" class="erppage-input" id="NumOtherCESS1" />
-                        <input type="number" class="erppage-input" id="NumOtherCESS2" />
-                    </div>
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherTCS">TCS</label>
-                    <div class="input-divide">
-                        <input type="number" class="erppage-input" id="NumOtherTCS1" />
-                        <input type="number" class="erppage-input" id="NumOtherTCS2" />
-                    </div>
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherRoundOff">Round off</label>
-                    <input type="number" class="erppage-input" id="NumOtherRoundOff" />
-                </div>
-
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherRoundOff">Round off</label>
-                    <input type="number" class="erppage-input" id="NumOtherRoundOff" />
-
-                </div>
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumOtherNetAmount">Net Amount</label>
-                    <input type="number" class="erppage-input" id="NumOtherNetAmount" />
-
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="ddlDocStatus">Doc Status</label>
-                    <select class="erppage-input erppage-select" id="ddlDocStatus">
-                        <option value="">Select Doc Status</option>
-                    </select>
-                </div>
-
-            </div>    
-
-
-            <div class="erppage-grid">
-
-                <div class="erppage-divfield">      
-                    <label class="erppage-label" for="NumGrossQty">Gross Quantity</label>
-                    <input type="number" class="erppage-input" id="NumGrossQty" />
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumNetQty">Net Quantity</label>
-                    <input type="number" class="erppage-input" id="NumNetQty" />
-
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="NumWBQty">WB Quantity</label>
-                    <input type="number" class="erppage-input" id="NumWBQty" />
-
-                </div>
-
-                <div class="erppage-divfield">
-                    <label class="erppage-label" for="TxtLUTDetail">LUT Detail</label>
-                    <input type="text" class="erppage-input" id="TxtLUTDetail" />
-                 </div>          
-                
-         
-                 <div class="erppage-divfield">
-                    <div class="button-right btn-mt">
-                        <button type="button" class="btn btn-primary" id="btn_outallowed"> Out Allowed</button>
-                    </div>
-
-                </div>
-            </div>
-        </fieldset>
-
-
-        <fieldset class="fieldset-sub btn-mt">
-            <div class="row">          
-                <div class="col-md-7">
-                    <div class="navtab-form">
-                        <ul class="nav nav-tabs" id="formTabs" role="tablist">
-                            <li class="nav-item">
-                                <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab">Transport Detail</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab">Waybill/Loading Details</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link" id="tab3-tab" data-bs-toggle="tab" data-bs-target="#tab3" type="button" role="tab">Export Details</button>
-                            </li>
-
-
-
-
-
-
-                        </ul>
-                        <div class="tab-content">
-                            <div class="tab-pane fade show active" id="tab1">
-                                <fieldset class="erppage-fieldset">
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">                                   
-                                                <label class="erppage-label" for="ddlTransport">Transport</label>
-                                                <select class="erppage-input erppage-select" id="ddlTransport">
-                                                    <option value="">Select Transport</option>
-                                                </select>                                         
-                                        </div>
+                <div class="erppage-tab-content active" id="transportdetails">
+                    <div class="erppage-accordion-header">Transport Details</div>
+                    <div class="erppage-accordion-body">
+                        <fieldset class="erppage-fieldset">
+                            <div class="erppage-grid4">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Transport</label>
+                                    <select class="erppage-input erppage-select" id="ddlTransport">
+                                        <option value="">Select Transport</option>
+                                    </select>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">GR No</label>
+                                    <input type="number" class="erppage-input" id="NumGRNo" placeholder="Enter GR No"  oninput="LimitNumberLength(this, 50)">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">GR Date</label>
+                                    <div class="calender-check">
+                                        <input type="date" class="erppage-input" id="DtGRDate" name="GRDate" style="padding-left: 30px;">
+                                        <input type="checkbox" id="chkGRDate" class="checkbox-inside">
                                     </div>
-
-
-                                    <div class="erppage-grid3">
-                                        <div class="erppage-divfield">                                    
-                                                <label class="erppage-label" for="NumGRNo">GR No</label>
-                                                <input type="number" class="erppage-input" id="NumGRNo" />                                          
-                                        </div>
-                                        <div class="erppage-divfield">                                 
-                                                <label class="erppage-label" for="DtGRDate">GR Date</label>
-                                                <div class="calender-check">
-                                                    <input type="date" class="erppage-input" id="DtGRDate" name="GRDate" style="padding-left: 30px;">
-                                                    <input type="checkbox" id="chkGRDate" class="checkbox-inside">
-                                                </div>                                        
-                                        </div>
-                                        <div class="erppage-divfield">                             
-                                                <label class="erppage-label" for="TxtTruckNo">Truck No</label>
-                                                <input type="text" class="erppage-input" id="TxtTruckNo" />                                          
-                                        </div>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Truck No</label>
+                                    <input type="text" class="erppage-input" id="TxtTruckNo" placeholder="Enter Truck No" maxlength="20">
+                                </div>
+                                <div class="erppage-divfield erppage-col-span-2">
+                                    <label class="erppage-label">Driver Name</label>
+                                    <input type="text" class="erppage-input" id="TxtDriverName" placeholder="Enter Driver Name" maxlength="50">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Driver Mob.</label>
+                                    <input type="number" class="erppage-input" id="NumDriverMob" placeholder="Enter Mobile No"  oninput="LimitNumberLength(this, 20)">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Insurance %</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="erppage-input" id="NumInsurance1" placeholder="0.00"  oninput="LimitNumberLength(this, 10)">
+                                        <input type="number" class="erppage-input" id="NumInsurance2" placeholder="0.00"  oninput="LimitNumberLength(this, 12)">
                                     </div>
-                                    <div class="erppage-grid2">
-                                        <div class="erppage-divfield">                                      
-                                                <label class="erppage-label" for="TxtDriverName">Driver Name</label>
-                                                <input type="text" class="erppage-input" id="TxtDriverName" />                                            
-                                        </div>
-                                        <div class="erppage-divfield">
-                                            <label class="erppage-label" for="NumDriverMob">Driver Mob.</label>
-                                            <input type="number" class="erppage-input" id="NumDriverMob" />                                           
-                                        </div>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">TDS on Freight %</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="erppage-input" id="NumTDSFreight1" placeholder="0.00"  oninput="LimitNumberLength(this, 10)">
+                                        <input type="number" class="erppage-input" id="NumTDSFreight2" placeholder="0.00"  oninput="LimitNumberLength(this, 10)">
                                     </div>
-
-
-                                    <div class="erppage-grid4">
-                                        <div class="erppage-divfield">                                          
-                                                <label class="erppage-label" for="NumInsurance">Insurance %</label>
-                                                <div class="input-divide">
-                                                    <input type="number" class="erppage-input" id="NumInsurance1" />
-                                                    <input type="number" class="erppage-input" id="NumInsurance2" />
-                                                </div>
-                                        
-                                        </div>
-                                        <div class="erppage-divfield">
-                                        
-                                                <label class="erppage-label" for="NumTDSFreight">TDS on Freight %</label>
-                                                <div class="input-divide">
-                                                    <input type="number" class="erppage-input" id="NumTDSFreight1" />
-                                                    <input type="number" class="erppage-input" id="NumTDSFreight2" />
-                                                </div>
-                                          
-                                        </div>
-                                        <div class="erppage-divfield">                   
-                                                <label class="erppage-label" for="NumTaxFreight">Tax on Freight %</label>
-                                                <div class="input-divide">
-                                                    <input type="number" class="erppage-input" id="NumTaxFreight1" />
-                                                    <input type="number" class="erppage-input" id="NumTaxFreight2" />
-                                                </div>                                           
-                                        </div>
-                                        <div class="erppage-divfield">                                           
-                                                <label class="erppage-label" for="NumFreightAmount">Freight Amount</label>
-                                                <input type="number" class="erppage-input" id="NumFreightAmount" />                                          
-                                        </div>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Tax on Freight %</label>
+                                    <div class="input-divide">
+                                        <input type="number" class="erppage-input" id="NumTaxFreight1" placeholder="0.00"  oninput="LimitNumberLength(this, 12)">
+                                        <input type="number" class="erppage-input" id="NumTaxFreight2" placeholder="0.00"  oninput="LimitNumberLength(this, 12)">
                                     </div>
-
-
-                                    <div class="erppage-grid4">
-                                        <div class="erppage-divfield">
-                                    
-                                                <label class="erppage-label" for="NumDistance">Distance</label>
-                                                <input type="number" class="erppage-input" id="NumDistance" />
-                                    
-                                        </div>
-                                        <div class="erppage-divfield">
-                                      
-                                                <label class="erppage-label" for="ddlMode">Mode</label>
-                                                <select class="erppage-input erppage-select" id="ddlMode">
-                                                    <option value="">Select Mode</option>
-                                                </select>
-                                      
-                                        </div>
-                                        <div class="erppage-divfield">
-                                           
-                                                <label class="erppage-label" for="ddlPaymentTerm">Payment Term</label>
-                                                <select class="erppage-input erppage-select" id="ddlPaymentTerm">
-                                                    <option value="">Select Payment Term</option>
-                                                </select>
-                                           
-                                        </div>
-                                        <div class="erppage-divfield">
-                                            
-                                                <label class="erppage-label" for="TxtDeliveryTerm">Delivery Term</label>
-                                                <textarea typeof="text" class="erppage-input" id="TxtDeliveryTerm"></textarea>
-                                  
-                                        </div>
-                                    </div>
-                                </fieldset>
-
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Freight Amount</label>
+                                    <input type="number" class="erppage-input" id="NumFreightAmount" placeholder="Enter Freight Amount"  oninput="LimitNumberLength(this, 12)">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Distance</label>
+                                    <input type="number" class="erppage-input" id="NumDistance" placeholder="Enter Distance"  oninput="LimitNumberLength(this, 12)">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Mode</label>
+                                    <select class="erppage-input erppage-select" id="ddlMode">
+                                        <option value="">Select Mode</option>
+                                    </select>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Payment Term</label>
+                                    <input type="text" class="erppage-input" id="ddlPaymentTerm" placeholder="Enter Payment Term" maxlength="5">
+                                                                    
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">Delivery Term</label>
+                                    <textarea class="erppage-input" id="TxtDeliveryTerm" placeholder="Enter Delivery Term" maxlength="500"></textarea>
+                                </div>
                             </div>
-                            <div class="tab-pane fade" id="tab2">
-                                <fieldset class="erppage-fieldset">
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">                                         
-                                                <label class="erppage-label" for="NumWayBillNo">WayBill No</label>
-                                                <input type="number" class="erppage-input" id="NumWayBillNo" />                                     
-                                        </div>
+                        </fieldset>
+                    </div>
+                </div>                                
+
+                <div class="erppage-tab-content" id="waybillloadingdetail">
+                    <div class="erppage-accordion-header">WayBill/Loading Detail</div>
+                    <div class="erppage-accordion-body">
+                        <fieldset class="erppage-fieldset">
+                            <div class="erppage-section-header">WayBill/Loading Detail</div>
+                            <div class="erppage-body">
+                                <div class="erppage-grid grid1">
+
+
+                                    <div class="erppage-field">
+                                        <label for="txtWayBillNo" class="erppage-label">Way Bill No</label>
+                                        <input type="text" class="erppage-input" id="txt_WayBillNo" maxlength="20">
                                     </div>
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">                                            
-                                                <label class="erppage-label" for="NumToPayFrt">To Pay Frt</label>
-                                                <input type="number" class="erppage-input" id="NumToPayFrt" placeholder="Enter To Pay Frt">                                           
-                                        </div>
+
+                            
+                                </div>
+
+                               <div class="erppage-grid grid1">
+
+                                <div class="erppage-field">
+                                    <label for="txt_ToPayFrt" class="erppage-label">To Pay Frt</label>
+                                    <input type="number" class="erppage-input" id="txt_ToPayFrt"  oninput="LimitNumberLength(this, 16)">
+                                </div>
+
+                               </div>
+
+
+                                <div class="erppage-grid grid2">
+
+                                    <div class="erppage-field">
+                                        <label for="txt_LoadAmt" class="erppage-label">Load Amt</label>
+
+                                        <input type="number" class="erppage-input" id="txt_loadPer"  oninput="LimitNumberLength(this, 16)">
+                                        <input type="number" class="erppage-input" id="txt_LoadAmt"  oninput="LimitNumberLength(this, 18)">
                                     </div>
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">                                    
-                                                <label class="erppage-label" for="NumLoadAmount">Load Amount</label>
-                                                <div class="input-divide">
-                                                    <input type="number" class="erppage-input" id="NumLoadAmount1">
-                                                    <input type="number" class="erppage-input" id="NumLoadAmount2">
-                                                </div>                                           
-                                        </div>
-                                        <div class="erppage-divfield">
-                                    
-                                                <label class="erppage-label" for="TxtRemarks">Remarks</label>
-                                                <textarea typeof="text" class="erppage-input" id="TxtRemarks1"></textarea>
+
+                                    <div class="erppage-field">
+                                        <label for="txt_Remark" class="erppage-label">Remark</label>
+                                        <input type="text" class="erppage-input" id="txt_ldRemark" maxlength="100">
+                                    </div>
+                                </div>
+
+
+
+                                <div class="erppage-grid grid1">
+
+                                    <div class="erppage-field">
+                                        <label for="txt_WBParty" class="erppage-label">Load Party</label>
+                                        <select class="erppage-input erppage-select" id="ddl_LoadParty">
+                                        <option value="">Select Load Party</option>
+                                        </select>  
+                                    </div>
                                 
-                                        </div>
+                                </div>                               
+
+                                  <div class="erppage-grid grid2 ">
+
+                                    <div class="erppage-field">
+                                        <label for="txt_WBAmt" class="erppage-label">WB Amt</label>                                 
+                                        <input type="number" class="erppage-input" id="txt_WBamt"  oninput="LimitNumberLength(this, 12)">
                                     </div>
-                                    <div class="erppage-grid" >
-                                        <div class="erppage-divfield">
-                                       
-                                                <label class="erppage-label" for="ddlLoadparty">Load Party</label>
-                                                <select class="erppage-input erppage-select" id="ddlLoadparty">
-                                                    <option value="">Select Load Party</option>
-                                                </select>
-                                           
-                                        </div>
+
+                                    <div class="erppage-field">
+                                        <label for="txt_Remark" class="erppage-label">Remark</label>
+                                        <input type="text" class="erppage-input" id="txt_wbRemark" maxlength="100">
                                     </div>
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">
-                                          
-                                                <label class="erppage-label" for="NumWBAmount1">WB Amount</label>
-                                                <input type="number" class="erppage-input" id="NumWBAmount1">
-                                        
-                                        </div>
-                                        <div class="erppage-divfield">                                         
-                                                <label class="erppage-label" for="TxtRemarks">Remarks</label>
-                                                <textarea typeof="text" class="erppage-input" id="TxtRemarks2"></textarea>                                          
-                                        </div>
+                                </div>
+
+                                <div class="erppage-grid grid1">
+
+                                    <div class="erppage-field">
+                                        <label for="txt_WBParty" class="erppage-label">WB Party</label>
+                                        <select class="erppage-input erppage-select" id="ddl_WBParty">
+                                        <option value="">Select WB Party</option>
+                                        </select>  
                                     </div>
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">                                          
-                                                <label class="erppage-label" for="ddlWBParty1">WB Party</label>
-                                                <select class="erppage-input erppage-select" id="ddlWBParty1">
-                                                    <option value="">Select WB Party</option>
-                                                </select>                                         
-                                        </div>
-                                    </div>
-                                </fieldset>
+                                
+                                </div>
+
+
+
                             </div>
-                            <div class="tab-pane fade" id="tab3">
-                                <fieldset class="erppage-fieldset">
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">                                          
-                                            <label class="erppage-label" for="NumExRate">ExRate</label>
-                                            <div class="input-divide">
-                                                <input type="number" class="erppage-input" id="NumExRate">
-                                                <select class="erppage-input erppage-select" id="ddlCurrency">
-                                                    <option value="">-Select -</option>
-                                                </select>
-                                            </div>                               
-                                        </div>
-
-                                        <div class="erppage-divfield">                                           
-                                                <label class="erppage-label" for="NumFOBValue">FOB Value</label>
-                                                <input type="number" class="erppage-input" id="NumFOBValue">                                          
-                                        </div>
-                                        <div class="erppage-divfield">                                           
-                                                <label class="erppage-label" for="NumFOBFreight">FOB Freight</label>
-                                                <input type="number" class="erppage-input" id="NumFOBFreight">                                       
-                                        </div>
-                                    </div>
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">                           
-                                                <label class="erppage-label" for="NumFOBInsu">FOB Insu.</label>
-                                                <input type="number" class="erppage-input" id="NumFOBInsu">                           
-                                        </div>
-                                        <div class="erppage-divfield">                                         
-                                                <label class="erppage-label" for="NumFOBOther">FOB Other</label>
-                                                <input type="number" class="erppage-input" id="NumFOBOther">                             
-                                        </div>
-                                        <div class="erppage-divfield">                                      
-                                                <label class="erppage-label" for="NumOrderNo">Order No.</label>
-                                                <input type="number" class="erppage-input" id="NumOrderNo">                                     
-                                        </div>
-                                        <div class="erppage-divfield">                                      
-                                                <label class="erppage-label" for="NumLUTNo">LUT No.</label>
-                                                <input type="number" class="erppage-input" id="NumLUTNo">                                    
-                                        </div>
-                                    </div>
-
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">
-                                            <label class="erppage-label" for="TxtPOL">P.O.L.</label>
-                                            <input type="text" class="erppage-input" id="TxtPOL">                                
-                                        </div>
-                                        <div class="erppage-divfield">                                          
-                                                <label class="erppage-label" for="TxtPOD">P.O.D.</label>
-                                                <input type="text" class="erppage-input" id="TxtPOD">                                      
-                                        </div>
-                                        <div class="erppage-divfield">                                       
-                                                <label class="erppage-label" for="TxtReceiptAt">Receipt At</label>
-                                                <input type="text" class="erppage-input" id="TxtReceiptAt">                                 
-                                        </div>
-                                        <div class="erppage-divfield">                                          
-                                                <label class="erppage-label" for="TxtLUTDate">LUT Date</label>
-                                                <input type="date" class="erppage-input" id="TxtLUTDate">                                    
-                                        </div>
-                                    </div>
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">                                       
-                                                <label class="erppage-label" for="TxtFinalDestination">Final Destination</label>
-                                                <input type="text" class="erppage-input" id="TxtFinalDestination">                           
-                                        </div>
-                                        <div class="erppage-divfield">                                      
-                                                <label class="erppage-label" for="TxtFDCountry">FD Country</label>
-                                                <input type="text" class="erppage-input" id="TxtFDCountry">                             
-                                        </div>
-                                        <div class="erppage-divfield">                                       
-                                                <label class="erppage-label" for="TxtBillLading">Bill of Lading</label>
-                                                <input type="text" class="erppage-input" id="TxtBillLading">                                 
-                                        </div>
-                                    </div>
-
-
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">                                          
-                                                <label class="erppage-label" for="NumShipBillNo">Ship Bill No.</label>
-                                                <input type="number" class="erppage-input" id="NumShipBillNo">                                            
-                                        </div>
-                                        <div class="erppage-divfield">                                 
-                                                <label class="erppage-label" for="DtShipBillDate">Ship Bill Date</label>
-                                                <div class="calender-check">
-                                                    <input type="date" class="erppage-input" id="DtShipBillDate" name="ShipBillDate" style="padding-left: 30px;">
-                                                    <input type="checkbox" id="chkShipBillDate" class="checkbox-inside">
-                                                </div>                                      
-                                        </div>
-                                        <div class="erppage-divfield">                                      
-                                                <label class="erppage-label" for="NumPortCode">Port Code</label>
-                                                <input type="number" class="erppage-input" id="NumPortCode">                                           
-                                        </div>
-
-                                    </div>
-                                    <div class="erppage-grid">
-                                        <div class="erppage-divfield">
-                                            <div class="form-group">
-                                                <label class="erppage-label" for="TxtInsuranceDetail">Insurance Detail</label>
-                                                <input type="text" class="erppage-input" id="TxtInsuranceDetail">
-                                            </div>
-                                        </div>
-                                        <div class="erppage-divfield">
-                                            <div class="form-group">
-                                                <label class="erppage-label" for="ddlBankName">Bank Name</label>
-                                                <select class="erppage-input erppage-select" id="ddlBankName">
-                                                    <option value="">Select Bank Name</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </fieldset>
-                            </div>
-                        </div>
+                        </fieldset>
                     </div>
                 </div>
- 
-            </div>
-        </fieldset>
+                
+                <div class="erppage-tab-content" id="ExportDetail">
+                    <div class="erppage-accordion-header">Export Detail</div>
+                    <div class="erppage-accordion-body">
+                        <fieldset class="erppage-fieldset">
+                            <div class="erppage-section-header">Export Detail</div>
+                            <div class="erppage-body">
+          
+                                <div class="erppage-grid grid-3">
+                         
 
-        <div class="row">
-            <div class="col-md-3">
-                <div class="btn-mt">
-                    <button onclick="window.location.href='@Url.Action("Index", "JobworkIssueChallanList")'" type="button" class="btn btn-draft erppage-header-back">
-                        <i class="fa fa-list"></i>Back to list
+                                <div class="erppage-field">
+                                        <label for="txxt_ExRate" class="erppage-label">Ex Rate</label>
+                                        <input type="number" class="erppage-input" id="txxt_ExRate" oninput="LimitNumberLength(this, 12)">
+                                        <select class="erppage-input erppage-select" id="ddl_currency">
+                                         <option value=""> Select Currency </option>                                       
+                                        
+                                        </select>
+                                </div>                     
+                            
+                                <div class="erppage-field">
+                                        <label for="txxt_FobValue" class="erppage-label">FOB Value</label>
+                                        <input type="number" class="erppage-input" id="txxt_FobValue" oninput="LimitNumberLength(this, 12)">
+                                </div>   
+
+                                <div class="erppage-field">
+                                        <label for="txt_FOBFRT" class="erppage-label">FOB Frt.</label>
+                                        <input type="number" class="erppage-input" id="txt_FOBFRT" oninput="LimitNumberLength(this, 12)">
+                                </div>                                                    
+
+                            </div>
+
+                                <div class="erppage-grid grid-3">                
+
+                                    <div class="erppage-field">
+                                            <label for="txxt_ForIssu" class="erppage-label">For Insu.</label>
+                                            <input type="number" class="erppage-input" id="txxt_ForIssu" oninput="LimitNumberLength(this, 12)">
+                                     
+                                    </div>                     
+                            
+                                    <div class="erppage-field">
+                                            <label for="txxt_FobOther" class="erppage-label">FOB Other</label>
+                                            <input type="number" class="erppage-input" id="txxt_FobOther" oninput="LimitNumberLength(this, 12)">
+                                    </div>   
+
+                                    <div class="erppage-field">
+                                            <label for="txt_LutNo" class="erppage-label">Lut No.</label>
+                                            <input type="number" class="erppage-input" id="txt_LutNo" oninput="LimitNumberLength(this, 12)">
+                                    </div>                                                    
+                            
+                                </div>
+
+                                <div class="erppage-grid grid-4">                
+                                    <div class="erppage-field">
+                                            <label for="txxt_pol" class="erppage-label">P.O.L</label>
+                                            <input type="number" class="erppage-input" id="txxt_pol" oninput="LimitNumberLength(this, 12)" >
+                                     
+                                    </div>                     
+                            
+                                    <div class="erppage-field">
+                                            <label for="txxt_POD" class="erppage-label">P.O.D</label>
+                                            <input type="number" class="erppage-input" id="txxt_POD" oninput="LimitNumberLength(this, 12)">
+                                    </div>   
+
+                                    <div class="erppage-field">
+                                            <label for="txt_receiptat" class="erppage-label">Receipt at</label>
+                                            <input type="number" class="erppage-input" id="txt_receiptat" oninput="LimitNumberLength(this, 12)">
+                                    </div>                                                    
+    
+                                    <div class="erppage-field">
+                                        <label for="dt_LutDate" class="erppage-label">Lut Date</label>
+                                        <input type="date" class="erppage-input" id="dt_LutDate">
+                                    </div>   
+
+                                </div>
+
+                  
+
+                                <div class="erppage-grid grid-3">                
+        
+
+                                    <div class="erppage-field">
+                                            <label for="txxt_finalDestination" class="erppage-label">Final Destination</label>
+                                            <input type="text" class="erppage-input" id="txxt_finalDestination" maxlength="50">
+                                     
+                                    </div>                     
+                            
+                                    <div class="erppage-field">
+                                            <label for="txxt_FDCountry" class="erppage-label">F.D.Country </label>
+                                            <input type="text" class="erppage-input" id="txxt_FDCountry" maxlength="50">
+                                    </div>   
+
+
+                                    <div class="erppage-field">
+                                            <label for="txt_BillOfLanding" class="erppage-label">Bill OF Landing</label>
+                                            <input type="number" class="erppage-input" id="txt_BillOfLanding" maxlength="30">
+                                    </div>                                                    
+                                                         
+
+                                </div>
+
+
+                                <div class="erppage-grid grid-3">                
+        
+
+                                    <div class="erppage-field">
+                                            <label for="txxt_ShipBillNo" class="erppage-label">Ship.Bill No/Dt</label>
+                                            <input type="number" class="erppage-input" id="txxt_ShipBillNo">
+                                            <input type="date" class="erppage-input" id="dt_ShipDate">
+                                     
+                                    </div>                     
+                            
+                                    <div class="erppage-field">
+                                            <label for="txxt_PortCode" class="erppage-label">Port Code  </label>
+                                            <input type="text" class="erppage-input" id="txxt_PortCode" maxlength="20" >
+                                    </div>   
+
+
+                                    <div class="erppage-field">
+                                            <label for="txt_InsuranceDe" class="erppage-label">Insurance Detail</label>
+                                            <input type="text" class="erppage-input" id="txt_InsuranceDe" maxlength="100" />
+                                    </div>                                                    
+                                                         
+
+                                </div>
+
+
+                                <div  class="erppage-grid grid-3"  >
+                                
+                                    <div  class="erppage-filed"  >
+                                
+                                  <label for="txtlictype" class="erppage-label" >Lic Type </label>
+                                    <select class="erppage-input erppage-select" id="ddllictype">
+                                      <option value=""> Select Lic Type </option>                                      
+                                        
+                                    </select>
+
+                                </div>
+
+                                    <div  class="erppage-filed"  >
+                                
+                                      <label for="ddl_licNo" class="erppage-label" >Lic No. </label>
+                                        <select class="erppage-input erppage-select" id="DDL_LicNo">
+                                          <option value=""> Select Lic Type </option>                                    
+                                        </select>
+
+                                    </div>
+
+                                    <div  class="erppage-filed">         
+                                        <label for="txt_LicDT" class="erppage-label"> Lic Dt </label>
+                                        <input type="date" class="erppage-input" id="txt_LicDT">                      
+                                    
+                                    
+                                    </div>
+                                
+                                </div>
+
+                                <div class="erppage-grid grid-1">
+
+
+                                <div  class="erppage-field" >
+                                        <label for="DDL_Bank" class="erppage-label"> Bank Name</label>
+
+                                         <select class="erppage-input erppage-select" id="DDL_Bank">
+                                          <option value=""> Select Bank Name </option>                                    
+                                        
+                                        </select>                                                                                         
+                                
+                                </div>                                     
+
+                                </div>
+
+                                </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="PrintExportReport">
+
+                <div class="accordion-header fw-bold py-2"> Print Export Report </div>
+
+                 <div class="accordion-body">
+
+                    <fieldset class="border rounded p-3">
+
+                        <legend class="float-none w-auto px-2 fs-6 fw-bold"> Print Export Report  </legend>
+
+                        <div class="container-fluid">
+
+                            <!-- Row 1 -->
+                            <div class="row g-2 mb-2">
+
+                                <div class="col-md-4">  <button type="button" class="btn btn-primary w-100" id="btn_ExportToInvoice">  <i class="fa fa-file-invoice me-2"></i>
+                                        Export To Invoice
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-success w-100" id="btn_ComInvoiceforParty">  <i class="fa fa-file-invoice-dollar me-2"></i>
+                                        Commercial Invoice For Party
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-warning w-100" id="btn_PackingSlipForParty"> <i class="fa fa-box-open me-2"></i>
+                                        Packing Slip For Party
+                                    </button>
+                                </div>
+
+                            </div>
+
+                            <!-- Row 2 -->
+                            <div class="row g-2 mb-2">
+
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-primary w-100" id="btn_LCInvoice">  <i class="fa fa-file-invoice me-2"></i>
+                                        LC Invoice
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-success w-100" id="btn_ComInvoiceForBank"> <i class="fa fa-file-invoice-dollar me-2"></i>
+                                        Commercial Invoice For Bank
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-warning w-100" id="btn_PackingSlipForBank"> <i class="fa fa-box-open me-2"></i>
+                                        Packing Slip For Bank
+                                    </button>
+                                </div>
+
+                            </div>
+
+                            <!-- Row 3 -->
+                            <div class="row g-2 mb-3">
+
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-primary w-100" id="btn_ShippingInstruction"> <i class="fa fa-ship me-2"></i>
+                                        Shipping Instruction
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-success w-100" id="btn_ComInvoiceForCustom"> <i class="fa fa-file-invoice-dollar me-2"></i>
+                                        Commercial Invoice For Custom
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-warning w-100" id="btn_PackingSlipForCustom"> <i class="fa fa-box-open me-2"></i>
+                                        Packing Slip For Custom
+                                    </button>
+                                </div>
+
+                            </div>
+                                              
+                          
+
+
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield erppage-col-span-2">
+                                    <div class="erppage-checkboxinside">
+                                        <div class="erppage-checkbox-wrap">
+                               
+                                            <input type="checkbox" id="ch_report" class="erppage-checkbox-input">
+                                            <label for="ch_report" class="erppage-checkbox-label"> With Freight &amp; FOB Value </label>
+                                        </div>
+                                        <div class="erppage-checkbox-wrap">
+                                           <input type="checkbox" id="chk_PackSlipWithoutBag" class="erppage-checkbox-input">
+                                    <label for="chk_PackSlipWithoutBag" class="erppage-checkbox-label"> Packing Slip Without Bag Wt </label>
+                                        </div>
+                                        <div class="erppage-checkbox-wrap">
+                                             <input type="checkbox"  id="chk_PrintWithSignature"  class="erppage-checkbox-input">
+                                    <label for="chk_PrintWithSignature" class="erppage-checkbox-label">  Print With Signature </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                      
+                            </div>
+                                                     
+
+                        </div>
+
+                    </fieldset>
+
+                </div>
+
+                </div>
+
+            </div>
+    </div>
+
+    @* Modal Popup *@
+    <div class="modal fade" id="pendingchallanModal" tabindex="-1" aria-labelledby="pendingchallanLabel" aria-hidden="true">
+        <div class="modal-dialog medium-modal erppagesmodal">
+            <div class="modal-content erppagesmodal-content">
+                <div class="erppagesmodal-header">
+                    <div class="erppagesmodal-header-left">
+                        <div class="erppagesmodal-header-icon">
+                            <i class="fa fa-copy"></i>
+                        </div>
+                        <h5 class="erppagesmodal-title" id="pendingchallanLabel">Copy From</h5>
+                    </div>
+                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close" >
+                        <i class="fa fa-times"></i>
                     </button>
                 </div>
-            </div>
-            <div class="offset-md-7 col-md-2">
-                <div class="button-right btn-mt">
-                    <button id="btn-save" type="submit" class="btn btn-primary erppage-btn"><i class="fa fa-save"></i>Save</button>
+                <div class="erppagesmodal-body">
+                    <div class="erppagelist-toolbar">
+                        <div class="erppagelist-search-wrapper">
+                            <i class="fa fa-search"></i>
+                            <input type="text" id="searchBoxpc" placeholder="Search Module..." />
+                        </div>
+                        <div class="erppage-checkbox-wrap">
+                            <input type="checkbox" id="chkAppendPCModal" class="erppage-checkbox-input">
+                            <label class="erppage-checkbox-label">Append</label>
+                        </div>
+                        <div class="erppagelist-action">
+                            <button type="button" class="erppage-btn erppage-btn-common-active-disabled" data-bs-dismiss="modal" id="Btn_CopyData">
+                                <i class="fa fa-copy"></i>Copy
+                            </button>
+                        </div>
+                    </div>
+                    <div class="erppagelist-container">
+                        <div class="excel-wrapper fixed-grid-wrapper">
+                            <table id="tblpurchaseordermodal" class="excel-table fixed-grid-table table-width resizable-table">
+                                <colgroup>
+                                    <col style="width: 45px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 120px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 180px;">
+                                    <col style="width: 90px;">
+                                    <col style="width: 90px;">
+                                    <col style="width: 70px;">
+                                    <col style="width: 90px;">
+                                    <col style="width: 90px;">
+                                    <col style="width: 90px;">
+                                    <col style="width: 110px;">
+                                    <col style="width: 90px;">
+                                    <col style="width: 110px;">
+                                    <col style="width: 90px;">
+                                    <col style="width: 110px;">
+                                    <col style="width: 90px;">
+                                    <col style="width: 110px;">
+                                    <col style="width: 90px;">
+                                    <col style="width: 110px;">
+                                    <col style="width: 90px;">
+                                    <col style="width: 110px;">
+                                    <col style="width: 180px;">
+                                    <col style="width: 90px;">
+                                     <col style="width: 110px;">
+                                     <col style="width: 110px;">
+                                  
+                                    
+                                    
+                                    <col style="width: 100px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 100px;">
+
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                    <th>
+                                    <input type="checkbox" id="chkSelectAllPending">
+                                    </th>
+                                        <th>Document Id</th>
+                                        <th>Voucher Type</th>
+                                        <th>Voucher No</th>
+                                        <th>Voucher Date</th>
+                                        <th>Item Name</th>
+                                        <th>Item Unit</th>
+                                        <th>Hsn Code</th>
+                                        <th>Nos</th>
+                                        <th>Gross</th>
+                                        <th>Quantity</th>
+                                        <th>Rate</th>
+                                        <th>Amount</th>
+                                        <th>Disc_Per</th>
+                                        <th>Disc Amount</th>
+                                        <th>Cgst_Per</th>
+                                        <th>Cgst Amount</th>
+                                        <th>Sgst_Per</th>
+                                        <th>Sgst Amount</th>
+                                        <th>Igst_Per</th>
+                                        <th>Igst Amount</th>
+                                        <th>Pack_Per</th>
+                                        <th>Pack Amount</th>
+                                        <th>Remark</th>
+                                        <th>Type</th>
+                                        <th>Serial No</th>
+                                        <th>Item Code</th>
+                                      
+                                        <th>REPORT_TYPE</th>
+                                        <th>Sale_Rate</th>
+                                        <th>Taxable_Rate</th>
+                                        <th>Net_Wt</th>
+                                        <th>Packing_Wt</th>
+                                        <th>Packing_nos</th>                      
+
+
+                                        <th class="hidden-col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="btn-mt">
+                <button onclick="window.location.href='@Url.Action("Index", "SalesInvoiceList")'" type="button" class="btn btn-draft">
+                    <i class="fa fa-list"></i>Back to list
+                </button>
+            </div>
+        </div>
+        <div class="offset-md-7 col-md-2">
+            <div class="button-right btn-mt">
+                <button id="btn-save" type="submit" class="btn btn-primary"><i class="fa fa-save"></i>Save</button>
+            </div>
+        </div>
+    </div>
 </div>
+
 
 <script src="~/js/erpjs/sales/transaction/jobworkissuechallan/jobworkissuechallan.js"></script>
 <script src="~/js/erpjs/sales/transaction/jobworkissuechallan/jobworkissuechallanapi.js"></script>

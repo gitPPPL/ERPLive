@@ -34,7 +34,7 @@ async function cmbV_type() {
     try {
         const res = await fetch('/JobworkIssueChallan/DDlVType');
         const data = await res.json();
-        const ddl = $('#ddlDocType');
+        const ddl = $('#ddlDocumentType');
         // ddl.empty().append('<option value="">---Select Party Name---</option>');
         ddl.empty();
         data.forEach(item => {
@@ -109,8 +109,7 @@ async function DDlDoNo() {
             );
         });
 
-        // Initialize searchable dropdown
-        ddl.select2({  placeholder: '--- Select Do No ---', allowClear: true,  width: '100%'  });
+        ddl.select2({ placeholder: '--- Select Do No ---', allowClear: true, width: '100%' });
 
     } catch (error) {
         console.error("Error loading Doc Type:", error);

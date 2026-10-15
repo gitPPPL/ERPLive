@@ -4,7 +4,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const rowId = urlParams.get('id');
 let vtype = "";
 let vNo = "";
-
 const $tbody = $("#tblSalesProformaInvoice tbody");
 const form = $('#SalesProformaInvoiceform');
 const mode = urlParams.get('mode');
