@@ -23,7 +23,7 @@ body {
     display: none;
 }
 
-    .ERPPageLayout-overlay.active {
+.ERPPageLayout-overlay.active {
         display: block;
     }
 
@@ -35,7 +35,7 @@ body {
     transition: transform .3s ease;
 }
 
-    .ERPPageLayout-sidebar.collapsed {
+.ERPPageLayout-sidebar.collapsed {
         transform: translateX(-100%);
     }
 
@@ -44,10 +44,9 @@ body {
     transition: margin-left .3s ease;
 }
 
-    .ERPPageLayout-main.expanded {
+.ERPPageLayout-main.expanded {
         margin-left: 0;
     }
-
 
 .ERPPageLayout-sidebar {
     width: 250px;
@@ -64,11 +63,11 @@ body {
 }
 
     /* SCROLLBAR */
-    .ERPPageLayout-sidebar::-webkit-scrollbar {
+.ERPPageLayout-sidebar::-webkit-scrollbar {
         width: 6px;
     }
 
-    .ERPPageLayout-sidebar::-webkit-scrollbar-thumb {
+.ERPPageLayout-sidebar::-webkit-scrollbar-thumb {
         background: #ccd8c7;
         border-radius: 10px;
     }
@@ -85,7 +84,7 @@ body {
     background-color: #ededed;
 }
 
-    .ERPPageLayout-logo img {
+.ERPPageLayout-logo img {
         width: 150px;
         height: auto;
         object-fit: contain;
@@ -138,7 +137,7 @@ body {
     overflow: hidden;
 }
 
-    .ERPPageLayout-company-details h3 {
+.ERPPageLayout-company-details h3 {
         font-size: 12px;
         color: #ffffff;
         margin-bottom: 2px;
@@ -148,7 +147,7 @@ body {
         font-weight: 600;
     }
 
-    .ERPPageLayout-company-details span {
+.ERPPageLayout-company-details span {
         font-size: 11px;
         color: #b7c4b2;
         letter-spacing: 0.3px;
@@ -159,6 +158,7 @@ body {
     padding: 5px 15px;
     position: relative;
 }
+
 .ERPPageLayout-search-results {
     position: absolute;
     top: 58px;
@@ -175,7 +175,7 @@ body {
     border: 1px solid #e5e7eb;
 }
 
-    .ERPPageLayout-search-results a {
+.ERPPageLayout-search-results a {
         display: flex;
         align-items: center;
         gap: 10px;
@@ -187,11 +187,11 @@ body {
         transition: 0.25s;
     }
 
-        .ERPPageLayout-search-results a:last-child {
+.ERPPageLayout-search-results a:last-child {
             border-bottom: none;
         }
 
-        .ERPPageLayout-search-results a:hover {
+.ERPPageLayout-search-results a:hover {
             background: #edf4ea;
             padding-left: 18px;
         }
@@ -206,12 +206,12 @@ body {
     transition: 0.3s;
 }
 
-        .ERPPageLayout-search input:focus {
+.ERPPageLayout-search input:focus {
             border-color: #1C5E31;
             box-shadow: 0 0 0 3px rgba(28,94,49,0.08);
         }
 
-    .ERPPageLayout-search i {
+.ERPPageLayout-search i {
         position: absolute;
         left: 32px;
         top: 50%;
@@ -225,13 +225,13 @@ body {
     padding: 4px 10px;
 }
 
-    .ERPPageLayout-menu li {
+.ERPPageLayout-menu li {
         position: relative;
         margin-bottom: 2px;
     }
 
         /* ACTIVE BAR */
-        .ERPPageLayout-menu li.active::before {
+.ERPPageLayout-menu li.active::before {
             content: '';
             position: absolute;
             left: -12px;
@@ -257,13 +257,13 @@ body {
     font-weight: 500;
 }
 
-    .ERPPageLayout-menu-link span {
+.ERPPageLayout-menu-link span {
         display: flex;
         align-items: center;
         gap: 12px;
     }
 
-    .ERPPageLayout-menu-link:hover {
+.ERPPageLayout-menu-link:hover {
         background: #edf4ea;
         transform: translateX(3px);
         text-decoration: none;
@@ -277,7 +277,7 @@ body {
     box-shadow: 0 8px 18px rgba(28,94,49,0.18);
 }
 
-    .ERPPageLayout-menu li.active > .ERPPageLayout-menu-link i {
+.ERPPageLayout-menu li.active > .ERPPageLayout-menu-link i {
         color: #fff;
     }
 
@@ -290,23 +290,23 @@ body {
     margin-top: 5px;
 }
 
-    .ERPPageLayout-submenu.open {
+.ERPPageLayout-submenu.open {
         display: block;
     }
 
     /* THIRD LEVEL */
-    .ERPPageLayout-submenu .ERPPageLayout-submenu {
+.ERPPageLayout-submenu .ERPPageLayout-submenu {
         margin-left: 12px;
         padding-left: 14px;
         border-left: 1px dashed rgba(255,255,255,0.15);
     }
 
     /* SUBMENU LINKS */
-    .ERPPageLayout-submenu li {
+.ERPPageLayout-submenu li {
         margin-top: 2px;
     }
 
-        .ERPPageLayout-submenu li a {
+ .ERPPageLayout-submenu li a {
             display: flex;
             align-items: center;
             text-decoration: none;
@@ -317,7 +317,7 @@ body {
             transition: 0.25s;
         }
 
-        .ERPPageLayout-submenu li.active > a {
+ .ERPPageLayout-submenu li.active > a {
             background: rgb(233 255 240 / 12%);
             color: #ebfff2;
             font-weight: 600;
@@ -325,14 +325,14 @@ body {
     /* =========================================
    LEVEL 2 MENU (SECOND LEVEL) GREEN STYLE
 ========================================= */
-    .ERPPageLayout-submenu > li > a {
+ .ERPPageLayout-submenu > li > a {
         border-radius: 10px;
         transition: 0.25s ease;
     }
        
         /* ACTIVE / OPEN LEVEL 2 (LIKE "Transaction") */
-        .ERPPageLayout-submenu > li.active > a,
-        .ERPPageLayout-submenu > li > a.active-page {
+ .ERPPageLayout-submenu > li.active > a,
+ .ERPPageLayout-submenu > li > a.active-page {
             background: linear-gradient(135deg,#1C5E31,#2d7b46);
             color: #fff !important;
             font-weight: 600;
@@ -340,8 +340,8 @@ body {
         }
 
             /* ICON COLOR INSIDE LEVEL 2 */
-            .ERPPageLayout-submenu > li.active > a i,
-            .ERPPageLayout-submenu > li > a.active-page i {
+.ERPPageLayout-submenu > li.active > a i,
+.ERPPageLayout-submenu > li > a.active-page i {
                 color: #fff !important;
             }
 /* ARROW */
@@ -414,7 +414,7 @@ body {
     font-size: 14px;
 }
 
-    .ERPPageLayout-icon-btn:hover {
+.ERPPageLayout-icon-btn:hover {
         background: #1C5E31;
         color: #fff;
     }
@@ -437,7 +437,7 @@ body {
     font-weight: 500;
 }
 
-    .ERPPageLayout-user-btn img {
+.ERPPageLayout-user-btn img {
         width: 30px;
         height: 30px;
         border-radius: 50%;
@@ -456,11 +456,11 @@ body {
     z-index:999;
 }
 
-    .ERPPageLayout-user-menu.show {
+.ERPPageLayout-user-menu.show {
         display: block;
     }
 
-    .ERPPageLayout-user-menu a {
+.ERPPageLayout-user-menu a {
         display: flex;
         align-items: center;
         gap: 12px;
@@ -472,7 +472,7 @@ body {
         font-size: 12px;
     }
 
-        .ERPPageLayout-user-menu a:hover {
+.ERPPageLayout-user-menu a:hover {
             background: #ebebeb;
         }
 
