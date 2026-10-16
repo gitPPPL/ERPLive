@@ -857,6 +857,9 @@ $(document).ready(async function () {
 
 
 
+    $('#button_print').on('click', async function () {
+        await GetTransitReportFile("", true);
+    });
 
 
 

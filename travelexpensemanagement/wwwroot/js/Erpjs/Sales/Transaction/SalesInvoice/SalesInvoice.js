@@ -963,10 +963,7 @@ async function checkValidDate() {
 async function GetTransitReportFile(citype, exportPrint, si = false, ci = false, lc = false) {
 
     if (!rowId) {
-        showToast("Please save the data before printing the report.", {
-            type: "info"
-        });
-        throw new Error("No docId");
+        showToast("Please save the data before printing the report.", { type: "info" });
     }
 
     let reportName = "";
@@ -981,8 +978,7 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
     const IGSTAMT = $('#NumIGSTAmount').val();
     const godownNo = $('#ddlGodown').val();
     const godownType = $('#ddlGodown option:selected').text().trim();
-    const PackType =  $.trim($('#ddlPackNo option:selected').text())  .split('-') .pop() .trim() || "";
-
+    const PackType = $.trim($('#ddlPackNo option:selected').text()).split('-').pop().trim() || "";
     const $firstRow = $('#tblSalesInvoice tbody tr').eq(0);
     const SaudaType = $.trim($firstRow.find('.TxtSaudaType').val() || "");
     const SaudaNo = $.trim($firstRow.find('.TxtSaudaNo').val() || "");
@@ -991,22 +987,12 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
     const cbWithSign = $('#chk_PrintWithSignature').is(':checked') ? 1 : 0;
     const cbwithFreightFOB = $('#ch_report').is(':checked') ? 1 : 0;
 
-    // ---------------------------------------------------------
-    // Get Pack Nos
-    // ---------------------------------------------------------
-
     let packNos = "";
 
     $('#tblSalesInvoice tbody tr').each(function () {
-
         const $row = $(this);
-
-        const itemName =
-            $.trim($row.find('.ddlProductName').val() || "");
-
-        const packNo =
-            $.trim($row.find('.TxtPackno').val() || "");
-
+        const itemName = $.trim($row.find('.ddlProductName').val() || "");
+        const packNo = $.trim($row.find('.TxtPackno').val() || "");
         if (itemName !== "" && packNo !== "") {
             packNos += packNo + ",";
         }
@@ -1014,12 +1000,8 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
 
     packNos = packNos.replace(/,$/, "");
 
-    // ---------------------------------------------------------
-    // Print Validation
-    // ---------------------------------------------------------
-
     const validation = await $.ajax({
-        url: '/SalesInvoice/PrintValidation',
+        url: '/JobworkIssueChallan/PrintValidation',
         type: 'POST',
         contentType: 'application/json; charset=utf-8',
 
@@ -1048,36 +1030,24 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
         })
     });
 
+    console.log("validation", validation);
 
-    // ---------------------------------------------------------
-    // Validation Response
-    // ---------------------------------------------------------
-
-    if (validation.message1 != '')
-    {
+    if (validation.message1 != '') {
         showToast(validation.message1, { type: "warning" });
-        return;
     }
-    if (validation.message2 != '')
-    {
+    if (validation.message2 != '') {
         showToast(validation.message2, { type: "warning" });
-        return;
     }
 
-    if (validation.message3 != '')
-    {
+    if (validation.message3 != '') {
         showToast(validation.message3, { type: "warning" });
-        return;
     }
 
-    if (validation.message4 != '')
-    {
+    if (validation.message4 != '') {
         showToast(validation.message4, { type: "warning" });
-        return;
     }
 
-    if (validation.success == false)
-    {
+    if (validation.success == false) {
         showToast(validation.message, { type: "warning" });
         return;
     }
@@ -1101,43 +1071,34 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
 
     let containerDetailFormula = "";
 
-    if (exportPrint === true)
-    {
-        containerDetailFormula = "{tempContainerdetail.SI_TYPE} = '" + v_type +  "'" + " AND {tempContainerdetail.SI_NO} = " + (parseInt(v_no) || 0) + " AND {tempContainerdetail.COMP_CODE} = " +
-        globalVars.CompCode;
+    if (exportPrint === true) {
+        containerDetailFormula = "{tempContainerdetail.SI_TYPE} = '" + v_type + "'" + " AND {tempContainerdetail.SI_NO} = " + (parseInt(v_no) || 0) + " AND {tempContainerdetail.COMP_CODE} = " +
+            globalVars.CompCode;
     }
-
-
     // ---------------------------------------------------------
     // Report Name
     // ---------------------------------------------------------
 
     let dft = "";
 
-
-    if (v_type === "SAGT" || v_type === "SASI" || v_type === "SAST")
-    {
+    if (v_type === "SAGT" || v_type === "SASI" || v_type === "SAST") {
         RPTNAME = "TAX INVOICE" + dft;
     }
-    else if (v_type === "SACH")
-    {
+    else if (v_type === "SACH") {
         RPTNAME = "DELIVERY CHALLAN" + dft;
     }
     else if (v_type === "SAJI") {
-
         RPTNAME = "DELIVERY CHALLAN (JOBWORK)" + dft;
     }
     else {
-
         RPTNAME = "BILL OF SUPPLY" + dft;
     }
-
 
     // ---------------------------------------------------------
     // Main Report Selection Formula
     // ---------------------------------------------------------
 
-    const formula =  "{SALE1.V_TYPE} = '" +  v_type + "'" +
+    const formula = "{SALE1.V_TYPE} = '" + v_type + "'" +
         " AND {SALE1.V_NO} = " +
         (parseInt(v_no) || 0) +
         " AND {SALE1.COMP_CODE} = " +
@@ -1153,12 +1114,9 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
 
     let withSign = "";
 
-    if ( cbWithSign === 1 && String(globalVars.CompCode) === "1" ) {
-
+    if (cbWithSign === 1 && String(globalVars.CompCode) === "1") {
         withSign = "1";
     }
-
-
     // ---------------------------------------------------------
     // With Freight
     // ---------------------------------------------------------
@@ -1166,239 +1124,109 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
     let withFreight = "";
 
     if (cbwithFreightFOB === 1) {
-
         withFreight = "1";
     }
-
 
     // ---------------------------------------------------------
     // Godown Address
     // ---------------------------------------------------------
 
-    const godownAdd =  validation.godownAdd || "";
-
+    const godownAdd = validation.godownAdd || "";
     let godownAddText = "";
-
-    if (godownAdd !== "")
-    {
+    if (godownAdd !== "") {
         godownAddText = "Ship From : " + godownAdd;
     }
-
-    const txtnet_amt =  parseFloat( $('#NumOtherNetAmount').val() ) || 0;
-
-
-    const inWord = numberToWordsCurrency(  txtnet_amt, "Rs.", "PAISE"  );
-
-
-
+    const txtnet_amt = parseFloat($('#NumOtherNetAmount').val()) || 0;
+    const inWord = numberToWordsCurrency(txtnet_amt, "Rs.", "PAISE");
     let INUSD = "";
-
-    const exRate =
-        parseFloat(
-            $('#NumExRate').val()
-        ) || 0;
-
-
-    const currency =
-        $('#ddlCurrency option:selected')
-            .text()
-            .trim() || "Rs";
-
+    const exRate = parseFloat($('#NumExRate').val()) || 0;
+    const currency = $('#ddlCurrency option:selected').text().trim() || "Rs";
 
     if (exRate > 0) {
-
         let usdAmt = 0;
 
-
-        $('#tblSalesInvoice tbody tr').each(function ()
-        {
-
+        $('#tblSalesInvoice tbody tr').each(function () {
             const $row = $(this);
-            const qty = $('#ChkPCS').is(':checked') ? parseFloat(  $row.find('.TxtNos').val()  ) || 0  : parseFloat(  $row.find('.TxtNetQty').val()  ) || 0;
-            const rate =  parseFloat(  $row.find('.TxtRate').val() ) || 0;
+            const qty = $('#ChkPCS').is(':checked') ? parseFloat($row.find('.TxtNos').val()) || 0 : parseFloat($row.find('.TxtNetQty').val()) || 0;
+            const rate = parseFloat($row.find('.TxtRate').val()) || 0;
             usdAmt += qty * rate;
         });
 
 
-        usdAmt =
-            Math.round(
-                usdAmt * 1000
-            ) / 1000;
+        usdAmt = Math.round(usdAmt * 1000) / 1000;
 
 
         if (usdAmt > 0) {
 
-            INUSD =
-                numberToWordsCurrency(
-                    Math.round(
-                        usdAmt * 100
-                    ) / 100,
-
-                    currency,
-
-                    "CENT"
-                );
-
+            INUSD = numberToWordsCurrency(Math.round(usdAmt * 100) / 100, currency, "CENT");
         }
         else {
-
             INUSD = " .";
         }
     }
-
-
     // ---------------------------------------------------------
     // Challan Reference
     // ---------------------------------------------------------
-
     let challanRef = "";
 
-
     if (String(globalVars.CompCode) === "1") {
-
-        const challanNo =
-            $.trim(
-                validation.challanNo || ""
-            );
-
-
+        const challanNo = $.trim(validation.challanNo || "");
         if (challanNo.length > 1) {
-
-            challanRef =
-                "Agst. Challan No.:" +
-                challanNo;
+            challanRef = "Agst. Challan No.:" + challanNo;
         }
     }
 
-
-    // ---------------------------------------------------------
-    // Company Name 1
-    // ---------------------------------------------------------
-
     let compName1 = "";
 
-
-    if (
-        String(globalVars.CompCode) !== "3" &&
-        String(globalVars.CompCode) !== "8"
-    ) {
-
-        compName1 =
-            "An ISO 9001:2015 Certified Company";
+    if (String(globalVars.CompCode) !== "3" && String(globalVars.CompCode) !== "8") {
+        compName1 = "An ISO 9001:2015 Certified Company";
     }
 
-
-    // ---------------------------------------------------------
-    // Company Registration
-    // ---------------------------------------------------------
 
     let compReg = "";
 
-
-    if (
-        String(globalVars.CompCode) !== "3"
-    ) {
-
-        compReg =
-            "Reg.Office :" +
-            (globalVars.RegAdd1 || "") +
-            ", " +
-            (globalVars.RegAdd2 || "") +
-            "  CIN :" +
-            (globalVars.CINNO || "");
+    if (String(globalVars.CompCode) !== "3") {
+        compReg = "Reg.Office :" + (globalVars.RegAdd1 || "") + ", " + (globalVars.RegAdd2 || "") + "  CIN :" + (globalVars.CINNO || "");
     }
 
 
-    // =========================================================
-    // PAYLOAD
-    // =========================================================
 
     const payload = {
-
-        // Main Report
         Reportname: reportName,
-
-        // Main Report Record Selection Formula
         selectionFormula: formula,
-
-        // Database
         Database: database,
-
-
-        // -----------------------------------------------------
-        // Parameters
-        // -----------------------------------------------------
-
         Parameters: {
-
-            comp_name:
-                globalVars.CompanyName || "",
-
-            comp_add1:
-                globalVars.Address1 || "",
-
-            comp_add2:
-                globalVars.Address2 || "",
-
-            comp_phone:
-                "Mobile : " +
-                (globalVars.Phone || ""),
-
-            PAN:
-                "PAN NO.   : " +
-                (globalVars.PAN || ""),
-
-            EMAIL:
-                "Email   : " +
-                (globalVars.Email || ""),
-
-            Website:
-                "Web     : " +
-                (globalVars.pubCompWebsite || ""),
-
-            GST:
-                "GST NO.   : " +
-                (globalVars.GST || "")
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",
+            comp_phone: "Mobile : " + (globalVars.Phone || ""),
+            PAN: "PAN NO. : " + (globalVars.PAN || ""),
+            EMAIL: "Email : " + (globalVars.Email || ""),
+            Website: "Web : " + (globalVars.pubCompWebsite || ""),
+            GST: "GST NO. : " + (globalVars.GST || "")
         },
 
-
-        // =====================================================
-        // SUBREPORT
-        // =====================================================
-
         Subreports: {
-
             "rptContainerDetail.rpt": {
-
-                RecordSelectionFormula:
-                    containerDetailFormula
+                RecordSelectionFormula: containerDetailFormula
             }
         }
     };
 
 
-    // ---------------------------------------------------------
-    // Optional Parameters
-    // ---------------------------------------------------------
 
     if (withSign !== "") {
-
-        payload.Parameters.withSign =
-            withSign;
+        payload.Parameters.withSign = withSign;
     }
-
 
     if (withFreight !== "") {
 
-        payload.Parameters.withFreight =
-            withFreight;
+        payload.Parameters.withFreight = withFreight;
     }
 
 
     if (godownAddText !== "") {
-
-        payload.Parameters.godownAdd =
-            godownAddText;
+        payload.Parameters.godownAdd = godownAddText;
     }
 
 
@@ -1408,183 +1236,77 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
             compName1;
     }
 
-
     if (compReg !== "") {
-
-        payload.Parameters.Comp_reg =
-            compReg;
+        payload.Parameters.Comp_reg = compReg;
     }
-
 
     if (inWord !== "") {
-
-        payload.Parameters.INWORD =
-            inWord;
+        payload.Parameters.INWORD = inWord;
     }
-
 
     if (INUSD !== "") {
-
-        payload.Parameters.INUSD =
-            INUSD;
+        payload.Parameters.INUSD = INUSD;
     }
 
-
     if (challanRef !== "") {
-
-        payload.Parameters.challanRef =
-            challanRef;
+        payload.Parameters.challanRef = challanRef;
     }
 
 
     if (RPTNAME !== "") {
-
-        payload.Parameters.RPTNAME =
-            RPTNAME;
+        payload.Parameters.RPTNAME = RPTNAME;
     }
 
 
-    // ---------------------------------------------------------
-    // Debug
-    // ---------------------------------------------------------
-
-    console.log(
-        "Main Formula:",
-        formula
-    );
-
-    console.log(
-        "Container Detail Formula:",
-        containerDetailFormula
-    );
-
-    console.log(
-        "Final Payload:",
-        payload
-    );
-
-
-    // ---------------------------------------------------------
-    // Timestamp
-    // ---------------------------------------------------------
-
     const now = new Date();
 
-    const timestamp =
-        String(now.getDate())
-            .padStart(2, '0') +
-
-        String(now.getMonth() + 1)
-            .padStart(2, '0') +
-
-        String(now.getFullYear())
-            .slice(-2) +
-
+    const timestamp = String(now.getDate()).padStart(2, '0') +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getFullYear()).slice(-2) +
         "_" +
-
-        String(now.getHours())
-            .padStart(2, '0') +
-
-        String(now.getMinutes())
-            .padStart(2, '0') +
-
-        String(now.getSeconds())
-            .padStart(2, '0');
-
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
 
     // ---------------------------------------------------------
     // Generate Report
     // ---------------------------------------------------------
 
     $.ajax({
-
-        url:
-            'http://localhost:24085/Report/PendingQCReport',
-
+        url: 'http://localhost:24085/Report/PendingQCReport',
         type: 'POST',
-
-        data:
-            JSON.stringify(payload),
-
-        contentType:
-            "application/json",
-
-        xhrFields: {
-            responseType: 'blob'
-        },
-
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: { responseType: 'blob' },
 
         success: function (response) {
 
-            const file =
-                new Blob(
-                    [response],
-                    {
-                        type: 'application/pdf'
-                    }
-                );
+            const file = new Blob([response], { type: 'application/pdf' });
 
 
-            const fileName =
-                `${reportName}_${timestamp}.pdf`;
-
-
-            const link =
-                document.createElement('a');
-
-
-            link.href =
-                URL.createObjectURL(file);
-
-
-            link.download =
-                fileName;
-
-
-            document.body.appendChild(
-                link
-            );
-
-
+            const fileName = `${reportName}_${timestamp}.pdf`;
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(link);
             link.click();
-
-
-            document.body.removeChild(
-                link
-            );
-
+            document.body.removeChild(link);
         },
 
 
-        error: function (
-            xhr,
-            status,
-            error
-        ) {
-
+        error: function (xhr, status, error) {
             if (xhr.status === 0) {
 
-                console.error(
-                    "Cannot connect to API. Is the backend running?"
-                );
+                console.error("Cannot connect to API. Is the backend running?");
 
             }
             else {
 
-                console.error(
-                    'Error generating report:',
-                    xhr.status,
-                    xhr.statusText,
-                    error
-                );
+                console.error('Error generating report:', xhr.status, xhr.statusText, error);
 
 
                 if (xhr.responseText) {
-
-                    console.error(
-                        'Response:',
-                        xhr.responseText
-                    );
+                    console.error('Response:', xhr.responseText);
                 }
             }
         }

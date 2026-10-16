@@ -738,9 +738,19 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 con.Open();
 
 
-                if(request == null)
+                if (request == null)
                 {
-                    return Json(new { success = false, message = "Request Showing Null", ReportName = "", godownAdd = "" });
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Request Showing Null",
+                        ReportName = "",
+                        godownAdd = "",
+                        message1 = "",
+                        message2 = "",
+                        message3 = "",
+                        message4 = ""
+                    });
                 }
 
                 // GST Tax Validation
@@ -752,7 +762,15 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 {
                     if (getdata.PubUserLevel != "1")
                     {
-                        return Json(new { success = false, message = "ERROR! Please check Tax not calculated in Invoice." });
+                        return Json(new
+                        {
+                            success = false,
+                            message = "ERROR! Please check Tax not calculated in Invoice.",
+                            message1 = "",
+                            message2 = "",
+                            message3 = "",
+                            message4 = ""
+                        });
                     }
                 }
 
@@ -813,44 +831,16 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                                 if (cha == 0 && forwarder == 0 && shipline == 0 && etaPolEmpty && etaPodEmpty)
                                 {
-
-
-                                    //return Json(new
-                                    //{
-                                    //    success = true,
-                                    //    warning = true,
-                                    //    message = $"Please entry necessary fields in Export Detail " +
-                                    //    $"(like Actual Freight, CHA, Forwarder, Shipline, " +
-                                    //    $"ETA POL Date, ETA POD Date) of Invoice No:{request.V_NO}"
-                                    //});
-
                                     message3 = $"Please entry necessary fields in Export Detail " +
                                         $"(like Actual Freight, CHA, Forwarder, Shipline, " +
                                         $"ETA POL Date, ETA POD Date) of Invoice No:{request.V_NO}";
-
-
-
-
                                 }
                             }
                             else
                             {
-
-                                //return Json(new
-                                //{
-                                //    success = true,
-                                //    warning = true,
-                                //    message = $"Export Detail not feeded " +
-                                //    $"(like Actual Freight, CHA, Forwarder, Shipline, " +
-                                //    $"ETA POL Date, ETA POD Date) in Invoice No:{request.V_NO}"
-                                //});
-
-
                                 message4 = $"Export Detail not feeded " +
                                     $"(like Actual Freight, CHA, Forwarder, Shipline, " +
                                     $"ETA POL Date, ETA POD Date) in Invoice No:{request.V_NO}";
-
-
                             }
                         }
                     }
@@ -1079,22 +1069,22 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 else
                 {
 
-                    if(getdata.PubCompCode == "2")
+                    if (getdata.PubCompCode == "2")
                     {
                         request.ReportName = "INVOICE_GST1PLPLQR_DETAIL";
                     }
-                    else if(getdata.PubCompCode == "5")
+                    else if (getdata.PubCompCode == "5")
                     {
                         request.ReportName = "INVOICE_GST1SALASARQR_DETAIL";
                     }
-                    else if(getdata.PubCompCode == "4")
+                    else if (getdata.PubCompCode == "4")
                     {
                         request.ReportName = "INVOICE_GST1PEPLQR_DETAIL";
                     }
-                    else if(getdata.PubCompCode == "7")
+                    else if (getdata.PubCompCode == "7")
                     {
 
-                        if(request.cbDetail == 1)
+                        if (request.cbDetail == 1)
                         {
                             request.ReportName = "INVOICE_GST1KQRNew";
 
@@ -1103,15 +1093,15 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                         {
                             request.ReportName = "INVOICE_GST1KQRNewSumm";
                         }
-                       
+
                     }
-                    else if(getdata.PubCompCode == "8")
+                    else if (getdata.PubCompCode == "8")
                     {
                         request.ReportName = "INVOICE_GST1QR_SCTPL";
                     }
                     else
                     {
-                        if(request.V_TYPE == "Flakes" && request.cbDetail == 1)
+                        if (request.V_TYPE == "Flakes" && request.cbDetail == 1)
                         {
                             request.ReportName = "INVOICE_GST1QRSumm";
                         }
@@ -1127,7 +1117,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 V_type='{request.V_TYPE}' and  V_no= {request.V_NO} and Comp_code= {getdata.PubCompCode} and Branch_code={getdata.PubBranchCode} ");
 
 
-                if(pino != "")
+                if (pino != "")
                 {
                     string pidt = GetText(@$"Select format(V_DATE,'dd/MM/yyyy') From SALE1 Where Concat(V_type,V_no)= '{pino}' and Comp_code={getdata.PubCompCode}  and Branch_code={getdata.PubBranchCode}");
 
@@ -1140,23 +1130,23 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                 }
 
-
-
                 request.godownAdd = GetText(@$"Select isnull(COMP_NAME,'')+', '+ isnull(ADDRESS,'')+', '+ isnull(ADDRESS2,'') as adress from GODOWN_MAST where CODE= {request.godownNo} and COMP_CODE={getdata.PubCompCode}");
 
-
-
-
-                return Json(new { success = true, message = "Print validation successful.", ReportName = request.ReportName , godownAdd = request.godownAdd , message1 = message1,message2 = message2 ,
-                message3 = message3 , message4 = message4
-                
-                
-                
+                return Json(new
+                {
+                    success = true,
+                    message = "Print validation successful.",
+                    ReportName = request.ReportName,
+                    godownAdd = request.godownAdd,
+                    message1 = message1,
+                    message2 = message2,
+                    message3 = message3,
+                    message4 = message4
                 });
             }
         }
 
-         public class PrintValidationRequest
+        public class PrintValidationRequest
                 {
                     public string? V_TYPE { get; set; }
                     public int? V_NO { get; set; }              

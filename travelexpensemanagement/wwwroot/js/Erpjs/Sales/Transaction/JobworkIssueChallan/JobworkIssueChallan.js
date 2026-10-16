@@ -959,7 +959,8 @@ async function checkValidDate() {
     }
 } 
 
-async function GetTransitReportFile(citype, exportPrint, si = false, ci = false, lc = false) {
+async function GetTransitReportFile(citype, exportPrint, si = false, ci = false, lc = false)
+{
 
     if (!rowId)
     {
@@ -979,7 +980,6 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
     const godownNo = $('#ddlGodown').val();
     const godownType = $('#ddlGodown option:selected').text().trim();
     const PackType =  $.trim($('#ddlPackNo option:selected').text())  .split('-') .pop() .trim() || "";
-
     const $firstRow = $('#tblSalesInvoice tbody tr').eq(0);
     const SaudaType = $.trim($firstRow.find('.TxtSaudaType').val() || "");
     const SaudaNo = $.trim($firstRow.find('.TxtSaudaNo').val() || "");
@@ -988,35 +988,23 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
     const cbWithSign = $('#chk_PrintWithSignature').is(':checked') ? 1 : 0;
     const cbwithFreightFOB = $('#ch_report').is(':checked') ? 1 : 0;
 
-    // ---------------------------------------------------------
-    // Get Pack Nos
-    // ---------------------------------------------------------
-
     let packNos = "";
 
-    $('#tblSalesInvoice tbody tr').each(function () {
-
+    $('#tblSalesInvoice tbody tr').each(function ()
+    {
         const $row = $(this);
-
-        const itemName =
-            $.trim($row.find('.ddlProductName').val() || "");
-
-        const packNo =
-            $.trim($row.find('.TxtPackno').val() || "");
-
-        if (itemName !== "" && packNo !== "") {
+        const itemName = $.trim($row.find('.ddlProductName').val() || "");
+        const packNo =  $.trim($row.find('.TxtPackno').val() || "");
+        if (itemName !== "" && packNo !== "")
+        {
             packNos += packNo + ",";
         }
     });
 
     packNos = packNos.replace(/,$/, "");
 
-    // ---------------------------------------------------------
-    // Print Validation
-    // ---------------------------------------------------------
-
     const validation = await $.ajax({
-        url: '/SalesInvoice/PrintValidation',
+        url: '/JobworkIssueChallan/PrintValidation',
         type: 'POST',
         contentType: 'application/json; charset=utf-8',
 
@@ -1045,32 +1033,25 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
         })
     });
 
-
-    // ---------------------------------------------------------
-    // Validation Response
-    // ---------------------------------------------------------
+    console.log("validation", validation);
 
     if (validation.message1 != '')
     {
         showToast(validation.message1, { type: "warning" });
-        return;
     }
     if (validation.message2 != '')
     {
         showToast(validation.message2, { type: "warning" });
-        return;
     }
 
     if (validation.message3 != '')
     {
         showToast(validation.message3, { type: "warning" });
-        return;
     }
 
     if (validation.message4 != '')
     {
         showToast(validation.message4, { type: "warning" });
-        return;
     }
 
     if (validation.success == false)
@@ -1103,14 +1084,11 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
         containerDetailFormula = "{tempContainerdetail.SI_TYPE} = '" + v_type +  "'" + " AND {tempContainerdetail.SI_NO} = " + (parseInt(v_no) || 0) + " AND {tempContainerdetail.COMP_CODE} = " +
         globalVars.CompCode;
     }
-
-
     // ---------------------------------------------------------
     // Report Name
     // ---------------------------------------------------------
 
     let dft = "";
-
 
     if (v_type === "SAGT" || v_type === "SASI" || v_type === "SAST")
     {
@@ -1120,15 +1098,14 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
     {
         RPTNAME = "DELIVERY CHALLAN" + dft;
     }
-    else if (v_type === "SAJI") {
-
+    else if (v_type === "SAJI")
+    {
         RPTNAME = "DELIVERY CHALLAN (JOBWORK)" + dft;
     }
-    else {
-
+    else
+    {
         RPTNAME = "BILL OF SUPPLY" + dft;
     }
-
 
     // ---------------------------------------------------------
     // Main Report Selection Formula
@@ -1150,66 +1127,43 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
 
     let withSign = "";
 
-    if ( cbWithSign === 1 && String(globalVars.CompCode) === "1" ) {
-
+    if (cbWithSign === 1 && String(globalVars.CompCode) === "1")
+    {
         withSign = "1";
     }
-
-
     // ---------------------------------------------------------
     // With Freight
     // ---------------------------------------------------------
 
     let withFreight = "";
 
-    if (cbwithFreightFOB === 1) {
-
+    if (cbwithFreightFOB === 1)
+    {
         withFreight = "1";
     }
-
 
     // ---------------------------------------------------------
     // Godown Address
     // ---------------------------------------------------------
 
     const godownAdd =  validation.godownAdd || "";
-
     let godownAddText = "";
-
     if (godownAdd !== "")
     {
         godownAddText = "Ship From : " + godownAdd;
     }
-
     const txtnet_amt =  parseFloat( $('#NumOtherNetAmount').val() ) || 0;
-
-
     const inWord = numberToWordsCurrency(  txtnet_amt, "Rs.", "PAISE"  );
-
-
-
     let INUSD = "";
+    const exRate =  parseFloat( $('#NumExRate').val() ) || 0;
+    const currency = $('#ddlCurrency option:selected').text().trim() || "Rs";
 
-    const exRate =
-        parseFloat(
-            $('#NumExRate').val()
-        ) || 0;
-
-
-    const currency =
-        $('#ddlCurrency option:selected')
-            .text()
-            .trim() || "Rs";
-
-
-    if (exRate > 0) {
-
+    if (exRate > 0)
+    {
         let usdAmt = 0;
-
 
         $('#tblSalesInvoice tbody tr').each(function ()
         {
-
             const $row = $(this);
             const qty = $('#ChkPCS').is(':checked') ? parseFloat(  $row.find('.TxtNos').val()  ) || 0  : parseFloat(  $row.find('.TxtNetQty').val()  ) || 0;
             const rate =  parseFloat(  $row.find('.TxtRate').val() ) || 0;
@@ -1217,185 +1171,88 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
         });
 
 
-        usdAmt =
-            Math.round(
-                usdAmt * 1000
-            ) / 1000;
+        usdAmt = Math.round( usdAmt * 1000) / 1000;
 
 
-        if (usdAmt > 0) {
+        if (usdAmt > 0)
+        {
 
-            INUSD =
-                numberToWordsCurrency(
-                    Math.round(
-                        usdAmt * 100
-                    ) / 100,
-
-                    currency,
-
-                    "CENT"
-                );
-
+            INUSD = numberToWordsCurrency( Math.round( usdAmt * 100 ) / 100, currency, "CENT" );
         }
-        else {
-
+        else
+        {
             INUSD = " .";
         }
     }
-
-
     // ---------------------------------------------------------
     // Challan Reference
     // ---------------------------------------------------------
-
     let challanRef = "";
 
-
-    if (String(globalVars.CompCode) === "1") {
-
-        const challanNo =
-            $.trim(
-                validation.challanNo || ""
-            );
-
-
-        if (challanNo.length > 1) {
-
-            challanRef =
-                "Agst. Challan No.:" +
-                challanNo;
+    if (String(globalVars.CompCode) === "1")
+    {
+        const challanNo = $.trim(  validation.challanNo || "" );
+        if (challanNo.length > 1)
+        {
+            challanRef = "Agst. Challan No.:" + challanNo;
         }
     }
 
-
-    // ---------------------------------------------------------
-    // Company Name 1
-    // ---------------------------------------------------------
-
     let compName1 = "";
 
-
-    if (
-        String(globalVars.CompCode) !== "3" &&
-        String(globalVars.CompCode) !== "8"
-    ) {
-
-        compName1 =
-            "An ISO 9001:2015 Certified Company";
+    if (String(globalVars.CompCode) !== "3" && String(globalVars.CompCode) !== "8")
+    {
+        compName1 = "An ISO 9001:2015 Certified Company";
     }
 
-
-    // ---------------------------------------------------------
-    // Company Registration
-    // ---------------------------------------------------------
 
     let compReg = "";
 
-
-    if (
-        String(globalVars.CompCode) !== "3"
-    ) {
-
-        compReg =
-            "Reg.Office :" +
-            (globalVars.RegAdd1 || "") +
-            ", " +
-            (globalVars.RegAdd2 || "") +
-            "  CIN :" +
-            (globalVars.CINNO || "");
+    if (String(globalVars.CompCode) !== "3")
+    {
+        compReg = "Reg.Office :" + (globalVars.RegAdd1 || "") + ", " + (globalVars.RegAdd2 || "") + "  CIN :" + (globalVars.CINNO || "");
     }
 
 
-    // =========================================================
-    // PAYLOAD
-    // =========================================================
 
     const payload = {
-
-        // Main Report
         Reportname: reportName,
-
-        // Main Report Record Selection Formula
         selectionFormula: formula,
-
-        // Database
         Database: database,
-
-
-        // -----------------------------------------------------
-        // Parameters
-        // -----------------------------------------------------
-
         Parameters: {
-
-            comp_name:
-                globalVars.CompanyName || "",
-
-            comp_add1:
-                globalVars.Address1 || "",
-
-            comp_add2:
-                globalVars.Address2 || "",
-
-            comp_phone:
-                "Mobile : " +
-                (globalVars.Phone || ""),
-
-            PAN:
-                "PAN NO.   : " +
-                (globalVars.PAN || ""),
-
-            EMAIL:
-                "Email   : " +
-                (globalVars.Email || ""),
-
-            Website:
-                "Web     : " +
-                (globalVars.pubCompWebsite || ""),
-
-            GST:
-                "GST NO.   : " +
-                (globalVars.GST || "")
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",
+            comp_phone: "Mobile : " + (globalVars.Phone || ""),
+            PAN: "PAN NO. : " + (globalVars.PAN || ""),
+            EMAIL: "Email : " +  (globalVars.Email || ""),
+            Website: "Web : " +  (globalVars.pubCompWebsite || ""),
+            GST: "GST NO. : " + (globalVars.GST || "")
         },
 
-
-        // =====================================================
-        // SUBREPORT
-        // =====================================================
-
         Subreports: {
-
             "rptContainerDetail.rpt": {
-
-                RecordSelectionFormula:
-                    containerDetailFormula
+                RecordSelectionFormula: containerDetailFormula
             }
         }
     };
 
 
-    // ---------------------------------------------------------
-    // Optional Parameters
-    // ---------------------------------------------------------
 
-    if (withSign !== "") {
-
-        payload.Parameters.withSign =
-            withSign;
+    if (withSign !== "")
+    {
+        payload.Parameters.withSign = withSign;
     }
-
 
     if (withFreight !== "") {
 
-        payload.Parameters.withFreight =
-            withFreight;
+        payload.Parameters.withFreight = withFreight;
     }
 
 
-    if (godownAddText !== "") {
-
-        payload.Parameters.godownAdd =
-            godownAddText;
+    if (godownAddText !== "")
+    {
+        payload.Parameters.godownAdd = godownAddText;
     }
 
 
@@ -1405,183 +1262,85 @@ async function GetTransitReportFile(citype, exportPrint, si = false, ci = false,
             compName1;
     }
 
+    if (compReg !== "")
+    {
+        payload.Parameters.Comp_reg = compReg;
+    }
 
-    if (compReg !== "") {
+    if (inWord !== "")
+    {
+        payload.Parameters.INWORD = inWord;
+    }
 
-        payload.Parameters.Comp_reg =
-            compReg;
+    if (INUSD !== "")
+    {
+        payload.Parameters.INUSD = INUSD;
+    }
+
+    if (challanRef !== "")
+    {
+        payload.Parameters.challanRef = challanRef;
     }
 
 
-    if (inWord !== "") {
-
-        payload.Parameters.INWORD =
-            inWord;
+    if (RPTNAME !== "")
+    {
+        payload.Parameters.RPTNAME = RPTNAME;
     }
 
-
-    if (INUSD !== "") {
-
-        payload.Parameters.INUSD =
-            INUSD;
-    }
-
-
-    if (challanRef !== "") {
-
-        payload.Parameters.challanRef =
-            challanRef;
-    }
-
-
-    if (RPTNAME !== "") {
-
-        payload.Parameters.RPTNAME =
-            RPTNAME;
-    }
-
-
-    // ---------------------------------------------------------
-    // Debug
-    // ---------------------------------------------------------
-
-    console.log(
-        "Main Formula:",
-        formula
-    );
-
-    console.log(
-        "Container Detail Formula:",
-        containerDetailFormula
-    );
-
-    console.log(
-        "Final Payload:",
-        payload
-    );
-
-
-    // ---------------------------------------------------------
-    // Timestamp
-    // ---------------------------------------------------------
 
     const now = new Date();
 
-    const timestamp =
-        String(now.getDate())
-            .padStart(2, '0') +
-
-        String(now.getMonth() + 1)
-            .padStart(2, '0') +
-
-        String(now.getFullYear())
-            .slice(-2) +
-
+    const timestamp = String(now.getDate()) .padStart(2, '0') +
+        String(now.getMonth() + 1) .padStart(2, '0') +
+        String(now.getFullYear()) .slice(-2) +
         "_" +
-
-        String(now.getHours())
-            .padStart(2, '0') +
-
-        String(now.getMinutes())
-            .padStart(2, '0') +
-
-        String(now.getSeconds())
-            .padStart(2, '0');
-
+        String(now.getHours()) .padStart(2, '0') +
+        String(now.getMinutes()) .padStart(2, '0') +
+        String(now.getSeconds()) .padStart(2, '0');
 
     // ---------------------------------------------------------
     // Generate Report
     // ---------------------------------------------------------
 
     $.ajax({
-
-        url:
-            'http://localhost:24085/Report/PendingQCReport',
-
+        url: 'http://localhost:24085/Report/PendingQCReport',
         type: 'POST',
-
-        data:
-            JSON.stringify(payload),
-
-        contentType:
-            "application/json",
-
-        xhrFields: {
-            responseType: 'blob'
-        },
-
+        data: JSON.stringify(payload),
+        contentType: "application/json",
+        xhrFields: { responseType: 'blob' },
 
         success: function (response) {
 
-            const file =
-                new Blob(
-                    [response],
-                    {
-                        type: 'application/pdf'
-                    }
-                );
+            const file = new Blob( [response], { type: 'application/pdf' });
 
 
-            const fileName =
-                `${reportName}_${timestamp}.pdf`;
-
-
-            const link =
-                document.createElement('a');
-
-
-            link.href =
-                URL.createObjectURL(file);
-
-
-            link.download =
-                fileName;
-
-
-            document.body.appendChild(
-                link
-            );
-
-
+            const fileName = `${reportName}_${timestamp}.pdf`;
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = fileName;
+            document.body.appendChild(  link );
             link.click();
-
-
-            document.body.removeChild(
-                link
-            );
-
+            document.body.removeChild( link );
         },
 
 
-        error: function (
-            xhr,
-            status,
-            error
-        ) {
+        error: function (xhr, status, error)
+        {
+            if (xhr.status === 0)
+            {
 
-            if (xhr.status === 0) {
-
-                console.error(
-                    "Cannot connect to API. Is the backend running?"
-                );
+                console.error( "Cannot connect to API. Is the backend running?" );
 
             }
             else {
 
-                console.error(
-                    'Error generating report:',
-                    xhr.status,
-                    xhr.statusText,
-                    error
-                );
+                console.error(  'Error generating report:', xhr.status, xhr.statusText,  error );
 
 
-                if (xhr.responseText) {
-
-                    console.error(
-                        'Response:',
-                        xhr.responseText
-                    );
+                if (xhr.responseText)
+                {
+                    console.error( 'Response:', xhr.responseText );
                 }
             }
         }
@@ -1950,10 +1709,9 @@ function LimitNumberLength(input, maxLength)
     }
 }
 
-
-
 async function TransitReport() {
-    if (!rowId) {
+    if (!rowId)
+    {
         showToast(`Please save the data before printing the report.`, { type: "info" });
         return;
     }
@@ -1964,7 +1722,7 @@ async function TransitReport() {
     const netAmount = parseFloat($('#NumOtherNetAmount').val()) || 0;
     var reportName = "";
     var exportPrint = false;
-    var RPTNAME = "";
+    var RPTNAME = "TAX INVOICE";
 
     const validation = await $.ajax({
         url: '/JobworkIssueChallan/PrintEsingValidation',
@@ -1972,8 +1730,8 @@ async function TransitReport() {
         contentType: 'application/json; charset=utf-8',
         data: JSON.stringify({
             V_NO: parseInt(V_NO) || null,
-            V_TYPE: V_TYPE,
-            V_Date: V_Date
+            V_TYPE: V_TYPE
+           
         })
     });
 
@@ -1983,85 +1741,29 @@ async function TransitReport() {
     }
     console.log("validation", validation);
 
-
-    if (exportPrint == false) {
-        if (globalVars.CompCode == "2" || globalVars.CompCode == "5") {
-            if (V_TYPE == "SAJI") {
-                reportName = "INVOICE_JobworkSale";
-            }
-            else if (globalVars.CompCode == "5") {
-                reportName = "INVOICE_GST1SALASARQR_DETAIL";
-            }
-            else {
-                reportName = "INVOICE_GST1PLPLQR_DETAIL";
-            }
-        }
-        else if (globalVars.CompCode == "4") {
-            if (V_TYPE == "SACH" || V_TYPE == "SAJI") {
-                if (V_TYPE == "SAJI") {
-                    reportName = "INVOICE_JobworkSale";
-                }
-                else {
-                    reportName = "INVOICE_ChallanPEPL";
-                }
-            }
-
-            else if (globalVars.CompCode > "4") {
-                reportName = "INVOICE_GST1PEPLQR_DETAIL";
-            }
-
-            else {
-                reportName = "INVOICE_GST1PEPL";
-            }
-        }
-
-        else {
-            if (V_TYPE == "SACH" || V_TYPE == "SAJI") {
-                if (V_TYPE == "SAJI") {
-                    reportName = "INVOICE_JobworkSale";
-                }
-                else {
-                    reportName = "INVOICE_ChallanSale";
-                }
-
-            }
-            else if (globalVars.CompCode == "3") {
-                const date = new Date(V_Date);
-
-                if (date > new Date(2022, 9, 5)) {
-                    reportName = "INVOICE_GST1QR";
-                } else {
-                    reportName = "INVOICE_GST1";
-                }
-            }
-
-            else if (globalVars.CompCode == "7") {
-                if (globalVars.CompCode > "4") {
-                }
-                else {
-                    reportName = "INVOICE_GST1KQR";
-                }
-            }
-            else if (globalVars.CompCode == "8") {
-                if (globalVars.FYearCode >= "6") {
-
-                    if (V_TYPE == "SATD") {
-                        reportName = "INVOICEQR_SCTPL_SASI";
-                    }
-                    else {
-                        reportName = "INVOICE_GST1QR_SCTPL";
-                    }
-                }
-            }
-
-            else {
-                reportName = "INVOICE_GST1QR";
-            }
-        }
+    if (globalVars.CompCode == "2")
+    {
+        reportName = "INVOICE_GST1PLPLQR_DETAIL";          
     }
-
-    if (V_TYPE == "SAGT" || V_TYPE == "SATD" || V_TYPE == "SAST") {
-        RPTNAME = "TAX INVOICE";
+    else if (globalVars.CompCode == "4")
+    {
+        reportName = "INVOICE_GST1PEPLQR_DETAIL";
+    }
+    else if (globalVars.CompCode == "5")
+    {
+        reportName = "INVOICE_GST1SALASARQR_DETAIL";
+    }
+    else if (globalVars.CompCode == "3")
+    {
+        reportName = "INVOICE_GST1";
+    }
+    else if (globalVars.CompCode == "7")
+    {
+        reportName = "INVOICE_GST1KQRNew";
+    }
+    else
+    {
+        reportName = "INVOICE_GST1QR";
     }
 
     var formula =
@@ -2080,25 +1782,32 @@ async function TransitReport() {
             comp_add1: globalVars.Address1 || "",
             comp_add2: globalVars.Address2 || "",
             comp_phone: "Mobile : " + (globalVars.Phone || ""),
-            PAN: "PAN NO.   : " + (globalVars.PAN || ""),
-            EMAIL: "Email   : " + (globalVars.Email || ""),
-            Website: "Web     : " + (globalVars.website || ""),
             GST: "GST NO.   : " + (globalVars.GST || ""),
+            PAN: "PAN NO.   : " + (globalVars.PAN || ""),
+            Website: "Web     : " + (globalVars.website || ""),
+            EMAIL: "Email   : " + (globalVars.Email || ""),
             RPTNAME: RPTNAME
         }
     };
 
-    if (globalVars.CompCode != "3") {
 
-        if (globalVars.CompCode != "8") {
-            payload.Parameters.comp_name1 = "An ISO 9001:2015 Certified Company";
-        }
-
-        payload.Parameters.Comp_reg = "Reg.Office :" + (globalVars.RegAdd1 || "") + ", " + (globalVars.RegAdd2 || "") + "  CIN :" + (globalVars.CINNO || "");
+    if (validation.address != "")
+    {
+        payload.Parameters.godownAdd = "Ship From :" + (validation.address || "");
+    }
+    else
+    {
+        payload.Parameters.godownAdd = + (validation.address || "");
     }
 
 
-    const INWORD = numberToWordsCurrency(netAmount, "Rs.", "PAISE");
+    if (globalVars.CompCode != "3")
+    {
+      payload.Parameters.comp_name1 = "An ISO 9001:2015 Certified Company";
+      payload.Parameters.Comp_reg = "Reg.Office :" + (globalVars.RegAdd1 || "") + ", " + (globalVars.RegAdd2 || "") + "  CIN :" + (globalVars.CINNO || "");
+    }
+
+    const INWORD = numberToWordsCurrency(validation.netamt, "Rs.", "PAISE");
 
     payload.Parameters.INWORD = INWORD;
 

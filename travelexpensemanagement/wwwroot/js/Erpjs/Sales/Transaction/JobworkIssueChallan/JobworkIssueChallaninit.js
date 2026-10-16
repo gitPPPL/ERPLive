@@ -844,22 +844,15 @@ $(document).ready(async function () {
     });
 
 
-    $('#btn_EsignPrint').on('click', async function () {
+    //$('#btn_EsignPrint').on('click', async function ()
+    //{
+    //    TransitReport();
+    //});
 
-
-
-
+    $('#button_print').on('click', async function ()
+    {
+        await GetTransitReportFile("", true);
     });
-
-
-
-
-
-
-
-
-
-
 
     //kks
 

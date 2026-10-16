@@ -530,6 +530,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(data);
             }
         }
+
         [HttpPost]
         public async Task<JsonResult> SavedData([FromBody] JobworkIssueChallanModel request)
         {
@@ -732,8 +733,10 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
 
                 if (request == null)
-                {
-                    return Json(new { success = false, message = "Request Showing Null", ReportName = "", godownAdd = "" });
+                {      
+                    return Json(new { success = false, message = "Request Showing Null", ReportName = "", godownAdd = "" , message1 = "",
+                        message2 = "", message3 = "", message4 = ""
+                    });
                 }
 
                 // GST Tax Validation
@@ -745,7 +748,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 {
                     if (getdata.PubUserLevel != "1")
                     {
-                        return Json(new { success = false, message = "ERROR! Please check Tax not calculated in Invoice." });
+                        return Json(new { success = false, message = "ERROR! Please check Tax not calculated in Invoice.",
+                            message1 = "",
+                            message2 = "",
+                            message3 = "",
+                            message4 = ""
+                        });
                     }
                 }
 
@@ -805,45 +813,17 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 bool etaPodEmpty = reader["ETAPOD_DATE"] == DBNull.Value || string.IsNullOrWhiteSpace(Convert.ToString(reader["ETAPOD_DATE"]));
 
                                 if (cha == 0 && forwarder == 0 && shipline == 0 && etaPolEmpty && etaPodEmpty)
-                                {
-
-
-                                    //return Json(new
-                                    //{
-                                    //    success = true,
-                                    //    warning = true,
-                                    //    message = $"Please entry necessary fields in Export Detail " +
-                                    //    $"(like Actual Freight, CHA, Forwarder, Shipline, " +
-                                    //    $"ETA POL Date, ETA POD Date) of Invoice No:{request.V_NO}"
-                                    //});
-
+                                {                             
                                     message3 = $"Please entry necessary fields in Export Detail " +
                                         $"(like Actual Freight, CHA, Forwarder, Shipline, " +
                                         $"ETA POL Date, ETA POD Date) of Invoice No:{request.V_NO}";
-
-
-
-
                                 }
                             }
                             else
-                            {
-
-                                //return Json(new
-                                //{
-                                //    success = true,
-                                //    warning = true,
-                                //    message = $"Export Detail not feeded " +
-                                //    $"(like Actual Freight, CHA, Forwarder, Shipline, " +
-                                //    $"ETA POL Date, ETA POD Date) in Invoice No:{request.V_NO}"
-                                //});
-
-
+                            {                           
                                 message4 = $"Export Detail not feeded " +
                                     $"(like Actual Freight, CHA, Forwarder, Shipline, " +
                                     $"ETA POL Date, ETA POD Date) in Invoice No:{request.V_NO}";
-
-
                             }
                         }
                     }
@@ -1133,27 +1113,10 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                 }
 
-
-
                 request.godownAdd = GetText(@$"Select isnull(COMP_NAME,'')+', '+ isnull(ADDRESS,'')+', '+ isnull(ADDRESS2,'') as adress from GODOWN_MAST where CODE= {request.godownNo} and COMP_CODE={getdata.PubCompCode}");
 
-
-
-
-                return Json(new
-                {
-                    success = true,
-                    message = "Print validation successful.",
-                    ReportName = request.ReportName,
-                    godownAdd = request.godownAdd,
-                    message1 = message1,
-                    message2 = message2,
-                    message3 = message3,
-                    message4 = message4
-
-
-
-                });
+                return Json(new { success = true, message = "Print validation successful.", ReportName = request.ReportName,
+                    godownAdd = request.godownAdd, message1 = message1, message2 = message2, message3 = message3,  message4 = message4  });
             }
         }
 
@@ -1441,11 +1404,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
 
-
-
-
-
-
         [HttpPost]
         public JsonResult PrintEsingValidation([FromBody] PrintValidationRequest request)
         {
@@ -1482,7 +1440,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 }
 
                 // Get Godown Code
-                string sql2 = @$" SELECT Godown_code FROM Sale1 WHERE V_Type = {request.V_TYPE}  AND V_No = {request.V_NO}
+                string sql2 = @$" SELECT Godown_code FROM Sale1 WHERE V_Type = '{request.V_TYPE}'  AND V_No = {request.V_NO}
                 AND Comp_Code = {getdata.PubCompCode} AND Branch_Code = {getdata.PubBranchCode} AND Year_Code = {getdata.PubFYearCode}";
 
                 int gwdn = Convert.ToInt16(GetText(sql2));
@@ -1498,5 +1456,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
            
             }
         }
+
     }
 }

@@ -65,6 +65,10 @@
     <div class="erppage-header-right">   
 
 
+        <button type="button" class="erppage-btn erppage-btn-copy" id="button_print" >
+         <i class="fa-solid fa-print"></i> Print
+        </button>        
+
         <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Send Mail" id="button_mail">
          <i class="fa fa-envelope"></i>Mail
         </button>
@@ -73,14 +77,8 @@
         <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "JobworkIssueChallanList")', isReadOnly)">
             <i class="fa-solid fa-arrow-left"></i>Back to list
         </button>
+        
 
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn"  id="btn_EsignPrint">
-         <i class="fa fa-envelope"></i>E-sign Print
-        </button>
-
-        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn"  id="btn_EWayBill">
-         <i class="fa fa-envelope"></i>E-Way Bill
-        </button>
 
     </div>
 </div>
