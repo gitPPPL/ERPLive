@@ -1,4 +1,7 @@
 ﻿function AddRow(data = {}) {
+
+    console.log("data", data);
+
     let tbody = $('#tblSalesInvoice tbody');
     let newRow = `
         <tr class="no-border-input">
@@ -12,7 +15,7 @@
             <td>  <input type="number" class="erppagetable-control TxtAmount" value="${data.Amount ?? ''}"  readonly  />  </td>
             <td>  <input type="number" class="erppagetable-control TxtPacKPer" value="${data.PackPer ?? ''}"  />  </td>
             <td>  <input type="number" class="erppagetable-control TxtPackAmount" value="${data.PackAmt ?? ''}" readonly  />  </td>        
-            <td>  <input type="number" class="erppagetable-control TxtPackWeight" value="${data.PackWght ?? ''}"   />  </td>        
+            <td class="hidden-col">  <input type="number" class="erppagetable-control TxtPackWeight" value="${data.PackWght ?? ''}"   />  </td>        
             <td>  <input type="number"   class="erppagetable-control TxtDisPer" value="${data.DisPer ?? ''}"  /> </td>
             <td>  <input type="number" class="erppagetable-control TxtDisAmount"  value="${data.Disamt ?? ''}"  readonly />   </td>
             <td>  <select class="erppagetable-control TxtTaxType"> <option value="">-- Select Tax Type  --</option>  ${TaxTypeList}  </select> </td>
@@ -38,7 +41,7 @@
             <td>  <input type="text" class="erppagetable-control TxtHsnCode" value="${data.HsnCode ?? ''}"   /> </td>
             <td>  <input type="number" class="erppagetable-control TxtFreightAmount" value="${data.FreightAmount ?? ''}"   /> </td>
             <td>  <input type="number" class="erppagetable-control TxtInsuAmount" value="${data.InsuAmount ?? ''}"   /> </td>
-            <td>  <input type="number" class="erppagetable-control TxtCDiscAmount" value="${data.CDiscAmount ?? ''}"   /> </td>
+            <td> <input type="number" class="erppagetable-control TxtCDiscAmount" value="${data.CDiscAmount ?? ''}" /> </td>
             <td>  <input type="number" class="erppagetable-control TxtWBQuantity" value="${data.WBQuantity ?? ''}"   /> </td>
 
             <td class="hidden-col">  <input type="text" class="erppagetable-control TxtREPORT_TYPE" value="${data.REPORT_TYPE ?? ''}"   /> </td>
@@ -55,9 +58,17 @@
         </tr>
     `;
 
+
+
     tbody.append(newRow);
 
     let $row = tbody.find('tr:last');
+
+    console.log("CDiscAmount data:", data.CDiscAmount);
+    console.log("CDiscAmount input:", $row.find('.TxtCDiscAmount').val());
+
+
+
 
     $row.find('.ddlProductName').val(data.Productcode ?? '');
 
@@ -65,8 +76,8 @@
 
     $row.find('.TxtNos, .TxtGrossQty, .TxtNetQty, .TxtRate, ' +
         '.TxtPacKPer, .TxtDisPer, .TxtCgstper,.TxtSgstPer,.TxtIGSTPer,.TxtCessPer').on('input change', function () {
-        CalculateRow($row);
-    });
+            CalculateRow($row);
+        });
 
     $row.find('.TxtTaxType').on('change', function () {
 
@@ -91,8 +102,7 @@
 
         $row.find('.ID').val(ItemCode);
 
-        if (!ItemCode)
-        {
+        if (!ItemCode) {
             return;
         }
 
@@ -112,41 +122,37 @@
             $row.find('.TxtPacking_nos').val(item.packing_nos);
         }
     });
-    $row.find('.TxtTaxType').on('change', function ()
-    {
+    $row.find('.TxtTaxType').on('change', function () {
         const selectedCode = $(this).val();
         const selectedTax = TaxPercentageData.find(x => String(x.code) === String(selectedCode));
         console.log("Selected Tax Type:", selectedTax);
         if (!selectedTax) {
             $row.find('.TxtCgstper').val('0.00');
             $row.find('.TxtSgstPer').val('0.00');
-            $row.find('.TxtIGSTPer').val('0.00'); 
+            $row.find('.TxtIGSTPer').val('0.00');
             return;
         }
         $row.find('.TxtCgstper').val(Number(selectedTax.cgsT_PER || 0).toFixed(2));
         $row.find('.TxtSgstPer').val(Number(selectedTax.sgsT_PER || 0).toFixed(2));
         $row.find('.TxtIGSTPer').val(Number(selectedTax.igsT_PER || 0).toFixed(2));
-    });    
+    });
     $row.find('.TxtNos').on('input', function () {
         const $rows = $('#tblSalesInvoice tbody tr');
-        if ($rows.length <= 1)
-        {
+        if ($rows.length <= 1) {
             return;
         }
         const nos = $.trim($(this).val());
-        if (nos === '')
-        {
+        if (nos === '') {
             return;
         }
         const $previousRow = $row.prev('tr');
-        if ($previousRow.length === 0)
-        {
+        if ($previousRow.length === 0) {
             return;
         }
-        $row.find('.TxtTaxType') .val($previousRow.find('.TxtTaxType').val());
-        $row.find('.TxtCgstper') .val($previousRow.find('.TxtCgstper').val());
-        $row.find('.TxtSgstPer')  .val($previousRow.find('.TxtSgstPer').val());
-        $row.find('.TxtIGSTPer') .val($previousRow.find('.TxtIGSTPer').val());
+        $row.find('.TxtTaxType').val($previousRow.find('.TxtTaxType').val());
+        $row.find('.TxtCgstper').val($previousRow.find('.TxtCgstper').val());
+        $row.find('.TxtSgstPer').val($previousRow.find('.TxtSgstPer').val());
+        $row.find('.TxtIGSTPer').val($previousRow.find('.TxtIGSTPer').val());
         CalculateRow($row);
     });
 
@@ -175,36 +181,25 @@ function CalculateRow($row) {
     let packingNos = num('.TxtPacking_nos');
 
     if (defTonnageRate === 'yes') {
-
         if (netWt > 0) {
-
             grossQty = nos * netWt;
-
             $row.find('.TxtGrossQty').val(grossQty.toFixed(2));
         }
 
         if (packingNos > 0) {
-
             netQty = nos * packingNos;
-
             $row.find('.TxtNetQty').val(netQty.toFixed(2));
         }
     }
 
     if (defWtCalconBales === 'yes') {
-
         if (netWt > 0) {
-
             grossQty = nos * netWt;
-
             $row.find('.TxtGrossQty').val(grossQty.toFixed(2));
         }
 
-
         if (packingWt > 0) {
-
             netQty = nos * packingWt;
-
             $row.find('.TxtNetQty').val(netQty.toFixed(2));
         }
     }
@@ -215,7 +210,6 @@ function CalculateRow($row) {
     let amount = 0;
 
     if (!chkCalPCS) {
-
         if (netQty > 0) {
             if (defTonnageRate === 'yes') {
                 if (reportType === 'Hessian' || reportType === 'Sacking') {
@@ -238,10 +232,7 @@ function CalculateRow($row) {
             }
         }
     }
-
-
     else {
-
         if (nos > 0) {
             amount = grossQty * rate;
         }
@@ -253,7 +244,7 @@ function CalculateRow($row) {
 
     let discountAmount = baseAmount * disPer / 100;
 
-    const cashDiscountPer = parseFloat($('#NumCashDiscountPer').val()) || 0;
+    const cashDiscountPer = parseFloat($('#NumOtherCashDiscount1').val()) || 0;
 
     let cashDiscountAmount = baseAmount * cashDiscountPer / 100;
 
@@ -473,7 +464,7 @@ function GetSalesInvoiceDetails() {
             DCN_TYPE: $.trim($row.find('.TxtDocType').val()) || "",
             DCN_NO: parseInt($.trim($row.find('.TxtDocNo').val()), 10) || 0,
             HSN_CODE: $.trim($row.find('.TxtHsnCode').val()) || "",
-            FREIGHT_AMT: parseFloat($.trim($row.find('.TxtFreightAmount').val())) || 0,
+            FRT_AMT: parseFloat($.trim($row.find('.TxtFreightAmount').val())) || 0,
             INSU_AMT: parseFloat($.trim($row.find('.TxtInsuAmount').val())) || 0,
             CDISC_AMT: parseFloat($.trim($row.find('.TxtCDiscAmount').val())) || 0,
             WBQTY: parseFloat($.trim($row.find('.TxtWBQuantity').val())) || 0
@@ -501,16 +492,14 @@ async function LoadData() {
 
         console.log("Header", Header);
         console.log("Details", Details);
-            
+
         await Promise.all([
             DDlPackNo(Header?.bilL_CODE || ''),
             cmbPartyAddress(Header?.bilL_CODE || ''),
             cmbConsigneeAddress(Header?.shiP_CODE || ''),
             DDlLicNO(Header?.licencE_TYPE || '')
-
         ])
         // Header
-
         $('#TxtCode').val(Header.doC_ID);
         $('#ddlDocumentType').val(Header.v_TYPE);
         $('#NumInvoiceNo').val(Header.v_NO);
@@ -524,7 +513,7 @@ async function LoadData() {
         $('#NumPincode').val(Header.bilL_PINCODE);
         $('#ddlDONo').val(Header.do_NO || '').trigger('change');
         $('#ddlSalesThrough').val(Header.agenT_CODE || '').trigger('change');
-        $('#ddlSupplyType').val(Header.supplY_TYPE);       
+        $('#ddlSupplyType').val(Header.supplY_TYPE);
         $('#ddlConsignee').val(Header.shiP_CODE || '').trigger('change');
         $('#TxtSupplyAddressL1').val(Header.shiP_ADD1);
         $('#TxtSupplyAddressL2').val(Header.shiP_ADD2);
@@ -571,7 +560,7 @@ async function LoadData() {
         $('#NumNetQty').val(Header.toT_NET);
         $('#NumWbQty').val(Header.wB_QTY);
         $('#ddlTransport').val(Header.transporT_CODE);
-        $('#NumGRNo').val(Header.gR_NO);     
+        $('#NumGRNo').val(Header.gR_NO);
         $('#DtGRDate').val(formatDate(Header.gR_DATE));
         if (Header.gR_DATE != null && Header.gR_DATE !== '') {
             $('#chkGRDate').prop('checked', true);
@@ -601,7 +590,6 @@ async function LoadData() {
         $('#txt_WBamt').val(Header.wB_AMT);
         $('#txt_wbRemark').val(Header.wB_REM);
         $('#ddl_WBParty').val(Header.wB_AC);
-
         $('#txxt_ExRate').val(Header.exrate);
         $('#ddl_currency').val(Header.currency);
         $('#txxt_ForIssu').val(Header.foB_INSU);
@@ -629,17 +617,15 @@ async function LoadData() {
         $('#tblSalesInvoice tbody').empty();
 
         if (Array.isArray(Details) && Details.length > 0) {
-
             Details.forEach(item => {
-
                 AddRow({
                     ID: item.iteM_CODE ?? '',
                     Productcode: item.iteM_CODE ?? '',
                     nos: item.nos ?? '',
                     grossQty: item.grosS_QTY ?? '',
                     NetQty: item.qty ?? '',
-                    RateINUSD: item.foR_RATE ?? item.foR_RATE ?? '',
-                    Rate: item.rate ?? item.rate ?? '',
+                    RateINUSD: item.foR_RATE ?? '',
+                    Rate: item.rate ?? '',
                     Amount: item.amount ?? '',
                     PackPer: item.pacK_PER ?? '',
                     PackAmt: item.pacK_AMT ?? '',
@@ -671,21 +657,14 @@ async function LoadData() {
                     InsuAmount: item.insU_AMT ?? '',
                     CDiscAmount: item.cdisC_AMT ?? '',
                     WBQuantity: item.wbqty ?? '',
-
-
-
-
-
-
-
-
-
-
-
-
+                    REPORT_TYPE: item.reporT_TYPE ?? '',
+                    Sale_Rate: item.sale_Rate ?? '',
+                    Taxable_Rate: item.taxable_Rate ?? '',
+                    Net_Wt: item.net_Wt ?? '',
+                    Packing_Wt: item.packinG_WT ?? '',
+                    Packing_nos: item.packing_nos ?? '',
                     itemCode: item.iteM_CODE ?? ''
                 });
-
             });
         }
     }
@@ -901,7 +880,6 @@ function getDecimal(selector) {
 
     return Number.isNaN(number) ? null : number;
 }
-
 function getDate(selector) {
     const value = $.trim($(selector).val() || "");
 

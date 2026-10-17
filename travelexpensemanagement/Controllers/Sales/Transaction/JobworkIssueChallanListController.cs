@@ -188,6 +188,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                                     V_TYPE = rdr["V_TYPE"]?.ToString(),
                                     V_NO = rdr["V_no"] != DBNull.Value ? Convert.ToInt32(rdr["V_no"]) : 0,
+
+                                    DEFECTIVE_GOODS = rdr["DEFECTIVE_GOODS"]?.ToString(),
+                                    CAL_ONPCS = rdr["CAL_ONPCS"] != DBNull.Value ? Convert.ToInt32(rdr["CAL_ONPCS"]) : 0,
+                                    PRINT_DETAIL =  rdr["PRINT_DETAIL"]?.ToString(),
+                                   
+                                    
                                     V_DATE = rdr["V_date"] != DBNull.Value ? Convert.ToDateTime(rdr["V_date"]) : DateTime.MinValue,
                                     DOC_ID = rdr["DOC_ID"]?.ToString(),
                                     BILL_CODE = rdr["BILL_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["BILL_CODE"]) : 0,
@@ -277,7 +283,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     #endregion
 
                     #region Fetch Dispatch Data
-                    using (SqlCommand cmd4 = new SqlCommand("sp_SalesInvoiceDirect", con))
+                    using (SqlCommand cmd4 = new SqlCommand("sp_JobworkIssueChallan", con))
                     {
                         cmd4.CommandType = CommandType.StoredProcedure;
                         cmd4.Parameters.AddWithValue("@Action", "SHOWDATA");
@@ -315,7 +321,10 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     CESS_AMT = rdr["CESS_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["CESS_AMT"]) : 0,
                                     REMARK = rdr["REMARK"]?.ToString(),
                                     LOT_No = rdr["LOT_NO"]?.ToString(),
+                                    SAUDA_NO = rdr["SAUDA_NO"] != DBNull.Value ? Convert.ToInt32(rdr["SAUDA_NO"]) : 0,
                                     SAUDA_TYPE = rdr["SAUDA_TYPE"]?.ToString(),
+                                    SAUDA_RATE = rdr["SAUDA_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["ORD_RATE"]) : 0,
+
                                     ORD_TYPE = rdr["ORD_TYPE"]?.ToString(),
                                     ORD_NO = rdr["ORD_NO"] != DBNull.Value ? Convert.ToInt32(rdr["ORD_NO"]) : 0,
                                     ORD_RATE = rdr["ORD_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["ORD_RATE"]) : 0,
@@ -328,6 +337,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     CDISC_AMT = rdr["CDISC_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["CDISC_AMT"]) : 0,
                                     WBQTY = rdr["WBQTY"] != DBNull.Value ? Convert.ToDecimal(rdr["WBQTY"]) : 0,
 
+                                    PACK_NO = rdr["PACK_NO"] != DBNull.Value ? Convert.ToInt32(rdr["PACK_NO"]) : 0,
                                     REPORT_TYPE = rdr["REPORT_TYPE"]?.ToString(),
                                     Sale_Rate = rdr["Sale_Rate"] != DBNull.Value ? Convert.ToDecimal(rdr["Sale_Rate"]) : 0,
                                     Taxable_Rate = rdr["Taxable_Rate"] != DBNull.Value ? Convert.ToDecimal(rdr["Taxable_Rate"]) : 0,

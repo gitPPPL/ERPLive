@@ -160,18 +160,19 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             return Json(new { success = true, lists = headerList, totalCount });
         }
+
+
+
+
         [HttpPost]
         public IActionResult GetDataByCode([FromForm] string DOC_ID)
-
-
         {
             var GetGlobalCode = _globalVariableService.GetGlobalVariables();
 
-
-            SalesInvoiceModel wrapper = new SalesInvoiceModel
+            JobworkIssueChallanModel wrapper = new JobworkIssueChallanModel
             {
-                Header = new SalesInvoiceModel_Header(),
-                Details = new List<SalesInvoiceModel_Detail>()
+                Header = new JobworkIssueChallanModel_Header(),
+                Details = new List<JobworkIssueChallanModel_Detail>()
             };
 
             try
@@ -196,24 +197,26 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                         {
                             if (rdr.Read())
                             {
-                                wrapper.Header = new SalesInvoiceModel_Header
+                                wrapper.Header = new JobworkIssueChallanModel_Header
                                 {
-                               
-                                    V_TYPE = rdr["V_TYPE"]?.ToString(),                        
+
+                                    V_TYPE = rdr["V_TYPE"]?.ToString(),
                                     V_NO = rdr["V_no"] != DBNull.Value ? Convert.ToInt32(rdr["V_no"]) : 0,
+
+                                    DEFECTIVE_GOODS = rdr["DEFECTIVE_GOODS"]?.ToString(),
+                                    CAL_ONPCS = rdr["CAL_ONPCS"] != DBNull.Value ? Convert.ToInt32(rdr["CAL_ONPCS"]) : 0,
+                                    PRINT_DETAIL = rdr["PRINT_DETAIL"]?.ToString(),
+
+
                                     V_DATE = rdr["V_date"] != DBNull.Value ? Convert.ToDateTime(rdr["V_date"]) : DateTime.MinValue,
                                     DOC_ID = rdr["DOC_ID"]?.ToString(),
-                                    GODOWN_CODE = rdr["GODOWN_CODE"]?.ToString(),                       
-
-                                    BANK_CODE = rdr["BANK_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["BANK_CODE"]) : 0,
                                     BILL_CODE = rdr["BILL_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["BILL_CODE"]) : 0,
                                     BILL_NAME = rdr["BILL_NAME"]?.ToString(),
                                     BILL_ADD1 = rdr["BILL_ADD1"]?.ToString(),
                                     BILL_ADD2 = rdr["BILL_ADD2"]?.ToString(),
                                     BILL_ADD3 = rdr["BILL_ADD3"]?.ToString(),
                                     BILL_CITY = rdr["BILL_CITY"] != DBNull.Value ? Convert.ToInt32(rdr["BILL_CITY"]) : 0,
-                                    BILL_STATE = rdr["BILL_STATE"] != DBNull.Value ? Convert.ToInt32(rdr["BILL_STATE"]) : 0,
-                                    BILL_COUNTRY = rdr["BILL_COUNTRY"]?.ToString(),
+                                    INSUCR_DAYS = rdr["INSUCR_DAYS"] != DBNull.Value ? Convert.ToInt32(rdr["INSUCR_DAYS"]) : 0,
                                     BILL_PINCODE = rdr["BILL_PINCODE"]?.ToString(),
                                     BILL_GST = rdr["BILL_GST"]?.ToString(),
                                     AGENT_CODE = rdr["AGENT_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["AGENT_CODE"]) : 0,
@@ -222,16 +225,10 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     SHIP_ADD2 = rdr["SHIP_ADD2"]?.ToString(),
                                     SHIP_ADD3 = rdr["SHIP_ADD3"]?.ToString(),
                                     SHIP_CITY = rdr["SHIP_CITY"] != DBNull.Value ? Convert.ToInt32(rdr["SHIP_CITY"]) : 0,
-                                    SHIP_STATE = rdr["SHIP_STATE"] != DBNull.Value ? Convert.ToInt32(rdr["SHIP_STATE"]) : 0,
-                                    SHIP_COUNTRY = rdr["SHIP_COUNTRY"] != DBNull.Value ? Convert.ToInt32(rdr["SHIP_COUNTRY"]) : 0,
                                     SHIP_PINCODE = rdr["SHIP_PINCODE"]?.ToString(),
                                     SHIP_GST = rdr["SHIP_GST"]?.ToString(),
                                     TAX_CODE = rdr["TAX_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["TAX_CODE"]) : 0,
                                     ITEM_TYPE = rdr["ITEM_TYPE"]?.ToString(),
-                                    WB_NO = rdr["WB_NO"] != DBNull.Value ? Convert.ToInt32(rdr["WB_NO"]) : 0,
-                                    ISSUE_NO = rdr["ISSUE_NO"] != DBNull.Value ? Convert.ToInt32(rdr["ISSUE_NO"]) : 0,
-                                    PACK_TYPE = rdr["PACK_TYPE"]?.ToString(),
-                                    PACK_NO = rdr["PACK_NO"] != DBNull.Value ? Convert.ToInt32(rdr["PACK_NO"]) : 0,
                                     AMOUNT = rdr["AMOUNT"] != DBNull.Value ? Convert.ToDecimal(rdr["AMOUNT"]) : 0,
                                     PACK_PER = rdr["PACK_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["PACK_PER"]) : 0,
                                     PACK_AMT = rdr["PACK_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["PACK_AMT"]) : 0,
@@ -240,24 +237,18 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     NAMOUNT = rdr["NAMOUNT"] != DBNull.Value ? Convert.ToDecimal(rdr["NAMOUNT"]) : 0,
                                     CGST_PER = rdr["CGST_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["CGST_PER"]) : 0,
                                     CGST_AMT = rdr["CGST_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["CGST_AMT"]) : 0,
-
                                     SGST_PER = rdr["SGST_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["SGST_PER"]) : 0,
                                     SGST_AMT = rdr["SGST_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["SGST_AMT"]) : 0,
-
-
                                     IGST_PER = rdr["IGST_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["IGST_PER"]) : 0,
                                     IGST_AMT = rdr["IGST_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["IGST_AMT"]) : 0,
-
                                     CESS_PER = rdr["CESS_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["CESS_PER"]) : 0,
                                     CESS_AMT = rdr["CESS_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["CESS_AMT"]) : 0,
                                     LOAD_PER = rdr["LOAD_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["LOAD_PER"]) : 0,
                                     LOAD_AMT = rdr["LOAD_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["LOAD_AMT"]) : 0,
                                     LOAD_AC = rdr["LOAD_AC"]?.ToString(),
-                                    WB_AC = rdr["WB_AC"]?.ToString(),
-                                    PAYMENT_TERM = rdr["PAYMENT_TERM"]?.ToString(),
                                     WB_AMT = rdr["WB_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["WB_AMT"]) : 0,
+                                    WB_AC = rdr["WB_AC"]?.ToString(),
                                     TOT_NOS = rdr["TOT_NOS"] != DBNull.Value ? Convert.ToInt32(rdr["TOT_NOS"]) : 0,
-
                                     FRT_AMT = rdr["FRT_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["FRT_AMT"]) : 0,
                                     ROUND_OFF = rdr["ROUND_OFF"] != DBNull.Value ? Convert.ToDecimal(rdr["ROUND_OFF"]) : 0,
                                     TOT_NET = rdr["TOT_NET"] != DBNull.Value ? Convert.ToDecimal(rdr["TOT_NET"]) : 0,
@@ -269,14 +260,14 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     FRT_TAXAMT = rdr["FRT_TAXAMT"] != DBNull.Value ? Convert.ToDecimal(rdr["FRT_TAXAMT"]) : 0,
                                     LOAD_REM = rdr["LOAD_REM"]?.ToString(),
                                     WB_REM = rdr["WB_REM"]?.ToString(),
-
+                                    ISSUE_NO = rdr["ISSUE_NO"] != DBNull.Value ? Convert.ToInt32(rdr["ISSUE_NO"]) : 0,
+                                    ISSUE_TYPE = rdr["Issue_Type"]?.ToString(),
                                     TOT_GROSS = rdr["TOT_GROSS"] != DBNull.Value ? Convert.ToDecimal(rdr["TOT_GROSS"]) : 0,
-                               
                                     GR_NO = rdr["GR_NO"]?.ToString(),
                                     GR_DATE = rdr["GR_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["GR_DATE"]) : DateTime.MinValue,
                                     VEHICLE_NO = rdr["VEHICLE_NO"]?.ToString(),
                                     TRANSPORT_CODE = rdr["TRANSPORT_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["TRANSPORT_CODE"]) : 0,
-
+                                    TRANSPORT_NAME = rdr["TRANSPORT_NAME"]?.ToString(),
                                     DRIVER_NAME = rdr["DRIVER_NAME"]?.ToString(),
                                     DRIVER_NO = rdr["DRIVER_NO"]?.ToString(),
                                     TPT_MODE = rdr["TPT_MODE"] != DBNull.Value ? Convert.ToInt32(rdr["TPT_MODE"]) : 0,
@@ -284,58 +275,19 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     WAYBILL_NO = rdr["WAYBILL_NO"]?.ToString(),
                                     REMARK = rdr["REMARK"]?.ToString(),
                                     FRT_TOPAY = rdr["FRT_TOPAY"] != DBNull.Value ? Convert.ToDecimal(rdr["FRT_TOPAY"]) : 0,
-                                    WB_QTY = rdr["WB_QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["WB_QTY"]) : 0,
                                     DISC_PER = rdr["DISC_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["DISC_PER"]) : 0,
                                     DISC_AMT = rdr["DISC_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["DISC_AMT"]) : 0,
-
                                     CDISC_PER = rdr["CDISC_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["CDISC_PER"]) : 0,
                                     CDISC_AMT = rdr["CDISC_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["CDISC_AMT"]) : 0,
                                     FORM_CODE = rdr["form_Code"] != DBNull.Value ? Convert.ToInt32(rdr["form_Code"]) : 0,
                                     SAUDA_TYPE = rdr["sauda_type"]?.ToString(),
-                                    SAUDA_NO = rdr["SAUDA_NO"] != DBNull.Value ? Convert.ToInt32(rdr["SAUDA_NO"]) : 0,
-                                    SAUDA_RATE = rdr["sauda_rate"] != DBNull.Value ? Convert.ToInt32(rdr["sauda_rate"]) : 0,
-                                    DEFECTIVE_GOODS = rdr["DEFECTIVE_GOODS"]?.ToString(),
-                                    CAL_ONPCS = rdr["CAL_ONPCS"] != DBNull.Value ? Convert.ToInt32(rdr["CAL_ONPCS"]) : 0,
-                                    PRINT_DETAIL = rdr["PRINT_DETAIL"]?.ToString(),
-                                    EXRATE = rdr["EXRATE"] != DBNull.Value ? Convert.ToDecimal(rdr["EXRATE"]) : 0,
-                                    BUYER_ORDNO = rdr["BUYER_ORDNO"]?.ToString(),
-                                    PLACE_RECEIPT = rdr["PLACE_RECEIPT"]?.ToString(),
-                                    PORT_LOADING = rdr["PORT_LOADING"]?.ToString(),
-                                    PORT_DISCHARGE = rdr["PORT_DISCHARGE"]?.ToString(),
-                                    FINAL_DEST = rdr["FINAL_DEST"]?.ToString(),
-                                    FINAL_DEST_COUNTRY = rdr["FINAL_DEST_COUNTRY"]?.ToString(),
                                     DELIVERY_TERMS = rdr["DELIVERY_TERMS"]?.ToString(),
-                                    SB_NO = rdr["SB_NO"]?.ToString(),
-                                    SB_DATE = rdr["SB_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["SB_DATE"]) : DateTime.MinValue,
-                                    LUT_DATE = rdr["LUT_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["LUT_DATE"]) : DateTime.MinValue,
-                                 
-                                    PORT_CODE = rdr["PORT_CODE"]?.ToString(),
-                                    FOB_VALUE = rdr["FOB_VALUE"] != DBNull.Value ? Convert.ToDecimal(rdr["FOB_VALUE"]) : 0,
-                                    FOB_FRT = rdr["FOB_FRT"] != DBNull.Value ? Convert.ToDecimal(rdr["FOB_FRT"]) : 0,
-                                    FOB_INSU = rdr["FOB_INSU"] != DBNull.Value ? Convert.ToDecimal(rdr["FOB_INSU"]) : 0,
-                                    FOB_OTHER = rdr["FOB_OTHER"] != DBNull.Value ? Convert.ToDecimal(rdr["FOB_OTHER"]) : 0,
-
-                                    LUT_DETAIL = rdr["LUT_DETAIL"]?.ToString(),
-                                    LUT_NO = rdr["LUT_NO"]?.ToString(),
-                                    INSU_DETAIL = rdr["INSU_DETAIL"]?.ToString(),
-                                    INCOTERM = rdr["Incoterm"]?.ToString(),
-                                    WB_TYPE = rdr["WB_TYPE"]?.ToString(),
+                                    EINVOICE_FLG = rdr["EINVOICE_FLG"] != DBNull.Value ? Convert.ToInt32(rdr["EINVOICE_FLG"]) : 0,
                                     SUPPLY_TYPE = rdr["Supply_Type"]?.ToString(),
-                                    LC_NO = rdr["LC_NO"]?.ToString(),
-                                    LICENCE_NO = rdr["LICENCE_NO"]?.ToString(),
-                                    LICENCE_TYPE = rdr["LICENCE_TYPE"]?.ToString(),
-                                    LICENCE_DATE = rdr["LICENCE_DATE"] != DBNull.Value ? Convert.ToDateTime(rdr["LICENCE_DATE"]) : DateTime.MinValue,
-                                    BILLOF_LADING = rdr["BILLOF_LADING"]?.ToString(),
                                     SHIPMENT_TYPE = rdr["SHIPMENT_TYPE"]?.ToString(),
                                     TRAN_TYPE = rdr["TRAN_TYPE"]?.ToString(),
-                                    CURRENCY = rdr["CURRENCY"]?.ToString(),
-                                    EWAYBILL_NO = rdr["EWAYBILL_NO"]?.ToString(),                
-                                 
-                                    EINVOICE_FLG = rdr["EINVOICE_FLG"] != DBNull.Value ? Convert.ToInt32(rdr["EINVOICE_FLG"]) : 0,
-
                                     STATUS = rdr["STATUS"] != DBNull.Value ? Convert.ToInt32(rdr["STATUS"]) : 0,
-
-
+                                    PAY_TERM = rdr["PAY_TERM"] != DBNull.Value ? Convert.ToInt32(rdr["PAY_TERM"]) : 0
 
                                 };
                             }
@@ -343,34 +295,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                         }
                     }
                     #endregion
-
-
-
-                    #region Fetch DO Data
-
-                    using (SqlCommand cmd = new SqlCommand("sp_SalesInvoice", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        cmd.Parameters.AddWithValue("@Action", "SHOWDATA");
-                        cmd.Parameters.AddWithValue("@ShowActionOption", "DONO");
-                        cmd.Parameters.AddWithValue("@DOC_ID", DOC_ID);
-                        cmd.Parameters.AddWithValue("@COMP_CODE", GetGlobalCode.PubCompCode);
-                        cmd.Parameters.AddWithValue("@BRANCH_CODE", GetGlobalCode.PubBranchCode);
-                        cmd.Parameters.AddWithValue("@YEAR_CODE", GetGlobalCode.PubFYearCode);
-
-                        using (SqlDataReader rdr = cmd.ExecuteReader())
-                        {
-                            if (rdr.Read())
-                            {
-                                wrapper.Header.Do_NO = rdr["Do_NO"]?.ToString();
-                                wrapper.Header.DoType = rdr["DoType"]?.ToString();
-                            }
-                        }
-                    }
-
-                    #endregion
-
 
                     #region Fetch Dispatch Data
                     using (SqlCommand cmd4 = new SqlCommand("sp_SalesInvoice", con))
@@ -388,13 +312,14 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                         {
                             while (rdr.Read())
                             {
-                                wrapper.Details.Add(new SalesInvoiceModel_Detail
+                                wrapper.Details.Add(new JobworkIssueChallanModel_Detail
                                 {
                                     ITEM_CODE = rdr["ITEM_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["ITEM_CODE"]) : 0,
                                     NOS = rdr["NOS"] != DBNull.Value ? Convert.ToInt32(rdr["NOS"]) : 0,
                                     GROSS_QTY = rdr["GROSS_QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["GROSS_QTY"]) : 0,
                                     QTY = rdr["QTY"] != DBNull.Value ? Convert.ToDecimal(rdr["QTY"]) : 0,
                                     FOR_RATE = rdr["FOR_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["FOR_RATE"]) : 0,
+                                    RATE = rdr["RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["RATE"]) : 0,
                                     AMOUNT = rdr["AMOUNT"] != DBNull.Value ? Convert.ToDecimal(rdr["AMOUNT"]) : 0,
                                     PACK_PER = rdr["PACK_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["PACK_PER"]) : 0,
                                     PACK_AMT = rdr["PACK_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["PACK_AMT"]) : 0,
@@ -409,11 +334,11 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     CESS_PER = rdr["CESS_PER"] != DBNull.Value ? Convert.ToDecimal(rdr["CESS_PER"]) : 0,
                                     CESS_AMT = rdr["CESS_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["CESS_AMT"]) : 0,
                                     REMARK = rdr["REMARK"]?.ToString(),
-                                    PACK_NO = rdr["PACK_NO"] != DBNull.Value ? Convert.ToInt32(rdr["PACK_NO"]) : 0,
                                     LOT_No = rdr["LOT_NO"]?.ToString(),
-                                    SAUDA_TYPE = rdr["SAUDA_TYPE"]?.ToString(),
                                     SAUDA_NO = rdr["SAUDA_NO"] != DBNull.Value ? Convert.ToInt32(rdr["SAUDA_NO"]) : 0,
-                                    SAUDA_RATE = rdr["SAUDA_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["SAUDA_RATE"]) : 0,
+                                    SAUDA_TYPE = rdr["SAUDA_TYPE"]?.ToString(),
+                                    SAUDA_RATE = rdr["SAUDA_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["ORD_RATE"]) : 0,
+
                                     ORD_TYPE = rdr["ORD_TYPE"]?.ToString(),
                                     ORD_NO = rdr["ORD_NO"] != DBNull.Value ? Convert.ToInt32(rdr["ORD_NO"]) : 0,
                                     ORD_RATE = rdr["ORD_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["ORD_RATE"]) : 0,
@@ -425,12 +350,14 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     INSU_AMT = rdr["INSU_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["INSU_AMT"]) : 0,
                                     CDISC_AMT = rdr["CDISC_AMT"] != DBNull.Value ? Convert.ToDecimal(rdr["CDISC_AMT"]) : 0,
                                     WBQTY = rdr["WBQTY"] != DBNull.Value ? Convert.ToDecimal(rdr["WBQTY"]) : 0,
+
+                                    PACK_NO = rdr["PACK_NO"] != DBNull.Value ? Convert.ToInt32(rdr["PACK_NO"]) : 0,
                                     REPORT_TYPE = rdr["REPORT_TYPE"]?.ToString(),
                                     Sale_Rate = rdr["Sale_Rate"] != DBNull.Value ? Convert.ToDecimal(rdr["Sale_Rate"]) : 0,
                                     Taxable_Rate = rdr["Taxable_Rate"] != DBNull.Value ? Convert.ToDecimal(rdr["Taxable_Rate"]) : 0,
                                     Net_Wt = rdr["Net_Wt"] != DBNull.Value ? Convert.ToDecimal(rdr["Net_Wt"]) : 0,
                                     PACKING_WT = rdr["Packing_Wt"] != DBNull.Value ? Convert.ToDecimal(rdr["Packing_Wt"]) : 0,
-                                    Packing_nos = rdr["Packing_nos"] != DBNull.Value ? Convert.ToDecimal(rdr["Packing_nos"]) : 0,
+                                    Packing_nos = rdr["Packing_nos"] != DBNull.Value ? Convert.ToDecimal(rdr["Packing_nos"]) : 0
 
                                 });
                             }
@@ -449,6 +376,11 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(new { success = false, message = "Error fetching purchase requisition data", error = ex.Message });
             }
         }
+
+
+
+
+
         [HttpPost]
         public JsonResult Delete(int code, string VType )
         {

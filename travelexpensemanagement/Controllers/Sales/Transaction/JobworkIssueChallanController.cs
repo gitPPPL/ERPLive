@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Data.SqlClient;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using Org.BouncyCastle.Asn1.Cmp;
+using StackExchange.Redis;
 using System;
 using System.Data;
 using System.Text.Json;
@@ -1456,6 +1459,97 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
            
             }
         }
+
+        [HttpPost]
+        public JsonResult PrintCreditLimitValidation()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            try
+            {
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    using (SqlTransaction transaction = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            string sql = @" SELECT DISTINCT PARTY_CODE FROM CRLIMIT_MAST  WHERE COMP_CODE = @COMP_CODE";
+                            List<int> partyCodes = new List<int>();
+                            using (SqlCommand cmd = new SqlCommand(sql, con, transaction))
+                            {
+                                cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
+                                using (SqlDataReader reader = cmd.ExecuteReader())
+                                {
+                                    while (reader.Read())
+                                    {
+                                        if (reader["PARTY_CODE"] != DBNull.Value)
+                                        {
+                                            partyCodes.Add(Convert.ToInt32(reader["PARTY_CODE"]));
+                                        }
+                                    }
+                                }
+                            }
+                            // Calculate outstanding amount for each party
+                            foreach (int partyCode in partyCodes)
+                            {
+                                decimal drAmt = 0;
+                                decimal crAmt = 0;
+
+                                string balanceSql = @"
+                                SELECT ISNULL(SUM(CASE WHEN DR_CODE = @PARTY_CODE THEN AMT ELSE 0 END), 0) AS DR_AMT, ISNULL(SUM(CASE
+                                WHEN CR_CODE = @PARTY_CODE  THEN AMT ELSE 0 END), 0) AS CR_AMT FROM LEDGER2 WHERE COMP_CODE = @COMP_CODE
+                                AND (DR_CODE = @PARTY_CODE OR CR_CODE = @PARTY_CODE)";
+
+                                using (SqlCommand cmd = new SqlCommand( balanceSql, con, transaction))
+                                {
+                                    cmd.Parameters.AddWithValue( "@PARTY_CODE", partyCode);
+                                    cmd.Parameters.AddWithValue( "@COMP_CODE", getdata.PubCompCode);
+
+                                    using (SqlDataReader reader = cmd.ExecuteReader())
+                                    {
+                                        if (reader.Read())
+                                        {
+                                            drAmt = Convert.ToDecimal(reader["DR_AMT"]);
+                                            crAmt = Convert.ToDecimal(reader["CR_AMT"]);
+                                        }
+                                    }
+                                }
+
+                                decimal balanceAmt = drAmt - crAmt;
+
+                                string updateSql = @" UPDATE CRLIMIT_MAST SET OS_AMT = @OS_AMT WHERE PARTY_CODE = @PARTY_CODE
+                                AND COMP_CODE = @COMP_CODE";
+
+                                using (SqlCommand cmd = new SqlCommand( updateSql, con, transaction))
+                                {
+                                    cmd.Parameters.AddWithValue( "@OS_AMT", balanceAmt);
+                                    cmd.Parameters.AddWithValue( "@PARTY_CODE", partyCode);
+                                    cmd.Parameters.AddWithValue( "@COMP_CODE", getdata.PubCompCode);
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+
+                            transaction.Commit();
+                            return Json(new {  success = true, message = "Print validation successful." });
+                        }
+                        catch
+                        {
+                            transaction.Rollback();
+                            throw;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new  {  success = false, message = ex.Message });
+            }
+        }
+
+
+
+
 
     }
 }

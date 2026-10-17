@@ -1,4 +1,7 @@
 ﻿function AddRow(data = {}) {
+
+    console.log("data", data);
+
     let tbody = $('#tblSalesInvoice tbody');
     let newRow = `
         <tr class="no-border-input">
@@ -12,7 +15,7 @@
             <td>  <input type="number" class="erppagetable-control TxtAmount" value="${data.Amount ?? ''}"  readonly  />  </td>
             <td>  <input type="number" class="erppagetable-control TxtPacKPer" value="${data.PackPer ?? ''}"  />  </td>
             <td>  <input type="number" class="erppagetable-control TxtPackAmount" value="${data.PackAmt ?? ''}" readonly  />  </td>        
-            <td>  <input type="number" class="erppagetable-control TxtPackWeight" value="${data.PackWght ?? ''}"   />  </td>        
+            <td class="hidden-col">  <input type="number" class="erppagetable-control TxtPackWeight" value="${data.PackWght ?? ''}"   />  </td>        
             <td>  <input type="number"   class="erppagetable-control TxtDisPer" value="${data.DisPer ?? ''}"  /> </td>
             <td>  <input type="number" class="erppagetable-control TxtDisAmount"  value="${data.Disamt ?? ''}"  readonly />   </td>
             <td>  <select class="erppagetable-control TxtTaxType"> <option value="">-- Select Tax Type  --</option>  ${TaxTypeList}  </select> </td>
@@ -38,7 +41,7 @@
             <td>  <input type="text" class="erppagetable-control TxtHsnCode" value="${data.HsnCode ?? ''}"   /> </td>
             <td>  <input type="number" class="erppagetable-control TxtFreightAmount" value="${data.FreightAmount ?? ''}"   /> </td>
             <td>  <input type="number" class="erppagetable-control TxtInsuAmount" value="${data.InsuAmount ?? ''}"   /> </td>
-            <td>  <input type="number" class="erppagetable-control TxtCDiscAmount" value="${data.CDiscAmount ?? ''}"   /> </td>
+            <td> <input type="number" class="erppagetable-control TxtCDiscAmount" value="${data.CDiscAmount ?? ''}" /> </td>
             <td>  <input type="number" class="erppagetable-control TxtWBQuantity" value="${data.WBQuantity ?? ''}"   /> </td>
 
             <td class="hidden-col">  <input type="text" class="erppagetable-control TxtREPORT_TYPE" value="${data.REPORT_TYPE ?? ''}"   /> </td>
@@ -55,9 +58,17 @@
         </tr>
     `;
 
+  
+
     tbody.append(newRow);
 
     let $row = tbody.find('tr:last');
+
+    console.log("CDiscAmount data:", data.CDiscAmount);
+    console.log("CDiscAmount input:", $row.find('.TxtCDiscAmount').val());
+
+
+
 
     $row.find('.ddlProductName').val(data.Productcode ?? '');
 
@@ -254,7 +265,7 @@ function CalculateRow($row) {
 
     let discountAmount = baseAmount * disPer / 100;
 
-    const cashDiscountPer = parseFloat($('#NumCashDiscountPer').val()) || 0;
+    const cashDiscountPer = parseFloat($('#NumOtherCashDiscount1').val()) || 0;
 
     let cashDiscountAmount = baseAmount * cashDiscountPer / 100;
 
@@ -299,7 +310,7 @@ function CalculateRow($row) {
 
     $row.find('.TxtDisAmount').val(discountAmount.toFixed(2));
 
-    $row.find('.TxtCDiscAmount').val(cashDiscountAmount.toFixed(2));
+   $row.find('.TxtCDiscAmount').val(cashDiscountAmount.toFixed(2));
 
     $row.find('.TxtCgstAmt').val(cgstAmount.toFixed(2));
 
@@ -474,7 +485,7 @@ function GetSalesInvoiceDetails() {
             DCN_TYPE: $.trim($row.find('.TxtDocType').val()) || "",
             DCN_NO: parseInt($.trim($row.find('.TxtDocNo').val()), 10) || 0,
             HSN_CODE: $.trim($row.find('.TxtHsnCode').val()) || "",
-            FREIGHT_AMT: parseFloat($.trim($row.find('.TxtFreightAmount').val())) || 0,
+            FRT_AMT: parseFloat($.trim($row.find('.TxtFreightAmount').val())) || 0,
             INSU_AMT: parseFloat($.trim($row.find('.TxtInsuAmount').val())) || 0,
             CDISC_AMT: parseFloat($.trim($row.find('.TxtCDiscAmount').val())) || 0,
             WBQTY: parseFloat($.trim($row.find('.TxtWBQuantity').val())) || 0
@@ -490,7 +501,7 @@ async function LoadData() {
     try {
 
         const res = await $.ajax({
-            url: '/SalesInvoiceList/GetDataByCode',
+            url: '/JobworkIssueChallanList/GetDataByCode',
             type: 'Post',
             data: { DOC_ID: rowId }
         });
@@ -508,10 +519,8 @@ async function LoadData() {
             cmbPartyAddress(Header?.bilL_CODE || ''),
             cmbConsigneeAddress(Header?.shiP_CODE || ''),
             DDlLicNO(Header?.licencE_TYPE || '')
-
         ])
         // Header
-
         $('#TxtCode').val(Header.doC_ID);
         $('#ddlDocumentType').val(Header.v_TYPE);
         $('#NumInvoiceNo').val(Header.v_NO);
@@ -602,7 +611,6 @@ async function LoadData() {
         $('#txt_WBamt').val(Header.wB_AMT);
         $('#txt_wbRemark').val(Header.wB_REM);
         $('#ddl_WBParty').val(Header.wB_AC);
-
         $('#txxt_ExRate').val(Header.exrate);
         $('#ddl_currency').val(Header.currency);
         $('#txxt_ForIssu').val(Header.foB_INSU);
@@ -629,18 +637,17 @@ async function LoadData() {
         // Details
         $('#tblSalesInvoice tbody').empty();
 
-        if (Array.isArray(Details) && Details.length > 0) {
-
+        if (Array.isArray(Details) && Details.length > 0)
+        {
             Details.forEach(item => {
-
                 AddRow({
                     ID: item.iteM_CODE ?? '',
                     Productcode: item.iteM_CODE ?? '',
                     nos: item.nos ?? '',
                     grossQty: item.grosS_QTY ?? '',
                     NetQty: item.qty ?? '',
-                    RateINUSD: item.foR_RATE ?? item.foR_RATE ?? '',
-                    Rate: item.rate ?? item.rate ?? '',
+                    RateINUSD: item.foR_RATE  ?? '',
+                    Rate: item.rate ?? '',
                     Amount: item.amount ?? '',
                     PackPer: item.pacK_PER ?? '',
                     PackAmt: item.pacK_AMT ?? '',
@@ -672,25 +679,19 @@ async function LoadData() {
                     InsuAmount: item.insU_AMT ?? '',
                     CDiscAmount: item.cdisC_AMT ?? '',
                     WBQuantity: item.wbqty ?? '',
-
-
-
-
-
-
-
-
-
-
-
-
+                    REPORT_TYPE: item.reporT_TYPE ?? '',
+                    Sale_Rate: item.sale_Rate ?? '',
+                    Taxable_Rate: item.taxable_Rate ?? '',
+                    Net_Wt: item.net_Wt ?? '',
+                    Packing_Wt: item.packinG_WT ?? '',
+                    Packing_nos: item.packing_nos ?? '',
                     itemCode: item.iteM_CODE ?? ''
                 });
-
             });
         }
     }
-    catch (error) {
+    catch (error)
+    {
         console.error("Error loading data:", error);
     }
 }
@@ -1849,6 +1850,83 @@ async function TransitReport() {
     });
 }
 
+async function TransitReportViewCardLimit() {
+    try {
+        var reportName = "credit_limit";
+        var RPTNAME = "Credit Limit Master";
 
+        // Step 1: Validate credit limit data
+        const validation = await $.ajax({
+            url: '/JobworkIssueChallan/PrintCreditLimitValidation',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8'
+        });
 
+        // Step 2: Build Crystal Report selection formula
+        var formula = "{CRLIMIT_MAST.COMP_CODE} = " + globalVars.CompCode;
 
+        // Step 3: Prepare report payload
+        var payload = {
+            Reportname: reportName,
+            selectionFormula: formula,
+            Database: database,
+            Parameters: {
+                comp_name: "'" + (globalVars.CompanyName || "").replace(/'/g, "''") + "'",
+                comp_add1: "'" + (globalVars.Address1 || "").replace(/'/g, "''") + "'",
+                comp_add2: "'" + (globalVars.Address2 || "").replace(/'/g, "''") + "'",
+                RPTNAME: "'" + RPTNAME + "'"
+            }
+        };
+
+        // Step 4: Generate timestamp for PDF filename
+        var now = new Date();
+
+        var timestamp =
+            String(now.getDate()).padStart(2, '0') +
+            String(now.getMonth() + 1).padStart(2, '0') +
+            String(now.getFullYear()).slice(-2) + "_" +
+            String(now.getHours()).padStart(2, '0') +
+            String(now.getMinutes()).padStart(2, '0') +
+            String(now.getSeconds()).padStart(2, '0');
+
+        // Step 5: Generate and download PDF
+        const response = await $.ajax({
+            url: 'http://localhost:24085/Report/PendingQCReport',
+            type: 'POST',
+            data: JSON.stringify(payload),
+            contentType: 'application/json; charset=utf-8',
+            xhrFields: {
+                responseType: 'blob'
+            }
+        });
+
+        var file = new Blob([response], {
+            type: 'application/pdf'
+        });
+
+        var fileUrl = URL.createObjectURL(file);
+        var link = document.createElement('a');
+
+        link.href = fileUrl;
+        link.download = `${ reportName }_${ timestamp }.pdf`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(fileUrl);
+
+    } catch (error) {
+        if (error.status === 0) {
+            console.error("Cannot connect to the API. Is the backend running?");
+        } else {
+            console.error("Error generating Credit Limit report:", error);
+
+            if (error.responseJSON) {
+                console.error("Response:", error.responseJSON);
+            }
+        }
+
+        toastr.error("Unable to generate Credit Limit report.");
+    }
+}

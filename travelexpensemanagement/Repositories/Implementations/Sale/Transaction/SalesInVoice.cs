@@ -1466,12 +1466,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
             try
             {
 
-                var validationResult = await validation(header, details, action);
+                //var validationResult = await validation(header, details, action);
 
-                if (validationResult.Status != "Success")
-                {
-                    return (validationResult.Status, validationResult.Message);
-                }
+                //if (validationResult.Status != "Success")
+                //{
+                //    return (validationResult.Status, validationResult.Message);
+                //}
 
                 var GlobalData = _globalVariableService.GetGlobalVariables();
                 var GeneralSetting = await  _globalVariableService.LoadGeneralSetting();
@@ -1785,29 +1785,28 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
 
                 if (isFinalApprovalBody == true)
                 {
-                    if (fappstatus != "")
+                    if (!string.IsNullOrWhiteSpace(fappstatus))
                     {
-                        string checkQuery = @" SELECT 1  FROM approval_status  WHERE user_Code = @USER_CODE AND V_Type = @V_TYPE
-                            AND V_No = @V_NO AND COMP_CODE = @COMP_CODE  AND Branch_Code = @BRANCH_CODE  AND Year_Code = @YEAR_CODE";
+                        string checkQuery = @"
+                            SELECT 1 FROM approval_status WHERE user_Code = @USER_CODE AND V_Type = @V_TYPE
+                            AND V_No = @V_NO AND COMP_CODE = @COMP_CODE AND Branch_Code = @BRANCH_CODE AND Year_Code = @YEAR_CODE";
 
-                        using (var cmd = new SqlCommand(checkQuery, conn))
+                        using (var checkCmd = new SqlCommand(checkQuery, conn))
                         {
-                            cmd.Parameters.AddWithValue("@USER_CODE", GlobalData.PubUserId);
-                            cmd.Parameters.AddWithValue("@V_TYPE", (object?)header.V_TYPE ?? DBNull.Value);
-                            cmd.Parameters.AddWithValue("@V_NO", header.V_NO);
-                            cmd.Parameters.AddWithValue("@COMP_CODE", GlobalData.PubCompCode);
-                            cmd.Parameters.AddWithValue("@BRANCH_CODE", GlobalData.PubBranchCode);
-                            cmd.Parameters.AddWithValue("@YEAR_CODE", GlobalData.PubFYearCode);
+                            checkCmd.Parameters.AddWithValue("@USER_CODE", GlobalData.PubUserId);
+                            checkCmd.Parameters.AddWithValue("@V_TYPE", (object?)header.V_TYPE ?? DBNull.Value);
+                            checkCmd.Parameters.AddWithValue("@V_NO", header.V_NO);
+                            checkCmd.Parameters.AddWithValue("@COMP_CODE", GlobalData.PubCompCode);
+                            checkCmd.Parameters.AddWithValue("@BRANCH_CODE", GlobalData.PubBranchCode);
+                            checkCmd.Parameters.AddWithValue("@YEAR_CODE", GlobalData.PubFYearCode);
+                            object? exists = await checkCmd.ExecuteScalarAsync();
 
-                            var exists = await cmd.ExecuteScalarAsync();
-
-                            if (exists != null)
+                            if (exists != null && exists != DBNull.Value)
                             {
                                 string updateQuery = @"
-                                    UPDATE approval_status SET STATUS = 'CLOSE',  CLOSE_DATE = FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm'),
-                                    Approval_code = 8, Approval_remark = 'Approved', remarks = 'Document Approved'
-                                    WHERE V_Type = @V_TYPE AND V_No = @V_NO AND COMP_CODE = @COMP_CODE  AND Branch_Code = @BRANCH_CODE
-                                    AND Year_Code = @YEAR_CODE";
+                                    UPDATE approval_status SET STATUS = 'CLOSE', CLOSE_DATE = GETDATE(), Approval_code = 8,
+                                    Approval_remark = 'Approved', remarks = 'Document Approved'
+                                    WHERE V_Type = @V_TYPE AND V_No = @V_NO AND COMP_CODE = @COMP_CODE AND Branch_Code = @BRANCH_CODE AND Year_Code = @YEAR_CODE";
 
                                 using (var updateCmd = new SqlCommand(updateQuery, conn))
                                 {
@@ -1816,7 +1815,6 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
                                     updateCmd.Parameters.AddWithValue("@COMP_CODE", GlobalData.PubCompCode);
                                     updateCmd.Parameters.AddWithValue("@BRANCH_CODE", GlobalData.PubBranchCode);
                                     updateCmd.Parameters.AddWithValue("@YEAR_CODE", GlobalData.PubFYearCode);
-
                                     await updateCmd.ExecuteNonQueryAsync();
                                 }
                             }

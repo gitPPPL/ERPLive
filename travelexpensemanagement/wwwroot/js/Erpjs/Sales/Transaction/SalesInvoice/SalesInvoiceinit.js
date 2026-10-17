@@ -329,7 +329,7 @@ $(document).ready(async function () {
         const PACK_AMT = getDecimal($.trim($('#NumOtherPacking2').val())) || 0;
         const SAUDA_NO =   parseInt($.trim($('#ddlSaudaNo').val()), 10) || 0;
         const SAUDA_TYPE = SAUDA_NO ? $.trim($('#ddlSaudaNo option:selected').text()).split('-').pop().trim() : "";
-        const SAUDA_RATE =  getDecimal($.trim($('#txt_saudarate').val())) || 0;
+        const SAUDA_RATE =  $.trim($('#txt_saudarate').val()) || 0;
 
         const ISSUE_NO = parseInt($.trim($('#ddlIssueNo').val()), 10) || 0;
         const ISSUE_TYPE = ISSUE_NO  ? $.trim($('#ddlIssueNo option:selected').text()).split('-').pop().trim() : "";
@@ -854,6 +854,21 @@ $(document).ready(async function () {
         let AddressId = $('#ddlsupplyaddressL1').val();
         AddressConsigneeData(PartyCode, AddressId);
     });
+
+
+    $('#NumOtherCashDiscount1').on('change', function () {
+        const CASHDISCOUTPER = parseFloat($(this).val()) || 0;
+        if (CASHDISCOUTPER > 0) {
+            $('#tblSalesInvoice tbody tr').each(function () {
+                const $row = $(this);
+                const itemCode = $.trim($row.find('.ddlProductName').val() || '');
+                if (itemCode !== '') {
+                    CalculateRow($row);
+                }
+            });
+        }
+    });
+
 
 
 
