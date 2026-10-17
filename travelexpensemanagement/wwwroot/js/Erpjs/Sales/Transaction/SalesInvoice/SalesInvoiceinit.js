@@ -326,7 +326,7 @@ $(document).ready(async function () {
         const PACK_NO = parseInt($.trim($('#ddlPackNo').val()), 10) || 0;
         const PACK_TYPE = PACK_NO  ? $.trim($('#ddlPackNo option:selected').text()).split('-').pop().trim()  : "";
         const PACK_PER = parseFloat($.trim($('#NumOtherPacking1').val())) || 0;
-        const PACK_AMT = getDecimal($.trim($('#NumOtherPacking2').val())) || 0;
+        const PACK_AMT = $.trim($('#NumOtherPacking2').val()) || 0;
         const SAUDA_NO =   parseInt($.trim($('#ddlSaudaNo').val()), 10) || 0;
         const SAUDA_TYPE = SAUDA_NO ? $.trim($('#ddlSaudaNo option:selected').text()).split('-').pop().trim() : "";
         const SAUDA_RATE =  $.trim($('#txt_saudarate').val()) || 0;
@@ -338,29 +338,29 @@ $(document).ready(async function () {
         const ITEM_TYPE =  $.trim($('#ddlProductType').val()) || "";
         const WB_NO =  parseInt($.trim($('#ddlWBNo').val()), 10) || 0;
         const WB_TYPE = WB_NO  ? $.trim($('#ddlWBNo option:selected').text()).split('-').pop().trim()  : "";
-        const WB_QTY =  getDecimal($.trim($('#NumWbQty').val())) || 0;
+        const WB_QTY =  $.trim($('#NumWbQty').val()) || 0;
         const WB_AMT =  $.trim($('#txt_WBamt').val()) || 0;
         const WB_REM = $.trim($('#txt_wbRemark').val()) || "";
         const WB_AC = $.trim($('#ddl_WBParty').val()) || "";
-        const AMOUNT = getDecimal($.trim($('#NumOtherTotalAmount').val())) || 0;
+        const AMOUNT = ($.trim($('#NumOtherTotalAmount').val())) || 0;
         const DISC_PER =  parseFloat($.trim($('#NumOtherDiscount1').val())) || 0;
-        const DISC_AMT = getDecimal($.trim($('#NumOtherDiscount2').val())) || 0;
+        const DISC_AMT = $.trim($('#NumOtherDiscount2').val()) || 0;
         const CDISC_PER =  parseFloat($.trim($('#NumOtherCashDiscount1').val())) || 0;
-        const CDISC_AMT =  getDecimal($.trim($('#NumOtherCashDiscount2').val())) || 0;
+        const CDISC_AMT =  ($.trim($('#NumOtherCashDiscount2').val())) || 0;
         const CGST_PER =  parseFloat($.trim($('#NumOtherCGST1').val())) || 0;
-        const CGST_AMT = getDecimal($.trim($('#NumOtherCGST2').val())) || 0;
+        const CGST_AMT = ($.trim($('#NumOtherCGST2').val())) || 0;
         const SGST_PER = parseFloat($.trim($('#NumOtherSGST1').val())) || 0;
-        const SGST_AMT = getDecimal($.trim($('#NumOtherSGST2').val())) || 0;
+        const SGST_AMT = ($.trim($('#NumOtherSGST2').val())) || 0;
         const IGST_PER = parseFloat($.trim($('#NumOtherIGST1').val())) || 0;
-        const IGST_AMT = getDecimal($.trim($('#NumOtherIGST2').val())) || 0;
+        const IGST_AMT = ($.trim($('#NumOtherIGST2').val())) || 0;
         const CESS_PER = parseFloat($.trim($('#NumOtherCESS1').val())) || 0;
-        const CESS_AMT = getDecimal($.trim($('#NumOtherCESS2').val())) || 0;
+        const CESS_AMT = ($.trim($('#NumOtherCESS2').val())) || 0;
         const TCS_PER = parseFloat($.trim($('#NumOtherTCS1').val())) || 0;
-        const TCS_AMT = getDecimal($.trim($('#NumOtherTCS2').val())) || 0;
-        const ROUND_OFF = getDecimal($.trim($('#NumOtherRoundOff').val())) || 0;
+        const TCS_AMT = ($.trim($('#NumOtherTCS2').val())) || 0;
+        const ROUND_OFF = ($.trim($('#NumOtherRoundOff').val())) || 0;
         const TOT_NOS = parseInt($.trim($('#NumOtherTotalNos').val()), 10) || 0;
-        const TOT_GROSS =  getDecimal($.trim($('#NumGrossQty').val())) || 0;
-        const TOT_NET = getDecimal($.trim($('#NumNetQty').val())) || 0;
+        const TOT_GROSS =  ($.trim($('#NumGrossQty').val())) || 0;
+        const TOT_NET = ($.trim($('#NumNetQty').val())) || 0;
         const TRANSPORT_CODE =  parseInt($.trim($('#ddlTransport').val()), 10) || 0;
         const TRANSPORT_NAME = TRANSPORT_CODE ? $.trim($('#ddlTransport option:selected').text()) : "";
         const GR_NO =  $.trim($('#NumGRNo').val()) || "";
@@ -373,25 +373,24 @@ $(document).ready(async function () {
         const DRIVER_NAME = $.trim($('#TxtDriverName').val()) || "";
         const DRIVER_NO =  $.trim($('#NumDriverMob').val()) || "";
         const INSU_PER =  parseFloat($.trim($('#NumInsurance1').val())) || 0;
-        const INSU_AMT =  getDecimal($.trim($('#NumInsurance2').val())) || 0;
+        const INSU_AMT =  ($.trim($('#NumInsurance2').val())) || 0;
         const INSU_DETAIL = $.trim($('#txt_InsuranceDe').val()) || "";
         const TDS_PER = parseFloat($.trim($('#NumTDSFreight1').val())) || 0;
-        const TDS_AMT = getDecimal($.trim($('#NumTDSFreight2').val())) || 0;
+        const TDS_AMT = $.trim($('#NumTDSFreight2').val()) || 0;
         const FRT_TAXPER = parseFloat($.trim($('#NumTaxFreight1').val())) || 0;
-        const FRT_TAXAMT = getDecimal($.trim($('#NumTaxFreight2').val())) || 0;
-        const FRT_AMT =  getDecimal($.trim($('#NumFreightAmount').val())) || 0;
+        const FRT_TAXAMT = $.trim($('#NumTaxFreight2').val()) || 0;
+        const FRT_AMT =  ($.trim($('#NumFreightAmount').val())) || 0;
         const FRT_TOPAY = parseFloat($.trim($('#txt_ToPayFrt').val())) || 0;
         const TPT_DISTANCE = parseInt($.trim($('#NumDistance').val()), 10) || 0;
         const TPT_MODE =  parseInt($.trim($('#ddlMode').val()), 10) || 0;
-        const PAY_TERM =  parseInt($.trim($('#ddlPaymentTerm').val()), 10) || 0;
-        const PAYMENT_TERM = $.trim($('#ddlPaymentTerm option:selected').text()) || "";
+        const PAYMENT_TERM = $.trim($('#ddlPaymentTerm').val()) || ""; 
         const DELIVERY_TERMS = $.trim($('#TxtDeliveryTerm').val()) || "";
         const WAYBILL_NO = $.trim($('#txt_WayBillNo').val()) || "";
         const LOAD_AC =  $.trim($('#ddl_LoadParty').val()) || "";
         const LOAD_PER =  parseFloat($.trim($('#txt_loadPer').val())) || 0;
         const LOAD_AMT = $.trim($('#txt_LoadAmt').val()) || 0;
         const LOAD_REM =  $.trim($('#txt_ldRemark').val()) || "";
-        const NAMOUNT =  getDecimal($.trim($('#NumOtherNetAmount').val())) || 0;
+        const NAMOUNT =  ($.trim($('#NumOtherNetAmount').val())) || 0;
         const EXRATE =  parseFloat($.trim($('#txxt_ExRate').val())) || 0;
         const CURRENCY = $.trim($('#ddl_currency').val()) || "";
         const DEFECTIVE_GOODS = $('#ChkDefectiveGoods').is(':checked') ? "1" : "0";
@@ -634,8 +633,7 @@ $(document).ready(async function () {
             FRT_AMT: FRT_AMT,
             FRT_TOPAY: FRT_TOPAY,
             TPT_DISTANCE: TPT_DISTANCE,
-            TPT_MODE: TPT_MODE,
-            PAY_TERM: PAY_TERM,
+            TPT_MODE: TPT_MODE,       
             PAYMENT_TERM: PAYMENT_TERM,
             DELIVERY_TERMS: DELIVERY_TERMS,
             WAYBILL_NO: WAYBILL_NO,

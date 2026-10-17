@@ -536,6 +536,7 @@ async function LoadData() {
         $('#txt_saudarate').val(Header.saudA_RATE);
         $('#NumOtherTotalAmount').val(Header.amount);
         $('#ddlWBNo').val(Header.wB_NO || '').trigger('change');
+        $('#DDL_LicNo').val(Header.lC_NO || '').trigger('change');
         $('#NumOtherPacking1').val(Header.pacK_PER);
         $('#NumOtherPacking2').val(Header.pacK_AMT);
         $('#NumOtherDiscount1').val(Header.disC_PER);
@@ -599,7 +600,7 @@ async function LoadData() {
         $('#txxt_ShipBillNo').val(Header.sB_NO);
         $('#dt_ShipDate').val(formatDate(Header.sB_DATE));
         $('#ddllictype').val((Header.licencE_TYPE));
-        $('#DDL_LicNo').val((Header.licencE_NO));
+    
         $('#txt_LicDT').val(formatDate(Header.licencE_DATE));
         $('#txxt_FobValue').val((Header.foB_VALUE));
         $('#txxt_FobOther').val((Header.foB_OTHER));
