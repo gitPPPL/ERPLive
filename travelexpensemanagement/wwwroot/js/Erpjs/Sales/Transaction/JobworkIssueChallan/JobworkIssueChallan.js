@@ -513,7 +513,7 @@ async function LoadData() {
 
         console.log("Header", Header);
         console.log("Details", Details);
-            
+
         await Promise.all([
             DDlPackNo(Header?.bilL_CODE || ''),
             cmbPartyAddress(Header?.bilL_CODE || ''),
@@ -534,7 +534,7 @@ async function LoadData() {
         $('#NumPincode').val(Header.bilL_PINCODE);
         $('#ddlDONo').val(Header.do_NO || '').trigger('change');
         $('#ddlSalesThrough').val(Header.agenT_CODE || '').trigger('change');
-        $('#ddlSupplyType').val(Header.supplY_TYPE);       
+        $('#ddlSupplyType').val(Header.supplY_TYPE);
         $('#ddlConsignee').val(Header.shiP_CODE || '').trigger('change');
         $('#TxtSupplyAddressL1').val(Header.shiP_ADD1);
         $('#TxtSupplyAddressL2').val(Header.shiP_ADD2);
@@ -557,6 +557,7 @@ async function LoadData() {
         $('#txt_saudarate').val(Header.saudA_RATE);
         $('#NumOtherTotalAmount').val(Header.amount);
         $('#ddlWBNo').val(Header.wB_NO || '').trigger('change');
+        $('#DDL_LicNo').val(Header.lC_NO || '').trigger('change');
         $('#NumOtherPacking1').val(Header.pacK_PER);
         $('#NumOtherPacking2').val(Header.pacK_AMT);
         $('#NumOtherDiscount1').val(Header.disC_PER);
@@ -581,7 +582,7 @@ async function LoadData() {
         $('#NumNetQty').val(Header.toT_NET);
         $('#NumWbQty').val(Header.wB_QTY);
         $('#ddlTransport').val(Header.transporT_CODE);
-        $('#NumGRNo').val(Header.gR_NO);     
+        $('#NumGRNo').val(Header.gR_NO);
         $('#DtGRDate').val(formatDate(Header.gR_DATE));
         if (Header.gR_DATE != null && Header.gR_DATE !== '') {
             $('#chkGRDate').prop('checked', true);
@@ -620,7 +621,7 @@ async function LoadData() {
         $('#txxt_ShipBillNo').val(Header.sB_NO);
         $('#dt_ShipDate').val(formatDate(Header.sB_DATE));
         $('#ddllictype').val((Header.licencE_TYPE));
-        $('#DDL_LicNo').val((Header.licencE_NO));
+
         $('#txt_LicDT').val(formatDate(Header.licencE_DATE));
         $('#txxt_FobValue').val((Header.foB_VALUE));
         $('#txxt_FobOther').val((Header.foB_OTHER));
@@ -637,8 +638,7 @@ async function LoadData() {
         // Details
         $('#tblSalesInvoice tbody').empty();
 
-        if (Array.isArray(Details) && Details.length > 0)
-        {
+        if (Array.isArray(Details) && Details.length > 0) {
             Details.forEach(item => {
                 AddRow({
                     ID: item.iteM_CODE ?? '',
@@ -646,7 +646,7 @@ async function LoadData() {
                     nos: item.nos ?? '',
                     grossQty: item.grosS_QTY ?? '',
                     NetQty: item.qty ?? '',
-                    RateINUSD: item.foR_RATE  ?? '',
+                    RateINUSD: item.foR_RATE ?? '',
                     Rate: item.rate ?? '',
                     Amount: item.amount ?? '',
                     PackPer: item.pacK_PER ?? '',
@@ -690,8 +690,7 @@ async function LoadData() {
             });
         }
     }
-    catch (error)
-    {
+    catch (error) {
         console.error("Error loading data:", error);
     }
 }

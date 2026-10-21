@@ -1465,12 +1465,12 @@ namespace travelexpensemanagement.Repositories.Implementations.Sale.Transaction
         {
             try
             {
-                //var validationResult = await validation(header, details, action);
+                var validationResult = await validation(header, details, action);
 
-                //if (validationResult.Status != "Success")
-                //{
-                //    return (validationResult.Status, validationResult.Message);
-                //}
+                if (validationResult.Status != "Success")
+                {
+                    return (validationResult.Status, validationResult.Message);
+                }
 
                 var GlobalData = _globalVariableService.GetGlobalVariables();
                 var GeneralSetting = await  _globalVariableService.LoadGeneralSetting();
