@@ -150,7 +150,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             return Json(new { success = true, lists = headerList, totalCount });
         }
 
-
         [HttpPost]
         public IActionResult GetDataByCode([FromForm] string DOC_ID)
         {
@@ -388,9 +387,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(new { success = false, message = "Error fetching purchase requisition data", error = ex.Message });
             }
         }
-
-
-
+        
         [HttpPost]
         public JsonResult Delete(int code, string VType)
         {

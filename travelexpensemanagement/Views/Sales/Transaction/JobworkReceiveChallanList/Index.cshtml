@@ -58,7 +58,7 @@
 						<th>Amount</th>
 						<th>Pack Per</th>
 						<th>Pack Amount</th>
-						<th>Amount</th>
+						<th>Namount</th>
 						<th>Cgst Per</th>
 						<th>Cgst Amount</th>
 						<th>Sgst Per</th>
@@ -103,181 +103,347 @@
 			</table>
 		</div>
 		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
+		<div class="erppagelist-pagination">
+
+			<div class="pagination-left">
+				<select id="pageSizeSelect" onchange="changeRowsPerPage()">
+					<option value="5">5</option>
+					<option value="10" selected>10</option>
+					<option value="20">20</option>
+					<option value="50">50</option>
+				</select>
 			</div>
+
+			<div class="pagination-center">
+				<button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+				<div id="pageNumbers" class="page-numbers"></div>
+				<button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+			</div>
+
+			<div class="pagination-right" id="pageInfoText">
+				Results: 0 - 0 of 0
+			</div>
+
 		</div>
+
+
+
 	</div>
 
 </fieldset>
 
 
+
 <script>
-	let currentPage = 1;
-	let pageSize = 10;
+    let currentPage = 1;
+    let pageSize = 10;
+    let totalCount = 0;
+    var controllerName = window.location.pathname.split('/')[1];
+    $(document).ready(function () {
+       // checkPermission(controllerName, function () {
+            loadAllInward();
+       // });
 
-	$(document).ready(function () {
-		loadSalesReturnList();
-		$('#searchBox').on('keyup', function () {
-			currentPage = 1;
-			loadSalesReturnList();
-		});
-	});
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadAllInward();
+        });
 
-	function loadSalesReturnList() {
-		$.ajax({
-			url: '/JobworkReceiveChallanList/GetAlldataList',
-			type: 'GET',
-			dataType: 'json',
-			data: {
-				searchTerm: $('#searchBox').val(),
-				pageNumber: currentPage,
-				pageSize: pageSize
-			},
-			success: function (res) {
-				console.log('Response:', res);
-				const docs = res.data || [];
-				const totalCount = res.totalCount || 0;
-				const tbody = $('#tblSalesReturnList tbody'); 
-				tbody.empty();
+        $('#button_export').on('click', function () {
+            var text = $('#searchBox').val();
+            window.location.href = '/JobworkReceiveChallanList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+        });
 
-				if (docs.length === 0) {
-					tbody.append(`
-						<tr>
-							<td colspan="70" class="text-center text-muted">
-								No records found
-							</td>
-						</tr>`);
-					renderPagination(0);
-					return;
-				}
-				docs.forEach(d => {
-					tbody.append(`
-						<tr>
-							<td style="display:none;">${d.DOC_ID ?? ''}</td>
-							<td>${d.VoucherName ?? ''}</td>
-							<td>${d.VoucherNo ?? ''}</td>
-							<td style="display:none;">${d.vtype ?? ''}</td>
-							<td>${d.Date ?? ''}</td>
-							<td>${d.BILL_NAME ?? ''}</td>
-							<td>${d.BILL_ADD1 ?? ''}</td>
-							<td>${d.BILL_ADD2 ?? ''}</td>
-							<td>${d.BILL_ADD3 ?? ''}</td>
-							<td>${d.BillCity?.NAME ?? ''}</td>
-							<td>${d.Agent?.NAME ?? ''}</td>
-							<td>${d.SHIP_NAME ?? ''}</td>
-							<td>${d.SHIP_ADD1 ?? ''}</td>
-							<td>${d.SHIP_ADD2 ?? ''}</td>
-							<td>${d.SHIP_ADD3 ?? ''}</td>
-							<td>${d.ShipCity?.NAME ?? ''}</td>
-							<td>${d.TaxName ?? ''}</td>
-							<td>${d.ITEM_TYPE ?? ''}</td>
-							<td>${d.WB_NO ?? ''}</td>
-							<td>${d.PACK_NO ?? 0}</td>
-							<td>${d.AMOUNT ?? 0}</td>
-							<td>${d.PACK_PER ?? 0}</td>
-							<td>${d.PACK_AMT ?? 0}</td>
-							<td>${d.NAMOUNT ?? 0}</td>
-							<td>${d.CGST_PER ?? 0}</td>
-							<td>${d.CGST_AMT ?? 0}</td>
-							<td>${d.SGST_PER ?? 0}</td>
-							<td>${d.SGST_AMT ?? 0}</td>
-							<td>${d.IGST_PER ?? 0}</td>
-							<td>${d.IGST_AMT ?? 0}</td>
-							<td>${d.CESS_PER ?? 0}</td>
-							<td>${d.CESS_AMT ?? 0}</td>
-							<td>${d.LOAD_PER ?? 0}</td>
-							<td>${d.LOAD_AC ?? ''}</td>
-							<td>${d.LOAD_AMT ?? 0}</td>
-							<td>${d.WB_AMT ?? 0}</td>
-							<td>${d.WB_AC ?? ''}</td>
-							<td>${d.TOT_NOS ?? ''}</td>
-							<td>${d.FRT_AMT ?? 0}</td>
-							<td>${d.ROUND_OFF ?? 0}</td>
-							<td>${d.TOT_NET ?? 0}</td>
-							<td>${d.INSU_PER ?? 0}</td>
-							<td>${d.INSU_AMT ?? 0}</td>
-							<td>${d.TDS_PER ?? 0}</td>
-							<td>${d.TDS_AMT ?? 0}</td>
-							<td>${d.LOAD_REM ?? ''}</td>
-							<td>${d.WB_REM ?? ''}</td>
-							<td>${d.TOT_GROSS ?? 0}</td>
-							<td>${d.GR_NO ?? ''}</td>
-							<td>${d.GR_DATE ?? ''}</td>
-							<td>${d.VEHICLE_NO ?? ''}</td>
-							<td>${d.TRANSPORT_CODE ?? ''}</td>
-							<td>${d.TRANSPORT_NAME ?? ''}</td>
-							<td>${d.DRIVER_NAME ?? ''}</td>
-							<td>${d.DRIVER_NO ?? ''}</td>
-							<td>${d.WAYBILL_NO ?? ''}</td>
-							<td>${d.REMARK ?? ''}</td>
-							<td>${d.FRT_TOPAY ?? 0}</td>
-							<td>${d.WB_QTY ?? 0}</td>
-							<td>${d.DISC_PER ?? 0}</td>
-							<td>${d.DISC_AMT ?? 0}</td>
-							<td>
-								<div class="action-icons">
-									<i class="fa fa-edit btn-edit" data-bs-toggle="tooltip" title="Edit" onclick="editSalesReturn('${d.vtype}', '${d.VoucherNo}')"></i>
-									<i class="fas fa-eye btn-view" data-bs-toggle="tooltip" title="View" onclick="viewSalesReturn('${d.vtype}', '${d.VoucherNo}')"></i>
-									<i class="fas fa-trash btn-delete" data-bs-toggle="tooltip" title="Delete" onclick="deleteSalesReturn('${d.vType}', '${d.VoucherNo}')"></i>
-									<i class="fa fa-file btn-document" data-bs-toggle="tooltip" title="Document Details" onclick="showDocumentPopup('${d.VoucherNo}')"></i>
-								</div>
-							</td>
-						</tr>
-					`);
-				});
-				renderPagination(totalCount);
-			},
-			error: function () {
-				toastr.error('Failed to load sales return list');
-			}
-		});
-	}
-		function renderPagination(total, pageSize = 10, currentPageParam = currentPage) {
-		const totalPages = Math.ceil(total / pageSize);
-		const pagination = $('#tablePagination');
-		pagination.empty();
+        $('#button_print').on('click', function ()
+        {
+            var searchTerm = $('#searchBox').val() || '';
+            window.location.href = '/JobworkReceiveChallanList/ExportPdf?searchTerm=' + encodeURIComponent(searchTerm);
+        });
 
-		if (totalPages <= 1) return;
+    });
+    // ================= LOAD DATA =================
+    function loadAllInward() {
+        $.ajax({
+            url: '/JobworkReceiveChallanList/GetList',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: $('#searchBox').val(),
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res) {
+                console.log("Response from server:", res);
+                if (!res.success) {
+                    toastr.error("Failed to load data.");
+                    return;
+                }
+                const list = res.lists || [];
+                totalCount = res.totalCount || 0;
 
-		let html = '';
+                renderTable(list);
+                renderPagination();
+            },
+            error: function (xhr) {
+                toastr.error('Error loading list: ' + xhr.responseText);
+            }
+        });
+    }
+    // ================= TABLE =================
+    function renderTable(list) {
 
-		if (currentPageParam > 1) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPageParam - 1})">Prev</button>`;
-		}
+        const tbody = $('#tblSalesReturnList tbody');
+        tbody.empty();
 
-		const startPage = Math.max(1, currentPageParam - 2);
-		const endPage = Math.min(totalPages, currentPageParam + 2);
+        if (!list || list.length === 0) {
+            tbody.append('<tr><td colspan="13" class="text-center text-muted">No list found.</td></tr>');
+            return;
+        }
 
-		for (let i = startPage; i <= endPage; i++) {
-			html += `
-				<button class="btn btn-sm ${i === currentPageParam ? 'btn-primary' : 'btn-light'} mx-1"
-						onclick="goToPage(${i})">${i}</button>
-			`;
-		}
+        $.each(list, function (index, item) {
 
-		if (currentPageParam < totalPages) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPageParam + 1})">Next</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-		}
+            tbody.append(`
+                <tr>
+                            <td>${item.v_TYPEText ?? ''}</td>              
+                            <td>${item.v_NO ?? ''}</td>
+                            <td>${formatDate(item.v_DATE)}</td>
 
-		pagination.html(html);
-	}
-	function goToPage(page) {
-		currentPage = page;
-		loadSalesReturnList();
-	}
-	function editSalesReturn(vType, VoucherNo) {
-		window.location.href = `/JobworkReceiveChallan/Index?vType=${encodeURIComponent(vType)}&VoucherNo=${encodeURIComponent(VoucherNo)}`;
-	}
-	function viewSalesReturn(vType, VoucherNo) {
-		window.location.href = `/JobworkReceiveChallan/Index?vType=${encodeURIComponent(vType)}&VoucherNo=${encodeURIComponent(VoucherNo)}&mode=view`;
-	}
-	function deleteSalesReturn(vType, VoucherNo) {
-		window.location.href = `/JobworkReceiveChallan/Index?vType=${encodeURIComponent(vType)}&VoucherNo=${encodeURIComponent(VoucherNo)}`;
-	}
+                            <td>${item.bilL_NAME ?? ''}</td>
+                            <td>${item.bilL_ADD1 ?? ''}</td>
+                            <td>${item.bilL_ADD2 ?? ''}</td>
+                            <td>${item.bilL_ADD3 ?? ''}</td>
+                            <td>${item.bilL_CITYName ?? ''}</td>
+                            <td>${item.agenT_Name ?? ''}</td>
+
+                            <td>${item.shiP_NAME ?? ''}</td>
+                            <td>${item.shiP_ADD1 ?? ''}</td>
+                            <td>${item.shiP_ADD2 ?? ''}</td>
+                            <td>${item.shiP_ADD3 ?? ''}</td>
+                            <td>${item.statename ?? ''}</td>
+
+                            <td>${item.taX_Name ?? ''}</td>
+                            <td>${item.iteM_TYPE ?? ''}</td>
+                            <td>${item.wB_NO ?? ''}</td>
+                            <td>${item.pacK_NO ?? ''}</td>
+                            <td>${item.amount ?? ''}</td>
+                            <td>${item.pacK_PER ?? ''}</td>
+                            <td>${item.pacK_AMT ?? ''}</td>
+                            <td>${item.namount ?? ''}</td>
+
+                            <td>${item.cgsT_PER ?? ''}</td>
+                            <td>${item.cgsT_AMT ?? ''}</td>
+                            <td>${item.sgsT_PER ?? ''}</td>
+                            <td>${item.sgsT_AMT ?? ''}</td>
+                            <td>${item.igsT_PER ?? ''}</td>
+                            <td>${item.igsT_AMT ?? ''}</td>
+                            <td>${item.cesS_PER ?? ''}</td>
+                            <td>${item.cesS_AMT ?? ''}</td>
+
+                            <td>${item.loaD_PER ?? ''}</td>
+                                   <td>${item.loaD_AC ?? ''}</td>
+                            <td>${item.loaD_AMT ?? ''}</td>
+                     
+                            <td>${item.wB_AMT ?? ''}</td>
+                            <td>${item.wB_AC ?? ''}</td>
+                            <td>${item.toT_NOS ?? ''}</td>
+                            <td>${item.frT_AMT ?? ''}</td>
+                            <td>${item.rounD_OFF ?? ''}</td>
+
+                            <td>${item.toT_NET ?? ''}</td>
+                            <td>${item.insU_PER ?? ''}</td>
+                            <td>${item.insU_AMT ?? ''}</td>
+                            <td>${item.tdS_PER ?? ''}</td>
+                            <td>${item.tdS_AMT ?? ''}</td>
+
+                            <td>${item.loaD_REM ?? ''}</td>
+                            <td>${item.wB_REM ?? ''}</td>
+                            <td>${item.toT_GROSS ?? ''}</td>
+                            <td>${item.gR_NO ?? ''}</td>
+                            <td>${formatDate(item.gR_DATE)}</td>
+                            <td>${item.vehiclE_NO ?? ''}</td>
+                            <td>${item.transporT_CODE ?? ''}</td>
+                            <td>${item.transporT_NAME ?? ''}</td>
+                            <td>${item.driveR_NAME ?? ''}</td>
+                            <td>${item.driveR_NO ?? ''}</td>
+                            <td>${item.waybilL_NO ?? ''}</td>
+                            <td>${item.remark ?? ''}</td>
+                            <td>${item.frT_TOPAY ?? ''}</td>
+                            <td>${item.wB_QTY ?? ''}</td>
+                            <td>${item.disC_PER ?? ''}</td>
+                            <td>${item.disC_AMT ?? ''}</td>
+                       
+
+                    <td class="action-col">
+                        <div class="action-wrap">
+                            <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.doC_ID}')"><i class="fa fa-edit"></i></button>
+                            <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.doC_ID}')"><i class="fa fa-eye"></i></button>
+                            <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
+                            <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+
+                        </div>
+                    </td>
+                </tr>
+            `);
+
+            //applyGridPermission();
+        });
+
+    }
+    // ================= PAGINATION =================
+    function renderPagination() {
+
+        const totalPages = Math.ceil(totalCount / pageSize) || 1;
+
+        let html = '';
+        let maxVisible = 5;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = startPage + maxVisible - 1;
+
+        if (endPage > totalPages) {
+            endPage = totalPages;
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+
+        if (startPage > 1) {
+            html += `<span class="page-number" onclick="goToPage(1)">1</span>`;
+            if (startPage > 2) html += `<span class="dots">...</span>`;
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<span class="page-number ${i === currentPage ? 'active' : ''}"
+                        onclick="goToPage(${i})">${i}</span>`;
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += `<span class="dots">...</span>`;
+            html += `<span class="page-number" onclick="goToPage(${totalPages})">${totalPages}</span>`;
+        }
+
+        $('#pageNumbers').html(html);
+
+        let start = (currentPage - 1) * pageSize + 1;
+        let end = Math.min(currentPage * pageSize, totalCount);
+
+        if (totalCount === 0) {
+            start = 0;
+            end = 0;
+        }
+
+        $('#pageInfoText').text(`Results: ${start} - ${end} of ${totalCount}`);
+
+        $('#prevBtn').prop('disabled', currentPage === 1);
+        $('#nextBtn').prop('disabled', currentPage === totalPages);
+    }
+    // ================= PAGINATION ACTIONS =================
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadAllInward();
+        }
+    }
+
+    function nextPage() {
+        const totalPages = Math.ceil(totalCount / pageSize);
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadAllInward();
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllInward();
+    }
+
+    function changeRowsPerPage() {
+        pageSize = parseInt($('#pageSizeSelect').val());
+        currentPage = 1;
+        loadAllInward();
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '';
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    }
+
+    function AddOrEditFunction(DOC_ID) {
+        window.location.href = `/JobworkReceiveChallan/Index?id=${encodeURIComponent(DOC_ID)}`;
+    }
+
+    function viewMenuDetails(DOC_ID) {
+        window.location.href = `/JobworkReceiveChallan/Index?id=${encodeURIComponent(DOC_ID)}&mode=view`;
+    }
+
+    function deleteTemp(code, VType)
+    {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You want to delete this Sales Invoice ?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: '/JobworkReceiveChallanList/Delete',
+                    type: 'POST',
+                    data: { code: code, VType: VType },
+                    success: function (res) {
+
+                        console.log("Deelete Res",res);
+
+                        if(res.validation == false)
+                        {
+                          toastr.warning(res.message );
+                          return;
+                        }
+                        if (res.success)
+                        {
+                            toastr.success(res.message || "Deleted successfully");
+                            loadAllInward();
+                        } else {
+                            toastr.error(res.message || 'Failed to delete.');
+                        }
+                    },
+                    error: function ()
+                    {
+                        toastr.error('Error deleting record.');
+                    }
+                });
+            }
+        });
+    }
+
+    function showDocumentPopup(docCode) {
+
+        $.ajax({
+            url: '/JobworkIssueChallanList/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',
+            data: { docCode: docCode },
+            success: function (response) {
+                if (response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function () {
+                toastr.error("Error fetching document details.");
+            }
+        });
+    }
+
 </script>

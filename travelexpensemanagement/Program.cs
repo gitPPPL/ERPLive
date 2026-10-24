@@ -52,6 +52,11 @@ builder.Services.AddScoped< IInventoryDepartmentIssueListRepository, InventoryDe
 builder.Services.AddScoped<ISalesProformaInvoice , SalesProformaInvoice>();
 builder.Services.AddScoped<ISalesInVoice, SalesInVoice>();
 builder.Services.AddScoped<IJobworkIssueChallan, JobworkIssueChallan>();
+
+builder.Services.AddScoped<IJobworkReceiveChallan, JobworkReceiveChallan>();
+
+
+
 builder.Services.AddScoped<ISalesInvoiceDirect, SalesInvoiceDirect>();
 builder.Services.AddScoped<IExportDetailsRepository, ExportDetailsRepository>();
 builder.Services.Configure<EncryptionSettings>(

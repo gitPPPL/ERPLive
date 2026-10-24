@@ -1716,12 +1716,12 @@ async function TransitReport() {
         return;
     }
 
-    let V_NO = $('#NumInvoiceNo').val();
+    let V_NO = $('#NumDocumentNo').val();
     let V_TYPE = $('#ddlDocumentType').val();
+    let ConsFreight = $('#NumConsFreight').val();
 
-    const netAmount = parseFloat($('#NumOtherNetAmount').val()) || 0;
     var reportName = "";
-    var exportPrint = false;
+
     var RPTNAME = "TAX INVOICE";
 
     const validation = await $.ajax({
