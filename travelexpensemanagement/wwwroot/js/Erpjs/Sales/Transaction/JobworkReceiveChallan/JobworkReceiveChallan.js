@@ -146,7 +146,6 @@
     });
 
 }
-
 function CalculateRow($row) {
     const chkCalPCS = $('#ChkPCS').is(':checked');
 
@@ -316,7 +315,6 @@ function CalculateRow($row) {
     $('#NumOtherRoundOff').val(roundOff.toFixed(2));
 
 }
-
 function GetSalesInvoiceDetails() {
 
     const details = [];
@@ -523,7 +521,6 @@ async function LoadData() {
         console.error("Error loading data:", error);
     }
 }
-
 function ShowPendingDetails(data)
 {
     const $tbody = $('#tblpurchaseordermodal tbody');
@@ -767,133 +764,406 @@ function LimitNumberLength(input, maxLength)
     }
 }
 
-
 async function TransitReport() {
-    if (!rowId) {
-        showToast(`Please save the data before printing the report.`, { type: "info" });
-        return;
-    }
+    try {
+        if (!rowId)
+        {
+            showToast("Please save the data before printing the report.", { type: "info" });
+            return;
+        }
 
-    let V_NO = $('#NumInvoiceNo').val();
-    let V_TYPE = $('#ddlDocumentType').val();
+        const V_NO = parseInt($.trim($("#NumDocumentNo").val()), 10);
+        const V_TYPE = $.trim($("#ddlDocumentType").val() || "");
+        const COMP_CODE = Number(globalVars.CompCode) || 0;
+        const YEAR_CODE = Number(globalVars.FYearCode) || 0;
+        const BRANCH_CODE = Number(globalVars.BranchCode) || 0;
 
-    const netAmount = parseFloat($('#NumOtherNetAmount').val()) || 0;
-    var reportName = "";
-    var exportPrint = false;
-    var RPTNAME = "TAX INVOICE";
+        if (!V_TYPE || !Number.isInteger(V_NO) || V_NO <= 0) {
+            showToast("Please enter a valid voucher type and voucher number.", { type: "warning" });
+            return;
+        }
 
-    const validation = await $.ajax({
-        url: '/JobworkIssueChallan/PrintEsingValidation',
-        type: 'POST',
-        contentType: 'application/json; charset=utf-8',
-        data: JSON.stringify({
-            V_NO: parseInt(V_NO) || null,
-            V_TYPE: V_TYPE
+        const validation = await $.ajax({
+            url: "/JobworkReceiveChallan/PrintEsingValidation",
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify({
+                V_NO: V_NO,
+                V_TYPE: V_TYPE
+            })
+        });
 
-        })
-    });
+        console.log("Print validation:", validation);
 
-    if (validation.success == "false") {
-        toastr.warning(validation.message);
-    }
-    console.log("validation", validation);
+        if (validation.success === false)
+        {
+            toastr.warning( validation.message || "Voucher validation failed." );
+            return;
+        }
 
-    if (globalVars.CompCode == "2") {
-        reportName = "INVOICE_GST1PLPLQR_DETAIL";
-    }
-    else if (globalVars.CompCode == "4") {
-        reportName = "INVOICE_GST1PEPLQR_DETAIL";
-    }
-    else if (globalVars.CompCode == "5") {
-        reportName = "INVOICE_GST1SALASARQR_DETAIL";
-    }
-    else if (globalVars.CompCode == "3") {
-        reportName = "INVOICE_GST1";
-    }
-    else if (globalVars.CompCode == "7") {
-        reportName = "INVOICE_GST1KQRNew";
-    }
-    else {
-        reportName = "INVOICE_GST1QR";
-    }
+        let reportName = "";
 
-    var formula =
-        "{SALE1.V_TYPE} = '" + V_TYPE + "'" +
-        " and {SALE1.V_NO} = " + V_NO + "" +
-        " and {SALE1.COMP_CODE} = " + globalVars.CompCode + "" +
-        " and {SALE1.YEAR_CODE} = " + globalVars.FYearCode + "" +
-        " and {SALE1.BRANCH_CODE} = " + globalVars.BranchCode + "";
+        if (V_TYPE === "SAJR")
+        {
+            if (COMP_CODE === 3)
+            {
+                reportName = "rptJW";
+            } else
+            {
+                reportName = "INVOICE_ChallanSale";
+            }
+        }
+        else if (COMP_CODE === 1 || COMP_CODE === 2 || COMP_CODE === 3)
+        {
+            reportName = "INVOICE_GSTRETQR";
+        } else if ((COMP_CODE === 4 || COMP_CODE === 5 || COMP_CODE === 7 ||  COMP_CODE === 8) &&  YEAR_CODE > 4 )
+        {
+            reportName = "INVOICE_GSTRETQR";
+        } else
+        {
+            reportName = "INVOICE_GSTRETQR";
+        }
 
-    var payload = {
-        Reportname: reportName,
-        selectionFormula: formula,
-        Database: database,
-        Parameters: {
+        const RPTNAME = V_TYPE === "SAJR" ? "JOBWORK RECEIVED CHALLAN" : "SALES RETURN / CREDIT NOTE";
+
+        const formula =
+            "{SALE1.V_TYPE} = '" + V_TYPE + "'" +
+            " AND {SALE1.V_NO} = " + V_NO +
+            " AND {SALE1.COMP_CODE} = " + COMP_CODE +
+            " AND {SALE1.YEAR_CODE} = " + YEAR_CODE +
+            " AND {SALE1.BRANCH_CODE} = " + BRANCH_CODE;
+
+        console.log("Report name:", reportName);
+        console.log("Selection formula:", formula);
+
+        const parameters = {
             comp_name: globalVars.CompanyName || "",
             comp_add1: globalVars.Address1 || "",
             comp_add2: globalVars.Address2 || "",
-            comp_phone: "Mobile : " + (globalVars.Phone || ""),
-            GST: "GST NO.   : " + (globalVars.GST || ""),
-            PAN: "PAN NO.   : " + (globalVars.PAN || ""),
-            Website: "Web     : " + (globalVars.website || ""),
-            EMAIL: "Email   : " + (globalVars.Email || ""),
+            comp_phone: "Mobile :" + (globalVars.Phone || ""),
+            GST: "GSTIN       :" + (globalVars.GST || ""),
+            PAN: "PAN NO.   :" + (globalVars.PAN || ""),
+            Website: "Web  :" + (globalVars.website || ""),
+            EMAIL: "Email   :" + (globalVars.Email || ""),
             RPTNAME: RPTNAME
+        };
+
+        const regAdd1 = $.trim(globalVars.RegAdd1 || "");
+        const regAdd2 = $.trim(globalVars.RegAdd2 || "");
+        const CINNO = $.trim(globalVars.CINNO || "");
+
+        if (regAdd1 !== "" && CINNO !== "")
+        {
+            parameters.Comp_reg = "Reg.Office :" + regAdd1 + ", " + regAdd2 + "  CIN :" + CINNO;
         }
-    };
 
+        const netAmount = $('#NumOtherNetAmount').val();
+  
+        parameters.INWORD = numberToWordsCurrency( netAmount, "Rs.", "PAISE" );
 
-    if (validation.address != "") {
-        payload.Parameters.godownAdd = "Ship From :" + (validation.address || "");
-    }
-    else {
-        payload.Parameters.godownAdd = + (validation.address || "");
-    }
+        const payload = {
+            Reportname: reportName,
+            selectionFormula: formula,
+            Database: database,
+            Parameters: parameters
+        };
 
+        console.log("Crystal Report payload:", payload);
 
-    if (globalVars.CompCode != "3") {
-        payload.Parameters.comp_name1 = "An ISO 9001:2015 Certified Company";
-        payload.Parameters.Comp_reg = "Reg.Office :" + (globalVars.RegAdd1 || "") + ", " + (globalVars.RegAdd2 || "") + "  CIN :" + (globalVars.CINNO || "");
-    }
-
-    const INWORD = numberToWordsCurrency(validation.netamt, "Rs.", "PAISE");
-
-    payload.Parameters.INWORD = INWORD;
-
-    var now = new Date();
-    var timestamp =
-        String(now.getDate()).padStart(2, '0') +
-        String(now.getMonth() + 1).padStart(2, '0') +
-        String(now.getFullYear()).slice(-2) + "_" +
-        String(now.getHours()).padStart(2, '0') +
-        String(now.getMinutes()).padStart(2, '0') +
-        String(now.getSeconds()).padStart(2, '0');
-
-    $.ajax({
-        url: 'http://localhost:24085/Report/PendingQCReport',
-        type: 'POST',
-        data: JSON.stringify(payload),
-        contentType: "application/json",
-        xhrFields: { responseType: 'blob' },
-
-        success: function (response) {
-            var file = new Blob([response], { type: 'application/pdf' });
-            var fileName = `${reportName}_${timestamp}.pdf`;
-            var link = document.createElement('a');
-            link.href = URL.createObjectURL(file);
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        },
-
-        error: function (xhr, status, error) {
-            if (xhr.status === 0) {
-                console.error("Cannot connect to API. Is the backend running?");
-            } else {
-                console.error('Error generating report:', xhr.status, xhr.statusText, error);
-                xhr.responseText && console.error('Response:', xhr.responseText);
+        const response = await $.ajax({
+            url: "http://localhost:24085/Report/PendingQCReport",
+            type: "POST",
+            data: JSON.stringify(payload),
+            contentType: "application/json; charset=utf-8",
+            xhrFields: {
+                responseType: "blob"
             }
+        });
+
+        const file = new Blob([response], {
+            type: "application/pdf"
+        });
+
+        const now = new Date();
+
+        const timestamp =
+            String(now.getDate()).padStart(2, "0") +
+            String(now.getMonth() + 1).padStart(2, "0") +
+            String(now.getFullYear()).slice(-2) + "_" +
+            String(now.getHours()).padStart(2, "0") +
+            String(now.getMinutes()).padStart(2, "0") +
+            String(now.getSeconds()).padStart(2, "0");
+
+        const fileName = `${reportName}_${timestamp}.pdf`;
+        const fileUrl = URL.createObjectURL(file);
+        const link = document.createElement("a");
+
+        link.href = fileUrl;
+        link.download = fileName;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setTimeout(() => URL.revokeObjectURL(fileUrl), 1000);
+
+    } catch (error) {
+        if (error.status === 0) {
+            console.error(
+                "Cannot connect to the report API. Check whether the backend is running."
+            );
+        } else {
+            console.error("Error generating report:", error);
+
+            if (error.responseJSON) {
+                console.error("Response:", error.responseJSON);
+            } else if (error.responseText) {
+                console.error("Response:", error.responseText);
+            }
+
+            toastr.error("Unable to generate the report. Please check the console.");
         }
-    });
+    }
 }
 
+async function SendMail() {
+    try {
+
+        if (!rowId) {
+            showToast(`Please save the data before printing the report.`, { type: "info" });
+            return;
+        }
+
+        let PartyCode = $('#ddlPartyName').val();
+        const vno = parseInt($('#NumInvoiceNo').val()) || 0;
+        const v_type = $('#ddlDocumentType').val() || '';
+
+        // Confirmation
+        const result = await Swal.fire({
+            title: "Do you want to send mail?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            cancelButtonText: "No"
+        });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        // Step 1: Generate report
+        const report = await GetTransitReportFile();
+
+        if (!report || !report.file) {
+            toastr.error("Report generation failed.");
+            return;
+        }
+
+        // Step 2: Prepare FormData
+        let formData = new FormData();
+        formData.append("PartyCode", PartyCode);
+        formData.append("vno", vno);
+        formData.append("v_type", v_type);
+        formData.append("file", report.file, report.fileName);
+
+        // Step 3: Send mail
+        const mailRes = await $.ajax({
+            url: '/SalesInvoiceDirect/SendMail',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false
+        });
+
+
+        if (mailRes.success == true) {
+            toastr.success(mailRes.message || "Mail sent successfully.");
+        }
+        else {
+            toastr.error(mailRes.message || "Failed to send mail.");
+        }
+        return mailRes;
+
+    } catch (error) {
+        console.error("Error:", error);
+        toastr.error("An error occurred while sending the mail.");
+    }
+}
+
+async function GetTransitReportFile() {
+    try {
+        // 1. Check whether the document is saved
+        if (!rowId) {
+            showToast("Please save the data before printing the report.", {
+                type: "info"
+            });
+            return null;
+        }
+
+        // 2. Get voucher details
+        const V_NO = parseInt($.trim($("#NumDocumentNo").val()), 10);
+        const V_TYPE = $.trim($("#ddlDocumentType").val() || "");
+
+        const COMP_CODE = Number(globalVars.CompCode) || 0;
+        const YEAR_CODE = Number(globalVars.FYearCode) || 0;
+        const BRANCH_CODE = Number(globalVars.BranchCode) || 0;
+
+        if (!V_TYPE || !Number.isInteger(V_NO) || V_NO <= 0) {
+            showToast("Please enter a valid voucher type and voucher number.", {
+                type: "warning"
+            });
+            return null;
+        }
+
+        // 3. Validate voucher
+        const validation = await $.ajax({
+            url: "/JobworkReceiveChallan/PrintEsingValidation",
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify({
+                V_NO: V_NO,
+                V_TYPE: V_TYPE
+            })
+        });
+
+        console.log("Print validation:", validation);
+
+        if (
+            validation.success === false ||
+            String(validation.success).toLowerCase() === "false"
+        ) {
+            toastr.warning(
+                validation.message || "Voucher validation failed."
+            );
+            return null;
+        }
+
+        // 4. Select report file according to VB.NET logic
+        let reportName;
+
+        if (V_TYPE === "SAJR") {
+            reportName = COMP_CODE === 3
+                ? "rptJW"
+                : "INVOICE_ChallanSale";
+        } else {
+            reportName = "INVOICE_GSTRETQR";
+        }
+
+        // 5. Report title
+        const RPTNAME = V_TYPE === "SAJR"
+            ? "JOBWORK RECEIVED CHALLAN"
+            : "SALES RETURN / CREDIT NOTE";
+
+        // 6. Crystal Reports selection formula
+        const formula =
+            "{SALE1.V_TYPE} = '" + V_TYPE + "'" +
+            " AND {SALE1.V_NO} = " + V_NO +
+            " AND {SALE1.COMP_CODE} = " + COMP_CODE +
+            " AND {SALE1.YEAR_CODE} = " + YEAR_CODE +
+            " AND {SALE1.BRANCH_CODE} = " + BRANCH_CODE;
+
+        // 7. Company formula fields
+        const parameters = {
+            comp_name: globalVars.CompanyName || "",
+            comp_add1: globalVars.Address1 || "",
+            comp_add2: globalVars.Address2 || "",
+            comp_phone: "Mobile :" + (globalVars.Phone || ""),
+            GST: "GSTIN       :" + (globalVars.GST || ""),
+            PAN: "PAN NO.   :" + (globalVars.PAN || ""),
+            Website: "Web  :" + (globalVars.website || ""),
+            EMAIL: "Email   :" + (globalVars.Email || ""),
+            RPTNAME: RPTNAME
+        };
+
+        // 8. Additional company formula fields
+        if (COMP_CODE !== 3) {
+            if (COMP_CODE !== 8) {
+                parameters.comp_name1 =
+                    "An ISO 9001:2015 Certified Company";
+            }
+
+            const regAdd1 = $.trim(globalVars.RegAdd1 || "");
+            const regAdd2 = $.trim(globalVars.RegAdd2 || "");
+            const CINNO = $.trim(globalVars.CINNO || "");
+
+            // Match VB.NET: both address and CIN must be present
+            if (regAdd1 !== "" && CINNO !== "") {
+                parameters.Comp_reg =
+                    "Reg.Office :" + regAdd1 +
+                    ", " + regAdd2 +
+                    "  CIN :" + CINNO;
+            }
+        }
+
+        // 9. Amount in words
+        const netAmount = $('#NumOtherNetAmount').val();
+
+ 
+
+        parameters.INWORD = numberToWordsCurrency(
+            netAmount,
+            "Rs.",
+            "PAISE"
+        );
+
+        // 10. Build report payload
+        const payload = {
+            Reportname: reportName,
+            selectionFormula: formula,
+            Database: database,
+            Parameters: parameters
+        };
+
+        console.log("Report payload:", payload);
+
+        // 11. Generate PDF
+        const pdfBlob = await $.ajax({
+            url: "http://localhost:24085/Report/PendingQCReport",
+            type: "POST",
+            data: JSON.stringify(payload),
+            contentType: "application/json; charset=utf-8",
+            xhrFields: {
+                responseType: "blob"
+            }
+        });
+
+        // 12. Prepare file name
+        const now = new Date();
+
+        const timestamp =
+            String(now.getDate()).padStart(2, "0") +
+            String(now.getMonth() + 1).padStart(2, "0") +
+            String(now.getFullYear()).slice(-2) + "_" +
+            String(now.getHours()).padStart(2, "0") +
+            String(now.getMinutes()).padStart(2, "0") +
+            String(now.getSeconds()).padStart(2, "0");
+
+        const fileName =
+            `SalesInvoiceDirect_${V_NO}_${timestamp}.pdf`;
+
+        // 13. Return file to the caller
+        const file = new Blob([pdfBlob], {
+            type: "application/pdf"
+        });
+
+        return {
+            file: file,
+            fileName: fileName
+        };
+
+    } catch (error) {
+        console.error("GetTransitReportFile error:", error);
+
+        if (error.status === 0) {
+            toastr.error(
+                "Cannot connect to the report API. Check whether it is running."
+            );
+        } else {
+            toastr.error("Unable to generate the report.");
+        }
+
+        return null;
+    }
+}

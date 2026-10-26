@@ -1,6 +1,4 @@
-﻿
-
-const urlParams = new URLSearchParams(window.location.search);
+﻿const urlParams = new URLSearchParams(window.location.search);
 const rowId = urlParams.get('id');
 let vtype = "";
 let vNo = "";
@@ -73,106 +71,6 @@ $(document).ready(async function ()
         cmbConsigneeAddress(partycode);       
     });
 
-    $('#btn_pendingchallan').on('click', async function ()
-    {
-        await GetPendingDetails();
-    });
-
-    $('#chkSelectAllPending').on('change', function ()
-    {
-        let isChecked = $(this).prop('checked');
-        $('#tblpurchaseordermodal tbody .pending-row-check').prop('checked', isChecked);
-    });
-
-    $('#Btn_CopyData').on('click', function ()
-    {
-        let data = GetSelectedPendingRow();
-        if (data.length === 0) {
-            toastr.warning('Please select at least one row.');
-            return;
-        }
-        console.log("selected row data", data);
-        // Remove blank rows
-        $('#tblSalesInvoice tbody tr').each(function () {
-            let $row = $(this);
-            let itemCode = $.trim($row.find('.ID').val());
-            let productCode = $.trim($row.find('.ddlProductName').val());
-            if (!itemCode && !productCode) {
-                $row.remove();
-            }
-        });
-
-        let addedCount = 0;
-        let duplicateCount = 0;
-
-        // Add selected rows
-        data.forEach(function (row) {
-
-            if (!row || !row.Item_Code || !row.DOC_ID) {
-                return;
-            }
-
-            // Check duplicate
-            let exists = $('#tblSalesInvoice tbody tr').filter(function () {
-
-                return $(this).attr('data-doc-id') === String(row.DOC_ID) &&
-                    $(this).attr('data-sno') === String(row.SNO);
-
-            }).length > 0;
-
-            if (exists) {
-                duplicateCount++;
-                return;
-            }
-
-            AddRow({
-                ID: row.Item_Code,
-                Productcode: row.Item_Code,
-                nos: row.Nos ?? 0,
-                grossQty: row.Gross ?? 0,
-                NetQty: row.Qty ?? 0,
-                Rate: row.Rate ?? 0,
-                Amount: row.Amount ?? 0,
-                PackPer: row.PACK_Per ?? 0,
-                PackAmt: row.PACK_Amt ?? 0,
-                DisPer: row.Disc_Per ?? 0,
-                Disamt: row.Disc_Amt ?? 0,
-                CgstPer: row.CGST_Per ?? 0,
-                CgstAmt: row.CGST_Amt ?? 0,
-                SgstPer: row.SGST_Per ?? 0,
-                SgstAmt: row.SGST_Amt ?? 0,
-                IgstPer: row.IGST_Per ?? 0,
-                IgstAmt: row.IGST_Amt ?? 0,
-                Remark: row.Remark ?? '',
-                HsnCode: row.HSN_Code ?? '',
-                DocType: row.V_TYPE ?? '',
-                DocNo: row.V_NO ?? '',
-                REPORT_TYPE: row.REPORT_TYPE ?? '',
-                Sale_Rate: row.Sale_Rate ?? '',
-                Taxable_Rate: row.Taxable_Rate ?? '',
-                Net_Wt: row.Net_Wt ?? '',
-                Packing_Wt: row.Packing_Wt ?? '',
-                Packing_nos: row.Packing_nos ?? '',
-            });
-
-            $('#tblSalesInvoice tbody tr:last') .attr('data-doc-id', row.DOC_ID) .attr('data-sno', row.SNO);
-
-            addedCount++;
-        });
-
-        // Messages
-        if (addedCount > 0) {
-            toastr.success(addedCount + ' row(s) added successfully.');
-        }
-
-        if (duplicateCount > 0) {
-            toastr.warning(
-                duplicateCount + ' duplicate row(s) already exist and were not added.'
-            );
-        }
-
-    });
-
     $('#ddlTaxType').on('change', function () {
 
         const selectedCode = $(this).val();
@@ -224,42 +122,6 @@ $(document).ready(async function ()
 
     });
 
-    $('#btn_OutAlloed').on('click', async function () {
-
-        try {
-            let vType = $.trim($('#ddlDocumentType').val()) || "";
-            let vNo = $.trim($('#NumInvoiceNo').val()) || "";
-
-            if (!vType || !vNo) {
-                toastr.warning("Please select V Type and enter V No.");
-                return;
-            }
-
-            const res = await $.ajax({
-                url: '/JobworkIssueChallan/Outallowed',
-                type: 'POST',
-                data: {
-                    vType: vType,
-                    vNo: vNo
-                }
-            });
-
-            if (res.success) {
-                toastr.success(res.message);
-
-                $('#btn_OutAlloed').prop('disabled', true);
-
-            } else {
-                toastr.warning(res.message);
-            }
-
-        } catch (error) {
-            console.error("Out Allowed Error:", error);
-            toastr.error("Something went wrong.");
-        }
-
-    });
-
     $("#btn_save").click(async function (e) {
         e.preventDefault();
 
@@ -267,9 +129,6 @@ $(document).ready(async function ()
         if (!validateRequiredField('#NumDocumentNo', 'Please Fill Voucher No')) return;
         if (!validateRequiredField('#DtDocumentDate', 'Please select a Voucher Date.')) return;
         if (!validateRequiredField('#ddlPartyName', 'Please select a Party Name.')) return;
-        if (!validateRequiredField('#ddlFormType', 'Please select a Form Type.')) return;
-        if (!validateRequiredField('#txtDriverName', 'Please Fill  Driver Name.')) return;
-        if (!validateRequiredField('#NumMobileNo', 'Please Fill  Driver Mobile No.')) return;
 
         const isValid = await checkValidDate();
         if (isValid === false)
@@ -277,9 +136,40 @@ $(document).ready(async function ()
             return;
         }
 
+ 
+
         const DOC_ID = $.trim($('#TxtCode').val()) || "";
         const V_TYPE = $.trim($('#ddlDocumentType').val()) || "";
         const V_NO = parseInt($.trim($('#NumDocumentNo').val()), 10) || 0;
+
+
+
+        if (V_TYPE != "SAJR")
+        {
+            if (!validateRequiredField('#ddlReferenceNo', 'Please Select Reference No')) return;
+        }
+
+
+
+        // Validate quantity when Item Name is selected
+        let isQtyValid = true;
+
+        $('#tblJobworkReceiveChallan tbody tr').each(function () {
+            const $row = $(this);
+            const itemName = $.trim($row.find('.ddlProductName').val() || '');
+            const qty = $.trim($row.find('.TxtNetQty').val());
+            // Check quantity only if Item Name is selected
+            if (itemName !== '' && (qty === '' || isNaN(Number(qty)) || Number(qty) <= 0)) {
+                toastr.warning('Please enter a valid quantity for the selected Item Name.');
+                $row.find('.TxtNos').focus();
+                isQtyValid = false;
+                return false; // Stop checking rows
+            }
+        });
+        if (!isQtyValid)
+        {
+            return;
+        }
 
         let V_DATE = null;
         if ($.trim($('#DtDocumentDate').val()))
@@ -679,8 +569,14 @@ $(document).ready(async function ()
         }
     });
 
-    //kks
+    $('#button_print').on('click', async function () {
+        TransitReport();
+    });
 
+    $('#button_mail').on('click', async function () {
+        SendMail();
+    });
+    //kks
     $(document).on('click', '#btn_Sendapproval', function () {
         var FromName = window.location.pathname.split('/')[1];
         let vNo = $('#NumInvoiceNo').val();
@@ -721,11 +617,8 @@ $(document).ready(async function ()
         });
 
     });
-
     $(document).on('click', '#btn_Approved', function () {
         OpenApprovalModal({ DocType: vtype, DocNo: vNo, TableName: 'SALE1' });
     });
-
     //kks
-
 });

@@ -611,9 +611,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
 
-
-
-
         [HttpPost]
         public JsonResult PrintEsingValidation([FromBody] PrintValidationRequest request)
         {
@@ -638,6 +635,44 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         }
 
 
+
+        [HttpPost]
+        public async Task<IActionResult> SendMail(int PartyCode, int vno, string v_type, IFormFile file)
+        {
+            try
+            {
+                var globalVaraible = _globalVariableService.GetGlobalVariables();
+
+                if (file == null)
+                    return Json(new { success = false, message = "Report file missing" });
+
+                using var ms = new MemoryStream();
+                file.CopyTo(ms);
+
+                byte[] pdfBytes = ms.ToArray();
+
+                //string Mail = GetText("Select EMAIL from SUBGROUP_MAST WHERE CODE= " + PartyCode +
+                //                      " AND COMP_CODE= " + globalVaraible.PubCompCode);
+
+                string Mail = "sg256001@gmail.com";
+
+                if (Mail == "")
+                {
+                    return Json(new { success = false, message = "Email address is blank for the selected party." });
+                }
+
+                string compname = GetText("Select NAME from COMP_MAST WHERE CODE= " + globalVaraible.PubCompCode);
+
+                string mailBody = "Please find attached invoice(s) for product dispatches.<BR><BR><BR>Regards,<BR>" + globalVaraible.CompanyName + "<BR>";
+             
+
+                return await _globalValidationdate.GlobalSendMail(v_type, vno, Mail, mailBody, file, "sale1",  "");
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
 
     }

@@ -467,263 +467,290 @@
 
             </div>
 
-    <!-- =====================================================
-           TOTALS / OTHER DETAILS
-      ====================================================== -->
-    <fieldset class="erppagefieldset">
-        <legend class="erppagefieldset-legend">Total & Other Details</legend>
+<!-- =====================================================
+     TOTALS / OTHER DETAILS
+====================================================== -->
+<fieldset class="erppagefieldset">
+    <legend class="erppagefieldset-legend">Total & Other Details</legend>
 
-        <div class="erppagesrow">
-            <div class="erppagescol-4">
+    <div class="erppagesrow">
+
+        <!-- AMOUNT & TAX DETAILS -->
+        <div class="erppagescol-4">
+            <div class="erppage-grid2">
+
                 <div class="erppage-divfield">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumOtherTotalAmount">Total Amount</label>
-                        <input type="number" class="erppage-input" id="NumOtherTotalAmount" oninput="LimitNumberLength(this, 12)">
-                    </div>
+                    <label class="erppage-label" for="NumOtherTotalAmount">Total Amount</label>
+                    <input type="number" class="erppage-input" id="NumOtherTotalAmount"
+                           oninput="LimitNumberLength(this, 12)">
+                </div>
 
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumOtherTotalNos">Total Nos</label>
-                        <input type="number" class="erppage-input" id="NumOtherTotalNos">
-                    </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumOtherTotalNos">Total Nos</label>
+                    <input type="number" class="erppage-input" id="NumOtherTotalNos">
+                </div>
 
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Packing</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input" id="NumOtherPacking1" oninput="LimitNumberLength(this, 7)" >
-                            <input type="number" class="erppage-input" id="NumOtherPacking2" oninput="LimitNumberLength(this, 12)" readonly>
-                        </div>
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">CESS</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input" id="NumOtherCESS1" oninput="LimitNumberLength(this, 7);">
-                            <input type="number" class="erppage-input" id="NumOtherCESS2" oninput="LimitNumberLength(this, 18);" readonly>
-                        </div>
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Discount</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input" id="NumOtherDiscount1" oninput="LimitNumberLength(this, 7);" >
-                            <input type="number" class="erppage-input" id="NumOtherDiscount2" oninput="LimitNumberLength(this, 18);" readonly>
-                        </div>
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">TCS</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input" id="NumOtherTCS1" oninput="LimitNumberLength(this, 18);">
-                            <input type="number" class="erppage-input" id="NumOtherTCS2" oninput="LimitNumberLength(this, 18);" readonly>
-                        </div>
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumOtherSubTotal">Sub Total</label>
-                        <input type="number" class="erppage-input" id="NumOtherSubTotal">
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumOtherRoundOff">Round Off</label>
-                        <input type="number" class="erppage-input" id="NumOtherRoundOff" oninput="LimitNumberLength(this, 18);">
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">CGST</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input" id="NumOtherCGST1" oninput="LimitNumberLength(this, 7);" readonly >
-                            <input type="number" class="erppage-input" id="NumOtherCGST2" oninput="LimitNumberLength(this, 18);" readonly>
-                        </div>
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumOtherNetAmount">Net Amount</label>
-                        <input type="number" class="erppage-input" id="NumOtherNetAmount" oninput="LimitNumberLength(this, 18);">
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">SGST</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input" id="NumOtherSGST1" oninput="LimitNumberLength(this, 7);" readonly>
-                            <input type="number" class="erppage-input" id="NumOtherSGST2" oninput="LimitNumberLength(this, 18);" readonly>
-                        </div>
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Insurance %</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input" id="NumInsurance1" oninput="LimitNumberLength(this, 7);">
-                            <input type="number" class="erppage-input" id="NumInsurance2" oninput="LimitNumberLength(this, 18);">
-                        </div>
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">IGST</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input" id="NumOtherIGST1" oninput="LimitNumberLength(this, 7);" readonly>
-                            <input type="number" class="erppage-input" id="NumOtherIGST2" readonly>
-                        </div>
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumConsFreight">Cons. Freight</label>
-                        <input type="number" class="erppage-input" id="NumConsFreight" oninput="LimitNumberLength(this, 18);">
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">TDS Freight %</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input" id="NumTDSFreight1" oninput="LimitNumberLength(this, 7);">
-                            <input type="number" class="erppage-input" id="NumTDSFreight2" oninput="LimitNumberLength(this, 18);">
-                        </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Packing</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumOtherPacking1"
+                               oninput="LimitNumberLength(this, 7)">
+                        <input type="number" class="erppage-input" id="NumOtherPacking2"
+                               oninput="LimitNumberLength(this, 12)" readonly>
                     </div>
                 </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">CESS</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumOtherCESS1"
+                               oninput="LimitNumberLength(this, 7)">
+                        <input type="number" class="erppage-input" id="NumOtherCESS2"
+                               oninput="LimitNumberLength(this, 18)" readonly>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Discount</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumOtherDiscount1"
+                               oninput="LimitNumberLength(this, 7)">
+                        <input type="number" class="erppage-input" id="NumOtherDiscount2"
+                               oninput="LimitNumberLength(this, 18)" readonly>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">TCS</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumOtherTCS1"
+                               oninput="LimitNumberLength(this, 18)">
+                        <input type="number" class="erppage-input" id="NumOtherTCS2"
+                               oninput="LimitNumberLength(this, 18)" readonly>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumOtherSubTotal">Sub Total</label>
+                    <input type="number" class="erppage-input" id="NumOtherSubTotal">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumOtherRoundOff">Round Off</label>
+                    <input type="number" class="erppage-input" id="NumOtherRoundOff"
+                           oninput="LimitNumberLength(this, 18)">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">CGST</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumOtherCGST1"
+                               oninput="LimitNumberLength(this, 7)" readonly>
+                        <input type="number" class="erppage-input" id="NumOtherCGST2"
+                               oninput="LimitNumberLength(this, 18)" readonly>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">SGST</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumOtherSGST1"
+                               oninput="LimitNumberLength(this, 7)" readonly>
+                        <input type="number" class="erppage-input" id="NumOtherSGST2"
+                               oninput="LimitNumberLength(this, 18)" readonly>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">IGST</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumOtherIGST1"
+                               oninput="LimitNumberLength(this, 7)" readonly>
+                        <input type="number" class="erppage-input" id="NumOtherIGST2" readonly>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumOtherNetAmount">Net Amount</label>
+                    <input type="number" class="erppage-input" id="NumOtherNetAmount"
+                           oninput="LimitNumberLength(this, 18)">
+                </div>
+
+           
             </div>
 
-            <!-- =================================================
-                 QUANTITY / FREIGHT
-            ================================================== -->
-            <div class="erppagescol-4">
-
-                <div class="erppage-grid2">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumGrossQty">Gross Quantity</label>
-                        <input type="number" class="erppage-input" id="NumGrossQty" oninput="LimitNumberLength(this, 18);">
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumNetQty">Net Quantity</label>
-                        <input type="number" class="erppage-input" id="NumNetQty" oninput="LimitNumberLength(this, 18);">
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumPayFreight">To Pay Freight</label>
-                        <input type="number" class="erppage-input" id="NumPayFreight" oninput="LimitNumberLength(this, 18);">
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumWBQty">WB Quantity</label>
-                        <input type="number" class="erppage-input" id="NumWBQty" oninput="LimitNumberLength(this, 18);">
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">Load Amount</label>
-                        <div class="erppage-inputgroup">
-                            <input type="number" class="erppage-input" id="NumLoadAmount1" oninput="LimitNumberLength(this, 12);">
-                            <input type="number" class="erppage-input" id="NumLoadAmount2" oninput="LimitNumberLength(this, 18);">
-                        </div>
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumWayBillNo">Way Bill No</label>
-                        <input type="number" class="erppage-input" id="NumWayBillNo" maxlength="30">
-                    </div>
-                </div>
-                <div class="erppage-grid1">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="ddlLoadParty">Load Party</label>
-                        <select class="erppage-input erppage-select" id="ddlLoadParty">
-                            <option value="">Select Load Party</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="erppage-grid1">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="TxtRemarks1">Remarks</label>
-                        <textarea class="erppage-input" id="TxtRemarks1" maxlength="100"></textarea>
-                    </div>
-                </div>
-                <div class="erppage-grid2">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumWBAmount">WB Amount</label>
-                        <input type="number" class="erppage-input" id="NumWBAmount" oninput="LimitNumberLength(this, 12);">
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="TxtRemarks2">Remarks</label>
-                        <textarea class="erppage-input" id="TxtRemarks2" maxlength="100"></textarea>
-                    </div>
-                </div>
-                <div class="erppage-grid1">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="ddlWBParty">WB Party</label>
-                        <select class="erppage-input erppage-select" id="ddlWBParty">
-                            <option value="">Select WB Party</option>
-                        </select>
+            <div class="erppage-grid2">
+            
+                 <div class="erppage-divfield">
+                    <label class="erppage-label">Insurance %</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumInsurance1"
+                               oninput="LimitNumberLength(this, 7)">
+                        <input type="number" class="erppage-input" id="NumInsurance2"
+                               oninput="LimitNumberLength(this, 18)">
                     </div>
                 </div>
 
-            </div>
-
-            <!-- =================================================
-                 TRANSPORT
-            ================================================== -->
-            <div class="erppagescol-4">
-
-                <div class="erppage-grid2">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumGRNo">GR No</label>
-                        <input type="number" class="erppage-input" id="NumGRNo">
-                    </div>
-
-                    <div class="erppage-divfield erppage-datefield">
-                        <label class="erppage-label" for="DtGRdate">GR Date</label>
-                        <div class="erppage-datebox">
-                            <input type="date" class="erppage-input erppage-dateinput" id="DtGRdate">
-                            <label class="erppage-checkbox-inside">
-                                <input type="checkbox" class="erppage-checkbox-input" id="chkGRDate">
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="erppage-grid1">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="ddlTransport">Transport</label>
-                        <select class="erppage-input erppage-select" id="ddlTransport">
-                            <option value="">Select Transport</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="erppage-grid2">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumTruckNo">Truck No</label>
-                        <input type="text" class="erppage-input" id="NumTruckNo" maxlength="50">
-                    </div>
-                    <div class="erppage-divfield">
-                        <label class="erppage-label">&nbsp;</label>
-                        @* <div class="action-wrap"> *@
-                        <button type="button" id="btn-EditTptData" title="Edit Transport Data" style="cursor:pointer; display:none;">
-                            <i class="fa fa-pencil"></i>
-                        </button>
-                        <button type="button" id="btn-SaveTptData" title="Save Transport Data" style="cursor:pointer; display:none;">
-                            <i class="fa fa-save"></i>
-                        </button>
-                        @* </div> *@
-                    </div>
-                </div>
-                <div class="erppage-grid2">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="txtDriverName">Driver Name</label>
-                        <input type="text" class="erppage-input" id="txtDriverName" maxlength="50">
-                    </div>
-
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="NumMobileNo">Mobile No</label>
-                        <input type="number" class="erppage-input" id="NumMobileNo" maxlength="50">
-                    </div>
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumConsFreight">Cons. Freight</label>
+                    <input type="number" class="erppage-input" id="NumConsFreight"
+                           oninput="LimitNumberLength(this, 18)">
                 </div>
 
-                <div class="erppage-grid1">
-                    <div class="erppage-divfield">
-                        <label class="erppage-label" for="TxtRemarks3">Remarks</label>
-                        <textarea class="erppage-input" id="TxtRemarks3"></textarea>
+                <div class="erppage-divfield">
+                    <label class="erppage-label">TDS Freight %</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumTDSFreight1" oninput="LimitNumberLength(this, 7)">
+                        <input type="number" class="erppage-input" id="NumTDSFreight2" oninput="LimitNumberLength(this, 18)">
                     </div>
-                </div>
+                </div>           
+            
             </div>
 
         </div>
-    </fieldset>
 
+        <!-- QUANTITY, FREIGHT & PARTY DETAILS -->
+        <div class="erppagescol-4">
+            <div class="erppage-grid2">
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumGrossQty">Gross Quantity</label>
+                    <input type="number" class="erppage-input" id="NumGrossQty"
+                           oninput="LimitNumberLength(this, 18)">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumNetQty">Net Quantity</label>
+                    <input type="number" class="erppage-input" id="NumNetQty"
+                           oninput="LimitNumberLength(this, 18)">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumPayFreight">To Pay Freight</label>
+                    <input type="number" class="erppage-input" id="NumPayFreight"
+                           oninput="LimitNumberLength(this, 18)">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumWBQty">WB Quantity</label>
+                    <input type="number" class="erppage-input" id="NumWBQty"
+                           oninput="LimitNumberLength(this, 18)">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">Load Amount</label>
+                    <div class="erppage-inputgroup">
+                        <input type="number" class="erppage-input" id="NumLoadAmount1"
+                               oninput="LimitNumberLength(this, 12)">
+                        <input type="number" class="erppage-input" id="NumLoadAmount2"
+                               oninput="LimitNumberLength(this, 18)">
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumWayBillNo">Way Bill No</label>
+                    <input type="number" class="erppage-input" id="NumWayBillNo" maxlength="30">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumWBAmount">WB Amount</label>
+                    <input type="number" class="erppage-input" id="NumWBAmount"
+                           oninput="LimitNumberLength(this, 12)">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="ddlLoadParty">Load Party</label>
+                    <select class="erppage-input erppage-select" id="ddlLoadParty">
+                        <option value="">Select Load Party</option>
+                    </select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="ddlWBParty">WB Party</label>
+                    <select class="erppage-input erppage-select" id="ddlWBParty">
+                        <option value="">Select WB Party</option>
+                    </select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="TxtRemarks1">Remarks</label>
+                    <textarea class="erppage-input" id="TxtRemarks1" maxlength="100"></textarea>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="TxtRemarks2">Remarks</label>
+                    <textarea class="erppage-input" id="TxtRemarks2" maxlength="100"></textarea>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TRANSPORT DETAILS -->
+        <div class="erppagescol-4">
+            <div class="erppage-grid2">
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumGRNo">GR No</label>
+                    <input type="number" class="erppage-input" id="NumGRNo">
+                </div>
+
+                <div class="erppage-divfield erppage-datefield">
+                    <label class="erppage-label" for="DtGRdate">GR Date</label>
+                    <div class="erppage-datebox">
+                        <input type="date" class="erppage-input erppage-dateinput" id="DtGRdate">
+                        <label class="erppage-checkbox-inside">
+                            <input type="checkbox" class="erppage-checkbox-input" id="chkGRDate">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="ddlTransport">Transport</label>
+                    <select class="erppage-input erppage-select" id="ddlTransport">
+                        <option value="">Select Transport</option>
+                    </select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumTruckNo">Truck No</label>
+                    <input type="text" class="erppage-input" id="NumTruckNo" maxlength="50">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label">&nbsp;</label>
+                    <button type="button" id="btn-EditTptData"
+                            title="Edit Transport Data"
+                            style="cursor:pointer; display:none;">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+
+                    <button type="button" id="btn-SaveTptData"
+                            title="Save Transport Data"
+                            style="cursor:pointer; display:none;">
+                        <i class="fa fa-save"></i>
+                    </button>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="txtDriverName">Driver Name</label>
+                    <input type="text" class="erppage-input" id="txtDriverName" maxlength="50">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="NumMobileNo">Mobile No</label>
+                    <input type="number" class="erppage-input" id="NumMobileNo" maxlength="50">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label class="erppage-label" for="TxtRemarks3">Remarks</label>
+                    <textarea class="erppage-input" id="TxtRemarks3"></textarea>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</fieldset>
 
       <div class="erppage-actions">
             <button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
@@ -732,8 +759,6 @@
             </button>
           
         </div> 
-
-
 
     </div>
 

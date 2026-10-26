@@ -276,7 +276,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     #endregion
 
                     #region Fetch Dispatch Data
-                    using (SqlCommand cmd4 = new SqlCommand("sp_JobworkIssueChallan", con))
+                    using (SqlCommand cmd4 = new SqlCommand("sp_JobworkReceiveChallan", con))
                     {
                         cmd4.CommandType = CommandType.StoredProcedure;
                         cmd4.Parameters.AddWithValue("@Action", "SHOWDATA");
@@ -317,7 +317,15 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                     PACK_NO = rdr["PACK_NO"] != DBNull.Value ? Convert.ToInt32(rdr["PACK_NO"]) : 0,
                                     SAUDA_NO = rdr["SAUDA_NO"] != DBNull.Value ? Convert.ToInt32(rdr["SAUDA_NO"]) : 0,
                                     SAUDA_TYPE = rdr["SAUDA_TYPE"]?.ToString(),
-                                    SAUDA_RATE = rdr["SAUDA_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["ORD_RATE"]) : 0,
+                                    SAUDA_RATE = rdr["SAUDA_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["SAUDA_RATE"]) : 0,
+
+                                    ORD_NO = rdr["ORD_NO"] != DBNull.Value ? Convert.ToInt32(rdr["ORD_NO"]) : 0,
+                                    ORD_TYPE = rdr["ORD_TYPE"]?.ToString(),
+                                    ORD_RATE = rdr["ORD_RATE"] != DBNull.Value ? Convert.ToDecimal(rdr["ORD_RATE"]) : 0,
+
+                                    DCN_TYPE = rdr["DCN_TYPE"]?.ToString(),
+                                    DCN_NO = rdr["DCN_NO"] != DBNull.Value ? Convert.ToInt32(rdr["DCN_NO"]) : 0,
+                                    HSN_CODE = rdr["HSN_CODE"]?.ToString(),
                                     TAX_CODE = rdr["TAX_CODE"] != DBNull.Value ? Convert.ToInt32(rdr["TAX_CODE"]) : 0
                                 });
                             }
