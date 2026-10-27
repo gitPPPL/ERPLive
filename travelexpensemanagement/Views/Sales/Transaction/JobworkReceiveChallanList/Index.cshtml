@@ -33,7 +33,71 @@
 	</div>
 	<div class="card">
 		<div class="table-responsive">
-			<table id="tblSalesReturnList" class="table-width">
+            <table id="tblSalesReturnList" class="excel-table fixed-grid-table table-width resizable-table">
+                <colgroup>
+                    <col style="width: 0px;">       <!-- Code -->
+                    <col style="width: 150px;">     <!-- Voucher Name -->
+                    <col style="width: 110px;">     <!-- Voucher No. -->
+                    <col style="width: 100px;">     <!-- Date -->
+                    <col style="width: 180px;">     <!-- Bill Name -->
+                    <col style="width: 180px;">     <!-- Bill Address1 -->
+                    <col style="width: 180px;">     <!-- Bill Address2 -->
+                    <col style="width: 180px;">     <!-- Bill Address3 -->
+                    <col style="width: 120px;">     <!-- Bill City -->
+                    <col style="width: 150px;">     <!-- Agent -->
+                    <col style="width: 180px;">     <!-- Ship Name -->
+                    <col style="width: 180px;">     <!-- Ship Address1 -->
+                    <col style="width: 180px;">     <!-- Ship Address2 -->
+                    <col style="width: 180px;">     <!-- Ship Address3 -->
+                    <col style="width: 120px;">     <!-- S Name -->
+                    <col style="width: 120px;">     <!-- Tax Name -->
+                    <col style="width: 100px;">     <!-- Item Type -->
+                    <col style="width: 100px;">     <!-- Wb No -->
+                    <col style="width: 100px;">     <!-- Pack No -->
+                    <col style="width: 120px;">     <!-- Amount -->
+                    <col style="width: 100px;">     <!-- Pack Per -->
+                    <col style="width: 120px;">     <!-- Pack Amount -->
+                    <col style="width: 120px;">     <!-- Namount -->
+                    <col style="width: 100px;">     <!-- Cgst Per -->
+                    <col style="width: 120px;">     <!-- Cgst Amount -->
+                    <col style="width: 100px;">     <!-- Sgst Per -->
+                    <col style="width: 120px;">     <!-- Sgst Amount -->
+                    <col style="width: 100px;">     <!-- Igst Per -->
+                    <col style="width: 120px;">     <!-- Igst Amount -->
+                    <col style="width: 100px;">     <!-- Cess Per -->
+                    <col style="width: 120px;">     <!-- Cess Amount -->
+                    <col style="width: 100px;">     <!-- Load Per -->
+                    <col style="width: 120px;">     <!-- Load Ac -->
+                    <col style="width: 120px;">     <!-- Load Amount -->
+                    <col style="width: 120px;">     <!-- Wb Amount -->
+                    <col style="width: 120px;">     <!-- Wb Ac -->
+                    <col style="width: 100px;">     <!-- Tot Nos -->
+                    <col style="width: 120px;">     <!-- Frt Amount -->
+                    <col style="width: 100px;">     <!-- Round Off -->
+                    <col style="width: 120px;">     <!-- Tot Net -->
+                    <col style="width: 100px;">     <!-- Insu Per -->
+                    <col style="width: 120px;">     <!-- Insu Amount -->
+                    <col style="width: 100px;">     <!-- Tds Per -->
+                    <col style="width: 120px;">     <!-- Tds Amount -->
+                    <col style="width: 120px;">     <!-- Load Rem -->
+                    <col style="width: 120px;">     <!-- Wb Rem -->
+                    <col style="width: 120px;">     <!-- Tot Gross -->
+                    <col style="width: 100px;">     <!-- Gr No -->
+                    <col style="width: 120px;">     <!-- Gr Date -->
+                    <col style="width: 130px;">     <!-- Vehicle No -->
+                    <col style="width: 140px;">     <!-- Transport Code -->
+                    <col style="width: 180px;">     <!-- Transport Name -->
+                    <col style="width: 150px;">     <!-- Driver Name -->
+                    <col style="width: 120px;">     <!-- Driver No -->
+                    <col style="width: 150px;">     <!-- Waybill No -->
+                    <col style="width: 200px;">     <!-- Remark -->
+                    <col style="width: 120px;">     <!-- Frt Topay -->
+                    <col style="width: 120px;">     <!-- Wb Quantity -->
+                    <col style="width: 100px;">     <!-- Disc Per -->
+                    <col style="width: 120px;">     <!-- Disc Amount -->
+                    <col class="action-col"> <!-- Action -->
+                </colgroup>
+
 				<thead class="table-head">
 					<tr>
 						<th style="display:none;">Code</th>
@@ -96,7 +160,7 @@
 						<th>Wb Quantity</th>
 						<th>Disc Per</th>
 						<th>Disc Amount</th>
-						<th>Action</th>
+                        <th class="action-col">Action</th>
 					</tr>
 				</thead>
 				<tbody></tbody>
