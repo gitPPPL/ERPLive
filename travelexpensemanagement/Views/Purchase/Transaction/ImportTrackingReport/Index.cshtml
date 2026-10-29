@@ -2,6 +2,20 @@
 ViewBag.Title = "Import Tracking Report";
 Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+<style>
+.tracking-updated-row,
+.tracking-updated-row td:not(.action-col) {
+background-color: #cdf9da !important;
+}
+#tbldocumentsendlist tbody tr.row-sent td {
+background-color: #fff4cc !important; /* soft amber: sent, awaiting receipt */
+}
+#tbldocumentsendlist tbody tr.row-received td {
+background-color: #d9f2e3 !important; /* soft mint: received */
+}
+</style>
+
 <div id="erp-toast-container"></div>
 <div class="erppagelist-header">
 <div class="erppagelist-title">
@@ -195,7 +209,7 @@ Layout = "~/Views/Shared/_Layout.cshtml";
 </colgroup>
 <thead>
 <tr>
-<th class="hidden-col" data-column="0" >Code <span class="sort-icon"></span></th>
+<th class="hidden-col" data-column="0">Code <span class="sort-icon"></span></th>
 <th class="freeze-item" data-column="1" style="left:0px;width:111px;min-width:111px;max-width:111px;">Sauda No <span class="sort-icon"></span></th>
 <th class="freeze-item" data-column="2" style="left:111px;width:97px;min-width:97px;max-width:97px;">Sauda Date <span class="sort-icon"></span></th>
 <th class="freeze-item" data-column="3" style="left:208px;width:166px;min-width:166px;max-width:166px;">Supplier Name <span class="sort-icon"></span></th>
@@ -220,7 +234,7 @@ Layout = "~/Views/Shared/_Layout.cshtml";
 <th data-column="22">Inv Amt <span class="sort-icon"></span></th>
 <th data-column="23">POD <span class="sort-icon"></span></th>
 <th data-column="24">POL <span class="sort-icon"></span></th>
-<th data-column="25">VSI Name <span class="sort-icon"></span></th>
+<th data-column="25">VSL Name <span class="sort-icon"></span></th>
 <th data-column="26">ICD Name <span class="sort-icon"></span></th>
 <th data-column="27">Free Days <span class="sort-icon"></span></th>
 <th data-column="28">ETD <span class="sort-icon"></span></th>
@@ -233,8 +247,8 @@ Layout = "~/Views/Shared/_Layout.cshtml";
 <th data-column="35">Scan Doc. Verify Date <span class="sort-icon"></span></th>
 <th data-column="36">ETA Place <span class="sort-icon"></span></th>
 <th data-column="37">Doc. CHA Handover Date <span class="sort-icon"></span></th>
-<th data-column="38">BI No. <span class="sort-icon"></span></th>
-<th data-column="39">BI Date <span class="sort-icon"></span></th>
+<th data-column="38">BL No. <span class="sort-icon"></span></th>
+<th data-column="39">BL Date <span class="sort-icon"></span></th>
 <th data-column="40">BL Recd. Date <span class="sort-icon"></span></th>
 <th data-column="41">BL Handover Date to CHA <span class="sort-icon"></span></th>
 <th data-column="42">CHA Charge Detail <span class="sort-icon"></span></th>
@@ -344,7 +358,7 @@ Results: 0 - 0 of 0
 </div>
 <!--List Document Send-->
 <div class="modal fade" id="listdocumentsendModal" tabindex="-1" aria-labelledby="listdocumentsendLabel" aria-hidden="true">
-<div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+<div class="modal-dialog erppagesmodal large-modal erppage-modal-drag">
 <div class="modal-content erppagesmodal-content">
 <div class="erppagesmodal-header">
 <div class="erppagesmodal-header-left">
@@ -360,7 +374,7 @@ Document Send List
 </button>
 </div>
 <div class="erppagesmodal-body">
-<div class="erppage-grid4">
+<div class="erppage-grid6">
 <div class="erppage-divfield">
 <label class="erppage-label">Doc Type</label>
 <select class="erppage-input erppage-select" id="ddldoctype">
@@ -373,17 +387,6 @@ Document Send List
 <option value="">Select V Type</option>
 </select>
 </div>
-<div class="erppage-divfield erppage-col-span-2">
-<label class="erppage-label">Search By</label>
-<div class="erppage-inputgroup">
-<select class="erppage-input erppage-select erppage-width-30" id="ddlsearchby">
-<option value="">Select Search By</option>
-</select>
-<input type="text" class="erppage-input erppage-width-70" id="txtsearchby" />
-</div>
-</div>
-</div>
-<div class="erppage-grid4">
 <div class="erppage-divfield">
 <label class="erppage-label">From Date</label>
 <input type="date" class="erppage-input" id="Dtfromdate" />
@@ -391,6 +394,21 @@ Document Send List
 <div class="erppage-divfield">
 <label class="erppage-label">To Date</label>
 <input type="date" class="erppage-input" id="Dttodate" />
+</div>
+<div class="erppage-divfield erppage-col-span-2">
+<label class="erppage-label">Search By</label>
+<div class="erppage-inputgroup">
+<select class="erppage-input erppage-select erppage-width-30" id="ddlsearchby">
+<option value="">Select Search By</option>
+<option value="Party Name">Party Name</option>
+<option value="City">City</option>
+<option value="Bill No">Bill No</option>
+<option value="Sauda No">Sauda No</option>
+<option value="Exim No">Exim No</option>
+                                        <option value="Truck No">Truck No</option>
+</select>
+<input type="text" class="erppage-input erppage-width-70" id="txtsearchby" />
+</div>
 </div>
 </div>
 <div class="erppages-row mt-2">
@@ -416,16 +434,17 @@ Document Send List
 <span>Send and Received</span>
 </label>
 <label class="erppage-radio">
-<input type="radio" id="rdAll" name="PrintType" value="All">
+<input type="radio" id="rdAll" name="PrintType" value="All" checked>
 <span>All</span>
 </label>
 </div>
 </div>
 <div class="erppage-grid4">
 <div class="erppage-divfield">
+<label class="erppage-label">&nbsp;</label>
 <div class="erppage-checkbox-wrap">
 <input type="checkbox" id="ChkSelectAll" class="erppage-checkbox-input">
-<label class="erppage-checkbox-label">Select All</label>
+<label class="erppage-checkbox-label" for="ChkSelectAll">Select All</label>
 </div>
 </div>
 <div class="erppage-divfield">
@@ -434,29 +453,32 @@ Document Send List
 <option value="">Select Send To</option>
 </select>
 </div>
-<div class="erppages-internalaction">
+<div class="erppage-divfield  erppage-col-span-2">
+<label class="erppage-label">&nbsp;</label>
+<div class="erppages-internalaction erppage-btn-group-right">
 <button type="button" class="erppage-btn erppage-btn-common-disabled" id="btn_search"><i class="fa fa-search"></i> Search</button>
 <button type="button" class="erppage-btn erppage-btn-common-active-disabled" id="btn_send"><i class="fa fa-paper-plane"></i> Send</button>
+</div>
 </div>
 </div>
 <div class="excel-wrapper fixed-grid-wrapper">
 <table id="tbldocumentsendlist" class="excel-table width-table fixed-grid-table resizable-table">
 <colgroup>
-<col style="width:90px;">   
-<col style="width:110px;">  
-<col style="width:180px;">  
-<col style="width:220px;">  
-<col style="width:120px;">  
-<col style="width:110px;">  
-<col style="width:120px;">  
-<col style="width:180px;">  
-<col style="width:180px;">  
-<col style="width:110px;">  
-<col style="width:120px;">  
-<col style="width:110px;">  
-<col style="width:150px;">  
-<col style="width:50px;">   
-<col style="width:130px;">  
+<col style="width:90px;">
+<col style="width:110px;">
+<col style="width:180px;">
+<col style="width:220px;">
+<col style="width:120px;">
+<col style="width:110px;">
+<col style="width:120px;">
+<col style="width:180px;">
+<col style="width:180px;">
+<col style="width:110px;">
+<col style="width:120px;">
+<col style="width:110px;">
+<col style="width:150px;">
+<col style="width:50px;">
+<col style="width:130px;">
 </colgroup>
 <thead>
 <tr>
@@ -500,7 +522,6 @@ Recd Status <span class="sort-icon"></span>
 Recd Datetime <span class="sort-icon"></span>
 </th>
 <th data-column="13" class="text-center" style="width:40px;">
-<input type="checkbox" id="chkSelectAll" />
 </th>
 <th data-column="14">
 Send Document <span class="sort-icon"></span>

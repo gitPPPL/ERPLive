@@ -119,6 +119,9 @@ builder.Services.AddScoped<ISalesReturnRepository, SalesReturnRepository>();
 builder.Services.AddScoped<ISalesReturnListRepository, SalesReturnListRepository>();
 builder.Services.AddScoped<IEInvoiceUtilityRepository, EInvoiceUtilityRepository>();
 
+builder.Services.AddScoped<IImportTrackingReportRepository, ImportTrackingReportRepository>();
+builder.Services.AddScoped<IImportTrackingEntryListRepository, ImportTrackingEntryListRepository>();
+builder.Services.AddScoped<IImportTrackingEntryRepository, ImportTrackingEntryRepository>();
 
 // Gete Entry Transaction repositories
 

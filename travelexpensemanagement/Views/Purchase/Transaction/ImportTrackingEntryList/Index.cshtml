@@ -1,0 +1,87 @@
+﻿@{
+    ViewBag.Title = "Import Tracking Entry List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+
+<div class="erppagelist-header">
+    <div class="erppagelist-title">
+        <i class="fa fa-list"></i>
+        <span>Import Tracking Entry List</span>
+    </div>
+    <div class="erppagelist-header-right">
+        <button class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "ImportTrackingEntry")'" id="button_add">
+            <i class="fa fa-plus"></i>Add New
+        </button>
+    </div>
+</div>
+
+<div class="erppagelist-toolbar">
+    <div class="erppagelist-search-wrapper">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchBox" placeholder="Search Import Tracking..." />
+    </div>
+    <div class="erppagelist-actions">
+        <!--<button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print">
+            <i class="fa fa-print"></i> Print
+        </button>-->
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Export to Excel" id="button_export">
+            <i class="fa fa-file-excel"></i> Export
+        </button>
+    </div>
+</div>
+
+<div class="erppagelist-container">
+    <div class="excel-wrapper fixed-grid-wrapper">
+        <table id="tblImportTrackingEntry" class="excel-table fixed-grid-table table-width resizable-table">
+            <colgroup>
+                <col class="hidden-col">
+                <col style="width: 105px;">
+                <col style="width: 100px;">
+                <col style="width: 108px;">
+                <col style="width: 110px;">
+                <col style="width: 254px;">
+                <col style="width: 132px;">
+                <col style="width: 136px;">
+                <col style="width: 120px;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="hidden-col">Doc ID</th>
+                    <th>Doc No</th>
+                    <th>Doc Date</th>
+                    <th>Sauda No</th>
+                    <th>Sauda Date</th>
+                    <th>Supplier</th>
+                    <th>Location</th>
+                    <th>Invoice No</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="erppagelist-pagination">
+        <div class="pagination-left">
+            <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="pagination-center">
+            <button onclick="Pagination.prev()" class="page-nav" id="prevBtn">‹</button>
+            <div id="pageNumbers" class="page-numbers"></div>
+            <button onclick="Pagination.next()" class="page-nav" id="nextBtn">›</button>
+        </div>
+        <div class="pagination-right" id="pageInfoText">
+            Results: 0 - 0 of 0
+        </div>
+    </div>
+</div>
+
+<script src="~/common/delete.js"></script>
+<script src="~/common/pagination.js"></script>
+<script src="~/js/erpjs/purchase/transaction/importtrackingentrylist/ImportTrackingEntryList.js"></script>

@@ -1,8 +1,6 @@
-﻿let sendToList = [];
-
-$(document).ready(function () {
+﻿$(document).ready(async function () {
     var today = new Date();
-
+    
     var currentDate = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 
     $('#DtDatefrom').val(currentDate);
@@ -11,19 +9,19 @@ $(document).ready(function () {
     const currentYear = new Date().getFullYear();
     const fromDate = `${currentYear}-01-01`;
     $('#Dtfromdate').val(fromDate);
-
     $('#Dttodate').val(currentDate);
 
+    await WireEvents();
+});
+
+// ====================EVENTS====================
+async function WireEvents() {
+    // View data click
     $('#btnviewdata').on('click', async function () {
         GetReportData();
     });
 
-    $('#btn_listofdoc').on('click', async function () {
-        LoadDropdown();
-
-        GetDocumentListData();
-    });
-
+    // Report Search
     $('#searchBox').on('keyup', function () {
         let value = $(this).val().toLowerCase().trim();
         $('#tblImportTrackingReport tbody tr').each(function () {
@@ -41,219 +39,116 @@ $(document).ready(function () {
         $('#lblTotalCount').text(`Total Sauda : ${total}`);
     });
 
+    // Grid view/Update icon click
+    $(document).on('click', '#tblImportTrackingReport .btn-edit', function () {
+        const saudaNo = $(this).data('sauda-no');
+        if (!saudaNo) return;
+
+        window.open('/ImportTrackingEntry/Index?saudaNo=' + encodeURIComponent(saudaNo), '_blank');
+    });
+
+    // List of documents modal button click
+    $('#listdocumentsendModal').on('shown.bs.modal', async function () {
+        $('#Dtfromdate').val($('#DtDatefrom').val());
+        $('#Dttodate').val($('#Dtto').val());
+
+        $('#chkSelectAll').prop('checked', false);
+        $('#txtsearchby').val('');
+        $('#rdAll').prop('checked', true);
+
+        await BindDropdowns();
+        await bindDropdown("ImportTrackingReport", "sendto", '#ddlsendto', 'Select Send To', null, null, false, $('#ddlvtype').val(), false);
+        await GetDocumentListData();
+    });
+
+    // Modal vtype change
+    $('#ddlvtype').on('change', async function () {
+        const vtype = $(this).val();
+
+        if (!vtype) {
+            $('#ddlsendto').empty().append('<option value="">Select Send To</option>');
+            return;
+        }
+
+        await bindDropdown("ImportTrackingReport", "sendto", '#ddlsendto', 'Select Send To', null, null, false, vtype, false);
+    });
+
+    // Modal search
     $('#btn_search').on('click', async function () {
-        const v_type = $('#ddlvtype').val();
-        if (!v_type) {
-            toastr.warning("Please select VOucher Type");
+        const docType = $('#ddldoctype').val();
+        const vType = $('#ddlvtype').val();
+
+        if (!vType && !docType) {
+            showToast("Data not found", {type:"info"});
+            $('#tbldocumentsendlist tbody').empty();
+            $('#ddldoctype').focus();
             return;
         }
-        await loadSendTo();
-        GetDocumentListData();
+
+        $('#chkSelectAll').prop('checked', false);
+        $('#ddlsendto').val('');
+        await GetDocumentListData();
     });
 
-    $('#btn_send').on('click', async function () {
-
-        let selectedRows = [];
-
-        $('#tbldocumentsendlist tbody tr').each(function () {
-
-            let index = $(this).attr('id').replace('tr_', '');
-
-            let checkbox = $('#chkRow_' + index);
-
-            if (checkbox.is(':checked')) {
-
-                let rowData = {
-
-                    V_TYPE: $('#tdVType_' + index).text().trim(),
-
-                    V_NO: Number($('#tdVNo_' + index).text().trim()) || 0,
-
-                    SAUDA_TYPE: $('#tdSaudaType_' + index).text().trim(),
-
-                    SAUDA_NO: Number($('#tdSaudaNo_' + index).text().trim()) || 0,
-
-                    V_DATE: convertDate($('#tdVDate_' + index).text().trim()),
-
-                    PARTY_CODE: Number($('#tdPartyCode_' + index).text().trim()) || 0,
-
-                    PARTY_NAME: $('#tdPartyName_' + index).text().trim(),
-
-                    CITY_NAME: $('#tdCityName_' + index).text().trim(),
-
-                    BILL_NO: $('#tdBillNo_' + index).text().trim(),
-
-                    BILL_DATE: convertDate($('#tdBillDate_' + index).text().trim()),
-
-                    BILL_AMT: Number($('#tdInvAmt_' + index).text().trim()) || 0,
-
-                    REMARKS: $('#tdRemarks_' + index).text().trim(),
-
-                    TRUCK_NO: $('#tdTruckNo_' + index).text().trim(),
-
-                    SEND_TO: Number($('#ddlSendTo_' + index).val()) || 0,
-
-                    SEND_FLAG: Number($('#tdSendFlag_' + index).text().trim()) || 0,
-
-                    SEND_DATE: convertDate($('#tdSendDate_' + index).text().trim()),
-
-                    RECD_FLAG: Number($('#tdRecdFlag_' + index).text().trim()) || 0,
-
-                    RECD_DATE: convertDate($('#tdRecdDate_' + index).text().trim()),
-
-                    SEND_BY: null
-                };
-
-
-                selectedRows.push(rowData);
-            }
-
-        });
-
-
-        if (selectedRows.length === 0) {
-
-            toastr.warning("Please select at least one document.");
-            return;
-
-        }
-
-
-        console.log("Selected Data:", selectedRows);
-
-
-        $.ajax({
-
-            url: '/ImportTrackingReport/SendDocument',
-
-            type: 'POST',
-
-            contentType: 'application/json; charset=utf-8',
-
-            data: JSON.stringify(selectedRows),
-
-            success: function (res) {
-
-                if (res.validation === false) {
-
-                    toastr.warning(res.message);
-                    return;
-
-                }
-
-
-                if (res.success) {
-
-                    toastr.success(res.message);
-                    GetDocumentListData();
-
-                }
-                else {
-
-                    toastr.error(res.message);
-
-                }
-
-            },
-
-            error: function (xhr) {
-
-                console.log(xhr.responseText);
-                toastr.error("Error sending document.");
-
-            }
-
-        });
-
+    // Top "Select All" 
+    $(document).on('change', '#ChkSelectAll', function () {
+        $('#tbldocumentsendlist tbody .row-checkbox').prop('checked', this.checked);
     });
 
-    $(document).on('change', '#chkSelectAll', function () {
-        const isChecked = $(this).is(':checked');
-        $('#tbldocumentsendlist tbody .row-checkbox').prop('checked', isChecked);
-    });
-
+    // Row checkbox 
     $(document).on('change', '#tbldocumentsendlist tbody .row-checkbox', function () {
         const total = $('#tbldocumentsendlist tbody .row-checkbox').length;
         const checked = $('#tbldocumentsendlist tbody .row-checkbox:checked').length;
-        $('#chkSelectAll').prop('checked', total > 0 && total === checked);
+        $('#ChkSelectAll').prop('checked', total > 0 && total === checked);
     });
 
+    // Row Send button 
     $(document).on('click', '.btnSendDocument', async function (e) {
         e.preventDefault();
+        const $btn = $(this);
+        const $tr = $btn.closest('tr');
+        const row = collectRow($tr);
 
-        let selectedRows = [];
-        $('.row-checkbox:checked').each(function () {
-            const index = $(this).attr('id').split('_')[1];
-
-            const rowData = {
-                V_TYPE: $('#tdVType_' + index).text().trim(),
-                V_NO: parseInt($('#tdVNo_' + index).text().trim()) || null,
-                SAUDA_TYPE: $('#tdSaudaType_' + index).text().trim(),
-                SAUDA_NO: parseInt($('#tdSaudaNo_' + index).text().trim()) || null,
-                V_DATE: convertDate($('#tdVDate_' + index).text().trim()),
-                PARTY_CODE: parseInt($('#tdPartyCode_' + index).text().trim()) || null,
-                PARTY_NAME: $('#tdPartyName_' + index).text().trim(),
-                CITY_CODE: parseInt($('#tdPartyCity_' + index).text().trim()) || null,
-                CITY_NAME: $('#tdCityName_' + index).text().trim(),
-                BILL_NO: $('#tdBillNo_' + index).text().trim(),
-                BILL_DATE: convertDate($('#tdBillDate_' + index).text().trim()),
-                BILL_AMT: parseFloat($('#tdInvAmt_' + index).text().trim()) || null,
-                TRUCK_NO: $('#tdTruckNo_' + index).text().trim(),
-                SEND_BY: null,
-                SEND_TO: parseInt($('#ddlSendTo_' + index).val()) || null,
-                SEND_DATE: convertDate($('#tdSendDate_' + index).text().trim()),
-                RECD_DATE: convertDate($('#tdRecdDate_' + index).text().trim()),
-                SEND_FLAG: parseInt($('#tdSendFlag_' + index).text().trim()) || null,
-                RECD_FLAG: parseInt($('#tdRecdFlag_' + index).text().trim()) || null,
-                REMARKS: $('#tdRemarks_' + index).text().trim()
-            };
-
-            selectedRows.push(rowData);
-        });
-
-        if (selectedRows.length === 0) {
-            toastr.info("Please select at least one document.");
+        if (!row.SEND_TO) {
+            showToast("Please select 'Send To' User.", { type:"warning"});
+            $tr.find('.sendToDropdown').focus();
             return;
         }
 
-        $.ajax({
-            url: '/ImportTrackingReport/SendDocument',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(selectedRows),
-
-            success: async function (res) {
-                console.log("Response:", res);
-
-                if (!res) {
-                    toastr.error("No response received from server.");
-                    return;
-                }
-
-                if (res.validation === false) {
-                    toastr.warning(res.message);
-                    return;
-                }
-
-                if (res.success) {
-                    toastr.success(res.message || "Document sent successfully.");
-
-                    // Refresh grid
-                    await GetDocumentListData();
-                } else {
-                    toastr.error(res.message || "Failed to send document.");
-                }
-            },
-
-            error: function (xhr) {
-                console.log(xhr.responseText);
-                toastr.error("Error sending document.");
-            }
-        });
-
+        $btn.prop('disabled', true);
+        await postSendDocuments([row]);
+        $btn.prop('disabled', false);
     });
 
-});
+    // Top Send button 
+    $(document).on('click', '#btn_send', async function (e) {
+        e.preventDefault();
+        const sendTo = $('#ddlsendto').val();
+
+        if (!sendTo) {
+            showToast("Please select 'Send To' User.", { type:"warning"});
+            return;
+        }
+
+        const rows = [];
+        $('#tbldocumentsendlist tbody .row-checkbox:checked').each(function () {
+            const $tr = $(this).closest('tr');
+            $tr.find('.sendToDropdown').val(sendTo);  
+            rows.push(collectRow($tr));
+        });
+
+        if (rows.length === 0) {
+            showToast("Please select at least one document.", { type:"info"});
+            return;
+        }
+
+        const $btn = $(this);
+        $btn.prop('disabled', true);
+        await postSendDocuments(rows);
+        $btn.prop('disabled', false);
+    });
+}
+
 
 // ====================IMPORT TRACKING LIST====================
 function convertDate(date) {
@@ -281,12 +176,12 @@ async function GetReportData() {
         if (res.success) {
             bindImportTrackingReport(res.data, res.totalUpdatedRecords);
         } else {
-            toastr.error(res.message);
+            showToast(res.message, { type:"error"});
         }
 
     } catch (error) {
         console.error("Error:", error);
-        toastr.error("Failed to load report data.");
+        showToast("Failed to load report data.", { type:"error"});
     }
 }
 function fmtDate(v) {
@@ -309,8 +204,11 @@ function bindImportTrackingReport(data, totalUpdatedRecords) {
     $('#lblTotalUpdated').text(`Tracking Updated : ${totalUpdatedRecords}`); 
 
     data.forEach((item, index) => {
+
+        const rowClass = item.isTrackingUpdated === 1 ? 'tracking-updated-row' : '';
+
         tbody.append(`
-                <tr>
+                <tr class="${rowClass}">
                     <td class="hidden-col">${index + 1}</td>
                     <td class="freeze-item" data-column="1" style="left:0px;width:111px;min-width:111px;max-width:111px;">${item.saudaNo ?? ''}</td>
                     <td class="freeze-item" data-column="2" style="left:111px;width:97px;min-width:97px;max-width:97px;">${fmtDate(item.saudaDate)}</td>
@@ -435,7 +333,7 @@ function bindImportTrackingReport(data, totalUpdatedRecords) {
                     <td>${fmtDate(item.actuaL_CONTHODATE)}</td>
                     <td class="action-col">
                         <div class="action-wrap">
-                        <button type="button" class="act-btn edit btn-edit" title="View/Update Tracking"><i class="fa fa-eye"></i></button>
+                        <button type="button" class="act-btn edit btn-edit" title="View/Update Tracking" data-sauda-no="${item.saudaNo ?? ''}"><i class="fa fa-eye"></i></button>
                        </div>
                     </td>
                 </tr>
@@ -443,192 +341,156 @@ function bindImportTrackingReport(data, totalUpdatedRecords) {
     });
 }
 
-// ====================View/Update Tracking====================
 
-
-// ====================Document Send====================
-async function LoadDropdown() {
-    try {
-        await Promise.all([
-            cmbDoctype(),
-            cboVType()
-        ]);
-        await loadSendTo();
-
-    } catch (error) {
-        console.log("Dropdown load failed:", error);
-        toastr.error("Failed to load dropdown data");
-    }
+// ====================Document Send List====================
+async function BindDropdowns() {
+    await Promise.all([
+        bindDropdown("ImportTrackingReport", "doctype", '#ddldoctype', '', 'EXIMTracking', null, true, null, false),
+        bindDropdown("ImportTrackingReport", "vtype", '#ddlvtype', 'Select V Type', 'EXIM', null, true, null, false),
+    ]);
 }
-
-async function cmbDoctype() {
-    try {
-        const res = await fetch('/ImportTrackingReport/cmbDoctype');
-        const data = await res.json();
-        const ddl = $('#ddldoctype');
-        ddl.empty().append('');
-        data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}</option>`);
-        });
-    } catch (error) {
-        console.error("Error loading Doc Type:", error);
-    }
-}
-
-async function cboVType() {
-    try {
-        const res = await fetch('/ImportTrackingReport/cboVType');
-        const data = await res.json();
-        const ddl = $('#ddlvtype');
-        ddl.empty().append('');
-        data.forEach(item => {
-            ddl.append(`<option value="${item.value}">${item.text}</option>`);
-        });
-    } catch (error) {
-        console.error("Error loading Doc Type:", error);
-    }
-}
-
-async function loadSendTo() {
-    try {
-        const textbox = $('#txtsearchby').val();
-        const v_type = $('#ddlvtype').val();
-
-        const res = await fetch(`/ImportTrackingReport/SendTo?Textbox=${encodeURIComponent(textbox)}&v_type=${encodeURIComponent(v_type)}`);
-
-        if (!res.ok) {
-            throw new Error("Failed to load data.");
-        }
-
-        const data = await res.json();
-        sendToList = data;
-
-        // Fill dropdown
-        const ddl = $('#ddlsendto');
-        ddl.empty();
-        ddl.append('<option value="">-- Select Send To --</option>');
-
-        $.each(sendToList, function (index, item) {
-            ddl.append(
-                `<option value="${item.value}">${item.text}</option>`
-            );
-        });
-
-        // If using Select2
-        ddl.trigger('change');
-
-    } catch (error) {
-        console.error("Error loading Send To list:", error);
-    }
-}
-
 async function GetDocumentListData() {
     try {
-
         const DocType = $('#ddldoctype').val();
         const vType = $('#ddlvtype').val();
-        const fromDate = $('#Dtfromdate').val();
-        const toDate = $('#Dttodate').val();
-        const DocStatus = $('#ddlPrintType').val();
-        const Searchby = $('#ddlsearchby').val();
-        const SearchText = $('#txtsearchby').val();
 
-        if (DocType == "" && vType == "") {
-            toastr.info("Data not found");
+        if (!DocType && !vType) {
+            showToast("Data not found", { type:"info"});
+            $('#tbldocumentsendlist tbody').empty();
+            return;
         }
 
         const res = await $.ajax({
             url: '/ImportTrackingReport/GetDocumentListData',
             type: 'GET',
             data: {
-                FromDate: fromDate,
-                ToDate: toDate,
-                DocStatus: DocStatus,
-                Searchby: Searchby,
-                SearchText: SearchText
+                FromDate: $('#Dtfromdate').val(),
+                ToDate: $('#Dttodate').val(),
+                vType: vType,
+                DocStatus: $('input[name="PrintType"]:checked').val() || '',
+                Searchby: $('#ddlsearchby').val() || '',
+                SearchText: $('#txtsearchby').val() || ''
             }
         });
 
         if (res.success) {
             bindDocTabeList(res.data);
+        } else {
+            showToast(res.message, { type:"error"});
         }
-        else {
-            toastr.error(res.message);
-        }
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Error:", error);
-        toastr.error("Failed to load report data.");
+        showToast("Failed to load report data.", { type:"error"});
     }
 }
-
 function bindDocTabeList(data) {
-
-    console.table("data", data);
-
-
-    const tDocbody = $('#tbldocumentsendlist tbody');
-    tDocbody.empty();
-
+    const tbody = $('#tbldocumentsendlist tbody');
+    tbody.empty();
     $('#chkSelectAll').prop('checked', false);
 
     if (!data || data.length === 0) {
-        tDocbody.append(` <tr>  <td colspan="21" class="text-center">No data found.</td> </tr> `);
+        tbody.append(`<tr><td colspan="15" class="text-center">No data found.</td></tr>`);
         return;
     }
 
-    // Build dropdown HTML once
+    // Build Send To options once from the top Send To dropdown
     let sendToOptions = `<option value="">--Select--</option>`;
-
-    sendToList.forEach(user => {
-        sendToOptions += `<option value="${user.value}">${user.text}</option>`;
+    $('#ddlsendto option').each(function () {
+        if (this.value) sendToOptions += `<option value="${this.value}">${$(this).text()}</option>`;
     });
 
     data.forEach((item, index) => {
+        const rowClass = item.recD_DATE ? 'row-received' : (item.senD_DATE ? 'row-sent' : '');
 
-        tDocbody.append(`
-                <tr id="tr_${index}">
-                    <td id="tdVType_${index}">${item.v_TYPE ?? ''}</td>
-                    <td id="tdVNo_${index}">${item.v_NO ?? ''}</td>
-                    <td id="tdSaudaType_${index}">${item.saudA_TYPE ?? ''}</td>
-                    <td id="tdSaudaNo_${index}">${item.saudA_NO ?? ''}</td>
-                    <td id="tdVDate_${index}">${item.v_DATE ?? ''}</td>
-                    <td id="tdPartyName_${index}">${item.partyName ?? ''}</td>
-                    <td id="tdPartyCode_${index}">${item.partY_CODE ?? ''}</td>
-                    <td id="tdCityName_${index}">${item.cityName ?? ''}</td>
-                    <td id="tdPartyCity_${index}">${item.partY_CITY ?? ''}</td>
-                    <td id="tdBillNo_${index}">${item.bilL_NO ?? ''}</td>
-                    <td id="tdBillDate_${index}">${item.bilL_DATE ?? ''}</td>
-                    <td id="tdInvAmt_${index}" class="text-end">${item.inV_AMT ?? 0}</td>
-                    <td id="tdRemarks_${index}">${item.remarks ?? ''}</td>
-                    <td id="tdTruckNo_${index}">${item.trucK_NO ?? ''}</td>
+        tbody.append(`
+            <tr id="tr_${index}" class="${rowClass}"
+                data-vtype="${item.v_TYPE ?? ''}" data-vno="${item.v_NO ?? ''}"
+                data-saudatype="${item.saudA_TYPE ?? ''}"
+                data-partycode="${item.partY_CODE ?? ''}" data-partycity="${item.partY_CITY ?? ''}"
+                data-truckno="${item.trucK_NO ?? ''}">
+                <td>${item.saudA_NO ?? ''}</td>
+                <td>${item.v_DATE ?? ''}</td>
+                <td>${item.partyName ?? ''}</td>
+                <td>${item.cityName ?? ''}</td>
+                <td>${item.bilL_NO ?? ''}</td>
+                <td>${item.bilL_DATE ?? ''}</td>
+                <td class="text-end">${item.inV_AMT ?? 0}</td>
+                <td><input type="text" class="erppage-input remarks-input" value="${item.remarks ?? ''}" /></td>
+                <td><select id="ddlSendTo_${index}" class="erppage-input sendToDropdown">${sendToOptions}</select></td>
+                <td>${item.senD_FLAG ?? ''}</td>
+                <td>${item.senD_DATE ?? ''}</td>
+                <td>${item.recD_FLAG ?? ''}</td>
+                <td>${item.recD_DATE ?? ''}</td>
+                <td class="text-center"><input type="checkbox" id="chkRow_${index}" class="row-checkbox"></td>
+                <td class="text-center">
+                    <button type="button" id="btnSend_${index}" class="erppage-btn erppage-btn-common btnSendDocument" data-index="${index}">Send</button>
+                </td>
+            </tr>`);
 
-                    <td>
-                        <select id="ddlSendTo_${index}" class="erppage-input sendToDropdown">  ${sendToOptions} </select>
-                    </td>
-
-                    <td id="tdSendFlag_${index}">${item.senD_FLAG ?? ''}</td>
-                    <td id="tdSendDate_${index}">${item.senD_DATE ?? ''}</td>
-                    <td id="tdRecdFlag_${index}">${item.recD_FLAG ?? ''}</td>
-                    <td id="tdRecdDate_${index}">${item.recD_DATE ?? ''}</td>
-
-                    <td class="text-center">
-                      <input type="checkbox"  id="chkRow_${index}"  class="row-checkbox"  value="${item.v_TYPE}_${item.v_NO}"  ${(item.senD_FLAG ?? '').toLowerCase() === 'send' ? 'checked' : ''}>
-                    </td>
-
-
-                    <td class="text-center">
-                        <button  type="button" id="btnSend_${index}" class="erppage-btn erppage-btn-common btnSendDocument"  data-index="${index}" data-vtype="${item.v_TYPE}"
-                        data-vno="${item.v_NO}"> Send
-                        </button>
-                    </td>
-                </tr>
-            `);
-
-
-        if (item.senderCode) {
-            $('#ddlSendTo_' + index).val(item.senderCode);
+        if (item.receiverCode) {
+            $('#ddlSendTo_' + index).val(item.receiverCode);
         }
-
     });
 }
+
+
+// ====================Send Documents====================
+function collectRow($tr) {
+    const td = $tr.find('td');
+    return {
+        V_TYPE: String($tr.data('vtype') ?? ''),
+        V_NO: parseInt($tr.data('vno')) || null,
+        SAUDA_TYPE: String($tr.data('saudatype') ?? ''),
+        SAUDA_NO: parseInt(td.eq(0).text().trim()) || null,
+        V_DATE: convertDate(td.eq(1).text().trim()),
+        PARTY_CODE: parseInt($tr.data('partycode')) || null,
+        PARTY_NAME: td.eq(2).text().trim(),
+        CITY_CODE: parseInt($tr.data('partycity')) || null,
+        CITY_NAME: td.eq(3).text().trim(),
+        BILL_NO: td.eq(4).text().trim(),
+        BILL_DATE: convertDate(td.eq(5).text().trim()),
+        BILL_AMT: parseFloat(td.eq(6).text().trim()) || null,
+        TRUCK_NO: String($tr.data('truckno') ?? ''),
+        SEND_TO: parseInt($tr.find('.sendToDropdown').val()) || null,
+        REMARKS: $tr.find('.remarks-input').val() || ''
+    };
+}
+async function postSendDocuments(rows) {
+    try {
+        const res = await $.ajax({
+            url: '/ImportTrackingReport/SendDocument',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(rows)
+        });
+
+        if (res.validation) { showToast(res.message, { type: "warning" }); return; }
+        if (res.message && !res.success) { showToast(res.message, { type:"error" }); }
+
+        if (res.sent > 0) showToast(res.sent + " document(s) sent.", { type: "success" });
+        if (res.already > 0) showToast(res.already + " document(s) already sent.", { type:"warning"});
+
+        await GetDocumentListData();   
+    } catch (xhr) {
+        console.error(xhr);
+        showToast("Error sending document.", { type:"error"});
+    }
+}
+
+// ====================Toast above modal====================
+$(document).on('shown.bs.modal', '#listdocumentsendModal', function () {
+    const el = document.getElementById('erp-toast-container');
+    if (!el) return;
+    el._origParent = el._origParent || el.parentNode;
+    document.body.appendChild(el);                        // out of any stacking context
+    el.style.setProperty('position', 'fixed', 'important');
+    el.style.setProperty('z-index', '2147483647', 'important');
+});
+
+$(document).on('hidden.bs.modal', '#listdocumentsendModal', function () {
+    const el = document.getElementById('erp-toast-container');
+    if (!el || !el._origParent) return;
+    el._origParent.appendChild(el);
+    el.style.removeProperty('position');
+    el.style.removeProperty('z-index');
+});
