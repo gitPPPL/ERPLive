@@ -123,6 +123,7 @@ builder.Services.AddScoped<IImportTrackingReportRepository, ImportTrackingReport
 builder.Services.AddScoped<IImportTrackingEntryListRepository, ImportTrackingEntryListRepository>();
 builder.Services.AddScoped<IImportTrackingEntryRepository, ImportTrackingEntryRepository>();
 
+builder.Services.AddScoped<IExportTrackingReportRepository, ExportTrackingReportRepository>();
 // Gete Entry Transaction repositories
 
 builder.Services.AddScoped<IDatabaseMetadataService, DatabaseMetadataService>();

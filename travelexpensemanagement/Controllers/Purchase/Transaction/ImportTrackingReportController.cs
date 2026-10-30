@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using travelexpensemanagement.Common.DbHelper;
+using travelexpensemanagement.Common.GlobalExcel;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Models.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
@@ -12,12 +13,14 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
         private readonly GlobalVariableService _globalValue;
         private readonly DbHelper _dbHelper;
         private readonly IImportTrackingReportRepository _repo;
+        private readonly GlobalExcelExport _excel;
 
-        public ImportTrackingReportController(GlobalVariableService globalValue, DbHelper dbHelper, IImportTrackingReportRepository repo)
+        public ImportTrackingReportController(GlobalVariableService globalValue, DbHelper dbHelper, IImportTrackingReportRepository repo, GlobalExcelExport excel)
         {
             _globalValue = globalValue;
             _dbHelper = dbHelper;
             _repo = repo;
+            _excel = excel;
         }
 
         public IActionResult Index()
@@ -113,6 +116,33 @@ namespace travelexpensemanagement.Controllers.Purchase.Transaction
                 return Json(new { success = false, sent, already, message = res.message });
 
             return Json(new { success = res.status, sent, already });
+        }
+
+        //================EXCEL====================
+        [HttpGet]
+        public IActionResult ExportToExcel(DateTime FromDate, DateTime ToDate)
+        {
+            try
+            {
+                var gv = _globalValue.GetGlobalVariables();
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "@CompCode", gv.PubCompCode },
+                    { "@YEAR_CODE", gv.PubFYearCode },
+                    { "@BranchCode", gv.PubBranchCode },
+                    { "@FromDate", FromDate },
+                    { "@ToDate", ToDate },
+                    { "@Action", "ReportSql" }
+                };
+
+                var fileBytes = _excel.ExportToExcel("sp_ImportTrackingReport", "Export Tracking Report", parameters);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ImportTrackingReport_{DateTime.Now:ddMMyyyy}.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

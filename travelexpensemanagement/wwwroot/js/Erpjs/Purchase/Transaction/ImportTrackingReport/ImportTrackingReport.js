@@ -147,6 +147,18 @@ async function WireEvents() {
         await postSendDocuments(rows);
         $btn.prop('disabled', false);
     });
+
+    // Export To Excel
+    $(document).on('click', '.btn-export', function (e) {
+        e.preventDefault();
+
+        const params = new URLSearchParams({
+            FromDate: $('#DtDatefrom').val(),
+            ToDate: $('#Dtto').val()
+        });
+
+        window.location.href = `/ImportTrackingReport/ExportToExcel?${params.toString()}`;
+    });
 }
 
 
@@ -334,6 +346,7 @@ function bindImportTrackingReport(data, totalUpdatedRecords) {
                     <td class="action-col">
                         <div class="action-wrap">
                         <button type="button" class="act-btn edit btn-edit" title="View/Update Tracking" data-sauda-no="${item.saudaNo ?? ''}"><i class="fa fa-eye"></i></button>
+                        <button type="button" class="act-btn view btn-export" title="Export to Excel"><i class="fa fa-file-excel"></i></button>
                        </div>
                     </td>
                 </tr>
