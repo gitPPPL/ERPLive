@@ -12,10 +12,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 {
     public class ScrapSaleSaudaListController : Controller
     {
-
-
-
-
         private readonly DbHelper _dbHelper;
         private readonly DataBaseConnection _dbConnection;
         private readonly GlobalVariableService _globalVariableService;

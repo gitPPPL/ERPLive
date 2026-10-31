@@ -1,0 +1,353 @@
+﻿@{
+	ViewBag.Title = "Sales Target List";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<fieldset>
+    <legend class="legend-field">Sales Target List</legend>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="btn-rightalign">
+                <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "SalesTarget")'" type="submit" class="btn btn-add">
+                    <i class="fa fa-plus"></i>Add
+                </button>
+                <button class="btn btn-print" id="button_print">
+                    <i class="fa fa-print"></i> Print
+                </button>
+                <button class="btn btn-export" id="button_export">
+                    <i class="fas fa-file-export"></i> Export
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblSalesTargetList" class="excel-table fixed-grid-table table-width resizable-table">
+
+
+                <colgroup>
+                    <col style="width: 120px;">     <!-- Voucher Type -->
+                    <col style="width: 100px;">     <!-- Voucher No -->
+                    <col style="width: 120px;">     <!-- Voucher Date -->
+                    <col style="width: 250px;">     <!-- Party Name -->
+                    <col style="width: 120px;">     <!-- Plan Month -->
+                    <col style="width: 250px;">     <!-- Remarks -->
+                    <col style="width: 100px;">     <!-- Action -->
+                </colgroup>
+
+                <thead class="table-head">
+                    <tr>
+
+                        <th>Voucher Type</th>
+                        <th>Voucher No</th>
+                        <th>Voucher Date</th>
+                        <th>Party Name</th>
+                        <th>Plan Month</th>
+                        <th>Remarks</th>
+                        <th class="action-col">Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <!-- Pagination container -->
+        <div class="erppagelist-pagination">
+
+            <div class="pagination-left">
+                <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+
+            <div class="pagination-center">
+                <button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+                <div id="pageNumbers" class="page-numbers"></div>
+                <button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+            </div>
+
+            <div class="pagination-right" id="pageInfoText">
+                Results: 0 - 0 of 0
+            </div>
+
+        </div>
+    </div>
+
+</fieldset>
+
+<script>
+
+    let currentPage = 1;
+    let pageSize = 10;
+    let totalCount = 0;
+    var controllerName = window.location.pathname.split('/')[1];
+
+    $(document).ready(function () {
+       checkPermission(controllerName, function () {
+              loadAllInward();
+       });
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadAllInward();
+        });
+
+        $('#button_export').on('click', function () {
+            var text = $('#searchBox').val();
+            window.location.href = '/SalesTargetList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+        });
+
+        $('#button_print').on('click', function ()
+        {
+            var searchTerm = $('#searchBox').val() || '';
+            window.location.href = '/SalesTargetList/ExportPdf?searchTerm=' + encodeURIComponent(searchTerm);
+        });
+
+    });
+
+    // ================= LOAD DATA =================
+    function loadAllInward() {
+
+        $.ajax({
+            url: '/SalesTargetList/GetList',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: $('#searchBox').val(),
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res)
+            {
+                if (!res.success)
+                {
+                    toastr.error("Failed to load data.");
+                    return;
+                }
+
+                const list = res.lists || [];
+                totalCount = res.totalCount || 0;
+
+                renderTable(list);
+                renderPagination();
+            },
+            error: function (xhr)
+            {
+                toastr.error('Error loading list: ' + xhr.responseText);
+            }
+        });
+    }
+
+    // ================= TABLE =================
+    function renderTable(list) {
+
+        console.log("list",list);
+
+
+        const tbody = $('#tblSalesTargetList tbody');
+        tbody.empty();
+
+        if (!list || list.length === 0) {
+            tbody.append('<tr><td colspan="13" class="text-center text-muted">No list found.</td></tr>');
+            return;
+        }
+
+        $.each(list, function (index, item) 
+        {
+            tbody.append(`
+                <tr>
+                    <td>${item.v_TYPE ?? ''}</td>
+                    <td>${item.v_NO ?? ''}</td>
+                    <td>${formatDate(item.v_DATE)}</td>
+                    <td>${item.partyname ?? ''}</td>                     
+                    <td>${formatDate(item.plaN_MONTH)}</td>
+                    <td>${item.remarks ?? ''}</td>
+                    <td class="action-col">
+                        <div class="action-wrap">
+                            <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.doC_ID}')"><i class="fa fa-edit"></i></button>
+                            <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.doC_ID}')"><i class="fa fa-eye"></i></button>
+                            <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
+                            <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
+
+                        </div>
+                    </td>
+                </tr>
+            `);
+
+            applyGridPermission();
+        });
+
+    }
+
+    // ================= PAGINATION =================
+    function renderPagination() {
+
+        const totalPages = Math.ceil(totalCount / pageSize) || 1;
+
+        let html = '';
+        let maxVisible = 5;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = startPage + maxVisible - 1;
+
+        if (endPage > totalPages) {
+            endPage = totalPages;
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+
+        if (startPage > 1) {
+            html += `<span class="page-number" onclick="goToPage(1)">1</span>`;
+            if (startPage > 2) html += `<span class="dots">...</span>`;
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<span class="page-number ${i === currentPage ? 'active' : ''}"
+                        onclick="goToPage(${i})">${i}</span>`;
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += `<span class="dots">...</span>`;
+            html += `<span class="page-number" onclick="goToPage(${totalPages})">${totalPages}</span>`;
+        }
+
+        $('#pageNumbers').html(html);
+
+        let start = (currentPage - 1) * pageSize + 1;
+        let end = Math.min(currentPage * pageSize, totalCount);
+
+        if (totalCount === 0) {
+            start = 0;
+            end = 0;
+        }
+
+        $('#pageInfoText').text(`Results: ${start} - ${end} of ${totalCount}`);
+
+        $('#prevBtn').prop('disabled', currentPage === 1);
+        $('#nextBtn').prop('disabled', currentPage === totalPages);
+    }
+
+    // ================= PAGINATION ACTIONS =================
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadAllInward();
+        }
+    }
+
+    function nextPage() {
+        const totalPages = Math.ceil(totalCount / pageSize);
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadAllInward();
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllInward();
+    }
+
+    function changeRowsPerPage() {
+        pageSize = parseInt($('#pageSizeSelect').val());
+        currentPage = 1;
+        loadAllInward();
+    }
+
+    // ================= UTIL =================
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '';
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    }
+
+    // ================= ACTIONS =================
+    function AddOrEditFunction(DOC_ID)
+    {
+        window.location.href = `/SalesTarget/Index?id=${encodeURIComponent(DOC_ID)}`;
+    }
+
+    function viewMenuDetails(DOC_ID)
+    {
+        window.location.href = `/SalesTarget/Index?id=${encodeURIComponent(DOC_ID)}&mode=view`;
+    }
+
+    function deleteTemp(code, VType) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You want to delete this Sales Invoice Direct?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: '/SalesTargetList/Delete',
+                    type: 'POST',
+                    data: { code: code, VType: VType },
+                    success: function (res) {
+
+                        console.log("Deelete Res",res);
+
+                        if(res.validation == false)
+                        {
+                          toastr.warning(res.message );
+                          return;
+                        }
+
+
+                        if (res.success) {
+                            toastr.success(res.message || "Deleted successfully");
+                            loadAllInward();
+                        } else {
+                            toastr.error(res.message || 'Failed to delete.');
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Error deleting record.');
+                    }
+                });
+            }
+        });
+    }
+
+    function showDocumentPopup(docCode) {
+
+        $.ajax({
+            url: '/SalesTargetList/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',
+            data: { docCode: docCode },
+            success: function (response) {
+                if (response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function () {
+                toastr.error("Error fetching document details.");
+            }
+        });
+    }
+
+</script>

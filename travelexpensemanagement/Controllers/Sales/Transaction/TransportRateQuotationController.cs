@@ -35,9 +35,19 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             _moduleService = moduleService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            TempData["LoginDate"] = _globalVariableService.GetGlobalVariables().PubLoginDate;
+            var globalVariables = _globalVariableService.GetGlobalVariables();
+            var loadGeneralSetting = await _globalVariableService.LoadGeneralSetting();
+            ViewBag.LoadGeneralSetting = loadGeneralSetting;
+            string databaseName;
+            using (var connection = _dbConnection.GetErpConnection())
+            {
+                databaseName = connection.Database;
+            }
+            ViewBag.GlobalVariables = globalVariables;
+            ViewBag.DatabaseName = databaseName;
+
             return View("~/Views/Sales/Transaction/TransportRateQuotation/Index.cshtml");
         }
         public JsonResult GetVNo()

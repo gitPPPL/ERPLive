@@ -122,7 +122,7 @@ $(document).ready(async function ()
 
     });
 
-    $("#btn_save").click(async function (e) {
+    $("#btn-save").click(async function (e) {
         e.preventDefault();
 
         if (!validateRequiredField('#ddlDocumentType', 'Please select a Voucher Type')) return;
@@ -268,10 +268,7 @@ $(document).ready(async function ()
         const FORM_CODE = parseInt($.trim($('#ddlFormType').val()), 10) || 0;
         const SAUDA_NO = parseInt($.trim($('#ddlSaudaNo').val()), 10) || 0;
         const SAUDA_TYPE = SAUDA_NO ? $.trim($('#ddlSaudaNo option:selected').text()).split('-').pop().trim() : "";
-        const SAUDA_RATE = $.trim($('#NumSaudaRate').val()) || 0;
-
-
-   
+        const SAUDA_RATE = $.trim($('#NumSaudaRate').val()) || 0;   
 
         const CAL_ONPCS = $('#ChkPCS').is(':checked') ? 1 : 0;
         const INSU_DETAIL = $.trim($('#ddlNatureJW').val()) || "";
@@ -297,9 +294,7 @@ $(document).ready(async function ()
 
         if (!validateRequiredField('#ddlTaxType', 'Please select Valid Tax Type')) return;
 
-        const Header = {
-
-       
+        const Header = {       
             DOC_ID: DOC_ID,
             FRT_TOPAY: FRT_TOPAY ,
             V_TYPE: V_TYPE,

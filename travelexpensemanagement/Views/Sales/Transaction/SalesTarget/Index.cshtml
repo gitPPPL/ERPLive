@@ -1,0 +1,179 @@
+﻿
+
+@using System.Text.Json
+
+@{
+    ViewBag.Title = "Sales Target";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
+
+    var databaseName = ViewBag.DatabaseName as string ?? "";
+
+    var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0;
+
+    var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
+
+    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+
+    var LoadGeneralSetting = ViewBag.LoadGeneralSetting;
+
+}
+
+ <script>
+    window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
+        CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
+        UserId = globalVariables.PubUserId,
+        UserName = globalVariables.PubUserName,
+        UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
+        FYearCode = globalVariables.PubFYearCode,
+        BranchCode = globalVariables.PubBranchCode,
+        LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
+        CompanyName = globalVariables.CompanyName,
+        Address1 = globalVariables.Address1,
+        Address2 = globalVariables.Address2,
+        GST = globalVariables.gstin,
+        PAN = globalVariables.PAN,
+        Phone = globalVariables.Phone,
+        Email = globalVariables.Email,
+        ICE = globalVariables.IEC,
+        website = globalVariables.Website,
+        RegAdd1 = globalVariables.RegAdd1,
+        RegAdd2 = globalVariables.RegAdd2,
+        CINNO = globalVariables.CINNO
+
+    }));
+
+        var LoadGeneralSetting = @Html.Raw( JsonSerializer.Serialize(ViewBag.LoadGeneralSetting)
+    );
+
+
+    window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
+</script> 
+
+ <div id="erp-toast-container"></div>
+
+    <div class="erppage-header">
+
+        <div class="erppage-header-left">
+            <div class="erppage-header-icon">
+                <i class="fa fa-file-invoice-dollar"></i>
+            </div>
+            <div class="erppage-header-title">Sales Target</div>
+        </div>
+
+        <div class="erppage-header-right">
+          
+            <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "SalesTargetList")', isReadOnly)">
+                <i class="fa-solid fa-arrow-left"></i>Back to list
+            </button>  
+
+        </div>
+    </div>
+
+   <div class="erppage-container">
+
+    <div id="SalesTargetForm">
+
+            <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+
+            <fieldset class="fieldset-sub">
+                        <legend class="sub-legend">Document Details</legend>
+
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield">       
+                                <label for="DtDocumentDate">Document Date</label>
+                                <input type="date" class="erppage-input" id="DtDocumentDate">
+                            </div>
+
+                            <div class="erppage-divfield">                  
+                                <label for="NumDocumentNo">Document No</label>
+                                <input type="number" class="form-control" id="NumDocumentNo" readonly>     
+                            </div>
+
+                            <div class="erppage-divfield">       
+                                <label for="DtPalningMonthDate">Planning of Month</label>
+                                <input type="month" class="erppage-input" id="DtPalningMonthDate">
+                            </div>
+             
+
+                            <div class="erppage-divfield">             
+                                <label for="ddlPartyName">Party Name</label>
+                                <select class="form-control" id="ddlPartyName">
+                                <option value="">Select Party Name</option>
+                                </select>  
+                            </div>
+
+                        </div>
+
+                    </fieldset>
+
+            <fieldset class="fieldset-sub">
+                            <legend class="sub-legend">Import Data</legend>
+                            <div class="erppage-grid4">
+                                <div class="erppage-divfield">       
+                                    <label for="DtDocumentDate">import From Month</label>
+                                    <input type="month" class="erppage-input" id="DtImportfromDate">
+                                </div>
+                                <div class="erppage-divfield">
+                                    <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" id="btn_copydata"><i class="fa fa-clock"></i>Copy Data</button>
+                                </div>
+                            </div>
+
+                    </fieldset>
+
+        <div class="erppagelist-container">
+              <div class="excel-wrapper fixed-grid-wrapper">
+            <table id="tblSalesTaget"
+                   class="excel-table fixed-grid-table table-width resizable-table">
+
+                <colgroup>
+                    <col style="display: none;" /> 
+                    <col style="width: 8%;" />     
+                    <col style="width: 16%;" />    
+                    <col style="width: 18%;" />   
+                    <col style="width: 8%;" />     
+                    <col style="width: 9%;" />     
+                    <col style="width: 15%;" />    
+                    <col style="width: 15%;" />    
+                    <col style="width: 15%;" />     
+                    <col style="width: 15%;" />     
+                    <col style="width: 8%;" />     
+                    <col style="width: 8%;" />    
+                </colgroup>
+
+                <thead>
+                    <tr>
+                        <th style="display: none;">Code</th>
+                        <th>Item code</th>
+                        <th>Item Name</th>
+                        <th>Last month sales Target</th>
+                        <th>Target Qty</th>
+                        <th>Sales Through</th>
+                        <th>Min Price</th>
+                        <th>Max Price</th>
+                        <th>App Price</th>
+                        <th>Virgin Price</th>
+                        <th>Remarks</th>
+                        <th class="action-col">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody></tbody>
+            </table>
+        </div>
+        </div>
+
+            <div class="erppage-actions">
+                <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+                </button>
+            </div>
+
+        </div>
+   </div> 
+      
+<script src="~/js/erpjs/sales/transaction/SalesTarget/SalesTarget.js"></script>
+<script src="~/js/erpjs/sales/transaction/SalesTarget/SalesTargetapi.js"></script>
+<script src="~/js/erpjs/sales/transaction/SalesTarget/SalesTargetinit.js"></script>

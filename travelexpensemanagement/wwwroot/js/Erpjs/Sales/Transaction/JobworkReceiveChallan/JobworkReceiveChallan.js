@@ -45,9 +45,7 @@
             <button type="button"  class="act-btn delete"   onclick="DeleteRow(this)"> <i class="fa fa-trash"></i>  </button>
             </td>
         </tr>
-    `;
-
-  
+    `;  
 
     tbody.append(newRow);
 
@@ -58,7 +56,7 @@
     $row.find('.TxtTaxType').val(data.TaxType ?? '');
 
     $row.find('.TxtNos, .TxtGrossQty, .TxtNetQty, .TxtRate, ' +
-        '.TxtPacKPer, .TxtDisPer, .TxtCgstper,.TxtSgstPer,.TxtIGSTPer,.TxtCessPer').on('input change', function () {
+        '.TxtPacKPer, .TxtDisPer, .TxtCgstper,.TxtSgstPer,.TxtIGSTPer,.TxtCessPer,.NumTDSFreight1').on('input change', function () {
         CalculateRow($row);
     });
 
@@ -440,6 +438,11 @@ async function LoadData() {
         }
         $('#NumOtherCESS1').val(Header.cesS_PER);
         $('#NumOtherCESS2').val(Header.cesS_AMT);
+
+        $('#NumTDSFreight1').val(Header.tdS_PER);
+        $('#NumTDSFreight2').val(Header.tdS_AMT);
+
+
         $('#NumPayFreight').val(Header.frT_TOPAY);
         $('#NumWBQty').val(Header.wB_QTY);
         $('#ddlTransport').val(Header.transporT_CODE);
@@ -1165,5 +1168,19 @@ async function GetTransitReportFile() {
         }
 
         return null;
+    }
+}
+
+function SetMaxlength(selector, precision, scale) {
+    let value = $(selector).val();
+
+    const integerDigits = precision - scale;
+
+    const regex = new RegExp(
+        `^\\d{0,${integerDigits}}(\\.\\d{0,${scale}})?$`
+    );
+
+    if (!regex.test(value)) {
+        $(selector).val(value.slice(0, -1));
     }
 }

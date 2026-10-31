@@ -67,9 +67,6 @@
     console.log("CDiscAmount data:", data.CDiscAmount);
     console.log("CDiscAmount input:", $row.find('.TxtCDiscAmount').val());
 
-
-
-
     $row.find('.ddlProductName').val(data.Productcode ?? '');
 
     $row.find('.TxtTaxType').val(data.TaxType ?? '');
