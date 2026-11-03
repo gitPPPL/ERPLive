@@ -2,7 +2,7 @@
 const id = urlParams.get('id');
 const vtype = urlParams.get('vType');
 let isReadOnly = urlParams.get('readOnly') === 'true';
-
+ 
 let deliveryOrderCalcSettings = null;
 let isDistributingInsurance = false;
 
@@ -175,7 +175,7 @@ async function WireEvent() {
         $('#NumTransactionPIN').val(address.pincode || '');
 
         const stationCode = String(address.cityCode || '');
-
+        
         if (!stationCode) {
             $('#TxtTransactionStation').val('');
             return;
@@ -227,7 +227,7 @@ async function WireEvent() {
     //========================================
 
     $('#ddlVoucherType, #ddlProdType, #DtBillDate').on('change', async function () {
-            await BindPackingVoucherList();
+        await BindPackingVoucherList();
     });
 
     $('#ddlPartyName').on('change', async function () {
@@ -373,6 +373,7 @@ async function WireEvent() {
                 row.find('.netQuantity').val(item.pendingQty ?? '');
                 row.find('.rateRs').val(item.rate ?? '');
                 row.find('.saudaNo').val(item.saudaNo ?? '');
+                row.find('.saudaType').val(item.saudaType ?? '');
                 row.find('.saudaRate').val(item.saudaRate ?? '');
                 row.find('.stockQuantity').val(productDDL.find('option:selected').data('item')?.stockQty ?? 0);
 
@@ -483,6 +484,10 @@ async function WireEvent() {
         CalculateFooterTotals();
     });
 }
+
+$(document).on('blur', '#NumOtherPacking2', function () {
+    DistributePackingAmount();
+});
 
 function SetCurrentDate() {
     const today = new Date();
@@ -825,9 +830,7 @@ async function BindConsigneeAddressDDL(partyCode) {
 
         ddl.empty();
 
-        ddl.append(
-            new Option('Select Address', '')
-        );
+        ddl.append(new Option('Select Address', ''));
 
         data.forEach(function (item) {
 
@@ -1241,43 +1244,6 @@ async function BindPackingVoucherList() {
     }
 }
 
-//async function BindPackingVoucherList() {
-//    try {
-//        const vType = $('#ddlVoucherType').val();
-//        const pType = $('#ddlProdType option:selected').text();
-//        const partyCode = $('#ddlPartyName').val();
-//        const vDate = $('#DtBillDate').val();
-
-//        if (!vType || !partyCode || !vDate) {
-//            return;
-//        }
-
-//        const params = new URLSearchParams({
-//            vType: vType,
-//            pType: pType,
-//            partyCode: partyCode,
-//            vDate: vDate,
-//        });
-
-//        const response = await fetch(
-//            `/DeliveryOrder/GetPackingVoucherList?${params.toString()}`
-//        );
-
-//        if (!response.ok) {
-//            throw new Error('Failed to load packing vouchers');
-//        }
-
-//        const data = await response.json();
-
-//        return data;
-
-//    } catch (error) {
-//        console.error('Packing Voucher Error:', error);
-//        showToast('Failed to load packing vouchers', { type: 'error' });
-//        return [];
-//    }
-//}
-
 async function BindWaybillList() {
     try {
         const response = await fetch('/DeliveryOrder/GetWaybillList');
@@ -1436,12 +1402,12 @@ async function addNewRow() {
         <tr>
             <!-- Col0: Product Code / ID (hidden) -->
             <td>
-                 <input type="number" class="erppagetable-control productCode">
+                 <input type="number" class="erppagetable-control productCode " readonly>
             </td>
              
             <!-- Col1: Product Name -->
             <td class="freeze-item">
-                <select class="erppagetable-control productName">
+                <select class="erppagetable-control productName" disabled>
                     <option value="">Select Item</option>
                 </select>
             </td>
@@ -1483,7 +1449,7 @@ async function addNewRow() {
 
             <!-- Col9: Pack Amount -->
             <td>
-                <input type="number" class="erppagetable-control packAmount" step="0.01">
+                <input type="number" class="erppagetable-control packAmount" step="0.01" readonly>
             </td>
 
             <!-- Col10: Discount % -->
@@ -1493,7 +1459,7 @@ async function addNewRow() {
 
             <!-- Col11: Discount Amount -->
             <td>
-                <input type="number" class="erppagetable-control discAmount" step="0.01">
+                <input type="number" class="erppagetable-control discAmount " step="0.01" readonly>
             </td>
 
             <!-- Col12: Tax Type (hidden) -->
@@ -1513,17 +1479,17 @@ async function addNewRow() {
 
             <!-- Col21: Remark (hidden) -->
             <td style="display:none;">
-                <input type="text" class="erppagetable-control remark">
+                <input type="text" class="erppagetable-control remark" readonly>
             </td>
 
             <!-- Col22: Pack No -->
             <td>
-                <input type="text" class="erppagetable-control packNo">
+                <input type="text" class="erppagetable-control packNo" readonly>
             </td>
 
             <!-- Col23: Lot No -->
             <td>
-                <input type="text" class="erppagetable-control lotNo">
+                <input type="text" class="erppagetable-control lotNo " readonly>
             </td>
 
             <!-- Col24: Sauda Type (hidden) -->
@@ -1533,7 +1499,7 @@ async function addNewRow() {
 
             <!-- Col25: Sauda No -->
             <td>
-                <input type="text" class="erppagetable-control saudaNo">
+                <input type="text" class="erppagetable-control saudaNo" readonly>
             </td>
 
             <!-- Col26: Sauda Rate -->
@@ -2166,6 +2132,82 @@ function CalculateFooterTotals() {
 
 }
 
+// =========================================
+// Distribute Packing Amount
+// =========================================
+function DistributePackingAmount() {
+
+    const packingAmount = parseFloat($('#NumOtherPacking2').val()) || 0;
+    const totalAmount = parseFloat($('#NumOtherTotalAmount').val()) || 0;
+
+    if (totalAmount <= 0) return;
+
+    $('#tblDeliveryorder tbody tr').each(function () {
+
+        const row = $(this);
+
+        const packPer = parseFloat(row.find('.packPer').val()) || 0;
+        const amount = parseFloat(row.find('.amount').val()) || 0;
+
+        if (packPer === 0) {
+            const packAmount = (amount * packingAmount) / totalAmount;
+            row.find('.packAmount').val(packAmount.toFixed(2));
+        }
+    });
+
+    CalculateFooterTotals();
+}
+
+// =========================================
+// Distribute Discount Amount
+// =========================================
+function DistributeDiscountAmount() {
+
+    const discountAmount = parseFloat($('#NumOtherDiscount2').val()) || 0;
+    const totalAmount = parseFloat($('#NumOtherTotalAmount').val()) || 0;
+
+    if (totalAmount <= 0) return;
+
+    $('#tblDeliveryorder tbody tr').each(function () {
+
+        const row = $(this);
+        const packPer = parseFloat(row.find('.packPer').val()) || 0;
+        const amount = parseFloat(row.find('.amount').val()) || 0;
+
+        if (packPer === 0) {
+            const value = (amount * discountAmount) / totalAmount;
+            row.find('.discAmount').val(value.toFixed(2));
+        }
+    });
+
+    CalculateFooterTotals();
+}
+
+// =========================================
+// Distribute Cash Discount Amount
+// =========================================
+function DistributeCashDiscountAmount() {
+
+    const cashDiscountAmount = parseFloat($('#NumCashDiscount2').val()) || 0;
+    const totalAmount = parseFloat($('#NumOtherTotalAmount').val()) || 0;
+
+    if (totalAmount <= 0) return;
+
+    $('#tblDeliveryorder tbody tr').each(function () {
+
+        const row = $(this);
+        const packPer = parseFloat(row.find('.packPer').val()) || 0;
+        const amount = parseFloat(row.find('.amount').val()) || 0;
+
+        if (packPer === 0) {
+            const value = (amount * cashDiscountAmount) / totalAmount;
+            row.find('.cashDiscountAmount').val(value.toFixed(2));
+        }
+    });
+
+    CalculateFooterTotals();
+}
+
 function DistributeInsuranceAmount() {
 
     const settings = deliveryOrderCalcSettings || {};
@@ -2323,11 +2365,11 @@ async function SaveDeliveryOrder() {
 
             AGENT_CODE: $('#ddlSoldBy').val(),
             FORM_CODE: $('#ddlFormType').val(),
-            SAUDA_TYPE: '',
+            SAUDA_TYPE: null,
             SAUDA_NO: $('#NumSaudaNo').val(),
-            SAUDA_RATE: '',
+            SAUDA_RATE: null,
 
-            DEFECTIVE_GOODS: '',
+            DEFECTIVE_GOODS: $('#ChkDefectiveGood').is(':checked') ? 1 : 0,
             CAL_ONPCS: $('#cbCalOnPcs').is(':checked') ? '1' : '0',
             PRINT_DETAIL: $('#ChkDetail').is(':checked') ? '1' : '0',
 
@@ -2453,7 +2495,13 @@ async function SaveDeliveryOrder() {
             throw new Error("Server returned HTML instead of JSON. Check console for the actual error.");
         }
 
-        showToast(result.message || 'Delivery Order saved successfully', { type: 'success' });
+        if (result.success === true) {
+            showToast(result.message || 'Delivery Order saved successfully', { type: 'success' });
+            console.log('Delivery Order Save Response:', result);
+        } else {
+            showToast(result.message || 'Failed to save Delivery Order', { type: 'error' });
+            console.error('Delivery Order Save Failed:', result.message);
+        }
         console.log('Delivery Order Save Response:', result);
 
     } catch (error) {
@@ -3030,8 +3078,583 @@ async function ReconcileDeliveryOrder() {
 
         showToast(result.message || 'Reconciliation completed', {type: 'success' });
 
+        await UpdateDeliveryOrder();
+
     } catch (error) {
         console.error('Reconcile Delivery Order Error:', error);
         showToast('Failed to reconcile Delivery Order: ' + error.message, {type: 'error'});
     }
 }
+
+//===========================
+// Proforma Invoice
+//===========================
+
+$(document).on('click', '#btnCreateProforma', function (e) {
+    e.preventDefault();
+    GetProformaVNo();
+});
+
+function getProformaModel() {
+    const model = {
+        V_NO: parseInt($('#NumVoucherNo').val(), 10) || 0,
+        V_TYPE: $('#ddlVoucherType').val(),
+        V_DATE: $('#DtBillDate').val() || null,
+        DEL_DATE: $('#DtDeliveryDate').val() || null,
+
+        GODOWN_CODE: null,
+
+        BILL_CODE: $('#ddlPartyName').val() ? parseInt($('#ddlPartyName').val(), 10) : null,
+        BILL_NAME: $('#ddlPartyName option:selected').text(),
+        BILL_ADD1: $('#TxtAddressL1').val(),
+        BILL_ADD2: $('#TxtAddressL2').val(),
+        BILL_ADD3: $('#TxtAddressL3').val(),
+        BILL_CITY: $('#ddlStation').val() ? parseInt($('#ddlStation').val(), 10) : null,
+        BILL_CITYNAME: $('#ddlStation option:selected').text(),
+        BILL_GST: $('#TxtGST').val(),
+        BILL_PINCODE: $('#NumPincode').val(),
+
+        SHIP_CODE: $('#ddlConsignee').val() ? parseInt($('#ddlConsignee').val(), 10) : null,
+        SHIP_NAME: $('#ddlConsignee option:selected').text(),
+        SHIP_ADD1: $('#TxtTransactionAddressL1').val(),
+        SHIP_ADD2: $('#TxtTransactionAddressL2').val(),
+        SHIP_ADD3: $('#TxtTransactionAddressL3').val(),
+        SHIP_CITY: $('#TxtTransactionStation').val() ? parseInt($('#TxtTransactionStation').val(), 10) : null,
+        SHIP_CITYNAME: $('#TxtTransactionStation option:selected').text(),
+        SHIP_GST: $('#NumTransactionGSTNo').val(),
+        SHIP_PINCODE: $('#NumTransactionPIN').val(),
+
+        TAX_CODE: $('#ddlTaxType').val() ? parseInt($('#ddlTaxType').val(), 10) : null,
+        PACK_TYPE: $('#ddlPackNo option:selected').data('vtype') || '',
+        PACK_NO: $('#ddlPackNo').val() ? parseInt($('#ddlPackNo').val(), 10) : null,
+        ITEM_TYPE: $('#ddlProdType').val(),
+
+        WB_NO: $('#ddlWBNo').val() ? parseInt($('#ddlWBNo').val(), 10) : null,
+        WB_TYPE: $('#ddlWBNo option:selected').data('vtype') || '',
+
+        ISSUE_NO: $('#ddlIssueNo').val() ? parseInt($('#ddlIssueNo').val(), 10) : null,
+        ISSUE_TYPE: $('#ddlIssueNo option:selected').data('vtype') || '',
+
+        AMOUNT: $('#NumOtherTotalAmount').val() !== '' ? parseFloat($('#NumOtherTotalAmount').val()) : null,
+        PACK_PER: $('#NumOtherPacking1').val() !== '' ? parseFloat($('#NumOtherPacking1').val()) : null,
+        PACK_AMT: $('#NumOtherPacking2').val() !== '' ? parseFloat($('#NumOtherPacking2').val()) : null,
+
+        TCS_PER: $('#NumOtherTCS1').val() !== '' ? parseFloat($('#NumOtherTCS1').val()) : null,
+        TCS_AMT: $('#NumOtherTCS2').val() !== '' ? parseFloat($('#NumOtherTCS2').val()) : null,
+
+        CGST_PER: $('#NumOtherCGST1').val() !== '' ? parseFloat($('#NumOtherCGST1').val()) : null,
+        CGST_AMT: $('#NumOtherCGST2').val() !== '' ? parseFloat($('#NumOtherCGST2').val()) : null,
+        SGST_PER: $('#NumOtherSGST1').val() !== '' ? parseFloat($('#NumOtherSGST1').val()) : null,
+        SGST_AMT: $('#NumOtherSGST2').val() !== '' ? parseFloat($('#NumOtherSGST2').val()) : null,
+        IGST_PER: $('#NumOtherIGST1').val() !== '' ? parseFloat($('#NumOtherIGST1').val()) : null,
+        IGST_AMT: $('#NumOtherIGST2').val() !== '' ? parseFloat($('#NumOtherIGST2').val()) : null,
+        CESS_PER: $('#NumOtherCESS1').val() !== '' ? parseFloat($('#NumOtherCESS1').val()) : null,
+        CESS_AMT: $('#NumOtherCESS2').val() !== '' ? parseFloat($('#NumOtherCESS2').val()) : null,
+
+        LOAD_PER: $('#NumLoadPer').val() !== '' ? parseFloat($('#NumLoadPer').val()) : null,
+        LOAD_AMT: $('#Txtload_amt').val() !== '' ? parseFloat($('#Txtload_amt').val()) : null,
+        LOAD_AC: $('#ddlLoadParty').val(),
+        LOAD_REM: $('#TxtLoadRemarks').val(),
+
+        WB_AMT: $('#NumWBAmt').val() !== '' ? parseFloat($('#NumWBAmt').val()) : null,
+        WB_AC: $('#ddlWBParty').val(),
+
+        TOT_NOS: $('#NumOtherTotalNos').val() !== '' ? parseInt($('#NumOtherTotalNos').val(), 10) : null,
+        TOT_GROSS: getTableTotal('.grossQuantity'),
+        TOT_NET: $('#NumNetQuantity').val() !== '' ? parseFloat($('#NumNetQuantity').val()) : getTableTotal('.netQuantity'),
+
+        FRT_AMT: $('#NumFreightAmt').val() !== '' ? parseFloat($('#NumFreightAmt').val()) : null,
+        ROUND_OFF: $('#NumOtherRoundOff').val() !== '' ? parseFloat($('#NumOtherRoundOff').val()) : null,
+        NAMOUNT: $('#NumOtherNetAmount').val() !== '' ? parseFloat($('#NumOtherNetAmount').val()) : null,
+
+        INSU_PER: $('#txtins_p').val() !== '' ? parseFloat($('#txtins_p').val()) : null,
+        INSU_AMT: $('#txtins_amt').val() !== '' ? parseFloat($('#txtins_amt').val()) : null,
+        TDS_PER: $('#txttds_p').val(),
+        TDS_AMT: $('#txttds_amt').val() !== '' ? parseFloat($('#txttds_amt').val()) : null,
+
+        FRT_TAXPER: $('#txttaxOnFrt_p').val() !== '' ? parseFloat($('#txttaxOnFrt_p').val()) : null,
+        FRT_TAXAMT: $('#txttaxOnFrt_Amt').val() !== '' ? parseFloat($('#txttaxOnFrt_Amt').val()) : null,
+
+        WB_REM: $('#TxtWBRemarks').val(),
+
+        GR_NO: $('#TxtGRNo').val(),
+        GR_DATE: $('#DtGRDate').val() || null,
+        VEHICLE_NO: $('#TxtTruckNo').val(),
+
+        TRANSPORT_CODE: $('#ddlTransport').val() ? parseInt($('#ddlTransport').val(), 10) : null,
+        TRANSPORT_NAME: $('#ddlTransport option:selected').text(),
+
+        DRIVER_NAME: $('#TxtDriverName').val(),
+        DRIVER_NO: $('#TxtDriverNo').val(),
+
+        TPT_MODE: $('#ddlModeOfTransport').val() ? parseInt($('#ddlModeOfTransport').val(), 10) : null,
+        TPT_DISTANCE: $('#NumDist').val() !== '' ? parseInt($('#NumDist').val(), 10) : null,
+
+        WAYBILL_NO: $('#TxtWayBillNo').val(),
+        FRT_TOPAY: $('#NumToPayFrt').val() !== '' ? parseFloat($('#NumToPayFrt').val()) : null,
+        REMARK: $('#TxtRemarks').val(),
+        WB_QTY: null,
+
+        DISC_PER: $('#NumOtherDiscount1').val() !== '' ? parseFloat($('#NumOtherDiscount1').val()) : null,
+        DISC_AMT: $('#NumOtherDiscount2').val() !== '' ? parseFloat($('#NumOtherDiscount2').val()) : null,
+
+        CDISC_PER: $('#NumCashDiscount1').val() !== '' ? parseFloat($('#NumCashDiscount1').val()) : null,
+        CDISC_AMT: $('#NumCashDiscount2').val() !== '' ? parseFloat($('#NumCashDiscount2').val()) : null,
+
+        AGENT_CODE: $('#ddlSoldBy').val() ? parseInt($('#ddlSoldBy').val(), 10) : null,
+        FORM_CODE: $('#ddlFormType').val() ? parseInt($('#ddlFormType').val(), 10) : null,
+
+        SAUDA_TYPE: null,
+        SAUDA_NO: $('#NumSaudaNo').val() ? parseInt($('#NumSaudaNo').val(), 10) : null,
+        SAUDA_RATE: null,
+
+        DEFECTIVE_GOODS: null,
+        CAL_ONPCS: $('#cbCalOnPcs').is(':checked') ? 1 : 0,
+        PRINT_DETAIL: $('#ChkDetail').is(':checked') ? 1 : 0,
+
+        EXRATE: $('#NumExRate').val() !== '' ? parseFloat($('#NumExRate').val()) : null,
+
+        BUYER_ORDNO: $('#TxtBuyerOrder').val(),
+        PLACE_RECEIPT: $('#TxtPlaceOfReceipt').val(),
+        PORT_LOADING: $('#TxtPortOfLoading').val(),
+        PORT_DISCHARGE: $('#TxtPortOfDischarge').val(),
+
+        FINAL_DEST: $('#TxtFinalDestination').val(),
+        FINAL_DEST_COUNTRY: $('#TxtFDCountry').val(),
+        DELIVERY_TERMS: $('#TxtDeliveryTerms').val(),
+
+        SB_NO: $('#TxtShippingBillNo').val(),
+        SB_DATE: $('#DtShippingBillDate').val() || null,
+        PORT_CODE: $('#TxtPortCode').val(),
+
+        LUT_DETAIL: $('#TxtLUTDetail').val(),
+        INSU_DETAIL: $('#TxtInsuranceDetail').val(),
+
+        SUPPLY_TYPE: $('#ddlSupplyType').val(),
+        LC_NO: $('#TxtLCNo').val(),
+        TRAN_TYPE: $('#ddlTransactionType').val(),
+        STATUS: $('#ddlDocStatus').val() ? parseInt($('#ddlDocStatus').val(), 10) : null,
+        PAYMENT_TERM: $('#TxtPaymentTerm').val(),
+
+        Footer: []
+    };
+
+    // FOOTER DATA
+    $('#tblDeliveryorder tbody tr').each(function () {
+
+        const row = $(this);
+        const itemCode = row.find('.productCode').val();
+
+        if (!itemCode) return;
+
+        model.Footer.push({
+
+            ITEM_CODE: parseInt(itemCode, 10),
+            ITEM_NAME: row.find('.productName option:selected').text(),
+
+            UNIT_NAME: row.find('.unitName').val() || '',
+            UNIT_CODE: row.find('.unitCode').val() ? parseInt(row.find('.unitCode').val(), 10) : null,
+            HSN_CODE: row.find('.hsn').val() || '',
+
+            NOS: row.find('.nos').val() !== '' ? parseInt(row.find('.nos').val(), 10) : null,
+            GROSS_QTY: row.find('.grossQuantity').val() !== '' ? parseFloat(row.find('.grossQuantity').val()) : null,
+            QTY: row.find('.netQuantity').val() !== '' ? parseFloat(row.find('.netQuantity').val()) : null,
+
+            FOR_RATE: row.find('.rateUsd').val() !== '' ? parseFloat(row.find('.rateUsd').val()) : null,
+            RATE: row.find('.rateRs').val() !== '' ? parseFloat(row.find('.rateRs').val()) : null,
+            AMOUNT: row.find('.amount').val() !== '' ? parseFloat(row.find('.amount').val()) : null,
+
+            PACK_PER: row.find('.packPer').val() !== '' ? parseFloat(row.find('.packPer').val()) : null,
+            PACK_AMT: row.find('.packAmount').val() !== '' ? parseFloat(row.find('.packAmount').val()) : null,
+
+            DISC_PER: row.find('.discPer').val() !== '' ? parseFloat(row.find('.discPer').val()) : null,
+            DISC_AMT: row.find('.discAmount').val() !== '' ? parseFloat(row.find('.discAmount').val()) : null,
+
+            REMARK: row.find('.remark').val(),
+            STATUS: model.STATUS,
+
+            PACK_TYPE: row.find('.packType').val() || '',
+            PACK_NO: row.find('.packNo').val() ? parseInt(row.find('.packNo').val(), 10) : null,
+            LOT_No: row.find('.lotNo').val(),
+
+            SAUDA_TYPE: row.find('.saudaType').val(),
+            SAUDA_NO: row.find('.saudaNo').val() ? parseInt(row.find('.saudaNo').val(), 10) : null,
+            SAUDA_RATE: row.find('.saudaRate').val() !== '' ? parseFloat(row.find('.saudaRate').val()) : null,
+
+            ORD_TYPE: row.find('.orderType').val(),
+            ORD_NO: row.find('.orderNo').val() ? parseInt(row.find('.orderNo').val(), 10) : null,
+            ORD_RATE: row.find('.orderRate').val() !== '' ? parseFloat(row.find('.orderRate').val()) : null,
+
+            DCN_TYPE: row.find('.dcnType').val(),
+            DCN_NO: row.find('.dcnNo').val() ? parseInt(row.find('.dcnNo').val(), 10) : null,
+
+            ROW_ID: row.find('.rowid').val(),
+            TAX_CODE: row.find('.taxCode').val() ? parseInt(row.find('.taxCode').val(), 10) : null,
+
+            FRT_AMT: row.find('.freightAmount').val() !== '' ? parseFloat(row.find('.freightAmount').val()) : null,
+            INSU_AMT: row.find('.insuranceAmount').val() !== '' ? parseFloat(row.find('.insuranceAmount').val()) : null,
+            CDISC_AMT: row.find('.cashDiscountAmount').val() !== '' ? parseFloat(row.find('.cashDiscountAmount').val()) : null,
+            WB_QTY: row.find('.wbQty').val() !== '' ? parseFloat(row.find('.wbQty').val()) : null
+        });
+    });
+
+    return model;
+}
+
+async function GetProformaVNo() {
+    try {
+        const response = await fetch('/DeliveryOrder/GetProformaV_NO');
+
+        if (!response.ok) {
+            throw new Error('Failed to generate VNo');
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            showToast("Voucher No Error: " + data.error, { type: "error" });
+            return;
+        }
+
+        const vNo = data.v_NO;
+        const docId = 'DMEU' + vNo;
+
+        console.log("Proforma VNo:", vNo);
+        console.log("Proforma DocId:", docId);
+
+        // Existing page model ko yahan apne actual form-collection
+        // code se populate karna hoga.
+        const model = getProformaModel();
+
+        console.log("Proforma JSON:", JSON.stringify(model));
+
+        const saveResponse = await fetch(
+            `/DeliveryOrder/SaveProformaData?vNo=${encodeURIComponent(vNo)}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(model)
+            }
+        );
+
+        const result = await saveResponse.json();
+        console.log("Controller Response:", result);
+
+        if (!saveResponse.ok || !result.success) {
+            showToast(result.message || "Proforma save failed.", { type: "error" });
+            return;
+        }
+
+        showToast("Proforma saved successfully: " + docId, { type: "success" });
+
+    } catch (error) {
+        console.error('Proforma Error:', error);
+        showToast("Error: " + error.message, { type: "error" });
+    }
+}
+
+//===========================
+// Sales Invoice
+//===========================
+
+$(document).on('click', '#btnCreateSalesInvoice', function (e) {
+    e.preventDefault();
+    GetSalesInvoiceVNo();
+});
+
+function getSalesInvoiceModel(vNo) {
+    const model = {
+        ...getProformaModel(),
+        V_NO: parseInt(vNo, 10),
+        V_TYPE: "SAGT"
+    };
+
+    return model;
+}
+
+//===========================
+// Sales Invoice VNo & Save
+//===========================
+async function GetSalesInvoiceVNo() {
+    try {
+
+        const vType = "SAGT";
+
+        const response = await fetch('/DeliveryOrder/GetSalesInvoiceV_NO');
+
+        if (!response.ok) {
+            throw new Error('Failed to generate Sales Invoice VNo');
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            showToast("Voucher No Error: " + data.error, { type: "error" });
+            return;
+        }
+
+        const vNo = data.v_NO;
+        const docId = vType + vNo;
+
+        console.log("Sales Invoice VNo:", vNo);
+        console.log("Sales Invoice DocId:", docId);
+
+        // Get Sales Invoice Model
+        const model = getSalesInvoiceModel(vNo);
+
+        console.log("Sales Invoice JSON:", JSON.stringify(model));
+
+        // Save Sales Invoice
+        const saveResponse = await fetch(
+            `/DeliveryOrder/SaveSaleData?vNo=${encodeURIComponent(vNo)}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(model)
+            }
+        );
+
+        const result = await saveResponse.json();
+
+        console.log("Controller Response:", result);
+
+        if (!saveResponse.ok || !result.success) {
+            showToast(result.message || "Sales Invoice save failed.", { type: "error" });
+            return;
+        }
+
+        showToast("Sales Invoice saved successfully: " + docId, { type: "success" });
+
+    } catch (error) {
+        console.error('Sales Invoice Error:', error);
+        showToast("Error: " + error.message, { type: "error" });
+    }
+}
+
+//============================
+// UPDATE DO AFTER RECONCILE
+//============================
+async function UpdateDeliveryOrder() {
+    try {
+        const vType = $('#ddlVoucherType').val();
+        const vNo = $('#NumVoucherNo').val();
+
+        const header = {
+            V_TYPE: vType,
+            V_NO: parseInt(vNo, 10),
+
+            V_DATE: $('#DtBillDate').val(),
+            DEL_DATE: $('#DtDeliveryDate').val(),
+            GODOWN_CODE: '',
+
+            BILL_CODE: $('#ddlPartyName').val(),
+            BILL_NAME: $('#ddlPartyName option:selected').text(),
+            BILL_ADD1: $('#TxtAddressL1').val(),
+            BILL_ADD2: $('#TxtAddressL2').val(),
+            BILL_ADD3: $('#TxtAddressL3').val(),
+            BILL_CITY: $('#ddlStation').val(),
+            BILL_CITYNAME: $('#ddlStation option:selected').text(),
+            BILL_GST: $('#TxtGST').val(),
+            BILL_PINCODE: $('#NumPincode').val(),
+
+            SHIP_CODE: $('#ddlConsignee').val(),
+            SHIP_NAME: $('#ddlConsignee option:selected').text(),
+            SHIP_ADD1: $('#TxtTransactionAddressL1').val(),
+            SHIP_ADD2: $('#TxtTransactionAddressL2').val(),
+            SHIP_ADD3: $('#TxtTransactionAddressL3').val(),
+            SHIP_CITY: $('#TxtTransactionStation').val(),
+            SHIP_CITYNAME: $('#TxtTransactionStation option:selected').text(),
+            SHIP_GST: $('#NumTransactionGSTNo').val(),
+            SHIP_PINCODE: $('#NumTransactionPIN').val(),
+
+            TAX_CODE: $('#ddlTaxType').val(),
+            PACK_TYPE: $('#ddlPackNo option:selected').data('vtype') || '',
+            PACK_NO: $('#ddlPackNo').val(),
+            ITEM_TYPE: $('#ddlProdType').val(),
+            WB_NO: $('#ddlWBNo').val(),
+            WB_TYPE: $('#ddlWBNo option:selected').data('vtype') || '',
+            ISSUE_NO: $('#ddlIssueNo').val(),
+            ISSUE_TYPE: $('#ddlIssueNo option:selected').data('vtype') || '',
+
+            AMOUNT: $('#NumOtherTotalAmount').val(),
+            PACK_PER: $('#NumOtherPacking1').val(),
+            PACK_AMT: $('#NumOtherPacking2').val(),
+            TCS_PER: $('#NumOtherTCS1').val(),
+            TCS_AMT: $('#NumOtherTCS2').val(),
+            CGST_PER: $('#NumOtherCGST1').val(),
+            CGST_AMT: $('#NumOtherCGST2').val(),
+            SGST_PER: $('#NumOtherSGST1').val(),
+            SGST_AMT: $('#NumOtherSGST2').val(),
+            IGST_PER: $('#NumOtherIGST1').val(),
+            IGST_AMT: $('#NumOtherIGST2').val(),
+            CESS_PER: $('#NumOtherCESS1').val(),
+            CESS_AMT: $('#NumOtherCESS2').val(),
+
+            LOAD_PER: $('#txtload_p').val(),
+            LOAD_AMT: $('#Txtload_amt').val(),
+            LOAD_AC: $('#ddlLoadParty').val(),
+            LOAD_REM: $('#TxtLoadRemarks').val(),
+            WB_AMT: $('#NumWBAmt').val(),
+            WB_AC: $('#ddlWBParty').val(),
+            TOT_NOS: $('#NumOtherTotalNos').val(),
+            FRT_AMT: $('#NumFreightAmt').val(),
+            ROUND_OFF: $('#NumOtherRoundOff').val(),
+            NAMOUNT: $('#NumOtherNetAmount').val(),
+
+            INSU_PER: $('#txtins_p').val(),
+            INSU_AMT: $('#txtins_amt').val(),
+            TDS_PER: $('#txttds_p').val(),
+            TDS_AMT: $('#txttds_amt').val(),
+            FRT_TAXPER: $('#txttaxOnFrt_p').val(),
+            FRT_TAXAMT: $('#txttaxOnFrt_Amt').val(),
+            WB_REM: $('#TxtWBRemarks').val(),
+            TOT_GROSS: getTableTotal('.grossQuantity'),
+            TOT_NET: $('#NumNetQuantity').val() || getTableTotal('.netQuantity'),
+
+            GR_NO: $('#TxtGRNo').val(),
+            GR_DATE: $('#DtGRDate').val(),
+            VEHICLE_NO: $('#TxtTruckNo').val(),
+            TRANSPORT_CODE: $('#ddlTransport').val(),
+            TRANSPORT_NAME: $('#ddlTransport option:selected').text(),
+            DRIVER_NAME: $('#TxtDriverName').val(),
+            DRIVER_NO: $('#TxtDriverNo').val(),
+            TPT_MODE: $('#ddlModeOfTransport').val(),
+            TPT_DISTANCE: $('#NumDist').val(),
+            WAYBILL_NO: $('#TxtWayBillNo').val(),
+            FRT_TOPAY: $('#NumToPayFrt').val(),
+            REMARK: $('#TxtRemarks').val(),
+            WB_QTY: '',
+
+            DISC_PER: $('#NumOtherDiscount1').val(),
+            DISC_AMT: $('#NumOtherDiscount2').val(),
+            CDISC_PER: $('#NumCashDiscount1').val(),
+            CDISC_AMT: $('#NumCashDiscount2').val(),
+
+            AGENT_CODE: $('#ddlSoldBy').val(),
+            FORM_CODE: $('#ddlFormType').val(),
+            SAUDA_TYPE: null,
+            SAUDA_NO: $('#NumSaudaNo').val(),
+            SAUDA_RATE: null,
+
+            DEFECTIVE_GOODS: $('#ChkDefectiveGood').is(':checked') ? 1 : 0,
+            CAL_ONPCS: $('#cbCalOnPcs').is(':checked') ? '1' : '0',
+            PRINT_DETAIL: $('#ChkDetail').is(':checked') ? '1' : '0',
+
+            EXRATE: $('#NumExRate').val(),
+            BUYER_ORDNO: $('#TxtBuyerOrder').val(),
+            PAYMENT_TERM: $('#TxtPaymentTerm').val(),
+            PLACE_RECEIPT: $('#TxtPlaceOfReceipt').val(),
+            PORT_LOADING: $('#TxtPortOfLoading').val(),
+            PORT_DISCHARGE: $('#TxtPortOfDischarge').val(),
+            FINAL_DEST: $('#TxtFinalDestination').val(),
+            FINAL_DEST_COUNTRY: $('#TxtFDCountry').val(),
+            DELIVERY_TERMS: $('#TxtDeliveryTerms').val(),
+            SB_NO: $('#TxtShippingBillNo').val(),
+            SB_DATE: $('#DtShippingBillDate').val(),
+            PORT_CODE: $('#TxtPortCode').val(),
+            LUT_DETAIL: $('#TxtLUTDetail').val(),
+            INSU_DETAIL: $('#TxtInsuranceDetail').val(),
+
+            SUPPLY_TYPE: $('#ddlSupplyType').val(),
+            LC_NO: $('#TxtLCNo').val(),
+            TRAN_TYPE: $('#ddlTransactionType').val(),
+            STATUS: $('#ddlDocStatus').val(),
+
+            Footer: []
+        };
+
+        // =========================
+        // FOOTER DATA
+        // =========================
+
+        $('#tblDeliveryorder tbody tr').each(function () {
+            const row = $(this);
+            const itemCode = row.find('.productCode').val();
+
+            if (!itemCode) return;
+
+            header.Footer.push({
+                ITEM_CODE: itemCode,
+                ITEM_NAME: row.find('.productName option:selected').text(),
+                UNIT_NAME: row.find('.unitName').val() || '',
+                UNIT_CODE: row.find('.unitCode').val() || '',
+                HSN_CODE: row.find('.hsn').val() || '',
+
+                NOS: row.find('.nos').val(),
+                GROSS_QTY: row.find('.grossQuantity').val(),
+                QTY: row.find('.netQuantity').val(),
+
+                FOR_RATE: row.find('.rateUsd').val(),
+                RATE: row.find('.rateRs').val(),
+                AMOUNT: row.find('.amount').val(),
+
+                PACK_PER: row.find('.packPer').val(),
+                PACK_AMT: row.find('.packAmount').val(),
+                DISC_PER: row.find('.discPer').val(),
+                DISC_AMT: row.find('.discAmount').val(),
+
+                REMARK: row.find('.remark').val(),
+                PACK_TYPE: row.find('.packType').val() || '',
+                PACK_NO: row.find('.packNo').val(),
+                LOT_No: row.find('.lotNo').val(),
+
+                SAUDA_TYPE: row.find('.saudaType').val(),
+                SAUDA_NO: row.find('.saudaNo').val(),
+                SAUDA_RATE: row.find('.saudaRate').val(),
+
+                ORD_TYPE: row.find('.orderType').val(),
+                ORD_NO: row.find('.orderNo').val(),
+                ORD_RATE: row.find('.orderRate').val(),
+                DCN_TYPE: row.find('.dcnType').val(),
+                DCN_NO: row.find('.dcnNo').val(),
+
+                ROW_ID: row.find('.rowid').val(),
+                TAX_CODE: row.find('.taxCode').val(),
+
+                FRT_AMT: row.find('.freightAmount').val(),
+                INSU_AMT: row.find('.insuranceAmount').val(),
+                CDISC_AMT: row.find('.cashDiscountAmount').val(),
+                WB_QTY: row.find('.wbQty').val()
+            });
+        });
+
+        // =========================
+        // UPDATE API
+        // =========================
+
+        const response = await fetch('/DeliveryOrder/UpdateDO', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(header)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showToast(result.message || 'Delivery Order updated successfully', {type: 'success'});
+        } else {
+            showToast(result.message || 'Failed to update Delivery Order', { type: 'error' });
+        }
+
+        console.log('Update DO Response:', result);
+
+    } catch (error) {
+        console.error('Update DO Error:', error);
+        showToast('Failed to update Delivery Order: ' + error.message, { type: 'error'});
+    }
+}
+
+// =========================================
+// Header Amount Distribution Events
+// =========================================
+$(document).on('blur', '#NumOtherPacking2', DistributePackingAmount);
+$(document).on('blur', '#NumOtherDiscount2', DistributeDiscountAmount);
+$(document).on('blur', '#NumCashDiscount2', DistributeCashDiscountAmount);

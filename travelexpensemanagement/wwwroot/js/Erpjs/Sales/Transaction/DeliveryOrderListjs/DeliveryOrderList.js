@@ -1,5 +1,6 @@
 ﻿let deliveryOrderPagination;
 var controllerName = window.location.pathname.split('/')[1];
+const formMode = new URLSearchParams(window.location.search).get('mode') || 'DOrder';
 $(document).ready(function () {
 
 	checkPermission(controllerName, function () {
@@ -207,9 +208,15 @@ function formatDate(dateValue) {
 }
 
 function editDeliveryOrder(vNo, vType) {
-	window.location.href = '/DeliveryOrder/Index?id=' + encodeURIComponent(vNo) + '&vType=' + encodeURIComponent(vType);
+	window.location.href =
+		'/DeliveryOrder/Index?id=' + encodeURIComponent(vNo) +
+		'&vType=' + encodeURIComponent(vType) +
+		'&mode=' + encodeURIComponent(formMode);
 }
-
-function viewSaleSaudaEntry(vNo, vType) {
-	window.location.href = '/DeliveryOrder/Index?id=' + encodeURIComponent(vNo) + '&vType=' + encodeURIComponent(vType) + '&readOnly=true';
+function viewDeliveryOrder(vNo, vType) {
+	window.location.href =
+		'/DeliveryOrder/Index?id=' + encodeURIComponent(vNo) +
+		'&vType=' + encodeURIComponent(vType) +
+		'&mode=' + encodeURIComponent(formMode) +
+		'&readOnly=true';
 }

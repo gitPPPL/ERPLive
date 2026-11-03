@@ -1,5 +1,13 @@
-﻿@{
+﻿@* @{
     ViewBag.Title = "Delivery Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+} *@
+
+@{
+    var formMode = ViewBag.FormMode?.ToString() ?? "DOrder";
+    bool isSaleInvFromDO = formMode == "DInv";
+
+    ViewBag.Title = isSaleInvFromDO ? "Sales Invoice From DO" : "Delivery Order";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -7,7 +15,10 @@
 <div class="erppage-header">
     <div class="erppage-header-left">
         <div class="erppage-header-icon"><i class="fa-solid fa-truck-fast"></i></div>
-        <div class="erppage-header-title">Delivery Order</div>
+       @*  <div class="erppage-header-title">Delivery Order</div> *@
+        <div class="erppage-header-title">
+            @(isSaleInvFromDO ? "Sales Invoice From DO" : "Delivery Order")
+        </div>
     </div>
     <div class="erppage-header-right">
         <button type="button" class="erppage-header-back" onclick="window.location.href='@Url.Action("Index", "DeliveryOrderList")'">
@@ -17,7 +28,8 @@
 </div>
 
 <input type="hidden" id="TxtCode" name="CODE">
-<div class="erppage-container">
+<input type="hidden" id="FormMode" value="@formMode" />
+<div class="erppage-container" id="deliveryOrderForm" data-mode="@formMode">
     <fieldset class="erppage-fieldset">
         <div class="erppage-grid5">
             <div class="erppage-divfield">
@@ -201,6 +213,9 @@
                         <label for="ChkDetail" class="erppage-checkbox-label">Detail</label>
                         <input type="checkbox" id="cbCalOnPcs" class="erppage-checkbox-input">
                         <label for="cbCalOnPcs" class="erppage-checkbox-label">PCS</label>
+
+                        <input type="checkbox" id="ChkDefectiveGood" class="erppage-checkbox-input">
+                        <label for="ChkDefectiveGood" class="erppage-checkbox-label">Defective Goods</label>
                     </div>
                 </div>
                 <div class="erppage-divfield">
@@ -270,9 +285,9 @@
         <!-- Delivery Order Tabs -->
         <div class="erppage-tabs">
             <button type="button" class="erppage-tab active" data-tab="accounttaxsummary">Account & Tax Summary </button>
-            <button type="button" class="erppage-tab"  data-tab="transportdetail">Transport Detail</button>
-            <button type="button"  class="erppage-tab" data-tab="waybillloading">Waybill/Loading Detail</button>
-            <button type="button" class="erppage-tab"  data-tab="exportdetail"> Export Detail</button>
+            <button type="button" class="erppage-tab @(isSaleInvFromDO ? "" : "d-none")" data-tab="transportdetail">Transport Detail</button>
+            <button type="button" class="erppage-tab @(isSaleInvFromDO ? "" : "d-none")" data-tab="waybillloading">Waybill/Loading Detail</button>
+            <button type="button" class="erppage-tab @(isSaleInvFromDO ? "" : "d-none")" data-tab="exportdetail"> Export Detail</button>
         </div>
         <!-- ========================================================= -->
         <!-- ACCOUNT & TAX SUMMARY -->
@@ -383,10 +398,11 @@
                 </div>
             </fieldset>
         </div>
+
         <!-- ========================================================= -->
         <!-- TRANSPORT DETAIL -->
         <!-- ========================================================= -->
-        <div class="erppage-tab-content" id="transportdetail">
+        <div class ="erppage-tab-content @(isSaleInvFromDO ? "" : "d-none")" id="transportdetail">
             <fieldset class="erppagefieldset">
                 <div class="erppage-grid4">
                     <div class="erppage-divfield">
@@ -475,7 +491,7 @@
         <!-- ========================================================= -->
         <!-- WAYBILL / LOADING DETAIL -->
         <!-- ========================================================= -->
-        <div class="erppage-tab-content" id="waybillloading">
+        <div class="erppage-tab-content @(isSaleInvFromDO ? "" : "d-none")" id="waybillloading">
             <fieldset class="erppagefieldset">
                 <div class="erppage-grid2">
                     <div class="erppage-divfield">
@@ -527,7 +543,7 @@
         <!-- ========================================================= -->
         <!-- EXPORT DETAIL -->
         <!-- ========================================================= -->
-        <div class="erppage-tab-content" id="exportdetail">
+        <div class="erppage-tab-content @(isSaleInvFromDO ? "" : "d-none")" id="exportdetail">
             <fieldset class="erppagefieldset">
                 <!-- Row 1 -->
                 <div class="erppage-grid4">
@@ -606,9 +622,16 @@
         </div>
     </fieldset>
 
-    <div class="erppage-actions">
-        <button id="btn_save" type="submit" class="erppage-btn erppage-btn-save"><i class="fa-solid fa-floppy-disk"></i><span>Save</span></button>
-    </div>
+    @if (!isSaleInvFromDO)
+    {
+        <div class="erppage-actions">
+            <button id="btn_save" type="submit"
+                    class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+            </button>
+        </div>
+    }
 
     <div class="modal fade" id="partyInfoModal" tabindex="-1">
         <div class="modal-dialog modal-sm modal-dialog-centered">
@@ -745,3 +768,34 @@
 </div>
 
 <script src="~/js/erpjs/sales/transaction/deliveryorderjs/deliveryorder.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+
+        const mode = $('#FormMode').val();
+
+        if (mode === 'DInv') {
+
+            // All fields readonly
+            $('#deliveryOrderForm input:not([type="hidden"]), #deliveryOrderForm textarea')
+                .prop('readonly', true);
+
+            // Dropdowns and checkboxes disabled
+            $('#deliveryOrderForm select, #deliveryOrderForm input[type="checkbox"]')
+                .prop('disabled', true);
+
+            // Disable other buttons except 3 action buttons and tab navigation
+            $('#deliveryOrderForm button')
+                .not('#btnReconcileDO, #btnCreateProforma, #btnCreateSalesInvoice, .erppage-tab')
+                .prop('disabled', true);
+
+            // Hide normal Save button
+            $('#btn_save').hide();
+
+        }
+
+    });
+
+
+</script>

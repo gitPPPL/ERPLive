@@ -34,8 +34,15 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             _deliveryOrderRepository = deliveryOrderRepository;
         }
 
-        public IActionResult Index()
+        //public IActionResult Index()
+        //{
+        //    return View("~/Views/Sales/Transaction/DeliveryOrder/Index.cshtml");
+        //}
+
+        public IActionResult Index(string mode = "DOrder")
         {
+            ViewBag.FormMode = mode;
+
             return View("~/Views/Sales/Transaction/DeliveryOrder/Index.cshtml");
         }
 
@@ -1663,7 +1670,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
+        
         [HttpGet]
         public async Task<IActionResult> LoadEditData(int vNo, string vType)
         {
@@ -2334,6 +2341,121 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     message = ex.Message
                 });
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateDO([FromBody] DeliveryOrderModel model)
+        {
+            var result = await _deliveryOrderRepository.UpdateDOAsync(model);
+            return Json(result);
+        }
+
+        //==================Porforma Invoice Generation========================
+        public JsonResult GetProformaV_NO()
+        {
+            string newV_NO = "00001";
+            string vType = "DMEU";
+            try
+            {
+                var getdata = _globalVariableService.GetGlobalVariables();
+
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = @YearCode";
+                    SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con);
+                    prefixCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
+                    string prefixYR = prefixCmd.ExecuteScalar()?.ToString() ?? "0000";
+
+                    string lastV_NO_Query = "SELECT ISNULL(MAX(CAST(RIGHT(V_NO,5) AS INT)), 0) + 1 FROM SALE1 WHERE V_TYPE = @V_TYPE AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+                    SqlCommand lastVnoCmd = new SqlCommand(lastV_NO_Query, con);
+
+                    lastVnoCmd.Parameters.AddWithValue("@V_TYPE", vType);
+                    lastVnoCmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
+                    lastVnoCmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
+                    lastVnoCmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
+
+                    object result = lastVnoCmd.ExecuteScalar();
+
+                    int nextNo = Convert.ToInt32(result);
+
+                    string runningPart = nextNo.ToString("D5");
+
+                    newV_NO = prefixYR + runningPart;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error in GetVNo: {ex.Message}");
+                return Json(new { error = "An error occurred while generating the V_NO." });
+            }
+
+            return Json(new { v_NO = newV_NO });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveProformaData([FromBody] DeliveryOrderModel model, [FromQuery] string vNo)
+        {
+            var sourceType = model?.V_TYPE;
+            var sourceNo = model?.V_NO;
+            var result = await _deliveryOrderRepository.SaveProformaDataAsync(model, vNo);
+            return Ok(result);
+        }
+
+        //===================Sales Invoice Generation========================
+        public JsonResult GetSalesInvoiceV_NO()
+        {
+            string newV_NO = "00001";
+            string vType = "SAGT";
+            try
+            {
+                var getdata = _globalVariableService.GetGlobalVariables();
+
+                using (SqlConnection con = _dbConnection.GetErpConnection())
+                {
+                    con.Open();
+
+                    string prefixYRQuery = "SELECT PREFIXYR FROM YEAR_MAST WHERE CODE = @YearCode";
+                    SqlCommand prefixCmd = new SqlCommand(prefixYRQuery, con);
+                    prefixCmd.Parameters.AddWithValue("@YearCode", getdata.PubFYearCode);
+                    string prefixYR = prefixCmd.ExecuteScalar()?.ToString() ?? "0000";
+
+                    string lastV_NO_Query = "SELECT ISNULL(MAX(CAST(RIGHT(V_NO,5) AS INT)), 0) + 1 FROM SALE1 WHERE V_TYPE = @V_TYPE AND COMP_CODE = @COMP_CODE AND BRANCH_CODE = @BRANCH_CODE AND YEAR_CODE = @YEAR_CODE";
+                    SqlCommand lastVnoCmd = new SqlCommand(lastV_NO_Query, con);
+
+                    lastVnoCmd.Parameters.AddWithValue("@V_TYPE", vType);
+                    lastVnoCmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
+                    lastVnoCmd.Parameters.AddWithValue("@YEAR_CODE", getdata.PubFYearCode);
+                    lastVnoCmd.Parameters.AddWithValue("@BRANCH_CODE", getdata.PubBranchCode);
+
+                    object result = lastVnoCmd.ExecuteScalar();
+
+                    int nextNo = Convert.ToInt32(result);
+
+                    string runningPart = nextNo.ToString("D5");
+
+                    newV_NO = prefixYR + runningPart;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error in GetVNo: {ex.Message}");
+                return Json(new { error = "An error occurred while generating the V_NO." });
+            }
+
+            return Json(new { v_NO = newV_NO });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveSaleData([FromBody] DeliveryOrderModel model, [FromQuery] string vNo)
+        {
+            var sourceType = model?.V_TYPE;
+            var sourceNo = model?.V_NO;
+            var result = await _deliveryOrderRepository.SaveSaleInvoiceDataAsync(model, vNo);
+            return Ok(result);
         }
 
 

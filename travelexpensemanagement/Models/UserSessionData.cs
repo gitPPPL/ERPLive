@@ -33,6 +33,8 @@
         public string? RegAdd2 { get; set; }
         public string? CINNO { get; set; }
 
+        public int? PubCompStateCode { get; set; }
+
 
     }
     public class CompanyModel
@@ -52,6 +54,7 @@
         public string? RegAdd1 { get; set; }
         public string? RegAdd2 { get; set; }
         public string? CINNO { get; set; }
+        public int? StateCode { get; set; }
 
     }
     public class GlobalGeneralSettingModel

@@ -1,17 +1,22 @@
 ﻿@{
-	ViewBag.Title = "Delivery Order List";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+	var formMode = ViewBag.FormMode?.ToString() ?? "DOrder";
+	bool isSaleInvFromDO = formMode == "DInv";
 
+	ViewBag.Title = isSaleInvFromDO ? "Sales Invoice From DO List" : "Delivery Order List";
+
+	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div id="erp-toast-container"></div>
 <div class="erppagelist-header">
 	<div class="erppagelist-title">
 		<i class="fa fa-list"></i>
-		<span>Delivery Order</span>
+		<span>
+			@(isSaleInvFromDO ? "Sales Invoice From DO" : "Delivery Order")
+		</span>
 	</div>
 	<div class="erppagelist-header-right">
-		<button class="erppage-header-back" id="button_add" onclick="window.location.href='@Url.Action("Index", "DeliveryOrder")'">
+		<button class="erppage-header-back" id="button_add" onclick="window.location.href='@Url.Action("Index", "DeliveryOrder", new { mode = ViewBag.FormMode })'">
 			<i class="fa fa-plus"></i>Add New
 		</button>
 	</div>
