@@ -27,6 +27,7 @@ namespace travelexpensemanagement.Models.Sale
             public int? SHIP_CITY { get; set; }
             public String? REMARKS { get; set; }
             public String? FAPROV_STATUS { get; set; }
+            public String? V_TYPE { get; set; }
             public String? FAPROV_REMARKS { get; set; }
             public decimal? QTY { get; set; }
             public string? action { get; set; }

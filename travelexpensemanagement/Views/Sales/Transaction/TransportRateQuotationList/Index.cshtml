@@ -1,215 +1,349 @@
 ﻿@{
-	ViewBag.Title = "Transport Rate Quotation List";
+    ViewBag.Title = "Transport Quotation Approval List";
 	Layout = "~/Views/Shared/_Layout.cshtml";
-
 }
 
 <fieldset>
-	<legend class="legend-field">Transport Rate Quotation List</legend>
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="input-group shadow-sm rounded-pill overflow-hidden">
-				<input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
-			</div>
-		</div>
-		<div class="col-lg-6">
-			<div class="btn-rightalign">
-				<button id="btnSave" onclick="window.location.href='@Url.Action("Index", "TransportRateQuotation")'" type="button" class="btn btn-add">
-					<i class="fa fa-plus"></i>Add
-				</button>
-				<button class="btn btn-print" onclick="printCityMasterReport()">
-					<i class="fa fa-print"></i> Print
-				</button>
-				<button class="btn btn-export">
-					<i class="fas fa-file-export"></i> Export
-				</button>
-				<button class="btn btn-mail">
-					<i class="fa fa-envelope"></i> Mail
-				</button>
-				<button class="btn btn-approved">
-					<i class="fa fa-check"></i> Approved
-				</button>
-			</div>
-		</div>
-	</div>
-	<div class="card">
-		<div class="table-responsive">
-			<table id="tblTransportRateQuotationList" class="table-width">
-				<colgroup>
-					<col style="width: 10%;" />
-					<col style="width: 20%;" />
-					<col style="width: 10%;" />
-					<col style="width: 10%;" />
-					<col style="width: 15%;" />
-					
-				</colgroup>
-				<thead class="table-head">
-					<tr>
-						<th>Code</th>
-						<th>Voucher No</th>
-						<th>Voucher Date</th>
-						<th>Customer Name </th>
-						<th>Do No</th>						
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<!-- Pagination container -->
-		<div class="row">
-			<div class="col-md-12">
-				<div class="pagination-end">
-					<div class="custom-pagination" id="tablePagination"></div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <legend class="legend-field">Transport Rate Quotation List</legend>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                <input type="text" id="searchBox" class="form-control" placeholder="Search by All Columns Name..." aria-label="Search term">
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="btn-rightalign">
+                <button id="btnSave" onclick="window.location.href='@Url.Action("Index", "TransportRateQuotation")'" type="submit" class="btn btn-add">
+                    <i class="fa fa-plus"></i>Add
+                </button>
+                <button class="btn btn-print" id="button_print">
+                    <i class="fa fa-print"></i> Print
+                </button>
+                <button class="btn btn-export" id="button_export">
+                    <i class="fas fa-file-export"></i> Export
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="table-responsive">
+            <table id="tblTransportRateQuotationList" class="excel-table fixed-grid-table table-width resizable-table">
+
+
+                <colgroup>
+
+                    <col style="width: 20%;" />
+                    <col style="width: 10%;" />
+                    <col style="width: 10%;" />
+                    <col style="width: 15%;" />
+
+                </colgroup>
+
+                <thead class="table-head">
+                    <tr>              
+                        <th>Voucher Type</th>
+                        <th>Voucher No</th>
+                        <th>Voucher Date</th>
+                        <th>Customer Name </th>
+                        <th>Do No</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <!-- Pagination container -->
+        <div class="erppagelist-pagination">
+
+            <div class="pagination-left">
+                <select id="pageSizeSelect" onchange="changeRowsPerPage()">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+
+            <div class="pagination-center">
+                <button onclick="prevPage()" class="page-nav" id="prevBtn">‹</button>
+                <div id="pageNumbers" class="page-numbers"></div>
+                <button onclick="nextPage()" class="page-nav" id="nextBtn">›</button>
+            </div>
+
+            <div class="pagination-right" id="pageInfoText">
+                Results: 0 - 0 of 0
+            </div>
+
+        </div>
+    </div>
 
 </fieldset>
 
 <script>
-	let currentPage = 1;
-	let pageSize = 10;
 
-	$(document).ready(function () {
-		loadAllMenus();
+    let currentPage = 1;
+    let pageSize = 10;
+    let totalCount = 0;
+    var controllerName = window.location.pathname.split('/')[1];
 
-		$('#searchBox').on('keyup', function () {
-			currentPage = 1;
-			loadAllMenus();
-		});
-	});
+    $(document).ready(function () {
+       checkPermission(controllerName, function () {
+              loadAllInward();
+       });
+
+        $('#searchBox').on('keyup', function () {
+            currentPage = 1;
+            loadAllInward();
+        });
+
+        $('#button_export').on('click', function () {
+            var text = $('#searchBox').val();
+            window.location.href = '/TransportRateQuotationList/ExportToExcel?searchTerm=' + encodeURIComponent(text);
+        });
+
+        $('#button_print').on('click', function ()
+        {
+            var searchTerm = $('#searchBox').val() || '';
+            window.location.href = '/TransportRateQuotationList/ExportPdf?searchTerm=' + encodeURIComponent(searchTerm);
+        });
+
+    });
+
+    // ================= LOAD DATA =================
+    function loadAllInward() {
+
+        $.ajax({
+            url: '/TransportRateQuotationList/GetList',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                searchTerm: $('#searchBox').val(),
+                pageNumber: currentPage,
+                pageSize: pageSize
+            },
+            success: function (res)
+            {
+                if (!res.success)
+                {
+                    toastr.error("Failed to load data.");
+                    return;
+                }
+
+                const list = res.lists || [];
+                totalCount = res.totalCount || 0;
+
+                renderTable(list);
+                renderPagination();
+            },
+            error: function (xhr)
+            {
+                toastr.error('Error loading list: ' + xhr.responseText);
+            }
+        });
+    }
+
+    // ================= TABLE =================
+    function renderTable(list) {
+
+        console.log("list",list);
 
 
-	function loadAllMenus() {
-			const searchTerm = $('#searchBox').val();
-			$.ajax({
-				url: '/TransportRateQuotationList/GetList',
-				type: 'GET',
-				dataType: 'json',
-				data: {
-					searchTerm: searchTerm,
-					pageNumber: currentPage,
-					pageSize: pageSize
-				},
-				success: function (res) {
-					if (!res.success) {
-						toastr.error("Failed to load data.");
-						return;
-					}
-					console.log("Res", res);
-					const list = res.lists;
-					const totalCount = res.totalCount;
-					let tbody = $('#tblTransportRateQuotationList tbody');
-					tbody.empty();
+        const tbody = $('#tblTransportRateQuotationList tbody');
+        tbody.empty();
 
-					if (list.length === 0) {
-						tbody.append('<tr><td colspan="11" class="text-center text-muted">No list found.</td></tr>');
-					} else {
-						$.each(list, function (index, item) {
-							tbody.append(`
-								<tr>								
-								<td>${item.doC_ID}</td>
-								<td>${item.v_NO}</td>
-								<td>${formatDate(item.v_DATE)}</td>
-								<td>${item.bilL_NAME}</td>
-								<td>${item.dO_NO}</td>						
-								<td>
-									<i class="fas fa-edit btn-edit" title="Edit" onclick="AddOrEditFunction('${item.doC_ID}')"></i>
-									<i class="fa fa-eye btn-view" title="View Detail" onclick="viewMenuDetails('${item.doC_ID}')"></i>
-									<i class="fa fa-trash text-danger btn-delete" title="Delete" onclick="deleteDocStage('${item.v_NO}')"></i>
-								</td>
-								</tr>
-							`);
-						});
-						renderPagination(totalCount, pageSize, currentPage);
-					}
-				},
-				error: function (xhr) {
-					toastr.error('Error loading menu list: ' + xhr.responseText);
-				}
-			});
-		}
+        if (!list || list.length === 0) {
+            tbody.append('<tr><td colspan="13" class="text-center text-muted">No list found.</td></tr>');
+            return;
+        }
 
-	function renderPagination(total, pageSize, currentPage) {
-		const totalPages = Math.ceil(total / pageSize);
-		const pagination = $('#tablePagination');
-		pagination.empty();
+        $.each(list, function (index, item)
+        {
+            tbody.append(`
+                <tr>
+                    <td>${item.v_TYPE ?? ''}</td>
+                    <td>${item.v_NO ?? ''}</td>
+                    <td>${formatDate(item.v_DATE)}</td>
+                    <td>${item.bilL_NAME ?? ''}</td>
+                    <td>${item.dO_NO ?? ''}</td>
+                    <td class="action-col">
+                        <div class="action-wrap">
+                            <button class="act-btn edit permission-edit" onclick="AddOrEditFunction('${item.doC_ID}')"><i class="fa fa-edit"></i></button>
+                            <button class="act-btn view btn-view" onclick="viewMenuDetails('${item.doC_ID}')"><i class="fa fa-eye"></i></button>
+                            <button class="act-btn delete permission-delete" onclick="deleteTemp('${item.v_NO}','${item.v_TYPE}')"><i class="fa fa-trash"></i></button>
+                            <button class="act-btn document btn-document" onclick="showDocumentPopup('${item.doC_ID}')"><i class="fa fa-file"></i></button>
 
-		if (totalPages <= 1) return;
+                        </div>
+                    </td>
+                </tr>
+            `);
 
-		let html = '';
+            applyGridPermission();
+        });
 
-		if (currentPage > 1) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(1)">First</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage - 1})">Prev</button>`;
-		}
+    }
 
-		const startPage = Math.max(1, currentPage - 2);
-		const endPage = Math.min(totalPages, currentPage + 2);
+    // ================= PAGINATION =================
+    function renderPagination() {
 
-		for (let i = startPage; i <= endPage; i++) {
-			html += `
-				<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1" onclick="goToPage(${i})">${i}</button>`;
-		}
+        const totalPages = Math.ceil(totalCount / pageSize) || 1;
 
-		if (currentPage < totalPages) {
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${currentPage + 1})">Next</button>`;
-			html += `<button class="btn btn-sm btn-light mx-1" onclick="goToPage(${totalPages})">Last</button>`;
-		}
+        let html = '';
+        let maxVisible = 5;
 
-		pagination.html(html);
-	}
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = startPage + maxVisible - 1;
 
-	function goToPage(page) {
-		currentPage = page;
-		loadAllMenus();
-	}
+        if (endPage > totalPages) {
+            endPage = totalPages;
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
 
-	function AddOrEditFunction(code) {
-		window.location.href = '/TransportRateQuotation/Index?id=' + encodeURIComponent(code);
-	}
+        if (startPage > 1) {
+            html += `<span class="page-number" onclick="goToPage(1)">1</span>`;
+            if (startPage > 2) html += `<span class="dots">...</span>`;
+        }
 
-	function viewMenuDetails(code) {
-		window.location.href = '/TransportRateQuotation/Index?id=' + encodeURIComponent(code) + '&mode=view';
-	}
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<span class="page-number ${i === currentPage ? 'active' : ''}"
+                        onclick="goToPage(${i})">${i}</span>`;
+        }
 
-	function deleteDocStage(code) {
-		Swal.fire({
-			title: 'Are you sure?',
-			text: "You won't be able to revert this deletion!",
-			icon: 'warning',
-			showCancelButton: true,
-			confirmButtonColor: '#d33',
-			cancelButtonColor: '#3085d6',
-			confirmButtonText: 'Yes, delete it!'
-		}).then((result) => {
-			if (result.isConfirmed) {
-				$.ajax({
-					url: '/TransportRateQuotationList/Delete',
-					type: 'Delete',
-					data: { code: code },
-					success: function (response) {
-						if (response.success) {
-							toastr.success(response.message || "Record deleted successfully.");
-							loadAllMenus();
-						} else {
-							toastr.warning("Delete failed.");
-						}
-					},
-					error: function () {
-						toastr.error("An error occurred while deleting.");
-					}
-				});
-			}
-		});
-	}
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += `<span class="dots">...</span>`;
+            html += `<span class="page-number" onclick="goToPage(${totalPages})">${totalPages}</span>`;
+        }
 
-	function formatDate(dateStr) {
-			if (!dateStr) return '';
-			const d = new Date(dateStr);
-			if (isNaN(d)) return '';
-			return d.toISOString().slice(0, 10);
-		}
+        $('#pageNumbers').html(html);
+
+        let start = (currentPage - 1) * pageSize + 1;
+        let end = Math.min(currentPage * pageSize, totalCount);
+
+        if (totalCount === 0) {
+            start = 0;
+            end = 0;
+        }
+
+        $('#pageInfoText').text(`Results: ${start} - ${end} of ${totalCount}`);
+
+        $('#prevBtn').prop('disabled', currentPage === 1);
+        $('#nextBtn').prop('disabled', currentPage === totalPages);
+    }
+
+    // ================= PAGINATION ACTIONS =================
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadAllInward();
+        }
+    }
+
+    function nextPage() {
+        const totalPages = Math.ceil(totalCount / pageSize);
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadAllInward();
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAllInward();
+    }
+
+    function changeRowsPerPage() {
+        pageSize = parseInt($('#pageSizeSelect').val());
+        currentPage = 1;
+        loadAllInward();
+    }
+
+    // ================= UTIL =================
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return '';
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    }
+
+    // ================= ACTIONS =================
+    function AddOrEditFunction(DOC_ID)
+    {
+        window.location.href = `/TransportRateQuotation/Index?id=${encodeURIComponent(DOC_ID)}`;
+    }
+
+    function viewMenuDetails(DOC_ID)
+    {
+        window.location.href = `/TransportRateQuotation/Index?id=${encodeURIComponent(DOC_ID)}&mode=view`;
+    }
+
+    function deleteTemp(code, VType) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You want to delete this Transport Rate Quotation?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: '/TransportRateQuotationList/Delete',
+                    type: 'POST',
+                    data: { code: code, VType: VType },
+                    success: function (res) {
+
+                        console.log("Deelete Res",res);
+
+                        if(res.validation == false)
+                        {
+                          toastr.warning(res.message );
+                          return;
+                        }
+
+
+                        if (res.success) {
+                            toastr.success(res.message || "Deleted successfully");
+                            loadAllInward();
+                        } else {
+                            toastr.error(res.message || 'Failed to delete.');
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Error deleting record.');
+                    }
+                });
+            }
+        });
+    }
+
+    function showDocumentPopup(docCode) {
+
+        $.ajax({
+            url: '/TransportRateQuotationList/DocDetailsCode',
+            type: 'POST',
+            dataType: 'json',
+            data: { docCode: docCode },
+            success: function (response) {
+                if (response.success) {
+                    showDocumentPopupjQuery(response.data, docCode);
+                } else {
+                    toastr.error("Failed to get document details.");
+                }
+            },
+            error: function () {
+                toastr.error("Error fetching document details.");
+            }
+        });
+    }
+
 </script>
+

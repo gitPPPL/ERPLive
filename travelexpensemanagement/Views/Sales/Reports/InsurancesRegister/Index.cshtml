@@ -1,0 +1,275 @@
+﻿@using System.Text.Json
+
+@{
+    ViewBag.Title = "Performa Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
+   
+    var databaseName = ViewBag.DatabaseName as string ?? "";
+
+    var CompCode = int.TryParse( globalVariables.PubCompCode, out var parsedCompCode ) ? parsedCompCode : 0;
+
+    var PubUserLevel = int.TryParse( globalVariables.PubUserLevel, out var parsedPubUserLevel ) ? parsedPubUserLevel : 0;
+
+    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+
+    var LoadGeneralSetting = ViewBag.LoadGeneralSetting;
+
+}
+
+<script>
+    console.log("globalVariables:", @Html.Raw(JsonSerializer.Serialize(globalVariables)));
+    window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
+        CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
+        UserId = globalVariables.PubUserId,
+        UserName = globalVariables.PubUserName,
+        UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
+        FYearCode = globalVariables.PubFYearCode,
+        BranchCode = globalVariables.PubBranchCode,
+        LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
+        CompanyName = globalVariables.CompanyName,
+        Address1 = globalVariables.Address1,
+        Address2 = globalVariables.Address2,
+        GST = globalVariables.gstin,
+        PAN = globalVariables.PAN,
+        Phone = globalVariables.Phone,
+        Email = globalVariables.Email,
+        ICE = globalVariables.IEC,
+        website = globalVariables.Website,
+        RegAdd1 = globalVariables.RegAdd1,
+        RegAdd2 = globalVariables.RegAdd2,
+        CINNO = globalVariables.CINNO,
+        PubWorkStationID = globalVariables.PubWorkStationID
+
+    }));
+
+    var LoadGeneralSetting = @Html.Raw( JsonSerializer.Serialize(ViewBag.LoadGeneralSetting) );
+    window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
+</script>
+
+<div id="erp-toast-container"></div>
+
+<!-- Header Upgrade -->
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-file-invoice-dollar"></i>
+        </div>
+        <div class="erppage-header-title">Insurances Register</div>
+    </div>
+    <div class="erppage-header-right">
+        <button type="button" class="erppage-btn-green" id="btnPrint">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button type="button" class="erppage-btn-danger" id="btnExit">
+            <i class="fa fa-sign-out-alt"></i> Exit
+        </button>
+    </div>
+</div>
+
+<div id="InsurancesRegisterform">
+    <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+    
+    <div class="erppage-container">
+
+        <!-- 1. Top Section: Date Controls & Options -->
+        <div class="erppage-fieldset">
+            <div class="erppage-section-header">Date Selection & Options</div>
+            <div class="erppage-body">
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">From Date</label>
+                        <input type="date" class="erppage-input" id="DtFromDate" value="@logindate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">To Date</label>
+                        <input type="date" class="erppage-input" id="DtToDate" value="@logindate">
+                    </div>     
+
+                    <div class="erppagecheckbox-field">
+                        <label class="erppagecheckbox-label" for="ChkPCS">
+                            <input type="checkbox" class="erppagecheckbox-input" id="ChkPCS"> PCS
+                        </label>
+                    </div>
+
+                    <div class="erppagecheckbox-field">
+                        <label class="erppagecheckbox-label" for="ChkQty">
+                            <input type="checkbox" class="erppagecheckbox-input" id="ChkQty"> Qty Details
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Main Grid: Filters (Left Side) & Report Types (Right Side) -->
+        <div class="erppagesrow">
+            
+            <!-- Filter Options (Left Side - 8 Columns) -->
+            <div class="erppagescol-8">
+                
+                <div class="erppage-fieldset">
+                    <div class="erppage-section-header">Filter Criteria</div>
+                    <div class="erppage-body">
+                        
+                        <div class="erppage-grid2">
+                            <!-- Document Type -->
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">For Document Type</label>
+                                <select class="erppage-input erppage-select" id="ddlforDocumentType">
+                                    <option value="">All Document Types</option>
+                                </select>
+                            </div>
+
+                            <!-- Item Type -->
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">For Item Type</label>
+                                <select class="erppage-input erppage-select" id="ddlforItemType">
+                                    <option value="">All Item Types</option>
+                                </select>
+                            </div>
+
+                            <!-- OS Group -->
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">For OS Group</label>
+                                <select class="erppage-input erppage-select" id="ddlforOSGroup">
+                                    <option value="">All OS Groups</option>
+                                </select>
+                            </div>
+
+                            <!-- Transport -->
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">For Transport</label>
+                                <select class="erppage-input erppage-select" id="ddlforTransport">
+                                    <option value="">All Transports</option>
+                                </select>
+                            </div>
+
+                            <!-- A/c Group -->
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">For A/c Group</label>
+                                <select class="erppage-input erppage-select" id="ddlforAcGroup">
+                                    <option value="">All A/c Groups</option>
+                                </select>
+                            </div>
+
+                            <!-- Supply Type -->
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">For Supply Type</label>
+                                <select class="erppage-input erppage-select" id="ddlforSupplyType">
+                                    <option value="">All Supply Types</option>
+                                </select>
+                            </div>
+
+                            <!-- Godown -->
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">For Godown</label>
+                                <select class="erppage-input erppage-select" id="ddlforGodown">
+                                    <option value="">All Godowns</option>
+                                </select>
+                            </div>
+
+                            <!-- Party Name -->
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">For Party Name</label>
+                                <select class="erppage-input erppage-select" id="ddlforPartyName">
+                                    <option value="">All Parties</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Report Type Options (Right Side - 4 Columns) -->
+            <div class="erppagescol-4">
+                
+                <div class="erppage-fieldset" style="height: 100%;">
+                    <div class="erppage-section-header">Report Type</div>
+                    <div class="erppage-body">
+                        
+                        <div class="erppage-grid1" style="gap: 8px;">
+                            
+                            <div class="erppagecheckbox-field" style="min-height: auto;">
+                                <label class="erppagecheckbox-label">
+                                    <input type="radio" name="ReportType" class="erppagecheckbox-input" value="SaleRegister" checked>
+                                    Sale Register
+                                </label>
+                            </div>
+
+                            <div class="erppagecheckbox-field" style="min-height: auto;">
+                                <label class="erppagecheckbox-label">
+                                    <input type="radio" name="ReportType" class="erppagecheckbox-input" value="SaleRegisterDetails">
+                                    Sale Register Details
+                                </label>
+                            </div>
+
+                            <div class="erppagecheckbox-field" style="min-height: auto;">
+                                <label class="erppagecheckbox-label">
+                                    <input type="radio" name="ReportType" class="erppagecheckbox-input" value="FreightReport">
+                                    Tpt Freight Report
+                                </label>
+                            </div>
+
+                            <div class="erppagecheckbox-field" style="min-height: auto;">
+                                <label class="erppagecheckbox-label">
+                                    <input type="radio" name="ReportType" class="erppagecheckbox-input" value="ExportSaleList">
+                                    Export Sale List
+                                </label>
+                            </div>
+
+                            <div class="erppagecheckbox-field" style="min-height: auto;">
+                                <label class="erppagecheckbox-label">
+                                    <input type="radio" name="ReportType" class="erppagecheckbox-input" value="AgentWiseSale">
+                                    Agent Wise Sale
+                                </label>
+                            </div>
+
+                            <div class="erppagecheckbox-field" style="min-height: auto;">
+                                <label class="erppagecheckbox-label">
+                                    <input type="radio" name="ReportType" class="erppagecheckbox-input" value="AnalysisTon">
+                                    Analysis (Ton)
+                                </label>
+                            </div>
+
+                            <div class="erppagecheckbox-field" style="min-height: auto;">
+                                <label class="erppagecheckbox-label">
+                                    <input type="radio" name="ReportType" class="erppagecheckbox-input" value="AnalysisTruck">
+                                    Analysis (Truck)
+                                </label>
+                            </div>
+
+                            <div class="erppagecheckbox-field" style="min-height: auto;">
+                                <label class="erppagecheckbox-label">
+                                    <input type="radio" name="ReportType" class="erppagecheckbox-input" value="PartyItemWise">
+                                    Party / Item Wise
+                                </label>
+                            </div>
+
+                            <div class="erppagecheckbox-field" style="min-height: auto;">
+                                <label class="erppagecheckbox-label">
+                                    <input type="radio" name="ReportType" class="erppagecheckbox-input" value="MonthWiseCustomer">
+                                    Month Wise - Customer
+                                </label>
+                            </div>
+
+                            <div class="erppagecheckbox-field" style="min-height: auto;">
+                                <label class="erppagecheckbox-label">
+                                    <input type="radio" name="ReportType" class="erppagecheckbox-input" value="MonthWiseItem">
+                                    Month Wise - Item
+                                </label>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

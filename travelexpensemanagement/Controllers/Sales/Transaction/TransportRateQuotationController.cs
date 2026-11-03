@@ -106,7 +106,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(DDlDo);
             }
         }
-
         public JsonResult DDlBillto()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -141,15 +140,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-              //  string query = "select CODE,NAME from TRANSPORT_MAST where comp_code= "+ getdata.PubCompCode +" and Active=1 order by  NAME asc";
-                string query = "select top 1 CODE,NAME from TRANSPORT_MAST  where Active=1 and code = 39 order by  NAME asc";
-
+                string query = "select CODE,NAME from TRANSPORT_MAST where comp_code= "+ getdata.PubCompCode +" and Active=1 order by  NAME asc";
+              
 
                 var DDlTransPortName = _dropdownService.GetDropdownList(query);
                 return Json(DDlTransPortName);
             }
-
-
         }
         public JsonResult GetDatabyDo(int Dono, int Vno)
         {
@@ -221,7 +217,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             // If no errors, return success along with the data
             return Json(new { success = true, data = result, message = "" });
         }
-
         public JsonResult GetFillData()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -229,16 +224,11 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = @"Select Code, Name from Transport_mast 
-                         Where Sale_group='Sale' 
-                         and comp_code = @compCode
-                         and Active = 1";
+                string query = @"Select Code, Name from Transport_mast  Where Sale_group='Sale'  and comp_code = @compCode and Active = 1";
 
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
-                    // Add parameterized query to prevent SQL injection
                     cmd.Parameters.AddWithValue("@compCode", getdata.PubCompCode);
-
                     try
                     {
                         con.Open();
@@ -246,9 +236,9 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                         {
                             if (reader.HasRows)
                             {
-                                var rows = new List<object>(); // List to store multiple rows
+                                var rows = new List<object>(); 
 
-                                while (reader.Read()) // Loop through all rows
+                                while (reader.Read()) 
                                 {
                                     rows.Add(new
                                     {
@@ -256,8 +246,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                         Code = reader["Code"] != DBNull.Value ? Convert.ToInt32(reader["Code"]) : 0
                                     });
                                 }
-
-                                result = rows; // Return list of rows
+                                result = rows;
                             }
                             else
                             {
@@ -278,6 +267,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             return Json(result);
         }
+
         [HttpPost]
         public IActionResult SavedData([FromBody] Sale_TransportRateQuatation_Request request)
         {
@@ -289,9 +279,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             var action = request.Header.action == "INSERT" ? "INSERT" : "UPDATE";
             var result = SubmitRequest(request.Header, request.Detail, action);
 
-            return result == "Success"
-                ? Json(new { success = true })
-                : Json(new { success = false, message = result });
+            return result == "Success" ? Json(new { success = true }) : Json(new { success = false, message = result });
         }
         private string SubmitRequest(sale_TransportRate_Header Header, List<sale_TransportRate_Detail> Detail, string action)
         {
@@ -300,8 +288,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 var g = _globalVariableService.GetGlobalVariables();
                 using var conn = _dbConnection.GetErpConnection();
                 conn.Open();
-                string deletePRequest2Sql = @"
-                    DELETE FROM TRANSPORT_QT2 
+                string deletePRequest2Sql = @" DELETE FROM TRANSPORT_QT2 
                     Where V_TYPE=@V_TYPE and V_NO=@V_NO and comp_code=@comp_code and year_code=@year_code and branch_code=@branch_code";
 
                 using (var deletePRequest2Cmd = conn.CreateCommand())
@@ -394,13 +381,11 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
 
-
         [HttpPost]
         public async Task<JsonResult> SMSSend(string mobileno, string smsMatter, string smstemplate)
         {
             try
-            {
-               
+            {               
                 if (string.IsNullOrEmpty(mobileno) || !Regex.IsMatch(mobileno, @"^\d{10}$"))
                 {
                     return Json(new { success = false, message = "Invalid mobile number. It must be 10 digits." });
@@ -487,9 +472,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(new { success = false, message = "An error occurred while sending the SMS: " + ex.Message });
             }
         }
-
-
-
 
     }
 }
