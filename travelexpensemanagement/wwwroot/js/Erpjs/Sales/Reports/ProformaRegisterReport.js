@@ -147,39 +147,112 @@ async function DDlCountry()
     }
 }
 
-async function DDlItem()
-{
+async function DDlItem() {
     try {
         const res = await fetch('/PerformaRegisterReport/DDlItem');
+
+        if (!res.ok) {
+            throw new Error('Failed to load Item Name');
+        }
+
         const data = await res.json();
         const ddl = $('#ddlItem');
-        ddl.empty();
-        ddl.append('<option value="">--- Select Item ---</option>');
 
-        data.forEach(item => { ddl.append(`<option value="${item.value}"> ${item.value} - ${item.text}  </option>`); });
-        // Initialize searchable dropdown
-        ddl.select2({ placeholder: '--- Select Item---', allowClear: true, width: '100%' });
+        // Destroy existing Select2
+        if (ddl.hasClass('select2-hidden-accessible')) {
+            ddl.select2('destroy');
+        }
+
+        ddl.empty();
+        ddl.append('<option value="">--- Select Item Name ---</option>');
+
+        // Bind Party Names
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+
+        // Initialize Select2 Multiple Checkbox
+        ddl.select2({
+            placeholder: "--- Select Item ---",
+            closeOnSelect: false,
+            allowClear: true,
+            width: '100%',
+            templateResult: function (item) {
+
+                if (!item.id) {
+                    return item.text;
+                }
+
+                const checkbox = $('<span><input type="checkbox" class="me-2" />' + item.text + '</span>');
+
+                checkbox.find('input').prop(
+                    'checked',
+                    item.element.selected
+                );
+
+                return checkbox;
+            },
+            templateSelection: function (item) {
+                return item.text;
+            }
+        });
 
     } catch (error) {
-        console.error("Error loading Item:", error);
+        console.error("Error loading Item :", error);
     }
 }
 
-async function DDlPartyName()
-{
+async function DDlPartyName() {
     try {
         const res = await fetch('/PerformaRegisterReport/DDlPartyName');
+
+        if (!res.ok) {
+            throw new Error('Failed to load Party Names');
+        }
+
         const data = await res.json();
         const ddl = $('#ddlforPartyName');
-        ddl.empty();
-        ddl.append('<option value="">--- Select Item ---</option>');
 
-        data.forEach(item => { ddl.append(`<option value="${item.value}"> ${item.value} - ${item.text}  </option>`); });
-        // Initialize searchable dropdown
-        ddl.select2({ placeholder: '--- Select Party Name---', allowClear: true, width: '100%' });
+        // Destroy existing Select2
+        if (ddl.hasClass('select2-hidden-accessible')) {
+            ddl.select2('destroy');
+        }
+
+        ddl.empty();
+        ddl.append('<option value="">--- Select Party Name ---</option>');
+
+        // Bind Party Names
+        data.forEach(item => { ddl.append(  `<option value="${item.value}">${item.text}</option>` );
+        });
+
+        // Initialize Select2 Multiple Checkbox
+        ddl.select2({
+            placeholder: "--- Select Party ---",
+            closeOnSelect: false,
+            allowClear: true,
+            width: '100%',
+            templateResult: function (item) {
+
+                if (!item.id) {
+                    return item.text;
+                }
+
+                const checkbox = $('<span><input type="checkbox" class="me-2" />' + item.text + '</span>');
+
+                checkbox.find('input').prop(
+                    'checked',
+                    item.element.selected
+                );
+
+                return checkbox;
+            },
+            templateSelection: function (item) {
+                return item.text;
+            }
+        });
 
     } catch (error) {
-        console.error("Error loading Item:", error);
+        console.error("Error loading Party Names:", error);
     }
 }
 
