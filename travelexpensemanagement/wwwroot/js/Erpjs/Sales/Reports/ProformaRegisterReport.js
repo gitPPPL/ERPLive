@@ -18,6 +18,33 @@ $(document).ready(async function () {
     }
 });
 
+
+    $('#chkSelectDocumentType').on('change', function () {
+
+        if (this.checked) {
+            $('#chkAllDocumentType').prop('checked', false);
+            $('#divDocumentTypeDropdown').show();
+        } else {
+            $('#divDocumentTypeDropdown').hide();
+            $('#ddlforDocumentType').val('');
+        }
+
+    });
+
+    $('#chkAllDocumentType').on('change', function () {
+
+        if (this.checked) {
+            $('#chkSelectDocumentType').prop('checked', false);
+            $('#divDocumentTypeDropdown').hide();
+            $('#ddlforDocumentType').val('');
+        }
+
+    });
+
+
+
+
+
 });
 
 

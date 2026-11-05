@@ -71,28 +71,60 @@
         <!-- 2. Filters Panel (Full Width or Adjusted Container) -->
 
        <fieldset class="erppage-fieldset">
-                        <!-- Left Column: Filters Panel -->
-                        <div class="erppagescol-12" style="width: 100%;">
-                            <div class="erppage-grid3">
+          <div class="erppagescol-12" style="width: 100%;">
+        <div class="erppage-grid3">
 
-                                <!-- Document Type -->
-                                <fieldset class="erppage-fieldset">
-                                    <legend class="erppage-fieldset-legend">For Document Type</legend>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                                        <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                                            <select class="erppage-input erppage-select" id="ddlforDocumentType">
-                                                <option value="">All Documents</option>
-                                            </select>
-                                        </div>
-                                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                                            <input type="checkbox" id="chkForDocumentType" class="erppagecheckbox-input">
-                                            <label for="chkForDocumentType" class="erppagecheckbox-label">All</label>
-                                        </div>
-                                    </div>
-                                </fieldset>
+       <fieldset class="erppage-fieldset"
+          style="position: relative; min-height: 105px; padding: 8px 10px;">
 
-                                <!-- Item Type -->
-                                <fieldset class="erppage-fieldset">
+    <legend class="erppage-fieldset-legend">For Document Type</legend>
+
+    <!-- Checkbox Row -->
+    <div style="display: flex; align-items: center; gap: 22px; margin-bottom: 9px;">
+
+        <div class="erppagecheckbox-field"
+             style="display: flex; align-items: center; gap: 5px; width: auto; min-height: auto; margin: 0;">
+
+            <input type="checkbox"
+                   id="chkSelectDocumentType"
+                   class="erppagecheckbox-input">
+
+            <label for="chkSelectDocumentType"
+                   class="erppagecheckbox-label">Select</label>
+        </div>
+
+        <div class="erppagecheckbox-field"
+             style="display: flex; align-items: center; gap: 5px; width: auto; min-height: auto; margin: 0;">
+
+            <input type="checkbox"
+                   id="chkAllDocumentType"
+                   class="erppagecheckbox-input">
+
+            <label for="chkAllDocumentType"
+                   class="erppagecheckbox-label">All</label>
+        </div>
+
+    </div>
+
+    <!-- Dropdown -->
+    <div id="divDocumentTypeDropdown"
+         style="display: none; width: 100%;">
+
+        <select class="erppage-input erppage-select"
+                id="ddlforDocumentType"
+                style="width: 100%; height: 30px; margin: 0;">
+
+            <option value="">--- Select Document Type ---</option>
+
+        </select>
+
+    </div>
+
+</fieldset>
+
+
+         <!-- Item Type -->
+        <fieldset class="erppage-fieldset">
                                     <legend class="erppage-fieldset-legend">For Item Type</legend>
                                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
                                         <div class="erppage-divfield" style="flex: 1; min-width: 0;">
@@ -107,8 +139,8 @@
                                     </div>
                                 </fieldset>
 
-                                <!-- OS Group -->
-                                <fieldset class="erppage-fieldset">
+        <!-- OS Group -->
+        <fieldset class="erppage-fieldset">
                                     <legend class="erppage-fieldset-legend">For OS Group</legend>
                                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
                                         <div class="erppage-divfield" style="flex: 1; min-width: 0;">
@@ -123,8 +155,8 @@
                                     </div>
                                 </fieldset>
 
-                                <!-- Transport -->
-                                <fieldset class="erppage-fieldset">
+        <!-- Transport -->
+        <fieldset class="erppage-fieldset">
                                     <legend class="erppage-fieldset-legend">For Transport</legend>
                                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
                                         <div class="erppage-divfield" style="flex: 1; min-width: 0;">
@@ -139,8 +171,8 @@
                                     </div>
                                 </fieldset>
 
-                                <!-- A/c Group -->
-                                <fieldset class="erppage-fieldset">
+        <!-- A/c Group -->
+        <fieldset class="erppage-fieldset">
                                     <legend class="erppage-fieldset-legend">For A/c Group</legend>
                                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
                                         <div class="erppage-divfield" style="flex: 1; min-width: 0;">
@@ -155,8 +187,8 @@
                                     </div>
                                 </fieldset>
 
-                                <!-- Supply Type -->
-                                <fieldset class="erppage-fieldset">
+        <!-- Supply Type -->
+        <fieldset class="erppage-fieldset">
                                     <legend class="erppage-fieldset-legend">For Supply Type</legend>
                                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
                                         <div class="erppage-divfield" style="flex: 1; min-width: 0;">
@@ -179,8 +211,8 @@
                                     </div>
                                 </fieldset>
 
-                                <!-- Country -->
-                                <fieldset class="erppage-fieldset">
+        <!-- Country -->
+        <fieldset class="erppage-fieldset">
                                     <legend class="erppage-fieldset-legend">For Country</legend>
                                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
                                         <div class="erppage-divfield" style="flex: 1; min-width: 0;">
@@ -195,8 +227,8 @@
                                     </div>
                                 </fieldset>
 
-                                <!-- Item Multi-Select Dropdown -->
-                                <fieldset class="erppage-fieldset">
+        <!-- Item Multi-Select Dropdown -->
+        <fieldset class="erppage-fieldset">
                                     <legend class="erppage-fieldset-legend">For Item</legend>
                                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
                                 <div class="erppage-divfield" style="flex: 1; min-width: 0;">
@@ -213,8 +245,8 @@
                                    </div>
                                 </fieldset>
 
-                                <!-- Party Name -->
-                                <fieldset class="erppage-fieldset">
+        <!-- Party Name -->
+        <fieldset class="erppage-fieldset">
                                     <legend class="erppage-fieldset-legend">For Party Name</legend>
                                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
                                         <div class="erppage-divfield" style="flex: 1; min-width: 0;">
@@ -229,10 +261,9 @@
                                     </div>
                                 </fieldset>
 
-                            </div>
-                        </div>
-
-                   </fieldset>
+        </div>
+    </div>
+       </fieldset>
 
 
        <fieldset class="erppage-fieldset">
