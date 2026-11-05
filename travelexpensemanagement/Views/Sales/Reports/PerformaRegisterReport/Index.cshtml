@@ -69,10 +69,11 @@
                         </div>
                     </fieldset>
         <!-- 2. Filters Panel (Full Width or Adjusted Container) -->
+
        <fieldset class="erppage-fieldset">
                         <!-- Left Column: Filters Panel -->
                         <div class="erppagescol-12" style="width: 100%;">
-                            <div class="erppage-grid4">
+                            <div class="erppage-grid3">
 
                                 <!-- Document Type -->
                                 <fieldset class="erppage-fieldset">
@@ -197,10 +198,19 @@
                                 <!-- Item Multi-Select Dropdown -->
                                 <fieldset class="erppage-fieldset">
                                     <legend class="erppage-fieldset-legend">For Item</legend>
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
+                                <div class="erppage-divfield" style="flex: 1; min-width: 0;">
                                     <select class="erppage-input erppage-select" id="ddlItem">
                                         <option value="">Select Item </option>
                                     </select>
 
+                                    </div>
+
+                                    <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
+                                        <input type="checkbox" id="chkForItem" class="erppagecheckbox-input">
+                                        <label for="chkForItem" class="erppagecheckbox-label">All</label>
+                                    </div>
+                                   </div>
                                 </fieldset>
 
                                 <!-- Party Name -->
@@ -223,6 +233,107 @@
                         </div>
 
                    </fieldset>
+
+
+       <fieldset class="erppage-fieldset">
+
+        <div class="erppagescol-12" style="width: 100%;">
+        <div class="erppage-grid3">
+
+             <fieldset class="erppage-fieldset">
+                        <legend class="erppage-fieldset-legend">For Color</legend>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
+                            <div class="erppage-divfield" style="flex: 1; min-width: 0;">
+                                <select class="erppage-input erppage-select" id="ddlforColor">
+                                    <option value="">All Color</option>
+                                </select>
+                            </div>
+                            <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
+                                <input type="checkbox" id="chkForColor" class="erppagecheckbox-input">
+                                <label for="chkForDocumentType" class="erppagecheckbox-label">All</label>
+                            </div>
+                        </div>
+                    </fieldset>
+       
+             <fieldset class="erppage-fieldset">
+                        <legend class="erppage-fieldset-legend">For Denier/Gram</legend>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
+                            <div class="erppage-divfield" style="flex: 1; min-width: 0;">
+                                <select class="erppage-input erppage-select" id="ddlDenierGram">
+                                    <option value="">All Denier/Gram</option>
+                                </select>
+                            </div>
+                            <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
+                                <input type="checkbox" id="chkDenierGram" class="erppagecheckbox-input">
+                                <label for="chkForDenierGram" class="erppagecheckbox-label">All</label>
+                            </div>
+                        </div>
+                    </fieldset>
+
+            <fieldset class="erppage-fieldset">
+                <legend class="erppage-fieldset-legend">For Godown</legend>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
+                    <div class="erppage-divfield" style="flex: 1; min-width: 0;">
+                            <select class="erppage-input erppage-select" id="ddlForGodown">
+                            <option value="">All For Godown</option>
+                            </select>
+                        </div>
+                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
+                        <input type="checkbox" id="chkGodown" class="erppagecheckbox-input">
+                        <label for="chkGodown" class="erppagecheckbox-label">All</label>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="erppage-fieldset">
+                <legend class="erppage-fieldset-legend">For PType Group</legend>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
+                    <div class="erppage-divfield" style="flex: 1; min-width: 0;">
+                            <select class="erppage-input erppage-select" id="ddlForPTypeGroup">
+                            <option value=""> Select  Ptype Group</option>
+                            </select>
+                        </div>
+                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
+                        <input type="checkbox" id="chkPtypeGroup" class="erppagecheckbox-input">
+                        <label for="chkPTypeGroup" class="erppagecheckbox-label">All</label>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="erppage-fieldset">
+                <legend class="erppage-fieldset-legend">For Item M Group</legend>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
+                    <div class="erppage-divfield" style="flex: 1; min-width: 0;">
+                            <select class="erppage-input erppage-select" id="ddlForItemMGroup">
+                            <option value=""> Select  Item M Group</option>
+                            </select>
+                        </div>
+                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
+                        <input type="checkbox" id="chkForItemMGroup" class="erppagecheckbox-input">
+                        <label for="chkForItemMGroup" class="erppagecheckbox-label">All</label>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="erppage-fieldset">
+                <legend class="erppage-fieldset-legend">For Sale Through</legend>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
+                    <div class="erppage-divfield" style="flex: 1; min-width: 0;">
+                            <select class="erppage-input erppage-select" id="ddlForSaleThrough">
+                            <option value=""> Select Sale Through</option>
+                            </select>
+                        </div>
+                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
+                        <input type="checkbox" id="chkForSaleThrough" class="erppagecheckbox-input">
+                        <label for="chkForSaleThrough" class="erppagecheckbox-label">All</label>
+                    </div>
+                </div>
+            </fieldset>
+
+       </<div>
+       </<div>
+       
+       </fieldset>
 
        <fieldset class="erppage-fieldset">
              <legend class="erppage-fieldset-legend">Report Type</legend>
@@ -336,12 +447,12 @@
                           </div>
                           <div class="erppagecheckbox-field" style="min-height: 24px;">
                                 <label class="erppagecheckbox-label" for="chk_BileItemWise">
-                                    <input type="radio" name="ReportType" id="chk_colurAnalysis" class="erppagecheckbox-input"> Denier Analysis(Truck)
+                                    <input type="radio" name="ReportType" id="chk_DenierAnalysisTruck" class="erppagecheckbox-input"> Denier Analysis(Truck)
                                 </label>
                           </div>
                           <div class="erppagecheckbox-field" style="min-height: 24px;">
                                 <label class="erppagecheckbox-label" for="chk_BileItemWise">
-                                    <input type="radio" name="ReportType" id="chk_colurAnalysis" class="erppagecheckbox-input"> Gate To  Invoice Time
+                                    <input type="radio" name="ReportType" id="chk_GateToInvoiceTime" class="erppagecheckbox-input"> Gate To  Invoice Time
                                 </label>
                           </div>
 
@@ -357,19 +468,19 @@
                 
                           <div class="erppagecheckbox-field" style="min-height: 24px;">
                                 <label class="erppagecheckbox-label" for="chk_SaleRegistercrdr">
-                                    <input type="radio" name="ReportType" id="chk_SaleRegistercrdr" class="erppagecheckbox-input"> Month Wise-Customer
+                                    <input type="radio" name="ReportType" id="chk_MonthWiseCustomer" class="erppagecheckbox-input"> Month Wise-Customer
                                 </label>
                             </div>
                 
                           <div class="erppagecheckbox-field" style="min-height: 24px;">
                                 <label class="erppagecheckbox-label" for="chk_BileItemWise">
-                                    <input type="radio" name="ReportType" id="chk_BileItemWise" class="erppagecheckbox-input"> Month Wise-Item
+                                    <input type="radio" name="ReportType" id="chk_MonthWiseItem" class="erppagecheckbox-input"> Month Wise-Item
                                 </label>
                          </div>
 
                           <div class="erppagecheckbox-field" style="min-height: 24px;">
                                 <label class="erppagecheckbox-label" for="chk_MonthwiseColor">
-                                    <input type="radio" name="ReportType" id="chk_MonthwiseColor" class="erppagecheckbox-input"> Month Wise-color
+                                    <input type="radio" name="ReportType" id="chk_MonthWisecolor" class="erppagecheckbox-input"> Month Wise-color
                                 </label>
                           </div>
 
@@ -546,10 +657,16 @@
            
            </div>
            
+            <div class="erppage-actions">
+                    <button id="btn_Report" type="submit" class="erppage-btn erppage-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Print</span>
+                    </button>
+         
+                </div>
            </div>
            
        </fieldset>
-
 
      </div>
  </div>

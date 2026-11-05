@@ -31,8 +31,13 @@ async function LoadDropdown() {
             DDlACGroup(),
             DDlCountry(),
             DDlItem(),
-            DDlPartyName()
-
+            DDlPartyName(),
+            DDlcolur(),
+            DDlDenierGram(),
+            DDlGodown(),
+            DDlPTypeGroup(),
+            DDlPItemMGroup(),
+            DDlSaleThrough()
         ]);
     } catch (error) {
         console.log("Dropdown load failed:", error);
@@ -65,6 +70,7 @@ async function DDlDocumentType() {
         console.error("Error loading Document Type:", error);
     }
 }
+
 async function DDlItemType() {
     try {
         const res = await fetch('/PerformaRegisterReport/DDlItemType');
@@ -79,6 +85,7 @@ async function DDlItemType() {
         console.error("Error loading Item Type:", error);
     }
 }
+
 async function OSGroup() {
     try {
         const res = await fetch('/PerformaRegisterReport/OSGroup');
@@ -111,7 +118,6 @@ async function DDlTransport() {
         console.error("Error loading Transport:", error);
     }
 }
-
 async function DDlACGroup() {
     try {
         const res = await fetch('/PerformaRegisterReport/DDlACGroup');
@@ -128,7 +134,6 @@ async function DDlACGroup() {
         console.error("Error loading AC Group:", error);
     }
 }
-
 async function DDlCountry()
 {
     try {
@@ -146,7 +151,6 @@ async function DDlCountry()
         console.error("Error loading Country:", error);
     }
 }
-
 async function DDlItem() {
     try {
         const res = await fetch('/PerformaRegisterReport/DDlItem');
@@ -201,7 +205,6 @@ async function DDlItem() {
         console.error("Error loading Item :", error);
     }
 }
-
 async function DDlPartyName() {
     try {
         const res = await fetch('/PerformaRegisterReport/DDlPartyName');
@@ -256,40 +259,201 @@ async function DDlPartyName() {
     }
 }
 
+async function DDlcolur() {
+    try {
+        const res = await fetch('/PerformaRegisterReport/DDlcolur');
+        const data = await res.json();
+        const ddl = $('#ddlforColor');
+        ddl.empty().append('<option value="">---Select Color--</option>');
+
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading Item Type:", error);
+    }
+}
+async function DDlDenierGram() {
+    try {
+        const res = await fetch('/PerformaRegisterReport/DDlDenierGram');
+        const data = await res.json();
+        const ddl = $('#ddlDenierGram');
+        ddl.empty().append('<option value="">---Select Denier Gram--</option>');
+
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading Denier Gram:", error);
+    }
+}
+async function DDlGodown() {
+    try {
+        const res = await fetch('/PerformaRegisterReport/DDlGodown');
+        const data = await res.json();
+        const ddl = $('#ddlForGodown');
+        ddl.empty().append('<option value="">---Select Godown--</option>');
+
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading Godown:", error);
+    }
+}
+async function DDlPTypeGroup() {
+    try {
+        const res = await fetch('/PerformaRegisterReport/DDlPTypeGroup');
+        const data = await res.json();
+        const ddl = $('#ddlForPTypeGroup');
+        ddl.empty().append('<option value="">---Select PType Group--</option>');
+
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading PType Group:", error);
+    }
+}
+async function DDlPItemMGroup() {
+    try {
+        const res = await fetch('/PerformaRegisterReport/DDlPItemMGroup');
+        const data = await res.json();
+        const ddl = $('#ddlForItemMGroup');
+        ddl.empty().append('<option value="">---Select Item M Group--</option>');
+
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading Item M Group:", error);
+    }
+}
+async function DDlSaleThrough() {
+    try {
+        const res = await fetch('/PerformaRegisterReport/DDlSaleThrough');
+        const data = await res.json();
+        const ddl = $('#ddlForSaleThrough');
+        ddl.empty().append('<option value="">---Select Sale Through--</option>');
+
+        data.forEach(item => {
+            ddl.append(`<option value="${item.value}">${item.text}</option>`);
+        });
+    } catch (error) {
+        console.error("Error loading Item M Group:", error);
+    }
+}
+
+
 async function TransitReport() {
     try {
 
         // 1. Get form values
         const ToDate = $('#DtToDate').val();
         const FromDate = $('#DtFromDate').val();
-        const InsuranceId = $('#ddlInsurancesName').val();
+        const ChkQty = $('#ChkQty').is(':checked') ? 1 : 0;
 
-        const reportName = "INSU_REGISTER";
+        const DocumentType = $('#ddlforDocumentType').val();
+        const DocumentTypechk = $('#chkForDocumentType').is(':checked') ? 1 : 0;
 
-        if (!FromDate || !ToDate) {
-            toastr.warning("Please select From Date and To Date.");
-            return;
+        const ItemType = $('#ddlforItemType').val();
+        const ItemTypechk = $('#chkAllItemTypes').is(':checked') ? 1 : 0;
+
+        const OsGroup = $('#ddlforOSGroup').val();
+        const OsGroupchk = $('#chkAllOSGroups').is(':checked') ? 1 : 0;
+
+        const TransPort = $('#ddlforTransport').val();
+        const TransPortchk = $('#chkAllTransports').is(':checked') ? 1 : 0;
+
+        const ACGroup = $('#ddlforAcGroup').val();
+        const AccGroupchk = $('#chkAllAcGroups').is(':checked') ? 1 : 0;
+
+        const SupplyType = $('#ddlForSupplyType').val();
+        const supplyTypechk = $('#chkForSupplyType').is(':checked') ? 1 : 0;
+
+
+        const Country = $('#ddlForCountry').val();
+        const Countrychk = $('#chkForCountry').is(':checked') ? 1 : 0;
+
+        const Item = $('#ddlItem').val() || [];
+        const ItemValues = Item.join(',');
+        const Itemchk = $('#chkForItem').is(':checked') ? 1 : 0;
+
+
+        const Patycode = $('#ddlforPartyName').val() || [];
+        const PartyValues = Patycode.join(',');
+        const Partychk = $('#chkAllParties').is(':checked') ? 1 : 0;
+
+        const Color = $('#ddlforColor').val();
+        const Colorchk = $('#chkForColor').is(':checked') ? 1 : 0;
+
+        const DenierGram = $('#ddlDenierGram').val();
+        const DenierGramchk = $('#chkDenierGram').is(':checked') ? 1 : 0;
+
+        const Godown = $('#ddlDenierGram').val();
+        const Godownchk = $('#chkDenierGram').is(':checked') ? 1 : 0;
+
+        const PType = $('#ddlForPTypeGroup').val();
+        const PTypechk = $('#chkPtypeGroup').is(':checked') ? 1 : 0;
+
+        const ItemMGroup = $('#ddlForItemMGroup').val();
+        const ItemMGroupchk = $('#chkForItemMGroup').is(':checked') ? 1 : 0;
+
+        const SaleThrough = $('#ddlForSaleThrough').val();
+        const SaleThroughchk = $('#chkForSaleThrough').is(':checked') ? 1 : 0;
+
+
+        const SalesRegister = $('#chk_SaleRegister').is(':checked') ? 1 : 0;
+        const SalesRegisterDetail = $('#chk_SaleRegisterDetails').is(':checked') ? 1 : 0;
+        const TptFreightReport = $('#chk_tptfrieghtreport').is(':checked') ? 1 : 0;
+        const AgentWiseSale = $('#chk_AgentWiseSale').is(':checked') ? 1 : 0;
+        const AnalysisTon = $('#chk_Analysis').is(':checked') ? 1 : 0;
+        const AnalysisTruck = $('#chk_AnalysisTruck').is(':checked') ? 1 : 0;
+        const MsMESaleList = $('#chk_MSMESaleList').is(':checked') ? 1 : 0;
+        const PartyItemWise = $('#chk_PartyItemWise').is(':checked') ? 1 : 0;
+        const SaleRegisterDrCrNote = $('#chk_SaleRegistercrdr').is(':checked') ? 1 : 0;
+        const BileItemwise = $('#chk_BileItemWise').is(':checked') ? 1 : 0;
+        const LoadUnLoadReport = $('#chk_LoadUnlaodReport').is(':checked') ? 1 : 0;
+        const WBReport = $('#chk_LoadUnlaodReport').is(':checked') ? 1 : 0;
+        const SalesThrough = $('#chk_salesThrough').is(':checked') ? 1 : 0;
+        const ColourAnalysisTruck = $('#chk_colurAnalysis').is(':checked') ? 1 : 0;
+        const ColourGrpAnalysisTruck = $('#chk_colurGrpAnalysis').is(':checked') ? 1 : 0;
+        const DenierAnalysisTruck = $('#chk_DenierAnalysisTruck').is(':checked') ? 1 : 0;
+        const GateToInvoiceTime = $('#chk_GateToInvoiceTime').is(':checked') ? 1 : 0;
+        const MonthWiseCustomer = $('#chk_MonthWiseCustomer').is(':checked') ? 1 : 0;
+        const MonthWiseItem = $('#chk_MonthWiseItem').is(':checked') ? 1 : 0;
+        const MonthWisecolor = $('#chk_MonthWisecolor').is(':checked') ? 1 : 0;
+        const MonthWiseItemGroup = $('#chk_MonthwiseItemGroup').is(':checked') ? 1 : 0;
+        const MonthWisePartyItem = $('#chk_MonthWisePartyItem').is(':checked') ? 1 : 0;
+        const MonthWiseAgent = $('#chk_MonthWiseAgent').is(':checked') ? 1 : 0;
+        const ItemGroup = $('#chk_ItemGroup').is(':checked') ? 1 : 0;
+        const ItemWise = $('#chk_ItemWise').is(':checked') ? 1 : 0;
+        const PartyWise = $('#chk_PartyWise').is(':checked') ? 1 : 0;
+        const ItemDateRateList = $('#chk_ItemDateRateList').is(':checked') ? 1 : 0;
+        const SaleListDetail = $('#chk_MonthWisePartyItem').is(':checked') ? 1 : 0;
+        const SalesRegisterCancel = $('#chk_SalesRegisterCancel').is(':checked') ? 1 : 0;
+        const SalesRegisterDetailCancel = $('#chk_SalesRegisterDetailCancel').is(':checked') ? 1 : 0;
+
+        const Group = $('#ddlGroup').val();
+        const Rwo = $('#ddlRow').val();
+        const Column = $('#ddlColumn').val();
+
+        let SelForMul = "";
+
+        if (ItemGroup == 1 || ItemWise == 1 || PartyWise == 1 || ColourAnalysisTruck == 1 || MonthWiseCustomer == 1 || MonthWiseAgent == 1 ||
+            MonthWiseItemGroup == 1 || MonthWiseItem == 1 || MonthWisecolor == 1 || ItemDateRateList == 1 || MonthWisePartyItem == 1)
+        {
+         
+
+            SelForMul = `{VW_SALES_COMBINED.V_DATE} IN DATE(${FromDate}) TO DATE(${ToDate})`;
+
+            SelForMul += ` AND {VW_SALES_COMBINED.COMP_CODE} = ${globalVars.CompCode}`;
+
+            SelForMul += ` AND {VW_SALES_COMBINED.BRANCH_CODE} = ${globalVars.BranchCode}`;
+
+
         }
 
-        // 2. Prepare TEMP_GST and calculate Opening Balance
-        const validation = await $.ajax({
-            url: '/InsurancesRegister/Report',
-            type: 'POST',
-            data: {
-                ToDate: ToDate,
-                FromDate: FromDate,
-                InsuranceId: InsuranceId
-            }
-        });
-
-        console.log("Opening Balance Response:", validation);
-
-        const openingBalance = Number(
-            validation.openingBalance ??
-            validation.OpeningBalance ?? 0
-        );
-
-        // 3. Prepare Selection Formula
         const formula =
             "{TEMP_GST.COMP_CODE}=" + Number(globalVars.CompCode) +
             " and {TEMP_GST.WSID}= '" +
@@ -333,20 +497,20 @@ async function TransitReport() {
             String(now.getSeconds()).padStart(2, '0');
 
         // 6. Generate Crystal Reports PDF
-        const response = await $.ajax({
-            url: 'http://localhost:24085/Report/PendingQCReport',
-            type: 'POST',
-            data: JSON.stringify(payload),
-            contentType: "application/json; charset=utf-8",
-            xhrFields: {
-                responseType: 'blob'
-            }
-        });
+        //const response = await $.ajax({
+        //    url: 'http://localhost:24085/Report/PendingQCReport',
+        //    type: 'POST',
+        //    data: JSON.stringify(payload),
+        //    contentType: "application/json; charset=utf-8",
+        //    xhrFields: {
+        //        responseType: 'blob'
+        //    }
+        //});
 
-        // 7. Validate PDF response
-        if (!response || response.size === 0) {
-            throw new Error("Crystal Reports returned an empty PDF.");
-        }
+        //// 7. Validate PDF response
+        //if (!response || response.size === 0) {
+        //    throw new Error("Crystal Reports returned an empty PDF.");
+        //}
 
         // 8. Download PDF
         const fileName = `${reportName}_${timestamp}.pdf`;

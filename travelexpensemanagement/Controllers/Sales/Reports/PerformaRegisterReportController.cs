@@ -151,6 +151,84 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
             }
         }
 
+        public JsonResult DDlcolur()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+               string query = @$"select code, name  from COLOR_MAST where comp_code={getdata.PubCompCode} order by name";
+
+                var Data = _dropdownService.GetDropdownList(query);
+                return Json(Data);
+            }
+        }
+        public JsonResult DDlDenierGram()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+               string query = @$"select code, name  from ITEMGRAM_MAST where comp_code={getdata.PubCompCode} order by name";
+
+                var Data = _dropdownService.GetDropdownList(query);
+                return Json(Data);
+            }
+        }
+        public JsonResult DDlGodown()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+               string query = @$"select code, name  from GODOWN_MAST where comp_code={getdata.PubCompCode} order by name";
+
+                var Data = _dropdownService.GetDropdownList(query);
+                return Json(Data);
+            }
+        }
+        public JsonResult DDlPTypeGroup()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+               string query = @$"select code, name from ITEMPTYPE_MAST WHERE COMP_CODE={getdata.PubCompCode} order by name";
+
+                var Data = _dropdownService.GetDropdownList(query);
+                return Json(Data);
+            }
+        }
+        public JsonResult DDlPItemMGroup()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+               string query = @$"select code, name  from ITEM_MGROUP where comp_code={getdata.PubCompCode} order by name";
+
+                var Data = _dropdownService.GetDropdownList(query);
+                return Json(Data);
+            }
+        }
+        public JsonResult DDlSaleThrough()
+        {
+            var getdata = _globalVariableService.GetGlobalVariables();
+            using (SqlConnection con = _dbConnection.GetErpConnection())
+            {
+               string query = @$"select distinct code,name from (
+                  Select distinct b.code,b.NAME from Sauda a Left Join EMP_MAST b on a.DEAL_THROUGH=b.code and a.comp_code=b.comp_code 
+                  where a.V_type='SAUD' and a.COMP_CODE={getdata.PubCompCode} and b.ACTIVE=1
+                  union all Select distinct b.code,b.NAME from Sauda a Left Join SALESEXECUTIVE_MAST b on a.DEAL_THROUGH=b.code and 
+                  a.comp_code=b.comp_code where a.V_type='SAUD' and a.COMP_CODE={getdata.PubCompCode} and
+                  b.ACTIVE=1)x where x.CODE is not null Order by x.Name";
+
+                var Data = _dropdownService.GetDropdownList(query);
+                return Json(Data);
+            }
+        }
+
+
+
+
+
+
+
     }
 }
 
