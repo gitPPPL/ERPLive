@@ -1,0 +1,194 @@
+﻿@{
+    ViewBag.Title = "Transport Rate Quotation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="erp-toast-container"></div>
+
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon"><i class="fa fa-truck"></i></div>
+        <div class="erppage-header-title">Transport Rate Quotation</div>
+    </div>
+
+    <div class="erppage-header-right">
+        <button type="button" class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print" id="button_print"
+                onclick="TransportRateReport()">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "TransportRateRequestForQuotationList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+
+<div class="erppage-container">
+    <div class="erppage-fieldset">
+        <div id="TransportRequestForm">
+
+            <input type="hidden" class="erppage-input" id="TxtCode" name="CODE">
+
+            <!-- =====================================================
+                 DOCUMENT DETAILS + IMPORT
+            ====================================================== -->
+            <div class="erppagesrow">
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Document Details</legend>
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" for="ddlDocumentType">Doc Type</label>
+                                <select class="erppage-redinput erppage-required" id="ddlDocumentType">
+                                    <option value="">Select Doc Type</option>
+                                </select>
+                            </div>
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" for="NumDocumentNo">Doc No</label>
+                                <input type="number" class="erppage-redinput" id="NumDocumentNo" disabled>
+                            </div>
+
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" for="DtDocumentDate">Doc Date</label>
+                                <input type="date" class="erppage-input" id="DtDocumentDate">
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Import</legend>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" for="ddlRefNo">Ref No</label>
+                                <div class="erppage-inputgroup">
+                                    <select class="erppage-input erppage-select" id="ddlRefNo">
+                                        <option value="">Select Ref No</option>
+                                    </select>
+                                    <button type="button" id="btn-Import" class="erppagelist-btn erppagelist-btn-action">
+                                        <i class="fa fa-file-import"></i> Import
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+            <!-- =====================================================
+                 ITEM DETAILS
+            ====================================================== -->
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Details</legend>
+
+                <div class="erppagelist-container">
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblTransportRequest" class="excel-table fixed-grid-table resizable-table">
+                            <colgroup>
+                                <col style="width: 51px;">
+                                <col style="width: 116px;">
+                                <col style="width: 107px;">
+                                <col style="width: 165px;">
+                                <col style="width: 94px;">
+                                <col style="width: 172px;">
+                                <col style="width: 240px;">
+                                <col class="action-col" style="width: 80px;">
+                            </colgroup>
+                            <thead class="table-head">
+                                <tr>
+                                    <th>Sno</th>
+                                    <th>Weight (Kgs.)</th>
+                                    <th>Item Type</th>
+                                    <th>Delivery Location</th>
+                                    <th>Pin Code</th>
+                                    <th>Vehicle Type</th>
+                                    <th>Remarks</th>
+                                    <th class="action-col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- =====================================================
+                 TRANSPORTER LIST + SEND REQUEST
+            ====================================================== -->
+            <div class="erppagesrow">
+                <!-- TRANSPORTER LIST -->
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Transporters</legend>
+
+                        <div class="erppagelist-container">
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblTransporter" class="excel-table fixed-grid-table table-width resizable-table">
+                                    <colgroup>
+                                        <col style="width: 59px;">
+                                        <col>
+                                    </colgroup>
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th><input type="checkbox" class="erppage-checkbox-input" id="chkAllTransporter" aria-label="Select all transporters"></th>
+                                            <th>Transport Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- SEND REQUEST -->
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset" id="fsSendRequest">
+                        <legend class="erppagefieldset-legend">Send Request</legend>
+
+                        <div class="erppage-grid3">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label" for="NumMobileNo">Mobile No</label>
+                                <div class="erppage-inputgroup">
+                                    <input type="tel" class="erppage-input" id="NumMobileNo" maxlength="15" placeholder="Enter mobile no">
+                                    <button type="button" class="erppage-btn erppage-btn-common-active" id="btn-SendWhatsApp" title="Send via WhatsApp" aria-label="Send via WhatsApp">
+                                        <i class="fa-brands fa-whatsapp"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label" for="TxtEmailId">Email Id</label>
+                                <div class="erppage-inputgroup">
+                                    <input type="email" class="erppage-input" id="TxtEmailId" maxlength="100" placeholder="Enter email id">
+                                    <button type="button" class="erppage-btn erppage-btn-common-print-disabled" id="btn-SendEmail" title="Send via Email" aria-label="Send via Email">
+                                        <i class="fa fa-envelope"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <div class="erppage-checkbox-wrap">
+                                    <input type="checkbox" id="ChkSendToTransporter" class="erppage-checkbox-input">
+                                    <label for="ChkSendToTransporter" class="erppage-checkbox-label">Send To Transporter</label>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+            <!-- =====================================================
+                 SAVE
+            ====================================================== -->
+            <div class="erppage-actions">
+                <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/js/erpjs/sales/transaction/transportraterequestforquotation/transportraterequestforquotation.js"></script>
