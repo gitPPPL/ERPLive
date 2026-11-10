@@ -72,10 +72,9 @@
 
        <fieldset class="erppage-fieldset">
           <div class="erppagescol-12" style="width: 100%;">
-        <div class="erppage-grid3">
+          <div class="erppage-grid3">
 
-       <fieldset class="erppage-fieldset"
-          style="position: relative; min-height: 105px; padding: 8px 10px;">
+    <fieldset class="erppage-fieldset" style="position: relative; min-height: 105px; padding: 8px 10px;">
 
     <legend class="erppage-fieldset-legend">For Document Type</legend>
 
@@ -122,249 +121,341 @@
 
 </fieldset>
 
+    <!-- Item Type -->
+    <fieldset class="erppage-fieldset" style="position: relative; min-height: 105px; padding: 8px 10px;">
+    <legend class="erppage-fieldset-legend">For Item Type</legend>
 
-         <!-- Item Type -->
-        <fieldset class="erppage-fieldset">
-                                    <legend class="erppage-fieldset-legend">For Item Type</legend>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                                        <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                                            <select class="erppage-input erppage-select" id="ddlforItemType">
-                                                <option value="">All Item Types</option>
-                                            </select>
-                                        </div>
-                                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                                            <input type="checkbox" id="chkAllItemTypes" class="erppagecheckbox-input">
-                                            <label for="chkAllItemTypes" class="erppagecheckbox-label">All</label>
-                                        </div>
-                                    </div>
-                                </fieldset>
+    <div style="display: flex; align-items: center; gap: 22px; margin-bottom: 9px;">
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkSelectItemType" class="erppagecheckbox-input">
+            <label for="chkSelectItemType" class="erppagecheckbox-label">Select</label>
+        </div>
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkAllItemTypes" class="erppagecheckbox-input">
+            <label for="chkAllItemTypes" class="erppagecheckbox-label">All</label>
+        </div>
+    </div>
 
-        <!-- OS Group -->
-        <fieldset class="erppage-fieldset">
-                                    <legend class="erppage-fieldset-legend">For OS Group</legend>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                                        <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                                            <select class="erppage-input erppage-select" id="ddlforOSGroup">
-                                                <option value="">All OS Groups</option>
-                                            </select>
-                                        </div>
-                                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                                            <input type="checkbox" id="chkAllOSGroups" class="erppagecheckbox-input">
-                                            <label for="chkAllOSGroups" class="erppagecheckbox-label">All</label>
-                                        </div>
-                                    </div>
-                                </fieldset>
+    <div id="divItemTypeDropdown" style="display:none; width:100%;">
+        <select class="erppage-input erppage-select" id="ddlforItemType" style="width:100%; height:30px; margin:0;">
+            <option value="">All Item Types</option>
+        </select>
+    </div>
+</fieldset>
+    
+    <!-- OS Group -->
+    <fieldset class="erppage-fieldset" style="position: relative; min-height: 105px; padding: 8px 10px;">
+    <legend class="erppage-fieldset-legend">For OS Group</legend>
 
-        <!-- Transport -->
-        <fieldset class="erppage-fieldset">
-                                    <legend class="erppage-fieldset-legend">For Transport</legend>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                                        <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                                            <select class="erppage-input erppage-select" id="ddlforTransport">
-                                                <option value="">All Transports</option>
-                                            </select>
-                                        </div>
-                                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                                            <input type="checkbox" id="chkAllTransports" class="erppagecheckbox-input">
-                                            <label for="chkAllTransports" class="erppagecheckbox-label">All</label>
-                                        </div>
-                                    </div>
-                                </fieldset>
+    <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkSelectOSGroup" class="erppagecheckbox-input">
+            <label for="chkSelectOSGroup" class="erppagecheckbox-label">Select</label>
+        </div>
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkAllOSGroups" class="erppagecheckbox-input">
+            <label for="chkAllOSGroups" class="erppagecheckbox-label">All</label>
+        </div>
+    </div>
 
-        <!-- A/c Group -->
-        <fieldset class="erppage-fieldset">
-                                    <legend class="erppage-fieldset-legend">For A/c Group</legend>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                                        <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                                            <select class="erppage-input erppage-select" id="ddlforAcGroup">
-                                                <option value="">All A/c Groups</option>
-                                            </select>
-                                        </div>
-                                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                                            <input type="checkbox" id="chkAllAcGroups" class="erppagecheckbox-input">
-                                            <label for="chkAllAcGroups" class="erppagecheckbox-label">All</label>
-                                        </div>
-                                    </div>
-                                </fieldset>
+    <div id="divOSGroupDropdown" style="display:none; width:100%;">
+        <select class="erppage-input erppage-select" id="ddlforOSGroup" style="width:100%; height:30px; margin:0;">
+            <option value="">All OS Groups</option>
+        </select>
+    </div>
+</fieldset>
+    
+    <!-- Transport -->
+    <fieldset class="erppage-fieldset" style="position: relative; min-height: 105px; padding: 8px 10px;">
+    <legend class="erppage-fieldset-legend">For Transport</legend>
 
-        <!-- Supply Type -->
-        <fieldset class="erppage-fieldset">
-                                    <legend class="erppage-fieldset-legend">For Supply Type</legend>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                                        <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                                            <select class="erppage-input erppage-select" id="ddlForSupplyType">
-                                                <option value="">Select Supply Types</option>
-                                                <option value="B2B">B2B</option>
-                                                <option value="B2C">B2C</option>
-                                                <option value="DEXP">DEXP</option>
-                                                <option value="EXPWOP">EXPWOP</option>
-                                                <option value="EXPWP">EXPWP</option>
-                                                <option value="SEZWOP">SEZWOP</option>
-                                                <option value="SEZWP">SEZWP</option>
+    <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkSelectTransport" class="erppagecheckbox-input">
+            <label for="chkSelectTransport" class="erppagecheckbox-label">Select</label>
+        </div>
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkAllTransports" class="erppagecheckbox-input">
+            <label for="chkAllTransports" class="erppagecheckbox-label">All</label>
+        </div>
+    </div>
 
-                                            </select>
-                                        </div>
-                                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                                            <input type="checkbox" id="chkForSupplyType" class="erppagecheckbox-input">
-                                            <label for="chkForSupplyType" class="erppagecheckbox-label">All</label>
-                                        </div>
-                                    </div>
-                                </fieldset>
+    <div id="divTransportDropdown" style="display:none; width:100%;">
+        <select class="erppage-input erppage-select" id="ddlforTransport" style="width:100%; height:30px; margin:0;">
+            <option value="">All Transports</option>
+        </select>
+    </div>
+</fieldset>
+    
+    <!-- A/c Group -->
+    <fieldset class="erppage-fieldset" style="position: relative; min-height: 105px; padding: 8px 10px;">
+    <legend class="erppage-fieldset-legend">For A/c Group</legend>
 
-        <!-- Country -->
-        <fieldset class="erppage-fieldset">
-                                    <legend class="erppage-fieldset-legend">For Country</legend>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                                        <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                                            <select class="erppage-input erppage-select" id="ddlForCountry">
-                                                <option value="">All Countries</option>
-                                            </select>
-                                        </div>
-                                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                                            <input type="checkbox" id="chkForCountry" class="erppagecheckbox-input">
-                                            <label for="chkForCountry" class="erppagecheckbox-label">All</label>
-                                        </div>
-                                    </div>
-                                </fieldset>
+    <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkSelectAcGroup" class="erppagecheckbox-input">
+            <label for="chkSelectAcGroup" class="erppagecheckbox-label">Select</label>
+        </div>
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkAllAcGroups" class="erppagecheckbox-input">
+            <label for="chkAllAcGroups" class="erppagecheckbox-label">All</label>
+        </div>
+    </div>
 
-        <!-- Item Multi-Select Dropdown -->
-        <fieldset class="erppage-fieldset">
-                                    <legend class="erppage-fieldset-legend">For Item</legend>
-                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                                <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                                    <select class="erppage-input erppage-select" id="ddlItem">
-                                        <option value="">Select Item </option>
-                                    </select>
+    <div id="divAcGroupDropdown" style="display:none; width:100%;">
+        <select class="erppage-input erppage-select" id="ddlforAcGroup" style="width:100%; height:30px; margin:0;">
+            <option value="">All A/c Groups</option>
+        </select>
+    </div>
+</fieldset>
+    
+    <!-- Supply Type -->
+    <fieldset class="erppage-fieldset" style="position: relative; min-height: 105px; padding: 8px 10px;">
+    <legend class="erppage-fieldset-legend">For Supply Type</legend>
 
-                                    </div>
+    <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkSelectSupplyType" class="erppagecheckbox-input">
+            <label for="chkSelectSupplyType" class="erppagecheckbox-label">Select</label>
+        </div>
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkForSupplyType" class="erppagecheckbox-input">
+            <label for="chkForSupplyType" class="erppagecheckbox-label">All</label>
+        </div>
+    </div>
 
-                                    <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                                        <input type="checkbox" id="chkForItem" class="erppagecheckbox-input">
-                                        <label for="chkForItem" class="erppagecheckbox-label">All</label>
-                                    </div>
-                                   </div>
-                                </fieldset>
+    <div id="divSupplyTypeDropdown" style="display:none; width:100%;">
+        <select class="erppage-input erppage-select" id="ddlForSupplyType" style="width:100%; height:30px; margin:0;">
+            <option value="">Select Supply Types</option>
+            <option value="B2B">B2B</option>
+            <option value="B2C">B2C</option>
+            <option value="DEXP">DEXP</option>
+            <option value="EXPWOP">EXPWOP</option>
+            <option value="EXPWP">EXPWP</option>
+            <option value="SEZWOP">SEZWOP</option>
+            <option value="SEZWP">SEZWP</option>
+        </select>
+    </div>
+</fieldset>
+    
+    <!-- Country -->
+    <fieldset class="erppage-fieldset" style="position: relative; min-height: 105px; padding: 8px 10px;">
+    <legend class="erppage-fieldset-legend">For Country</legend>
 
-        <!-- Party Name -->
-        <fieldset class="erppage-fieldset">
-                                    <legend class="erppage-fieldset-legend">For Party Name</legend>
-                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                                        <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                                            <select class="erppage-input erppage-select" id="ddlforPartyName">
-                                                <option value="">All Parties</option>
-                                            </select>
-                                        </div>
-                                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                                            <input type="checkbox" id="chkAllParties" class="erppagecheckbox-input">
-                                            <label for="chkAllParties" class="erppagecheckbox-label">All</label>
-                                        </div>
-                                    </div>
-                                </fieldset>
+    <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkSelectCountry" class="erppagecheckbox-input">
+            <label for="chkSelectCountry" class="erppagecheckbox-label">Select</label>
+        </div>
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkForCountry" class="erppagecheckbox-input">
+            <label for="chkForCountry" class="erppagecheckbox-label">All</label>
+        </div>
+    </div>
+
+    <div id="divCountryDropdown" style="display:none; width:100%;">
+        <select class="erppage-input erppage-select" id="ddlForCountry" style="width:100%; height:30px; margin:0;">
+            <option value="">All Countries</option>
+        </select>
+    </div>
+</fieldset>
+    
+    <!-- Item -->
+    <fieldset class="erppage-fieldset" style="position: relative; min-height: 105px; padding: 8px 10px;">
+    <legend class="erppage-fieldset-legend">For Item</legend>
+
+    <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkSelectItem" class="erppagecheckbox-input">
+            <label for="chkSelectItem" class="erppagecheckbox-label">Select</label>
+        </div>
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkForItem" class="erppagecheckbox-input">
+            <label for="chkForItem" class="erppagecheckbox-label">All</label>
+        </div>
+    </div>
+
+    <div id="divItemDropdown" style="display:none; width:100%;">
+        <select class="erppage-input erppage-select" id="ddlItem" style="width:100%; height:30px; margin:0;">
+            <option value="">Select Item</option>
+        </select>
+    </div>
+</fieldset>
+    
+    
+    <!-- Party Name -->
+    <fieldset class="erppage-fieldset" style="position: relative; min-height: 105px; padding: 8px 10px;">
+    <legend class="erppage-fieldset-legend">For Party Name</legend>
+
+    <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkSelectPartyName" class="erppagecheckbox-input">
+            <label for="chkSelectPartyName" class="erppagecheckbox-label">Select</label>
+        </div>
+        <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+            <input type="checkbox" id="chkAllParties" class="erppagecheckbox-input">
+            <label for="chkAllParties" class="erppagecheckbox-label">All</label>
+        </div>
+    </div>
+
+    <div id="divPartyNameDropdown" style="display:none; width:100%;">
+        <select class="erppage-input erppage-select" id="ddlforPartyName" style="width:100%; height:30px; margin:0;">
+            <option value="">All Parties</option>
+        </select>
+    </div>
+</fieldset>
+
 
         </div>
     </div>
        </fieldset>
-
-
+              
        <fieldset class="erppage-fieldset">
 
-        <div class="erppagescol-12" style="width: 100%;">
+    <div class="erppagescol-12" style="width: 100%;">
         <div class="erppage-grid3">
 
-             <fieldset class="erppage-fieldset">
-                        <legend class="erppage-fieldset-legend">For Color</legend>
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                            <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                                <select class="erppage-input erppage-select" id="ddlforColor">
-                                    <option value="">All Color</option>
-                                </select>
-                            </div>
-                            <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                                <input type="checkbox" id="chkForColor" class="erppagecheckbox-input">
-                                <label for="chkForDocumentType" class="erppagecheckbox-label">All</label>
-                            </div>
-                        </div>
-                    </fieldset>
-       
-             <fieldset class="erppage-fieldset">
-                        <legend class="erppage-fieldset-legend">For Denier/Gram</legend>
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                            <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                                <select class="erppage-input erppage-select" id="ddlDenierGram">
-                                    <option value="">All Denier/Gram</option>
-                                </select>
-                            </div>
-                            <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                                <input type="checkbox" id="chkDenierGram" class="erppagecheckbox-input">
-                                <label for="chkForDenierGram" class="erppagecheckbox-label">All</label>
-                            </div>
-                        </div>
-                    </fieldset>
+            <!-- Color -->
+            <fieldset class="erppage-fieldset" style="position:relative; min-height:105px; padding:8px 10px;">
+                <legend class="erppage-fieldset-legend">For Color</legend>
 
-            <fieldset class="erppage-fieldset">
+                <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+                        <input type="checkbox" id="chkSelectColor" class="erppagecheckbox-input">
+                        <label for="chkSelectColor" class="erppagecheckbox-label">Select</label>
+                    </div>
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+                        <input type="checkbox" id="chkForColor" class="erppagecheckbox-input">
+                        <label for="chkForColor" class="erppagecheckbox-label">All</label>
+                    </div>
+                </div>
+
+                <div id="divColorDropdown" style="display:none; width:100%;">
+                    <select class="erppage-input erppage-select" id="ddlforColor" style="width:100%; height:30px; margin:0;">
+                        <option value="">All Color</option>
+                    </select>
+                </div>
+            </fieldset>
+
+
+            <!-- Denier / Gram -->
+            <fieldset class="erppage-fieldset" style="position:relative; min-height:105px; padding:8px 10px;">
+                <legend class="erppage-fieldset-legend">For Denier/Gram</legend>
+
+                <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+                        <input type="checkbox" id="chkSelectDenierGram" class="erppagecheckbox-input">
+                        <label for="chkSelectDenierGram" class="erppagecheckbox-label">Select</label>
+                    </div>
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+                        <input type="checkbox" id="chkDenierGram" class="erppagecheckbox-input">
+                        <label for="chkDenierGram" class="erppagecheckbox-label">All</label>
+                    </div>
+                </div>
+
+                <div id="divDenierGramDropdown" style="display:none; width:100%;">
+                    <select class="erppage-input erppage-select" id="ddlDenierGram" style="width:100%; height:30px; margin:0;">
+                        <option value="">All Denier/Gram</option>
+                    </select>
+                </div>
+            </fieldset>
+
+
+            <!-- Godown -->
+            <fieldset class="erppage-fieldset" style="position:relative; min-height:105px; padding:8px 10px;">
                 <legend class="erppage-fieldset-legend">For Godown</legend>
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                    <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                            <select class="erppage-input erppage-select" id="ddlForGodown">
-                            <option value="">All For Godown</option>
-                            </select>
-                        </div>
-                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
+
+                <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+                        <input type="checkbox" id="chkSelectGodown" class="erppagecheckbox-input">
+                        <label for="chkSelectGodown" class="erppagecheckbox-label">Select</label>
+                    </div>
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
                         <input type="checkbox" id="chkGodown" class="erppagecheckbox-input">
                         <label for="chkGodown" class="erppagecheckbox-label">All</label>
                     </div>
                 </div>
-            </fieldset>
 
-            <fieldset class="erppage-fieldset">
-                <legend class="erppage-fieldset-legend">For PType Group</legend>
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                    <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                            <select class="erppage-input erppage-select" id="ddlForPTypeGroup">
-                            <option value=""> Select  Ptype Group</option>
-                            </select>
-                        </div>
-                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
-                        <input type="checkbox" id="chkPtypeGroup" class="erppagecheckbox-input">
-                        <label for="chkPTypeGroup" class="erppagecheckbox-label">All</label>
-                    </div>
+                <div id="divGodownDropdown" style="display:none; width:100%;">
+                    <select class="erppage-input erppage-select" id="ddlForGodown" style="width:100%; height:30px; margin:0;">
+                        <option value="">All For Godown</option>
+                    </select>
                 </div>
             </fieldset>
 
-            <fieldset class="erppage-fieldset">
+
+            <!-- PType Group -->
+            <fieldset class="erppage-fieldset" style="position:relative; min-height:105px; padding:8px 10px;">
+                <legend class="erppage-fieldset-legend">For PType Group</legend>
+
+                <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+                        <input type="checkbox" id="chkSelectPtypeGroup" class="erppagecheckbox-input">
+                        <label for="chkSelectPtypeGroup" class="erppagecheckbox-label">Select</label>
+                    </div>
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+                        <input type="checkbox" id="chkPtypeGroup" class="erppagecheckbox-input">
+                        <label for="chkPtypeGroup" class="erppagecheckbox-label">All</label>
+                    </div>
+                </div>
+
+                <div id="divPtypeGroupDropdown" style="display:none; width:100%;">
+                    <select class="erppage-input erppage-select" id="ddlForPTypeGroup" style="width:100%; height:30px; margin:0;">
+                        <option value="">Select Ptype Group</option>
+                    </select>
+                </div>
+            </fieldset>
+
+
+            <!-- Item M Group -->
+            <fieldset class="erppage-fieldset" style="position:relative; min-height:105px; padding:8px 10px;">
                 <legend class="erppage-fieldset-legend">For Item M Group</legend>
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                    <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                            <select class="erppage-input erppage-select" id="ddlForItemMGroup">
-                            <option value=""> Select  Item M Group</option>
-                            </select>
-                        </div>
-                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
+
+                <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+                        <input type="checkbox" id="chkSelectItemMGroup" class="erppagecheckbox-input">
+                        <label for="chkSelectItemMGroup" class="erppagecheckbox-label">Select</label>
+                    </div>
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
                         <input type="checkbox" id="chkForItemMGroup" class="erppagecheckbox-input">
                         <label for="chkForItemMGroup" class="erppagecheckbox-label">All</label>
                     </div>
                 </div>
+
+                <div id="divItemMGroupDropdown" style="display:none; width:100%;">
+                    <select class="erppage-input erppage-select" id="ddlForItemMGroup" style="width:100%; height:30px; margin:0;">
+                        <option value="">Select Item M Group</option>
+                    </select>
+                </div>
             </fieldset>
 
-            <fieldset class="erppage-fieldset">
+
+            <!-- Sale Through -->
+            <fieldset class="erppage-fieldset" style="position:relative; min-height:105px; padding:8px 10px;">
                 <legend class="erppage-fieldset-legend">For Sale Through</legend>
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-                    <div class="erppage-divfield" style="flex: 1; min-width: 0;">
-                            <select class="erppage-input erppage-select" id="ddlForSaleThrough">
-                            <option value=""> Select Sale Through</option>
-                            </select>
-                        </div>
-                        <div class="erppagecheckbox-field" style="display: flex; align-items: center; gap: 6px; min-height: auto; width: auto; flex-shrink: 0;">
+
+                <div style="display:flex; align-items:center; gap:22px; margin-bottom:9px;">
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
+                        <input type="checkbox" id="chkSelectSaleThrough" class="erppagecheckbox-input">
+                        <label for="chkSelectSaleThrough" class="erppagecheckbox-label">Select</label>
+                    </div>
+                    <div class="erppagecheckbox-field" style="display:flex; align-items:center; gap:5px; width:auto; min-height:auto; margin:0;">
                         <input type="checkbox" id="chkForSaleThrough" class="erppagecheckbox-input">
                         <label for="chkForSaleThrough" class="erppagecheckbox-label">All</label>
                     </div>
                 </div>
+
+                <div id="divSaleThroughDropdown" style="display:none; width:100%;">
+                    <select class="erppage-input erppage-select" id="ddlForSaleThrough" style="width:100%; height:30px; margin:0;">
+                        <option value="">Select Sale Through</option>
+                    </select>
+                </div>
             </fieldset>
 
-       </<div>
-       </<div>
-       
-       </fieldset>
+        </div>
+    </div>
+
+</fieldset>
 
        <fieldset class="erppage-fieldset">
              <legend class="erppage-fieldset-legend">Report Type</legend>
