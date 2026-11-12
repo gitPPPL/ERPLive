@@ -9,7 +9,18 @@ $(document).ready(async function () {
     LoadDropdown();
 
     $('#btn_Report').on('click', async function () {
-    try {
+        try {
+
+            const SaleRegisterDrCrNote = isChecked('#chk_SaleRegistercrdr');
+            const TptFreightReport = isChecked('#chk_tptfrieghtreport');
+            const ToDate = getValue('#DtToDate');
+            const FromDate = getValue('#DtFromDate');
+
+
+        await DataInsert(SaleRegisterDrCrNote, TptFreightReport, FromDate, ToDate);
+
+
+
 
         TransitReport();
 
@@ -500,333 +511,660 @@ async function DDlSaleThrough() {
     }
 }
 
-async function TransitReport() {
+async function TransitReport()
+{
     try {
+        const isChecked = id => $(id).is(':checked');
+        const getValue = id => $(id).val();
+        const getArray = id => {
+            const value = $(id).val();
+            if (!value) return [];
+            return Array.isArray(value) ? value : [value];
+        };
+        const escapeCrystalString = value => String(value ?? '').replace(/'/g, "''");
 
-        // 1. Get form values
-        const ToDate = $('#DtToDate').val();
-        const FromDate = $('#DtFromDate').val();
-        const ChkQty = $('#ChkQty').is(':checked') ? 1 : 0;
+        const crystalString = value => `'${escapeCrystalString(value)}'`;
 
-        const DocumentType = $('#ddlforDocumentType').val();
-        const DocumentTypetext = $('#ddlforDocumentType option:selected').text();
-
-        const DocumentTypechk = $('#chkForDocumentType').is(':checked') ? 1 : 0;
-        const SelectDocumentType = $('#chkSelectDocumentType').is(':checked') ? 1 : 0;
-
-        const ItemType = $('#ddlforItemType').val();
-        const ItemTypechk = $('#chkAllItemTypes').is(':checked') ? 1 : 0;
-        const SelectItemType = $('#chkSelectItemType').is(':checked') ? 1 : 0;
-
-        const OsGroup = $('#ddlforOSGroup').val();
-        const OsGroupchk = $('#chkAllOSGroups').is(':checked') ? 1 : 0;
-        const SelectOSGroup = $('#chkSelectOSGroup').is(':checked') ? 1 : 0;
-
-        const TransPort = $('#ddlforTransport').val();
-        const TransPortchk = $('#chkAllTransports').is(':checked') ? 1 : 0;
-        const SelectTransport = $('#chkSelectTransport').is(':checked') ? 1 : 0;
-
-        const ACGroup = $('#ddlforAcGroup').val();
-        const AccGroupchk = $('#chkAllAcGroups').is(':checked') ? 1 : 0;
-        const SelectAcGroup = $('#chkSelectAcGroup').is(':checked') ? 1 : 0;
-
-        const SupplyType = $('#ddlForSupplyType').val();
-        const supplyTypechk = $('#chkForSupplyType').is(':checked') ? 1 : 0;
-        const SelectSupplyType = $('#chkSelectSupplyType').is(':checked') ? 1 : 0;
-
-
-        const Country = $('#ddlForCountry').val();
-        const Countrychk = $('#chkForCountry').is(':checked') ? 1 : 0;
-        const SelectCountry = $('#chkSelectCountry').is(':checked') ? 1 : 0;
-
-        const Item = $('#ddlItem').val() || [];
-        const ItemValues = Item.join(',');
-        const Itemchk = $('#chkForItem').is(':checked') ? 1 : 0;
-        const SelectItem = $('#chkSelectItem').is(':checked') ? 1 : 0;
-
-
-        const Patycode = $('#ddlforPartyName').val() || [];
-        const PartyValues = Patycode.join(',');
-        const Partychk = $('#chkAllParties').is(':checked') ? 1 : 0;
-        const SelectPartyName = $('#chkSelectPartyName').is(':checked') ? 1 : 0;
-
-        const Color = $('#ddlforColor').val();
-        const Colorchk = $('#chkForColor').is(':checked') ? 1 : 0;
-        const SelectColor = $('#chkSelectColor').is(':checked') ? 1 : 0;
-
-        const DenierGram = $('#ddlDenierGram').val();
-        const DenierGramchk = $('#chkDenierGram').is(':checked') ? 1 : 0;
-        const SelectDenierGram = $('#chkSelectDenierGram').is(':checked') ? 1 : 0;
-
-        const Godown = $('#ddlDenierGram').val();
-        const Godownchk = $('#chkDenierGram').is(':checked') ? 1 : 0;
-        const SelectGodown = $('#chkSelectGodown').is(':checked') ? 1 : 0;
-
-        const PType = $('#ddlForPTypeGroup').val();
-        const PTypechk = $('#chkPtypeGroup').is(':checked') ? 1 : 0;
-        const SelectPtypeGroup = $('#chkSelectPtypeGroup').is(':checked') ? 1 : 0;
-
-        const ItemMGroup = $('#ddlForItemMGroup').val();
-        const ItemMGroupchk = $('#chkForItemMGroup').is(':checked') ? 1 : 0;
-        const chkSelectItemMGroup = $('#chkForItemMGroup').is(':checked') ? 1 : 0;
-
-        const SaleThrough = $('#ddlForSaleThrough').val();
-        const SaleThroughchk = $('#chkForSaleThrough').is(':checked') ? 1 : 0;
-        const SelectSaleThrough = $('#chkSelectSaleThrough').is(':checked') ? 1 : 0;
-
-        const SalesRegister = $('#chk_SaleRegister').is(':checked') ? 1 : 0;
-        const SalesRegisterDetail = $('#chk_SaleRegisterDetails').is(':checked') ? 1 : 0;
-        const TptFreightReport = $('#chk_tptfrieghtreport').is(':checked') ? 1 : 0;
-        const AgentWiseSale = $('#chk_AgentWiseSale').is(':checked') ? 1 : 0;
-        const AnalysisTon = $('#chk_Analysis').is(':checked') ? 1 : 0;
-        const AnalysisTruck = $('#chk_AnalysisTruck').is(':checked') ? 1 : 0;
-        const MsMESaleList = $('#chk_MSMESaleList').is(':checked') ? 1 : 0;
-        const PartyItemWise = $('#chk_PartyItemWise').is(':checked') ? 1 : 0;
-        const SaleRegisterDrCrNote = $('#chk_SaleRegistercrdr').is(':checked') ? 1 : 0;
-        const BileItemwise = $('#chk_BileItemWise').is(':checked') ? 1 : 0;
-        const LoadUnLoadReport = $('#chk_LoadUnlaodReport').is(':checked') ? 1 : 0;
-        const WBReport = $('#chk_LoadUnlaodReport').is(':checked') ? 1 : 0;
-        const SalesThrough = $('#chk_salesThrough').is(':checked') ? 1 : 0;
-        const ColourAnalysisTruck = $('#chk_colurAnalysis').is(':checked') ? 1 : 0;
-        const ColourGrpAnalysisTruck = $('#chk_colurGrpAnalysis').is(':checked') ? 1 : 0;
-        const DenierAnalysisTruck = $('#chk_DenierAnalysisTruck').is(':checked') ? 1 : 0;
-        const GateToInvoiceTime = $('#chk_GateToInvoiceTime').is(':checked') ? 1 : 0;
-        const MonthWiseCustomer = $('#chk_MonthWiseCustomer').is(':checked') ? 1 : 0;
-        const MonthWiseItem = $('#chk_MonthWiseItem').is(':checked') ? 1 : 0;
-        const MonthWisecolor = $('#chk_MonthWisecolor').is(':checked') ? 1 : 0;
-        const MonthWiseItemGroup = $('#chk_MonthwiseItemGroup').is(':checked') ? 1 : 0;
-        const MonthWisePartyItem = $('#chk_MonthWisePartyItem').is(':checked') ? 1 : 0;
-        const MonthWiseAgent = $('#chk_MonthWiseAgent').is(':checked') ? 1 : 0;
-        const ItemGroup = $('#chk_ItemGroup').is(':checked') ? 1 : 0;
-        const ItemWise = $('#chk_ItemWise').is(':checked') ? 1 : 0;
-        const PartyWise = $('#chk_PartyWise').is(':checked') ? 1 : 0;
-        const ItemDateRateList = $('#chk_ItemDateRateList').is(':checked') ? 1 : 0;
-        const SaleListDetail = $('#chk_MonthWisePartyItem').is(':checked') ? 1 : 0;
-        const SalesRegisterCancel = $('#chk_SalesRegisterCancel').is(':checked') ? 1 : 0;
-        const SalesRegisterDetailCancel = $('#chk_SalesRegisterDetailCancel').is(':checked') ? 1 : 0;
-
-        const Group = $('#ddlGroup').val();
-        const Rwo = $('#ddlRow').val();
-        const Column = $('#ddlColumn').val();
-
-        let SelForMul = "";
-        let formula = "";
-
-        if (ItemGroup == 1 || ItemWise == 1 || PartyWise == 1 || ColourAnalysisTruck == 1 || MonthWiseCustomer == 1 || MonthWiseAgent == 1 ||
-            MonthWiseItemGroup == 1 || MonthWiseItem == 1 || MonthWisecolor == 1 || ItemDateRateList == 1 || MonthWisePartyItem == 1)
-        {        
-
-            SelForMul = `{VW_SALES_COMBINED.V_DATE} IN DATE(${FromDate}) TO DATE(${ToDate})`;
-
-            SelForMul += ` AND {VW_SALES_COMBINED.COMP_CODE} = ${globalVars.CompCode}`;
-
-            SelForMul += ` AND {VW_SALES_COMBINED.BRANCH_CODE} = ${globalVars.BranchCode}`;
-
-
-            if (SelectDocumentType == 1) {
-                SelForMul += ` AND {VW_SALES_COMBINED.V_TYPE} = '${DocumentTypetext}'`;
-            }
-            else if (TptFreightReport == 1) {
-                SelForMul += `AND ({DOCTYPE_MAST.DOCTYPE} = 'SalesInvoice' OR {DOCTYPE_MAST.DOCTYPE} = 'EComSalesInvoice' OR {DOCTYPE_MAST.DOCTYPE} = 'TradingSale' OR {DOCTYPE_MAST.DOCTYPE} = 'EComSalesReturn' or {DOCTYPE_MAST.DOCTYPE} = 'SalesReturn' or {DOCTYPE_MAST.DOCTYPE} = 'JobReturn' or {DOCTYPE_MAST.DOCTYPE} = 'SaleChallan' or {DOCTYPE_MAST.DOCTYPE} = 'JobworkIssue' or {DOCTYPE_MAST.DOCTYPE} = 'JobworkReceived')`;
-
-            }
-            else {
-                SelForMul += ` AND ({DOCTYPE_MAST.DOCTYPE} = 'SalesInvoice' OR {DOCTYPE_MAST.DOCTYPE} = 'EComSalesInvoice' OR {DOCTYPE_MAST.DOCTYPE} = 'TradingSale' OR {DOCTYPE_MAST.DOCTYPE} = 'EComSalesReturn' or {DOCTYPE_MAST.DOCTYPE} = 'SalesReturn' OR {DOCTYPE_MAST.DOCTYPE} ='GSTCreditNote' OR {DOCTYPE_MAST.DOCTYPE} ='GSTDebitNote')`;
-
-            }
-
-            if (SelectItemType == 1)
+        const crystalNumber = value =>
+        {
+            const number = Number(value);
+            return Number.isFinite(number) ? number : 0;
+        };
+        function crystalDate(value) {
+            if (!value)
             {
-                SelForMul += `AND {VW_SALES_COMBINED.ITEM_TYPE} = '${ItemType}'`;
+                throw new Error("Please select both dates.");
             }
 
-            if (SelectOSGroup == 1)
+            const parts = value.split('-');
+            if (parts.length !== 3)
             {
-                SelForMul += `AND {SUBGROUP_MAST.OS_CODE} = ${OsGroup}`;
+                throw new Error("Invalid date format: " + value);
             }
 
-            if (SelectAcGroup == 1) {
-                SelForMul += `AND {SUBGROUP_MAST.GROUP_CODE} = ${ACGroup}`;
-            }
-            if (SelectTransport == 1)
+            const year = Number(parts[0]);
+            const month = Number(parts[1]);
+            const day = Number(parts[2]);
+
+            return `DATE(${year},${month},${day})`;
+        }
+        function formatReportDate(value) {
+            const parts = value.split('-');
+            const year = Number(parts[0]);
+            const month = Number(parts[1]);
+            const day = Number(parts[2]);
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            return `${String(day).padStart(2, '0')}/${months[month - 1]}/${year}`;
+        }
+        function addCondition(formula, condition)
+        {
+            if (!condition) return formula;
+            return formula ? `${formula} AND ${condition}` : condition;
+        }
+        function numericInCondition(field, values) {
+            const validValues = values
+                .map(Number)
+                .filter(value => Number.isFinite(value));
+
+            if (validValues.length === 0) return "";
+
+            return `${field} IN [${validValues.join(",")}]`;
+        }
+
+        const ToDate = getValue('#DtToDate');
+        const FromDate = getValue('#DtFromDate');
+  
+        if (!FromDate || !ToDate) {
+            toastr.warning("Please select From Date and To Date.");
+            return;
+        }
+
+        if (new Date(ToDate) < new Date(FromDate)) {
+            toastr.warning("Invalid Date");
+            return;
+        }
+
+        const CompCode = crystalNumber(globalVars.CompCode);
+        const BranchCode = crystalNumber(globalVars.BranchCode);
+        const FromCrystalDate = crystalDate(FromDate);
+        const ToCrystalDate = crystalDate(ToDate);
+        const ChkQty = isChecked('#ChkQty');
+        const DocumentType = getValue('#ddlforDocumentType');
+        const ItemType = getValue('#ddlforItemType');
+        const OsGroup = getValue('#ddlforOSGroup');
+        const TransPort = getValue('#ddlforTransport');
+        const ACGroup = getValue('#ddlforAcGroup');
+        const SupplyType = getValue('#ddlForSupplyType');
+        const Country = getValue('#ddlForCountry');
+        const Item = getArray('#ddlItem');
+        const Party = getArray('#ddlforPartyName');
+        const Color = getValue('#ddlforColor');
+        const DenierGram = getValue('#ddlDenierGram');
+        const Godown = getValue('#ddlGodown');
+        const PType = getValue('#ddlForPTypeGroup');
+        const ItemMGroup = getValue('#ddlForItemMGroup');
+        const SaleThrough = getValue('#ddlForSaleThrough');
+        const SelectDocumentType = isChecked('#chkSelectDocumentType');
+        const SelectItemType = isChecked('#chkSelectItemType');
+        const SelectOSGroup = isChecked('#chkSelectOSGroup');
+        const SelectTransport = isChecked('#chkSelectTransport');
+        const SelectAcGroup = isChecked('#chkSelectAcGroup');
+        const SelectSupplyType = isChecked('#chkSelectSupplyType');
+        const SelectCountry = isChecked('#chkSelectCountry');
+        const SelectItem = isChecked('#chkSelectItem');
+        const SelectPartyName = isChecked('#chkSelectPartyName');
+        const SelectColor = isChecked('#chkSelectColor');
+        const SelectDenierGram = isChecked('#chkSelectDenierGram');
+        const SelectGodown = isChecked('#chkSelectGodown');
+        const SelectPtypeGroup = isChecked('#chkSelectPtypeGroup');
+        const SelectItemMGroup = isChecked('#chkSelectItemMGroup');
+        const SelectSaleThrough = isChecked('#chkSelectSaleThrough');
+        const SalesRegister = isChecked('#chk_SaleRegister');
+        const SalesRegisterDetail = isChecked('#chk_SaleRegisterDetails');
+        const TptFreightReport = isChecked('#chk_tptfrieghtreport');
+        const AgentWiseSale = isChecked('#chk_AgentWiseSale');
+        const AnalysisTon = isChecked('#chk_Analysis');
+        const AnalysisTruck = isChecked('#chk_AnalysisTruck');
+        const MsMESaleList = isChecked('#chk_MSMESaleList');
+        const PartyItemWise = isChecked('#chk_PartyItemWise');
+        const SaleRegisterDrCrNote = isChecked('#chk_SaleRegistercrdr');
+        const BileItemwise = isChecked('#chk_BileItemWise');
+        const LoadUnLoadReport = isChecked('#chk_LoadUnlaodReport');
+        const WBReport = isChecked('#chk_WBReport');
+        const SalesThrough = isChecked('#chk_salesThrough');
+        const ColourAnalysisTruck = isChecked('#chk_colurAnalysis');
+        const ColourGrpAnalysisTruck = isChecked('#chk_colurGrpAnalysis');
+        const DenierAnalysisTruck = isChecked('#chk_DenierAnalysisTruck');
+        const GateToInvoiceTime = isChecked('#chk_GateToInvoiceTime');
+        const MonthWiseCustomer = isChecked('#chk_MonthWiseCustomer');
+        const MonthWiseItem = isChecked('#chk_MonthWiseItem');
+        const MonthWisecolor = isChecked('#chk_MonthWisecolor');
+        const MonthWiseItemGroup = isChecked('#chk_MonthwiseItemGroup');
+        const MonthWisePartyItem = isChecked('#chk_MonthWisePartyItem');
+        const MonthWiseAgent = isChecked('#chk_MonthWiseAgent');
+        const ItemGroup = isChecked('#chk_ItemGroup');
+        const ItemWise = isChecked('#chk_ItemWise');
+        const PartyWise = isChecked('#chk_PartyWise');
+        const ItemDateRateList = isChecked('#chk_ItemDateRateList');
+        const SaleListDetail = isChecked('#chk_SaleListDetail');
+        const SalesRegisterCancel = isChecked('#chk_SalesRegisterCancel');
+        const SalesRegisterDetailCancel = isChecked('#chk_SalesRegisterDetailCancel');
+
+        const Group = getValue('#ddlGroup');
+        const Row = getValue('#ddlRow');
+        const Column = getValue('#ddlColumn');
+
+/*       await DataInsert(SaleRegisterDrCrNote, TptFreightReport, FromDate, ToDate );*/
+
+        let reportName = "";
+        let selectionFormula = "";
+        let formulaFields = {};
+        let isCombinedReport = false;
+        const combinedReportSelected = ItemGroup ||  ItemWise || PartyWise || ItemDateRateList || ColourAnalysisTruck ||
+        MonthWiseCustomer || MonthWiseAgent || MonthWiseItemGroup || MonthWiseItem ||  MonthWisecolor || MonthWisePartyItem || SaleListDetail;
+
+        if (combinedReportSelected)
+        {
+            isCombinedReport = true;
+            selectionFormula = `{VW_SALES_COMBINED.V_DATE} IN ${FromCrystalDate} TO ${ToCrystalDate}`;
+            selectionFormula = addCondition( selectionFormula, `{VW_SALES_COMBINED.COMP_CODE} = ${CompCode}` );
+            selectionFormula = addCondition( selectionFormula, `{VW_SALES_COMBINED.BRANCH_CODE} = ${BranchCode}` );
+            if (SelectDocumentType && DocumentType)
             {
-                SelForMul += `AND {VW_SALES_COMBINED.TRANSPORT_CODE} = ${ACGroup}`;
+             selectionFormula = addCondition( selectionFormula, `{VW_SALES_COMBINED.V_TYPE} = ${crystalString(DocumentType)}`);
             }
-
-            if (SelectColor == 1)
+            else
             {
-                SelForMul += `AND {ITEM_MAST.COLOR_CODE} = ${Color}`;
+                const documentTypes = ["SalesInvoice", "EComSalesInvoice", "TradingSale", "EComSalesReturn", "SalesReturn",
+                "GSTCreditNote", "GSTDebitNote" ];
+                const typeConditions = documentTypes.map(type =>  `{DOCTYPE_MAST.DOCTYPE} = ${crystalString(type)}`);
+                selectionFormula = addCondition(  selectionFormula,  `(${typeConditions.join(" OR ")})`);
             }
-            if (SelectDenierGram == 1)
+
+            // Item Type
+            if (SelectItemType && ItemType) 
             {
-                SelForMul += `AND {ITEM_MAST.GRAM_CODE} = ${DenierGram}`;
+                selectionFormula = addCondition(  selectionFormula,  `{VW_SALES_COMBINED.ITEM_TYPE} = ${crystalString(ItemType)}`  );
             }
 
-
-            if (SelectGodown == 1)
+            // Agent / OS Group
+            if (SelectOSGroup && OsGroup)
             {
-                SelForMul += `AND {VW_SALES_COMBINED.GODOWN_CODE} = ${Godown}`;
+                selectionFormula = addCondition( selectionFormula, `{SUBGROUP_MAST.OS_CODE} = ${crystalNumber(OsGroup)}` );
             }
-            if (SelectSupplyType == 1)
+
+            // Account Group
+            if (SelectAcGroup && ACGroup)
             {
-                SelForMul += `AND {VW_SALES_COMBINED.SUPPLY_TYPE} = ${SupplyType}`;
+                selectionFormula = addCondition( selectionFormula,`{SUBGROUP_MAST.GROUP_CODE} = ${crystalNumber(ACGroup)}` );
             }
-            if (SelectCountry == 1)
+
+            // Transport
+            if (SelectTransport && TransPort)
             {
-                SelForMul += `AND {SUBGROUP_MAST.COUNTRY_CODE} = ${Country}`;
+                selectionFormula = addCondition( selectionFormula,  `{VW_SALES_COMBINED.TRANSPORT_CODE} = ${crystalNumber(TransPort)}` );
             }
-            if (SelectPtypeGroup == 1)
+
+            // Color
+            if (SelectColor && Color)
             {
-                SelForMul += `AND {ITEM_MAST.PTYPE_CODE} = ${PType}`;
+                selectionFormula = addCondition( selectionFormula, `{ITEM_MAST.COLOR_CODE} = ${crystalNumber(Color)}`  );
             }
-            if (SelectPtypeGroup == 1)
+
+            // Denier / Gram
+            if (SelectDenierGram && DenierGram)
             {
-                SelForMul += `AND {ITEM_MAST.PTYPE_CODE} = ${PType}`;
+                selectionFormula = addCondition( selectionFormula,  `{ITEM_MAST.GRAM_CODE} = ${crystalNumber(DenierGram)}` );
             }
-            if (chkSelectItemMGroup == 1)
+
+            // Godown
+            if (SelectGodown && Godown)
             {
-                SelForMul += `AND {ITEM_MAST.MGROUP_CODE} = ${ItemMGroup}`;
+                selectionFormula = addCondition( selectionFormula, `{VW_SALES_COMBINED.GODOWN_CODE} = ${crystalNumber(Godown)}` );
             }
-            if (SelectSaleThrough == 1)
+
+            // Supply Type
+            if (SelectSupplyType && SupplyType)
             {
-                SelForMul += `AND {SAUDA.DEAL_THROUGH} = ${SalesThrough}`;
+                selectionFormula = addCondition( selectionFormula, `{VW_SALES_COMBINED.SUPPLY_TYPE} = ${crystalString(SupplyType)}` );
             }
 
-            if (ItemGroup == 1 || ItemWise == 1 || PartyWise == 1 || ) {
-                reportName = "SALE4";
-
-                if (PartyWise == 1) {
-                    formula = "{GrpName1} = ITEM_GROUP.GROUP_TYPE ";
-                    formula += " AND {GrpName2} = SUBGROUP_MAST.NAME ";
-                    formula += " AND {RPTNAME} = 'SALE SUMMARY CUSTOMER WISE' ";
-                }
-
-                else if (ItemWise == 1) {
-                    formula = "{GrpName1} = ITEM_GROUP.GROUP_TYPE";
-                    formula += " AND {GrpName2} = ITEM_MAST.NAME ";
-                    formula += " AND {RPTNAME} = 'SALE SUMMARY ITEM WISE'";
-
-                }
-
-                else if (ItemGroup == 1) {
-                    formula = "{GrpName1} = ITEM_GROUP.GROUP_TYPE";
-                    formula += "  {GrpName2} = ITEM_MAST.NAME ";
-                    formula += "  {RPTNAME} = 'SALE SUMMARY ITEM-GROUP WISE'";
-                }
-
-            }
-
-            else if (ItemDateRateList == 1) {
-                reportName = "SALE6";
-                formula += " AND {RPTNAME} = 'ITEM/DATE WISE SALE'";
-            }
-            else if (ColourAnalysisTruck == 1) {
-                reportName = "SALE5";
-                formula += "  {RPTNAME} = 'SALE ANALYSIS COLOR WISE(TRUCK)'";
-            }
-            else if (MonthWisePartyItem == 1) {
-                reportName = "SALE25_PLPL";
-
-                if (ChkQty == 1) {
-                    formula += " {Qty} = {VW_SALES_COMBINED.Qty}";
-
-                }
-                else {
-                    formula += " {Qty} = {VW_SALES_COMBINED.ITEM_AMT}+{VW_SALES_COMBINED.PACK_AMT}-{VW_SALES_COMBINED.DISC_AMT}";
-                }
-                formula += "  {RPTNAME} = 'MONTH WISE SALE (PARTY/ITEM WISE)'";
-
-            }
-
-            else if (SaleListDetail == 1) {
-                reportName = "SALE_COMBINED1";
-                formula += "  {RPTNAME} = 'Sale Register Details(Combined)'";
-
-            }
-            else if (MonthWiseCustomer == 1)
+            // Country
+            if (SelectCountry && Country)
             {
-                reportName = "SALE25";
+                selectionFormula = addCondition( selectionFormula, `{SUBGROUP_MAST.COUNTRY_CODE} = ${crystalNumber(Country)}` );
+            }
 
-                if (ChkQty == 1)
+            // Product Type
+            if (SelectPtypeGroup && PType)
+            {
+                selectionFormula = addCondition( selectionFormula,  `{ITEM_MAST.PTYPE_CODE} = ${crystalNumber(PType)}` );
+            }
+
+            // Main Item Group
+            if (SelectItemMGroup && ItemMGroup)
+            {
+                selectionFormula = addCondition( selectionFormula, `{ITEM_MAST.MGROUP_CODE} = ${crystalNumber(ItemMGroup)}` );
+            }
+
+            // Sale Through
+            if (SelectSaleThrough && SaleThrough) {
+                selectionFormula = addCondition(  selectionFormula, `{SAUDA.DEAL_THROUGH} = ${crystalNumber(SaleThrough)}` );
+            }
+
+            // Multiple Party Selection
+            if (SelectPartyName && Party.length > 0)
+            {
+                const partyCondition = numericInCondition('{SUBGROUP_MAST.CODE}', Party);
+                selectionFormula = addCondition(  selectionFormula, partyCondition );
+            }
+
+            // Multiple Item Selection
+            if (SelectItem && Item.length > 0)
+            {
+                const itemCondition = numericInCondition(  '{ITEM_MAST.CODE}', Item );
+                selectionFormula = addCondition(  selectionFormula, itemCondition );
+            }
+
+        }
+        else
+        {
+
+            selectionFormula = `{SALE1.V_DATE} IN ${FromCrystalDate} TO ${ToCrystalDate}`;
+            selectionFormula = addCondition( selectionFormula, `{SALE1.COMP_CODE} = ${CompCode}`  );
+            selectionFormula = addCondition( selectionFormula, `{SALE1.BRANCH_CODE} = ${BranchCode}` );
+
+            if (SalesRegisterCancel || SalesRegisterDetailCancel)
+            {
+                selectionFormula = addCondition(  selectionFormula,  `{SALE1.STATUS} = 2` );
+            }
+            else
+            {
+                selectionFormula = addCondition( selectionFormula, `{SALE1.STATUS} <> 2` );
+            }
+
+            if (SelectDocumentType && DocumentType)
+            {
+                selectionFormula = addCondition(  selectionFormula, `{SALE1.V_TYPE} = ${crystalString(DocumentType)}` );
+
+            }
+            else
+            {
+
+                let documentTypes = [];
+
+                if (TptFreightReport)
                 {
-                    formula += "  {Qty} = 'VW_SALES_COMBINED.Qty'";
+                    documentTypes = ["SalesInvoice", "EComSalesInvoice", "TradingSale", "EComSalesReturn",
+                    "SalesReturn", "JobReturn", "SaleChallan", "JobworkIssue", "JobworkReceived" ];
                 }
                 else
                 {
-                    formula += "  {Qty} = {VW_SALES_COMBINED.ITEM_AMT}+{VW_SALES_COMBINED.PACK_AMT}-{VW_SALES_COMBINED.DISC_AMT}";
+                    documentTypes = ["SalesInvoice",  "EComSalesInvoice", "TradingSale" ];
                 }
-
-                      else if (MonthWiseCustomer == 1) {
-                    formula += " {GrpName1} = {DOCTYPE_MAST.NAME}";
-                    formula += " {GrpName2} = {SUBGROUP_MAST.NAME}";
-                    formula += " {RPTNAME} = 'MONTH WISE SALE (CUSTOMER WISE)'";
-
-
-                }
-
-                else if (MonthWiseItem == 1) {
-                    formula += " {GrpName1} = {ACOS_MAST.NAME}";
-                    formula += " {GrpName2} = {SUBGROUP_MAST.NAME}";
-                    formula += " {RPTNAME} = 'MONTH WISE SALE (AGENT-CUSTOMER WISE)'";
-
-                }
-                else if (MonthWiseItemGroup == 1) {
-                    formula += " {GrpName1} = {ACOS_MAST.NAME}";
-                    formula += " {GrpName2} = {SUBGROUP_MAST.NAME}";
-                    formula += " {RPTNAME} = 'MONTH WISE SALE (AGENT-CUSTOMER WISE)'";
-                }
-
-                else if (MonthWiseItem == 1) {
-                    formula += " {GrpName1} = {ITEM_GROUP.NAME}";
-                    formula += " {GrpName2} = {ITEM_MAST.NAME}";
-                    formula += " {RPTNAME} = 'MONTH WISE SALE (ITEM WISE)'";
-                }
-
-                else if (MonthWisecolor == 1) {
-                    formula += " {GrpName1} = {SUBGROUP_MAST.NAME}";
-                    formula += " {GrpName2} = {ITEM_MAST.COLOR_CODE}";
-                    formula += " {RPTNAME} = 'MONTH WISE SALE (COLOR WISE)'";
-                }
-
-
-
+                const typeConditions = documentTypes.map(type => `{DOCTYPE_MAST.DOCTYPE} = ${crystalString(type)}` );
+                selectionFormula = addCondition( selectionFormula,  `(${typeConditions.join(" OR ")})` );
             }
-      
 
+            // Item Type
+            if (SelectItemType && ItemType)            {
+                selectionFormula = addCondition( selectionFormula, `{SALE1.ITEM_TYPE} = ${crystalString(ItemType)}` );
+            }
 
+            // Agent / OS Group
+            if (SelectOSGroup && OsGroup)            {
+                selectionFormula = addCondition( selectionFormula, `{SUBGROUP_MAST.OS_CODE} = ${crystalNumber(OsGroup)}` );
+            }
 
-         formula =
-            "{TEMP_GST.COMP_CODE}=" + Number(globalVars.CompCode) +
-            " and {TEMP_GST.WSID}= '" +
-            (globalVars.PubWorkStationID || "").replace(/'/g, "''") + "' " +
-            " and {TEMP_GST.USERID}=" + Number(globalVars.UserId) +
-            " AND {TEMP_GST.V_TYPE}='INSU' " +
-            " AND {SALE1.V_TYPE}='SAGT'";
+            // Account Group
+            if (SelectAcGroup && ACGroup)            {
+                selectionFormula = addCondition( selectionFormula,  `{SUBGROUP_MAST.GROUP_CODE} = ${crystalNumber(ACGroup)}` );
+            }
 
-        // 4. Prepare Formula Fields
-        const Formulafield =
-            "From " + ReportformatDate(FromDate) +
-            " To " + ReportformatDate(ToDate);
+            // Transport
+            if (SelectTransport && TransPort)            {
+                selectionFormula = addCondition( selectionFormula, `{SALE1.TRANSPORT_CODE} = ${crystalNumber(TransPort)}` );
+            }
+
+            // Color
+            if (SelectColor && Color)
+            {
+                selectionFormula = addCondition(  selectionFormula, `{ITEM_MAST.COLOR_CODE} = ${crystalNumber(Color)}` );
+            }
+
+            // Denier / Gram
+            if (SelectDenierGram && DenierGram)
+            {
+                selectionFormula = addCondition( selectionFormula, `{ITEM_MAST.GRAM_CODE} = ${crystalNumber(DenierGram)}` );
+            }
+
+            // Godown
+            if (SelectGodown && Godown)
+            {
+                selectionFormula = addCondition( selectionFormula,  `{SALE1.GODOWN_CODE} = ${crystalNumber(Godown)}` );
+            }
+
+            // Supply Type
+            if (SelectSupplyType && SupplyType)
+            {
+                selectionFormula = addCondition( selectionFormula, `{SALE1.SUPPLY_TYPE} = ${crystalString(SupplyType)}` );
+            }
+
+            // Country
+            if (SelectCountry && Country)
+            {
+                selectionFormula = addCondition( selectionFormula, `{SUBGROUP_MAST.COUNTRY_CODE} = ${crystalNumber(Country)}` );
+            }
+
+            // Product Type
+            if (SelectPtypeGroup && PType)
+            {
+                selectionFormula = addCondition( selectionFormula,  `{ITEM_MAST.PTYPE_CODE} = ${crystalNumber(PType)}` );
+            }
+
+            // Main Item Group
+            if (SelectItemMGroup && ItemMGroup)
+            {
+                selectionFormula = addCondition( selectionFormula,  `{ITEM_MAST.MGROUP_CODE} = ${crystalNumber(ItemMGroup)}` );
+            }
+
+            // Sale Through
+            if (SelectSaleThrough && SaleThrough)
+            {
+                selectionFormula = addCondition(  selectionFormula, `{SAUDA.DEAL_THROUGH} = ${crystalNumber(SaleThrough)}` );
+            }
+        }
+
+        if (isCombinedReport) {
+
+            // SALE4 - Summary Reports
+            if (PartyWise == true || ItemWise == true || ItemGroup == true)
+            {
+                reportName = "SALE4";
+                if (PartyWise == true)
+                {
+                    formulaFields.GrpName1 = "{ITEM_GROUP.GROUP_TYPE}";
+                    formulaFields.GrpName2 = "{SUBGROUP_MAST.NAME}";
+                    formulaFields.RPTNAME =  crystalString("SALE SUMMARY CUSTOMER WISE");
+
+                }
+                else if (ItemWise == true)
+                {
+
+                    formulaFields.GrpName1 = "{ITEM_GROUP.GROUP_TYPE}";
+                    formulaFields.GrpName2 = "{ITEM_MAST.NAME}";
+                    formulaFields.RPTNAME = crystalString("SALE SUMMARY ITEM WISE");
+
+                }
+                else if (ItemGroup == true)
+                {
+                    formulaFields.GrpName1 = "{ITEM_GROUP.GROUP_TYPE}";
+                    formulaFields.GrpName2 = "{ITEM_GROUP.NAME}";
+                    formulaFields.RPTNAME = crystalString("SALE SUMMARY ITEM-GROUP WISE");
+                }
+            }
+
+            // SALE6 - Item / Date Wise Sale
+            else if (ItemDateRateList == true)
+            {
+                reportName = "SALE6";
+                formulaFields.RPTNAME = crystalString("ITEM/DATE WISE SALE");
+            }
+
+            // SALE5 - Color Analysis
+            else if (ColourAnalysisTruck == true)
+            {
+                reportName = "SALE5";
+                formulaFields.RPTNAME = crystalString("SALE ANALYSIS COLOR WISE(TRUCK)");
+            }
+
+            // SALE25_PLPL - Month Wise Party / Item
+            else if (MonthWisePartyItem == true)
+            {
+                reportName = "SALE25_PLPL";
+                formulaFields.Qty = ChkQty  ? "{VW_SALES_COMBINED.Qty}" : "{VW_SALES_COMBINED.ITEM_AMT}+{VW_SALES_COMBINED.PACK_AMT}-{VW_SALES_COMBINED.DISC_AMT}";
+                formulaFields.RPTNAME =  crystalString("MONTH WISE SALE (PARTY/ITEM WISE)");
+            }
+
+            // SALE_COMBINED1 - Combined Sale Register Details
+            else if (SaleListDetail == true)
+            {
+                reportName = "SALE_COMBINED1";
+                formulaFields.RPTNAME = crystalString("Sale Register Details(Combined)");
+            }
+
+            // SALE25 - Month Wise Reports
+            else if (MonthWiseCustomer == true || MonthWiseAgent == true || MonthWiseItemGroup == true || MonthWiseItem == true || MonthWisecolor == true)
+            {
+
+                reportName = "SALE25";
+                formulaFields.Qty = ChkQty
+                    ? "{VW_SALES_COMBINED.Qty}"
+                    : "{VW_SALES_COMBINED.ITEM_AMT}+{VW_SALES_COMBINED.PACK_AMT}-{VW_SALES_COMBINED.DISC_AMT}";
+
+                if (MonthWiseCustomer == true)
+                {
+                    formulaFields.GrpName1 = "{DOCTYPE_MAST.NAME}";
+                    formulaFields.GrpName2 = "{SUBGROUP_MAST.NAME}";
+                    formulaFields.RPTNAME = crystalString("MONTH WISE SALE (CUSTOMER WISE)");
+                }
+                else if (MonthWiseAgent == true)
+                {
+                    formulaFields.GrpName1 = "{ACOS_MAST.NAME}";
+                    formulaFields.GrpName2 = "{SUBGROUP_MAST.NAME}";
+                    formulaFields.RPTNAME = crystalString("MONTH WISE SALE (AGENT-CUSTOMER WISE)");
+
+                }
+                else if (MonthWiseItemGroup == true)
+                {
+                    formulaFields.GrpName1 = "{ITEM_GROUP.GROUP_TYPE}";
+                    formulaFields.GrpName2 = "{ITEM_GROUP.NAME}";
+                    formulaFields.RPTNAME = crystalString("MONTH WISE SALE (ITEM GROUP WISE)");
+
+                }
+                else if (MonthWiseItem == true)
+                {
+                    formulaFields.GrpName1 = "{ITEM_GROUP.NAME}";
+                    formulaFields.GrpName2 = "{ITEM_MAST.NAME}";
+                    formulaFields.RPTNAME = crystalString("MONTH WISE SALE (ITEM WISE)");
+
+                }
+                else if (MonthWisecolor == true)
+                {
+                    formulaFields.GrpName1 = "{SUBGROUP_MAST.NAME}";
+                    formulaFields.GrpName2 = "{ITEM_MAST.COLOR_CODE}";
+                    formulaFields.RPTNAME = crystalString("MONTH WISE SALE (COLOR WISE)");
+                }
+            }
+
+        }
+        else
+        {
+            if (SalesRegister == true)
+            {
+                reportName = "SALE1";
+                formulaFields.RPTNAME =  crystalString(  DocumentType === "SART" ? "Sales Return Register" : "Sales Register" );
+            }
+
+            else if (SaleRegisterDrCrNote == true)
+            {
+                reportName = "SALE7";
+                formulaFields.RPTNAME = crystalString("Sales Register (With Debit & Credit Note)");
+            }
+
+            else if (SalesRegisterCancel == true)
+            {
+                reportName = "SALE1";
+                formulaFields.RPTNAME = crystalString("Sales Register-Cancel");
+            }
+
+            else if (SalesRegisterDetail == true)
+            {
+                reportName = "SALE115";
+                formulaFields.RPTNAME = crystalString("Daily Dispatch Register");
+            }
+
+            else if (SalesThrough == true)
+            {
+                reportName = "SALE12";
+                formulaFields.RPTNAME = crystalString("Sales Through Report");
+            }
+
+            else if (SalesRegisterDetailCancel == true)
+            {
+                reportName = "SALE115";
+                formulaFields.RPTNAME = crystalString("Daily Dispatch Register-Cancel");
+            }
+
+            else if (BileItemwise == true)
+            {
+                reportName = "SALE31";
+                formulaFields.RPTNAME = crystalString("BILL & ITEM WISE SALE");
+            }
+
+            else if (PartyItemWise == true)
+            {
+                reportName = "SALE30_PLPL";
+                formulaFields.RPTNAME = crystalString("CUSTOMER/ITEM WISE SALE REPORT");
+            }
+
+            else if (TptFreightReport == true)
+            {
+                reportName = "FREIGHT2";
+                selectionFormula = addCondition(selectionFormula, " AND ({SALE1.FRT_AMT}>0 or {SALE1.INSU_AMT}>0)" );
+                formulaFields.RPTNAME = crystalString("TRANSPORT FREIGHT REPORT(SALE)");
+            }
+
+            else if (LoadUnLoadReport == true)
+            {
+                reportName = "FREIGHT5";
+                selectionFormula = addCondition( selectionFormula,  "{SALE1.LOAD_AMT}>0" );
+                formulaFields.RPTNAME = crystalString("LOADING/UNLOADING REPORT(SALE)");
+            }
+
+            else if (WBReport == true)
+            {
+                reportName = "FREIGHT6";
+                selectionFormula = addCondition( selectionFormula, "{SALE1.WB_AMT}>0" );
+                formulaFields.RPTNAME = crystalString("WEIGH BRIDGE REPORT(SALE)");
+            }
+
+            else if (AgentWiseSale == true)
+            {
+                reportName = "SALE30";
+                formulaFields.RPTNAME = crystalString("AGENT WISE SALE REPORT");
+            }
+
+            else if (ColourGrpAnalysisTruck == true)
+            {
+                reportName = "SALE5C";
+                formulaFields.RPTNAME =  crystalString("SALE ANALYSIS COLOR GROUP WISE(TRUCK)");
+            }
+
+            else if (AnalysisTruck == true)
+            {
+                reportName = "SALE5B";
+                formulaFields.RPTNAME = crystalString("SALE ANALYSIS (TRUCK)");
+            }
+
+            else if (AnalysisTon == true)
+            {
+                reportName = "SALE5D";
+                selectionFormula = addCondition( selectionFormula,  "{@qty_truck} >= .51"  );
+                formulaFields.RPTNAME = crystalString("SALE ANALYSIS (in TONES)");
+            }
+
+            else if (DenierAnalysisTruck == true)
+            {
+                reportName = "SALE5A";
+                formulaFields.RPTNAME = crystalString("SALE ANALYSIS COLOR/DENIER WISE(TRUCK)");
+            }
+
+            else if (MsMESaleList == true)
+            {
+                reportName = "SALE1_MSME";
+                selectionFormula = addCondition( selectionFormula,  "{SUBGROUP_MAST.MSME_NO} <> ''" );
+                formulaFields.RPTNAME = crystalString("MSME SALE LIST");
+            }
+
+            else if (GateToInvoiceTime == true)
+            {
+                reportName = "SALE1_TIMEDIFF";
+                formulaFields.RPTNAME = crystalString("INVOICE TIME REPORT");
+            }
+
+            else if (getValue('#ddlGroup') && getValue('#ddlRow') && getValue('#ddlColumn'))
+            {
+                reportName = "SALE8";
+
+                if (Row === Column || Row === Group) {
+                    toastr.warning( "Row should be different from Column and Group." );
+                    return;
+                }
+
+                const dynamicFields = {
+                    ItemName: "{ITEM_MAST.NAME}",
+                    Date: "{SALE2.V_DATE}",
+                    Month: "totext({SALE2.V_DATE},'yyyy-MM')",
+                    Year: "{YEAR_MAST.CURR_YEAR}",
+                    PartyName: "{SUBGROUP_MAST.NAME}",
+                    StateName: "{STATE_MAST.NAME}",
+                    StateType: "{STATE_MAST.STATE_TYPE}",
+                    ItemType: "{SALE1.ITEM_TYPE}",
+                    ItemCat: "{ITEMCAT_MAST.NAME}",
+                    ItemGram: "{ITEMGRAM_MAST.NAME}",
+                    ItemGroup: "{ITEM_GROUP.NAME}",
+                    ItemMGroup: "{ITEM_MGROUP.NAME}",
+                    ItemMainGroup: "{ITEM_MGROUP.MGROUP_TYPE}",
+                    ItemColor: "{COLOR_MAST.NAME}",
+                    ItemMColor: "{COLORGROUP_MAST.NAME}",
+                    ItemPType: "{ITEMPTYPE_MAST.NAME}",
+                    ItemPTypeGrp: "{ITEMPTYPE_MAST.PTYPE}",
+                    ItemHSN: "{SALE2.HSN_CODE}",
+                    DocId: "{SALE1.DOC_ID}"
+                };
+
+                if (!dynamicFields[Group] || !dynamicFields[Row] || !dynamicFields[Column])
+                {
+                    toastr.warning("Invalid Row, Column or Group selection.");
+                    return;
+                }
+
+                formulaFields.NameRowGrp = dynamicFields[Group];
+                formulaFields.NameRow = dynamicFields[Row];
+                formulaFields.NameCol = dynamicFields[Column];
+                formulaFields.RPTNAME = crystalString("SALES REPORT");
+            }
+        }
+
+        if (!reportName)
+        {
+            toastr.warning("Please select a report.");
+            return;
+        }
+
+        const reportDateText = `From ${formatReportDate(FromDate)} To ${formatReportDate(ToDate)}`;
+        formulaFields.comp_name = crystalString(globalVars.CompanyName || "");
+        formulaFields.comp_add1 = crystalString(globalVars.Address1 || "");
+        formulaFields.comp_add2 = crystalString(globalVars.Address2 || "");
+        formulaFields.f1 =  crystalString(reportDateText);
 
         const payload = {
             Reportname: reportName,
-            Database: database,
-            selectionFormula: formula,
-
-            Parameters: {
-                comp_name: "'" + (globalVars.CompanyName || "") + "'",
-                comp_add1: "'" + (globalVars.Address1 || "") + "'",
-                comp_add2: "'" + (globalVars.Address2 || "") + "'",
-                RPTNAME: "'STATEMENT OF INSURANCE DECLARATION'",
-                F1: "'" + Formulafield + "'",
-                OPAMT: openingBalance
-            }
+            Database: globalVars.Database || (typeof database !== "undefined" ? database : ""),
+            selectionFormula: selectionFormula,
+            Parameters: formulaFields
         };
 
-        console.log("Selection Formula:", formula);
-        console.log("Report Payload:", payload);
+        console.log("Report Name:", reportName);
+        console.log("Selection Formula:", selectionFormula);
+        console.log("Formula Fields:", formulaFields);
+        console.log("Final Payload:", payload);
 
-        // 5. Generate Timestamp
         const now = new Date();
 
         const timestamp =
@@ -837,83 +1175,57 @@ async function TransitReport() {
             String(now.getMinutes()).padStart(2, '0') +
             String(now.getSeconds()).padStart(2, '0');
 
-        // 6. Generate Crystal Reports PDF
-        //const response = await $.ajax({
-        //    url: 'http://localhost:24085/Report/PendingQCReport',
-        //    type: 'POST',
-        //    data: JSON.stringify(payload),
-        //    contentType: "application/json; charset=utf-8",
-        //    xhrFields: {
-        //        responseType: 'blob'
-        //    }
-        //});
+        const response = await $.ajax({
+            url: 'http://localhost:24085/Report/PendingQCReport',
+            type: 'POST',
+            data: JSON.stringify(payload),
+            contentType: "application/json; charset=utf-8",
+            xhrFields: { responseType: 'blob' }
+        });
 
-        //// 7. Validate PDF response
-        //if (!response || response.size === 0) {
-        //    throw new Error("Crystal Reports returned an empty PDF.");
-        //}
+        if (!response || response.size === 0) {
+            throw new Error("Crystal Reports returned an empty PDF.");
+        }
 
-        // 8. Download PDF
         const fileName = `${reportName}_${timestamp}.pdf`;
-
         const fileUrl = URL.createObjectURL(
             new Blob([response], { type: 'application/pdf' })
         );
 
         const link = document.createElement('a');
-
         link.href = fileUrl;
         link.download = fileName;
-
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
-        setTimeout(() => {
-            URL.revokeObjectURL(fileUrl);
-        }, 1000);
-
+        URL.revokeObjectURL(fileUrl);
         toastr.success("Report generated successfully.");
-
     }
-    catch (error) {
-
+    catch (error)
+    {
         console.error("Transit Report Error:", error);
-
-        // 9. Read actual API error
         let errorMessage = error.message || "Unknown error";
-
         if (error.response instanceof Blob) {
-
             try {
                 const responseText = await error.response.text();
-
                 console.error("API Error Response:", responseText);
-
-                try {
+                try
+                {
                     const errorJson = JSON.parse(responseText);
-
-                    errorMessage =
-                        errorJson.Message ||
-                        errorJson.message ||
-                        errorJson.ExceptionMessage ||
-                        responseText;
+                    errorMessage = errorJson.Message || errorJson.message ||  errorJson.ExceptionMessage || responseText;
                 }
-                catch {
+                catch
+                {
                     errorMessage = responseText;
                 }
 
-            }
-            catch (readError) {
+            } catch (readError)
+            {
                 console.error("Error reading API response:", readError);
             }
         }
 
-        console.error("Final Error:", errorMessage);
-
-        toastr.error(
-            "Report generation failed: " + errorMessage
-        );
+        toastr.error("Report generation failed: " + errorMessage);
     }
 }
 function ReportformatDate(value) {
@@ -932,4 +1244,26 @@ function ReportformatDate(value) {
     }
 
     return `${String(day).padStart(2, '0')}/${months[month - 1]}/${year}`;
+}
+
+async function DataInsert(SaleRegisterDrCrNote, TptFreightReport, FromDate, Todate) {
+    try {
+        const res = await $.ajax({
+            url: '/PerformaRegisterReport/DataInsert',
+            type: 'POST',
+            data: {
+                SaleRegisterDrCrNote: SaleRegisterDrCrNote,
+                TptFreightReport: TptFreightReport,
+                FromDate: FromDate,
+                Todate: Todate
+            },
+            dataType: 'json'
+        });
+
+       
+    }
+    catch (error) {
+        console.error("DataInsert Error:", error);
+        toastr.error(error.responseJSON?.message || "Error while inserting data.");
+    }
 }
