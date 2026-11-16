@@ -127,6 +127,8 @@ builder.Services.AddScoped<IExportTrackingReportRepository, ExportTrackingReport
 builder.Services.AddScoped<ITransportRateRequestForQuotationRepository, TransportRateRequestForQuotationRepository>();
 builder.Services.AddScoped<ITransportRateRequestForQuotationListRepository, TransportRateRequestForQuotationListRepository>();
 
+builder.Services.AddScoped<IDocumentEmailingRepository, DocumentEmailingRepository>();
+
 // Gete Entry Transaction repositories
 
 builder.Services.AddScoped<IDatabaseMetadataService, DatabaseMetadataService>();
