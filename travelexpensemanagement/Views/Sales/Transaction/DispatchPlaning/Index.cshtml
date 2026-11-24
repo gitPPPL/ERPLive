@@ -1,0 +1,284 @@
+﻿@{
+    ViewBag.Title = "Dispatch Planning";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVar = ViewBag.GlobalVariables as Models.UserSessionData;
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa-solid fa-clipboard-list"></i>
+        </div>
+        <div class="erppage-header-title">Dispatch Planning</div>
+    </div>
+
+    <div class="erppage-header-right">
+        <div class="erppage-internalaction">
+            <button type="button" id="btn_print" class="erppage-btn erppage-btn-common-print-disabled" onclick="DispatchPlanningReport()"><i class="fa fa-print"></i> Print</button>
+        </div>
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "DispatchPlanningList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to list
+        </button>
+    </div>
+</div>
+<fieldset class="erppagefieldset">
+
+    <div class="erppagesrow">
+
+        <!-- LEFT SIDE: DOCUMENT DETAILS -->
+        <div class="erppagescol-5">
+
+            <fieldset class="erppagefieldset">
+
+                <div class="erppage-grid2">
+
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" for="txtItemFooterDocNo">Doc No</label>
+                        <input type="text" class="erppage-input" id="txtItemFooterDocNo" />
+                    </div>
+
+                    <div class="erppage-divfield">
+                        <label class="erppage-label" for="dtItemFooterDate">Date</label>
+                        <input type="date" class="erppage-input" id="dtItemFooterDate" />
+                    </div>
+
+                </div>
+
+                <div class="erppage-divfield">
+
+                    <div class="erppage-checkbox-wrap">
+
+                        <input type="radio" name="itemSearchType" id="rdoItemName" value="ItemName" checked>
+                        <label for="rdoItemName" class="erppage-checkbox-label">Item Name</label>
+
+                        <input type="radio" name="itemSearchType" id="rdoItemSize" value="ItemSize">
+                        <label for="rdoItemSize" class="erppage-checkbox-label">Item Size</label>
+
+                        <input type="radio" name="itemSearchType" id="rdoShortName" value="ShortName">
+                        <label for="rdoShortName" class="erppage-checkbox-label">Short Name</label>
+
+                        <input type="radio" name="itemSearchType" id="rdoItemColor" value="ItemColor">
+                        <label for="rdoItemColor" class="erppage-checkbox-label">Item Color</label>
+
+                        <input type="radio" name="itemSearchType" id="rdoItemGram" value="ItemGram">
+                        <label for="rdoItemGram" class="erppage-checkbox-label">Item Gram</label>
+
+                    </div>
+
+                </div>
+
+                <div class="erppage-internalaction">
+
+                    <button type="button" id="btnItemFooterFillData"
+                            class="erppage-btn erppage-btn-common">
+                        <i class="fa-solid fa-fill-drip"></i> Fill data
+                    </button>
+
+                    <button type="button" id="btnItemFooterReset"
+                            class="erppage-btn erppage-btn-common">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+
+                    <button type="button" id="btnShowAllPendingOrder"
+                            class="erppage-btn erppage-btn-common">
+                        <i class="fa-solid fa-rotate"></i> Show All Pending Order
+                    </button>
+
+                </div>
+
+            </fieldset>
+
+        </div>
+
+        <!-- RIGHT SIDE: PENDING ORDER DETAILS -->
+        <div class="erppagescol-7">
+            <div class="erppagelist-container">
+
+                <div class="excel-wrapper fixed-grid-wrapper">
+
+                    <table id="tblItemPendingOrder" class="excel-table fixed-grid-table width-table resizable-table">
+                        <thead>
+                            <tr>
+                                <th>V_Type</th>
+                                <th>V_No</th>
+                                <th>Vdate</th>
+                                <th>Itemname</th>
+                                <th>Tenacity</th>
+                                <th>Status</th>
+                                <th>Party</th>
+                                <th>Plan_Qty</th>
+                            </tr>
+                        </thead>
+
+                        <tbody></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- FOOTER TABLE -->
+    <!-- ========================================================= -->
+
+    <div class="erppagelist-container">
+
+        <div class="excel-wrapper fixed-grid-wrapper">
+
+            <table id="tblItemNameFooter" class="excel-table fixed-grid-table width-table resizable-table">
+
+                <colgroup>
+                    <col style="display: none;">
+                    <col style="width: 200px;">
+                    <col style="width: 137px;">
+                    <col style="width: 123px;">
+                    <col style="width: 90px;">
+                    <col style="width: 90px;">
+                    <col style="width: 146px;">
+                    <col style="width: 160px;">
+                    <col style="width: 126px;">
+                    <col style="width: 134px;">
+                    <col style="width: 110px;">
+                </colgroup>
+
+                <thead>
+                    <tr>
+                        <th style="display: none;">Item Code</th>
+                        <th class="freeze-item">Item Name</th>
+                        <th>Tenacity</th>
+                        <th>Status</th>
+                        <th>Bale No.</th>
+                        <th>Stock</th>
+                        <th>Dispatch Plan Qty</th>
+                        <th>Party Name</th>
+                        <th>Est. Production</th>
+                        <th>Approx. Amount</th>
+                        <th class="action-col">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!--Dispatch Planning Modal Popup-->
+    <div class="modal fade" id="copyFromModal" tabindex="-1" aria-labelledby="dispatchPlanningLabel" aria-hidden="true">
+        <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+            <div class="modal-content erppagesmodal-content">
+                <div class="erppagesmodal-header">
+                    <div class="erppagesmodal-header-left">
+                        <div class="erppagesmodal-header-icon">
+                            <i class="fa fa-copy"></i>
+                        </div>
+                        <h5 class="erppagesmodal-title" id="dispatchPlanningLabel">
+                            Copy From
+                        </h5>
+                    </div>
+                    <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <div class="erppagesmodal-body">
+                    <div class="erppage-grid3">
+                        <div class="erppage-divfield">
+                            <div class="erppagelist-search-wrapper">
+                                <i class="fa fa-search"></i>
+                                <input type="text" id="searchBoxPR" placeholder="Search..." />
+                            </div>
+                        </div>
+                        <div class="erppage-divfield">
+                            <label class="erppage-label"></label>
+                            <div class="erppage-checkbox-wrap">
+                                <input type="checkbox" id="chkAppendPR" class="erppage-checkbox-input">
+                                <label for="chkAppendPR" class="erppage-checkbox-label">Append</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="erppagesmodal-action mt-2">
+                        <button type="button" id="btnCopyPendingOrders" class="erppagesmodal-btn" data-bs-dismiss="modal">
+                            <i class="fa fa-copy"></i>Copy
+                        </button>
+                    </div>
+                    <div class="excel-wrapper fixed-grid-wrapper">
+                        <table id="tblDeliveryOrderPopUp" class="excel-table width-table fixed-grid-table resizable-table">
+                            <colgroup>
+                                <col style="width:50px;">
+                                <col style="width: 114px;">
+                                <col style="width: 55px;">
+                                <col style="width: 292px;">
+                                <col style="width: 83px;">
+                                <col style="width: 110px;">
+                                <col style="width:80px;">
+                                <col style="width:120px;">
+                                <col style="width: 95px;">
+                                <col style="width:100px;">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllPR" /></th>
+                                    <th>Doc No</th>
+                                    <th>Date</th>
+                                    <th>Party Name</th>
+                                    <th>Item Name</th>
+                                    <th>Tenacity</th>
+                                    <th>Qty</th>
+                                    <th>Rate</th>
+                                    <th>Bal Qty</th>
+                                    <th>Plan Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="erppage-actions">
+        <button id="btn_save" type="submit" class="erppage-btn erppage-btn-save">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save</span>
+        </button>
+    </div>
+
+</fieldset>
+
+<script src="~/js/erpjs/sales/transaction/dispatchplanningjs/dispatchplanning.js"></script>
+
+<script>
+    var compCode = '@ViewBag.CompCode';
+    var branchCode = '@ViewBag.BranchCode';
+    var yearCode = '@ViewBag.YearCode';
+
+    window.globalVariables = {
+        compCode: "@globalVar?.PubCompCode",
+        yearCode: "@globalVar?.PubFYearCode",
+        branchCode: "@globalVar?.PubBranchCode",
+
+        companyName: "@globalVar?.CompanyName",
+        add1: "@globalVar?.Address1",
+        add2: "@globalVar?.Address2",
+
+        gstin: "@globalVar?.gstin",
+        pan: "@globalVar?.PAN",
+        website: "@globalVar?.Website",
+        email: "@globalVar?.Email",
+        phone: "@globalVar?.Phone"
+    };
+
+    window.database = {
+        db: "@ViewBag.DatabaseName"
+    };
+</script>

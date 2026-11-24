@@ -34,11 +34,6 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             _deliveryOrderRepository = deliveryOrderRepository;
         }
 
-        //public IActionResult Index()
-        //{
-        //    return View("~/Views/Sales/Transaction/DeliveryOrder/Index.cshtml");
-        //}
-
         public IActionResult Index(string mode = "DOrder")
         {
             ViewBag.FormMode = mode;

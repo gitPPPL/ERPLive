@@ -95,6 +95,8 @@ builder.Services.AddScoped<IInsuranceCoverNoteListRepository, InsuranceCoverNote
 builder.Services.AddScoped<IExportDetailsRepository, ExportDetailsRepository>();
 builder.Services.AddScoped<IDeliveryOrderRepository, DeliveryOrderRepository>();
 builder.Services.AddScoped<IDeliveryOrderListRepositroy, DeliveryOrderListRepository>();
+builder.Services.AddScoped<IDispatchPlanningRepository, DispatchPlanningRepository>();
+builder.Services.AddScoped<IDispatchPlanningListRepository, DispatchPlanningListRepository>();
 
 
 

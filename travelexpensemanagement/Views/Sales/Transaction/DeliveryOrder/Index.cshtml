@@ -785,17 +785,18 @@
             $('#deliveryOrderForm select, #deliveryOrderForm input[type="checkbox"]')
                 .prop('disabled', true);
 
-            // Disable other buttons except 3 action buttons and tab navigation
+            // Disable other buttons except action buttons and tabs
             $('#deliveryOrderForm button')
                 .not('#btnReconcileDO, #btnCreateProforma, #btnCreateSalesInvoice, .erppage-tab')
                 .prop('disabled', true);
 
-            // Hide normal Save button
+            // Hide Save button
             $('#btn_save').hide();
 
+            // Keep Back to list enabled
+            $('.erppage-header-back').prop('disabled', false);
         }
 
     });
-
 
 </script>

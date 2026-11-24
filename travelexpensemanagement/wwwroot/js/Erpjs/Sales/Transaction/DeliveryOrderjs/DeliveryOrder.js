@@ -483,6 +483,35 @@ async function WireEvent() {
 
         CalculateFooterTotals();
     });
+
+    // =========================================
+    // INSURANCE AMOUNT - BLUR
+    // =========================================
+    $(document).on('blur', '#txtins_amt', function () {
+
+        if (deliveryOrderCalcSettings?.taxOnInsurance === 'Yes') {
+            DistributeInsuranceAmount();
+        }
+
+    });
+
+    // =========================================
+    // FREIGHT AMOUNT - BLUR
+    // =========================================
+    $(document).on('blur', '#NumFreightAmt', function () {
+
+        if (deliveryOrderCalcSettings?.taxOnFreight === 'Yes') {
+            DistributeFreightAmount();
+        }
+
+        const freightAmount = parseFloat($('#NumFreightAmt').val()) || 0;
+        const taxPercent = parseFloat($('#txttaxOnFrt_p').val()) || 0;
+
+        $('#txttaxOnFrt_Amt').val(
+            (freightAmount * taxPercent * 0.01).toFixed(2)
+        );
+
+    });
 }
 
 $(document).on('blur', '#NumOtherPacking2', function () {
@@ -2208,6 +2237,9 @@ function DistributeCashDiscountAmount() {
     CalculateFooterTotals();
 }
 
+// =========================================
+// Distribute Insurance Amount
+// =========================================
 function DistributeInsuranceAmount() {
 
     const settings = deliveryOrderCalcSettings || {};
@@ -2217,14 +2249,16 @@ function DistributeInsuranceAmount() {
     }
 
     const insuranceAmount = parseFloat($('#txtins_amt').val()) || 0;
-    const totalAmount = parseFloat($('#NumOtherTotalAmount').val()) || 0;
 
     const rows = $('#tblDeliveryorder tbody tr').filter(function () {
         return !!$(this).find('.productCode').val();
     });
 
-    // Reset insurance allocation for all valid item rows
+    let totalAmount = 0;
+
     rows.each(function () {
+        totalAmount += parseFloat($(this).find('.amount').val()) || 0;
+
         $(this).find('.insuranceAmount').val('0.00');
     });
 
@@ -2232,20 +2266,18 @@ function DistributeInsuranceAmount() {
         return;
     }
 
-    let cumulativeAmount = 0;
+    let cumAmt = 0;
 
     rows.each(function (index) {
 
         const row = $(this);
         const itemAmount = parseFloat(row.find('.amount').val()) || 0;
-        let allocatedAmount;
 
-        // Last item receives the remaining amount to avoid rounding differences
+        let allocatedAmount = 0;
+
         if (index === rows.length - 1) {
 
-            allocatedAmount = Number(
-                (insuranceAmount - cumulativeAmount).toFixed(2)
-            );
+            allocatedAmount = insuranceAmount - cumAmt;
 
         } else {
 
@@ -2253,22 +2285,78 @@ function DistributeInsuranceAmount() {
                 (insuranceAmount / totalAmount * itemAmount).toFixed(2)
             );
 
-            cumulativeAmount += allocatedAmount;
+            cumAmt += allocatedAmount;
         }
 
         row.find('.insuranceAmount').val(allocatedAmount.toFixed(2));
+
     });
 
-    // Recalculate row taxes without recursively calling footer calculation
-    isDistributingInsurance = true;
+    rows.each(function () {
+        CalculateRowAmounts($(this));
+    });
 
-    try {
-        rows.each(function () {
-            CalculateRowAmounts($(this));
-        });
-    } finally {
-        isDistributingInsurance = false;
+}
+
+// =========================================
+// Distribute Freight Amount
+// =========================================
+function DistributeFreightAmount() {
+
+    const settings = deliveryOrderCalcSettings || {};
+
+    if (settings.taxOnFreight !== 'Yes') {
+        return;
     }
+
+    const freightAmount = parseFloat($('#NumFreightAmt').val()) || 0;
+
+    const rows = $('#tblDeliveryorder tbody tr').filter(function () {
+        return !!$(this).find('.productCode').val();
+    });
+
+    let totalAmount = 0;
+
+    rows.each(function () {
+        totalAmount += parseFloat($(this).find('.amount').val()) || 0;
+
+        $(this).find('.freightAmount').val('0.00');
+    });
+
+    if (totalAmount <= 0 || rows.length === 0) {
+        return;
+    }
+
+    let cumAmt = 0;
+
+    rows.each(function (index) {
+
+        const row = $(this);
+        const itemAmount = parseFloat(row.find('.amount').val()) || 0;
+
+        let allocatedAmount = 0;
+
+        if (index === rows.length - 1) {
+
+            allocatedAmount = freightAmount - cumAmt;
+
+        } else {
+
+            allocatedAmount = Number(
+                (freightAmount / totalAmount * itemAmount).toFixed(2)
+            );
+
+            cumAmt += allocatedAmount;
+        }
+
+        row.find('.freightAmount').val(allocatedAmount.toFixed(2));
+
+    });
+
+    rows.each(function () {
+        CalculateRowAmounts($(this));
+    });
+
 }
 
 async function SaveDeliveryOrder() {

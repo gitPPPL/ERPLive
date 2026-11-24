@@ -34,6 +34,7 @@ namespace travelexpensemanagement.ModuleService
             }
             return modules;
         }
+
         public List<MenuModule> GetMenuMaster()
         {
             var menumodules = new List<MenuModule>();
@@ -41,9 +42,9 @@ namespace travelexpensemanagement.ModuleService
             int userLevel = GetUserLevel() ?? 0;
 
             string menuQuery = userLevel == 1
-                ? "SELECT CODE, MODULE_CODE, DISPLAY_NAME, MAINMENU_CODE, WebFORM_NAME FROM MENU_MAST ORDER BY MODULE_CODE, MAINMENU_CODE, MENU_OPTION"
-                : "SELECT CODE, MODULE_CODE, DISPLAY_NAME, MAINMENU_CODE, WebFORM_NAME FROM MENU_MAST WHERE DISPLAY_NAME NOT IN ('User Authorizations') ORDER BY DISPLAY_NAME ASC";
-            using var conn = _dbConnection.GetErpConnection();
+              ? "SELECT CODE, MODULE_CODE, DISPLAY_NAME, MAINMENU_CODE, WebFORM_NAME, TAG_NAME FROM MENU_MAST ORDER BY MODULE_CODE, MAINMENU_CODE, MENU_OPTION"
+              : "SELECT CODE, MODULE_CODE, DISPLAY_NAME, MAINMENU_CODE, WebFORM_NAME, TAG_NAME FROM MENU_MAST WHERE DISPLAY_NAME NOT IN ('User Authorizations') ORDER BY DISPLAY_NAME ASC";
+                    using var conn = _dbConnection.GetErpConnection();
             conn.Open();
             using var cmd = new SqlCommand(menuQuery, conn);
             using var reader = cmd.ExecuteReader();
@@ -56,7 +57,8 @@ namespace travelexpensemanagement.ModuleService
                     MODULE_CODE = reader["MODULE_CODE"] != DBNull.Value ? Convert.ToInt32(reader["MODULE_CODE"]) : 0,
                     MainMenuCode = reader["MAINMENU_CODE"] != DBNull.Value ? Convert.ToInt32(reader["MAINMENU_CODE"]) : 0,
                     DISPLAY_NAME = reader["DISPLAY_NAME"]?.ToString() ?? string.Empty,
-                    WebFORM_NAME = reader["WebFORM_NAME"]?.ToString() ?? string.Empty
+                    WebFORM_NAME = reader["WebFORM_NAME"]?.ToString() ?? string.Empty,
+                    TAG_NAME = reader["TAG_NAME"]?.ToString() ?? string.Empty
                 });
             }
             return menumodules;
@@ -109,6 +111,7 @@ namespace travelexpensemanagement.ModuleService
 
             return parentMenus;
         }
+
         private List<MenuModule> GetChildMenus(int parentId, List<MenuModule> allMenus)
         {
             return allMenus
@@ -120,6 +123,7 @@ namespace travelexpensemanagement.ModuleService
                     MainMenuCode = x.MainMenuCode,
                     DISPLAY_NAME = x.DISPLAY_NAME,
                     WebFORM_NAME = x.WebFORM_NAME,
+                    TAG_NAME = x.TAG_NAME,
 
                     Children = GetChildMenus(x.CODE, allMenus)
                 })
@@ -216,6 +220,8 @@ namespace travelexpensemanagement.ModuleService
             public int MainMenuCode { get; set; }
 
             public string WebFORM_NAME { get; set; }
+
+            public string TAG_NAME { get; set; }
 
             // Child Menus
             public List<MenuModule> Children { get; set; } = new List<MenuModule>();
