@@ -463,8 +463,6 @@ function formatDate(dateStr) {
         String(d.getDate()).padStart(2, '0');
 }
 
-
-
 function numberToWordsCurrency(amount, currency = "Rs.", decimalName = "PAISE") {
 
     amount = parseFloat(amount) || 0;

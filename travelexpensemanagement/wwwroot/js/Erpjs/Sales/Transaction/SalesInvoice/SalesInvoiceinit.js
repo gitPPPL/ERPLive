@@ -58,6 +58,18 @@ $(document).ready(async function () {
         await GetVNo(vtype, "SALE1");
     }
 
+
+    $('#ddlDocumentType').on('change', async function () {
+        vtype = $('#ddlDocumentType').val();
+        await GetVNo(vtype, "SALE1");
+    });
+
+
+
+
+
+
+
     $('#ddlPartyName').on('change',async function () {
         selectedPartyData();
         let partycode = $('#ddlPartyName').val();
@@ -867,20 +879,9 @@ $(document).ready(async function () {
         }
     });
 
-
-
-
     $('#button_print').on('click', async function () {
         await GetTransitReportFile("", true);
     });
-
-
-
-
-
-
-
-
 
 
     //kks

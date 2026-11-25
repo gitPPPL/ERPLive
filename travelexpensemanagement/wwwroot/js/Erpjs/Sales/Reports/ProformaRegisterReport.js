@@ -13,18 +13,73 @@ $(document).ready(async function () {
 
             const SaleRegisterDrCrNote = $('#chk_SaleRegistercrdr').is(':checked');
             const TptFreightReport = $('#chk_tptfrieghtreport').is(':checked');
-
             const ToDate = $('#DtToDate').val();
             const FromDate = $('#DtFromDate').val();
-
             await DataInsert(SaleRegisterDrCrNote, TptFreightReport, FromDate, ToDate);
-
         TransitReport();
 
     } catch (error) {
         console.error("Error generating report:", error);
     }
-});
+    });
+
+    $('#ddlItem').on('change', function () {
+
+        const selectedItems = $(this).select2('data');
+        const tbody = $('#tblSelectedItem tbody');
+
+        selectedItems.forEach(item => {
+
+            const itemId = String(item.id);
+            const itemName = item.text;
+
+            // Check duplicate Item ID
+            const alreadyExists = tbody.find('tr').filter(function () {
+                return String($(this).attr('data-id')) === itemId;
+            }).length > 0;
+
+            if (alreadyExists)
+            {
+
+                toastr.info("Item already selected.");
+                return;
+            }
+
+            const row = `
+            <tr data-id="${$('<div>').text(itemId).html()}">
+                <td>${$('<div>').text(itemId).html()}</td>
+                <td>${$('<div>').text(itemName).html()}</td>
+                <td class="text-center">
+                    <button type="button"
+                            class="btn btn-danger btn-sm btnRemoveItem">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+
+            tbody.append(row);
+        });
+
+        $('#divSelectedItemGrid').toggle(tbody.find('tr').length > 0);
+    });
+    $(document).on('click', '.btnRemoveItem', function () {
+
+        const itemId = String($(this).closest('tr').attr('data-id'));
+
+        let selectedItems = $('#ddlItem').val() || [];
+
+        // Ensure selectedItems is an array
+        if (!Array.isArray(selectedItems)) {
+            selectedItems = [selectedItems];
+        }
+
+        selectedItems = selectedItems.filter(id => String(id) !== itemId);
+
+        $('#ddlItem').val(selectedItems).trigger('change');
+
+    });
+
 
     $('#chkSelectDocumentType').on('change', function () {
 
@@ -326,35 +381,17 @@ async function DDlItem() {
         ddl.empty();
         ddl.append('<option value="">--- Select Item Name ---</option>');
 
-        // Bind Party Names
+        // Bind Item Names
         data.forEach(item => {
             ddl.append(`<option value="${item.value}">${item.text}</option>`);
         });
 
-        // Initialize Select2 Multiple Checkbox
+        // Initialize Select2 Multiple
         ddl.select2({
             placeholder: "--- Select Item ---",
             closeOnSelect: false,
             allowClear: true,
-            width: '100%',
-            templateResult: function (item) {
-
-                if (!item.id) {
-                    return item.text;
-                }
-
-                const checkbox = $('<span><input type="checkbox" class="me-2" />' + item.text + '</span>');
-
-                checkbox.find('input').prop(
-                    'checked',
-                    item.element.selected
-                );
-
-                return checkbox;
-            },
-            templateSelection: function (item) {
-                return item.text;
-            }
+            width: '100%'
         });
 
     } catch (error) {
@@ -1262,4 +1299,14 @@ async function DataInsert(SaleRegisterDrCrNote, TptFreightReport, FromDate, Toda
         console.error("DataInsert Error:", error);
         toastr.error(error.responseJSON?.message || "Error while inserting data.");
     }
+}
+
+
+function RemoveSelectedItem(itemId) {
+
+    let selectedValues = $('#ddlItem').val() || [];
+
+    selectedValues = selectedValues.filter(id => id !== itemId);
+
+    $('#ddlItem').val(selectedValues).trigger('change');
 }
