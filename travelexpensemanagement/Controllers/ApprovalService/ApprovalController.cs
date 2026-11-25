@@ -28,7 +28,7 @@ namespace travelexpensemanagement.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CheckApprovalStatus(string v_type,int v_no, string tableName)
+        public async Task<IActionResult> CheckApprovalStatus(string v_type, int v_no, string tableName)
         {
             string status = await _approvalService.GetApprovalStatus(v_type, v_no, tableName);
 
@@ -64,8 +64,7 @@ namespace travelexpensemanagement.Controllers
 
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = @"
-                    SELECT a.USER_CODE AS Value, b.FULL_NAME AS Text
+                string query = @"  SELECT a.USER_CODE AS Value, b.FULL_NAME AS Text
                     FROM DOC_APPROSTAGE a
                     LEFT JOIN CONDATABASE.dbo.USER_MAST b
                     ON a.USER_CODE = b.CODE
@@ -179,7 +178,7 @@ namespace travelexpensemanagement.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new {  success = false,  message = ex.Message });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
@@ -197,12 +196,9 @@ namespace travelexpensemanagement.Controllers
                     int menuCode = 0;
                     string webFormMainName = "";
 
-                    using (SqlCommand menuCmd = new SqlCommand(
-                        @"SELECT TOP 1 Code, WebFORM_MainName  FROM MENU_MAST
-                        WHERE LTRIM(RTRIM(WebFORM_MainName)) = @FormName", con))
+                    using (SqlCommand menuCmd = new SqlCommand(@"SELECT TOP 1 Code, WebFORM_MainName  FROM MENU_MAST WHERE LTRIM(RTRIM(WebFORM_MainName)) = @FormName", con))
                     {
                         menuCmd.Parameters.AddWithValue("@FormName", model.FromName);
-
                         using (SqlDataReader dr = await menuCmd.ExecuteReaderAsync())
                         {
                             if (await dr.ReadAsync())
@@ -210,13 +206,10 @@ namespace travelexpensemanagement.Controllers
                                 menuCode = Convert.ToInt32(dr["Code"]);
                                 webFormMainName = Convert.ToString(dr["WebFORM_MainName"]);
                             }
+
                             else
                             {
-                                return Json(new
-                                {
-                                    success = false,
-                                    message = "Menu not found in MENU_MAST"
-                                });
+                                return Json(new { success = false, message = "Menu not found in MENU_MAST" });
                             }
                         }
                     }
@@ -227,22 +220,9 @@ namespace travelexpensemanagement.Controllers
                     DateTime? originDate = null;
                     string docName = "";
 
-                    string query = $@"
-                        SELECT 
-                        G.V_TYPE,
-                        G.V_NO,
-                        G.DOC_ID,
-                        G.UUSER AS ORIGIN_CODE,
-                        G.UDATE AS ORIGIN_DATE,
-                        G.EDATE AS SEND_DATE,
-                        ISNULL(D.NAME,'') AS DOC_NAME
-                        FROM {model.tableName} G
-                        LEFT JOIN DOCTYPE_MAST D ON D.CODE = G.V_TYPE
-                        WHERE G.V_NO = @V_NO
-                        AND G.V_TYPE = @V_TYPE
-                        AND G.YEAR_CODE = @YEAR_CODE
-                        AND G.BRANCH_CODE = @BRANCH_CODE
-                        AND G.COMP_CODE = @COMP_CODE";
+                    string query = $@" SELECT G.V_DATE as SEND_DATE ,  G.V_TYPE, G.V_NO, G.DOC_ID, G.UUSER AS ORIGIN_CODE,  G.UDATE AS ORIGIN_DATE, ISNULL(D.NAME,'') AS 
+                    DOC_NAME FROM {model.tableName} G LEFT JOIN DOCTYPE_MAST D ON D.CODE = G.V_TYPE
+                    WHERE G.V_NO = @V_NO AND G.V_TYPE = @V_TYPE AND G.YEAR_CODE = @YEAR_CODE AND G.BRANCH_CODE = @BRANCH_CODE AND G.COMP_CODE = @COMP_CODE";
 
                     using (SqlCommand fetchCmd = new SqlCommand(query, con))
                     {
@@ -268,11 +248,7 @@ namespace travelexpensemanagement.Controllers
                             }
                             else
                             {
-                                return Json(new
-                                {
-                                    success = false,
-                                    message = "Document not found"
-                                });
+                                return Json(new { success = false, message = "Document not found" });
                             }
                         }
                     }
@@ -284,34 +260,23 @@ namespace travelexpensemanagement.Controllers
                         cmd.Parameters.AddWithValue("@YEAR_CODE", gv.PubFYearCode);
                         cmd.Parameters.AddWithValue("@BRANCH_CODE", gv.PubBranchCode);
                         cmd.Parameters.AddWithValue("@COMP_CODE", gv.PubCompCode);
-
                         // From MENU_MAST
                         cmd.Parameters.AddWithValue("@MENU_CODE", menuCode);
                         cmd.Parameters.AddWithValue("@FORM_NAME", webFormMainName);
-
                         cmd.Parameters.AddWithValue("@DEPARTMENT", "");
                         cmd.Parameters.AddWithValue("@ORIGIN_CODE", originCode);
                         cmd.Parameters.AddWithValue("@ORIGIN_NAME", "");
                         cmd.Parameters.AddWithValue("@ORIGIN_DATE", (object)originDate ?? DBNull.Value);
-
                         cmd.Parameters.AddWithValue("@SEND_CODE", gv.PubUserId);
                         cmd.Parameters.AddWithValue("@SEND_NAME", gv.PubUserName);
-
                         cmd.Parameters.AddWithValue("@USER_CODE", Convert.ToInt32(model.SendTo));
                         cmd.Parameters.AddWithValue("@USER_NAME", "");
-
                         cmd.Parameters.AddWithValue("@DOC_NAME", docName);
                         cmd.Parameters.AddWithValue("@DOC_ID", doc_id);
-
                         cmd.Parameters.AddWithValue("@V_TYPE", model.DocType);
                         cmd.Parameters.AddWithValue("@V_NO", model.DocNo);
-
-                        cmd.Parameters.Add("@V_DATE", SqlDbType.DateTime)
-                            .Value = (object)sendDate ?? DBNull.Value;
-
-                        cmd.Parameters.Add("@SEND_DATE", SqlDbType.DateTime)
-                            .Value = DateTime.Now;
-
+                        cmd.Parameters.Add("@V_DATE", SqlDbType.DateTime).Value = (object)sendDate ?? DBNull.Value;
+                        cmd.Parameters.Add("@SEND_DATE", SqlDbType.DateTime).Value = DateTime.Now;
                         cmd.Parameters.AddWithValue("@STATUS", "Open");
                         cmd.Parameters.AddWithValue("@APPROVAL_CODE", 0);
                         cmd.Parameters.AddWithValue("@APPROVAL_REMARK", model.Remarks ?? "");
@@ -320,11 +285,9 @@ namespace travelexpensemanagement.Controllers
                         cmd.Parameters.AddWithValue("@NEW_MODIFY", "N");
                         cmd.Parameters.AddWithValue("@MSG_STS", 0);
                         cmd.Parameters.AddWithValue("@REQUESTID", 0);
-
                         cmd.Parameters.AddWithValue("@WSID", gv.PubWorkStationID);
                         cmd.Parameters.AddWithValue("@LIP", gv.PubLocalId);
                         cmd.Parameters.AddWithValue("@LID", Environment.MachineName);
-
                         await cmd.ExecuteNonQueryAsync();
                     }
                 }

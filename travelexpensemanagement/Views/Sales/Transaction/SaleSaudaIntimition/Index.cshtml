@@ -1,0 +1,237 @@
+﻿
+
+@using System.Text.Json
+
+@{
+      ViewBag.Title = "Transport Quotation Approval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
+    var databaseName = ViewBag.DatabaseName as string ?? "";
+    var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0;
+    var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
+    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+    var LoadGeneralSetting = ViewBag.LoadGeneralSetting;
+}
+
+ <script>
+
+    window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
+        CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
+        UserId = globalVariables.PubUserId,
+        UserName = globalVariables.PubUserName,
+        UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
+        FYearCode = globalVariables.PubFYearCode,
+        BranchCode = globalVariables.PubBranchCode,
+        LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
+        CompanyName = globalVariables.CompanyName,
+        Address1 = globalVariables.Address1,
+        Address2 = globalVariables.Address2,
+        GST = globalVariables.gstin,
+        PAN = globalVariables.PAN,
+        Phone = globalVariables.Phone,
+        Email = globalVariables.Email,
+        ICE = globalVariables.IEC,
+        website = globalVariables.Website,
+        RegAdd1 = globalVariables.RegAdd1,
+        RegAdd2 = globalVariables.RegAdd2,
+        CINNO = globalVariables.CINNO
+
+    }));
+
+        var LoadGeneralSetting = @Html.Raw( JsonSerializer.Serialize(ViewBag.LoadGeneralSetting)
+    );
+
+
+    window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
+</script> 
+
+
+ <div id="erp-toast-container"></div>
+
+ <div class="erppage-header">
+
+        <div class="erppage-header-left">
+            <div class="erppage-header-icon">
+                <i class="fa fa-file-invoice-dollar"></i>
+            </div>
+            <div class="erppage-header-title">Sale Sauda Intimition</div>
+        </div>
+
+    
+    </div>
+
+ <div class="erppage-container">
+    <div id="SaleSaudaIntimition">
+     
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+        <input type="hidden" class="form-control" id="Vtpye" >
+          
+          <div class="card">
+            <div class="table-responsive">
+                <table id="tblSaleSaudaIntimition" class="table-width">
+                    <colgroup>
+                        <col style="width: 10%;" />
+                        <col style="width: 20%;" />
+                        <col style="width: 10%;" />
+                        <col style="width: 10%;" />
+                        <col style="width: 15%;" />
+                        <col style="width: 15%;" />
+                        <col style="width: 15%;" />
+                        <col style="width: 10%;" />
+                        <col style="width: 10%;" />
+                        <col style="width: 10%;" />
+                    </colgroup>
+                    <thead class="table-head">
+                        <tr>
+                            <th>Action</th>
+                            <th>Doc Date</th>
+                            <th>Doc Type</th>
+                            <th>Doc No</th>
+                            <th>Party Name</th>
+                            <th>Item Name</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>Remark</th>
+                            <th>Doc ID</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+    
+        </div>           
+       
+    </div>
+</div>
+
+<script>
+
+$(document).ready(async function () 
+{
+    GetSaleSaudaIntimitionData();
+});
+
+function GetSaleSaudaIntimitionData() {
+
+    $.ajax({
+        url: '/SaleSaudaIntimition/GetData',
+        type: 'GET',
+        success: function (response) {
+
+            if (response.success) {
+
+                let tbody = $('#tblSalesInvoice tbody');
+                tbody.empty();
+
+                if (response.data && response.data.length > 0) {
+
+                    response.data.forEach(function (item) {
+                        AddRow({
+                            DocDate: item.v_DATE ? item.v_DATE.split('T')[0] : '',
+                            DocType: item.v_TYPE,
+                            DocNo: item.v_NO,
+                            PartyName: item.partyname,
+                            ItemName: item.itemname,
+                            Qty: item.qty,
+                            Rate: item.rate,
+                            Remark: item.remark,
+                            Docid: item.doC_ID
+                        });
+                    });
+
+                } else {
+                    AddRow();
+                }
+
+            }
+            else {
+                toastr.error(response.message);
+            }
+        },
+        error: function () {
+            toastr.error('Error fetching data.');
+        }
+    });
+}
+
+function AddRow(data = {}) {
+
+    console.log("data", data);
+
+    let tbody = $('#tblSaleSaudaIntimition tbody');
+    let newRow = `
+        <tr class="no-border-input">
+
+             <td class="action-col">
+                <button type="button" class="act-btn ok" onclick="ConfirmRow(this)"> OK </button>
+            </td>
+
+            <td>  <input type="Date" class="erppagetable-control TxtDocDate" value="${data.DocDate ?? ''}"  readonly />  </td>
+            <td>  <input type="text" class="erppagetable-control TxtDocType" value="${data.DocType ?? ''}" readonly  />  </td>
+            <td>  <input type="number" class="erppagetable-control TxtDocNo" value="${data.DocNo ?? ''}" readonly />  </td>
+            <td>  <input type="text" class="erppagetable-control TxtPartyName" value="${data.PartyName ?? ''}"  readonly />  </td>
+            <td>  <input type="text" class="erppagetable-control TxtItemName" value="${data.ItemName ?? ''}"  readonly />  </td>
+            <td>  <input type="number" class="erppagetable-control TxtQty" value="${data.Qty ?? ''}" readonly  />  </td>
+            <td>  <input type="number" class="erppagetable-control TxtRate" value="${data.Rate ?? ''}"  readonly />  </td>
+            <td>  <input type="text" class="erppagetable-control TxtRemark" value="${data.Remark ?? ''}"  readonly />  </td>
+            <td>  <input type="text" class="erppagetable-control TxtDocId" value="${data.Docid ?? ''}"  readonly />  </td>
+        </tr>
+    `;
+
+    tbody.append(newRow);
+
+}
+
+function ConfirmRow(btn) {
+
+    console.log("window.globalVariables.UserId", window.globalVariables.UserId);
+
+        // if (window.globalVariables.UserId != 42) {
+        // return;
+        // }
+
+    let row = $(btn).closest('tr');
+
+    let V_NO = row.find('.TxtDocNo').val();
+    let V_TYPE = row.find('.TxtDocType').val();
+
+    if (!V_NO || !V_TYPE) {
+        toastr.warning('Document Type and Document No are required.');
+        return;
+    }
+
+    $.ajax({
+        url: '/SaleSaudaIntimition/UPDATEDATA',
+        type: 'POST',
+        data: {
+            V_NO: V_NO,
+            V_TYPE: V_TYPE
+        },
+        success: function (response) {
+
+            if (response.success) {
+                toastr.success(response.message);
+
+                $(btn).prop('disabled', true);
+            }
+            else {
+                toastr.error(response.message);
+            }
+        },
+        error: function (xhr) {
+            toastr.error('Error updating priority.');
+            console.log(xhr.responseText);
+        }
+    });
+
+
+
+
+      GetSaleSaudaIntimitionData();
+
+
+}
+
+</script>
+

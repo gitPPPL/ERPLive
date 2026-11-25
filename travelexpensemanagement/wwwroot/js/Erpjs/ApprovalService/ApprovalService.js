@@ -30,8 +30,7 @@
                     TableName: tableName
                 };
 
-                $('#btn_Approved')
-                    .text('Send For Approval')
+                $('#btn_Approved') .text('Send For Approval')
                     .show()
                     .prop('disabled', false);
                 break;

@@ -27,7 +27,6 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
             _dbHelper = dbHelper;
             _moduleService = moduleService;
         }
-
         public async Task<IActionResult> Index()
         {
             var globalVariables = _globalVariableService.GetGlobalVariables();
@@ -48,7 +47,6 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
 
             return View("~/Views/Sales/Reports/PerformaRegisterReport/Index.cshtml");
         }
-
         public JsonResult DDlDocumentType()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -92,7 +90,6 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
                 return Json(Data);
             }
         }
-
         public JsonResult DDlACGroup()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -126,7 +123,6 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
                 return Json(Data);
             }
         }
-
         public JsonResult DDlItem()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -221,7 +217,6 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
                 return Json(Data);
             }
         }
-
         public JsonResult DataInsert(bool SaleRegisterDrCrNote, bool TptFreightReport, DateTime FromDate, DateTime Todate, bool LoadUnLoadReport, bool WBReport, bool GateToInvoiceTime)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -260,7 +255,7 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
 
                 }
 
-                if (TptFreightReport == true)
+                else if (TptFreightReport == true)
                 {
                     string query = @$"delete from temp_gst ; 
 
@@ -298,7 +293,7 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
                     }
                 }
 
-                if (LoadUnLoadReport == true)
+                else if (LoadUnLoadReport == true)
                 {
                     string query = @$"delete from temp_gst ;  
                     insert into temp_gst(comp_code,v_type,v_no,v_date,form_code,bill_type) select comp_code,v_type,v_no,
@@ -325,7 +320,7 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
                     }
                 }
 
-                if (WBReport == true)
+                else if (WBReport == true)
                 {
 
                     string query = @$"delete from temp_gst ; 
@@ -355,7 +350,7 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
 
                 }
 
-                if (GateToInvoiceTime == true)
+                else if (GateToInvoiceTime == true)
                 {
                     string query = @$"delete from workflow ; 
                     insert into workflow(comp_code,branch_code,year_code,v_type,v_no,pass_time,pq_time) select comp_code,branch_code,year_code,
@@ -402,7 +397,6 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
                 return Json(new { success = true });
             }
         }
-
 
     }
 }

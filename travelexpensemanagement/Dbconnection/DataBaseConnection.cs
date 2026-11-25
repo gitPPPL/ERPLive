@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Data.SqlClient;
 
 namespace travelexpensemanagement.Dbconnection
 {
@@ -74,8 +72,7 @@ namespace travelexpensemanagement.Dbconnection
             }
         }
 
-        private (string ServerName, string User, string Password)
-            GetDbCredentials(string serverIp)
+        private (string ServerName, string User, string Password) GetDbCredentials(string serverIp)
         {
             return serverIp switch
             {

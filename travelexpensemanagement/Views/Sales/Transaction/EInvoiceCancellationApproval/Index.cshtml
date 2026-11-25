@@ -1,0 +1,190 @@
+﻿
+
+@using System.Text.Json
+
+@{
+    ViewBag.Title = "EInvoice Cancellation Approval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var globalVariables = ViewBag.GlobalVariables as Models.UserSessionData ?? new Models.UserSessionData();
+    var databaseName = ViewBag.DatabaseName as string ?? "";
+    var CompCode = int.TryParse(globalVariables.PubCompCode, out var parsedCompCode) ? parsedCompCode : 0;
+    var PubUserLevel = int.TryParse(globalVariables.PubUserLevel, out var parsedPubUserLevel) ? parsedPubUserLevel : 0;
+    var logindate = globalVariables.PubLoginDate is DateTime date ? date.ToString("yyyy-MM-dd") : "";
+    var LoadGeneralSetting = ViewBag.LoadGeneralSetting;
+}
+
+ <script>
+    window.globalVariables = @Html.Raw(JsonSerializer.Serialize(new {
+        CompCode = int.TryParse(globalVariables.PubCompCode, out var c) ? c : 0,
+        UserId = globalVariables.PubUserId,
+        UserName = globalVariables.PubUserName,
+        UserLevel = int.TryParse(globalVariables.PubUserLevel, out var ul) ? ul : 0,
+        FYearCode = globalVariables.PubFYearCode,
+        BranchCode = globalVariables.PubBranchCode,
+        LoginDate = globalVariables.PubLoginDate.ToString("yyyy-MM-dd"),
+        CompanyName = globalVariables.CompanyName,
+        Address1 = globalVariables.Address1,
+        Address2 = globalVariables.Address2,
+        GST = globalVariables.gstin,
+        PAN = globalVariables.PAN,
+        Phone = globalVariables.Phone,
+        Email = globalVariables.Email,
+        ICE = globalVariables.IEC,
+        website = globalVariables.Website,
+        RegAdd1 = globalVariables.RegAdd1,
+        RegAdd2 = globalVariables.RegAdd2,
+        CINNO = globalVariables.CINNO
+
+    }));
+
+        var LoadGeneralSetting = @Html.Raw( JsonSerializer.Serialize(ViewBag.LoadGeneralSetting)
+    );
+
+
+    window.database = @Html.Raw(JsonSerializer.Serialize(databaseName));
+</script> 
+
+ <div id="erp-toast-container"></div>
+
+ <div class="erppage-header">
+        <div class="erppage-header-left">
+            <div class="erppage-header-icon">
+                <i class="fa fa-file-invoice-dollar"></i>
+            </div>
+            <div class="erppage-header-title">EInvoice Cancellation Approval</div>
+        </div>
+
+        <div class="erppage-header-right">          
+
+        <button type="button" id="btn_Sendapproval" style="display:none;" class="erppagebtn_sendapproval"> Send For Approval </button>
+
+        <button type="button"  id="btn_Approved" style="display:none;" class="erppagebtn_approved">  Approved </button>
+
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "EInvoiceCancellationApprovalList")', isReadOnly)">
+             <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>  
+
+        </div>
+    </div>
+
+ <div class="erppage-container">
+    <div id="TransportRateQuotationForm">
+     
+        <input type="hidden" class="form-control" id="TxtCode" name="CODE">
+
+          <fieldset class="fieldset-sub">         
+
+                <div class="erppage-grid3">
+
+                   <div class="erppage-divfield">                  
+                        <label for="TxtDocumentType">Document Type</label>
+                        <select class="form-control" id="DDlDocumentType">
+                            <option value="">Select Document Type</option>
+                        </select>
+                   </div>
+
+                   <div class="erppage-divfield">     
+                            <label for="NumDocumentNo">Document No</label>
+                            <input type="number" class="form-control" id="NumDocumentNo" placeholder="Enter Document No" readonly>
+                    </div>
+
+                   <div class="erppage-divfield"> 
+                        <label for="DtDocumentDate">Document Date</label>
+                        <input type="date" class="form-control" id="DtDocumentDate">
+                    </div>      
+                </div>
+          </fieldset>
+
+          <fieldset class="fieldset-sub">
+            <div class="erppage-grid3">
+
+                <div class="erppage-divfield">
+                    <label for="DDlDocumentType">E Invoice Document</label>
+                    <select class="form-control" id="DDlEInvoiceDocument">
+                        <option value="">Select EInvoice Document</option>
+                    </select>
+                </div>
+
+                <div class="erppage-divfield">
+                    <label for="DtFromDate">From Date</label>
+                    <input type="date" class="form-control" id="DtFromDate">
+                </div>
+
+                <div class="erppage-divfield">
+                    <label for="DtToDate">To Date</label>
+                    <input type="date" class="form-control" id="DtToDate">
+                </div>
+
+            </div>
+
+
+     
+            <div class="erppage-grid3">
+
+                <div class="erppage-divfield">
+                    <label for="txt_search">Search</label>
+                    <input type="text" class="form-control" id="txt_search" placeholder="Enter search text" />
+                </div>
+
+                <div class="erppage-divfield">
+       
+                
+                <button type="button" class="erppage-btn erppage-btn-common-pending-disabled" id="btn_LoadData" ><i class="fa fa-clock"></i>Load Data</button>
+
+
+                </div>
+
+            </div>       
+
+     </fieldset>
+                         
+          <div class="card">
+            <div class="table-responsive">
+                <table id="tblEinVoicce" class="table-width">
+      
+                    <thead class="table-head">
+                        <tr>                        
+                            <th ">Action</th>
+                            <th>Voucher Type</th>
+                            <th>voucher No</th>
+                            <th>Voucher Date</th>
+                            <th>Net Ammount</th>
+                            <th>Bill To</th>
+                            <th>Bill Gst</th>
+                            <th class="d-none" >Faprov Status</th>
+                            <th>E-Invoice</th>
+                            <th>E-Invoice Generated Date</th>                                              
+                            <th>E-WayBill</th>
+                            <th>E-WayBill Generated Date</th>
+                            <th>Status</th>
+                            <th class="d-none">Trans Type</th>
+                            <th class="d-none">IRN</th>
+                            <th class="d-none">Bill Code</th>
+                            <th class="d-none">Bill Pin Code</th>
+                            <th class="d-none">Ship Code</th>
+                            <th class="d-none">Ship Name</th>
+                            <th class="d-none">Ship Gst</th>
+                            <th class="d-none">Ship Pin Code</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+    
+        </div>
+           
+          <div class="erppage-actions">
+                <button id="btn-save" type="submit" class="erppage-btn erppage-btn-save">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save</span>
+                </button>
+          </div>
+
+    </div>
+</div>
+
+<script src="~/js/erpjs/approvalservice/approvalservice.js"> </script>
+<script src="~/js/erpjs/sales/transaction/EInvoiceCancellationApproval/einvoicecancellationapprovalinit.js"></script>
+<script src="~/js/erpjs/sales/transaction/EInvoiceCancellationApproval/einvoicecancellationapprovalapi.js"></script>
+<script src="~/js/erpjs/sales/transaction/EInvoiceCancellationApproval/einvoicecancellationapproval.js"></script>

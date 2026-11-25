@@ -1,11 +1,7 @@
-﻿using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Drawing.Diagrams;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Text.Json;
-using System.Threading.Tasks;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
@@ -33,7 +29,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             _globalValidationdate = globalValidationdate;
             _dropdownService = dropdownService;
             _dbHelper = dbHelper;
-            _moduleService = moduleService;    
+            _moduleService = moduleService;
             _salesInVoice = salesInVoice;
         }
         public async Task<IActionResult> Index()
@@ -100,7 +96,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
-        }        
+        }
         public JsonResult DDlLicNO(String TYPE)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -131,7 +127,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
-        }        
+        }
         public JsonResult DDlDoNo()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -154,7 +150,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int) .Value = getdata.PubCompCode;
+                    cmd.Parameters.Add("@COMP_CODE", SqlDbType.Int).Value = getdata.PubCompCode;
                     cmd.Parameters.Add("@Action", SqlDbType.VarChar, 50).Value = "PartyMast";
 
 
@@ -262,7 +258,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 return Json(partyList);
             }
         }
-        public JsonResult DDlPackNo(string v_type , string v_typetext, DateOnly V_DATE , int PARTY_CODE)
+        public JsonResult DDlPackNo(string v_type, string v_typetext, DateOnly V_DATE, int PARTY_CODE)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
             using (SqlConnection con = _dbConnection.GetErpConnection())
@@ -275,7 +271,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 if (v_type == "SAGT" || v_type == "SABS")
                 {
 
-                    if(v_typetext == "Flakes" || v_typetext == "Chips")
+                    if (v_typetext == "Flakes" || v_typetext == "Chips")
                     {
                         packtyp = "'SFIS','SFEI'";
 
@@ -287,14 +283,14 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     else
                     {
                         packtyp = "'FPIS'";
-                    }      
+                    }
 
                 }
-                else if(v_type == "SACH")
+                else if (v_type == "SACH")
                 {
                     packtyp = "'FGIS','FGRC'";
                 }
-               else if(v_type == "SAJI")
+                else if (v_type == "SAJI")
                 {
                     if (getdata.PubCompCode == "2" || getdata.PubCompCode == "5")
                     {
@@ -306,7 +302,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                         packtyp = "'FFIS'";
                         filtercnd = " and MAC_TYPE='Job Issue'";
                     }
-               }
+                }
 
                 string query = $@"select top 10  ltrim(rtrim(a.V_NO))'V_no',V_TYPE from {TableName} a  ";
 
@@ -355,7 +351,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 DEFECTIVE_GOODS = reader["DEFECTIVE_GOODS"],
                                 OFFERNO = reader["OFFERNO"],
                                 payterm = reader["payterm"]
-                        
+
                             });
                         }
                     }
@@ -399,7 +395,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 V_no = reader["V_no"],
                                 V_TYPE = reader["V_TYPE"],
                                 TOT_NET = reader["TOT_NET"],
-                                tot_Nos = reader["tot_Nos"]                
+                                tot_Nos = reader["tot_Nos"]
 
                             });
                         }
@@ -487,7 +483,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                string query = $@" Select b.CODE , ltrim(rtrim(b.name)) 'itemname' from item_mast b where b.ACTIVE=1 and b.comp_code={getdata.PubCompCode } 
+                string query = $@" Select b.CODE , ltrim(rtrim(b.name)) 'itemname' from item_mast b where b.ACTIVE=1 and b.comp_code={getdata.PubCompCode} 
                 group by b.name ,b.CODE  order by b.name  ; ";
 
                 var partyList = new List<object>();
@@ -506,7 +502,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                             {
                                 CODE = reader["CODE"],
                                 itemname = reader["itemname"]
-                    
+
                             });
                         }
                     }
@@ -525,7 +521,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 var data = _dropdownService.GetDropdownList(query);
                 return Json(data);
             }
-        }        
+        }
         public JsonResult DDlWBParty()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -586,7 +582,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                     if (string.IsNullOrWhiteSpace(dno) || dno.Length < 13)
                     {
-                        return Json(new  { success = false, status = "INVALID_DO", message = "Invalid DO Number." });
+                        return Json(new { success = false, status = "INVALID_DO", message = "Invalid DO Number." });
                     }
 
                     string gateCheckQuery = @" SELECT COUNT(1)  FROM Gate1  WHERE CONCAT(Disp_Plan_type, Disp_Plan_No) = @DNo
@@ -622,7 +618,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                         if (count == 0)
                         {
-                            return Json(new  {  success = false, status = "NOT_ACTIVE",  message = "DO Number not Active." });
+                            return Json(new { success = false, status = "NOT_ACTIVE", message = "DO Number not Active." });
                         }
                     }
 
@@ -641,12 +637,12 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     }
 
 
-                    return Json(new { success = true, status = "SUCCESS",  message = "Out Allowed.", doNo = dno });
+                    return Json(new { success = true, status = "SUCCESS", message = "Out Allowed.", doNo = dno });
                 }
             }
             catch (Exception ex)
             {
-                return Json(new {  success = false, status = "ERROR",  message = ex.Message  });
+                return Json(new { success = false, status = "ERROR", message = ex.Message });
             }
         }
         public JsonResult CalRate(int Itemcode)
@@ -655,7 +651,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
             using (SqlConnection con = _dbConnection.GetErpConnection())
             {
-                    string query = $@"select isnull(b.REPORT_TYPE,'')REPORT_TYPE,isnull(a.Sale_Rate,0)Sale_Rate,isnull(a.Taxable_Rate,0)Taxable_Rate,
+                string query = $@"select isnull(b.REPORT_TYPE,'')REPORT_TYPE,isnull(a.Sale_Rate,0)Sale_Rate,isnull(a.Taxable_Rate,0)Taxable_Rate,
                     isnull(a.Net_Wt,0)Net_Wt,isnull(a.Packing_Wt,0)Packing_Wt,isnull(a.Packing_nos,0)Packing_nos from Item_mast a 
                     left join ITEM_MGROUP b on a.MGROUP_CODE=b.code and a.comp_code=b.comp_code
                     where a.comp_code={getdata.PubCompCode} and a.code={Itemcode} order by REPORT_TYPE";
@@ -680,7 +676,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 Net_Wt = reader["Net_Wt"],
                                 Packing_Wt = reader["Packing_Wt"],
                                 Packing_nos = reader["Packing_nos"]
-             
+
                             });
                         }
                     }
@@ -717,11 +713,15 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                     if (addctr > 1)
                     {
-                        return Json(new {  success = false,  multipleAddress = true, message = "This party has multiple addresses. For Export, multiple addresses are not allowed in the same Ledger."
+                        return Json(new
+                        {
+                            success = false,
+                            multipleAddress = true,
+                            message = "This party has multiple addresses. For Export, multiple addresses are not allowed in the same Ledger."
                         });
                     }
 
-                    return Json(new { success = true,  multipleAddress = false, message = "" });
+                    return Json(new { success = true, multipleAddress = false, message = "" });
                 }
             }
         }
@@ -1147,40 +1147,37 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
         }
 
         public class PrintValidationRequest
-                {
-                    public string? V_TYPE { get; set; }
-                    public int? V_NO { get; set; }              
-                    public DateTime? V_Date { get; set; }              
-                             
-            
-                     public Decimal? FrtAmt { get; set; } 
-                    public Decimal? TdsAmt { get; set; } 
-                    public Decimal? ExRate { get; set; } 
-                    public Decimal? CGSTAmt { get; set; } 
-                    public Decimal? SGSTAmt { get; set; } 
-                    public Decimal? IGSTAMT { get; set; } 
-                    public int? LutNo { get; set; } 
-                    public DateOnly? LutDate { get; set; } 
-                    public  string? PackType { get; set; }
-                    public  string? packNos { get; set; }
-                    public  Boolean? exportPrint { get; set; }
-                    public  Boolean? ci { get; set; }
-                    public  Boolean? si { get; set; }
-                    public  Boolean? lc { get; set; }
-                    public  int? WithoutBag { get; set; }
-                    public  int? cbDetail { get; set; }
-                    public string? ReportName { get; set; }
-                    public string? citype { get; set; }
-                    public string? SaudaType { get; set; }
-                    public string? godownAdd { get; set; }
-                    public int? SaudaNo { get; set; }                              
-                    public string? godownNo{ get; set; }
-                    public string? ProdType { get; set; }
-                    public int? godownType { get; set; }
-                    public int? rowscount { get; set; }
-                              
+        {
+            public string? V_TYPE { get; set; }
+            public int? V_NO { get; set; }
+            public DateTime? V_Date { get; set; }
+            public Decimal? FrtAmt { get; set; }
+            public Decimal? TdsAmt { get; set; }
+            public Decimal? ExRate { get; set; }
+            public Decimal? CGSTAmt { get; set; }
+            public Decimal? SGSTAmt { get; set; }
+            public Decimal? IGSTAMT { get; set; }
+            public int? LutNo { get; set; }
+            public DateOnly? LutDate { get; set; }
+            public string? PackType { get; set; }
+            public string? packNos { get; set; }
+            public Boolean? exportPrint { get; set; }
+            public Boolean? ci { get; set; }
+            public Boolean? si { get; set; }
+            public Boolean? lc { get; set; }
+            public int? WithoutBag { get; set; }
+            public int? cbDetail { get; set; }
+            public string? ReportName { get; set; }
+            public string? citype { get; set; }
+            public string? SaudaType { get; set; }
+            public string? godownAdd { get; set; }
+            public int? SaudaNo { get; set; }
+            public string? godownNo { get; set; }
+            public string? ProdType { get; set; }
+            public int? godownType { get; set; }
+            public int? rowscount { get; set; }
 
-                }
+        }
 
         public string GetText(string query)
         {
@@ -1260,7 +1257,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 string tblname1 = "Production1";
                 string tblname2 = "Production2";
 
-                if(request.WithoutBag == 1)
+                if (request.WithoutBag == 1)
                 {
                     cqry = "Sum(b.QTY)";
                     dqry = "isnull(b.pack_Qty,0) + isnull(b.Tare_Qty,0),b.Qty";
@@ -1271,15 +1268,15 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     dqry = "b.Pack_qty ,b.Gross_Qty";
                 }
 
-                if(request.PackType == "SFIS" || request.PackType == "SFEI")
+                if (request.PackType == "SFIS" || request.PackType == "SFEI")
                 {
-                    if(getdata.PubCompCode == "1")
+                    if (getdata.PubCompCode == "1")
                     {
                         tblname1 = "Prod_sfg1";
                         tblname2 = "Prod_sfg2";
                     }
 
-                       sql = @$"Insert into tempContainerDetail (COMP_CODE,SI_TYPE,SI_NO,V_TYPE,V_NO,CONTAINER_NO,GROSS_WT,NET_WT,NOS,LINESEAL_NO,CUSTOMSEAL_NO)
+                    sql = @$"Insert into tempContainerDetail (COMP_CODE,SI_TYPE,SI_NO,V_TYPE,V_NO,CONTAINER_NO,GROSS_WT,NET_WT,NOS,LINESEAL_NO,CUSTOMSEAL_NO)
                         Select a.COMP_CODE,'{request.V_TYPE}',{request.V_NO},a.V_type,a.V_no,CONTAINER_NO,iif(sum(b.pack_Qty)>0,sum(b.GROSS_QTY+b.pack_qty),
                         sum(b.GROSS_QTY)), {cqry},count(*),LINESEAL_NO,a.CUSTOMSEAL_NO from {tblname1} a left join {tblname2} b on a.V_TYPE=b.V_TYPE and 
                          a.v_no=b.V_no and a.COMP_CODE=b.COMP_CODE and a.BRANCH_CODE=b.BRANCH_CODE and a.YEAR_CODE=b.YEAR_CODE 
@@ -1288,13 +1285,13 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                         group by a.COMP_CODE,a.V_type,a.V_no,CONTAINER_NO,LINESEAL_NO,a.CUSTOMSEAL_NO order by CONTAINER_NO";
 
 
-                        using (SqlCommand cmd = new SqlCommand(sql, con))
-                        {
-                            cmd.ExecuteNonQuery();
-                        }
-                  
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+
                 }
-                else if( request.PackType == "FPIS")
+                else if (request.PackType == "FPIS")
                 {
                     sql = @$" Insert into tempContainerDetail (COMP_CODE,SI_TYPE,SI_NO,V_TYPE,V_NO,CONTAINER_NO,GROSS_WT,NET_WT,NOS,LINESEAL_NO,CUSTOMSEAL_NO)
                           Select a.COMP_CODE,'{request.V_TYPE}',{request.V_NO},a.V_type,a.V_no,CONTAINER_NO,sum(b.GROSS_QTY),sum(b.QTY),count(*),LINESEAL_NO,
@@ -1321,7 +1318,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 {
                     vtyp = "SFIS";
                 }
-                else if(request.ProdType == "PSF" || request.ProdType == "Finish" || request.ProdType == "Fabric" || request.ProdType == "Sacks")
+                else if (request.ProdType == "PSF" || request.ProdType == "Finish" || request.ProdType == "Fabric" || request.ProdType == "Sacks")
                 {
                     vtyp = "FPIS";
                 }
@@ -1330,19 +1327,19 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     vtyp = "SFEI";
                 }
 
-                if(request.rowscount > 0)
+                if (request.rowscount > 0)
                 {
                     int dataLength = 0;
                     sql = @$" SELECT COUNT(DISTINCT V_NO) FROM {tblname2} WHERE V_TYPE = '{vtyp}'  AND V_NO IN ({request.packNos})  AND Comp_code = {getdata.PubCompCode} AND Branch_code = {getdata.PubBranchCode}";
 
                     using (SqlCommand cmd = new SqlCommand(sql, con))
                     {
-                         dataLength = Convert.ToInt32(cmd.ExecuteScalar());
+                        dataLength = Convert.ToInt32(cmd.ExecuteScalar());
                     }
-                        if(dataLength > 0 )
-                        {
+                    if (dataLength > 0)
+                    {
 
-                            sql = @$" Insert into tempExportPackingSlip(COMP_CODE,BRANCH_CODE,YEAR_CODE,SI_TYPE,SI_NO,SI_DATE,V_TYPE,V_NO,V_DATE,CONTAINER_NO,VEHICLE_NO,
+                        sql = @$" Insert into tempExportPackingSlip(COMP_CODE,BRANCH_CODE,YEAR_CODE,SI_TYPE,SI_NO,SI_DATE,V_TYPE,V_NO,V_DATE,CONTAINER_NO,VEHICLE_NO,
                             LINESEAL_NO,CUSTOMSEAL_NO,ITEM_CODE,ITEM_NAME,GROSS_QTY,TARE_QTY,NET_QTY) Select a.COMP_CODE,a.BRANCH_CODE,a.YEAR_CODE,
                             '{request.V_TYPE}',{request.V_NO},'{request.V_Date}',a.V_TYPE,a.V_NO,a.V_DATE,a.CONTAINER_NO,a.VEHICLE_NO,a.LINESEAL_NO,CUSTOMSEAL_NO,ITEM_CODE,
                             '',iif(b.pack_Qty>0,b.GROSS_QTY+b.pack_qty,b.GROSS_QTY),{dqry} from {tblname1}  a  Left join {tblname2} 
@@ -1350,19 +1347,19 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                             and a.v_no in ( {request.packNos} ) and a.Comp_code={getdata.PubCompCode} and a.Branch_code={getdata.PubBranchCode}";
 
 
-                            using (SqlCommand cmd = new SqlCommand(sql, con))
-                            {
-                                cmd.ExecuteNonQuery();
-                            }
-
-                            sql = @$"update tempExportPackingSlip set ITEM_NAME=(iif(isnull(b.Print_name,'')<>'',b.Print_name,b.Name)),hsn_Code=b.hsn_Code from Item_mast b Where tempExportPackingSlip.Item_Code=b.code and tempExportPackingSlip.comp_Code=b.comp_Code";
-                            using (SqlCommand cmd = new SqlCommand(sql, con))
-                            {
-                                cmd.ExecuteNonQuery();
-                            }
-
+                        using (SqlCommand cmd = new SqlCommand(sql, con))
+                        {
+                            cmd.ExecuteNonQuery();
                         }
-      
+
+                        sql = @$"update tempExportPackingSlip set ITEM_NAME=(iif(isnull(b.Print_name,'')<>'',b.Print_name,b.Name)),hsn_Code=b.hsn_Code from Item_mast b Where tempExportPackingSlip.Item_Code=b.code and tempExportPackingSlip.comp_Code=b.comp_Code";
+                        using (SqlCommand cmd = new SqlCommand(sql, con))
+                        {
+                            cmd.ExecuteNonQuery();
+                        }
+
+                    }
+
                     sql = "Select top 1* from tempExportPackingSlip";
 
                     int dataLengthCount = 0;
@@ -1371,9 +1368,9 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     {
                         dataLengthCount = Convert.ToInt32(cmd.ExecuteScalar());
 
-                        if(dataLengthCount > 0)
+                        if (dataLengthCount > 0)
                         {
-                            return Json(new { success = false, message = "Packing Slip Not Found"});
+                            return Json(new { success = false, message = "Packing Slip Not Found" });
                         }
                     }
                 }
@@ -1430,4 +1427,4 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
     }
-} 
+}

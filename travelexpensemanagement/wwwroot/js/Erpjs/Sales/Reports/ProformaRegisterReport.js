@@ -11,16 +11,13 @@ $(document).ready(async function () {
     $('#btn_Report').on('click', async function () {
         try {
 
-            const SaleRegisterDrCrNote = isChecked('#chk_SaleRegistercrdr');
-            const TptFreightReport = isChecked('#chk_tptfrieghtreport');
-            const ToDate = getValue('#DtToDate');
-            const FromDate = getValue('#DtFromDate');
+            const SaleRegisterDrCrNote = $('#chk_SaleRegistercrdr').is(':checked');
+            const TptFreightReport = $('#chk_tptfrieghtreport').is(':checked');
 
+            const ToDate = $('#DtToDate').val();
+            const FromDate = $('#DtFromDate').val();
 
-        await DataInsert(SaleRegisterDrCrNote, TptFreightReport, FromDate, ToDate);
-
-
-
+            await DataInsert(SaleRegisterDrCrNote, TptFreightReport, FromDate, ToDate);
 
         TransitReport();
 
@@ -174,9 +171,7 @@ $(document).ready(async function () {
 
     });
 
-
 });
-
 
 async function LoadDropdown() {
     try {
@@ -773,7 +768,6 @@ async function TransitReport()
         }
         else
         {
-
             selectionFormula = `{SALE1.V_DATE} IN ${FromCrystalDate} TO ${ToCrystalDate}`;
             selectionFormula = addCondition( selectionFormula, `{SALE1.COMP_CODE} = ${CompCode}`  );
             selectionFormula = addCondition( selectionFormula, `{SALE1.BRANCH_CODE} = ${BranchCode}` );
@@ -799,8 +793,7 @@ async function TransitReport()
 
                 if (TptFreightReport)
                 {
-                    documentTypes = ["SalesInvoice", "EComSalesInvoice", "TradingSale", "EComSalesReturn",
-                    "SalesReturn", "JobReturn", "SaleChallan", "JobworkIssue", "JobworkReceived" ];
+                    documentTypes = ["SalesInvoice", "EComSalesInvoice", "TradingSale", "EComSalesReturn", "SalesReturn", "JobReturn", "SaleChallan", "JobworkIssue", "JobworkReceived" ];
                 }
                 else
                 {
@@ -879,7 +872,8 @@ async function TransitReport()
             }
         }
 
-        if (isCombinedReport) {
+        if (isCombinedReport)
+        {
 
             // SALE4 - Summary Reports
             if (PartyWise == true || ItemWise == true || ItemGroup == true)
@@ -980,7 +974,6 @@ async function TransitReport()
                     formulaFields.RPTNAME = crystalString("MONTH WISE SALE (COLOR WISE)");
                 }
             }
-
         }
         else
         {
@@ -1034,9 +1027,11 @@ async function TransitReport()
 
             else if (TptFreightReport == true)
             {
+                selectionFormula += " AND ({SALE1.FRT_AMT}>0 OR {SALE1.INSU_AMT}>0)";
+
                 reportName = "FREIGHT2";
-                selectionFormula = addCondition(selectionFormula, " AND ({SALE1.FRT_AMT}>0 or {SALE1.INSU_AMT}>0)" );
-                formulaFields.RPTNAME = crystalString("TRANSPORT FREIGHT REPORT(SALE)");
+
+                formulaFields.RPTNAME = "'TRANSPORT FREIGHT REPORT(SALE)'";
             }
 
             else if (LoadUnLoadReport == true)
@@ -1101,7 +1096,8 @@ async function TransitReport()
             {
                 reportName = "SALE8";
 
-                if (Row === Column || Row === Group) {
+                if (Row === Column || Row === Group)
+                {
                     toastr.warning( "Row should be different from Column and Group." );
                     return;
                 }

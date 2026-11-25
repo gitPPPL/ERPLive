@@ -1,24 +1,10 @@
-﻿using iTextSharp.text.pdf.parser.clipper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
-using Org.BouncyCastle.Asn1.Cmp;
-using StackExchange.Redis;
-using System;
 using System.Data;
 using System.Text.Json;
-using travelexpensemanagement.Common.DbHelper;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
-using travelexpensemanagement.Controllers.Travelexpense;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.Models;
-using travelexpensemanagement.Models.Admin.Setup;
-using travelexpensemanagement.Models.FincialAccounting.Master;
-using travelexpensemanagement.Models.Purchase.Transaction;
-using travelexpensemanagement.Models.Sales.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Sale.Transaction;
 
 namespace travelexpensemanagement.Controllers.Sales.Transaction
@@ -312,7 +298,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                     }
                 }
 
-               // string query = $@"select top 10  ltrim(rtrim(a.V_NO))'V_no',V_TYPE from {TableName} a  ";
+                // string query = $@"select top 10  ltrim(rtrim(a.V_NO))'V_no',V_TYPE from {TableName} a  ";
                 string query = $@"select V_TYPE,ltrim(rtrim(a.V_NO))'V_no' from {TableName} a 
                 where a.V_DATE=CONVERT(smalldatetime, {V_DATE}, 103) and a.V_TYPE in ({packtyp}) and a.COMP_CODE= {getdata.PubCompCode} and a.BRANCH_CODE= {getdata.PubBranchCode}
                 and a.YEAR_CODE={getdata.PubFYearCode} and (a.PARTY_CODE={PARTY_CODE} or a.PARTY_CODE=(select main_code from SUBGROUP_MAST where COMP_CODE=a.COMP_CODE and 
@@ -736,9 +722,17 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
 
                 if (request == null)
-                {      
-                    return Json(new { success = false, message = "Request Showing Null", ReportName = "", godownAdd = "" , message1 = "",
-                        message2 = "", message3 = "", message4 = ""
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Request Showing Null",
+                        ReportName = "",
+                        godownAdd = "",
+                        message1 = "",
+                        message2 = "",
+                        message3 = "",
+                        message4 = ""
                     });
                 }
 
@@ -751,7 +745,10 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 {
                     if (getdata.PubUserLevel != "1")
                     {
-                        return Json(new { success = false, message = "ERROR! Please check Tax not calculated in Invoice.",
+                        return Json(new
+                        {
+                            success = false,
+                            message = "ERROR! Please check Tax not calculated in Invoice.",
                             message1 = "",
                             message2 = "",
                             message3 = "",
@@ -816,14 +813,14 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 bool etaPodEmpty = reader["ETAPOD_DATE"] == DBNull.Value || string.IsNullOrWhiteSpace(Convert.ToString(reader["ETAPOD_DATE"]));
 
                                 if (cha == 0 && forwarder == 0 && shipline == 0 && etaPolEmpty && etaPodEmpty)
-                                {                             
+                                {
                                     message3 = $"Please entry necessary fields in Export Detail " +
                                         $"(like Actual Freight, CHA, Forwarder, Shipline, " +
                                         $"ETA POL Date, ETA POD Date) of Invoice No:{request.V_NO}";
                                 }
                             }
                             else
-                            {                           
+                            {
                                 message4 = $"Export Detail not feeded " +
                                     $"(like Actual Freight, CHA, Forwarder, Shipline, " +
                                     $"ETA POL Date, ETA POD Date) in Invoice No:{request.V_NO}";
@@ -1118,8 +1115,17 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                 request.godownAdd = GetText(@$"Select isnull(COMP_NAME,'')+', '+ isnull(ADDRESS,'')+', '+ isnull(ADDRESS2,'') as adress from GODOWN_MAST where CODE= {request.godownNo} and COMP_CODE={getdata.PubCompCode}");
 
-                return Json(new { success = true, message = "Print validation successful.", ReportName = request.ReportName,
-                    godownAdd = request.godownAdd, message1 = message1, message2 = message2, message3 = message3,  message4 = message4  });
+                return Json(new
+                {
+                    success = true,
+                    message = "Print validation successful.",
+                    ReportName = request.ReportName,
+                    godownAdd = request.godownAdd,
+                    message1 = message1,
+                    message2 = message2,
+                    message3 = message3,
+                    message4 = message4
+                });
             }
         }
 
@@ -1427,7 +1433,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 }
 
                 // Insert invoice details into tempInvoice
-                    string sql1 = @" INSERT INTO tempInvoice SELECT a.comp_code,  a.Branch_code, a.V_type, a.v_no,  1,
+                string sql1 = @" INSERT INTO tempInvoice SELECT a.comp_code,  a.Branch_code, a.V_type, a.v_no,  1,
                     'Triplicate for Office', b.IRN,  b.QR_IMAGE FROM sale1 a  LEFT JOIN QRImage_Path b ON a.v_no = b.v_no
                     AND a.V_TYPE = b.V_TYPE AND a.COMP_CODE = b.COMP_CODE AND a.BRANCH_CODE = b.BRANCH_CODE AND a.YEAR_CODE = b.YEAR_CODE
                     WHERE a.comp_code = @CompCode AND a.branch_code = @BranchCode AND a.YEAR_CODE = @YearCode AND a.v_type = @VType AND a.v_no = @VNo";
@@ -1455,8 +1461,8 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 decimal netamt = Convert.ToDecimal(GetText(@$"Select NAMOUNT from SALE1 where V_TYPE='{request.V_TYPE}' and V_NO={request.V_NO} and 
                 COMP_CODE={getdata.PubCompCode} and BRANCH_CODE={getdata.PubBranchCode} and YEAR_CODE={getdata.PubFYearCode}"));
 
-                return Json(new {  success = true, message = "Print validation successful.", gwdn = gwdn , ADDRESS = ADDRESS , netamt = netamt });
-           
+                return Json(new { success = true, message = "Print validation successful.", gwdn = gwdn, ADDRESS = ADDRESS, netamt = netamt });
+
             }
         }
 
@@ -1501,10 +1507,10 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 WHEN CR_CODE = @PARTY_CODE  THEN AMT ELSE 0 END), 0) AS CR_AMT FROM LEDGER2 WHERE COMP_CODE = @COMP_CODE
                                 AND (DR_CODE = @PARTY_CODE OR CR_CODE = @PARTY_CODE)";
 
-                                using (SqlCommand cmd = new SqlCommand( balanceSql, con, transaction))
+                                using (SqlCommand cmd = new SqlCommand(balanceSql, con, transaction))
                                 {
-                                    cmd.Parameters.AddWithValue( "@PARTY_CODE", partyCode);
-                                    cmd.Parameters.AddWithValue( "@COMP_CODE", getdata.PubCompCode);
+                                    cmd.Parameters.AddWithValue("@PARTY_CODE", partyCode);
+                                    cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
 
                                     using (SqlDataReader reader = cmd.ExecuteReader())
                                     {
@@ -1521,17 +1527,17 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 string updateSql = @" UPDATE CRLIMIT_MAST SET OS_AMT = @OS_AMT WHERE PARTY_CODE = @PARTY_CODE
                                 AND COMP_CODE = @COMP_CODE";
 
-                                using (SqlCommand cmd = new SqlCommand( updateSql, con, transaction))
+                                using (SqlCommand cmd = new SqlCommand(updateSql, con, transaction))
                                 {
-                                    cmd.Parameters.AddWithValue( "@OS_AMT", balanceAmt);
-                                    cmd.Parameters.AddWithValue( "@PARTY_CODE", partyCode);
-                                    cmd.Parameters.AddWithValue( "@COMP_CODE", getdata.PubCompCode);
+                                    cmd.Parameters.AddWithValue("@OS_AMT", balanceAmt);
+                                    cmd.Parameters.AddWithValue("@PARTY_CODE", partyCode);
+                                    cmd.Parameters.AddWithValue("@COMP_CODE", getdata.PubCompCode);
                                     cmd.ExecuteNonQuery();
                                 }
                             }
 
                             transaction.Commit();
-                            return Json(new {  success = true, message = "Print validation successful." });
+                            return Json(new { success = true, message = "Print validation successful." });
                         }
                         catch
                         {
@@ -1543,12 +1549,9 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
             catch (Exception ex)
             {
-                return Json(new  {  success = false, message = ex.Message });
+                return Json(new { success = false, message = ex.Message });
             }
         }
-
-
-
 
 
     }
