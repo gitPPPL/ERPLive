@@ -306,10 +306,7 @@ async function cmbProductName() {
             throw new Error("cmbProductName response is not an array");
         }
         ProductDataList = data;
-        ProductList = data.map(x =>
-            `<option value="${x.code}">${x.shortname}</option>`
-        ).join('');
-
+        ProductList = data.map(x => `<option value="${x.code}">${x.shortname}</option>` ).join('');
 
         return ProductList;
 
@@ -563,5 +560,3 @@ async function AddressConsigneeData(PartyCode, AddressId) {
         console.log("error", error);
     }
 }
-
-

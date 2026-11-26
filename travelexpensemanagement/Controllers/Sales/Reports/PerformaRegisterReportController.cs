@@ -17,8 +17,8 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
         private readonly travelexpensemanagement.ModuleService.ModuleService _moduleService;
 
         public PerformaRegisterReportController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
-       travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
-       ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
+        travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
+        ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -400,16 +400,3 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
 
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

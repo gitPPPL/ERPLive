@@ -4,7 +4,6 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Net;
 using System.Text;
-using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.EncryptionHelper;
 using travelexpensemanagement.Dbconnection;
 using travelexpensemanagement.Models.Login;
@@ -49,7 +48,7 @@ namespace travelexpensemanagement.Controllers
                 {
                     if (con.State != ConnectionState.Open)
                     {
-                        con.Open(); 
+                        con.Open();
                     }
                     string subUserQuery = "SELECT 1 FROM SUBUSER_MAST WHERE COMP_CODE = @CompanyCode AND USER_CODE = @UserMasterCode";
                     using (SqlCommand cmd = new SqlCommand(subUserQuery, con))
@@ -126,11 +125,18 @@ namespace travelexpensemanagement.Controllers
                                 string USER_LEVEL = reader["USER_LEVEL"].ToString();
                                 string CompCode = model.CompanyCode;
                                 DateTime loginDate = model.LoginDate;
-                                reader.Close(); 
+                                reader.Close();
 
                                 // Step 3: Check if the user has the necessary menu access
 
                                 HttpContext.Session.SetString("COMP_CODE", CompCode);
+
+                                // ODBC configuration start
+                                _dbConnection.ConfigureErpDsn(CompCode);
+                                // ODBC configuration End
+
+
+
                                 using (SqlConnection con2 = _dbConnection.GetErpConnection())
                                 {
                                     if (con2.State != ConnectionState.Open)
@@ -189,7 +195,7 @@ namespace travelexpensemanagement.Controllers
                             }
                             else
                             {
-                                HttpContext.Session.Clear(); 
+                                HttpContext.Session.Clear();
                                 TempData["ErrorMessage"] = "User not found.";
                                 return RedirectToAction(nameof(Index));
                             }
@@ -234,7 +240,7 @@ namespace travelexpensemanagement.Controllers
             {
                 string query = "Select code, USER_NAME From USER_MAST where ACTIVE=1 ORDER BY USER_NAME";
                 SqlCommand cmd = new SqlCommand(query, con);
-                con.Open(); 
+                con.Open();
                 SqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {

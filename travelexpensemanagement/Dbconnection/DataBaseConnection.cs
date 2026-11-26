@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.Runtime.InteropServices;
 
 namespace travelexpensemanagement.Dbconnection
 {
@@ -83,5 +84,67 @@ namespace travelexpensemanagement.Dbconnection
                 _ => throw new Exception("Unknown server IP: " + serverIp)
             };
         }
+
+        // ==================ODBC configuration for ERP connection=================================
+        [DllImport("ODBCCP32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "SQLConfigDataSourceW")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SQLConfigDataSource(IntPtr hwndParent, ushort fRequest, string lpszDriver, string lpszAttributes);
+
+        public void ConfigureErpDsn(string compCode)
+        {
+            string serverIp, databaseName;
+
+            // Get company server and database
+            using (SqlConnection con = GetConDbConnection())
+            {
+                con.Open();
+
+                string query = @"SELECT SERVER_IP, DATABASE_NAME FROM Condatabase.dbo.COMP_MAST WHERE CODE = @Code";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@Code", compCode);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.Read())
+                            throw new Exception("Company details not found.");
+
+                        serverIp = reader["SERVER_IP"].ToString();
+                        databaseName = reader["DATABASE_NAME"].ToString();
+                    }
+                }
+            }
+
+            // Get existing server credentials
+            var credentials = GetDbCredentials(serverIp);
+
+            string attributes =
+            $"DSN=ERP\0" +
+            $"SERVER={serverIp}\0" +
+            $"DATABASE={databaseName}\0\0";
+
+            bool result = SQLConfigDataSource(
+                IntPtr.Zero,
+                2, // ODBC_CONFIG_DSN
+                "SQL Server",
+                attributes);
+
+            if (!result)
+            {
+                result = SQLConfigDataSource(
+                    IntPtr.Zero,
+                    1, // ODBC_ADD_DSN
+                    "SQL Server",
+                    attributes);
+            }
+
+
+            if (!result)
+            {
+                throw new Exception("ERP DSN Configuration Failed.");
+            }
+        }
+
     }
 }

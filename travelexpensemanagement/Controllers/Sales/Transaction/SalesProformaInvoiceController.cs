@@ -1,13 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 using travelexpensemanagement.Authorize;
 using travelexpensemanagement.Common.DropdownService;
 using travelexpensemanagement.Common.Globalvariable;
 using travelexpensemanagement.Dbconnection;
-using travelexpensemanagement.Models.Inventory.Transaction;
-using travelexpensemanagement.Repositories.Interfaces.GateEntry.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Sale.Transaction;
 
 namespace travelexpensemanagement.Controllers.Sales.Transaction
@@ -25,7 +21,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
         public SalesProformaInvoiceController(DataBaseConnection dbConnection, GlobalVariableService globalVariableService,
           travelexpensemanagement.Common.DropdownService.DropdownService dropdownService, travelexpensemanagement.Common.DbHelper.DbHelper dbHelper,
-          ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate ,ISalesProformaInvoice salesProformaInvoice )
+          ModuleService.ModuleService moduleService, GlobalValidationdate globalValidationdate, ISalesProformaInvoice salesProformaInvoice)
         {
             _dbConnection = dbConnection;
             _globalVariableService = globalVariableService;
@@ -171,7 +167,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
             }
         }
         [HttpGet]
-        public JsonResult GetAddressData(int  PartyCode , int  AddressId)
+        public JsonResult GetAddressData(int PartyCode, int AddressId)
         {
             var getdata = _globalVariableService.GetGlobalVariables();
 
@@ -209,8 +205,8 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 City_Code = reader["City_Code"],
                                 CountryCode = reader["CountryCode"],
                                 Pincode = reader["Pincode"],
-                                SCode = reader["SCode"]                             
-                            
+                                SCode = reader["SCode"]
+
                             });
                         }
                     }
@@ -270,7 +266,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 var partyList = new List<object>();
 
                 using (SqlCommand cmd = new SqlCommand(query, con))
-                {   
+                {
 
                     con.Open();
 
@@ -287,7 +283,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 IGST_PER = reader["IGST_PER"],
                                 TDS_PER = reader["TDS_PER"],
                                 TCS_PER = reader["TCS_PER"],
-                                OTH_PER = reader["OTH_PER"]                             
+                                OTH_PER = reader["OTH_PER"]
                             });
                         }
                     }
@@ -305,7 +301,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 string query = @" SELECT  a.CODE, LTRIM(RTRIM(a.SHORTNAME)) AS Shortname,  b.mgroup_type,  a.Packing_Wt,  a.HSN_CODE
                 FROM ITEM_MAST a
                 LEFT JOIN ITEM_MGROUP b  ON b.CODE = a.MGROUP_CODE  AND b.COMP_CODE = a.COMP_CODE
-                WHERE a.Active = 1 AND a.comp_code = @CompCode   order by a.SHORTNAME ; ";
+                WHERE a.Active = 1 AND a.comp_code = @CompCode  and a.SHORTNAME != ''  order by a.SHORTNAME ; ";
 
                 var partyList = new List<object>();
 
@@ -326,7 +322,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                                 mgroup_type = reader["mgroup_type"],
                                 Packing_Wt = reader["Packing_Wt"],
                                 HSN_CODE = reader["HSN_CODE"]
-                   
+
                             });
                         }
                     }
@@ -334,7 +330,7 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
 
                 return Json(partyList);
             }
-        }        
+        }
         public JsonResult cmbTransport()
         {
             var getdata = _globalVariableService.GetGlobalVariables();
@@ -388,10 +384,10 @@ namespace travelexpensemanagement.Controllers.Sales.Transaction
                 string compname = GetText("Select NAME from COMP_MAST WHERE CODE= " + globalVaraible.PubCompCode);
 
                 string mailBody = "Please find attached Proforma invoice(s) for product.<br><br><br>";
-                        mailBody += "<br><br>Regards,<br>"
-                         + compname + "<br>"
-                         + globalVaraible.Address1 + "<br>"
-                         + globalVaraible.Address2;
+                mailBody += "<br><br>Regards,<br>"
+                 + compname + "<br>"
+                 + globalVaraible.Address1 + "<br>"
+                 + globalVaraible.Address2;
 
                 return await _globalValidationdate.GlobalSendMail(v_type, vno, Mail, mailBody, file, "sale1", "");
             }

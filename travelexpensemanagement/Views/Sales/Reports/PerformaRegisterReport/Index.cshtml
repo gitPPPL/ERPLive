@@ -278,7 +278,7 @@
     <table class="table table-bordered table-sm" id="tblSelectedItem">
         <thead class="table-light text-dark" style="position:sticky; top:0; z-index:2;">
             <tr>
-                <th style="width:25%; color:black;">Item ID</th>
+                <th style="width:25%; color:black;">Item Code</th>
                 <th style="color:black;">Item Name</th>
                 <th style="width:70px; color:black;">Action</th>
             </tr>
@@ -311,7 +311,24 @@
             <option value="">All Parties</option>
         </select>
     </div>
-</fieldset>
+
+    <div id="divSelectedPartyGrid" class="table-responsive mt-2"
+     style="display:none; max-height:200px; overflow-y:auto;">
+
+    <table class="table table-bordered table-sm" id="tblSelectedParty">
+        <thead class="table-light text-dark" style="position:sticky; top:0; z-index:2;">
+            <tr>
+                <th style="width:25%; color:black;">Party Code</th>
+                <th style="color:black;">Party Name</th>
+                <th style="width:70px; color:black;">Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+</div>
+
+   </fieldset>
 
 
         </div>
