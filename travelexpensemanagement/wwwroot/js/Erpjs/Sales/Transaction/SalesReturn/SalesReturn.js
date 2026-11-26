@@ -2800,20 +2800,6 @@ function gridFunction() {
     }
 }
 
-//==============formatVal==========
-function formatVal(value, type) {
-    const n = parseFloat(value);
-    const v = isNaN(n) ? 0 : n;
-
-    switch ((type || '').toUpperCase()) {
-        case 'AMT': return v.toFixed(2);
-        case 'RATE': return v.toFixed(4);
-        case 'QTY': return v.toFixed(2);
-        case 'AMTSALE': return v.toFixed(2);
-        default: return v.toFixed(2);
-    }
-}
-
 
 //============== TRansport Edit=======
 function updateTptButtons() {

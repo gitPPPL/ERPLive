@@ -1,0 +1,397 @@
+﻿@{
+    ViewBag.Title = "Proforma Packing Slip";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="erp-toast-container"></div>
+<div class="erppage-header">
+    <div class="erppage-header-left">
+        <div class="erppage-header-icon">
+            <i class="fa fa-file-text-o"></i>
+        </div>
+        <div class="erppage-header-title">Proforma Packing Slip</div>
+    </div>
+    <div class="erppage-header-right">
+        <button class="erppagelist-btn erppagelist-btn-action tooltip-btn" data-tooltip="Print Report" id="button_print" onclick="PackingSlipReport()">
+            <i class="fa fa-print"></i> Print
+        </button>
+        <button type="button" class="erppage-header-back" onclick="handleBack('@Url.Action("Index", "PackingSlipEntryList")', isReadOnly)">
+            <i class="fa-solid fa-arrow-left"></i>Back to list
+        </button>
+    </div>
+</div>
+
+<div id="ProformaPackingSlipForm">
+    <input type="hidden" id="TxtCode" name="CODE">
+    <div class="erppage-container">
+        <div class="erppage-fieldset">
+
+            <!-- Document Details -->
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Document Details</legend>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc Type</label>
+                        <select class="erppage-input erppage-select erppage-required" id="ddlDocType" disabled>
+                            <option value="">--Select DocType--</option>
+                        </select>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc No</label>
+                        <input type="number" class="erppage-redinput" id="NumDocNo" placeholder="Doc No" disabled>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Doc Date</label>
+                        <input type="date" class="erppage-redinput" id="DtDocDate">
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Status</label>
+                        <div class="erppage-inputgroup">
+                            <select class="erppage-input erppage-select" id="ddlStatus">
+                                <option value="">--Select Status--</option>
+                            </select>
+                            <input type="text" class="erppage-input" id="TxtStatusRemark">
+                        </div>
+                    </div>
+                </div>
+                <div class="erppage-grid4 d-none">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Place</label>
+                        <select class="erppage-input erppage-select" id="ddlPlace">
+                            <option value="">--Select Place--</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Issue Details | Party Details -->
+            <div class="erppagesrow">
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Issue Details</legend>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Issue/Mach Type</label>
+                                <select class="erppage-input erppage-select" id="ddlIssueMachType">
+                                    <option value="">Select Issue/Mach Type</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Shift</label>
+                                <select class="erppage-input erppage-select erppage-required" id="ddlShift">
+                                    <option value="">--Select Shift--</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="erppage-grid2">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Item Name</label>
+                                <select class="erppage-input erppage-select" id="ddlItem">
+                                    <option value="">Select Item</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Godown</label>
+                                <select class="erppage-input erppage-select" id="ddlGodown">
+                                    <option value="">--Select Godown--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="erppagescol-6">
+                    <fieldset class="erppagefieldset">
+                        <legend class="erppagefieldset-legend">Party Details</legend>
+                        <div class="erppage-grid4">
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">DO. No.</label>
+                                <select class="erppage-input erppage-select" id="ddlDONo">
+                                    <option value="">--Select DO--</option>
+                                </select>
+                            </div>
+                            <div class="erppage-divfield erppage-col-span-2">
+                                <label class="erppage-label">Party Name</label>
+                                <div class="erppage-inputgroup">
+                                    <select class="erppage-input erppage-select" id="ddlPartyName">
+                                        <option value="">--Select Party Name--</option>
+                                    </select>
+                                    <button type="button" class="erppage-btn erppage-btn-common p-2" id="btnPartyInfo" title="Account Info" disabled style="width:28px;">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="erppage-grid1">
+                            <div class="erppage-divfield">
+                                <label class="erppage-label">Remarks</label>
+                                <textarea class="erppage-input" id="TxtRemarks" rows="2" placeholder="Enter Remarks"></textarea>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="erppage-internalaction mt-2">
+                <button class="erppage-btn-common erppage-btn" type="button" data-bs-toggle="modal" data-bs-target="#copyFromModal" id="btnCopyFrom">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>Copy From</span>
+                </button>
+            </div>
+
+            <!-- Item grid -->
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Item Record</legend>
+                <div class="excel-wrapper fixed-grid-wrapper">
+                    <table id="tblProformaPackingSlip" class="excel-table fixed-grid-table width-table resizable-table">
+                        <colgroup>
+                            <col style="width: 80px;">  <!-- ICode -->
+                            <col style="width: 200px;"> <!-- Item Name -->
+                            <col style="width: 100px;"> <!-- Bale/Roll/Bag No -->
+                            <col style="width: 100px;"> <!-- Lot No -->
+                            <col class="laminator-col" style="width: 90px;"> <!-- Meter -->
+                            <col style="width: 90px;">  <!-- Gr. Wgt. -->
+                            <col style="width: 90px;">  <!-- Tr. Wgt. -->
+                            <col style="width: 90px;">  <!-- Net Wgt. -->
+                            <col class="laminator-col" style="width: 90px;"> <!-- Avg. Wgt. -->
+                            <col class="laminator-col" style="width: 90px;"> <!-- Gram -->
+                            <col style="width: 100px;"> <!-- Tenacity -->
+                            <col style="width: 90px;">  <!-- Status -->
+                            <col style="width: 150px;"> <!-- Remarks -->
+                            <col style="width: 100px;"> <!-- Ref Type -->
+                            <col style="width: 100px;"> <!-- Ref No -->
+                            <col style="width: 100px;"> <!-- LMRC Type -->
+                            <col style="width: 100px;"> <!-- LMRC No -->
+                            <col style="width: 100px;"> <!-- Loom Type -->
+                            <col style="width: 100px;"> <!-- Loom No -->
+                            <col style="width: 100px;"> <!-- PlaceCode -->
+                            <col style="width: 100px;"> <!-- ItemSize -->
+                            <col style="width: 80px;">  <!-- Action -->
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>ICode</th>
+                                <th class="freeze-item">Item Name</th>
+                                <th class="bale-no-header">Bale No</th>
+                                <th>Lot No</th>
+                                <th class="laminator-col">Meter</th>
+                                <th>Gr. Wgt.</th>
+                                <th>Tr. Wgt.</th>
+                                <th>Net Wgt.</th>
+                                <th class="laminator-col">Avg. Wgt.</th>
+                                <th class="laminator-col">Gram</th>
+                                <th>Tenacity</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                                <th>Ref Type</th>
+                                <th>Ref No</th>
+                                <th>LMRC Type</th>
+                                <th>LMRC No</th>
+                                <th>Loom Type</th>
+                                <th>Loom No</th>
+                                <th>PlaceCode</th>
+                                <th>ItemSize</th>
+                                <th class="action-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </fieldset>
+
+            <!-- Totals -->
+            <fieldset class="erppagefieldset">
+                <legend class="erppagefieldset-legend">Total</legend>
+                <div class="erppage-grid4">
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">No of Records</label>
+                        <input type="number" class="erppage-input" id="NumNoOfRecords" disabled>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Gross Wt</label>
+                        <input type="number" class="erppage-input" id="NumGrossWt" disabled>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Tare Wt</label>
+                        <input type="number" class="erppage-input" id="NumTareWt" disabled>
+                    </div>
+                    <div class="erppage-divfield">
+                        <label class="erppage-label">Net Wt</label>
+                        <input type="number" class="erppage-input" id="NumNetWt" disabled>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="erppage-actions">
+                <button id="btn-save" type="button" class="erppage-btn erppage-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save</span>
+                </button>
+            </div>
+
+            <!-- Account Info modal (opens when Party Name changes) -->
+            <div class="modal fade" id="accountInfoModal" tabindex="-1" aria-labelledby="accountInfoLabel" aria-hidden="true">
+                <div class="modal-dialog erppagesmodal small-modal erppage-modal-drag">
+                    <div class="modal-content erppagesmodal-content">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-user"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="accountInfoLabel">Party Details</h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="erppagesmodal-body">
+                            <div class="erppage-grid2">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">A/c Code</label>
+                                    <input type="text" class="erppage-input" id="TxtAcCode" readonly>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">A/c Name</label>
+                                    <input type="text" class="erppage-input" id="TxtAcName" readonly>
+                                </div>
+                            </div>
+                            <div class="erppage-grid5">
+                                <div class="erppage-divfield erppage-col-span-2">
+                                    <label class="erppage-label">Closing Bal</label>
+                                    <input type="text" class="erppage-input" id="TxtClosingBal" readonly>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label">&nbsp;</label>
+                                    <label class="erppage-label" id="lblDrCr">DrCr</label>
+                                </div>
+                                <div class="erppage-divfield erppage-col-span-2">
+                                    <label class="erppage-label">CrLimit</label>
+                                    <input type="text" class="erppage-input" id="TxtCrLimit" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copy From modal -->
+            <div class="modal fade" id="copyFromModal" tabindex="-1" aria-labelledby="copyFromLabel" aria-hidden="true">
+                <div class="modal-dialog erppagesmodal medium-modal erppage-modal-drag">
+                    <div class="modal-content erppagesmodal-content">
+                        <div class="erppagesmodal-header">
+                            <div class="erppagesmodal-header-left">
+                                <div class="erppagesmodal-header-icon">
+                                    <i class="fa fa-copy"></i>
+                                </div>
+                                <h5 class="erppagesmodal-title" id="copyFromLabel">Copy From</h5>
+                            </div>
+                            <button type="button" class="erppagesmodal-close" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div class="erppagesmodal-body">
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield erppage-col-span-2">
+                                    <div class="erppagelist-search-wrapper">
+                                        <i class="fa fa-search"></i>
+                                        <input type="text" id="searchBoxCopyFrom" placeholder="Search..." />
+                                    </div>
+                                </div>
+                                <div class="erppagesmodal-action mt-2">
+                                    <button type="button" class="erppagesmodal-btn" id="btnCopy">
+                                        <i class="fa fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="erppage-grid3">
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" id="lblTotalRecords">Total Records: </label>
+                                </div>
+
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" id="lblSelectedRecords" style="display:none;">Selected Records: </label>
+                                </div>
+                                <div class="erppage-divfield">
+                                    <label class="erppage-label" id="lblTotalNetWt" style="display:none;">Total Net Wt: </label>
+                                </div>
+                            </div>
+                            
+
+                            <div class="excel-wrapper fixed-grid-wrapper">
+                                <table id="tblCopyFromModal" class="excel-table width-table fixed-grid-table resizable-table">
+                                    <colgroup>
+                                        <col style="width: 51px;"> <!-- Bale No -->
+                                        <col style="width: 69px;">  <!-- V. No -->
+                                        <col style="width: 85px;">  <!-- V. Type -->
+                                        <col style="width: 66px;">  <!-- V. Date -->
+                                        <col style="width: 80px;">  <!-- Item Code -->
+                                        <col style="width: 86px;"> <!-- Item Name -->
+                                        <col style="width: 114px;">  <!-- UOM Name -->
+                                        <col style="width: 90px;">  <!-- Lot No -->
+                                        <col style="width: 69px;">  <!-- Gross Wgt. -->
+                                        <col style="width: 95px;">  <!-- Tare Wgt. -->
+                                        <col style="width: 83px;">  <!-- Net Wgt. -->
+                                        <col style="width: 79px;">  <!-- Meter -->
+                                        <col style="width: 62px;">  <!-- Avg. Wgt. -->
+                                        <col style="width: 82px;">  <!-- Gram -->
+                                        <col style="width: 53px;">  <!-- Tenacity -->
+                                        <col style="width: 77px;">  <!-- Status -->
+                                        <col style="width: 69px;">  <!-- Remarks -->
+                                        <col style="width: 76px;">  <!-- LMRC Type -->
+                                        <col style="width: 97px;">  <!-- LMRC No -->
+                                        <col style="width: 79px;">  <!-- Loom Type -->
+                                        <col style="width: 91px;">  <!-- Loom No -->
+                                        <col style="width: 81px;">  <!-- Place Code -->
+                                        <col style="width: 94px;">  <!-- Unit Code -->
+                                        <col style="width: 84px;"> <!-- Tenacity Code -->
+                                        <col style="width: 112px;"> <!-- Status Code -->
+                                        <col style="width: 80px;">  <!-- Inch -->
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="chkSelectAllCopyFrom"></th>
+                                            <th>Bale No</th>
+                                            <th>V. No</th>
+                                            <th>V. Type</th>
+                                            <th>V. Date</th>
+                                            <th>Item Code</th>
+                                            <th>Item Name</th>
+                                            <th>UOM Name</th>
+                                            <th>Lot No</th>
+                                            <th>Gross Wgt.</th>
+                                            <th>Tare Wgt.</th>
+                                            <th>Net Wgt.</th>
+                                            <th>Meter</th>
+                                            <th>Avg. Wgt.</th>
+                                            <th>Gram</th>
+                                            <th>Tenacity</th>
+                                            <th>Status</th>
+                                            <th>Remarks</th>
+                                            <th>LMRC Type</th>
+                                            <th>LMRC No</th>
+                                            <th>Loom Type</th>
+                                            <th>Loom No</th>
+                                            <th>Place Code</th>
+                                            <th>Unit Code</th>
+                                            <th>Tenacity Code</th>
+                                            <th>Status Code</th>
+                                            <th>Inch</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="~/js/erpjs/sales/otherunused/packingslipentry/packingslipentry.js"></script>

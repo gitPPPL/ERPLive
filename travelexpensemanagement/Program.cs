@@ -16,6 +16,7 @@ using travelexpensemanagement.Repositories.Implementations.Inventory.Transaction
 using travelexpensemanagement.Repositories.Implementations.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Master;
 using travelexpensemanagement.Repositories.Implementations.QualityControl.Transaction;
+using travelexpensemanagement.Repositories.Implementations.Sales.OtherUnused;
 using travelexpensemanagement.Repositories.Implementations.Sales.Transaction;
 using travelexpensemanagement.Repositories.Implementations.Test;
 using travelexpensemanagement.Repositories.Implementations.Weighbridge.Transaction;
@@ -27,6 +28,7 @@ using travelexpensemanagement.Repositories.Interfaces.Inventory.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Purchase.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Master;
 using travelexpensemanagement.Repositories.Interfaces.QualityControl.Transaction;
+using travelexpensemanagement.Repositories.Interfaces.Sales.OtherUnused;
 using travelexpensemanagement.Repositories.Interfaces.Sales.Transaction;
 using travelexpensemanagement.Repositories.Interfaces.Test;
 using travelexpensemanagement.Repositories.Interfaces.Weighbridge.Transaction;
@@ -128,6 +130,13 @@ builder.Services.AddScoped<ITransportRateRequestForQuotationRepository, Transpor
 builder.Services.AddScoped<ITransportRateRequestForQuotationListRepository, TransportRateRequestForQuotationListRepository>();
 
 builder.Services.AddScoped<IDocumentEmailingRepository, DocumentEmailingRepository>();
+
+builder.Services.AddScoped<IPackingSlipEntryListRepository, PackingSlipEntryListRepository>();
+builder.Services.AddScoped<IPackingSlipEntryRepository, PackingSlipEntryRepository>();
+
+builder.Services.AddScoped<ISaleSaudaEntryRepository, SaleSaudaEntryRepository>();
+builder.Services.AddScoped<ISaleSaudaEntryListRepository, SaleSaudaEntryListRepository>();
+builder.Services.AddScoped<IExportDetailsRepository, ExportDetailsRepository>();
 
 // Gete Entry Transaction repositories
 
