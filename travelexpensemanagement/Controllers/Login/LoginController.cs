@@ -131,6 +131,11 @@ namespace travelexpensemanagement.Controllers
                                 // Step 3: Check if the user has the necessary menu access
 
                                 HttpContext.Session.SetString("COMP_CODE", CompCode);
+
+                                // ODBC configuration start
+                                _dbConnection.ConfigureErpDsn(CompCode);
+                                // ODBC configuration End
+
                                 using (SqlConnection con2 = _dbConnection.GetErpConnection())
                                 {
                                     if (con2.State != ConnectionState.Open)
