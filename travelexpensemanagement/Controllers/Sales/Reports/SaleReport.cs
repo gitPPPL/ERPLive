@@ -45,7 +45,7 @@ namespace travelexpensemanagement.Controllers.Sales.Reports
             ViewBag.GlobalVariables = globalVariables;
             ViewBag.DatabaseName = databaseName;
 
-            return View("~/Views/Sales/Reports/PerformaRegisterReport/Index.cshtml");
+            return View("~/Views/Sales/Reports/SaleReport/Index.cshtml");
         }
         public JsonResult DDlDocumentType()
         {
